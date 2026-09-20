@@ -10,3 +10,12 @@ export function validateTextRange(text:string,from:number,to:number){
   const stops=new Set(boundaries(text));
   if(from>to||!stops.has(from)||!stops.has(to))throw new Error('Edit range must follow grapheme boundaries');
 }
+
+/** Word movement uses Unicode segments, with platform-specific forward stops. */
+export function wordBoundary(text:string,offset:number,back:boolean,platform:'mac'|'other'){
+ const segments=[...words.segment(text)].filter(segment=>segment.isWordLike);
+ if(back)return segments.filter(segment=>segment.index<offset).at(-1)?.index??0;
+ if(platform==='other')return segments.find(segment=>segment.index>offset)?.index??text.length;
+ const next=segments.find(segment=>segment.index+segment.segment.length>offset);
+ return next?next.index+next.segment.length:text.length;
+}

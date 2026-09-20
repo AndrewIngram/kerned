@@ -11,3 +11,5 @@ export function CanvasPrimitive({id,paint,layer='content'}:{id:string;paint:Canv
   if(!register)throw new Error('CanvasPrimitive requires a CanvasLayerProvider');
   useLayoutEffect(()=>register(id,paint,layer),[register,id,paint,layer]);return null;
 }
+
+export {usePointerSelection} from './pointer-selection';

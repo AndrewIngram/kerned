@@ -50,7 +50,8 @@
     "check:editor-unicode": "node scripts/check-editor-unicode.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 5176",
     "check:project": "node scripts/check-project.mjs && npm run check:editor-boundaries",
-    "demo:extensions": "vite --host 127.0.0.1 --open /hybrid-editor.html"
+    "demo:extensions": "vite --host 127.0.0.1 --open /hybrid-editor.html",
+    "check:editor-navigation": "node scripts/check-editor-navigation.mjs"
   },
   "dependencies": {
     "canvaskit-wasm": "0.42.0",

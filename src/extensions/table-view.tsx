@@ -39,7 +39,7 @@ export function TableBlock({findMatches,activeMatch,node,width,onMeasure,selecti
     const observer=new ResizeObserver(measure);observer.observe(element);measure();
     return()=>observer.disconnect();
   },[node.id,width,onMeasure]);
-  return <div ref={ref} tabIndex={-1} className="table-block" data-table={node.id} onKeyDown={e=>{
+  return <div ref={ref} tabIndex={-1} className="table-block" data-editor-interactive data-table={node.id} onKeyDown={e=>{
     if((e.metaKey||e.ctrlKey)&&['b','i','u'].includes(e.key.toLowerCase())){e.preventDefault();onFormat(e.key.toLowerCase()==='b'?'bold':e.key.toLowerCase()==='i'?'italic':'underline');return;}
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'){e.preventDefault();onUndo(e.shiftKey);return;}
     if(selected.size&&(e.key==='Backspace'||e.key==='Delete')){e.preventDefault();onReplace('');}

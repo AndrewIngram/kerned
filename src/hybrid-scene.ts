@@ -16,6 +16,7 @@ type Cached = {node:TextBlockNode;width:number|null;height:number;layout:LaidOut
 export function createHybridScene(owned:Owned,size=20) {
   const cache=new Map<number,Cached>(),dirty=new Map<number,TextBlockNode>();
   let previous:Scene={placements:[],height:50,width:0,top:0,zoom:1,pending:0,generation:0,paddingTop:0};
+  let currentDecorations:ReadonlyMap<number,BlockDecoration>=new Map();
   let previousNodes:HybridLeaf[]=[],previousMeasurements:ReadonlyMap<number,Measurement>=new Map();
   function compose(node:TextBlockNode,width:number):Cached {
     const style=typography(node,size),spans=node.kind==='heading'&&node.text.length?[...node.spans,{start:0,end:node.text.length,bold:true,italic:false}]:node.spans;
@@ -34,6 +35,7 @@ export function createHybridScene(owned:Owned,size=20) {
   }
   return {
     build(nodes:HybridLeaf[],width:number,measurements:ReadonlyMap<number,Measurement>,view:View,decorations:ReadonlyMap<number,BlockDecoration>=new Map()) {
+      currentDecorations=decorations;
       const started=performance.now(),layoutIds:number[]=[];
       let compositionMs=0;
       const padding=view.paddingTop??0,paddingChanged=padding!==previous.paddingTop;
@@ -144,6 +146,17 @@ export function createHybridScene(owned:Owned,size=20) {
       previous={placements,height:y+24,width,top,zoom:view.zoom,pending:dirty.size,generation,paddingTop:padding};
       previousNodes=nodes;previousMeasurements=measurements;
       return {scene:previous,layoutIds,reflow,background,compositionMs,workMs:performance.now()-started};
+    },
+    layoutFor(id:number){
+      const placement=previous.placements.find(p=>p.node.id===id);
+      if(!placement||(placement.node.kind!=='paragraph'&&placement.node.kind!=='heading'))throw new Error('Missing text layout');
+      const value=cache.get(id),inset=currentDecorations.get(id)?.inset??0,width=Math.max(80,previous.width-inset);
+      if(value?.layout&&value.width===width&&value.node===placement.node)return offsetLayout(value.layout,inset);
+      // Measure for navigation without publishing a partly hydrated scene. The
+      // selection update pins this block for the following normal scene build.
+      const next=compose(placement.node,width);
+      if(!next.layout)throw new Error('Missing composed layout');
+      return offsetLayout(next.layout,inset);
     },
     clear(){for(const id of cache.keys())owned.release(id);cache.clear();dirty.clear();previousNodes=[];previous={placements:[],height:50,width:0,top:0,zoom:1,pending:0,generation:0,paddingTop:0};previousMeasurements=new Map();},
     get cachedParagraphs(){return cache.size;},

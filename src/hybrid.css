@@ -61,3 +61,5 @@ body[data-demo="minimal"] .table-block{font-size:18px}body[data-demo="minimal"] 
 .table-menu{position:relative;flex-shrink:0}.table-menu summary{list-style:none;width:34px;height:32px;display:grid;place-items:center;border-radius:5px;color:#555;cursor:pointer}.table-menu summary::-webkit-details-marker{display:none}.table-menu[open] summary,.table-menu summary:hover{background:#f0f0f2}
 .table-menu>div{position:absolute;top:35px;right:0;width:190px;background:white;border:1px solid #e5e5e7;border-radius:7px;box-shadow:0 8px 24px #0002;padding:5px;z-index:20}.minimal-toolbar .table-menu button{display:block;width:100%;text-align:left;font-size:13px;padding:8px;height:auto}
 @media(max-width:600px){.toolbar-inner{gap:4px}.toolbar-inner>button,.toolbar-trailing>button{width:30px}.blocks-menu summary span{max-width:none}.minimal-toolbar .sample-picker{max-width:105px;flex:none}}
+
+.editor-surface{cursor:text;touch-action:none}

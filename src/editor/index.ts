@@ -9,3 +9,7 @@ export {indexTree,validateTree,childrenAt,spliceChildren,type TreeEntry} from '.
 export {Selection,TextSelection,NodeSelection,AllSelection,textSelection,selectionContext,selectionMapping,selectionNear,createSelectionRegistry,type TextPoint,type SelectionRange,type SelectionContext,type SelectionMapping,type SelectionBookmark,type SelectionEdit,type SelectionStep,type SelectionJSON,type SelectionFragment,type SelectionContent,type SelectionExtension} from './selection';
 export {mapPosition,type PositionMap} from './positions';
 export {createFind,type EditorFind,type FindMatch,type FindOptions,type FindState,type FindSnapshot} from './find';
+
+export {hitTestTextLines,type TextHit,type TextHitRegion} from './hit-testing';
+
+export {createTextNavigation,type NavigationBlock,type NavigationLayout,type NavigationKey} from './keyboard-navigation';

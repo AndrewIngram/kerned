@@ -1,3 +1,6 @@
+import {createTextNavigation} from './editor';
+import {hitTestTextLines,type TextHitRegion} from './editor';
+import {usePointerSelection} from './editor-react';
 import {supportsOwnedText} from './owned-text-support';
 import {writeClipboard,readClipboard,pasteFragment} from './extensions/clipboard';
 import {pasteParagraphs} from './extensions/paste';
@@ -17,7 +20,7 @@ import CanvasKitInit,{type CanvasKit,type Paint} from 'canvaskit-wasm';
 import {createOwnedEngine} from './owned-layout';
 import type {Rect} from './engines';
 import {plainText,type HybridNode,type ChecklistNode} from './extensions/demo-model';
-import {boundaries,type Direction} from './model';
+import {boundaries} from './model';
 import './hybrid.css';
 import {type TextFormat} from './extensions/formatting';
 import {wordRange} from './editor/text';
@@ -33,7 +36,7 @@ import {TableBlock} from './extensions/table-view';
 import {tablePlainText,tableCells,createTable,appendTableRow,appendTableColumn} from './extensions/table';
 import {ImageBlock} from './hybrid-image';
 import {checkTransactions} from './hybrid-transaction-checks';
-import {TextSelection,textSelection,createEditor,type Selection,type TextPoint,type Step,type Transaction,selectionContext} from './editor';
+import {TextSelection,textSelection,createEditor,type Selection,type Step,type Transaction,selectionContext} from './editor';
 import {createAnchor,parseAnchor,resolveAnchor} from './editor';
 import {checkReflow} from './hybrid-reflow-checks';
 import {FindBar,FindIcon} from './demo/find-bar';
@@ -105,8 +108,6 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   const primary=editorState.selection.ranges(context).find(r=>r.kind==='text');
   const selection=editorState.selection instanceof TextSelection?editorState.selection:textSelection(primary?.id??nodes[0].id,primary?.kind==='text'?primary.from:0);
   const nonTextSelection=!(editorState.selection instanceof TextSelection);
-  const textDrag=useRef<{pointerId:number;anchor:TextPoint;x:number;y:number}|null>(null);
-  const mousePointer=useRef(0);
   function setSelection(next:Selection){setEditorState(editor.select(next));}
   const nodeIndexes=useMemo(()=>new Map(nodes.map((node,index)=>[node.id,index])),[nodes]);
   let findEntry=findOpen&&findState.active?tree.byId.get(findState.active.id):undefined;
@@ -122,6 +123,8 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     const index=nodeIndexes.get(node.id);if(nonTextSelection||!nodeIndexes.has(selection.anchor.id)||collapsed||index===undefined||index<startIndex||index>endIndex)return null;
     return (node.kind==='paragraph'||node.kind==='heading')?{from:node.id===start.id?start.offset:0,to:node.id===end.id?end.offset:node.text.length}:{from:0,to:1};
   }
+  const [navigation]=useState(createTextNavigation);
+  const revealCaret=useRef(false);
   const capture=useRef({value:'',offset:0});
   const [metrics]=useState(()=>({current:createStreamMetrics()}));
   const paused=useRef(streamConfig.paused);
@@ -494,20 +497,8 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
       event.preventDefault();selectAll();return;
     }
     if(event.key==='Escape'){event.preventDefault();if(findOpen)closeFind();else closePanel();return;}
-    const map:Record<string,Direction>={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',Home:'home',End:'end'};
-    const direction=map[event.key];
-    if(direction)editor.breakHistory();
-    if(direction&&activePlacement?.layout){
-      event.preventDefault();
-      if(!event.shiftKey&&!collapsed&&(direction==='left'||direction==='right')){const point=direction==='left'?start:end;setSelection(new TextSelection(point));return;}
-      const next=activePlacement.layout.move(selection.head.offset,selection.upstream,direction);
-      let head={id:selection.head.id,offset:next.index},upstream=next.upstream;
-      if(next.index===selection.head.offset&&next.upstream===selection.upstream&&(direction==='left'||direction==='right'||direction==='up'||direction==='down')){
-        const backwards=direction==='left'||direction==='up',step=backwards?-1:1;
-        for(let index=headIndex+step;index>=0&&index<nodes.length;index+=step){const node=nodes[index];if((node.kind!=='paragraph'&&node.kind!=='heading'))continue;head={id:node.id,offset:backwards?node.text.length:0};upstream=false;break;}
-      }
-      setSelection(new TextSelection(event.shiftKey?selection.anchor:head,head,upstream));return;
-    }
+    const moved=/^(Arrow(Left|Right|Up|Down)|Home|End|PageUp|PageDown)$/.test(event.key)?navigation.move({event,selection,blocks:scene.placements.flatMap(p=>p.node.kind==='paragraph'||p.node.kind==='heading'?[{id:p.node.id,text:p.node.text,top:p.y,height:p.height}]:[]),layout:id=>sceneCache.layoutFor(id),viewportHeight:viewportHeight/zoom,platform:/Mac|iPhone|iPad/.test(navigator.platform)?'mac':'other'}):null;
+    if(moved){event.preventDefault();editor.breakHistory();revealCaret.current=true;setSelection(moved);return;}
     if(event.key==='Backspace'||event.key==='Delete'){
       event.preventDefault();if(crossNode){replace(0,0,'',true);return;}let from=Math.min(selection.anchor.offset,selection.head.offset),to=Math.max(selection.anchor.offset,selection.head.offset);
       if(from===to&&(active?.kind==='paragraph'||active?.kind==='heading')){const b=boundaries(active.text),i=b.indexOf(from);if(event.key==='Backspace')from=b[Math.max(0,i-1)];else to=b[Math.min(b.length-1,i+1)];}
@@ -553,24 +544,32 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
       scrollTo:(id:number,offset=0)=>{const p=sceneRef.current.placements.find(p=>p.node.id===id);if(p)scrollDocumentTo((p.y+offset)*zoom);},
       checkInline:()=>checkInline(owned),read:()=>({nodes:current.current.nodes,selection:{id:current.current.selection.head.id,anchorId:current.current.selection.anchor.id,anchor:current.current.selection.anchor.offset,focus:current.current.selection.head.offset,upstream:current.current.selection.upstream},scene:sceneRef.current.placements.map(p=>({id:p.node.id,y:p.y,height:p.height,layoutWidth:p.layoutWidth,boxes:p.boxes})),stats:{...owned.stats},mounted:[...document.querySelectorAll('[data-widget]')].map(n=>n.getAttribute('data-widget')),zoom,width:widthRef.current,scroll:readScroll(),paintCount:painters.current.size}),select:(id:number,index:number)=>{setSelection(textSelection(id,index));inputRef.current?.focus({preventScroll:true});}}});
   },[owned,zoom]);
-  function beginTextSelection(event:React.MouseEvent<HTMLDivElement>|React.PointerEvent<HTMLDivElement>,pointerId:number,clicks:number){
-    if(event.button!==0||!(event.target instanceof Element)||!(event.target===canvasRef.current||event.target.closest('.range-hit')))return;
-    const canvas=canvasRef.current;if(!canvas)return;
-    const bounds=canvas.getBoundingClientRect(),x=(event.clientX-bounds.left)/zoom-28,y=(event.clientY-bounds.top+readScroll())/zoom;
-    const placement=scene.placements.find(p=>p.layout&&y>=p.y&&y<=p.y+p.height);
-    if(!placement?.layout||(placement.node.kind!=='paragraph'&&placement.node.kind!=='heading'))return;
-    event.preventDefault();
-    const pos=placement.layout.hit(x,y-placement.y),point={id:placement.node.id,offset:pos.index};
-    const range=clicks>=3?{from:0,to:placement.node.text.length}:clicks===2?wordRange(placement.node.text,pos.index-(pos.upstream?1:0)):null;
-    const anchor=range?{id:point.id,offset:range.from}:event.shiftKey?selection.anchor:point;
-    const head=range?{id:point.id,offset:range.to}:point;
-    textDrag.current={pointerId,anchor,x:event.clientX,y:event.clientY};
-    event.currentTarget.setPointerCapture(pointerId);
-    setSelection(new TextSelection(anchor,head,range?false:pos.upstream));
-    const comment=clicks===1?placement.node.comments.find(c=>pos.index>=c.start&&pos.index<=c.end):undefined;
-    setPanel(comment?{kind:'comment',nodeId:point.id,atomId:comment.id,focus:'text'}:null);
-    inputRef.current?.focus({preventScroll:true});
-  }
+  const pointerSelection=usePointerSelection({
+    selection,onSelect:next=>{navigation.reset();setSelection(next);},focus:()=>inputRef.current?.focus({preventScroll:true}),
+    hitTest(clientX,clientY){
+      const canvas=canvasRef.current;if(!canvas)return null;
+      const bounds=canvas.getBoundingClientRect(),x=(clientX-bounds.left)/zoom-28,y=(clientY-bounds.top+readScroll())/zoom;
+      function* regions():Iterable<TextHitRegion>{for(const p of scene.placements)if(p.layout)yield {id:p.node.id,top:p.y,lines:p.layout.lines,hit:p.layout.hit};}
+      return hitTestTextLines(regions(),x,y);
+    },
+    selectRange(hit,clicks){
+      const node=tree.byId.get(hit.point.id)?.node;if(!node||(node.kind!=='paragraph'&&node.kind!=='heading')||clicks<2)return null;
+      const range=clicks>=3?{from:0,to:node.text.length}:wordRange(node.text,hit.point.offset-(hit.upstream?1:0));
+      return new TextSelection({id:node.id,offset:range.from},{id:node.id,offset:range.to});
+    },
+    onStart(hit,clicks){
+      const node=tree.byId.get(hit.point.id)?.node;
+      const comment=clicks===1&&(node?.kind==='paragraph'||node?.kind==='heading')?node.comments.find(c=>hit.point.offset>=c.start&&hit.point.offset<=c.end):undefined;
+      setPanel(comment?{kind:'comment',nodeId:hit.point.id,atomId:comment.id,focus:'text'}:null);
+    },onDrag:()=>setPanel(null),
+  });
+  useLayoutEffect(()=>{
+    if(!revealCaret.current||!activePlacement||!caret)return;
+    revealCaret.current=false;
+    const top=activePlacement.y*zoom+caret[1]*zoom,bottom=activePlacement.y*zoom+caret[3]*zoom,currentScroll=readScroll();
+    const target=top<currentScroll+8?top-8:bottom>currentScroll+viewportHeight-8?bottom-viewportHeight+8:currentScroll;
+    if(target!==currentScroll){scrollDocumentTo(Math.max(0,target));setScroll(readScroll());}
+  },[selection,activePlacement,caret,viewportHeight,zoom]);
   const quoteRules=new Map<number,{top:number;bottom:number;left:number}>();
   for(const p of visible)for(const quote of projection.decorations.get(p.node.id)?.quotes??[]){
     const prior=quoteRules.get(quote.id);quoteRules.set(quote.id,{top:prior?.top??p.y,bottom:p.y+p.height,left:quote.inset});
@@ -613,28 +612,10 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     </header>:<header className="app-header"><strong>gprose <span> / Extension study</span></strong><div><label>Sample <select value={sample.id} disabled={loading} onChange={e=>onSampleChange(e.target.value)}><option value="extensions">Launch notes</option><option value="stream">10,000 mixed blocks</option>{bookSamples.map(book=><option key={book.id} value={book.id}>{book.title}</option>)}</select></label><button aria-label="Find" aria-expanded={findOpen} onClick={openFind}><FindIcon/></button><button onClick={()=>restore()}>Undo</button><button onClick={()=>restore(true)}>Redo</button><label>Zoom <select value={zoom} onChange={e=>setZoom(Number(e.target.value))}><option value={1}>100%</option><option value={1.25}>125%</option><option value={1.5}>150%</option></select></label></div></header>}
       {!minimal&&<div className="document-heading"><h1>{sample.title}</h1>{sample.description&&<p>{sample.description}</p>}</div>}
       {minimal&&<OutlineMenu availableKeys={outlineAvailable} entries={outline} activeKey={outlineActive} onNavigate={navigateOutline} toolbarHeight={toolbarHeight}/>}
-      <div className="editor-frame" onKeyDown={e=>{if(e.key==='Escape'&&panel){e.preventDefault();closePanel();}}}>
+      <div className="editor-surface" {...pointerSelection}><div className="editor-frame" onKeyDown={e=>{if(e.key==='Escape'&&panel){e.preventDefault();closePanel();}}}>
         {findOpen&&<div className="find-anchor" style={{top:minimal?toolbarHeight:0}}><FindBar state={findState} initialQuery={lastQuery.current} initialOptions={lastFindOptions.current} stale={findStale} focusRequest={findFocus} onQuery={requestFind} onMove={moveFind} onClose={closeFind}/></div>}
         <div className="document-scroll" ref={scroller} onScroll={e=>{if(!minimal)setScroll(e.currentTarget.scrollTop);}}>
-          <div className="document-space" style={{height:Math.max(scene.height*zoom,viewportHeight)}} onPointerDown={e=>{
-              if(e.pointerType==='mouse'){mousePointer.current=e.pointerId;return;}
-              beginTextSelection(e,e.pointerId,1);
-            }} onMouseDown={e=>beginTextSelection(e,mousePointer.current,e.detail)} onPointerMove={e=>{
-              const drag=textDrag.current;if(!drag||drag.pointerId!==e.pointerId)return;
-              if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)<3)return;
-              const canvas=canvasRef.current;if(!canvas)return;
-              const bounds=canvas.getBoundingClientRect(),x=(e.clientX-bounds.left)/zoom-28,y=(e.clientY-bounds.top+readScroll())/zoom;
-              let nearest:Placement|undefined,distance=Infinity;
-              for(const candidate of scene.placements){if(!candidate.layout)continue;const d=Math.max(candidate.y-y,0,y-candidate.y-candidate.height);if(d<distance){nearest=candidate;distance=d;}}
-              if(!nearest?.layout)return;
-              const pos=nearest.layout.hit(x,y-nearest.y);
-              setSelection(new TextSelection(drag.anchor,{id:nearest.node.id,offset:pos.index},pos.upstream));
-              if(nearest.node.id!==drag.anchor.id||pos.index!==drag.anchor.offset)setPanel(null);
-            }} onPointerUp={e=>{
-              if(textDrag.current?.pointerId!==e.pointerId)return;
-              textDrag.current=null;
-              if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);
-            }} onPointerCancel={()=>{textDrag.current=null;}} onLostPointerCapture={()=>{textDrag.current=null;}}>
+          <div className="document-space" style={{height:Math.max(scene.height*zoom,viewportHeight)}}>
             <canvas ref={canvasRef} style={{width,height:viewportHeight,top:minimal?toolbarHeight:undefined}} aria-label="Canvas document"/>
             <div className="dom-layer" style={{width:width/zoom,height:scene.height,transform:`scale(${zoom})`}}>
               {[...quoteRules].map(([id,rule])=><span key={`quote-${id}`} data-quote={id} className="quote-rule" style={{left:28+rule.left,top:rule.top,bottom:'auto',height:rule.bottom-rule.top,pointerEvents:'none'}}/>)}
@@ -652,7 +633,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
         }} onCopy={e=>{e.preventDefault();writeClipboard(e.clipboardData,demoSchema,editorState,copyText());}} onCut={e=>{e.preventDefault();writeClipboard(e.clipboardData,demoSchema,editorState,copyText());if(!collapsed)replace(start.offset,end.offset,'',true);}} onPaste={e=>{e.preventDefault();try{const fragment=readClipboard(e.clipboardData);if(fragment){const command=pasteFragment(demoSchema,editorState,fragment,allocate);dispatch(command.steps,'separate',command.selection);setPanel(null);}else replace(start.offset,end.offset,e.clipboardData.getData('text/plain'),true,true);}catch(error){setInputNotice(error instanceof Error?error.message:String(error));}}}/>
         <div className="panel-layer" ref={setPortal}/>
         {portal&&panel&&panelRect&&panelRect[3]*zoom-scroll>=0&&panelRect[1]*zoom-scroll<=viewportHeight&&createPortal(<div className="nearby-panel" role="dialog" aria-label={panel.kind==='mention'?'Mention details':'Comment'} style={{left:Math.max(8,Math.min((panelRect[0]+28)*zoom,width-294)),top:(minimal?scroll:0)+Math.max(8,Math.min(panelRect[3]*zoom-scroll+8,290))}}><button className="close-panel" onClick={closePanel}>Close</button>{panel.kind==='mention'?<MentionDetails/>:<><strong>Comment</strong>{panel.atomId==='review'&&<p>Can we limit this to the core editing flow?</p>}<label>Reply<textarea value={(panelPlacement?.node.kind==='paragraph'||panelPlacement?.node.kind==='heading')?panelPlacement.node.comments.find(c=>c.id===panel.atomId)?.data.reply??'':''} onChange={e=>{const node=panelPlacement?.node;if((node?.kind==='paragraph'||node?.kind==='heading'))dispatch(tree.order.flatMap(({node:part})=>(part.kind==='paragraph'||part.kind==='heading')&&part.comments.some(c=>c.id===panel.atomId)?[{kind:'updateBlock',node:{...part,comments:part.comments.map(c=>c.id===panel.atomId?{...c,data:{...c.data,reply:e.target.value}}:c)}}]:[]));}}/></label></>}</div>,portal)}
-      </div>
+      </div></div>
       <p className="input-notice" role="status">{inputNotice}</p>{!minimal&&<footer>Canvas text · React controls · Paragraph-local layout <span>{sample.total?`${nodes.length.toLocaleString()} / ${sample.total.toLocaleString()} blocks`:''}{!bookSamples.some(book=>book.id===sample.id)?` · ${visible.filter(p=>p.node.kind==='checklist').length} mounted checklists`:''}</span></footer>}
     </main>
   </CanvasLayerProvider></TeamContext.Provider>;
