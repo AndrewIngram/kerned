@@ -19,11 +19,11 @@ for (const width of [1100, 390]) {
       .toBe(`Hello ${original[0].text}`);
     for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+ArrowLeft');
     await page.getByRole('button', {name: 'Bold', exact: true}).click();
-    await expect.poll(() => page.evaluate(() => window.hybridSpike.read().nodes[0].spans
-      .some(span => span.bold && span.start === 0 && span.end === 6))).toBe(true);
+    await expect.poll(() => page.evaluate(() => window.hybridSpike.read().nodes[0].marks
+      .some(span => (span.mark.type==='bold') && span.from === 0 && span.to === 6))).toBe(true);
     await page.getByRole('button', {name: 'Undo', exact: true}).click();
-    await expect.poll(() => page.evaluate(() => window.hybridSpike.read().nodes[0].spans))
-      .toEqual(original[0].spans);
+    await expect.poll(() => page.evaluate(() => window.hybridSpike.read().nodes[0].marks))
+      .toEqual(original[0].marks);
     await page.getByRole('button', {name: 'Undo', exact: true}).click();
     await expect.poll(() => page.evaluate(() => window.hybridSpike.read().nodes)).toEqual(original);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

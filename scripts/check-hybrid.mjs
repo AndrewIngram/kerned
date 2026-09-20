@@ -9,16 +9,16 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   const page=await browser.newPage({viewport:{width,height:950},deviceScaleFactor:dpr});const errors=[];page.on('pageerror',e=>errors.push(String(e)));
   await page.goto(url);await page.waitForFunction(()=>window.hybridSpike);const read=()=>page.evaluate(()=>window.hybridSpike.read());
   const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await settle();
-  const atom=(await read()).nodes[0].atoms[0];const input=page.getByLabel('Canvas text input');
+  const atom=(await read()).nodes[0].inline[0];const input=page.getByLabel('Canvas text input');
   await page.getByLabel('Open @Maya Chen').click();await page.getByRole('dialog').waitFor();assert.match(await page.getByRole('dialog').innerText(),/Design team/);
   await page.keyboard.press('Escape');assert.equal(await input.evaluate(el=>el===document.activeElement),true);
   await page.evaluate(i=>window.hybridSpike.select(1,i),atom.index);await page.keyboard.press('ArrowRight');assert.equal((await read()).selection.focus,atom.index+1);
   await page.keyboard.press('Shift+ArrowLeft');await settle();if((await read()).selection.focus===atom.index+1){await page.keyboard.press('Shift+ArrowLeft');await settle();}
   const copied=await input.evaluate(el=>{const clipboardData=new DataTransfer();const event=new ClipboardEvent('copy',{bubbles:true,cancelable:true,clipboardData});el.dispatchEvent(event);return event.clipboardData.getData('text/plain');});assert.equal(copied,'@Maya Chen',`${name}/${width} copy`);
-  await page.keyboard.press('Backspace');assert.equal((await read()).nodes[0].atoms.length,0);
-  await page.getByRole('button',{name:'Undo',exact:true}).click();assert.equal((await read()).nodes[0].atoms.length,1);
-  await page.evaluate(()=>window.hybridSpike.select(1,0));await settle();await page.keyboard.type('Hello ');assert.equal((await read()).nodes[0].atoms[0].index,atom.index+6);
-  for(let i=0;i<6;i++)await page.getByRole('button',{name:'Undo',exact:true}).click();assert.equal((await read()).nodes[0].atoms[0].index,atom.index);
+  await page.keyboard.press('Backspace');assert.equal((await read()).nodes[0].inline.length,0);
+  await page.getByRole('button',{name:'Undo',exact:true}).click();assert.equal((await read()).nodes[0].inline.length,1);
+  await page.evaluate(()=>window.hybridSpike.select(1,0));await settle();await page.keyboard.type('Hello ');assert.equal((await read()).nodes[0].inline[0].index,atom.index+6);
+  for(let i=0;i<6;i++)await page.getByRole('button',{name:'Undo',exact:true}).click();assert.equal((await read()).nodes[0].inline[0].index,atom.index);
   for(const zoom of ['1','1.25','1.5']){
    await page.getByLabel('Zoom').selectOption(zoom);await settle();
    const delta=await page.evaluate(()=>{const s=window.hybridSpike.read(),p=s.scene[0],b=p.boxes[0],r=document.querySelector('[data-mention]').getBoundingClientRect(),v=document.querySelector('.document-scroll').getBoundingClientRect();return [r.left-v.left-(28+b.x)*s.zoom,r.top-v.top-(p.y+b.y)*s.zoom+s.scroll,r.width-b.width*s.zoom];});
@@ -39,7 +39,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await input.evaluate(el=>{const clipboardData=new DataTransfer();const event=new ClipboardEvent('paste',{bubbles:true,cancelable:true,clipboardData});event.clipboardData.setData('text/plain','Pasted\ntext ');el.dispatchEvent(event);});
   assert.equal((await read()).nodes[0].text,'Pasted');assert.ok((await read()).nodes[1].text.startsWith('text '));await page.getByRole('button',{name:'Undo',exact:true}).click();
   await page.evaluate(()=>window.hybridSpike.select(1,0));await settle();await page.keyboard.insertText('漢');await page.getByRole('status').filter({hasText:'Latin'}).waitFor();assert.ok(!(await read()).nodes[0].text.includes('漢'));
-  await page.evaluate(i=>window.hybridSpike.select(1,i+1),atom.index);await settle();await page.keyboard.insertText('\u0301');await page.getByRole('status').filter({hasText:'Combining marks'}).waitFor();assert.equal((await read()).nodes[0].atoms.length,1);
+  await page.evaluate(i=>window.hybridSpike.select(1,i+1),atom.index);await settle();await page.keyboard.insertText('\u0301');await page.getByRole('status').filter({hasText:'Combining marks'}).waitFor();assert.equal((await read()).nodes[0].inline.length,1);
   const inline=await page.evaluate(()=>window.hybridSpike.checkInline());assert.ok(inline.assertions>100);assert.deepEqual(errors,[]);results.push({browser:name,width,dpr,inlineAssertions:inline.assertions,mounted:bottom.mounted.length,shapeCalls:shape});await page.close();
  }}finally{await browser.close();}
 }

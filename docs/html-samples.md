@@ -78,8 +78,7 @@ counts: 8,619 text blocks, 80 headings and 236,364 whitespace-delimited words.
 Running the conversion twice produces identical full HTML. The default output
 never overwrites the trimmed sample. With `--sample`, the script verifies that
 its paragraphs form an unchanged contiguous section of the full text and writes
-`warbreaker.json`: 7,312 text blocks, 61 headings and 196,131 words. In the editor,
-the table's 34 paragraphs in 33 cells belong to one table block, giving 7,279 root blocks.
+the original excerpt metadata. The current editor sample adds the title as H1 and uses H2 for its chapter headings. Its refreshed `warbreaker.json` records 7,313 text blocks, 62 headings and 196,136 words. In the editor, the table's 34 paragraphs in 33 cells belong to one table block, giving 7,280 root blocks. The manifest's source offsets still describe the excerpt without the added title.
 
 ## Import boundary
 

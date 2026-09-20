@@ -22,7 +22,9 @@ Each command reads the draft produced by preceding commands. `run()` publishes o
 
 An intervening editor change invalidates a prepared chain. Current permissions are checked again at execution, including after revocation. Permission failures return false. Invalid schema operations still throw rather than being hidden as ordinary command unavailability. The imperative `dispatch` API remains available and rejects unauthorized transactions before publishing any state.
 
-The demo routes formatting and structural toolbar actions through command chains. Named command registration, generic active/mixed state queries and reusable focus/scroll effects remain future work.
+The demo routes formatting and structural toolbar actions through command chains. Command definitions pair `execute` with an optional `activity(state)` query. `editor.commandState(definition, ...args)` returns `{available, activity}`, with activity `active`, `inactive` or `mixed`. Chains accept functions or definitions. `context.effect(callback)` defers view effects such as focus/scroll until a successful commit; `can()`, failed commands, permission rejection and stale chains do not run them. Effect exceptions are reported asynchronously after commit. Commands and extension reducers must be pure apart from draft operations and queued effects.
+
+`toggleMarkCommand(schema, mark)` handles ranges and caret stored marks. `markActivity` distinguishes partial coverage within one text node as well as mixed blocks. `chain.storedMarks(marks)` participates in validation and atomic publication. A standalone caret-only mark command retains the existing no-revision/no-history behavior. The demo formatting buttons use this command and report mixed coverage through `aria-pressed`.
 
 `chain.steps(steps)` previews a batch together and commits it with the rest of the chain as one transaction. Prefer it for a command that already produces many steps; repeated `step` calls each create a separate draft preview.
 
@@ -44,7 +46,7 @@ function Revision({editor}) {
 }
 ```
 
-The hook uses React's external-store contract and cleans up on unmount. All snapshot changes currently trigger a render, then the selector computes its value. A generic Editor component and selector equality optimization are still outstanding. Existing canvas primitives and DOM overlays continue to work.
+The hook uses React's external-store contract and cleans up on unmount. `useEditorState(editor, selector, equal = Object.is)` caches the selected value and suppresses renders when it is unchanged. Selectors must be pure; use a stable selector for expensive calculations. `useCommandState(editor, definition, ...args)` observes availability and activity with value equality. Existing canvas primitives and DOM overlays continue to work.
 
 ## External comments and decorations
 
@@ -94,3 +96,24 @@ These are text preconditions, not a guarantee that formatting or policy remained
 ## Marks and document serialization
 
 Text extensions can provide a mark-storage adapter, and node extensions can provide a versioned payload codec. See [marks and codecs](marks-and-codecs.md) for the implemented interfaces, validation rules and remaining work. These are independent of React and do not add serialization to the editing/layout path.
+
+## Browser view and React host
+
+`mountEditorView(element, options)` from `src/editor-browser` owns pointer selection, native input/key/composition/clipboard routing and focus events. `update(options)` changes callbacks without reinstalling listeners; `destroy()` releases them and cancels dragging. Embedded controls opt out of canvas hit testing. Input events are routed only from the configured capture textarea, so interactive overlays retain their native behavior. `createTextInput(schema, editor)` owns schema-independent textarea synchronization, diffing, composition and native Select All observation. Call `sync` after selection/text changes outside composition, route native input through `read`, and release the cleanup returned by `mount`. `observeEditorViewport` handles page scrolling with a sticky toolbar or an embedded scrollport and returns cleanup.
+
+`Editor` from `src/editor-react` mounts this runtime around its children. The caller supplies `view.pointer`, optional `view.input`, and a renderer as children. The editor session belongs to the caller and survives React unmount/remount. Both demos use this host and the native runtime. Schema-specific shortcuts, clipboard codecs and CanvasKit scene assembly remain in the application; this is not a zero-configuration rich-text widget.
+
+`createReactRenderers<Value>([{name, component}])` creates a typed `ExtensionView` taking `{type, value}`. Build registries outside render so components retain their identity. Components may return DOM, `CanvasPrimitive` registrations, or both. Duplicate names and missing registrations reject explicitly. The starter kit registers block renderers, a mention inline renderer, underline drawing, and external comment decorations through this public interface. Layout geometry is passed by the host; React is absent from core and from the browser runtime.
+
+## Typed extension state
+
+```ts
+const stats = createStateField<MyNode, number>({
+  create: () => 0,
+  update: (count, event) => count + (event.kind === 'transaction' ? 1 : 0),
+});
+const editor = createEditor(schema, nodes, selection, [], {fields: [stats]});
+const count = stats.read(editor.state);
+```
+
+State fields are independent of schema nodes and stored in weakly held session snapshots. Reducers receive before/after state and transaction or undo/redo mapping, or selection/stored-mark events. They prepare before publication; a thrown error leaves document, history and reference metadata unchanged. Readers notified after commit see updated fields. Reducers also run for draft command previews, must have no external effects, and cannot reenter editor mutation. A failed preview is never published. Fields do not automatically serialize, persist externally, or rewind on undo; their reducer defines the response to undo/redo.

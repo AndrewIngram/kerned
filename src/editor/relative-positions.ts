@@ -3,6 +3,7 @@ import {invertAnchorMap, type AnchorMap} from './anchors';
 import type {NodeIdentity, Schema} from './schema';
 import {indexTree} from './tree';
 import {boundaries, validateTextRange} from './text';
+import {createStructuralPositions} from './structural-positions';
 
 export type RelativePosition = Readonly<{version: 1; documentId: string; revision: number; key: string; offset: number; association: -1 | 1}>;
 export type RelativeRange = Readonly<{version: 1; start: RelativePosition; end: RelativePosition}>;
@@ -216,6 +217,7 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
     return resolvePoint(point, position.association);
   }
   const api = Object.freeze({
+    ...createStructuralPositions(schema,documentId,()=>state.nodes),
     at(id: number, offset: number, bias: -1 | 1 = 1): RelativePosition {
       association(bias);
       const node = tree().byId.get(id)?.node, text = node ? schema.text(node) : null;

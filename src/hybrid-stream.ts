@@ -1,3 +1,4 @@
+import {formattingMarks} from './extensions/formatting';
 import {createMention} from './extensions/mention';
 import {createHybridDocument, type HybridNode} from './extensions/demo-model';
 
@@ -24,8 +25,8 @@ export function hybridChunk(start: number, count: number): HybridNode[] {
     const bold = text.indexOf('styled'), italic = text.indexOf('feedback');
     return {
       kind:'paragraph',id,key:`block-${id}`,text,
-      spans:[{start:bold,end:bold+12,bold:true,italic:false},{start:italic,end:italic+8,bold:false,italic:true}],
-      atoms:mention?[createMention({id:`mention-${id}`,index:text.indexOf('\ufffc'),width:132,ascent:23,descent:7,label:'@Maya Chen'})]:[],
+      marks:formattingMarks([{start:bold,end:bold+12,bold:true,italic:false},{start:italic,end:italic+8,bold:false,italic:true}]),
+      inline:mention?[createMention({id:`mention-${id}`,index:text.indexOf('\ufffc'),width:132,ascent:23,descent:7,label:'@Maya Chen'})]:[],
     };
   });
 }

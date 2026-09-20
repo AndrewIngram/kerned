@@ -1,4 +1,4 @@
-import {inputMarks,sameMark,TextSelection,changeSelectionMarks,selectionHasMark,selectionContext,type EditorState,type Schema,type Step} from '../editor';
+import {markActivity,inputMarks,sameMark,TextSelection,changeSelectionMarks,selectionHasMark,selectionContext,type EditorState,type Schema,type Step} from '../editor';
 import {indexTree} from '../editor';
 import type {HybridNode} from './demo-model';
 import {formattingSchema,type TextFormat} from './formatting';
@@ -17,6 +17,7 @@ export function textCommands(schema:Schema<HybridNode>,state:EditorState<HybridN
     available:ranges.length>0||!!caretNode&&(schema.resolve(caretNode).kind==='text'&&!!schema.editing(caretNode).marks),
     caret,current,
     active,
+    activity:(key:TextFormat)=>markActivity(schema,state,formattingSchema.create(key,null),tree),
     toggle(key:TextFormat):Step<HybridNode>[]{
       const enabled=!active(key);
       return changeSelectionMarks(schema,state,enabled?{kind:'set',mark:formattingSchema.create(key,null)}:{kind:'remove',type:key},tree);

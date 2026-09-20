@@ -2,11 +2,11 @@ import {typography} from './typography';
 import {useLayoutEffect,useRef,useState} from 'react';
 import {TextSelection,textSelection,type Selection,type SelectionContext,type FindMatch} from '../editor';
 import {tableCells} from './table';
-import type {TextFormat} from './formatting';
+import {formattingSpans,type TextFormat} from './formatting';
 import type {TableNode,TableCell} from './demo-model';
 
 function CellText({paragraph,matches=[],activeMatch}:{paragraph:TableCell['paragraphs'][number];matches?:readonly FindMatch[];activeMatch?:FindMatch|null}){
-  const {text,spans}=paragraph;
+  const {text}=paragraph,spans=formattingSpans(paragraph.marks);
   const cuts=[...new Set([0,text.length,...spans.flatMap(s=>[s.start,s.end]),...matches.flatMap(m=>[m.from,m.to])])].sort((a,b)=>a-b);
   const style=paragraph.kind==='heading'?typography(paragraph,18):undefined;
   return <p style={style?{fontSize:style.size,lineHeight:`${style.lineHeight}px`,fontWeight:700}:undefined}>{cuts.slice(0,-1).map((start,index)=>{

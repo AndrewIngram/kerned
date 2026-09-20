@@ -47,7 +47,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
         const node=nodes[i],level=element.tagName==='H2'?2:element.tagName==='H3'?3:undefined;
         return node&&normal(node.text)===normal(element.textContent)&&node.kind===(level?'heading':'paragraph')&&node.level===level?[]:[i];
       });
-      const italic=nodes.flatMap(node=>node.spans.filter(span=>span.italic).map(span=>node.text.slice(span.start,span.end))).join('');
+      const italic=nodes.flatMap(node=>node.marks.filter(span=>(span.mark.type==='italic')).map(span=>node.text.slice(span.from,span.to))).join('');
       const expectedItalic=[...template.content.querySelectorAll('em')].map(element=>element.textContent).join('');
       const passages=[...template.content.querySelectorAll('.preformatted')].map(element=>normal(element.textContent));
       return {count:nodes.length,mismatches,italicVerified:compact(italic)===compact(expectedItalic),linesVerified:passages.every(text=>nodes.find(node=>normal(node.text)===text)?.text.includes('\n')),words:nodes.map(node=>node.text).join(' ').split(/\s+/).length,last:nodes.at(-1).id,lastText:nodes.at(-1).text};

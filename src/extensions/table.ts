@@ -37,7 +37,7 @@ export const tableCellExtension:NodeExtension<HybridNode>={
  },validateChildren(node,children,context){if(context.parent?.kind!=='table'||node.kind!=='tableCell'||!children.length||children.some(c=>(c.kind!=='paragraph'&&c.kind!=='heading')))throw new Error('Invalid table cell');}},
 };
 export function createTable(allocate:()=>NodeIdentity,rows=3,columns=3):TableNode{
- return {kind:'table',...allocate(),caption:'',rows:Array.from({length:rows},(_,row)=>Array.from({length:columns},()=>({kind:'tableCell',...allocate(),row,header:row===0,colspan:1,rowspan:1,paragraphs:[{kind:'paragraph',...allocate(),text:'',spans:[],atoms:[]}]})))};
+ return {kind:'table',...allocate(),caption:'',rows:Array.from({length:rows},(_,row)=>Array.from({length:columns},()=>({kind:'tableCell',...allocate(),row,header:row===0,colspan:1,rowspan:1,paragraphs:[{kind:'paragraph',...allocate(),text:'',marks:[],inline:[]}]})))};
 }
 
 export function appendTableRow(table:TableNode,allocate:()=>NodeIdentity):TableNode{

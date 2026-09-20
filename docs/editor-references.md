@@ -50,3 +50,14 @@ Normal dispatch retains owned mapping records without JSON/WASM serialization or
 See the [performance report](relative-position-performance.md) for the algorithm, regression budget and measured limits. The original 1,000-range / 10,000-edit workload now resolves in a 3.0 ms median including index construction, compared with about 120 ms before. Different capture revisions and undo/redo are also covered. The checkpoint remains 1,426,801 bytes at 10,000 edits; faster lookup does not compact persisted history or guarantee constant-time resolution for arbitrary structural histories.
 
 The public-core tests cover external values, checkpoint reload, deletion of both original endpoint blocks with surviving interior content, split/move/join, newly inserted interior blocks, associations, disjoint cells, undo/redo, malformed checkpoints and atomic rejection. The benchmark also asserts that creating references does not change stored metadata.
+
+
+## Durable structural gaps
+
+`editor.positions.gap(parentId, childIndex, association)`, `before(nodeId)` and `after(nodeId)` capture standalone `RelativeGap` values. Parse external JSON using `parseRelativeGap` and resolve it with `resolveGap`. Values contain the document identity, parent key and neighboring child keys, never runtime IDs or a registered range ID. They can resolve after reload without text-edit metadata if the document keeps its durable keys.
+
+Association `1` prefers the following child's leading edge; `-1` prefers the preceding child's trailing edge. The preferred edge follows its node through moves, wrapping and unwrapping. If it is deleted, resolution uses the surviving other edge. If both disappear, the result is `deleted`; undo can restore resolution. An originally empty-container gap follows that container's beginning or end as children arrive. A different document returns `unavailable`.
+
+These are identity-attached structural references, not historical child indexes. They deliberately do not claim to recover a gap after both defining edges have been deleted, even if other children now occupy the container. Text comment ranges continue to use the existing revision-aware relative endpoints, including interior expansion and partial deletion semantics. Never reuse a deleted durable key for unrelated content.
+
+Snapshot gap transformation now uses public `mapGapPosition`; text selection and snapshot transformation continue to share `mapPosition`. Durable text references retain the undo-aware mapping index. The coordinate kernels are shared, but interactive selection recovery and orphaned external-reference handling remain separate policies.

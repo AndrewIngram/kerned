@@ -1,5 +1,6 @@
+import {formattingSpans} from './extensions/formatting';
 import {typography} from './extensions/typography';
-import {mention} from './extensions/mention';
+import {inlineSchema} from './extensions/mention';
 import type {CanvasKit} from 'canvaskit-wasm';
 import {createOwnedEngine} from './owned-layout';
 import type {HybridLeaf} from './extensions/demo-model';
@@ -16,9 +17,9 @@ export async function checkReflow(kit:CanvasKit,nodes:HybridLeaf[],scene:Scene,m
       if(!actual||actual.node!==node||actual.y!==y)throw new Error(`Placement differs at ${node.id}`);
       if((node.kind==='paragraph'||node.kind==='heading')){
         const style=typography(node,20);
-        const spans=node.kind==='heading'&&node.text.length?[...node.spans,{start:0,end:node.text.length,bold:true,italic:false}]:node.spans;
+        const spans=node.kind==='heading'&&node.text.length?[...formattingSpans(node.marks),{start:0,end:node.text.length,bold:true,italic:false}]:formattingSpans(node.marks);
         const input={id:-1,text:node.text,spans,width:scene.width,size:style.size,lineHeight:style.lineHeight,baselineGrid:4};
-        const expected=node.atoms.length?owned.layoutInline({...input,atoms:node.atoms.map(mention.layout)}):owned.engine.layout(input);
+        const expected=node.inline.length?owned.layoutInline({...input,atoms:node.inline.map(inlineSchema.layout)}):owned.engine.layout(input);
         const geometry=(layout:typeof expected)=>[layout.height,layout.lines,layout.geometry(0,node.text.length,false),layout.move(0,false,'end'),layout.hit(10,10)];
         if(actual.height!==expected.height||actual.layoutWidth!==scene.width||actual.layout&&JSON.stringify(geometry(actual.layout))!==JSON.stringify(geometry(expected)))throw new Error(`Geometry differs at ${node.id}`);
         if(actual.layout)hydrated++;

@@ -8,6 +8,8 @@
     "build:wasm": "node scripts/build-shaper.mjs",
     "build": "npm run setup && npm run check:project && tsc --noEmit && vite build",
     "test": "playwright test",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit",
     "setup": "node scripts/setup-assets.mjs && npm run build:wasm",
     "check:hybrid": "node scripts/check-hybrid.mjs",
     "check:hybrid-book": "node scripts/check-hybrid-book.mjs",
@@ -55,7 +57,8 @@
     "check:editor-foundation": "playwright test tests/foundation.spec.js",
     "benchmark:editor-foundation": "node scripts/benchmark-editor-foundation.mjs",
     "benchmark:schema-codecs": "node scripts/benchmark-schema-codecs.mjs",
-    "benchmark:relative-positions": "node scripts/benchmark-relative-positions.mjs"
+    "benchmark:relative-positions": "node scripts/benchmark-relative-positions.mjs",
+    "check:editor-performance": "node scripts/check-editor-performance.mjs"
   },
   "dependencies": {
     "canvaskit-wasm": "0.42.0",
@@ -63,9 +66,11 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@oxlint/plugins": "1.83.0",
     "@playwright/test": "^1.55.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "oxlint": "1.83.0",
     "typescript": "~5.9.2",
     "vite": "8.3.0"
   }

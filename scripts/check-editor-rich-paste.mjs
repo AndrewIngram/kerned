@@ -20,7 +20,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const id=await page.evaluate(()=>window.hybridSpike.read().nodes[0].id);
  await page.evaluate(id=>window.hybridSpike.select(id,7),id);await settle();await page.keyboard.down('Shift');for(let i=0;i<4;i++)await page.keyboard.press('ArrowRight');await page.keyboard.up('Shift');const partial=await copy();
  await page.evaluate(id=>window.hybridSpike.select(id,0),id);await settle();await paste(partial);
- const nodes=await page.evaluate(()=>window.hybridSpike.read().nodes);assert.equal(nodes.length,1);assert.equal(nodes[0].text,'boldbefore bold after');assert.ok(nodes[0].spans.some(s=>s.start===0&&s.end===4&&s.bold));
+ const nodes=await page.evaluate(()=>window.hybridSpike.read().nodes);assert.equal(nodes.length,1);assert.equal(nodes[0].text,'boldbefore bold after');assert.ok(nodes[0].marks.some(s=>s.from===0&&s.to===4&&(s.mark.type==='bold')));
  // A whole novel must preserve every supported block and mark through HTML.
  await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');await page.waitForFunction(()=>window.hybridSpike?.probe([]).complete);
  await page.evaluate(()=>window.hybridSpike.select(1,0));await page.keyboard.press('ControlOrMeta+a');const book=await copy();assert.ok(book['text/plain'].length>1_000_000);

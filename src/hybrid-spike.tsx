@@ -1,8 +1,10 @@
+import {toggleMarkCommand} from './editor';
+import {createTextInput,observeEditorViewport,type BrowserViewOptions} from './editor-browser';
 import {captureComment,commentDecorations,createCommentStore} from './extensions/comment';
 import {resolveDecorations} from './editor';
 import {createTextNavigation} from './editor';
 import {hitTestTextLines,type TextHitRegion} from './editor';
-import {useEditorState,usePointerSelection} from './editor-react';
+import {useEditorState,Editor} from './editor-react';
 import {supportsOwnedText} from './owned-text-support';
 import {writeClipboard,readClipboard,pasteFragment} from './extensions/clipboard';
 import {pasteParagraphs} from './extensions/paste';
@@ -13,7 +15,7 @@ import {checkSelections} from './editor-selection-checks';
 import {checkContainers,benchmarkContainerEdits} from './editor-container-checks';
 import {checkExtensions} from './editor-extension-checks';
 import {CanvasLayerProvider,type CanvasPainter as Painter,type CanvasPaintLayer} from './editor-react';
-import {ParagraphExtensions,type CommentHighlight} from './extensions/text-block-view';
+import {type CommentHighlight} from './extensions/text-block-view';
 import {demoSchema} from './extensions/demo-schema';
 import {createContext,startTransition,useCallback,useContext,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
@@ -21,7 +23,7 @@ import {createPortal,flushSync} from 'react-dom';
 import CanvasKitInit,{type CanvasKit,type Paint} from 'canvaskit-wasm';
 import {createOwnedEngine} from './owned-layout';
 import type {Rect} from './engines';
-import {plainText,type HybridNode,type ChecklistNode} from './extensions/demo-model';
+import {plainText,type HybridNode} from './extensions/demo-model';
 import {boundaries} from './model';
 import './hybrid.css';
 import {type TextFormat} from './extensions/formatting';
@@ -35,9 +37,8 @@ import {createHybridScene,type Placement,type Scene} from './hybrid-scene';
 import {streamConfig,createStreamMetrics} from './hybrid-stream';
 import {bookSamples,loadHybridSample,sampleUrl,type HybridSample} from './hybrid-samples';
 import {importHtml} from './extensions/html';
-import {TableBlock} from './extensions/table-view';
+import {DemoNodeView} from './extensions/node-views';
 import {tablePlainText,tableCells,createTable,appendTableRow,appendTableColumn} from './extensions/table';
-import {ImageBlock} from './hybrid-image';
 import {checkTransactions} from './hybrid-transaction-checks';
 import {TextSelection,textSelection,createEditor,type Selection,type Step,type Transaction,selectionContext} from './editor';
 import {createAnchor,parseAnchor,resolveAnchor} from './editor';
@@ -47,20 +48,6 @@ import type {FindOptions,FindState,FindSnapshot} from './editor';
 
 type Owned=Awaited<ReturnType<typeof createOwnedEngine>>;
 const TeamContext=createContext('');
-function Checklist({node,width,onChange,onMeasure}:{node:ChecklistNode;width:number;onChange:(node:ChecklistNode)=>void;onMeasure:(id:number,width:number,height:number)=>void}){
-  const ref=useRef<HTMLDivElement>(null);
-  useLayoutEffect(()=>{
-    const element=ref.current;if(!element)return;
-    const observer=new ResizeObserver(()=>onMeasure(node.id,width,element.offsetHeight));observer.observe(element);
-    onMeasure(node.id,width,element.offsetHeight);return()=>observer.disconnect();
-  },[node.id,width,onMeasure]);
-  return <div ref={ref} className="checklist" data-widget={node.id}>
-    <div className="checklist-heading"><strong>Review checklist</strong><small>{node.checked.filter(Boolean).length} of 3 complete</small></div>
-    {['Confirm the outline','Review the examples','Check the final wording'].map((label,i)=><label key={label}><input type="checkbox" checked={node.checked[i]} onChange={e=>onChange({...node,checked:node.checked.map((v,n)=>n===i?e.target.checked:v)})}/>{label}</label>)}
-    <button aria-expanded={node.expanded} onClick={()=>onChange({...node,expanded:!node.expanded})}>{node.expanded?'Hide block notes':'Add block notes'}</button>
-    {node.expanded&&<label className="notes-label">Block notes<textarea value={node.notes} onChange={e=>onChange({...node,notes:e.target.value})} placeholder="What needs attention?"/></label>}
-  </div>;
-}
 function MentionDetails(){const team=useContext(TeamContext);return <><strong>Maya Chen</strong><p>Product designer · {team}</p></>;}
 function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owned;sample:HybridSample;onSampleChange:(id:string)=>void;loading:boolean}){
   const minimal=location.pathname==='/editor.html';
@@ -69,6 +56,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   const [toolbarHeight,setToolbarHeight]=useState(50);
   const renderStarted=performance.now();
   const [editor]=useState(()=>createEditor(demoSchema,sample.initial,textSelection(1,0),[tableCells.extension]));
+  const [textInput]=useState(()=>createTextInput(demoSchema,editor));
   const editorState=useEditorState(editor,state=>state);
   const [comments]=useState(()=>createCommentStore<{body:string;reply:string}>());
   function seedComments(nodes:readonly HybridNode[]){
@@ -142,7 +130,6 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   }
   const [navigation]=useState(createTextNavigation);
   const revealCaret=useRef(false);
-  const capture=useRef({value:'',offset:0});
   const [metrics]=useState(()=>({current:createStreamMetrics()}));
   const paused=useRef(streamConfig.paused);
   const pending=useRef<{target:number;count:number;started:number;generationMs:number;renderMs:number;layouts:number;compositionMs:number;done:(work:number)=>void}|null>(null);
@@ -197,7 +184,6 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     };
     window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);
   },[findOpen,selectAll]);
-  const composing=useRef(false);
   const current=useRef({nodes,selection,width});current.current={nodes,selection,width};
   const renderer=useRef<{surface:NonNullable<ReturnType<CanvasKit['MakeSWCanvasSurface']>>;paint:Paint}|null>(null);
   const painters=useRef(new Map<string,{paint:Painter;layer:CanvasPaintLayer}>()),drawRef=useRef(()=>{}),frame=useRef(0);
@@ -295,11 +281,8 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   },[scene,reflowTick]);
   useLayoutEffect(()=>{
     const el=scroller.current;if(!el)return;
-    const measure=()=>{setWidth(el.clientWidth);setToolbarHeight(toolbarRef.current?.offsetHeight??50);setViewportHeight(minimal?Math.max(1,window.innerHeight-(toolbarRef.current?.offsetHeight??50)):el.clientHeight);};
-    const onPageScroll=()=>setScroll(window.scrollY);
-    const observer=new ResizeObserver(measure);observer.observe(el);if(toolbarRef.current)observer.observe(toolbarRef.current);measure();
-    if(minimal){window.addEventListener('scroll',onPageScroll,{passive:true});window.addEventListener('resize',measure);}
-    return()=>{observer.disconnect();window.removeEventListener('scroll',onPageScroll);window.removeEventListener('resize',measure);};
+    return observeEditorViewport({element:el,scrollport:minimal?window:el,toolbar:toolbarRef.current,
+      onChange:({width,height,inset,scrollTop})=>{setWidth(width);setViewportHeight(height);setToolbarHeight(inset);setScroll(scrollTop);}});
   },[]);
   useEffect(()=>{
     const close=(event:PointerEvent|KeyboardEvent)=>{
@@ -360,16 +343,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     schedule();return()=>{drawRef.current=()=>{};};
   },[kit,width,zoom,scroll,scene,visible,selection,activePlacement,caret?.join(','),hasFocus,schedule,top,bottom,findGeometry,findState.active]);
   useLayoutEffect(()=>{renderWork.current=performance.now()-renderStarted;if(pending.current)pending.current.renderMs+=renderWork.current;});
-  function syncInput(){
-    const input=inputRef.current,value=editor.state.selection;if(!input||!(value instanceof TextSelection))return;
-    if(value.anchor.id!==value.head.id){
-      const a=nodes.findIndex(node=>node.id===value.anchor.id),h=nodes.findIndex(node=>node.id===value.head.id),first=a<h?value.anchor:value.head;
-      input.value='';input.setSelectionRange(0,0);capture.current={value:'',offset:first.offset};
-    }else{
-      const node=indexTree(demoSchema,editor.state.nodes).byId.get(value.head.id)?.node;if((node?.kind!=='paragraph'&&node?.kind!=='heading'))return;
-      input.value=node.text;input.setSelectionRange(Math.min(value.anchor.offset,value.head.offset),Math.max(value.anchor.offset,value.head.offset));capture.current={value:node.text,offset:0};
-    }
-  }
+  function syncInput(){if(inputRef.current)textInput.sync(inputRef.current);}
   useLayoutEffect(()=>{
     const input=inputRef.current,canvas=canvasRef.current;if(!input||!canvas)return;
     // Native typing reveals the focused input even after focus({preventScroll:true}).
@@ -381,21 +355,10 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     input.style.left=`${Math.max(0,Math.min(window.innerWidth-2,x))}px`;
     input.style.top=`${Math.max(0,Math.min(window.innerHeight-2,Math.max(bounds.top,Math.min(bounds.bottom-2,y))))}px`;
   },[caret?.join(','),activePlacement,scroll,zoom,width,viewportHeight]);
-  useLayoutEffect(()=>{if(!composing.current)syncInput();},[active,selection]);
+  useLayoutEffect(()=>{if(!textInput.composing)syncInput();},[active,selection]);
   useEffect(()=>{
-    const input=inputRef.current;if(!input)return;
-    const nativeSelect=()=>{
-      const value=editor.state.selection;
-      // Safari's native Select All can bypass keydown and React's selection
-      // plugin. Observe the capture input's native select event directly.
-      if(composing.current||!input.value||input.selectionStart!==0||input.selectionEnd!==input.value.length||!(value instanceof TextSelection)||value.anchor.id!==value.head.id)return;
-      // Ignore syncInput echoes, including deliberate paragraph selections.
-      if(Math.min(value.anchor.offset,value.head.offset)===0&&Math.max(value.anchor.offset,value.head.offset)===input.value.length)return;
-      selectAll();
-    };
-    input.addEventListener('select',nativeSelect);
-    return()=>input.removeEventListener('select',nativeSelect);
-  },[editor,selectAll]);
+    const input=inputRef.current;if(input)return textInput.mount(input,selectAll);
+  },[textInput,selectAll]);
   useEffect(()=>{
     let cancelled=false,raf=0,last=performance.now();
     function sampleFrame(now:number){if(!metrics.current.completedAt&&metrics.current.frames.length<30000)metrics.current.frames.push({at:now,gapMs:now-last});last=now;if(!metrics.current.completedAt&&metrics.current.frames.length<30000)raf=requestAnimationFrame(sampleFrame);}
@@ -446,14 +409,14 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     }catch(error){setInputNotice(error instanceof Error?error.message:'Command failed');return false;}
   }
   const formatting=textCommands(demoSchema,editorState,tree);
-  const formatActive=formatting.active;
+  const formatPressed=(key:TextFormat)=>{const value=formatting.activity(key);return value==='mixed'?'mixed':value==='active';};
   function focusText(){
     const cell=scroller.current?.querySelector<HTMLTextAreaElement>(`textarea[data-text-block="${selection.head.id}"]`);
     (cell??inputRef.current)?.focus({preventScroll:true});
   }
   function toggleFormat(key:TextFormat){
     if(!formatting.available)return;
-    if(formatting.caret)editor.setStoredMarks(formatActive(key)?formatting.current.filter(mark=>mark.type!==key):[...formatting.current,formattingSchema.create(key,null)]);else runCommand(formatting.toggle(key));focusText();
+    try{editor.chain().command(toggleMarkCommand(demoSchema,formattingSchema.create(key,null))).effect(focusText).run();}catch(error){setInputNotice(String(error));}
   }
   function clearMarks(){if(formatting.caret)editor.setStoredMarks([]);else runCommand(formatting.clear());focusText();}
   function addComment(){
@@ -476,7 +439,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   function insertTable(){
     let entry=tree.byId.get(selection.head.id);while(entry?.parent!=null)entry=tree.byId.get(entry.parent);
     if(!entry)return;
-    const table=createTable(allocate),after:HybridNode={kind:'paragraph',...allocate(),text:'',spans:[],atoms:[]};
+    const table=createTable(allocate),after:HybridNode={kind:'paragraph',...allocate(),text:'',marks:[],inline:[]};
     runCommand([{kind:'insertChildren',parent:null,index:entry.index+1,nodes:[table,after]}],textSelection(after.id,0));
   }
   function replaceCells(text:string){
@@ -504,9 +467,9 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
       reject('This study currently supports Latin text.');return;
     }
     if(paragraphs&&clean.includes('\n')){const command=pasteParagraphs(demoSchema,editorState,clean,allocate);dispatch(command.steps,'separate',command.selection);setPanel(null);return;}
-    if(crossNode){const command=replaceStructuredText(demoSchema,editorState,clean);const history=separate?'separate':{group:`${composing.current?'composition':clean?'typing':'delete'}:${start.id}`};dispatch(command.steps,history,command.selection,true);setPanel(null);return;}
+    if(crossNode){const command=replaceStructuredText(demoSchema,editorState,clean);const history=separate?'separate':{group:`${textInput.composing?'composition':clean?'typing':'delete'}:${start.id}`};dispatch(command.steps,history,command.selection,true);setPanel(null);return;}
     const nextSelection=textSelection(active.id,from+clean.length);
-    const history=separate?'separate':{group:`${composing.current?'composition':clean?'typing':'delete'}:${active.id}`};
+    const history=separate?'separate':{group:`${textInput.composing?'composition':clean?'typing':'delete'}:${active.id}`};
     dispatch([{kind:'replaceText',id:active.id,from,to,text:clean}],history,nextSelection,true);
   }
 
@@ -516,8 +479,8 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   }).join('\n');}
 
   function closePanel(){setPanel(null);inputRef.current?.focus({preventScroll:true});}
-  function key(event:React.KeyboardEvent<HTMLTextAreaElement>){
-    if(event.nativeEvent.isComposing||composing.current)return;
+  function key(event:KeyboardEvent){
+    if(event.isComposing||textInput.composing)return;
     if(nonTextSelection&&(event.key==='Backspace'||event.key==='Delete')){event.preventDefault();replaceCells('');return;}
     if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='z'){event.preventDefault();restore(event.shiftKey);return;}
     if((event.metaKey||event.ctrlKey)&&['b','i','u'].includes(event.key.toLowerCase())){event.preventDefault();toggleFormat(event.key.toLowerCase()==='b'?'bold':event.key.toLowerCase()==='i'?'italic':'underline');return;}
@@ -553,6 +516,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
       dispatch(steps,'separate',textSelection(rightId,0),true);setPanel(null);
     }
   }
+  const inputEvents:NonNullable<BrowserViewOptions['input']>={element:()=>inputRef.current,focus:setHasFocus,keydown:key,compositionstart:textInput.compositionStart,compositionend:()=>textInput.compositionEnd(inputRef.current),input:(_event,input)=>textInput.read(input,replace),copy:e=>{e.preventDefault();if(!e.clipboardData)return;writeClipboard(e.clipboardData,demoSchema,editorState,copyText());},cut:e=>{e.preventDefault();if(!e.clipboardData)return;writeClipboard(e.clipboardData,demoSchema,editorState,copyText());if(!collapsed)replace(start.offset,end.offset,'',true);},paste:e=>{e.preventDefault();if(!e.clipboardData)return;try{const fragment=readClipboard(e.clipboardData);if(fragment){const command=pasteFragment(demoSchema,editorState,fragment,allocate);dispatch(command.steps,'separate',command.selection);setPanel(null);}else replace(start.offset,end.offset,e.clipboardData.getData('text/plain'),true,true);}catch(error){setInputNotice(error instanceof Error?error.message:String(error));}}};
   const panelThread=commentState.threads.find(thread=>thread.id===panel?.atomId);
   const panelRanges=decorations.resolved.find(decoration=>decoration.id===panel?.atomId)?.ranges;
   const panelRange=panelRanges?.find(range=>range.id===panel?.nodeId)??panelRanges?.[0];
@@ -576,8 +540,8 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
       scrollTo:(id:number,offset=0)=>{const p=sceneRef.current.placements.find(p=>p.node.id===id);if(p)scrollDocumentTo((p.y+offset)*zoom);},
       checkInline:()=>checkInline(owned),read:()=>({nodes:current.current.nodes,selection:{id:current.current.selection.head.id,anchorId:current.current.selection.anchor.id,anchor:current.current.selection.anchor.offset,focus:current.current.selection.head.offset,upstream:current.current.selection.upstream},scene:sceneRef.current.placements.map(p=>({id:p.node.id,y:p.y,height:p.height,layoutWidth:p.layoutWidth,boxes:p.boxes})),stats:{...owned.stats},mounted:[...document.querySelectorAll('[data-widget]')].map(n=>n.getAttribute('data-widget')),zoom,width:widthRef.current,scroll:readScroll(),paintCount:painters.current.size}),select:(id:number,index:number)=>{setSelection(textSelection(id,index));inputRef.current?.focus({preventScroll:true});}}});
   },[owned,zoom]);
-  const pointerSelection=usePointerSelection({
-    selection,onSelect:next=>{navigation.reset();setSelection(next);},focus:()=>inputRef.current?.focus({preventScroll:true}),
+  const pointerSelection:BrowserViewOptions['pointer']={
+    selection:()=>selection,onSelect:next=>{navigation.reset();setSelection(next);},focus:()=>inputRef.current?.focus({preventScroll:true}),
     hitTest(clientX,clientY){
       const canvas=canvasRef.current;if(!canvas)return null;
       const bounds=canvas.getBoundingClientRect(),x=(clientX-bounds.left)/zoom-28,y=(clientY-bounds.top+readScroll())/zoom;
@@ -594,7 +558,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
       const comment=clicks===1&&(node?.kind==='paragraph'||node?.kind==='heading')?commentsByNode.get(node.id)?.find(c=>hit.point.offset>=c.from&&hit.point.offset<=c.to):undefined;
       setPanel(comment?{kind:'comment',nodeId:hit.point.id,atomId:comment.id,focus:'text'}:null);
     },onDrag:()=>setPanel(null),
-  });
+  };
   useLayoutEffect(()=>{
     if(!revealCaret.current||!activePlacement||!caret)return;
     revealCaret.current=false;
@@ -622,9 +586,9 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
 
         </div></details>
         <span className="toolbar-divider"/>
-        <button aria-label="Bold" title="Bold selected text (⌘B)" aria-pressed={formatActive('bold')} disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={()=>toggleFormat('bold')}><b>B</b></button>
-        <button aria-label="Italic" title="Italic selected text (⌘I)" aria-pressed={formatActive('italic')} disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={()=>toggleFormat('italic')}><i>I</i></button>
-        <button aria-label="Underline" title="Underline selected text" aria-pressed={formatActive('underline')} disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={()=>toggleFormat('underline')}><u>U</u></button>
+        <button aria-label="Bold" title="Bold selected text (⌘B)" aria-pressed={formatPressed('bold')} disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={()=>toggleFormat('bold')}><b>B</b></button>
+        <button aria-label="Italic" title="Italic selected text (⌘I)" aria-pressed={formatPressed('italic')} disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={()=>toggleFormat('italic')}><i>I</i></button>
+        <button aria-label="Underline" title="Underline selected text" aria-pressed={formatPressed('underline')} disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={()=>toggleFormat('underline')}><u>U</u></button>
         <button aria-label="Clear formatting" title="Clear formatting" disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={clearMarks}>Tx</button>
         <button aria-label="Add comment" title="Comment on selection" disabled={formatting.caret||!formatting.available||!nodeIndexes.has(selection.head.id)} onMouseDown={e=>e.preventDefault()} onClick={addComment}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11v6a2 2 0 0 1-2 2H7l-4 3V5a2 2 0 0 1 2-2h8M19 2v6M16 5h6"/></svg></button>
 
@@ -644,28 +608,29 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     </header>:<header className="app-header"><strong>gprose <span> / Extension study</span></strong><div><label>Sample <select value={sample.id} disabled={loading} onChange={e=>onSampleChange(e.target.value)}><option value="extensions">Launch notes</option><option value="stream">10,000 mixed blocks</option>{bookSamples.map(book=><option key={book.id} value={book.id}>{book.title}</option>)}</select></label><button aria-label="Find" aria-expanded={findOpen} onClick={openFind}><FindIcon/></button><button onClick={()=>restore()}>Undo</button><button onClick={()=>restore(true)}>Redo</button><label>Zoom <select value={zoom} onChange={e=>setZoom(Number(e.target.value))}><option value={1}>100%</option><option value={1.25}>125%</option><option value={1.5}>150%</option></select></label></div></header>}
       {!minimal&&<div className="document-heading"><h1>{sample.title}</h1>{sample.description&&<p>{sample.description}</p>}</div>}
       {minimal&&<OutlineMenu availableKeys={outlineAvailable} entries={outline} activeKey={outlineActive} onNavigate={navigateOutline} toolbarHeight={toolbarHeight}/>}
-      <div className="editor-surface" {...pointerSelection}><div className="editor-frame" onKeyDown={e=>{if(e.key==='Escape'&&panel){e.preventDefault();closePanel();}}}>
+      <Editor className="editor-surface" view={{pointer:pointerSelection,input:inputEvents}}><div className="editor-frame" onKeyDown={e=>{if(e.key==='Escape'&&panel){e.preventDefault();closePanel();}}}>
         {findOpen&&<div className="find-anchor" style={{top:minimal?toolbarHeight:0}}><FindBar state={findState} initialQuery={lastQuery.current} initialOptions={lastFindOptions.current} stale={findStale} focusRequest={findFocus} onQuery={requestFind} onMove={moveFind} onClose={closeFind}/></div>}
-        <div className="document-scroll" ref={scroller} onScroll={e=>{if(!minimal)setScroll(e.currentTarget.scrollTop);}}>
+        <div className="document-scroll" ref={scroller}>
           <div className="document-space" style={{height:Math.max(scene.height*zoom,viewportHeight)}}>
             <canvas ref={canvasRef} style={{width,height:viewportHeight,top:minimal?toolbarHeight:undefined}} aria-label="Canvas document"/>
             <div className="dom-layer" style={{width:width/zoom,height:scene.height,transform:`scale(${zoom})`}}>
               {[...quoteRules].map(([id,rule])=><span key={`quote-${id}`} data-quote={id} className="quote-rule" style={{left:28+rule.left,top:rule.top,bottom:'auto',height:rule.bottom-rule.top,pointerEvents:'none'}}/>)}
               {visible.map(p=>{const d=projection.decorations.get(p.node.id);return d?.marker?<div key={`structure-${p.node.id}`} className="block-decoration" data-block-decoration={p.node.id} style={{left:28,top:p.y,height:p.height,width:d.inset}}><span className="list-marker">{d.marker}</span></div>:null;})}
-              {visible.map(p=>p.node.kind==='table'?<div onFocusCapture={()=>setFocusedWidget(p.node.id)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocusedWidget(null);}} key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}}><TableBlock findMatches={findMatches} activeMatch={findOpen?findState.active:null} node={p.node} width={contentWidth} onMeasure={onMeasure} selection={editorState.selection} context={context} onSelect={setSelection} onText={(id,from,to,text,caret)=>dispatch([{kind:'replaceText',id,from,to,text}],{group:`typing:${id}`},textSelection(id,caret),true)} onUndo={restore} onFormat={toggleFormat} onReplace={replaceCells}/></div>:p.node.kind==='image'?<div key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}}><ImageBlock node={p.node} width={contentWidth} onMeasure={onMeasure}/></div>:p.node.kind==='checklist'?<div key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}} onFocusCapture={()=>setFocusedWidget(p.node.id)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocusedWidget(null);}}><Checklist node={p.node} width={contentWidth} onChange={update} onMeasure={onMeasure}/></div>:<ParagraphExtensions key={p.node.id} comments={commentsByNode.get(p.node.id)} placement={p} kit={kit} owned={owned} open={(kind,atomId,index)=>{setSelection(textSelection(p.node.id,index));setPanel({kind,nodeId:p.node.id,atomId,focus:'panel'});}}/>) }
+              {visible.map(p=>{
+                const view=<DemoNodeView key={p.node.id} type={demoSchema.resolve(p.node).name} value={{node:p.node,
+                  table:{findMatches,activeMatch:findOpen?findState.active:null,width:contentWidth,onMeasure,selection:editorState.selection,context,onSelect:setSelection,onText:(id,from,to,text,caret)=>dispatch([{kind:'replaceText',id,from,to,text}],{group:`typing:${id}`},textSelection(id,caret),true),onUndo:restore,onFormat:toggleFormat,onReplace:replaceCells},
+                  image:{width:contentWidth,onMeasure},checklist:{width:contentWidth,onMeasure,onChange:update},
+                  text:{comments:commentsByNode.get(p.node.id),placement:p,kit,owned,open:(kind,atomId,index)=>{setSelection(textSelection(p.node.id,index));setPanel({kind,nodeId:p.node.id,atomId,focus:'panel'});}},
+                }}/>;
+                return demoSchema.resolve(p.node).kind==='text'?view:<div key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}} onFocusCapture={()=>setFocusedWidget(p.node.id)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocusedWidget(null);}}>{view}</div>;
+              })}
             </div>
           </div>
         </div>
-        <textarea ref={inputRef} className="text-capture" tabIndex={-1} aria-label="Canvas text input" autoComplete="off" spellCheck={false} onFocus={()=>setHasFocus(true)} onBlur={()=>setHasFocus(false)} onKeyDown={key} onCompositionStart={()=>{editor.breakHistory();composing.current=true;}} onCompositionEnd={()=>{composing.current=false;editor.breakHistory();requestAnimationFrame(()=>syncInput());}} onInput={e=>{
-          if((active?.kind!=='paragraph'&&active?.kind!=='heading'))return;const value=e.currentTarget.value,old=capture.current.value,offset=capture.current.offset;
-          if(!collapsed&&!crossNode){capture.current={value,offset};replace(start.offset,end.offset,value.slice(start.offset,value.length-(old.length-end.offset)));return;}
-          let from=0;while(from<old.length&&from<value.length&&old[from]===value[from])from++;
-          let oldEnd=old.length,tail=value.length;while(oldEnd>from&&tail>from&&old[oldEnd-1]===value[tail-1]){oldEnd--;tail--;}
-          capture.current={value,offset};replace(offset+from,offset+oldEnd,value.slice(from,tail));
-        }} onCopy={e=>{e.preventDefault();writeClipboard(e.clipboardData,demoSchema,editorState,copyText());}} onCut={e=>{e.preventDefault();writeClipboard(e.clipboardData,demoSchema,editorState,copyText());if(!collapsed)replace(start.offset,end.offset,'',true);}} onPaste={e=>{e.preventDefault();try{const fragment=readClipboard(e.clipboardData);if(fragment){const command=pasteFragment(demoSchema,editorState,fragment,allocate);dispatch(command.steps,'separate',command.selection);setPanel(null);}else replace(start.offset,end.offset,e.clipboardData.getData('text/plain'),true,true);}catch(error){setInputNotice(error instanceof Error?error.message:String(error));}}}/>
+        <textarea ref={inputRef} className="text-capture" tabIndex={-1} aria-label="Canvas text input" autoComplete="off" spellCheck={false}/>
         <div className="panel-layer" ref={setPortal}/>
         {portal&&panel&&panelRect&&panelRect[3]*zoom-scroll>=0&&panelRect[1]*zoom-scroll<=viewportHeight&&createPortal(<div className="nearby-panel" role="dialog" aria-label={panel.kind==='mention'?'Mention details':'Comment'} style={{left:Math.max(8,Math.min((panelRect[0]+28)*zoom,width-294)),top:(minimal?scroll:0)+Math.max(8,Math.min(panelRect[3]*zoom-scroll+8,290))}}><button className="close-panel" onClick={closePanel}>Close</button>{panel.kind==='mention'?<MentionDetails/>:<><strong>Comment</strong>{panelThread?.messages[0]?.body&&<p>{panelThread.messages[0].body}</p>}<label>Reply<textarea value={panelThread?.messages[0]?.reply??''} onChange={e=>{if(panelThread)comments.put({...panelThread,messages:[{body:panelThread.messages[0]?.body??'',reply:e.target.value}]});}}/></label></>}</div>,portal)}
-      </div></div>
+      </div></Editor>
       <p className="input-notice" role="status">{inputNotice}</p>{!minimal&&<footer>Canvas text · React controls · Paragraph-local layout <span>{sample.total?`${nodes.length.toLocaleString()} / ${sample.total.toLocaleString()} blocks`:''}{!bookSamples.some(book=>book.id===sample.id)?` · ${visible.filter(p=>p.node.kind==='checklist').length} mounted checklists`:''}</span></footer>}
     </main>
   </CanvasLayerProvider></TeamContext.Provider>;

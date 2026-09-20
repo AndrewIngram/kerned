@@ -51,3 +51,19 @@ export async function mountStateProbe(editor, element) {
   flushSync(() => root.render(createElement(Probe)));
   return {flush: action => flushSync(action), unmount: () => root.unmount()};
 }
+
+export async function mountOptimizedProbe(editor, element) {
+  const React=await import('react'), {createRoot}=await import('react-dom/client'), {flushSync}=await import('react-dom');
+  const {useEditorState,Editor,createReactRenderers}=await import('../../src/editor-react/index.tsx');
+  const counts={revision:0,selection:0,pointer:0,input:0,renderer:0};
+  const selectRevision=state=>state.revision;
+  const selectSelection=state=>({kind:state.selection.type});
+  function Revision(){counts.revision++;return React.createElement('output',null,useEditorState(editor,selectRevision));}
+  function Selection(){counts.selection++;useEditorState(editor,selectSelection,(a,b)=>a.kind===b.kind);return null;}
+  const View=createReactRenderers([{name:'custom',component:({value})=>{const [n,setN]=React.useState(0);counts.renderer++;return React.createElement('button',{onClick:()=>setN(n+1)},`${value}:${n}`);}}]);
+  const props={pointer:{hitTest:()=>({point:{id:3,offset:0},upstream:false}),selection:()=>editor.state.selection,onSelect:()=>{counts.pointer++;},focus:()=>{}},input:{element:()=>element.querySelector('textarea'),input:()=>{counts.input++;}}};
+  function Probe(){return React.createElement(Editor,{view:props},React.createElement(Revision),React.createElement(Selection),React.createElement('textarea'),React.createElement(View,{type:'custom',value:'node'}));}
+  const root=createRoot(element);
+  flushSync(()=>root.render(React.createElement(React.StrictMode,null,React.createElement(Probe))));
+  return {counts,flush:flushSync,unmount:()=>flushSync(()=>root.unmount())};
+}

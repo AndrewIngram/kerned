@@ -3,26 +3,26 @@
   "results": [
     {
       "browser": "chromium",
-      "blocks": 7279,
-      "textBlocks": 7312,
+      "blocks": 7280,
+      "textBlocks": 7313,
       "underlineVerified": true,
-      "loadMs": 1370,
+      "loadMs": 1268,
       "stalePaints": 0
     },
     {
       "browser": "firefox",
-      "blocks": 7279,
-      "textBlocks": 7312,
+      "blocks": 7280,
+      "textBlocks": 7313,
       "underlineVerified": true,
-      "loadMs": 1240,
+      "loadMs": 1583,
       "stalePaints": 0
     },
     {
       "browser": "webkit",
-      "blocks": 7279,
-      "textBlocks": 7312,
+      "blocks": 7280,
+      "textBlocks": 7313,
       "underlineVerified": true,
-      "loadMs": 1320,
+      "loadMs": 1254,
       "stalePaints": 0
     }
   ]

@@ -1,5 +1,6 @@
+import {formattingSpans} from './extensions/formatting';
 import {typography} from './extensions/typography';
-import {mention} from './extensions/mention';
+import {inlineSchema} from './extensions/mention';
 import type {LaidOut,Rect} from './engines';
 import type {BlockDecoration} from './extensions/blocks';
 import type {HybridLeaf, TextBlockNode} from './extensions/demo-model';
@@ -19,10 +20,10 @@ export function createHybridScene(owned:Owned,size=20) {
   let currentDecorations:ReadonlyMap<number,BlockDecoration>=new Map();
   let previousNodes:HybridLeaf[]=[],previousMeasurements:ReadonlyMap<number,Measurement>=new Map();
   function compose(node:TextBlockNode,width:number):Cached {
-    const style=typography(node,size),spans=node.kind==='heading'&&node.text.length?[...node.spans,{start:0,end:node.text.length,bold:true,italic:false}]:node.spans;
+    const style=typography(node,size),spans=node.kind==='heading'&&node.text.length?[...formattingSpans(node.marks),{start:0,end:node.text.length,bold:true,italic:false}]:formattingSpans(node.marks);
     const input={id:node.id,text:node.text,spans,width,size:style.size,lineHeight:style.lineHeight,baselineGrid:4};
-    if(node.atoms.length){
-      const layout=owned.layoutInline({...input,atoms:node.atoms.map(mention.layout)});
+    if(node.inline.length){
+      const layout=owned.layoutInline({...input,atoms:node.inline.map(inlineSchema.layout)});
       return {node,width,height:layout.height,layout,boxes:layout.inlineBoxes};
     }
     const layout=owned.engine.layout(input);
@@ -77,7 +78,7 @@ export function createHybridScene(owned:Owned,size=20) {
           placements.push({node,y,height,layout:null,layoutWidth:width,boxes:[]});y+=Math.ceil(height/4)*4;continue;
         }
         let value=cache.get(node.id);
-        const changed=!value||value.node.kind!==node.kind||(value.node.kind==='heading'&&node.kind==='heading'&&value.node.level!==node.level)||value.node.text!==node.text||value.node.spans!==node.spans||value.node.atoms!==node.atoms;
+        const changed=!value||value.node.kind!==node.kind||(value.node.kind==='heading'&&node.kind==='heading'&&value.node.level!==node.level)||value.node.text!==node.text||value.node.marks!==node.marks||value.node.inline!==node.inline;
         const urgent=index>=first&&(index<=anchorIndex||y<=anchorY+offset+view.height+160)||pinned.has(node.id)||view.eager&&(changed||value?.width!==layoutWidth);
         // Loading arrives in chunks of at most 128 blocks. Larger insertions
         // use the background queue, while the viewport and caret stay exact.

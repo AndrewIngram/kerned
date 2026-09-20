@@ -1,0 +1,32 @@
+import {test, expect} from '@playwright/test';
+
+test('Warbreaker retains its editable table after outline navigation', async ({page}) => {
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('/editor.html?sample=warbreaker');
+  await page.waitForFunction(()=>window.hybridSpike?.probe([]).complete);
+  await page.getByRole('button',{name:'Open document outline',exact:true}).focus();
+  await page.getByRole('button',{name:'Ars Arcanum',exact:true}).click();
+  await page.keyboard.press('Escape');
+  const table=page.getByRole('table');
+  await expect(table).toBeVisible();
+  await expect(table.locator('tr')).toHaveCount(11);
+  await expect(table.locator('td,th')).toHaveCount(33);
+  await expect(table).toContainText('Aura Recognition');
+  await page.getByRole('button',{name:'Edit cell 2, 1',exact:true}).click();
+  const input=page.getByLabel('Cell 2, 1 text',{exact:true});
+  await input.fill('First edited');
+  await expect(input).toHaveValue('First edited');
+  await page.keyboard.press('Tab');
+  await expect(page.getByLabel('Cell 2, 2 text',{exact:true})).toBeFocused();
+  await page.getByRole('button',{name:'Select cell 2, 1',exact:true}).click();
+  await page.getByRole('button',{name:'Select cell 3, 2',exact:true}).click({modifiers:['Shift']});
+  await expect(table.locator('[data-cell][data-selected="true"]')).toHaveCount(4);
+  await page.keyboard.press('Backspace');
+  await expect(table).not.toContainText('First edited');
+  await page.getByRole('button',{name:'Undo',exact:true}).click();
+  await expect(table).toContainText('First edited');
+  await expect(table.locator('[data-cell][data-selected="true"]')).toHaveCount(4);
+  await expect(page.getByLabel('Canvas text input')).not.toBeFocused();
+  expect(errors).toEqual([]);
+});

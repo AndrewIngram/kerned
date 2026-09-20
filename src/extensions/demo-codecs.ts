@@ -1,23 +1,19 @@
-import {jsonRecord,jsonString,jsonNumber,jsonBoolean,jsonArray,validateInlineObjects,type NodeCodec,type JsonValue} from '../editor';
+import {inlineSchema} from './mention';
+import {jsonRecord,jsonString,jsonNumber,jsonBoolean,jsonArray,type NodeCodec,type JsonValue} from '../editor';
 import type {HybridNode,TextBlockNode,TableCell} from './demo-model';
-import {formattingMarks,formattingSchema,formattingSpans} from './formatting';
+import {formattingSchema} from './formatting';
 
 function integer(value:unknown,min=0){const result=jsonNumber(value);if(!Number.isSafeInteger(result)||result<min)throw new Error('Expected an integer in range');return result;}
 function textNode(node:HybridNode):TextBlockNode{if(node.kind!=='paragraph'&&node.kind!=='heading')throw new Error('Expected text node');return node;}
 function textData(node:HybridNode):{[key:string]:JsonValue}{
   const text=textNode(node);
-  return {text:text.text,marks:formattingSchema.encode(formattingMarks(text.spans)),atoms:text.atoms.map(atom=>({...atom,data:{...atom.data}}))};
+  return {text:text.text,marks:formattingSchema.encode(text.marks),inline:inlineSchema.encode(text.inline)};
 }
 function parseText(value:unknown){
   const data=jsonRecord(value),text=jsonString(data.text);
   const marks=formattingSchema.decode(text,data.marks);
-  const atoms=jsonArray(data.atoms).map(value=>{
-    const atom=jsonRecord(value),data=jsonRecord(atom.data),width=jsonNumber(data.width),ascent=jsonNumber(data.ascent),descent=jsonNumber(data.descent);
-    if(width<0||ascent<0||descent<0)throw new Error('Invalid mention dimensions');
-    return {id:jsonString(atom.id),index:integer(atom.index),data:{label:jsonString(data.label),width,ascent,descent}};
-  });
-  validateInlineObjects(text,atoms);
-  return {text,spans:formattingSpans(formattingSchema.validate(text,marks)),atoms};
+  const inline=inlineSchema.decode(text,data.inline);
+  return {text,marks:formattingSchema.validate(text,marks),inline};
 }
 function paragraphs(children:HybridNode[]):TextBlockNode[]{return children.map(textNode);}
 function cell(node:HybridNode):TableCell{if(node.kind!=='tableCell')throw new Error('Expected table cell');return node;}

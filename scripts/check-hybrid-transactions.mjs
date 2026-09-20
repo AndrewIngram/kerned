@@ -13,12 +13,12 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   const core=await page.evaluate(()=>window.hybridSpike.checkTransactions());
   const read=()=>page.evaluate(()=>window.hybridSpike.read());
   const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
-  const original=(await read()).nodes.find(n=>n.id===1),at=original.atoms[0].index;
+  const original=(await read()).nodes.find(n=>n.id===1),at=original.inline[0].index;
   const saved=await page.evaluate(at=>window.hybridSpike.anchor(1,at,1),at);
   await page.evaluate(at=>window.hybridSpike.select(1,at),at);await settle();
   await page.keyboard.press('Enter');await settle();
   let state=await read();const right=state.selection.id;assert.ok(right<0);assert.equal(state.selection.focus,0);
-  assert.equal(state.nodes.find(n=>n.id===right).atoms[0].index,0);
+  assert.equal(state.nodes.find(n=>n.id===right).inline[0].index,0);
   const resolved=await page.evaluate(a=>window.hybridSpike.resolveAnchor(a),JSON.parse(JSON.stringify(saved)));
   assert.equal(resolved.status,'resolved');assert.equal(resolved.anchor.blockKey,state.nodes.find(n=>n.id===right).key);assert.equal(resolved.anchor.offset,0);
   await page.keyboard.type('Hello world ');await settle();
@@ -28,7 +28,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   assert.ok((await read()).nodes.find(n=>n.id===right).text.startsWith('Hello world '));
   await page.evaluate(id=>window.hybridSpike.select(id,0),right);await settle();await page.keyboard.press('Backspace');await settle();
   state=await read();assert.ok(!state.nodes.some(n=>n.id===right));assert.equal(state.selection.id,1);assert.equal(state.selection.focus,at);
-  assert.equal(state.nodes[0].atoms[0].index,at+12);
+  assert.equal(state.nodes[0].inline[0].index,at+12);
   await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();assert.ok((await read()).nodes.some(n=>n.id===right));
   // Streaming remains outside user history, including after structural edits.
   await page.evaluate(()=>window.hybridSpike.resume());await page.waitForFunction(()=>window.hybridSpike.metrics().samples.length>3);

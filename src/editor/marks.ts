@@ -8,6 +8,8 @@ export type MarkExtension = {
   version:number;
   /** Parse and normalize attributes at the schema boundary. */
   parse(attrs:unknown):JsonValue;
+  inclusiveStart?:boolean;
+  inclusiveEnd?:boolean;
 };
 function key(value:JsonValue):string{
   if(value===null||typeof value!=='object')return JSON.stringify(value);
@@ -64,6 +66,10 @@ export function createMarkSchema(extensions:readonly MarkExtension[]){
     return normalizeMarks(ranges.map(range=>{validateTextRange(text,range.from,range.to);return {...range,mark:create(range.mark.type,range.mark.attrs)};}));
   }
   return {
+    boundary(mark:Mark,edge:'start'|'end'):boolean|undefined{
+      const extension=registry.get(mark.type);if(!extension)throw new Error(`Unknown mark: ${mark.type}`);
+      return edge==='start'?extension.inclusiveStart:extension.inclusiveEnd;
+    },
     encode(ranges:readonly MarkRange[]):JsonValue[]{return ranges.map(range=>{
       const mark=create(range.mark.type,range.mark.attrs);
       return {from:range.from,to:range.to,mark:{...mark,version:registry.get(mark.type)!.version}};

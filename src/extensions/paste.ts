@@ -12,7 +12,7 @@ export function pasteParagraphs(schema:Schema<HybridNode>,state:EditorState<Hybr
   const entry=indexTree(schema,state.nodes).byId.get(caret.head.id);
   if(!entry)throw new Error('Missing paste destination');
   const tail=allocate(),last=lines[lines.length-1];
-  const middle:HybridNode[]=lines.slice(1,-1).map(text=>({kind:'paragraph',...allocate(),text,spans:[],atoms:[]}));
+  const middle:HybridNode[]=lines.slice(1,-1).map(text=>({kind:'paragraph',...allocate(),text,marks:[],inline:[]}));
   const steps:Step<HybridNode>[]=[...replacement.steps,
     {kind:'split',id:caret.head.id,at:caret.head.offset,rightId:tail.id,rightKey:tail.key},
     {kind:'replaceText',id:tail.id,from:0,to:0,text:last},

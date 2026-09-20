@@ -6,6 +6,20 @@ export type PositionMap =
   | {kind:'split';id:number;at:number;rightId:number}
   | {kind:'join';left:number;right:number;at:number};
 
+export type GapPosition={parent:number|null;index:number};
+/** Structural coordinate mapping shared by snapshots and extension selections. */
+export function mapGapPosition(gap:GapPosition,bias:-1|1,map:PositionMap):GapPosition{
+  if(map.kind==='unwrap'&&gap.parent===map.id)return {parent:map.parent,index:map.index+gap.index};
+  if(map.kind==='wrap'&&gap.parent===map.parent
+    &&(gap.index>map.index||gap.index===map.index&&bias===1)
+    &&(gap.index<map.index+map.count||gap.index===map.index+map.count&&bias===-1))return {parent:map.id,index:gap.index-map.index};
+  if(map.kind==='children'&&gap.parent===map.parent){
+    const end=map.index+map.removed;
+    return {...gap,index:gap.index<map.index?gap.index:gap.index>end?gap.index+map.inserted-map.removed:map.index+(bias===1?map.inserted:0)};
+  }
+  return gap;
+}
+
 export function mapPosition(id:number,index:number,bias:-1|1,map:PositionMap){
   switch(map.kind){
     case 'children':case 'unwrap':case 'wrap':return {id,index};

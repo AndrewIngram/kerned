@@ -17,12 +17,16 @@ Subsequent performance work: [indexed relative-position lookup](relative-positio
 - Atomic `editor.chain()` commands over draft state and side-effect-free `editor.can()` checks. A later failed command abandons earlier draft changes. Permission revocation before execution is rechecked.
 - Optimistic text replacement proposals with external ranges, expected node keys/text and a checked base revision. Unrelated edits can be tolerated; changed targets and stale commits reject. This is not general OT rebasing, exactly-once delivery or automatic schema/formatting conflict resolution.
 - Stored marks for caret formatting, input inheritance, Enter, selection reset and undo/redo. The demo uses the core input path for canvas text and table cells.
-- Headless subscriptions and optional React `useEditorState`. The hook reads a stable session snapshot; selector computation occurs during render. It does not yet suppress renders for unchanged selector values.
+- Framework-independent browser event ownership and viewport observation, used by both demos. Optional React `Editor` handles mounting/cleanup without owning the session. `useEditorState` suppresses unchanged selected values; `useCommandState` observes activity and availability.
+- Typed extension state fields with atomic pre-publication reducers, command draft support and reentrancy rejection. Public React renderer registration is used for starter-kit nodes, mentions, underline drawing and external comment decorations.
+- Direct semantic mark and inline-value storage in the starter kit. Layout-only projections retain compact font runs and inline boxes. Mark extensions can control boundary inclusion; inline extensions own attribute validation, layout/plain-text projection and versioned codecs.
+- Durable serialized structural gaps attached to node edges, including movement, wrapping, deletion, undo and reload. Shared text/gap coordinate kernels serve snapshot mapping and extension selections. Text reference replay and interactive selection recovery retain their distinct policies.
+- Command definitions with active/inactive/mixed queries, permission-aware availability, queued success effects and caret stored marks. The demo formatting actions use the shared toggle command.
 - Public inline decoration resolution and external comment-thread records. Threads retain their own IDs, messages and endpoint values; core nodes contain none of those fields. The demo now stores discussion threads outside document nodes, resolves their relative ranges into canvas decorations, and keeps replies independent of text history and rich clipboard content. Streamed samples seed external threads as their content arrives.
 
 ## Validation
 
-`npm test` passed 141 tests across Chromium, Firefox and WebKit, with three skips: the same still-unimplemented concurrent split/insert convergence scenario in each browser. No expected failures are counted as implemented behavior. Coverage includes real React mount/unmount, permission revocation, undo, failed multi-step transactions, external comment decoration resolution, nested/disjoint selections and existing demo editing/formatting.
+`npm test` passed 162 tests across Chromium, Firefox and WebKit, with three skips: the same still-unimplemented concurrent split/insert convergence scenario in each browser. Final focused verification passed 45 tests, including two additional cases per browser for command-chain mark resets and framework-free nested text capture. No expected failures are counted as implemented behavior. Coverage includes real React mount/unmount, permission revocation, undo, failed multi-step transactions, external comment decoration resolution, nested/disjoint selections and existing demo editing/formatting.
 
 The mixed-block streaming checks pass all nine cases across the three browsers (2,000/10,000 blocks, desktop/narrow viewports), including 501 resolved external threads at 10,000 blocks. An old image-spacing expectation was updated to account for the existing four-pixel baseline grid; the no-extra-shaping assertion remains intact.
 
@@ -30,27 +34,27 @@ The mixed-block streaming checks pass all nine cases across the three browsers (
 
 ## Large-document regression measurements
 
-Three serial development-mode Chromium trials on Apple M4 Pro; Warbreaker contains 7,280 blocks and 1,117,497 plain-text characters. [Original baseline](../artifacts/editor-foundation/baseline.json), [current measurements](../artifacts/editor-stored-marks/baseline.json).
+Three serial development-mode Chromium trials on Apple M4 Pro; Warbreaker contains 7,280 blocks and 1,117,497 plain-text characters. [Original baseline](../artifacts/editor-foundation/baseline.json), [current measurements](../artifacts/editor-runtime-extensions-fixed/baseline.json).
 
 | Measurement | Original median | Current median |
 | --- | ---: | ---: |
-| First usable editor | 204 ms | 213 ms |
-| Progressive load after resume | 1,087 ms | 1,059 ms |
-| Full-book rich paste handler | 52.2 ms | 54.9 ms |
-| Paste to second animation frame | 102.2 ms | 105.3 ms |
-| Typing to second animation frame | 31.8 ms | 31.6 ms |
-| Paging to second animation frame | 32.0 ms | 31.9 ms |
-| Loaded JS heap after GC | 31.36 MB | 31.65 MB |
+| First usable editor | 204 ms | 199 ms |
+| Progressive load after resume | 1,087 ms | 1,003 ms |
+| Full-book rich paste handler | 52.2 ms | 53.1 ms |
+| Paste to second animation frame | 102.2 ms | 102.3 ms |
+| Typing to second animation frame | 31.8 ms | 31.9 ms |
+| Paging to second animation frame | 32.0 ms | 32.1 ms |
+| Loaded JS heap after GC | 31.36 MB | 31.93 MB |
 
-These remain within the initial review budgets: 20% beyond the original maximum for loading/paste, 15% for heap, or an extra frame for typing/paging. Existing paste correctness, undo/redo and stale-paint checks pass. Frame timings include scheduling; heap excludes GPU/native memory. These default-demo measurements do not establish large-document permission-validation or decoration-resolution costs. The [lookup optimization report](relative-position-performance.md) records the subsequent fix, including different capture revisions and undo/redo.
+An initial regression rebuilt the full tree for each toolbar mark query. Reusing the existing tree index removed it. `npm run check:editor-performance -- artifacts/editor-runtime-extensions-fixed/baseline.json` enforces the initial review budgets: 20% beyond the original maximum for loading/paste, 15% for heap, or an extra frame for typing/paging. Existing paste correctness, undo/redo and stale-paint checks pass. Frame timings include scheduling; heap excludes GPU/native memory. These default-demo measurements do not establish large-document permission-validation or decoration-resolution costs. The [lookup optimization report](relative-position-performance.md) records the subsequent fix, including different capture revisions and undo/redo.
 
 ## Remaining implementation
 
 - Authority operation transforms and collaborative undo; the bounded Automerge comparison and idempotent delivery.
 - A durable storage strategy that bounds retained metadata while preserving unknown external references. Indexed lookup now skips safe replay; persisted history still grows.
 - Permission-aware client update transport, revocation handling, restricted reference resolution and protected-text/mark semantics. Projection must run at a trusted boundary, and application-defined metadata must not duplicate hidden descendant content.
-- Custom mark rendering, extension state and further starter-kit migration. Semantic mark commands and node codecs are implemented; the demo still stores compact font-style spans behind its text adapter. Automatic schema migrations and session persistence remain outstanding.
-- Complete reusable view/session assembly, the generic React Editor component and selector optimization. The demo now uses `useEditorState`; formatting, heading, list, quote and table toolbar actions use batched command chains.
-- Durable structural positions and unified selection mapping.
+- Automatic schema migrations and application persistence. The starter-kit paragraph/heading codecs are version 2; older serialized inline payloads require migration.
+- Packaging the application-owned CanvasKit scene and starter-kit shortcuts into a configurable ready-made editor assembly. The generic browser runtime and React host are implemented and used, but consumers still supply these policies and their renderer.
+- Durable mixed text/structural range semantics, if needed by future features. Structural gaps follow surviving edge identities; both-edge deletion is explicit. Text comments retain their existing durable range behavior.
 
 These are remaining engineering tasks, not requests for another round of routine decisions. Offline guarantees and trust/encryption assumptions still belong at the collaboration architecture gate.

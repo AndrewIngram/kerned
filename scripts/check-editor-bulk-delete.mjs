@@ -16,10 +16,10 @@ try{
     const reports=[];
     const check=(condition,message)=>{if(!condition)throw new Error(message);};
     const same=(a,b,message)=>check(JSON.stringify(a)===JSON.stringify(b),message);
-    const leaf=(id,text='Editable content.')=>({id,key:`p-${id}`,kind:'paragraph',text,spans:[],atoms:[]});
+    const leaf=(id,text='Editable content.')=>({id,key:`p-${id}`,kind:'paragraph',text,marks:[],inline:[]});
     const apply=(editor,command)=>editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:'separate',time:0,...command});
-    const first={...leaf(1,'Hello world'),kind:'heading',level:2,spans:[{start:0,end:5,bold:true,italic:false}]};
-    const last={...leaf(4,'Goodbye world'),spans:[{start:5,end:13,bold:false,italic:true}]};
+    const first={...leaf(1,'Hello world'),kind:'heading',level:2,marks:[{from:0,to:5,mark:{type:'bold',attrs:null}}]};
+    const last={...leaf(4,'Goodbye world'),marks:[{from:5,to:13,mark:{type:'italic',attrs:null}}]};
     const table={id:40,key:'table',kind:'table',caption:'Embedded',rows:[[{id:41,key:'cell',kind:'tableCell',row:0,header:false,colspan:1,rowspan:1,paragraphs:[leaf(42,'Cell text')]}]]};
     const initial=[leaf(100,'Before'),{id:20,key:'quote-1',kind:'quote',children:[first,{id:30,key:'list',kind:'list',ordered:true,start:3,children:[{id:31,key:'item-1',kind:'listItem',children:[leaf(2)]},{id:32,key:'item-2',kind:'listItem',children:[leaf(3)]}]}]},table,{id:21,key:'quote-2',kind:'quote',children:[last,leaf(5,'Keep this sibling')]},leaf(6,'After')];
     for(const inserted of ['', 'New text']){

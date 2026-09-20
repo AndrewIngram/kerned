@@ -1,3 +1,4 @@
+import {formattingMarks} from './extensions/formatting';
 import {createOutlineExtension,type OutlineEntry} from './extensions/outline';
 import {demoSchema} from './extensions/demo-schema';
 import {plainText} from './extensions/demo-model';
@@ -51,9 +52,9 @@ export async function loadHybridSample(url=new URL(location.href)):Promise<Hybri
       'The best tools give your ideas room to breathe.',
       'Try selecting a few words, or a passage across paragraphs. Make it bold or italic, rewrite it, and undo to find your way back.',
     ];
-    const initial:HybridNode[]=texts.map((text,index)=>({kind:'paragraph',id:index+1,key:`draft-${index+1}`,text,spans:[],atoms:[]}));
+    const initial:HybridNode[]=texts.map((text,index)=>({kind:'paragraph',id:index+1,key:`draft-${index+1}`,text,marks:[],inline:[]}));
     const second=initial[1];
-    if((second.kind==='paragraph'||second.kind==='heading'))second.spans=[{start:25,end:38,bold:true,italic:false},{start:54,end:73,bold:false,italic:true}];
+    if((second.kind==='paragraph'||second.kind==='heading'))second.marks=formattingMarks([{start:25,end:38,bold:true,italic:false},{start:54,end:73,bold:false,italic:true}]);
     return {id:'minimal',title:'Draft',description:'',total:0,initial,chunk:()=>[]};
   }
   return {id:'extensions',comments:sampleComments,title:'Launch notes',description:'Select a mention or highlighted phrase. Expand the checklist to add notes.',total:0,initial:createHybridDocument(),chunk:()=>[]};

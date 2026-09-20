@@ -471,7 +471,7 @@ test('node locks survive starter-kit heading conversion and end-of-heading split
     const {createEditor, textSelection} = await import('/src/editor/index.ts');
     const {demoSchema} = await import('/src/extensions/demo-schema.ts');
     const {setTextBlockType} = await import('/src/extensions/headings.ts');
-    const editor = createEditor(demoSchema, [{kind: 'paragraph', id: 1, key: 'p', text: 'Locked', locked: true, spans: [], atoms: []}], textSelection(1, 0));
+    const editor = createEditor(demoSchema, [{kind: 'paragraph', id: 1, key: 'p', text: 'Locked', locked: true, marks:[], inline: []}], textSelection(1, 0));
     const dispatch = steps => editor.dispatch({baseRevision: editor.state.revision, origin: 'local', history: 'separate', time: 0, steps});
     dispatch(setTextBlockType(demoSchema, editor.state, [1], 2));
     const heading = editor.state.nodes[0];

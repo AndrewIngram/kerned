@@ -55,13 +55,13 @@ test('document codecs reload durable comment endpoints with their independent ch
  const result=await page.evaluate(async()=>{
   const {demoSchema,demoDocumentCodec}=await import('/src/extensions/demo-schema.ts');
   const {createEditor,textSelection,parseRelativeRange}=await import('/src/editor/index.ts');
-  const editor=createEditor(demoSchema,[{id:1,key:'p',kind:'paragraph',text:'Hello world',atoms:[],spans:[{start:0,end:5,bold:true,italic:false}]}],textSelection(1,0));
+  const editor=createEditor(demoSchema,[{id:1,key:'p',kind:'paragraph',text:'Hello world',inline:[],marks:[{from:0,to:5,mark:{type:'bold',attrs:null}}]}],textSelection(1,0));
   const range=editor.positions.range(editor.positions.at(1,0,1),editor.positions.at(1,5,-1));
   editor.chain().step({kind:'replaceText',id:1,from:2,to:2,text:'new'}).run();
   const data=JSON.parse(JSON.stringify({document:demoDocumentCodec.encode(editor.state.nodes),checkpoint:editor.positions.checkpoint(),range,documentId:editor.documentId,revision:editor.state.revision}));
   const restored=createEditor(demoSchema,demoDocumentCodec.decode(data.document),textSelection(1,0),[],{documentId:data.documentId,revision:data.revision,positionCheckpoint:data.checkpoint});
   const output=demoDocumentCodec.encode(restored.state.nodes);output.nodes[0].data.text='mutated output';
-  return {resolved:restored.positions.resolveRange(parseRelativeRange(data.range)),text:restored.state.nodes[0].text,bold:restored.state.nodes[0].spans[0].bold};
+  return {resolved:restored.positions.resolveRange(parseRelativeRange(data.range)),text:restored.state.nodes[0].text,bold:restored.state.nodes[0].marks[0].mark.type==='bold'};
  });
  expect(result).toEqual({resolved:{status:'resolved',ranges:[{id:1,from:0,to:8}]},text:'Henewllo world',bold:true});
 });

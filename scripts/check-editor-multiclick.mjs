@@ -17,7 +17,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();assert.equal(await selected(),'Good');
   const second=await point(2,18);
   await page.mouse.click(second.x,second.y,{clickCount:3});await settle();assert.equal(await selected(),(await read()).nodes[1].text);
-  await page.getByRole('button',{name:'Bold',exact:true}).click();await settle();assert.equal((await read()).nodes[1].spans[0].start,0);
+  await page.getByRole('button',{name:'Bold',exact:true}).click();await settle();assert.equal((await read()).nodes[1].marks[0].from,0);
   await page.mouse.click(first.x,first.y);await settle();const s=await read();assert.equal(s.selection.anchor,s.selection.focus);
   for(const shortcut of ['Meta+a','Control+a']){await page.keyboard.press(shortcut);await settle();const all=await read();assert.equal(all.selection.anchorId,1);assert.equal(all.selection.anchor,0);assert.equal(all.selection.id,4);assert.equal(all.selection.focus,all.nodes[3].text.length);}
   await page.keyboard.type('Replacement');await settle();assert.equal((await read()).nodes.length,1);assert.equal((await read()).nodes[0].text,'Replacement');await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();assert.equal((await read()).nodes.length,4);

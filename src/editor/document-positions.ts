@@ -1,7 +1,7 @@
 import type {NodeIdentity, Schema} from './schema';
 import {indexTree} from './tree';
 import {boundaries} from './text';
-import {mapPosition, type PositionMap} from './positions';
+import {mapPosition,mapGapPosition, type PositionMap} from './positions';
 
 const positionBrand: unique symbol = Symbol('snapshot position');
 const mappedLocation: unique symbol = Symbol('mapped location');
@@ -127,17 +127,7 @@ export function createPositionSnapshot<N extends NodeIdentity>(schema: Schema<N>
         if (location.kind === 'text') {
           const mapped = mapPosition(location.id, location.offset, bias, map);
           location = {kind: 'text', id: mapped.id, offset: mapped.index};
-        } else if (map.kind === 'unwrap' && location.parent === map.id) {
-          location = {kind: 'gap', parent: map.parent, index: map.index + location.index};
-        } else if (map.kind === 'wrap' && location.parent === map.parent
-          && (location.index > map.index || location.index === map.index && bias === 1)
-          && (location.index < map.index + map.count || location.index === map.index + map.count && bias === -1)) {
-          location = {kind: 'gap', parent: map.id, index: location.index - map.index};
-        } else if (map.kind === 'children' && location.parent === map.parent) {
-          const end = map.index + map.removed, offset = location.index;
-          location = {...location, index: offset < map.index ? offset : offset > end
-            ? offset + map.inserted - map.removed : map.index + (bias === 1 ? map.inserted : 0)};
-        }
+        } else location={kind:'gap',...mapGapPosition(location,bias,map)};
       }
       return target[mappedLocation](location, bias);
     },

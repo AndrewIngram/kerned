@@ -54,9 +54,9 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
         const paragraphs = state.nodes.filter(node => node.kind === 'paragraph' && node.text.length);
         const bold = paragraphs.every(node => {
           let end = 0;
-          for (const span of node.spans) {
-            if (span.start !== end || !span.bold) return false;
-            end = span.end;
+          for (const span of node.marks.filter(mark=>mark.mark.type==='bold')) {
+            if (span.from !== end) return false;
+            end = span.to;
           }
           return end === node.text.length;
         });

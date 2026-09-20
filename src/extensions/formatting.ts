@@ -1,11 +1,11 @@
-import {createMarkSchema,type MarkRange} from '../editor';
+import {normalizeMarks,createMarkSchema,type MarkRange} from '../editor';
 import type {HybridSpan} from './demo-model';
 
 export type TextFormat='bold'|'italic'|'underline';
 const formats:readonly TextFormat[]=['bold','italic','underline'];
 export const formattingSchema=createMarkSchema(formats.map(name=>({name,version:1,parse(attrs:unknown){if(attrs!==null)throw new Error(`${name} takes no attributes`);return null;}})));
 export function formattingMarks(spans:readonly HybridSpan[]):MarkRange[]{
-  return spans.flatMap(span=>formats.filter(type=>span[type]).map(type=>({from:span.start,to:span.end,mark:formattingSchema.create(type,null)})));
+  return normalizeMarks(spans.flatMap(span=>formats.filter(type=>span[type]).map(type=>({from:span.start,to:span.end,mark:formattingSchema.create(type,null)}))));
 }
 /** Project semantic marks to the compact font-style runs consumed by layout. */
 export function formattingSpans(ranges:readonly MarkRange[]):HybridSpan[]{

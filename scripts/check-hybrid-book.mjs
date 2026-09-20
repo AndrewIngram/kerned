@@ -33,35 +33,35 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
       return {marked,inert,table,combining,empty,injected:!!window.injected};
     });
     assert.deepEqual(parsed.marked.nodes.map(n=>n.text),['Heading','one two three four\nfive & six']);
-    assert.deepEqual(parsed.marked.nodes[1].spans,[
-      {start:4,end:8,bold:true,italic:false},
-      {start:8,end:13,bold:true,italic:true},
-      {start:14,end:18,bold:false,italic:false,underline:true},
+    assert.deepEqual(parsed.marked.nodes[1].marks,[
+      {from:4,to:13,mark:{type:'bold',attrs:null}},
+      {from:8,to:13,mark:{type:'italic',attrs:null}},
+      {from:14,to:18,mark:{type:'underline',attrs:null}},
     ]);
-    assert.equal(parsed.marked.nodes[0].spans[0].bold,true);
+    assert.equal(parsed.marked.nodes[0].kind,'heading');assert.equal(parsed.marked.nodes[0].level,2);
     assert.deepEqual(parsed.inert.nodes.map(n=>n.text),['Safe text']);assert.equal(parsed.injected,false);
     assert.deepEqual(parsed.table.nodes.map(n=>n.kind),['table','paragraph']);
     assert.deepEqual(parsed.table.nodes[0].rows[0].map(c=>c.paragraphs[0].text),['A','B']);
     assert.equal(parsed.table.nodes[1].text,'Link2');
     assert.equal(parsed.table.tables,1);assert.equal(parsed.table.conversions.links,1);
-    assert.equal(parsed.combining.nodes[0].spans[0].end,2);assert.deepEqual(parsed.empty.nodes,[]);
+    assert.equal(parsed.combining.nodes[0].marks[0].to,2);assert.deepEqual(parsed.empty.nodes.map(node=>({kind:node.kind,text:node.text})),[{kind:'paragraph',text:''}]);
 
     // Underline survives split/join/undo while source blocks are still arriving.
-    const first=await page.evaluate(()=>window.hybridSpike.probe([2]).nodes[0]);
-    const underlined=first.spans.find(s=>s.underline);assert.ok(underlined);
-    await page.evaluate(at=>window.hybridSpike.select(2,at),underlined.start+2);await settle();
+    const first=await page.evaluate(()=>window.hybridSpike.probe([3]).nodes[0]);
+    const underlined=first.marks.find(s=>(s.mark.type==='underline'));assert.ok(underlined);
+    await page.evaluate(at=>window.hybridSpike.select(3,at),underlined.from+2);await settle();
     await page.keyboard.press('Enter');await settle();
     const split=await page.evaluate(()=>window.hybridSpike.read().selection.id);assert.ok(split<0);
     await page.keyboard.press('Backspace');await settle();
-    assert.deepEqual(await page.evaluate(()=>window.hybridSpike.probe([2]).nodes[0]),first);
-    await page.evaluate(()=>window.hybridSpike.select(2,0));await settle();
+    assert.deepEqual(await page.evaluate(()=>window.hybridSpike.probe([3]).nodes[0]),first);
+    await page.evaluate(()=>window.hybridSpike.select(3,0));await settle();
     await page.keyboard.type('Edited ');await settle();
-    assert.ok((await page.evaluate(()=>window.hybridSpike.probe([2]).nodes[0].text)).startsWith('Edited '),`${name}: typing before loading`);
+    assert.ok((await page.evaluate(()=>window.hybridSpike.probe([3]).nodes[0].text)).startsWith('Edited '),`${name}: typing before loading`);
     await page.evaluate(()=>window.hybridSpike.resume());
     await page.waitForFunction(()=>window.hybridSpike.probe([]).complete,null,{timeout:90000});await settle();
-    assert.ok((await page.evaluate(()=>window.hybridSpike.probe([2]).nodes[0].text)).startsWith('Edited '));
+    assert.ok((await page.evaluate(()=>window.hybridSpike.probe([3]).nodes[0].text)).startsWith('Edited '));
     await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();
-    assert.deepEqual(await page.evaluate(()=>window.hybridSpike.probe([2]).nodes[0]),first);
+    assert.deepEqual(await page.evaluate(()=>window.hybridSpike.probe([3]).nodes[0]),first);
 
     const fidelity=await page.evaluate(html=>{
       const template=document.createElement('template');template.innerHTML=html;
@@ -69,9 +69,9 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
       const normal=text=>text.replace(/\s+/g,' ').trim();
       const expected=[...template.content.querySelectorAll('p,h1,h2,h3,h4,h5,h6')].map(e=>normal(e.textContent));
       const nodes=window.hybridSpike.read().nodes;
-      const paragraphs=nodes.flatMap(n=>n.kind==='paragraph'?[n]:n.kind==='table'?n.rows.flatMap(row=>row.flatMap(cell=>cell.paragraphs)):[]);
+      const paragraphs=nodes.flatMap(n=>n.kind==='paragraph'||n.kind==='heading'?[n]:n.kind==='table'?n.rows.flatMap(row=>row.flatMap(cell=>cell.paragraphs)):[]);
       const mismatches=expected.flatMap((text,i)=>text===normal(paragraphs[i]?.text??'')?[]:[i]);
-      const underlineText=paragraphs.flatMap(n=>n.spans.filter(s=>s.underline).map(s=>n.text.slice(s.start,s.end))).join('');
+      const underlineText=paragraphs.flatMap(n=>n.marks.filter(s=>(s.mark.type==='underline')).map(s=>n.text.slice(s.from,s.to))).join('');
       const expectedUnderline=[...template.content.querySelectorAll('u')].map(e=>e.textContent).join('');
       return {count:nodes.length,textBlocks:paragraphs.length,expected:expected.length,mismatches,underline:underlineText.replace(/\s/g,'')===expectedUnderline.replace(/\s/g,''),last:nodes.at(-1).id,lastText:expected.at(-1)};
     },html);

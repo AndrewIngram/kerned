@@ -61,10 +61,10 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await page.evaluate(()=>window.hybridSpike.scrollTo(11));await settle();
   await page.evaluate(()=>window.hybridSpike.select(11,0));await settle();const styledBefore=await probe([11]);
   await page.keyboard.insertText('New ');await settle();const styledAfter=await probe([11]);
-  assert.deepEqual(styledAfter.lastLayoutIds,[11]);assert.equal(styledAfter.nodes[0].spans[0].start,styledBefore.nodes[0].spans[0].start+4);
+  assert.deepEqual(styledAfter.lastLayoutIds,[11]);assert.equal(styledAfter.nodes[0].marks[0].from,styledBefore.nodes[0].marks[0].from+4);
   await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();assert.deepEqual((await probe([11])).nodes,styledBefore.nodes);
-  await page.evaluate(end=>window.hybridSpike.select(11,end),styledBefore.nodes[0].spans[0].end);await settle();await page.keyboard.insertText('\u0301');await settle();
-  assert.equal((await probe([11])).nodes[0].spans[0].end,styledBefore.nodes[0].spans[0].end+1);await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();
+  await page.evaluate(end=>window.hybridSpike.select(11,end),styledBefore.nodes[0].marks[0].to);await settle();await page.keyboard.insertText('\u0301');await settle();
+  assert.equal((await probe([11])).nodes[0].marks[0].to,styledBefore.nodes[0].marks[0].to+1);await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();
   const resizeId=Math.floor(total/2)+6;await page.evaluate(id=>window.hybridSpike.scrollTo(id,8),resizeId);await settle();
   const resizeBefore=await probe([resizeId]);
   await page.setViewportSize({width:width===420?520:700,height:950});await settle();await settle();

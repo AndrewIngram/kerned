@@ -7,7 +7,7 @@ export function setTextBlockType(schema:Schema<HybridNode>,state:EditorState<Hyb
     const entry=tree.byId.get(id);if(!entry)return [];
     const node=entry.node;if(node.kind!=='paragraph'&&node.kind!=='heading')return [];
     if(level===null&&node.kind==='paragraph'||node.kind==='heading'&&node.level===level)return [];
-    const content={id:node.id,key:node.key,locked:node.locked,text:node.text,spans:node.spans,atoms:node.atoms};
+    const content={id:node.id,key:node.key,locked:node.locked,text:node.text,marks:node.marks,inline:node.inline};
     const next:HybridNode=level===null?{...content,kind:'paragraph'}:{...content,kind:'heading',level};
     return [{kind:'replaceChildren',parent:entry.parent,index:entry.index,count:1,nodes:[next]}];
   });

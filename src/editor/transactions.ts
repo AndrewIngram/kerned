@@ -1,6 +1,7 @@
 import {inputMarks,markInsertedText} from './stored-marks';
 import type {Mark} from './marks';
-import {createCommandChain} from './commands';
+import {createCommandChain,type CommandDefinition,type CommandState} from './commands';
+import type {StateFieldRegistration,ExtensionUpdate} from './extension-state';
 import {assertEditAllowed,assertContentEditAllowed,type AccessPolicy} from './permissions';
 import {invertPositionMap,type PositionMap} from './positions';
 import {indexTree,validateTree,childrenAt,spliceChildren,type TreeIndex} from './tree';
@@ -26,7 +27,7 @@ export type Step<N extends NodeIdentity> =
   | {kind:'moveChildren';parent:number|null;index:number;count:number;toParent:number|null;toIndex:number}
   | {kind:'wrapChildren';parent:number|null;index:number;count:number;wrapper:N}
   | {kind:'unwrap';id:number};
-export type Transaction<N extends NodeIdentity> = {baseRevision:number;steps:readonly Step<N>[];selection?:Selection;input?:boolean} & (
+export type Transaction<N extends NodeIdentity> = {baseRevision:number;steps:readonly Step<N>[];selection?:Selection;input?:boolean;storedMarks?:readonly Mark[]|null} & (
   | {origin:'local';history:'separate'|{group:string};time:number}
   | {origin:'stream';history:'exclude'}
 );
@@ -34,7 +35,7 @@ export type EditorState<N extends NodeIdentity> = {nodes:N[];selection:Selection
 type Change<N extends NodeIdentity> = {index:number;before:N[];after:N[]};
 type Applied<N extends NodeIdentity> = {state:EditorState<N>;changes:Change<N>[];maps:PositionMap[];anchorMaps:AnchorMap[];changedIds:number[];positionMapping:SnapshotTransition<N>};
 type HistoryEntry<N extends NodeIdentity> = {changes:Change<N>[];maps:AnchorMap[];positionMaps:PositionMap[];operations:MappingOperation[];before:SelectionBookmark;after:SelectionBookmark;afterSelection:Selection;group:string|null;time:number;beforeMarks:readonly Mark[]|null;afterMarks:readonly Mark[]|null};
-export type EditorOptions<N extends NodeIdentity = NodeIdentity> = {documentId?:string;revision?:number;positionCheckpoint?:unknown;permissions?:AccessPolicy<N>};
+export type EditorOptions<N extends NodeIdentity = NodeIdentity> = {documentId?:string;revision?:number;positionCheckpoint?:unknown;permissions?:AccessPolicy<N>;fields?:readonly StateFieldRegistration<N>[]};
 
 export function applyTransaction<N extends NodeIdentity>(schema:Schema<N>,state:EditorState<N>,tx:Transaction<N>,selections=createSelectionRegistry(),permissions?:AccessPolicy<N>):Applied<N>{
   if(tx.baseRevision!==state.revision)throw new Error('Stale transaction: rebase before applying');
@@ -210,7 +211,16 @@ export function applyTransaction<N extends NodeIdentity>(schema:Schema<N>,state:
   selections.validate(context,selection);
   if(permissions)assertEditAllowed(schema,state.nodes,nodes,permissions);
   const caret=selection instanceof TextSelection&&selection.anchor.id===selection.head.id&&selection.anchor.offset===selection.head.offset;
-  const storedMarks=caret?(typingMarks??(state.selection.eq(selection)?state.storedMarks??null:null)):null;
+  let storedMarks=caret?(typingMarks??(state.selection.eq(selection)?state.storedMarks??null:null)):null;
+  if(tx.storedMarks!==undefined){
+    if(!caret||!(selection instanceof TextSelection))throw new Error('Stored marks require a caret');
+    const node=tree.byId.get(selection.head.id)?.node,adapter=node?schema.editing(node).marks:undefined;
+    if(!node||!adapter)throw new Error('Text does not support marks');
+    if(permissions)assertContentEditAllowed(schema,nodes,{kind:'replaceText',id:node.id,from:selection.head.offset,to:selection.head.offset,text:''},permissions);
+    const checked=tx.storedMarks===null?null:adapter.validate?.(tx.storedMarks)??tx.storedMarks;
+    if(checked&&new Set(checked.map(mark=>mark.type)).size!==checked.length)throw new Error('Duplicate stored mark type');
+    storedMarks=checked===null?null:structuredClone(checked);
+  }
   const next={nodes,selection,revision:state.revision+1,storedMarks};
   return {state:next,changes,maps,anchorMaps,changedIds:[...changedIds],positionMapping:{before:state,after:next,maps}};
 }
@@ -225,6 +235,15 @@ export function createEditor<N extends NodeIdentity>(schema:Schema<N>,initial:N[
   if(!documentId||!Number.isSafeInteger(revision)||revision<0)throw new Error('Invalid document identity or revision');
   let state:EditorState<N>={nodes:initial,selection,revision,storedMarks:null},nextId=-1;
   let boundary=true;
+  const fields=[...new Set(options.fields??[])];
+  for(const field of fields)field.initialize(state);
+  let preparing=false;
+  function prepareFields(event:ExtensionUpdate<N>){
+    if(preparing)throw new Error('Extension reducers cannot change editor state');
+    preparing=true;
+    try{for(const field of fields)field.prepare(event);}finally{preparing=false;}
+  }
+  function assertWritable(){if(preparing)throw new Error('Extension reducers cannot change editor state');}
   const positions=createRelativePositions(schema,state,documentId,options.positionCheckpoint);
   let allocationNodes:readonly N[]|undefined;
   let occupiedIds:ReadonlySet<number>=new Set();
@@ -232,6 +251,7 @@ export function createEditor<N extends NodeIdentity>(schema:Schema<N>,initial:N[
   function notify(){for(const listener of [...listeners]){try{listener();}catch(error){queueMicrotask(()=>{throw error;});}}}
   const past:HistoryEntry<N>[]=[],future:HistoryEntry<N>[]=[],journal:RevisionMap[]=[];
   function restore(redo:boolean){
+    assertWritable();
     const source=redo?future:past,target=redo?past:future,entry=source.at(-1);
     if(!entry)return null;
     let nodes=state.nodes;const changedIds=new Set<number>();
@@ -253,10 +273,12 @@ export function createEditor<N extends NodeIdentity>(schema:Schema<N>,initial:N[
       }
       assertEditAllowed(schema,state.nodes,next.nodes,options.permissions);
     }
+    const positionMapping={before:state,after:next,maps:redo?entry.positionMaps:[...entry.positionMaps].reverse().map(invertPositionMap)};
+    prepareFields({kind:redo?'redo':'undo',before:state,after:next,mapping:positionMapping});
     positions.advance(next,maps,{operations:entry.operations,redo});
     source.pop();target.push(entry);boundary=true;
     journal.push({from:state.revision,to:state.revision+1,maps});
-    const positionMapping={before:state,after:next,maps:redo?entry.positionMaps:[...entry.positionMaps].reverse().map(invertPositionMap)};
+
     state=next;notify();
     return {state,changedIds:[...changedIds],positionMapping};
   }
@@ -265,30 +287,36 @@ export function createEditor<N extends NodeIdentity>(schema:Schema<N>,initial:N[
     subscribe(listener:()=>void){listeners.add(listener);return ()=>{listeners.delete(listener);};},
     chain(){return createCommandChain(commandHost());},
     can(){return createCommandChain(commandHost(),true);},
+    commandState<Args extends unknown[]>(command:CommandDefinition<N,Args>,...args:Args):CommandState{
+      return {available:editor.can().command(command.execute,...args).run(),activity:command.activity?.(state,...args)??'inactive'};
+    },
     documentId,
     positions:positions.api,
     find:createFind(schema,()=>state.nodes),
     get journal():readonly RevisionMap[]{return journal;},
     /** Discards the legacy journal, not the retained metadata used by relative positions. */
     compactJournal(through=state.revision){
+      assertWritable();
       if(!Number.isSafeInteger(through)||through<0||through>state.revision)throw new Error('Invalid compaction revision');
       let count=0;while(count<journal.length&&journal[count].to<=through)count++;
       journal.splice(0,count);
     },
     get history(){return {undo:past.length,redo:future.length};},
     allocateBlockId(){
+      assertWritable();
       // A paste allocates thousands of identities before publishing any nodes.
       // Scan once per immutable document, including externally inserted IDs.
       if(allocationNodes!==state.nodes){occupiedIds=new Set(indexTree(schema,state.nodes).byId.keys());allocationNodes=state.nodes;}
       while(occupiedIds.has(nextId))nextId--;
       return nextId--;
     },
-    breakHistory(){boundary=true;},
+    breakHistory(){assertWritable();boundary=true;},
     selectionJSON(){return state.selection.encode(selectionContext(schema,state.nodes));},
     readSelection(value:unknown){return selections.read(selectionContext(schema,state.nodes),value);},
     selectionEdit(text:string){return state.selection.replace(selectionContext(schema,state.nodes),text);},
-    select(next:Selection){selections.validate(selectionContext(schema,state.nodes),next);if(!state.selection.eq(next))boundary=true;state={...state,selection:next,storedMarks:state.selection.eq(next)?state.storedMarks:null};notify();return state;},
+    select(next:Selection){assertWritable();selections.validate(selectionContext(schema,state.nodes),next);const after={...state,selection:next,storedMarks:state.selection.eq(next)?state.storedMarks:null};prepareFields({kind:'selection',before:state,after});if(!state.selection.eq(next))boundary=true;state=after;notify();return state;},
     setStoredMarks(marks:readonly Mark[]|null){
+      assertWritable();
       const selection=state.selection;
       if(!(selection instanceof TextSelection)||selection.anchor.id!==selection.head.id||selection.anchor.offset!==selection.head.offset)throw new Error('Stored marks require a caret');
       const node=indexTree(schema,state.nodes).byId.get(selection.head.id)?.node;
@@ -297,10 +325,12 @@ export function createEditor<N extends NodeIdentity>(schema:Schema<N>,initial:N[
       if(options.permissions)assertContentEditAllowed(schema,state.nodes,{kind:'replaceText',id:node.id,from:selection.head.offset,to:selection.head.offset,text:''},options.permissions);
       const checked=marks===null?null:adapter?.validate?.(marks)??marks;
       if(checked&&new Set(checked.map(mark=>mark.type)).size!==checked.length)throw new Error('Duplicate stored mark type');
-      state={...state,storedMarks:checked===null?null:structuredClone(checked)};boundary=true;notify();return state;
+      const after={...state,storedMarks:checked===null?null:structuredClone(checked)};prepareFields({kind:'storedMarks',before:state,after});state=after;boundary=true;notify();return state;
     },
     dispatch(tx:Transaction<N>){
+      assertWritable();
       const result=applyTransaction(schema,state,tx,selections,options.permissions);
+      prepareFields({kind:'transaction',before:state,after:result.state,transaction:tx,mapping:result.positionMapping});
       const operations=positions.advance(result.state,result.anchorMaps);
       if(tx.origin==='local'&&result.changes.length){
         const group=tx.history==='separate'?null:tx.history.group,last=past.at(-1);
@@ -318,9 +348,13 @@ export function createEditor<N extends NodeIdentity>(schema:Schema<N>,initial:N[
     get state(){return state;},
     preview(draft:EditorState<N>,tx:Transaction<N>){
       const result=applyTransaction(schema,draft,tx,selections,options.permissions);
+      prepareFields({kind:'transaction',before:draft,after:result.state,transaction:tx,mapping:result.positionMapping});
       return result.state;
     },
-    dispatch:editor.dispatch,
+    dispatch(tx:Transaction<N>){
+      if(!tx.steps.length&&(!tx.selection||state.selection.eq(tx.selection))&&tx.storedMarks!==undefined)return editor.setStoredMarks(tx.storedMarks);
+      return editor.dispatch(tx);
+    },
   };}
   return editor;
 }

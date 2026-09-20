@@ -4,7 +4,7 @@ export type NodeIdentity = {id:number;key:string;locked?:boolean};
 
 export type TextBehavior<N extends NodeIdentity> = {
   text(node:N):string;
-  marks?:{validate?(marks:readonly Mark[]):readonly Mark[];read(node:N):readonly MarkRange[];write(node:N,marks:readonly MarkRange[]):N};
+  marks?:{validate?(marks:readonly Mark[]):readonly Mark[];boundary?(mark:Mark,edge:'start'|'end'):boolean|undefined;read(node:N):readonly MarkRange[];write(node:N,marks:readonly MarkRange[]):N};
   replace(node:N,from:number,to:number,text:string):N;
   split(node:N,at:number,right:NodeIdentity):[N,N];
   join(left:N,right:N):N;

@@ -1,5 +1,6 @@
-import {createContext,useContext,useLayoutEffect,useSyncExternalStore} from 'react';
+import {createContext,useContext,useLayoutEffect,useMemo,useSyncExternalStore} from 'react';
 import type {Canvas,CanvasKit,Paint} from 'canvaskit-wasm';
+import type {NodeIdentity,EditorState,CommandDefinition,CommandState} from '../editor';
 export type CanvasPainter = (canvas:Canvas,kit:CanvasKit,paint:Paint)=>void;
 export type CanvasPaintLayer='background'|'content';
 export type RegisterCanvasPainter = (id:string,painter:CanvasPainter,layer:CanvasPaintLayer)=>()=>void;
@@ -13,9 +14,27 @@ export function CanvasPrimitive({id,paint,layer='content'}:{id:string;paint:Canv
 }
 
 export {usePointerSelection} from './pointer-selection';
+export {Editor} from './editor';
+export {createReactRenderers,type ReactRenderer} from './renderers';
 
 /** React is an optional subscriber to a headless editor session. */
-export function useEditorState<State, Value>(editor:{readonly state:State;subscribe(listener:()=>void):()=>void}, selector:(state:State)=>Value):Value{
-  const state=useSyncExternalStore(editor.subscribe,()=>editor.state,()=>editor.state);
-  return selector(state);
+export function useEditorState<State, Value>(editor:{readonly state:State;subscribe(listener:()=>void):()=>void}, selector:(state:State)=>Value,equal:(a:Value,b:Value)=>boolean=Object.is):Value{
+  const snapshot=useMemo(()=>{
+    let cached:{state:State;value:Value}|undefined;
+    return ()=>{
+      const state=editor.state;
+      if(cached&&Object.is(cached.state,state))return cached.value;
+      const value=selector(state);
+      cached={state,value:cached&&equal(cached.value,value)?cached.value:value};
+      return cached.value;
+    };
+  },[editor,selector,equal]);
+  return useSyncExternalStore(editor.subscribe,snapshot,snapshot);
+}
+
+export function useCommandState<N extends NodeIdentity,Args extends unknown[]>(editor:{
+  readonly state:EditorState<N>;subscribe(listener:()=>void):()=>void;
+  commandState(command:CommandDefinition<N,Args>,...args:Args):CommandState;
+},command:CommandDefinition<N,Args>,...args:Args):CommandState{
+  return useEditorState(editor,()=>editor.commandState(command,...args),(a,b)=>a.available===b.available&&a.activity===b.activity);
 }

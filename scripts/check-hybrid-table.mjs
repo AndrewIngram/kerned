@@ -13,8 +13,8 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
     const table=imported.nodes[1];
     assert.equal(table.caption,'Example');assert.equal(table.rows.length,3);
     assert.equal(table.rows[0][0].colspan,2);assert.equal(table.rows[0][0].header,true);
-    assert.equal(table.rows[1][0].rowspan,2);assert.equal(table.rows[1][0].paragraphs[0].spans[0].bold,true);
-    assert.equal(table.rows[2][0].paragraphs[0].spans[0].underline,true);
+    assert.equal(table.rows[1][0].rowspan,2);assert.equal(table.rows[1][0].paragraphs[0].marks[0].mark.type==='bold',true);
+    assert.equal(table.rows[2][0].paragraphs[0].marks[0].mark.type==='underline',true);
     await page.waitForFunction(()=>window.hybridSpike.probe([]).complete,null,{timeout:90000});
     const bookTable=await page.evaluate(()=>window.hybridSpike.read().nodes.find(n=>n.kind==='table'));
     assert.ok(bookTable);assert.equal(bookTable.rows.length,11);assert.equal(bookTable.rows.flat().length,33);

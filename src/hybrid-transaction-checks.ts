@@ -1,3 +1,4 @@
+import {formattingMarks} from './extensions/formatting';
 import {textSelection,selectionContext} from './editor';
 import {createMention} from './extensions/mention';
 import {demoSchema} from './extensions/demo-schema';
@@ -10,7 +11,7 @@ export function checkTransactions(){
   let assertions=0;
   function check(value:boolean,message:string){assertions++;if(!value)throw new Error(message);}
   function equal(a:unknown,b:unknown,message:string){check(JSON.stringify(a)===JSON.stringify(b),message);}
-  const paragraph:TextBlockNode={kind:'paragraph',id:1,key:'original',text:'café office \ufffc tail',spans:[{start:5,end:11,bold:true,italic:false}],atoms:[createMention({id:'mention',index:12,label:'Maya',width:70,ascent:20,descent:5})]};
+  const paragraph:TextBlockNode={kind:'paragraph',id:1,key:'original',text:'café office \ufffc tail',marks:formattingMarks([{start:5,end:11,bold:true,italic:false}]),inline:[createMention({id:'mention',index:12,label:'Maya',width:70,ascent:20,descent:5})]};
   for(const at of boundaries(paragraph.text)){
     const editor=createEditor(demoSchema,[paragraph],textSelection(1,at,at));
     const beforeAnchor=createAnchor(demoSchema,editor.state,'doc',1,at,-1),afterAnchor=createAnchor(demoSchema,editor.state,'doc',1,at,1);
