@@ -33,3 +33,41 @@ test('extension diagnostics retain mentions and editable React checklists', asyn
   await page.getByRole('button', {name: 'Undo', exact: true}).click();
   await expect(checklist.getByLabel('Review the examples')).not.toBeChecked();
 });
+
+test('comments remain external through replies, text edits, undo and rich paste', async ({page}) => {
+  await page.goto('/editor.html');
+  await page.waitForFunction(() => window.hybridSpike);
+  await page.evaluate(() => window.hybridSpike.select(1, 0));
+  await page.keyboard.press('Control+a');
+  await page.getByRole('button', {name: 'Add comment', exact: true}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  const before = await page.evaluate(() => ({comments: window.hybridSpike.comments(), history: window.hybridSpike.history(), nodes: window.hybridSpike.read().nodes}));
+  expect(before.comments.resolved[0].ranges).toHaveLength(4);
+  expect(before.nodes.every(node => !('comments' in node))).toBe(true);
+  await page.getByLabel('Reply', {exact: true}).fill('Keep this discussion');
+  const replied = await page.evaluate(() => ({comments: window.hybridSpike.comments(), history: window.hybridSpike.history()}));
+  expect(replied.comments.revision).toBe(before.comments.revision);
+  expect(replied.history).toEqual(before.history);
+  await page.getByRole('button', {name: 'Close', exact: true}).click();
+  await page.evaluate(() => window.hybridSpike.select(1, 10));
+  await page.keyboard.type('new');
+  await expect.poll(() => page.evaluate(() => window.hybridSpike.comments().resolved[0].ranges[0].to)).toBe(before.comments.resolved[0].ranges[0].to + 3);
+  await page.getByRole('button', {name: 'Undo', exact: true}).click();
+  await expect.poll(() => page.evaluate(() => window.hybridSpike.comments().resolved[0].ranges)).toEqual(before.comments.resolved[0].ranges);
+  expect(await page.evaluate(() => window.hybridSpike.comments().threads[0].messages[0].reply)).toBe('Keep this discussion');
+  await page.evaluate(() => {
+    const input = document.querySelector('.text-capture');
+    window.hybridSpike.select(1, 0);
+    input.dispatchEvent(new KeyboardEvent('keydown', {key:'a',ctrlKey:true,bubbles:true,cancelable:true}));
+  });
+  await page.evaluate(() => {
+    const input = document.querySelector('.text-capture'), data = new DataTransfer();
+    const event=new ClipboardEvent('copy', {clipboardData:data,bubbles:true,cancelable:true});input.dispatchEvent(event);
+    const last = window.hybridSpike.read().nodes.at(-1);
+    window.hybridSpike.select(last.id, last.text.length);
+    window.__commentClipboard = Object.fromEntries([...event.clipboardData.types].map(type=>[type,event.clipboardData.getData(type)]));
+  });
+  await page.evaluate(() => {const event=new ClipboardEvent('paste', {clipboardData:new DataTransfer(),bubbles:true,cancelable:true});for(const [type,value] of Object.entries(window.__commentClipboard))event.clipboardData.setData(type,value);document.querySelector('.text-capture').dispatchEvent(event);});
+  await expect.poll(() => page.evaluate(() => window.hybridSpike.read().nodes.length)).toBeGreaterThan(4);
+  expect(await page.evaluate(() => window.hybridSpike.comments().threads.length)).toBe(1);
+});

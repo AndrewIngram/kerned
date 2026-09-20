@@ -1,4 +1,4 @@
-import {createContext,useContext,useLayoutEffect} from 'react';
+import {createContext,useContext,useLayoutEffect,useSyncExternalStore} from 'react';
 import type {Canvas,CanvasKit,Paint} from 'canvaskit-wasm';
 export type CanvasPainter = (canvas:Canvas,kit:CanvasKit,paint:Paint)=>void;
 export type CanvasPaintLayer='background'|'content';
@@ -13,3 +13,9 @@ export function CanvasPrimitive({id,paint,layer='content'}:{id:string;paint:Canv
 }
 
 export {usePointerSelection} from './pointer-selection';
+
+/** React is an optional subscriber to a headless editor session. */
+export function useEditorState<State, Value>(editor:{readonly state:State;subscribe(listener:()=>void):()=>void}, selector:(state:State)=>Value):Value{
+  const state=useSyncExternalStore(editor.subscribe,()=>editor.state,()=>editor.state);
+  return selector(state);
+}

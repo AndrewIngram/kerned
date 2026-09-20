@@ -1,13 +1,17 @@
-export type NodeIdentity = {id:number;key:string};
+import type {Mark,MarkRange} from './marks';
+import type {NodeCodec} from './schema-codec';
+export type NodeIdentity = {id:number;key:string;locked?:boolean};
 
 export type TextBehavior<N extends NodeIdentity> = {
   text(node:N):string;
+  marks?:{validate?(marks:readonly Mark[]):readonly Mark[];read(node:N):readonly MarkRange[];write(node:N,marks:readonly MarkRange[]):N};
   replace(node:N,from:number,to:number,text:string):N;
   split(node:N,at:number,right:NodeIdentity):[N,N];
   join(left:N,right:N):N;
 };
 export type NodeExtension<N extends NodeIdentity> = {
   selectable?:boolean;
+  codec?:NodeCodec<N>;
   name:string;
   version:number;
   accepts(node:N):boolean;
@@ -16,7 +20,7 @@ export type NodeExtension<N extends NodeIdentity> = {
 
 /** Registration happens once. No schema name is privileged by the engine. */
 export function createSchema<N extends NodeIdentity>(extensions:readonly NodeExtension<N>[]){
-  const registered=[...extensions],names=new Set<string>();
+  const registered:readonly NodeExtension<N>[]=[...extensions];const names=new Set<string>();
   for(const extension of registered){if(!extension.name||!Number.isSafeInteger(extension.version)||extension.version<1)throw new Error('Extensions require a name and positive schema version');if(names.has(extension.name))throw new Error(`Duplicate extension: ${extension.name}`);names.add(extension.name);}
   function resolve(node:N){
     const matches=registered.filter(extension=>extension.accepts(node));
@@ -24,6 +28,7 @@ export function createSchema<N extends NodeIdentity>(extensions:readonly NodeExt
     return matches[0];
   }
   return {
+    extensions:Object.freeze([...registered]),
     manifest:registered.map(({name,version})=>({name,version})),
     resolve,
     children(node:N):readonly N[]{const extension=resolve(node);return extension.kind==='container'?extension.content.children(node):[];},

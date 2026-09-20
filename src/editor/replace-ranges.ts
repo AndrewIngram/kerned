@@ -1,3 +1,5 @@
+import {markInsertedText} from './stored-marks';
+import type {Mark} from './marks';
 import type {NodeIdentity,Schema} from './schema';
 import type {SelectionRange} from './selection';
 import type {PositionMap} from './positions';
@@ -7,7 +9,7 @@ import {validateTextRange} from './text';
 
 /** Replace ordered, non-overlapping fragments and join their text into the first
  * fragment. The command owns which empty containers may be removed. */
-export function replaceRanges<N extends NodeIdentity>(schema:Schema<N>,nodes:N[],tree:TreeIndex<N>,ranges:readonly SelectionRange[],text:string,pruneEmpty:readonly number[]){
+export function replaceRanges<N extends NodeIdentity>(schema:Schema<N>,nodes:N[],tree:TreeIndex<N>,ranges:readonly SelectionRange[],text:string,pruneEmpty:readonly number[],marks?:readonly Mark[]){
   const first=ranges[0];
   if(first?.kind!=='text')throw new Error('Range replacement requires a text start');
   const selected=new Set<number>(),prunable=new Set(pruneEmpty);
@@ -22,7 +24,8 @@ export function replaceRanges<N extends NodeIdentity>(schema:Schema<N>,nodes:N[]
     // Both ends of a complete string are grapheme boundaries. Interior cuts
     // still need validation, but deleting a book need not segment every word.
     if(range.from!==0||range.to!==original.length)validateTextRange(original,range.from,range.to);
-    const next=editing.replace(node,range.from,range.to,inserted);
+    let next=editing.replace(node,range.from,range.to,inserted);
+    if(marks&&range===first)next=markInsertedText(schema,next,range.from,inserted.length,marks);
     if(next.id!==node.id||next.key!==node.key||schema.text(next)!==original.slice(0,range.from)+inserted+original.slice(range.to))throw new Error('Text extension violated replacement contract');
     if(next!==node){
       maps.push({kind:'replace',id:node.id,from:range.from,to:range.to,inserted:inserted.length});

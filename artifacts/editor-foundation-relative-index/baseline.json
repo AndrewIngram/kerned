@@ -1,0 +1,345 @@
+{
+  "recordedAt": "2026-09-20T19:22:47.185Z",
+  "commit": "430ff8b6bcea74bf3f782708a32fb68c08272378",
+  "environment": {
+    "cpu": "Apple M4 Pro",
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v24.21.0",
+    "mode": "Vite development server; fresh browser/context per phase; OS/server caches not cleared",
+    "viewport": {
+      "width": 1100,
+      "height": 900
+    },
+    "sample": "warbreaker",
+    "browser": "153.0.8010.12"
+  },
+  "methodology": {
+    "input": "Browser beforeinput to second requestAnimationFrame, including frame scheduling, one key at a time",
+    "navigation": "Browser keydown to second requestAnimationFrame for alternating PageDown/PageUp",
+    "memory": "Chromium JS heap and backing storage after forced GC, separate from timed interactions; excludes total process/GPU memory",
+    "loading": "Existing streaming benchmark with find off",
+    "paste": "Existing synthetic rich-clipboard benchmark, including duplicate-content and undo/redo assertions"
+  },
+  "trials": [
+    {
+      "trial": 0,
+      "loading": {
+        "browser": "chromium",
+        "sample": "warbreaker",
+        "find": "off",
+        "firstUsableMs": 184,
+        "blocks": 7280,
+        "loadMs": 1015.5999999046326,
+        "batches": 59,
+        "batchSize": {
+          "min": 32,
+          "median": 128,
+          "max": 128
+        },
+        "workMs": {
+          "median": 11.299999952316284,
+          "p95": 13.599999904632568
+        },
+        "elapsedMs": {
+          "median": 16.40000009536743,
+          "p95": 18.699999809265137
+        },
+        "layouts": 7311,
+        "vanished": 0,
+        "decreased": 0,
+        "busyFrames": 0,
+        "matches": 0,
+        "stalePaints": 0
+      },
+      "paste": {
+        "browser": "chromium",
+        "copyMs": 44.89999985694885,
+        "characters": 1117497,
+        "blocks": 14560,
+        "originalBlocks": 7280,
+        "handlerMs": 50.5,
+        "paintMs": 93.89999985694885,
+        "layoutsToPaint": 169,
+        "completeMs": 1377.5999999046326,
+        "maxFrameGapMs": 77.09999990463257,
+        "stalePaints": 0
+      },
+      "typingMs": {
+        "min": 21.5,
+        "median": 32,
+        "max": 33.700000047683716
+      },
+      "typingSamplesMs": [
+        21.5,
+        29.200000047683716,
+        30.300000190734863,
+        31.600000143051147,
+        32.89999985694885,
+        30.799999952316284,
+        33.700000047683716,
+        32.299999952316284,
+        30.899999856948853,
+        32.69999980926514,
+        32,
+        32.40000009536743
+      ],
+      "pagingMs": {
+        "min": 31.200000047683716,
+        "median": 32.200000047683716,
+        "max": 33.700000047683716
+      },
+      "pagingSamplesMs": [
+        31.899999856948853,
+        31.5,
+        32.200000047683716,
+        33.09999990463257,
+        31.799999952316284,
+        32.200000047683716,
+        32.299999952316284,
+        33.700000047683716,
+        32.39999985694885,
+        31.200000047683716,
+        32.09999990463257,
+        33.200000047683716
+      ],
+      "loadedHeap": {
+        "usedSize": 31514904,
+        "totalSize": 32686080,
+        "embedderHeapUsedSize": 1111680,
+        "backingStorageSize": 72904650
+      },
+      "afterInteractionHeap": {
+        "usedSize": 30249784,
+        "totalSize": 32686080,
+        "embedderHeapUsedSize": 1198264,
+        "backingStorageSize": 72906640
+      }
+    },
+    {
+      "trial": 1,
+      "loading": {
+        "browser": "chromium",
+        "sample": "warbreaker",
+        "find": "off",
+        "firstUsableMs": 180,
+        "blocks": 7280,
+        "loadMs": 1003.3000001907349,
+        "batches": 59,
+        "batchSize": {
+          "min": 32,
+          "median": 128,
+          "max": 128
+        },
+        "workMs": {
+          "median": 11.400000095367432,
+          "p95": 12.799999952316284
+        },
+        "elapsedMs": {
+          "median": 16.5,
+          "p95": 18.200000047683716
+        },
+        "layouts": 7311,
+        "vanished": 0,
+        "decreased": 0,
+        "busyFrames": 0,
+        "matches": 0,
+        "stalePaints": 0
+      },
+      "paste": {
+        "browser": "chromium",
+        "copyMs": 43.5,
+        "characters": 1117497,
+        "blocks": 14560,
+        "originalBlocks": 7280,
+        "handlerMs": 50.200000047683716,
+        "paintMs": 95.29999995231628,
+        "layoutsToPaint": 196,
+        "completeMs": 1379.2000000476837,
+        "maxFrameGapMs": 77.20000004768372,
+        "stalePaints": 0
+      },
+      "typingMs": {
+        "min": 30.200000047683716,
+        "median": 32.299999952316284,
+        "max": 33.5
+      },
+      "typingSamplesMs": [
+        33.5,
+        30.200000047683716,
+        31.100000143051147,
+        32.10000014305115,
+        32.299999952316284,
+        32.299999952316284,
+        32.200000047683716,
+        32.299999952316284,
+        32.299999952316284,
+        32.200000047683716,
+        32.5,
+        32.19999980926514
+      ],
+      "pagingMs": {
+        "min": 30.699999809265137,
+        "median": 32.39999985694885,
+        "max": 33.299999952316284
+      },
+      "pagingSamplesMs": [
+        30.699999809265137,
+        32.40000009536743,
+        32.700000047683716,
+        32.40000009536743,
+        32.39999985694885,
+        31.399999856948853,
+        33.299999952316284,
+        31.299999952316284,
+        33.299999952316284,
+        32.200000047683716,
+        32.299999952316284,
+        32.39999985694885
+      ],
+      "loadedHeap": {
+        "usedSize": 31512632,
+        "totalSize": 33472512,
+        "embedderHeapUsedSize": 1113416,
+        "backingStorageSize": 72904664
+      },
+      "afterInteractionHeap": {
+        "usedSize": 30248404,
+        "totalSize": 33472512,
+        "embedderHeapUsedSize": 1200584,
+        "backingStorageSize": 72906654
+      }
+    },
+    {
+      "trial": 2,
+      "loading": {
+        "browser": "chromium",
+        "sample": "warbreaker",
+        "find": "off",
+        "firstUsableMs": 182,
+        "blocks": 7280,
+        "loadMs": 994.7000000476837,
+        "batches": 59,
+        "batchSize": {
+          "min": 32,
+          "median": 128,
+          "max": 128
+        },
+        "workMs": {
+          "median": 11.5,
+          "p95": 13.599999904632568
+        },
+        "elapsedMs": {
+          "median": 16.199999809265137,
+          "p95": 17.399999856948853
+        },
+        "layouts": 7311,
+        "vanished": 0,
+        "decreased": 0,
+        "busyFrames": 0,
+        "matches": 0,
+        "stalePaints": 0
+      },
+      "paste": {
+        "browser": "chromium",
+        "copyMs": 41.5,
+        "characters": 1117497,
+        "blocks": 14560,
+        "originalBlocks": 7280,
+        "handlerMs": 50.799999952316284,
+        "paintMs": 97,
+        "layoutsToPaint": 205,
+        "completeMs": 1365,
+        "maxFrameGapMs": 77.59999990463257,
+        "stalePaints": 0
+      },
+      "typingMs": {
+        "min": 18.700000047683716,
+        "median": 31.5,
+        "max": 33.39999985694885
+      },
+      "typingSamplesMs": [
+        18.700000047683716,
+        30.40000009536743,
+        30.5,
+        31.5,
+        33.200000047683716,
+        31.200000047683716,
+        33.200000047683716,
+        32,
+        31.09999990463257,
+        32.700000047683716,
+        33.39999985694885,
+        31.200000047683716
+      ],
+      "pagingMs": {
+        "min": 30.700000047683716,
+        "median": 32.30000019073486,
+        "max": 34.200000047683716
+      },
+      "pagingSamplesMs": [
+        32.30000019073486,
+        32.40000009536743,
+        31.600000143051147,
+        34.200000047683716,
+        31.800000190734863,
+        31.899999856948853,
+        31.90000009536743,
+        32.200000047683716,
+        34.10000014305115,
+        30.700000047683716,
+        33,
+        33.299999952316284
+      ],
+      "loadedHeap": {
+        "usedSize": 31512448,
+        "totalSize": 33996800,
+        "embedderHeapUsedSize": 1115616,
+        "backingStorageSize": 72904680
+      },
+      "afterInteractionHeap": {
+        "usedSize": 30247920,
+        "totalSize": 32948224,
+        "embedderHeapUsedSize": 1201432,
+        "backingStorageSize": 72906670
+      }
+    }
+  ],
+  "summary": {
+    "firstUsableMs": {
+      "min": 180,
+      "median": 182,
+      "max": 184
+    },
+    "streamingMs": {
+      "min": 994.7000000476837,
+      "median": 1003.3000001907349,
+      "max": 1015.5999999046326
+    },
+    "pasteHandlerMs": {
+      "min": 50.200000047683716,
+      "median": 50.5,
+      "max": 50.799999952316284
+    },
+    "pastePaintMs": {
+      "min": 93.89999985694885,
+      "median": 95.29999995231628,
+      "max": 97
+    },
+    "typingFrameMs": {
+      "min": 31.5,
+      "median": 32,
+      "max": 32.299999952316284
+    },
+    "pagingFrameMs": {
+      "min": 32.200000047683716,
+      "median": 32.30000019073486,
+      "max": 32.39999985694885
+    },
+    "loadedHeapBytes": {
+      "min": 31512448,
+      "median": 31512632,
+      "max": 31514904
+    }
+  }
+}

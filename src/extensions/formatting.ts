@@ -1,37 +1,22 @@
-import type {HybridSpan,TextBlockNode} from './demo-model';
+import {createMarkSchema,type MarkRange} from '../editor';
+import type {HybridSpan} from './demo-model';
 
 export type TextFormat='bold'|'italic'|'underline';
-
-export function hasFormat(node:TextBlockNode,from:number,to:number,key:TextFormat):boolean{
-  let covered=from;
-  for(const span of node.spans.filter(s=>s[key]).sort((a,b)=>a.start-b.start)){
-    if(span.start>covered)break;
-    covered=Math.max(covered,span.end);
-    if(covered>=to)return true;
-  }
-  return false;
+const formats:readonly TextFormat[]=['bold','italic','underline'];
+export const formattingSchema=createMarkSchema(formats.map(name=>({name,version:1,parse(attrs:unknown){if(attrs!==null)throw new Error(`${name} takes no attributes`);return null;}})));
+export function formattingMarks(spans:readonly HybridSpan[]):MarkRange[]{
+  return spans.flatMap(span=>formats.filter(type=>span[type]).map(type=>({from:span.start,to:span.end,mark:formattingSchema.create(type,null)})));
 }
-
-/** Change a mark without changing text, inline objects, or annotation positions. */
-export function setFormat(node:TextBlockNode,from:number,to:number,key:TextFormat,enabled:boolean):TextBlockNode{
-  const points=[...new Set([0,node.text.length,from,to,...node.spans.flatMap(s=>[s.start,s.end])])].sort((a,b)=>a-b);
-  const spans:HybridSpan[]=[];
+/** Project semantic marks to the compact font-style runs consumed by layout. */
+export function formattingSpans(ranges:readonly MarkRange[]):HybridSpan[]{
+  const points=[...new Set(ranges.flatMap(range=>[range.from,range.to]))].sort((a,b)=>a-b),spans:HybridSpan[]=[];
   for(let i=0;i<points.length-1;i++){
-    const start=points[i],end=points[i+1];
-    const current=node.spans.filter(s=>s.start<=start&&s.end>=end);
-    const style={bold:current.some(s=>s.bold),italic:current.some(s=>s.italic),underline:current.some(s=>s.underline)};
-    if(start>=from&&end<=to)style[key]=enabled;
+    const start=points[i],end=points[i+1],active=ranges.filter(range=>range.from<=start&&range.to>=end);
+    const style={bold:active.some(range=>range.mark.type==='bold'),italic:active.some(range=>range.mark.type==='italic'),underline:active.some(range=>range.mark.type==='underline')};
     if(!style.bold&&!style.italic&&!style.underline)continue;
     const previous=spans.at(-1);
-    if(previous&&previous.end===start&&previous.bold===style.bold&&previous.italic===style.italic&&previous.underline===style.underline)previous.end=end;
+    if(previous&&previous.end===start&&previous.bold===style.bold&&previous.italic===style.italic&&!!previous.underline===style.underline)previous.end=end;
     else spans.push({start,end,...style});
   }
-  return {...node,spans};
-}
-
-export function clearFormatting(node:TextBlockNode,from:number,to:number):TextBlockNode{
-  return {...node,spans:node.spans.flatMap(span=>{
-    if(span.end<=from||span.start>=to)return [span];
-    return [...(span.start<from?[{...span,end:from}]:[]),...(span.end>to?[{...span,start:to}]:[])];
-  })};
+  return spans;
 }

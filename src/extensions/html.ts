@@ -45,7 +45,7 @@ export function importHtml(html:string):HtmlImport{
       }
       const id=nextId++;
       nodes.push({...headingLevel?{kind:'heading',level:headingLevel}:{kind:'paragraph'},id,key:`html-${id}`,text,
-        spans:spans.filter(s=>s.start<text.length).map(s=>({...s,start:snap(s.start,false),end:snap(Math.min(s.end,text.length),true)})),atoms:[],comments:[]});
+        spans:spans.filter(s=>s.start<text.length).map(s=>({...s,start:snap(s.start,false),end:snap(Math.min(s.end,text.length),true)})),atoms:[]});
     }
     text='';spans=[];
   }
@@ -62,7 +62,7 @@ export function importHtml(html:string):HtmlImport{
         return children.length?demoSchema.withChildren(copy,children.map(reidentify)):copy;
       }
       let children=imported.nodes.map(reidentify);
-      if(!children.length){const id=nextId++;children=[{kind:'paragraph',id,key:`html-${id}`,text:'',spans:[],atoms:[],comments:[]}];}
+      if(!children.length){const id=nextId++;children=[{kind:'paragraph',id,key:`html-${id}`,text:'',spans:[],atoms:[]}];}
       if(tag==='UL'||tag==='OL')children=children.map(child=>{if(child.kind==='listItem')return child;const id=nextId++;return {kind:'listItem',id,key:`html-${id}`,children:[child]};});
       const id=nextId++,identity={id,key:`html-${id}`};
       const start=Number(node.getAttribute('start')??1);
@@ -79,10 +79,10 @@ export function importHtml(html:string):HtmlImport{
         conversions.superscripts+=imported.conversions.superscripts;
         conversions.subscripts+=imported.conversions.subscripts;
         conversions.nestedTables+=imported.tables+imported.conversions.nestedTables;
-        const content=imported.nodes.flatMap((block):TextBlockNode[]=>block.kind==='paragraph'||block.kind==='heading'?[block]:block.kind==='table'?[{kind:'paragraph',id:0,key:'',text:tablePlainText(block),spans:[],atoms:[],comments:[]}]:[]);
+        const content=imported.nodes.flatMap((block):TextBlockNode[]=>block.kind==='paragraph'||block.kind==='heading'?[block]:block.kind==='table'?[{kind:'paragraph',id:0,key:'',text:tablePlainText(block),spans:[],atoms:[]}]:[]);
         // HTML rowspan=0 extends through the remaining rows in this row group.
         const rowspan=cell.rowSpan||[...node.rows].slice(rowIndex).filter(candidate=>candidate.parentElement===row.parentElement).length;
-        const paragraphs:TextBlockNode[]=content.length?content.map(p=>{const id=nextId++;return {...p,id,key:`html-${id}`};}):[{kind:'paragraph',id:nextId,key:`html-${nextId++}`,text:'',spans:[],atoms:[],comments:[]}];
+        const paragraphs:TextBlockNode[]=content.length?content.map(p=>{const id=nextId++;return {...p,id,key:`html-${id}`};}):[{kind:'paragraph',id:nextId,key:`html-${nextId++}`,text:'',spans:[],atoms:[]}];
         const id=nextId++;return {kind:'tableCell',id,key:`html-${id}`,row:rowIndex,header:cell.tagName==='TH',colspan:cell.colSpan,rowspan,paragraphs};
       }));
       if(rows.length){const id=nextId++;nodes.push({kind:'table',id,key:`html-${id}`,caption:node.caption?.textContent?.trim()??'',rows});tables++;}

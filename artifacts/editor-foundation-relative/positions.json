@@ -1,0 +1,98 @@
+{
+  "recordedAt": "2026-09-20T19:09:41.752Z",
+  "cpu": "Apple M4 Pro",
+  "browser": "153.0.8010.12",
+  "methodology": "Three serial trials; independent 1000 externally held ranges; fixed-size text edits outside the ranges; cold first resolution then shared-suffix-cache batch; serialized checkpoint size, not heap size",
+  "results": [
+    {
+      "trial": 0,
+      "edits": 100,
+      "ranges": 1000,
+      "coldMs": 0.20000004768371582,
+      "resolve1000Ms": 2.1000001430511475,
+      "checkpointBytes": 13793,
+      "definitions": 100,
+      "events": 100
+    },
+    {
+      "trial": 0,
+      "edits": 1000,
+      "ranges": 1000,
+      "coldMs": 0.10000014305114746,
+      "resolve1000Ms": 12.099999904632568,
+      "checkpointBytes": 139797,
+      "definitions": 1000,
+      "events": 1000
+    },
+    {
+      "trial": 0,
+      "edits": 10000,
+      "ranges": 1000,
+      "coldMs": 0.9000000953674316,
+      "resolve1000Ms": 117.90000009536743,
+      "checkpointBytes": 1426801,
+      "definitions": 10000,
+      "events": 10000
+    },
+    {
+      "trial": 1,
+      "edits": 100,
+      "ranges": 1000,
+      "coldMs": 0,
+      "resolve1000Ms": 1.2999999523162842,
+      "checkpointBytes": 13793,
+      "definitions": 100,
+      "events": 100
+    },
+    {
+      "trial": 1,
+      "edits": 1000,
+      "ranges": 1000,
+      "coldMs": 0.09999990463256836,
+      "resolve1000Ms": 11.799999952316284,
+      "checkpointBytes": 139797,
+      "definitions": 1000,
+      "events": 1000
+    },
+    {
+      "trial": 1,
+      "edits": 10000,
+      "ranges": 1000,
+      "coldMs": 1.2000000476837158,
+      "resolve1000Ms": 118.70000004768372,
+      "checkpointBytes": 1426801,
+      "definitions": 10000,
+      "events": 10000
+    },
+    {
+      "trial": 2,
+      "edits": 100,
+      "ranges": 1000,
+      "coldMs": 0,
+      "resolve1000Ms": 2.299999952316284,
+      "checkpointBytes": 13793,
+      "definitions": 100,
+      "events": 100
+    },
+    {
+      "trial": 2,
+      "edits": 1000,
+      "ranges": 1000,
+      "coldMs": 0.09999990463256836,
+      "resolve1000Ms": 11.799999952316284,
+      "checkpointBytes": 139797,
+      "definitions": 1000,
+      "events": 1000
+    },
+    {
+      "trial": 2,
+      "edits": 10000,
+      "ranges": 1000,
+      "coldMs": 0.7999999523162842,
+      "resolve1000Ms": 113.20000004768372,
+      "checkpointBytes": 1426801,
+      "definitions": 10000,
+      "events": 10000
+    }
+  ]
+}

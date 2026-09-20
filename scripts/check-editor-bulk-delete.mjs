@@ -16,10 +16,10 @@ try{
     const reports=[];
     const check=(condition,message)=>{if(!condition)throw new Error(message);};
     const same=(a,b,message)=>check(JSON.stringify(a)===JSON.stringify(b),message);
-    const leaf=(id,text='Editable content.')=>({id,key:`p-${id}`,kind:'paragraph',text,spans:[],atoms:[],comments:[]});
+    const leaf=(id,text='Editable content.')=>({id,key:`p-${id}`,kind:'paragraph',text,spans:[],atoms:[]});
     const apply=(editor,command)=>editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:'separate',time:0,...command});
-    const first={...leaf(1,'Hello world'),kind:'heading',level:2,spans:[{start:0,end:5,bold:true,italic:false}],comments:[{id:'left',start:0,end:2,data:{reply:'Keep'}}]};
-    const last={...leaf(4,'Goodbye world'),spans:[{start:5,end:13,bold:false,italic:true}],comments:[{id:'right',start:5,end:9,data:{reply:'Keep'}}]};
+    const first={...leaf(1,'Hello world'),kind:'heading',level:2,spans:[{start:0,end:5,bold:true,italic:false}]};
+    const last={...leaf(4,'Goodbye world'),spans:[{start:5,end:13,bold:false,italic:true}]};
     const table={id:40,key:'table',kind:'table',caption:'Embedded',rows:[[{id:41,key:'cell',kind:'tableCell',row:0,header:false,colspan:1,rowspan:1,paragraphs:[leaf(42,'Cell text')]}]]};
     const initial=[leaf(100,'Before'),{id:20,key:'quote-1',kind:'quote',children:[first,{id:30,key:'list',kind:'list',ordered:true,start:3,children:[{id:31,key:'item-1',kind:'listItem',children:[leaf(2)]},{id:32,key:'item-2',kind:'listItem',children:[leaf(3)]}]}]},table,{id:21,key:'quote-2',kind:'quote',children:[last,leaf(5,'Keep this sibling')]},leaf(6,'After')];
     for(const inserted of ['', 'New text']){
@@ -42,7 +42,7 @@ try{
         {kind:'replaceText',id:1,from:3,to:11,text:inserted},
         {kind:'join',left:1,right:2},{kind:'join',left:1,right:3},{kind:'join',left:1,right:4},
       ]});
-      same(bulk.state.nodes,reference.state.nodes,'Partial backward replacement preserves structure, marks and comments');
+      same(bulk.state.nodes,reference.state.nodes,'Partial backward replacement preserves structure and marks');
       check(bulk.state.nodes[0]===initial[0]&&bulk.state.nodes.at(-1)===initial.at(-1),'Unaffected roots retain identity');
       check(bulk.state.nodes[1].children[0].text===`Hel${inserted}bye world`,'Boundary text joins at the deletion point');
       check(result.changes.length===1,'Bulk replacement publishes once');

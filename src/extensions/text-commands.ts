@@ -1,7 +1,7 @@
-import {selectionContext,type EditorState,type Schema,type Step} from '../editor';
+import {inputMarks,sameMark,TextSelection,changeSelectionMarks,selectionHasMark,selectionContext,type EditorState,type Schema,type Step} from '../editor';
 import {indexTree} from '../editor';
 import type {HybridNode} from './demo-model';
-import {clearFormatting,hasFormat,setFormat,type TextFormat} from './formatting';
+import {formattingSchema,type TextFormat} from './formatting';
 
 /** Extension commands return ordinary transactions; the core owns history/mapping. */
 export function textCommands(schema:Schema<HybridNode>,state:EditorState<HybridNode>,tree=indexTree(schema,state.nodes)){
@@ -9,20 +9,19 @@ export function textCommands(schema:Schema<HybridNode>,state:EditorState<HybridN
     const node=tree.byId.get(range.id)?.node;
     return range.kind==='text'&&range.from<range.to&&(node?.kind==='paragraph'||node?.kind==='heading')?[{node,from:range.from,to:range.to}]:[];
   });
-  const active=(key:TextFormat)=>ranges.length>0&&ranges.every(({node,from,to})=>hasFormat(node,from,to,key));
+  const caret=state.selection instanceof TextSelection&&state.selection.anchor.id===state.selection.head.id&&state.selection.anchor.offset===state.selection.head.offset;
+  const caretNode=caret&&state.selection instanceof TextSelection?tree.byId.get(state.selection.head.id)?.node:undefined;
+  const current=caret?inputMarks(schema,state,tree):[];
+  const active=(key:TextFormat)=>caret?current.some(mark=>sameMark(mark,formattingSchema.create(key,null))):selectionHasMark(schema,state,formattingSchema.create(key,null),tree);
   return {
-    available:ranges.length>0,
+    available:ranges.length>0||!!caretNode&&(schema.resolve(caretNode).kind==='text'&&!!schema.editing(caretNode).marks),
+    caret,current,
     active,
     toggle(key:TextFormat):Step<HybridNode>[]{
       const enabled=!active(key);
-      return ranges.map(({node,from,to})=>({kind:'updateBlock',node:setFormat(node,from,to,key,enabled)}));
+      return changeSelectionMarks(schema,state,enabled?{kind:'set',mark:formattingSchema.create(key,null)}:{kind:'remove',type:key},tree);
     },
-    clear():Step<HybridNode>[]{return ranges.map(({node,from,to})=>({kind:'updateBlock',node:clearFormatting(node,from,to)}));},
-    comment(id:string):{steps:Step<HybridNode>[];target:{nodeId:number;commentId:string}|null}{
-      return {
-        steps:ranges.map(({node,from,to})=>({kind:'updateBlock',node:{...node,comments:[...node.comments,{id,start:from,end:to,data:{reply:''}}]}})),
-        target:ranges[0]?{nodeId:ranges[0].node.id,commentId:id}:null,
-      };
-    },
+    clear():Step<HybridNode>[]{return changeSelectionMarks(schema,state,{kind:'clear'},tree);},
+
   };
 }

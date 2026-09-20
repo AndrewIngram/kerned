@@ -52,7 +52,7 @@ export function readClipboard(data:DataTransfer):Fragment|null{
 export function pasteFragment(schema:Schema<HybridNode>,state:EditorState<HybridNode>,fragment:Fragment,allocate:()=>NodeIdentity){
  function clone(node:HybridNode):HybridNode{
   const children=schema.children(node);
-  const copy:HybridNode=node.kind==='paragraph'||node.kind==='heading'?{...node,...allocate(),atoms:node.atoms.map(a=>({...a,id:crypto.randomUUID()})),comments:node.comments.map(c=>({...c,id:crypto.randomUUID()}))}:{...node,...allocate()};
+  const copy:HybridNode=node.kind==='paragraph'||node.kind==='heading'?{...node,...allocate(),atoms:node.atoms.map(a=>({...a,id:crypto.randomUUID()}))}:{...node,...allocate()};
   return children.length?schema.withChildren(copy,children.map(clone)):copy;
  }
  const inserted=fragment.nodes.map(clone);
@@ -61,7 +61,7 @@ export function pasteFragment(schema:Schema<HybridNode>,state:EditorState<Hybrid
  const ranges=state.selection.ranges(selectionContext(schema,state.nodes)),selected=new Map(ranges.map(r=>[r.id,r]));
  function covered(node:HybridNode):boolean{const r=selected.get(node.id);if(r?.kind==='node')return true;const text=schema.text(node);if(text!==null)return r?.kind==='text'&&r.from===0&&r.to===text.length;const children=schema.children(node);return children.length>0&&children.every(covered);}
  let target=[...all].reverse().find(entry=>schema.text(entry.node)!==null)?.node;
- if(!target){target={kind:'paragraph',...allocate(),text:'',spans:[],atoms:[],comments:[]};inserted.push(target);}
+ if(!target){target={kind:'paragraph',...allocate(),text:'',spans:[],atoms:[]};inserted.push(target);}
  const selection=textSelection(target.id,schema.text(target)?.length??0);
  if(state.nodes.every(covered))return {steps:[{kind:'replaceChildren',parent:null,index:0,count:state.nodes.length,nodes:inserted} satisfies Step<HybridNode>],selection};
  const removal=replaceStructuredText(schema,state,'');

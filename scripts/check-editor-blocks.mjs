@@ -21,7 +21,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  await page.evaluate(()=>window.hybridSpike.select(1,0));await page.keyboard.down('Shift');for(let i=0;i<5;i++)await page.keyboard.press('ArrowRight');await page.keyboard.up('Shift');
  await page.getByRole('button',{name:'Underline',exact:true}).click();await settle();assert.ok((await read()).nodes[0].spans.some(s=>s.underline));
  await page.getByRole('button',{name:'Clear formatting',exact:true}).click();await settle();assert.equal((await read()).nodes[0].spans.length,0);
- await page.getByRole('button',{name:'Add comment',exact:true}).click();await page.getByRole('dialog').waitFor();await page.getByLabel('Reply',{exact:true}).fill('A comment');await settle();assert.equal((await read()).nodes[0].comments[0].data.reply,'A comment');
+ await page.getByRole('button',{name:'Add comment',exact:true}).click();await page.getByRole('dialog').waitFor();await page.getByLabel('Reply',{exact:true}).fill('A comment');await settle();assert.equal((await page.evaluate(()=>window.hybridSpike.comments())).threads[0].messages[0].reply,'A comment');
  assert.deepEqual(errors,[]);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:`artifacts/check-editor-blocks-${name}-${width}.png`});console.log(name,'quotes, lists, indentation, marks and comments passed');
  }}finally{await browser.close();}
 }

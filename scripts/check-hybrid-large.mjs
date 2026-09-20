@@ -36,7 +36,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await page.evaluate(()=>window.hybridSpike.scrollTo(14,40));await settle();
   const beforeImage=await probe([14,15]);const imageShape=beforeImage.stats.shapeCalls;
   await page.locator('[data-image="14"] img').waitFor();await page.waitForFunction(()=>window.hybridSpike.probe([14]).scene[0].height>100);await settle();
-  const afterImage=await probe([14,15]);assert.equal(afterImage.scene[1].y,afterImage.scene[0].y+afterImage.scene[0].height+24);
+  const afterImage=await probe([14,15]);assert.equal(afterImage.scene[1].y,afterImage.scene[0].y+Math.ceil(afterImage.scene[0].height/4)*4+24);
   assert.ok(Math.abs(afterImage.scroll-beforeImage.scroll)<1.1);assert.equal(afterImage.stats.shapeCalls,imageShape);
   // Resize a retained, focused widget above the viewport and preserve the next block's screen position.
   await page.evaluate(()=>window.hybridSpike.scrollTo(3));await settle();
@@ -49,6 +49,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   assert.equal(await block.getByLabel('Block notes').evaluate(el=>document.activeElement===el),true);
   const atResume=await probe();await page.evaluate(()=>window.hybridSpike.resume());
   await page.waitForFunction(()=>window.hybridSpike.probe([]).complete,undefined,{timeout:120000});await settle();
+  const discussions=await page.evaluate(()=>window.hybridSpike.comments());assert.equal(discussions.threads.length,1+Math.floor((total-4+10)/20));assert.equal(discussions.unresolved.length,0);assert.equal(discussions.resolved.length,discussions.threads.length);
   const loaded=await probe([1,3]);assert.equal(loaded.count,total);assert.ok(loaded.nodes[0].text.startsWith('Edited '));assert.equal(loaded.nodes[1].notes,'Keep this note while loading.');assert.deepEqual(loaded.selection,atResume.selection);
   await page.getByRole('button',{name:'Undo',exact:true}).focus();await settle();
   const beforeScroll=await probe();

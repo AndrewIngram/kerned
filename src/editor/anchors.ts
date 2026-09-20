@@ -9,7 +9,7 @@ export type AnchorMap =
   | {kind:'split';key:string;at:number;rightKey:string}
   | {kind:'join';key:string;rightKey:string;at:number}
   | {kind:'insert';keys:readonly string[]}
-  | {kind:'remove';keys:readonly string[]};
+  | {kind:'remove';keys:readonly string[];fallbacks?:readonly {key:string;before:{key:string;offset:number}|null;after:{key:string;offset:number}|null}[]};
 export type RevisionMap = {from:number;to:number;maps:readonly AnchorMap[]};
 export type AnchorResolution = {status:'resolved'|'deleted';anchor:Anchor}|{status:'unavailable';reason:'document-mismatch'|'future-revision'|'history-unavailable'|'invalid-offset'};
 export function parseAnchor(value:unknown):Anchor{

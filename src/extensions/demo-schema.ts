@@ -1,6 +1,7 @@
-import {createSchema,validateInlineObjects,sliceInlineObjects,type NodeExtension} from '../editor';
+import {formattingMarks,formattingSpans,formattingSchema} from './formatting';
+import {demoCodecs} from './demo-codecs';
+import {createDocumentCodec,createSchema,validateInlineObjects,sliceInlineObjects,type NodeExtension} from '../editor';
 import {replaceText,type HybridNode,type TextBlockNode} from './demo-model';
-import {comment} from './comment';
 import {editableTableExtension,tableCellExtension} from './table';
 import {listCommands,quoteExtension} from './blocks';
 function textBlock(node:HybridNode):TextBlockNode{
@@ -9,17 +10,16 @@ function textBlock(node:HybridNode):TextBlockNode{
 function slice(node:TextBlockNode,from:number,to:number,id=node.id):TextBlockNode{
   return {...node,id,text:node.text.slice(from,to),
     spans:node.spans.flatMap(s=>s.end>from&&s.start<to?[{...s,start:Math.max(s.start,from)-from,end:Math.min(s.end,to)-from}]:[]),
-    atoms:sliceInlineObjects(node.atoms,from,to),
-    comments:comment.slice(node.comments,from,to)};
+    atoms:sliceInlineObjects(node.atoms,from,to)};
 }
 function joined(left:TextBlockNode,right:TextBlockNode):TextBlockNode{
-  const offset=left.text.length,comments=comment.join(left.comments,right.comments,offset);
+  const offset=left.text.length;
   const spans=[...left.spans];
   for(const s of right.spans){
     const shifted={...s,start:s.start+offset,end:s.end+offset},same=spans.findIndex(v=>v.end===shifted.start&&v.bold===s.bold&&v.italic===s.italic&&!!v.underline===!!s.underline);
     if(same>=0)spans[same]={...spans[same],end:shifted.end};else spans.push(shifted);
   }
-  return {...left,text:left.text+right.text,spans,comments,atoms:[...left.atoms,...right.atoms.map(a=>({...a,index:a.index+offset}))]};
+  return {...left,text:left.text+right.text,spans,atoms:[...left.atoms,...right.atoms.map(a=>({...a,index:a.index+offset}))]};
 }
 
 export const paragraphExtension:NodeExtension<HybridNode>={
@@ -31,8 +31,9 @@ export const paragraphExtension:NodeExtension<HybridNode>={
   },
   editing:{
     text:node=>textBlock(node).text,
+    marks:{validate:marks=>marks.map(mark=>formattingSchema.create(mark.type,mark.attrs)),read:node=>formattingMarks(textBlock(node).spans),write(node,marks){const text=textBlock(node);return {...text,spans:formattingSpans(formattingSchema.validate(text.text,marks))};}},
     replace(node,from,to,text){const next=replaceText(textBlock(node),from,to,text);validateInlineObjects(next.text,next.atoms);return next;},
-    split(node,at,right){const p=textBlock(node);const tail={...slice(p,at,p.text.length,right.id),key:right.key};return [slice(p,0,at),at===p.text.length?{kind:'paragraph',id:tail.id,key:tail.key,text:tail.text,spans:tail.spans,atoms:tail.atoms,comments:tail.comments}:tail];},
+    split(node,at,right){const p=textBlock(node);const tail={...slice(p,at,p.text.length,right.id),key:right.key};return [slice(p,0,at),at===p.text.length?{kind:'paragraph',id:tail.id,key:tail.key,locked:tail.locked,text:tail.text,spans:tail.spans,atoms:tail.atoms}:tail];},
     join:(left,right)=>joined(textBlock(left),textBlock(right)),
   },
 };
@@ -40,5 +41,7 @@ export const headingExtension:NodeExtension<HybridNode>={...paragraphExtension,n
 export const checklistExtension:NodeExtension<HybridNode>={name:'checklist',version:1,kind:'atom',accepts:node=>node.kind==='checklist',validateUpdate(){}};
 export const imageExtension:NodeExtension<HybridNode>={name:'image',version:1,kind:'atom',accepts:node=>node.kind==='image',validateUpdate(){}};
 
-export const demoStarterKit=[paragraphExtension,headingExtension,checklistExtension,imageExtension,editableTableExtension,tableCellExtension,quoteExtension,...listCommands.extensions];
+export const demoStarterKit:NodeExtension<HybridNode>[]=[paragraphExtension,headingExtension,checklistExtension,imageExtension,editableTableExtension,tableCellExtension,quoteExtension,...listCommands.extensions].map(extension=>({...extension,codec:demoCodecs[extension.name]}));
 export const demoSchema=createSchema(demoStarterKit);
+
+export const demoDocumentCodec=createDocumentCodec(demoSchema);

@@ -25,8 +25,8 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  await page.keyboard.insertText('OK');await settle();assert.deepEqual(errors,[]);
  if(name==='chromium'){
   const variants=await page.evaluate(async()=>{
-   const {initialize}=await import('/src/engines.ts'),{createOwnedEngine}=await import('/src/owned-layout.ts');
-   const {kit}=await initialize(),results=[];
+   const {default:initialize}=await import('/tests/fixtures/canvas-kit.js'),{createOwnedEngine}=await import('/src/owned-layout.ts');
+   const kit=await initialize({locateFile:()=>'/engines/canvaskit.wasm'}),results=[];
    for(const storage of ['objects','packed','carets','shaping']){
     const owned=await createOwnedEngine(kit,storage),surface=kit.MakeSurface(500,200);
     const text='Bold 👩‍💻 and 🇬🇧 café 🜀';

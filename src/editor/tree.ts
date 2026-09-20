@@ -6,7 +6,7 @@ export function indexTree<N extends NodeIdentity>(schema:Schema<N>,nodes:readonl
   while(pending.length){
     const entry=pending.pop();if(!entry)break;
     if(byId.has(entry.node.id)||byKey.has(entry.node.key))throw new Error('Duplicate or cyclic node identity');
-    if(!entry.node.key||!Number.isSafeInteger(entry.node.id))throw new Error('Invalid node identity');
+    if(!entry.node.key||!Number.isSafeInteger(entry.node.id)||(entry.node.locked!==undefined&&typeof entry.node.locked!=='boolean'))throw new Error('Invalid node identity');
     schema.resolve(entry.node);byId.set(entry.node.id,entry);byKey.set(entry.node.key,entry);order.push(entry);
     const children=schema.children(entry.node);
     for(let i=children.length-1;i>=0;i--)pending.push({node:children[i],parent:entry.node.id,index:i,path:[...entry.path,i]});

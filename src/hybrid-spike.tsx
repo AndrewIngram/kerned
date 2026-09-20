@@ -1,6 +1,8 @@
+import {captureComment,commentDecorations,createCommentStore} from './extensions/comment';
+import {resolveDecorations} from './editor';
 import {createTextNavigation} from './editor';
 import {hitTestTextLines,type TextHitRegion} from './editor';
-import {usePointerSelection} from './editor-react';
+import {useEditorState,usePointerSelection} from './editor-react';
 import {supportsOwnedText} from './owned-text-support';
 import {writeClipboard,readClipboard,pasteFragment} from './extensions/clipboard';
 import {pasteParagraphs} from './extensions/paste';
@@ -11,7 +13,7 @@ import {checkSelections} from './editor-selection-checks';
 import {checkContainers,benchmarkContainerEdits} from './editor-container-checks';
 import {checkExtensions} from './editor-extension-checks';
 import {CanvasLayerProvider,type CanvasPainter as Painter,type CanvasPaintLayer} from './editor-react';
-import {ParagraphExtensions} from './extensions/text-block-view';
+import {ParagraphExtensions,type CommentHighlight} from './extensions/text-block-view';
 import {demoSchema} from './extensions/demo-schema';
 import {createContext,startTransition,useCallback,useContext,useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {createRoot} from 'react-dom/client';
@@ -24,6 +26,7 @@ import {boundaries} from './model';
 import './hybrid.css';
 import {type TextFormat} from './extensions/formatting';
 import {wordRange} from './editor/text';
+import {formattingSchema} from './extensions/formatting';
 import {textCommands} from './extensions/text-commands';
 import {projectBlocks,blockCommands,listCommands,replaceStructuredText} from './extensions/blocks';
 import {indexTree} from './editor/tree';
@@ -66,7 +69,21 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   const [toolbarHeight,setToolbarHeight]=useState(50);
   const renderStarted=performance.now();
   const [editor]=useState(()=>createEditor(demoSchema,sample.initial,textSelection(1,0),[tableCells.extension]));
-  const [editorState,setEditorState]=useState(editor.state);
+  const editorState=useEditorState(editor,state=>state);
+  const [comments]=useState(()=>createCommentStore<{body:string;reply:string}>());
+  function seedComments(nodes:readonly HybridNode[]){
+    comments.putAll((sample.comments?.(nodes)??[]).map(seed=>({id:seed.id,messages:[{body:seed.body,reply:''}],range:editor.positions.range(editor.positions.at(seed.nodeId,seed.from,1),editor.positions.at(seed.nodeId,seed.to,-1))})));
+  }
+  useEffect(()=>{seedComments(sample.initial);},[sample]);
+  const commentState=useEditorState(comments,state=>state);
+  const decorations=useMemo(()=>resolveDecorations(commentDecorations(commentState.threads),editor.positions),[commentState,editorState.nodes]);
+  const commentsByNode=useMemo(()=>{
+    const result=new Map<number,CommentHighlight[]>();
+    for(const decoration of decorations.resolved)for(const range of decoration.ranges){
+      const list=result.get(range.id)??[];list.push({id:decoration.id,from:range.from,to:range.to});result.set(range.id,list);
+    }
+    return result;
+  },[decorations]);
   const [findOpen,setFindOpen]=useState(false),[findRequest,setFindRequest]=useState(0),[findFocus,setFindFocus]=useState(0);
   const lastQuery=useRef(''),returnFocus=useRef<HTMLElement|null>(null),revealFind=useRef(false);
   const lastFindOptions=useRef<FindOptions>({matchCase:false}),findAbort=useRef<AbortController|null>(null);
@@ -108,7 +125,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   const primary=editorState.selection.ranges(context).find(r=>r.kind==='text');
   const selection=editorState.selection instanceof TextSelection?editorState.selection:textSelection(primary?.id??nodes[0].id,primary?.kind==='text'?primary.from:0);
   const nonTextSelection=!(editorState.selection instanceof TextSelection);
-  function setSelection(next:Selection){setEditorState(editor.select(next));}
+  function setSelection(next:Selection){editor.select(next);}
   const nodeIndexes=useMemo(()=>new Map(nodes.map((node,index)=>[node.id,index])),[nodes]);
   let findEntry=findOpen&&findState.active?tree.byId.get(findState.active.id):undefined;
   while(findEntry&&!nodeIndexes.has(findEntry.node.id))findEntry=findEntry.parent===null?undefined:tree.byId.get(findEntry.parent);
@@ -160,7 +177,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     const paragraphs=projectBlocks(editor.state.nodes).nodes.filter(node=>node.kind==='paragraph'||node.kind==='heading');
     const first=paragraphs[0],last=paragraphs.at(-1);
     if(first&&last){
-      setEditorState(editor.select(new TextSelection({id:first.id,offset:0},{id:last.id,offset:last.text.length})));
+      editor.select(new TextSelection({id:first.id,offset:0},{id:last.id,offset:last.text.length}));
       setPanel(null);inputRef.current?.focus({preventScroll:true});
     }
   },[editor]);
@@ -397,7 +414,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
           const result=editor.dispatch({baseRevision:editor.state.revision,origin:'stream',history:'exclude',steps:[{kind:'append',nodes:chunk}]});
           sourceLoaded.current=cursor+count;sourceRevision.current=result.state.revision;
           pending.current={target:result.state.revision,count,started,generationMs,renderMs:0,layouts:metrics.current.layoutCalls,compositionMs:metrics.current.compositionMs,done};
-          setEditorState(result.state);
+          seedComments(chunk);
         });
         cursor+=count;
         // Only new paragraph composition scales with batch size. Including the
@@ -410,34 +427,45 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     void load();
     return()=>{cancelled=true;cancelAnimationFrame(raf);pending.current?.done(0);pending.current=null;if(frame.current)cancelAnimationFrame(frame.current);sceneCache.clear();owned.engine.clear();};
   },[owned,sceneCache,sample]);
-  function dispatch(steps:Step<HybridNode>[],history:Transaction<HybridNode>['history']='separate',nextSelection?:Selection){
+  function dispatch(steps:Step<HybridNode>[],history:Transaction<HybridNode>['history']='separate',nextSelection?:Selection,input=false){
     if(history==='exclude')throw new Error('Local commands must declare a history group');
     try{
-      const result=editor.dispatch({baseRevision:editor.state.revision,origin:'local',history,time:performance.now(),steps,selection:nextSelection});
-      editStarted.current=performance.now();setInputNotice('');setEditorState(result.state);return true;
+      editor.dispatch({baseRevision:editor.state.revision,origin:'local',history,time:performance.now(),steps,selection:nextSelection,input});
+      editStarted.current=performance.now();setInputNotice('');return true;
     }catch(error){
       setInputNotice(error instanceof Error?error.message:'Edit failed');
       syncInput();
       return false;
     }
   }
+  function runCommand(steps:Step<HybridNode>[],nextSelection:Selection=editor.state.selection){
+    try{
+      editStarted.current=performance.now();
+      const applied=editor.chain().steps(steps).select(nextSelection).run();
+      setInputNotice(applied?'':'Command is not available');return applied;
+    }catch(error){setInputNotice(error instanceof Error?error.message:'Command failed');return false;}
+  }
   const formatting=textCommands(demoSchema,editorState,tree);
   const formatActive=formatting.active;
+  function focusText(){
+    const cell=scroller.current?.querySelector<HTMLTextAreaElement>(`textarea[data-text-block="${selection.head.id}"]`);
+    (cell??inputRef.current)?.focus({preventScroll:true});
+  }
   function toggleFormat(key:TextFormat){
     if(!formatting.available)return;
-    dispatch(formatting.toggle(key),'separate',editorState.selection);inputRef.current?.focus({preventScroll:true});
+    if(formatting.caret)editor.setStoredMarks(formatActive(key)?formatting.current.filter(mark=>mark.type!==key):[...formatting.current,formattingSchema.create(key,null)]);else runCommand(formatting.toggle(key));focusText();
   }
-  function clearMarks(){dispatch(formatting.clear(),'separate',editorState.selection);inputRef.current?.focus({preventScroll:true});}
+  function clearMarks(){if(formatting.caret)editor.setStoredMarks([]);else runCommand(formatting.clear());focusText();}
   function addComment(){
-    const command=formatting.comment(crypto.randomUUID());if(!command.target)return;
-    if(dispatch(command.steps,'separate',selection))setPanel({kind:'comment',nodeId:command.target.nodeId,atomId:command.target.commentId,focus:'panel'});
+    const thread=captureComment(demoSchema,editor,crypto.randomUUID(),[{body:'',reply:''}]);if(!thread)return;
+    comments.put(thread);setPanel({kind:'comment',nodeId:selection.anchor.id,atomId:thread.id,focus:'panel'});
   }
   const allocate=()=>({id:editor.allocateBlockId(),key:crypto.randomUUID()});
   const selectedBlocks=(nodeIndexes.has(selection.head.id)?nodes.slice(startIndex,endIndex+1):[]).filter(node=>node.id!==end.id||end.offset>0||collapsed||start.id===end.id);
   const blockLabel=selectedBlockLabel(demoSchema,editorState,tree);
   const blocks=blockCommands(demoSchema,editorState,selectedBlocks.map(n=>n.id),allocate,tree);
   function structure(action:()=>Step<HybridNode>[]){
-    try{dispatch(action(),'separate',editorState.selection);}catch(error){setInputNotice(error instanceof Error?error.message:'Cannot change these blocks');}
+    try{runCommand(action());}catch(error){setInputNotice(error instanceof Error?error.message:'Cannot change these blocks');}
     inputRef.current?.focus({preventScroll:true});
   }
   function selectedTable(){
@@ -448,20 +476,20 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
   function insertTable(){
     let entry=tree.byId.get(selection.head.id);while(entry?.parent!=null)entry=tree.byId.get(entry.parent);
     if(!entry)return;
-    const table=createTable(allocate),after:HybridNode={kind:'paragraph',...allocate(),text:'',spans:[],atoms:[],comments:[]};
-    dispatch([{kind:'insertChildren',parent:null,index:entry.index+1,nodes:[table,after]}],'separate',textSelection(after.id,0));
+    const table=createTable(allocate),after:HybridNode={kind:'paragraph',...allocate(),text:'',spans:[],atoms:[]};
+    runCommand([{kind:'insertChildren',parent:null,index:entry.index+1,nodes:[table,after]}],textSelection(after.id,0));
   }
   function replaceCells(text:string){
     try{const command=editor.selectionEdit(text);dispatch(command.steps,'separate',command.selection);}catch(error){setInputNotice(String(error));}
   }
   function setHeading(level:1|2|3|4|null){
     const steps=setTextBlockType(demoSchema,editorState,selectedBlocks.map(n=>n.id),level,tree);
-    dispatch(steps,'separate',editorState.selection);inputRef.current?.focus({preventScroll:true});
+    runCommand(steps);inputRef.current?.focus({preventScroll:true});
   }
   function update(node:HybridNode){dispatch([{kind:'updateBlock',node}]);}
   function restore(redo=false){
     const result=redo?editor.redo():editor.undo();if(!result)return;
-    editStarted.current=performance.now();setEditorState(result.state);
+    editStarted.current=performance.now();
     setPanel(null);inputRef.current?.focus({preventScroll:true});
   }
   function replace(from:number,to:number,value:string,separate=false,paragraphs=false){
@@ -476,10 +504,10 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
       reject('This study currently supports Latin text.');return;
     }
     if(paragraphs&&clean.includes('\n')){const command=pasteParagraphs(demoSchema,editorState,clean,allocate);dispatch(command.steps,'separate',command.selection);setPanel(null);return;}
-    if(crossNode){const command=replaceStructuredText(demoSchema,editorState,clean);const history=separate?'separate':{group:`${composing.current?'composition':clean?'typing':'delete'}:${start.id}`};dispatch(command.steps,history,command.selection);setPanel(null);return;}
+    if(crossNode){const command=replaceStructuredText(demoSchema,editorState,clean);const history=separate?'separate':{group:`${composing.current?'composition':clean?'typing':'delete'}:${start.id}`};dispatch(command.steps,history,command.selection,true);setPanel(null);return;}
     const nextSelection=textSelection(active.id,from+clean.length);
     const history=separate?'separate':{group:`${composing.current?'composition':clean?'typing':'delete'}:${active.id}`};
-    dispatch([{kind:'replaceText',id:active.id,from,to,text:clean}],history,nextSelection);
+    dispatch([{kind:'replaceText',id:active.id,from,to,text:clean}],history,nextSelection,true);
   }
 
   function copyText(){return nodes.slice(startIndex,endIndex+1).map(node=>{
@@ -522,18 +550,22 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
       const command=collapsed?{steps:[],selection}:replaceStructuredText(demoSchema,editorState,'');
       const caret=command.selection;if(!(caret instanceof TextSelection))throw new Error('Text replacement must return a caret');
       const steps:Step<HybridNode>[]=[...command.steps,{kind:'split',id:caret.head.id,at:caret.head.offset,rightId,rightKey:crypto.randomUUID()}];
-      dispatch(steps,'separate',textSelection(rightId,0));setPanel(null);
+      dispatch(steps,'separate',textSelection(rightId,0),true);setPanel(null);
     }
   }
-  const panelPlacement=scene.placements.find(p=>p.node.id===panel?.nodeId);
+  const panelThread=commentState.threads.find(thread=>thread.id===panel?.atomId);
+  const panelRanges=decorations.resolved.find(decoration=>decoration.id===panel?.atomId)?.ranges;
+  const panelRange=panelRanges?.find(range=>range.id===panel?.nodeId)??panelRanges?.[0];
+  const panelPlacement=scene.placements.find(p=>p.node.id===(panel?.kind==='comment'?panelRange?.id:panel?.nodeId));
   let panelRect:Rect|null=null;
   if(panel&&panelPlacement){if(panel.kind==='mention'){const box=panelPlacement.boxes.find(b=>b.id===panel.atomId);if(box)panelRect=[box.x,box.y+panelPlacement.y,box.x+box.width,box.y+box.height+panelPlacement.y];}
-    else if((panelPlacement.node.kind==='paragraph'||panelPlacement.node.kind==='heading')&&panelPlacement.layout){const range=panelPlacement.node.comments.find(c=>c.id===panel.atomId);const r=range&&panelPlacement.layout.geometry(range.start,range.end,false).rects[0];if(r)panelRect=[r[0],r[1]+panelPlacement.y,r[2],r[3]+panelPlacement.y];}}
+    else if((panelPlacement.node.kind==='paragraph'||panelPlacement.node.kind==='heading')&&panelPlacement.layout){const r=panelRange&&panelPlacement.layout.geometry(panelRange.from,panelRange.to,false).rects[0];if(r)panelRect=[r[0],r[1]+panelPlacement.y,r[2],r[3]+panelPlacement.y];}}
   useEffect(()=>{if(panel?.focus==='panel')portal?.querySelector<HTMLButtonElement>('.close-panel')?.focus({preventScroll:true});},[panel?.kind,panel?.nodeId,panel?.atomId,panel?.focus,portal]);
   useEffect(()=>{
     Object.assign(window,{hybridSpike:{
       anchor:(id:number,offset:number,bias:-1|1)=>createAnchor(demoSchema,editor.state,'hybrid-demo',id,offset,bias),
       resolveAnchor:(value:unknown)=>resolveAnchor(demoSchema,parseAnchor(value),'hybrid-demo',editor.state,editor.journal),
+      comments:()=>({threads:comments.state.threads,...resolveDecorations(commentDecorations(comments.state.threads),editor.positions),revision:editor.state.revision}),
       history:()=>editor.history,
       find:()=>findRef.current,
       checkTransactions,checkExtensions,checkContainers,checkSelections,benchmarkContainerEdits,importHtml,
@@ -559,7 +591,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
     },
     onStart(hit,clicks){
       const node=tree.byId.get(hit.point.id)?.node;
-      const comment=clicks===1&&(node?.kind==='paragraph'||node?.kind==='heading')?node.comments.find(c=>hit.point.offset>=c.start&&hit.point.offset<=c.end):undefined;
+      const comment=clicks===1&&(node?.kind==='paragraph'||node?.kind==='heading')?commentsByNode.get(node.id)?.find(c=>hit.point.offset>=c.from&&hit.point.offset<=c.to):undefined;
       setPanel(comment?{kind:'comment',nodeId:hit.point.id,atomId:comment.id,focus:'text'}:null);
     },onDrag:()=>setPanel(null),
   });
@@ -594,7 +626,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
         <button aria-label="Italic" title="Italic selected text (⌘I)" aria-pressed={formatActive('italic')} disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={()=>toggleFormat('italic')}><i>I</i></button>
         <button aria-label="Underline" title="Underline selected text" aria-pressed={formatActive('underline')} disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={()=>toggleFormat('underline')}><u>U</u></button>
         <button aria-label="Clear formatting" title="Clear formatting" disabled={!formatting.available} onMouseDown={e=>e.preventDefault()} onClick={clearMarks}>Tx</button>
-        <button aria-label="Add comment" title="Comment on selection" disabled={!formatting.available||!nodeIndexes.has(selection.head.id)} onMouseDown={e=>e.preventDefault()} onClick={addComment}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11v6a2 2 0 0 1-2 2H7l-4 3V5a2 2 0 0 1 2-2h8M19 2v6M16 5h6"/></svg></button>
+        <button aria-label="Add comment" title="Comment on selection" disabled={formatting.caret||!formatting.available||!nodeIndexes.has(selection.head.id)} onMouseDown={e=>e.preventDefault()} onClick={addComment}><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11v6a2 2 0 0 1-2 2H7l-4 3V5a2 2 0 0 1 2-2h8M19 2v6M16 5h6"/></svg></button>
 
           <button aria-label="Block quote" title="Block quote" aria-pressed={blocks.quoted} disabled={!selectedBlocks.length} onClick={()=>structure(()=>blocks.quote())}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 6H4v7h6V6Zm10 0h-6v7h6V6ZM10 13c0 4-2 5-5 5m15-5c0 4-2 5-5 5"/></svg></button>
           <button aria-label="Indent list item" title="Indent list item" disabled={blocks.item===undefined} onClick={()=>structure(()=>listCommands.indent(demoSchema,editorState,blocks.item!,allocate).steps)}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 5h9M12 12h9M12 19h9M3 8l4 4-4 4"/></svg></button>
@@ -620,7 +652,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
             <div className="dom-layer" style={{width:width/zoom,height:scene.height,transform:`scale(${zoom})`}}>
               {[...quoteRules].map(([id,rule])=><span key={`quote-${id}`} data-quote={id} className="quote-rule" style={{left:28+rule.left,top:rule.top,bottom:'auto',height:rule.bottom-rule.top,pointerEvents:'none'}}/>)}
               {visible.map(p=>{const d=projection.decorations.get(p.node.id);return d?.marker?<div key={`structure-${p.node.id}`} className="block-decoration" data-block-decoration={p.node.id} style={{left:28,top:p.y,height:p.height,width:d.inset}}><span className="list-marker">{d.marker}</span></div>:null;})}
-              {visible.map(p=>p.node.kind==='table'?<div onFocusCapture={()=>setFocusedWidget(p.node.id)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocusedWidget(null);}} key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}}><TableBlock findMatches={findMatches} activeMatch={findOpen?findState.active:null} node={p.node} width={contentWidth} onMeasure={onMeasure} selection={editorState.selection} context={context} onSelect={setSelection} onText={(id,from,to,text,caret)=>dispatch([{kind:'replaceText',id,from,to,text}],{group:`typing:${id}`},textSelection(id,caret))} onUndo={restore} onFormat={toggleFormat} onReplace={replaceCells}/></div>:p.node.kind==='image'?<div key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}}><ImageBlock node={p.node} width={contentWidth} onMeasure={onMeasure}/></div>:p.node.kind==='checklist'?<div key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}} onFocusCapture={()=>setFocusedWidget(p.node.id)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocusedWidget(null);}}><Checklist node={p.node} width={contentWidth} onChange={update} onMeasure={onMeasure}/></div>:<ParagraphExtensions key={p.node.id} placement={p} kit={kit} owned={owned} open={(kind,atomId,index)=>{setSelection(textSelection(p.node.id,index));setPanel({kind,nodeId:p.node.id,atomId,focus:'panel'});}}/>) }
+              {visible.map(p=>p.node.kind==='table'?<div onFocusCapture={()=>setFocusedWidget(p.node.id)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocusedWidget(null);}} key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}}><TableBlock findMatches={findMatches} activeMatch={findOpen?findState.active:null} node={p.node} width={contentWidth} onMeasure={onMeasure} selection={editorState.selection} context={context} onSelect={setSelection} onText={(id,from,to,text,caret)=>dispatch([{kind:'replaceText',id,from,to,text}],{group:`typing:${id}`},textSelection(id,caret),true)} onUndo={restore} onFormat={toggleFormat} onReplace={replaceCells}/></div>:p.node.kind==='image'?<div key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}}><ImageBlock node={p.node} width={contentWidth} onMeasure={onMeasure}/></div>:p.node.kind==='checklist'?<div key={p.node.id} className="block-position" data-selected={!!selectedRange(p.node)} style={{left:28,top:p.y,width:contentWidth}} onFocusCapture={()=>setFocusedWidget(p.node.id)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocusedWidget(null);}}><Checklist node={p.node} width={contentWidth} onChange={update} onMeasure={onMeasure}/></div>:<ParagraphExtensions key={p.node.id} comments={commentsByNode.get(p.node.id)} placement={p} kit={kit} owned={owned} open={(kind,atomId,index)=>{setSelection(textSelection(p.node.id,index));setPanel({kind,nodeId:p.node.id,atomId,focus:'panel'});}}/>) }
             </div>
           </div>
         </div>
@@ -632,7 +664,7 @@ function App({kit,owned,sample,onSampleChange,loading}:{kit:CanvasKit;owned:Owne
           capture.current={value,offset};replace(offset+from,offset+oldEnd,value.slice(from,tail));
         }} onCopy={e=>{e.preventDefault();writeClipboard(e.clipboardData,demoSchema,editorState,copyText());}} onCut={e=>{e.preventDefault();writeClipboard(e.clipboardData,demoSchema,editorState,copyText());if(!collapsed)replace(start.offset,end.offset,'',true);}} onPaste={e=>{e.preventDefault();try{const fragment=readClipboard(e.clipboardData);if(fragment){const command=pasteFragment(demoSchema,editorState,fragment,allocate);dispatch(command.steps,'separate',command.selection);setPanel(null);}else replace(start.offset,end.offset,e.clipboardData.getData('text/plain'),true,true);}catch(error){setInputNotice(error instanceof Error?error.message:String(error));}}}/>
         <div className="panel-layer" ref={setPortal}/>
-        {portal&&panel&&panelRect&&panelRect[3]*zoom-scroll>=0&&panelRect[1]*zoom-scroll<=viewportHeight&&createPortal(<div className="nearby-panel" role="dialog" aria-label={panel.kind==='mention'?'Mention details':'Comment'} style={{left:Math.max(8,Math.min((panelRect[0]+28)*zoom,width-294)),top:(minimal?scroll:0)+Math.max(8,Math.min(panelRect[3]*zoom-scroll+8,290))}}><button className="close-panel" onClick={closePanel}>Close</button>{panel.kind==='mention'?<MentionDetails/>:<><strong>Comment</strong>{panel.atomId==='review'&&<p>Can we limit this to the core editing flow?</p>}<label>Reply<textarea value={(panelPlacement?.node.kind==='paragraph'||panelPlacement?.node.kind==='heading')?panelPlacement.node.comments.find(c=>c.id===panel.atomId)?.data.reply??'':''} onChange={e=>{const node=panelPlacement?.node;if((node?.kind==='paragraph'||node?.kind==='heading'))dispatch(tree.order.flatMap(({node:part})=>(part.kind==='paragraph'||part.kind==='heading')&&part.comments.some(c=>c.id===panel.atomId)?[{kind:'updateBlock',node:{...part,comments:part.comments.map(c=>c.id===panel.atomId?{...c,data:{...c.data,reply:e.target.value}}:c)}}]:[]));}}/></label></>}</div>,portal)}
+        {portal&&panel&&panelRect&&panelRect[3]*zoom-scroll>=0&&panelRect[1]*zoom-scroll<=viewportHeight&&createPortal(<div className="nearby-panel" role="dialog" aria-label={panel.kind==='mention'?'Mention details':'Comment'} style={{left:Math.max(8,Math.min((panelRect[0]+28)*zoom,width-294)),top:(minimal?scroll:0)+Math.max(8,Math.min(panelRect[3]*zoom-scroll+8,290))}}><button className="close-panel" onClick={closePanel}>Close</button>{panel.kind==='mention'?<MentionDetails/>:<><strong>Comment</strong>{panelThread?.messages[0]?.body&&<p>{panelThread.messages[0].body}</p>}<label>Reply<textarea value={panelThread?.messages[0]?.reply??''} onChange={e=>{if(panelThread)comments.put({...panelThread,messages:[{body:panelThread.messages[0]?.body??'',reply:e.target.value}]});}}/></label></>}</div>,portal)}
       </div></div>
       <p className="input-notice" role="status">{inputNotice}</p>{!minimal&&<footer>Canvas text · React controls · Paragraph-local layout <span>{sample.total?`${nodes.length.toLocaleString()} / ${sample.total.toLocaleString()} blocks`:''}{!bookSamples.some(book=>book.id===sample.id)?` · ${visible.filter(p=>p.node.kind==='checklist').length} mounted checklists`:''}</span></footer>}
     </main>

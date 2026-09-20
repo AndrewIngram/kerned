@@ -1,0 +1,25 @@
+{
+  "recordedAt": "2026-09-20T20:38:31.429Z",
+  "blocks": 7280,
+  "method": "One warm-up, three serial trials; decode includes JSON.parse; Chromium development server",
+  "trials": [
+    {
+      "encodeMs": 7.5,
+      "jsonMs": 3.799999952316284,
+      "decodeMs": 120.5,
+      "bytes": 2143127
+    },
+    {
+      "encodeMs": 7.099999904632568,
+      "jsonMs": 4.6000001430511475,
+      "decodeMs": 120.5,
+      "bytes": 2143127
+    },
+    {
+      "encodeMs": 6.299999952316284,
+      "jsonMs": 4.099999904632568,
+      "decodeMs": 117.90000009536743,
+      "bytes": 2143127
+    }
+  ]
+}
