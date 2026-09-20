@@ -1,0 +1,35 @@
+{
+  "htmlSha256": "c6e9a936ea6cc8541faa3a92a5ef5ccc3f73c21b449203e63233172febc96bfc",
+  "results": [
+    {
+      "browser": "chromium",
+      "blocks": 11718,
+      "words": 562489,
+      "headings": 382,
+      "italicVerified": true,
+      "initialLoadMs": 277,
+      "elapsedIncludingPausedEditsMs": 2940,
+      "stalePaints": 0
+    },
+    {
+      "browser": "firefox",
+      "blocks": 11718,
+      "words": 562489,
+      "headings": 382,
+      "italicVerified": true,
+      "initialLoadMs": 491,
+      "elapsedIncludingPausedEditsMs": 5411,
+      "stalePaints": 0
+    },
+    {
+      "browser": "webkit",
+      "blocks": 11718,
+      "words": 562489,
+      "headings": 382,
+      "italicVerified": true,
+      "initialLoadMs": 336,
+      "elapsedIncludingPausedEditsMs": 2488,
+      "stalePaints": 0
+    }
+  ]
+}

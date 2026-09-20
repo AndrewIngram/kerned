@@ -1,0 +1,386 @@
+[
+  {
+    "paragraphs": 500,
+    "storage": "objects",
+    "stages": [
+      {
+        "stage": "baseline",
+        "js": 0,
+        "backing": 0,
+        "total": 0,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      },
+      {
+        "stage": "loaded",
+        "js": 14569064,
+        "backing": 318900,
+        "total": 14887964,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 1
+      },
+      {
+        "stage": "wide",
+        "js": 14455984,
+        "backing": 318900,
+        "total": 14774884,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 1
+      },
+      {
+        "stage": "narrow",
+        "js": 22747772,
+        "backing": 318900,
+        "total": 23066672,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 1
+      },
+      {
+        "stage": "restore",
+        "js": 14578512,
+        "backing": 318900,
+        "total": 14897412,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 1
+      },
+      {
+        "stage": "pin-and-resize",
+        "js": 19409340,
+        "backing": 637800,
+        "total": 20047140,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 2
+      },
+      {
+        "stage": "edit-50",
+        "js": 19439872,
+        "backing": 637910,
+        "total": 20077782,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 2
+      },
+      {
+        "stage": "release-cache",
+        "js": 9520460,
+        "backing": 637910,
+        "total": 10158370,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 2
+      },
+      {
+        "stage": "drop-snapshots",
+        "js": 54580,
+        "backing": 0,
+        "total": 54580,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      },
+      {
+        "stage": "release-cycles",
+        "js": 57676,
+        "backing": 0,
+        "total": 57676,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      }
+    ]
+  },
+  {
+    "paragraphs": 500,
+    "storage": "carets",
+    "stages": [
+      {
+        "stage": "baseline",
+        "js": 0,
+        "backing": 0,
+        "total": 0,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      },
+      {
+        "stage": "loaded",
+        "js": 11514244,
+        "backing": 1303600,
+        "total": 12817844,
+        "caretBytes": 984700,
+        "usedBytes": 459570,
+        "snapshots": 1
+      },
+      {
+        "stage": "wide",
+        "js": 11446800,
+        "backing": 1303600,
+        "total": 12750400,
+        "caretBytes": 984700,
+        "usedBytes": 451070,
+        "snapshots": 1
+      },
+      {
+        "stage": "narrow",
+        "js": 15448808,
+        "backing": 1303600,
+        "total": 16752408,
+        "caretBytes": 984700,
+        "usedBytes": 984700,
+        "snapshots": 1
+      },
+      {
+        "stage": "restore",
+        "js": 11533988,
+        "backing": 1303600,
+        "total": 12837588,
+        "caretBytes": 984700,
+        "usedBytes": 459570,
+        "snapshots": 1
+      },
+      {
+        "stage": "pin-and-resize",
+        "js": 13189412,
+        "backing": 2607200,
+        "total": 15796612,
+        "caretBytes": 984700,
+        "usedBytes": 468070,
+        "snapshots": 2
+      },
+      {
+        "stage": "edit-50",
+        "js": 13217300,
+        "backing": 2607640,
+        "total": 15824940,
+        "caretBytes": 985030,
+        "usedBytes": 468230,
+        "snapshots": 2
+      },
+      {
+        "stage": "release-cache",
+        "js": 3297888,
+        "backing": 2607640,
+        "total": 5905528,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 2
+      },
+      {
+        "stage": "drop-snapshots",
+        "js": 57816,
+        "backing": 0,
+        "total": 57816,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      },
+      {
+        "stage": "release-cycles",
+        "js": 66908,
+        "backing": 0,
+        "total": 66908,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      }
+    ]
+  },
+  {
+    "paragraphs": 2000,
+    "storage": "objects",
+    "stages": [
+      {
+        "stage": "baseline",
+        "js": 0,
+        "backing": 0,
+        "total": 0,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      },
+      {
+        "stage": "loaded",
+        "js": 58622512,
+        "backing": 1288900,
+        "total": 59911412,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 1
+      },
+      {
+        "stage": "wide",
+        "js": 58210900,
+        "backing": 1288900,
+        "total": 59499800,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 1
+      },
+      {
+        "stage": "narrow",
+        "js": 91838812,
+        "backing": 1288900,
+        "total": 93127712,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 1
+      },
+      {
+        "stage": "restore",
+        "js": 58698056,
+        "backing": 1288900,
+        "total": 59986956,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 1
+      },
+      {
+        "stage": "pin-and-resize",
+        "js": 78043872,
+        "backing": 2577800,
+        "total": 80621672,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 2
+      },
+      {
+        "stage": "edit-50",
+        "js": 78125008,
+        "backing": 2577910,
+        "total": 80702918,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 2
+      },
+      {
+        "stage": "release-cache",
+        "js": 38049996,
+        "backing": 2577910,
+        "total": 40627906,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 2
+      },
+      {
+        "stage": "drop-snapshots",
+        "js": 53976,
+        "backing": 0,
+        "total": 53976,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      },
+      {
+        "stage": "release-cycles",
+        "js": 57692,
+        "backing": 0,
+        "total": 57692,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      }
+    ]
+  },
+  {
+    "paragraphs": 2000,
+    "storage": "carets",
+    "stages": [
+      {
+        "stage": "baseline",
+        "js": 0,
+        "backing": 0,
+        "total": 0,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      },
+      {
+        "stage": "loaded",
+        "js": 46317272,
+        "backing": 5267600,
+        "total": 51584872,
+        "caretBytes": 3978700,
+        "usedBytes": 1855570,
+        "snapshots": 1
+      },
+      {
+        "stage": "wide",
+        "js": 46023444,
+        "backing": 5267600,
+        "total": 51291044,
+        "caretBytes": 3978700,
+        "usedBytes": 1821570,
+        "snapshots": 1
+      },
+      {
+        "stage": "narrow",
+        "js": 63065676,
+        "backing": 5267600,
+        "total": 68333276,
+        "caretBytes": 3978700,
+        "usedBytes": 3978700,
+        "snapshots": 1
+      },
+      {
+        "stage": "restore",
+        "js": 46407392,
+        "backing": 5267600,
+        "total": 51674992,
+        "caretBytes": 3978700,
+        "usedBytes": 1855570,
+        "snapshots": 1
+      },
+      {
+        "stage": "pin-and-resize",
+        "js": 53045800,
+        "backing": 10535200,
+        "total": 63581000,
+        "caretBytes": 3978700,
+        "usedBytes": 1889570,
+        "snapshots": 2
+      },
+      {
+        "stage": "edit-50",
+        "js": 53064312,
+        "backing": 10535640,
+        "total": 63599952,
+        "caretBytes": 3979030,
+        "usedBytes": 1889730,
+        "snapshots": 2
+      },
+      {
+        "stage": "release-cache",
+        "js": 13002744,
+        "backing": 10535640,
+        "total": 23538384,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 2
+      },
+      {
+        "stage": "drop-snapshots",
+        "js": 47436,
+        "backing": 0,
+        "total": 47436,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      },
+      {
+        "stage": "release-cycles",
+        "js": 50116,
+        "backing": 0,
+        "total": 50116,
+        "caretBytes": 0,
+        "usedBytes": 0,
+        "snapshots": 0
+      }
+    ]
+  }
+]

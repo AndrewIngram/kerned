@@ -1,0 +1,69 @@
+{
+  "package": "@pmndrs/glyph@0.1.0",
+  "technique": "MSDF",
+  "coverage": "ASCII, Latin-1, combining marks, and characters present in src/model.ts; no color emoji",
+  "records": [
+    {
+      "file": "NotoSans-Regular.ttf",
+      "status": "ready",
+      "output": "public/glyph-spike/NotoSans-Regular.glb",
+      "preparationMs": 5706.318584000001,
+      "cached": false,
+      "bytes": 3867444
+    },
+    {
+      "file": "NotoSans-Bold.ttf",
+      "status": "ready",
+      "output": "public/glyph-spike/NotoSans-Bold.glb",
+      "preparationMs": 5841.373459,
+      "cached": false,
+      "bytes": 4117640
+    },
+    {
+      "file": "NotoSans-Italic.ttf",
+      "status": "ready",
+      "output": "public/glyph-spike/NotoSans-Italic.glb",
+      "preparationMs": 5358.643375,
+      "cached": false,
+      "bytes": 3895496
+    },
+    {
+      "file": "NotoSans-BoldItalic.ttf",
+      "status": "ready",
+      "output": "public/glyph-spike/NotoSans-BoldItalic.glb",
+      "preparationMs": 5813.703874999999,
+      "cached": false,
+      "bytes": 3960384
+    },
+    {
+      "file": "NotoSansArabic-Regular.ttf",
+      "status": "ready",
+      "output": "public/glyph-spike/NotoSansArabic-Regular.glb",
+      "preparationMs": 1073.791666000001,
+      "cached": false,
+      "bytes": 824576
+    },
+    {
+      "file": "NotoSansHebrew-Regular.ttf",
+      "status": "ready",
+      "output": "public/glyph-spike/NotoSansHebrew-Regular.glb",
+      "preparationMs": 169.83224999999948,
+      "cached": false,
+      "bytes": 62652
+    },
+    {
+      "file": "NotoSansDevanagari-Regular.ttf",
+      "status": "ready",
+      "output": "public/glyph-spike/NotoSansDevanagari-Regular.glb",
+      "preparationMs": 5879.272083,
+      "cached": false,
+      "bytes": 3350268
+    },
+    {
+      "file": "NotoSansCJKjp-Regular.otf",
+      "status": "failed",
+      "preparationMs": 106.20979199999783,
+      "error": "MsdfBakeError: font has no glyf, CFF, or CFF2 outline table to generate a field from\n    at Object.createError (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/bakers/msdf.js:1:1882)\n    at l (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/internal/raster-baker-wasm.js:1:4131)\n    at Object.bake (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/internal/raster-baker-wasm.js:1:521)\n    at Object.bake (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/bakers/msdf.js:1:730)\n    at Object.bake (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/bakers/msdf.js:1:2005)\n    at Object.bake (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/bakers/msdf.js:1:2755)\n    at async i (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/internal/font-bake-pipeline.js:1:960)\n    at async F (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/node/bake.js:1:2001)\n    at async k (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/node/cli.js:2:7767)\n    at async _ (file:///Users/andrewingram/Code/gprose/node_modules/@pmndrs/glyph/dist/node/cli.js:2:1150)\n"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "sourceSha256": "bca262769db010fc07549da15b9bcff6d44fcf1fe2640bedf8726ea095dddbe0",
+  "results": [
+    {
+      "browser": "chromium",
+      "blocks": 7279,
+      "textBlocks": 7312,
+      "underlineVerified": true,
+      "loadMs": 1370,
+      "stalePaints": 0
+    },
+    {
+      "browser": "firefox",
+      "blocks": 7279,
+      "textBlocks": 7312,
+      "underlineVerified": true,
+      "loadMs": 1240,
+      "stalePaints": 0
+    },
+    {
+      "browser": "webkit",
+      "blocks": 7279,
+      "textBlocks": 7312,
+      "underlineVerified": true,
+      "loadMs": 1320,
+      "stalePaints": 0
+    }
+  ]
+}

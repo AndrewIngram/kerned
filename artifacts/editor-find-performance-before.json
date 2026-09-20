@@ -1,0 +1,155 @@
+[
+  {
+    "browser": "chromium",
+    "blocks": 11718,
+    "characters": 3175342,
+    "events": [
+      {
+        "value": "P",
+        "started": 18046.5,
+        "handlerMs": 176.29999995231628,
+        "inputPaintMs": 176.59999990463257,
+        "paintedValue": "P"
+      },
+      {
+        "value": "Pi",
+        "started": 18255.299999952316,
+        "handlerMs": 102.89999985694885,
+        "inputPaintMs": 103.39999985694885,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pie",
+        "started": 18390.89999985695,
+        "handlerMs": 57.5,
+        "inputPaintMs": 57.90000009536743,
+        "paintedValue": "Pie"
+      },
+      {
+        "value": "Pier",
+        "started": 18481.799999952316,
+        "handlerMs": 39.299999952316284,
+        "inputPaintMs": 39.5,
+        "paintedValue": "Pier"
+      },
+      {
+        "value": "Pierr",
+        "started": 18553.199999809265,
+        "handlerMs": 39.90000009536743,
+        "inputPaintMs": 40.200000047683716,
+        "paintedValue": "Pierr"
+      },
+      {
+        "value": "Pierre",
+        "started": 18625.599999904633,
+        "handlerMs": 37.40000009536743,
+        "inputPaintMs": 37.59999990463257,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 18699.39999985695,
+        "handlerMs": 243.60000014305115,
+        "inputPaintMs": 244,
+        "paintedValue": "e"
+      },
+      {
+        "value": "the",
+        "started": 18953.89999985695,
+        "handlerMs": 275.5,
+        "inputPaintMs": 275.7999999523163,
+        "paintedValue": "the"
+      },
+      {
+        "value": "",
+        "started": 19242.199999809265,
+        "handlerMs": 5.700000047683716,
+        "inputPaintMs": 6.1000001430511475,
+        "paintedValue": ""
+      },
+      {
+        "value": "P",
+        "started": 19253.5,
+        "handlerMs": 168.79999995231628,
+        "inputPaintMs": 169.09999990463257,
+        "paintedValue": "P"
+      },
+      {
+        "value": "Pi",
+        "started": 19454.599999904633,
+        "handlerMs": 93.5,
+        "inputPaintMs": 93.90000009536743,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pie",
+        "started": 19580.39999985695,
+        "handlerMs": 51,
+        "inputPaintMs": 51.299999952316284,
+        "paintedValue": "Pie"
+      },
+      {
+        "value": "Pier",
+        "started": 19663.599999904633,
+        "handlerMs": 40.90000009536743,
+        "inputPaintMs": 41,
+        "paintedValue": "Pier"
+      },
+      {
+        "value": "Pierr",
+        "started": 19736.39999985695,
+        "handlerMs": 38.90000009536743,
+        "inputPaintMs": 39,
+        "paintedValue": "Pierr"
+      },
+      {
+        "value": "Pierre",
+        "started": 19807.799999952316,
+        "handlerMs": 36.299999952316284,
+        "inputPaintMs": 36.5,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 19879.099999904633,
+        "handlerMs": 239,
+        "inputPaintMs": 239.29999995231628,
+        "paintedValue": "e"
+      },
+      {
+        "value": "the",
+        "started": 20126.299999952316,
+        "handlerMs": 161.29999995231628,
+        "inputPaintMs": 161.5,
+        "paintedValue": "the"
+      }
+    ],
+    "timings": [
+      {
+        "query": "P",
+        "matches": 44716,
+        "ms": 157.19999980926514
+      },
+      {
+        "query": "Pi",
+        "matches": 4186,
+        "ms": 72.40000009536743
+      },
+      {
+        "query": "Pierre",
+        "matches": 1964,
+        "ms": 30.09999990463257
+      },
+      {
+        "query": "e",
+        "matches": 311360,
+        "ms": 177.5
+      },
+      {
+        "query": "the",
+        "matches": 47140,
+        "ms": 156.90000009536743
+      }
+    ]
+  }
+]

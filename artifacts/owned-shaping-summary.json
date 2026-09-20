@@ -1,0 +1,306 @@
+[
+  {
+    "paragraphs": 500,
+    "storage": "carets",
+    "stages": [
+      {
+        "stage": "baseline",
+        "js": 0,
+        "backing": 0,
+        "total": 0,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "loaded",
+        "js": 10853956,
+        "backing": 1303600,
+        "total": 12157556,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "wide",
+        "js": 10792356,
+        "backing": 1303600,
+        "total": 12095956,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "narrow",
+        "js": 14828032,
+        "backing": 1303600,
+        "total": 16131632,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "restore",
+        "js": 10875120,
+        "backing": 1303600,
+        "total": 12178720,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "pin-and-resize",
+        "js": 11856616,
+        "backing": 2607200,
+        "total": 14463816,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "edit-50",
+        "js": 11885304,
+        "backing": 2607640,
+        "total": 14492944,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "release-cache",
+        "js": 1965892,
+        "backing": 2607640,
+        "total": 4573532,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "drop-snapshots",
+        "js": 76100,
+        "backing": 0,
+        "total": 76100,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "release-cycles",
+        "js": 83364,
+        "backing": 0,
+        "total": 83364,
+        "shapingBytes": 0
+      }
+    ]
+  },
+  {
+    "paragraphs": 500,
+    "storage": "shaping",
+    "stages": [
+      {
+        "stage": "baseline",
+        "js": 0,
+        "backing": 0,
+        "total": 0,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "loaded",
+        "js": 1802364,
+        "backing": 3133330,
+        "total": 4935694,
+        "shapingBytes": 1925400
+      },
+      {
+        "stage": "wide",
+        "js": 1740344,
+        "backing": 3133330,
+        "total": 4873674,
+        "shapingBytes": 1925400
+      },
+      {
+        "stage": "narrow",
+        "js": 5702392,
+        "backing": 3133330,
+        "total": 8835722,
+        "shapingBytes": 1925400
+      },
+      {
+        "stage": "restore",
+        "js": 1831252,
+        "backing": 3133330,
+        "total": 4964582,
+        "shapingBytes": 1925400
+      },
+      {
+        "stage": "pin-and-resize",
+        "js": 2756712,
+        "backing": 4373150,
+        "total": 7129862,
+        "shapingBytes": 1925400
+      },
+      {
+        "stage": "edit-50",
+        "js": 2783304,
+        "backing": 4374414,
+        "total": 7157718,
+        "shapingBytes": 1926060
+      },
+      {
+        "stage": "release-cache",
+        "js": 1910264,
+        "backing": 2543984,
+        "total": 4454248,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "drop-snapshots",
+        "js": 71492,
+        "backing": 0,
+        "total": 71492,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "release-cycles",
+        "js": 62544,
+        "backing": 0,
+        "total": 62544,
+        "shapingBytes": 0
+      }
+    ]
+  },
+  {
+    "paragraphs": 2000,
+    "storage": "carets",
+    "stages": [
+      {
+        "stage": "baseline",
+        "js": 0,
+        "backing": 0,
+        "total": 0,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "loaded",
+        "js": 43621408,
+        "backing": 5267600,
+        "total": 48889008,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "wide",
+        "js": 43368008,
+        "backing": 5267600,
+        "total": 48635608,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "narrow",
+        "js": 59831596,
+        "backing": 5267600,
+        "total": 65099196,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "restore",
+        "js": 43713252,
+        "backing": 5267600,
+        "total": 48980852,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "pin-and-resize",
+        "js": 47629712,
+        "backing": 10535200,
+        "total": 58164912,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "edit-50",
+        "js": 47652772,
+        "backing": 10535640,
+        "total": 58188412,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "release-cache",
+        "js": 7591264,
+        "backing": 10535640,
+        "total": 18126904,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "drop-snapshots",
+        "js": 52104,
+        "backing": 0,
+        "total": 52104,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "release-cycles",
+        "js": 54280,
+        "backing": 0,
+        "total": 54280,
+        "shapingBytes": 0
+      }
+    ]
+  },
+  {
+    "paragraphs": 2000,
+    "storage": "shaping",
+    "stages": [
+      {
+        "stage": "baseline",
+        "js": 0,
+        "backing": 0,
+        "total": 0,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "loaded",
+        "js": 6978824,
+        "backing": 12727330,
+        "total": 19706154,
+        "shapingBytes": 7781400
+      },
+      {
+        "stage": "wide",
+        "js": 6724608,
+        "backing": 12727330,
+        "total": 19451938,
+        "shapingBytes": 7781400
+      },
+      {
+        "stage": "narrow",
+        "js": 23773824,
+        "backing": 12727330,
+        "total": 36501154,
+        "shapingBytes": 7781400
+      },
+      {
+        "stage": "restore",
+        "js": 7066328,
+        "backing": 12727330,
+        "total": 19793658,
+        "shapingBytes": 7781400
+      },
+      {
+        "stage": "pin-and-resize",
+        "js": 10689912,
+        "backing": 17737150,
+        "total": 28427062,
+        "shapingBytes": 7781400
+      },
+      {
+        "stage": "edit-50",
+        "js": 10783748,
+        "backing": 17738414,
+        "total": 28522162,
+        "shapingBytes": 7782060
+      },
+      {
+        "stage": "release-cache",
+        "js": 7368684,
+        "backing": 10277984,
+        "total": 17646668,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "drop-snapshots",
+        "js": 53464,
+        "backing": 0,
+        "total": 53464,
+        "shapingBytes": 0
+      },
+      {
+        "stage": "release-cycles",
+        "js": 54972,
+        "backing": 0,
+        "total": 54972,
+        "shapingBytes": 0
+      }
+    ]
+  }
+]

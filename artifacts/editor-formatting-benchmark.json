@@ -1,0 +1,173 @@
+[
+  {
+    "browser": "chromium",
+    "trial": 0,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 12.299999952316284,
+    "paintedMs": 34.5,
+    "layouts": 41,
+    "pending": 7237,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2217.2000000476837,
+    "maxFrameGapMs": 16.800000000000182,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 27.799999952316284,
+      "restored": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "trial": 1,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 12.199999809265137,
+    "paintedMs": 33.5,
+    "layouts": 42,
+    "pending": 7236,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2200.5,
+    "maxFrameGapMs": 16.800000000000182,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 28,
+      "restored": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "trial": 2,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 11.400000095367432,
+    "paintedMs": 33.299999952316284,
+    "layouts": 45,
+    "pending": 7233,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2200,
+    "maxFrameGapMs": 16.800000000000182,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 28.299999952316284,
+      "restored": true
+    }
+  },
+  {
+    "browser": "firefox",
+    "trial": 0,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 20,
+    "paintedMs": 59,
+    "layouts": 42,
+    "pending": 7236,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2743,
+    "maxFrameGapMs": 30.279999999999745,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 33,
+      "restored": true
+    }
+  },
+  {
+    "browser": "firefox",
+    "trial": 1,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 23,
+    "paintedMs": 56,
+    "layouts": 58,
+    "pending": 7220,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2508,
+    "maxFrameGapMs": 27.88000000000011,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 34,
+      "restored": true
+    }
+  },
+  {
+    "browser": "firefox",
+    "trial": 2,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 21,
+    "paintedMs": 51,
+    "layouts": 21,
+    "pending": 7257,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2502,
+    "maxFrameGapMs": 30.079999999999927,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 31,
+      "restored": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "trial": 0,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 13,
+    "paintedMs": 35,
+    "layouts": 60,
+    "pending": 7218,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2115,
+    "maxFrameGapMs": 30,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 27,
+      "restored": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "trial": 1,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 13,
+    "paintedMs": 33,
+    "layouts": 45,
+    "pending": 7233,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2114,
+    "maxFrameGapMs": 21,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 27,
+      "restored": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "trial": 2,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 11,
+    "paintedMs": 32,
+    "layouts": 45,
+    "pending": 7233,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 2098,
+    "maxFrameGapMs": 19,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 28,
+      "restored": true
+    }
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "title": "Warbreaker",
+  "author": "Brandon Sanderson",
+  "version": "6.1",
+  "source": "WarbreakerFull6.1.prc",
+  "sourceSha256": "bca262769db010fc07549da15b9bcff6d44fcf1fe2640bedf8726ea095dddbe0",
+  "sourceEncoding": "cp1252",
+  "htmlSha256": "4f8b5368e822f38295993e95289d6e26d59b67c08604ebfbf13893565dcc2440",
+  "blocks": 7312,
+  "headings": 61,
+  "words": 196131,
+  "elements": {
+    "body": 1,
+    "br": 104,
+    "h1": 61,
+    "p": 7251,
+    "strong": 13,
+    "table": 1,
+    "td": 33,
+    "tr": 11,
+    "u": 2019
+  },
+  "textVerified": true,
+  "contents": "Trimmed editor sample, Prologue through Ars Arcanum. Complete source, attribution and rights are in warbreaker-full.html.",
+  "normalization": "Whitespace, indentation and empty layout paragraphs removed; pagebreak markers removed; b/i converted to strong/em. Text, underline, links and table cells preserved.",
+  "fullHtml": "warbreaker-full.html",
+  "sourceBlockStart": 53,
+  "sourceBlockEnd": 7365
+}

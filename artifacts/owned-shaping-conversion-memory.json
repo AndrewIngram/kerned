@@ -1,0 +1,3703 @@
+{
+  "recordedAt": "2026-09-19T13:50:03.641Z",
+  "cpu": "Apple M4 Pro",
+  "version": "153.0.8010.12",
+  "trials": [
+    {
+      "paragraphs": 500,
+      "trial": 0,
+      "storage": "carets",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3421776,
+            "totalSize": 3735552,
+            "embedderHeapUsedSize": 465512,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14267112,
+            "totalSize": 14745600,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 451070,
+              "caretUnusedBytes": 533630,
+              "caretCapacity": 65780,
+              "caretCount": 34390,
+              "lineCapacity": 31890,
+              "lineCount": 500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14206148,
+            "totalSize": 14745600,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 984700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 65780,
+              "caretCount": 65780,
+              "lineCapacity": 31890,
+              "lineCount": 31890,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 18243036,
+            "totalSize": 18825216,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14288900,
+            "totalSize": 14745600,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 468070,
+              "caretUnusedBytes": 516630,
+              "caretCapacity": 65780,
+              "caretCount": 35390,
+              "lineCapacity": 31890,
+              "lineCount": 1500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 15270444,
+            "totalSize": 15794176,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 2825034
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 985030,
+              "caretUsedBytes": 468230,
+              "caretUnusedBytes": 516800,
+              "caretCapacity": 65802,
+              "caretCount": 35402,
+              "lineCapacity": 31901,
+              "lineCount": 1501,
+              "glyphBufferBytes": 319010,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 15299000,
+            "totalSize": 15794176,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 2825474
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 5379588,
+            "totalSize": 5832704,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 2825474
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3489776,
+            "totalSize": 3997696,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3496016,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 500,
+      "trial": 0,
+      "storage": "shaping",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3480264,
+            "totalSize": 3997696,
+            "embedderHeapUsedSize": 465624,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5285708,
+            "totalSize": 5832704,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 451070,
+              "caretUnusedBytes": 533630,
+              "caretCapacity": 65780,
+              "caretCount": 34390,
+              "lineCapacity": 31890,
+              "lineCount": 500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5229876,
+            "totalSize": 5570560,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 984700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 65780,
+              "caretCount": 65780,
+              "lineCapacity": 31890,
+              "lineCount": 31890,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 9183024,
+            "totalSize": 9650176,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5312580,
+            "totalSize": 5832704,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 468070,
+              "caretUnusedBytes": 516630,
+              "caretCapacity": 65780,
+              "caretCount": 35390,
+              "lineCapacity": 31890,
+              "lineCount": 1500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 6238040,
+            "totalSize": 6619136,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 4590984
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 985030,
+              "caretUsedBytes": 468230,
+              "caretUnusedBytes": 516800,
+              "caretCapacity": 65802,
+              "caretCount": 35402,
+              "lineCapacity": 31901,
+              "lineCount": 1501,
+              "glyphBufferBytes": 319010,
+              "shapingBufferBytes": 1926060,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 6271496,
+            "totalSize": 6619136,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 4592248
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 5398456,
+            "totalSize": 5832704,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 2761818
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3559760,
+            "totalSize": 3997696,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3560800,
+            "totalSize": 3997696,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 500,
+      "trial": 1,
+      "storage": "shaping",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3480324,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 465616,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5287724,
+            "totalSize": 6094848,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 451070,
+              "caretUnusedBytes": 533630,
+              "caretCapacity": 65780,
+              "caretCount": 34390,
+              "lineCapacity": 31890,
+              "lineCount": 500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5229884,
+            "totalSize": 5832704,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 984700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 65780,
+              "caretCount": 65780,
+              "lineCapacity": 31890,
+              "lineCount": 31890,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 9184748,
+            "totalSize": 9912320,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5312888,
+            "totalSize": 6094848,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 468070,
+              "caretUnusedBytes": 516630,
+              "caretCapacity": 65780,
+              "caretCount": 35390,
+              "lineCapacity": 31890,
+              "lineCount": 1500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 6238348,
+            "totalSize": 6881280,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 4590984
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 985030,
+              "caretUsedBytes": 468230,
+              "caretUnusedBytes": 516800,
+              "caretCapacity": 65802,
+              "caretCount": 35402,
+              "lineCapacity": 31901,
+              "lineCount": 1501,
+              "glyphBufferBytes": 319010,
+              "shapingBufferBytes": 1926060,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 6271552,
+            "totalSize": 6881280,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 4592248
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 5398512,
+            "totalSize": 6094848,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 2761818
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3559768,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3564080,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 500,
+      "trial": 1,
+      "storage": "carets",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3421952,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 465512,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14267444,
+            "totalSize": 15007744,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 451070,
+              "caretUnusedBytes": 533630,
+              "caretCapacity": 65780,
+              "caretCount": 34390,
+              "lineCapacity": 31890,
+              "lineCount": 500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14206324,
+            "totalSize": 15532032,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 984700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 65780,
+              "caretCount": 65780,
+              "lineCapacity": 31890,
+              "lineCount": 31890,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 18243188,
+            "totalSize": 19087360,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14289076,
+            "totalSize": 15007744,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 468070,
+              "caretUnusedBytes": 516630,
+              "caretCapacity": 65780,
+              "caretCount": 35390,
+              "lineCapacity": 31890,
+              "lineCount": 1500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 15270620,
+            "totalSize": 16056320,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 2825034
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 985030,
+              "caretUsedBytes": 468230,
+              "caretUnusedBytes": 516800,
+              "caretCapacity": 65802,
+              "caretCount": 35402,
+              "lineCapacity": 31901,
+              "lineCount": 1501,
+              "glyphBufferBytes": 319010,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 15299156,
+            "totalSize": 16056320,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 2825474
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 5379744,
+            "totalSize": 6094848,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 2825474
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3489952,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3496192,
+            "totalSize": 3997696,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 500,
+      "trial": 2,
+      "storage": "carets",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3421892,
+            "totalSize": 3997696,
+            "embedderHeapUsedSize": 465360,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14270840,
+            "totalSize": 15007744,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 451070,
+              "caretUnusedBytes": 533630,
+              "caretCapacity": 65780,
+              "caretCount": 34390,
+              "lineCapacity": 31890,
+              "lineCount": 500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14206264,
+            "totalSize": 15007744,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 984700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 65780,
+              "caretCount": 65780,
+              "lineCapacity": 31890,
+              "lineCount": 31890,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 18241376,
+            "totalSize": 19087360,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 14289016,
+            "totalSize": 15007744,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 1521434
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 468070,
+              "caretUnusedBytes": 516630,
+              "caretCapacity": 65780,
+              "caretCount": 35390,
+              "lineCapacity": 31890,
+              "lineCount": 1500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 15270560,
+            "totalSize": 16056320,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 2825034
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 985030,
+              "caretUsedBytes": 468230,
+              "caretUnusedBytes": 516800,
+              "caretCapacity": 65802,
+              "caretCount": 35402,
+              "lineCapacity": 31901,
+              "lineCount": 1501,
+              "glyphBufferBytes": 319010,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 15299096,
+            "totalSize": 16056320,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 2825474
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 5379684,
+            "totalSize": 6094848,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 2825474
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3489892,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3496024,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 500,
+      "trial": 2,
+      "storage": "shaping",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3478720,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 465360,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5287836,
+            "totalSize": 6094848,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 451070,
+              "caretUnusedBytes": 533630,
+              "caretCapacity": 65780,
+              "caretCount": 34390,
+              "lineCapacity": 31890,
+              "lineCount": 500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5227780,
+            "totalSize": 5832704,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 984700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 65780,
+              "caretCount": 65780,
+              "lineCapacity": 31890,
+              "lineCount": 31890,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 9181480,
+            "totalSize": 9912320,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 459570,
+              "caretUnusedBytes": 525130,
+              "caretCapacity": 65780,
+              "caretCount": 34890,
+              "lineCapacity": 31890,
+              "lineCount": 1000,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 5310580,
+            "totalSize": 6094848,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 3351164
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 984700,
+              "caretUsedBytes": 468070,
+              "caretUnusedBytes": 516630,
+              "caretCapacity": 65780,
+              "caretCount": 35390,
+              "lineCapacity": 31890,
+              "lineCount": 1500,
+              "glyphBufferBytes": 318900,
+              "shapingBufferBytes": 1925400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 6236040,
+            "totalSize": 6881280,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 4590984
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 500
+            },
+            "memory": {
+              "caretBufferBytes": 985030,
+              "caretUsedBytes": 468230,
+              "caretUnusedBytes": 516800,
+              "caretCapacity": 65802,
+              "caretCount": 35402,
+              "lineCapacity": 31901,
+              "lineCount": 1501,
+              "glyphBufferBytes": 319010,
+              "shapingBufferBytes": 1926060,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 500
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 6269496,
+            "totalSize": 6881280,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 4592248
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 32000
+          },
+          "heap": {
+            "usedSize": 5396456,
+            "totalSize": 6094848,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 2761818
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3557664,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3558876,
+            "totalSize": 4259840,
+            "embedderHeapUsedSize": 464008,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 2000,
+      "trial": 0,
+      "storage": "carets",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3553304,
+            "totalSize": 4145152,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 47173052,
+            "totalSize": 47661056,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1821570,
+              "caretUnusedBytes": 2157130,
+              "caretCapacity": 265780,
+              "caretCount": 138890,
+              "lineCapacity": 128890,
+              "lineCount": 2000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 46921124,
+            "totalSize": 47661056,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 3978700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 265780,
+              "caretCount": 265780,
+              "lineCapacity": 128890,
+              "lineCount": 128890,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 63382808,
+            "totalSize": 63815680,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 47265412,
+            "totalSize": 47923200,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1889570,
+              "caretUnusedBytes": 2089130,
+              "caretCapacity": 265780,
+              "caretCount": 142890,
+              "lineCapacity": 128890,
+              "lineCount": 6000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 51181844,
+            "totalSize": 51855360,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 10753034
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3979030,
+              "caretUsedBytes": 1889730,
+              "caretUnusedBytes": 2089300,
+              "caretCapacity": 265802,
+              "caretCount": 142902,
+              "lineCapacity": 128901,
+              "lineCount": 6001,
+              "glyphBufferBytes": 1289010,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 51205240,
+            "totalSize": 52002816,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 10753474
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 11143768,
+            "totalSize": 11894784,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 10753474
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3604608,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3608388,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 2000,
+      "trial": 0,
+      "storage": "shaping",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3612360,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10596184,
+            "totalSize": 11223040,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1821570,
+              "caretUnusedBytes": 2157130,
+              "caretCapacity": 265780,
+              "caretCount": 138890,
+              "lineCapacity": 128890,
+              "lineCount": 2000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10341772,
+            "totalSize": 10960896,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 3978700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 265780,
+              "caretCount": 265780,
+              "lineCapacity": 128890,
+              "lineCount": 128890,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 27075780,
+            "totalSize": 27901952,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10675352,
+            "totalSize": 11485184,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1889570,
+              "caretUnusedBytes": 2089130,
+              "caretCapacity": 265780,
+              "caretCount": 142890,
+              "lineCapacity": 128890,
+              "lineCount": 6000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 14367944,
+            "totalSize": 15155200,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 17954984
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3979030,
+              "caretUsedBytes": 1889730,
+              "caretUnusedBytes": 2089300,
+              "caretCapacity": 265802,
+              "caretCount": 142902,
+              "lineCapacity": 128901,
+              "lineCount": 6001,
+              "glyphBufferBytes": 1289010,
+              "shapingBufferBytes": 7782060,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 14397128,
+            "totalSize": 15040512,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 17956248
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 10982028,
+            "totalSize": 11632640,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 10495818
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3666756,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3673684,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 2000,
+      "trial": 1,
+      "storage": "shaping",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3614700,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10605456,
+            "totalSize": 11223040,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1821570,
+              "caretUnusedBytes": 2157130,
+              "caretCapacity": 265780,
+              "caretCount": 138890,
+              "lineCapacity": 128890,
+              "lineCount": 2000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10342572,
+            "totalSize": 10960896,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 3978700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 265780,
+              "caretCount": 265780,
+              "lineCapacity": 128890,
+              "lineCount": 128890,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 27083084,
+            "totalSize": 27901952,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10676548,
+            "totalSize": 11485184,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1889570,
+              "caretUnusedBytes": 2089130,
+              "caretCapacity": 265780,
+              "caretCount": 142890,
+              "lineCapacity": 128890,
+              "lineCount": 6000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 14369524,
+            "totalSize": 15155200,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 17954984
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3979030,
+              "caretUsedBytes": 1889730,
+              "caretUnusedBytes": 2089300,
+              "caretCapacity": 265802,
+              "caretCount": 142902,
+              "lineCapacity": 128901,
+              "lineCount": 6001,
+              "glyphBufferBytes": 1289010,
+              "shapingBufferBytes": 7782060,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 14398792,
+            "totalSize": 15040512,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 17956248
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 10983692,
+            "totalSize": 11632640,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 10495818
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3668420,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3675188,
+            "totalSize": 4145152,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 2000,
+      "trial": 1,
+      "storage": "carets",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3553304,
+            "totalSize": 4145152,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 47172776,
+            "totalSize": 47923200,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1821570,
+              "caretUnusedBytes": 2157130,
+              "caretCapacity": 265780,
+              "caretCount": 138890,
+              "lineCapacity": 128890,
+              "lineCount": 2000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 46924424,
+            "totalSize": 47661056,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 3978700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 265780,
+              "caretCount": 265780,
+              "lineCapacity": 128890,
+              "lineCount": 128890,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 63390796,
+            "totalSize": 63815680,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 47265600,
+            "totalSize": 47923200,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1889570,
+              "caretUnusedBytes": 2089130,
+              "caretCapacity": 265780,
+              "caretCount": 142890,
+              "lineCapacity": 128890,
+              "lineCount": 6000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 51182096,
+            "totalSize": 51593216,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 10753034
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3979030,
+              "caretUsedBytes": 1889730,
+              "caretUnusedBytes": 2089300,
+              "caretCapacity": 265802,
+              "caretCount": 142902,
+              "lineCapacity": 128901,
+              "lineCount": 6001,
+              "glyphBufferBytes": 1289010,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 51205240,
+            "totalSize": 51740672,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 10753474
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 11143768,
+            "totalSize": 11632640,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 10753474
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3604608,
+            "totalSize": 4145152,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3608272,
+            "totalSize": 4145152,
+            "embedderHeapUsedSize": 464264,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 2000,
+      "trial": 2,
+      "storage": "carets",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3554444,
+            "totalSize": 4145152,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 47174436,
+            "totalSize": 47661056,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1821570,
+              "caretUnusedBytes": 2157130,
+              "caretCapacity": 265780,
+              "caretCount": 138890,
+              "lineCapacity": 128890,
+              "lineCount": 2000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 46925692,
+            "totalSize": 48185344,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 3978700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 265780,
+              "caretCount": 265780,
+              "lineCapacity": 128890,
+              "lineCount": 128890,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 63391844,
+            "totalSize": 63815680,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 47265916,
+            "totalSize": 47923200,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 5485434
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1889570,
+              "caretUnusedBytes": 2089130,
+              "caretCapacity": 265780,
+              "caretCount": 142890,
+              "lineCapacity": 128890,
+              "lineCount": 6000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 51182348,
+            "totalSize": 51593216,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 10753034
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3979030,
+              "caretUsedBytes": 1889730,
+              "caretUnusedBytes": 2089300,
+              "caretCapacity": 265802,
+              "caretCount": 142902,
+              "lineCapacity": 128901,
+              "lineCount": 6001,
+              "glyphBufferBytes": 1289010,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 51205384,
+            "totalSize": 51740672,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 10753474
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 11143876,
+            "totalSize": 11632640,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 10753474
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3604716,
+            "totalSize": 4145152,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3608688,
+            "totalSize": 4145152,
+            "embedderHeapUsedSize": 465008,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "paragraphs": 2000,
+      "trial": 2,
+      "storage": "shaping",
+      "stages": [
+        {
+          "stage": "baseline",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3617840,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "loaded",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10598136,
+            "totalSize": 11223040,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "wide",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1821570,
+              "caretUnusedBytes": 2157130,
+              "caretCapacity": 265780,
+              "caretCount": 138890,
+              "lineCapacity": 128890,
+              "lineCount": 2000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10343496,
+            "totalSize": 10960896,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "narrow",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 3978700,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 265780,
+              "caretCount": 265780,
+              "lineCapacity": 128890,
+              "lineCount": 128890,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 26843012,
+            "totalSize": 27639808,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "restore",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1855570,
+              "caretUnusedBytes": 2123130,
+              "caretCapacity": 265780,
+              "caretCount": 140890,
+              "lineCapacity": 128890,
+              "lineCount": 4000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 1,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 10682968,
+            "totalSize": 11485184,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 12945164
+          }
+        },
+        {
+          "stage": "pin-and-resize",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3978700,
+              "caretUsedBytes": 1889570,
+              "caretUnusedBytes": 2089130,
+              "caretCapacity": 265780,
+              "caretCount": 142890,
+              "lineCapacity": 128890,
+              "lineCount": 6000,
+              "glyphBufferBytes": 1288900,
+              "shapingBufferBytes": 7781400,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 14375920,
+            "totalSize": 15155200,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 17954984
+          }
+        },
+        {
+          "stage": "edit-50",
+          "state": {
+            "retention": {
+              "documents": 1,
+              "paragraphVariants": 2000
+            },
+            "memory": {
+              "caretBufferBytes": 3979030,
+              "caretUsedBytes": 1889730,
+              "caretUnusedBytes": 2089300,
+              "caretCapacity": 265802,
+              "caretCount": 142902,
+              "lineCapacity": 128901,
+              "lineCount": 6001,
+              "glyphBufferBytes": 1289010,
+              "shapingBufferBytes": 7782060,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 2000
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 14401388,
+            "totalSize": 15040512,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 17956248
+          }
+        },
+        {
+          "stage": "release-cache",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 2,
+            "pinnedHeight": 128000
+          },
+          "heap": {
+            "usedSize": 10986540,
+            "totalSize": 11632640,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 10495818
+          }
+        },
+        {
+          "stage": "drop-snapshots",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3672180,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        },
+        {
+          "stage": "release-cycles",
+          "state": {
+            "retention": {
+              "documents": 0,
+              "paragraphVariants": 0
+            },
+            "memory": {
+              "caretBufferBytes": 0,
+              "caretUsedBytes": 0,
+              "caretUnusedBytes": 0,
+              "caretCapacity": 0,
+              "caretCount": 0,
+              "lineCapacity": 0,
+              "lineCount": 0,
+              "glyphBufferBytes": 0,
+              "shapingBufferBytes": 0,
+              "wasmLinearBytes": 3604480,
+              "paragraphs": 0
+            },
+            "snapshots": 0,
+            "pinnedHeight": null
+          },
+          "heap": {
+            "usedSize": 3678836,
+            "totalSize": 4407296,
+            "embedderHeapUsedSize": 464160,
+            "backingStorageSize": 217834
+          }
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

@@ -1,0 +1,338 @@
+[
+  {
+    "browser": "chromium",
+    "sample": "warbreaker",
+    "find": "off",
+    "firstUsableMs": 200,
+    "blocks": 7280,
+    "loadMs": 1052.2000000476837,
+    "batches": 59,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 12.899999856948853,
+      "p95": 14.400000095367432
+    },
+    "elapsedMs": {
+      "median": 16.5,
+      "p95": 20.100000143051147
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  },
+  {
+    "browser": "chromium",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 196,
+    "blocks": 7280,
+    "loadMs": 1153.2999999523163,
+    "batches": 59,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 12.400000095367432,
+      "p95": 15.299999952316284
+    },
+    "elapsedMs": {
+      "median": 16.899999856948853,
+      "p95": 22.59999990463257
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "chromium",
+    "sample": "war-and-peace",
+    "find": "off",
+    "firstUsableMs": 233,
+    "blocks": 11718,
+    "loadMs": 2427.0999999046326,
+    "batches": 107,
+    "batchSize": {
+      "min": 32,
+      "median": 112,
+      "max": 128
+    },
+    "workMs": {
+      "median": 15.799999952316284,
+      "p95": 22.300000190734863
+    },
+    "elapsedMs": {
+      "median": 20.200000047683716,
+      "p95": 30.5
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  },
+  {
+    "browser": "chromium",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 250,
+    "blocks": 11718,
+    "loadMs": 2859.2999999523163,
+    "batches": 106,
+    "batchSize": {
+      "min": 32,
+      "median": 113,
+      "max": 128
+    },
+    "workMs": {
+      "median": 16.299999952316284,
+      "p95": 22.09999990463257
+    },
+    "elapsedMs": {
+      "median": 24.90000009536743,
+      "p95": 34.700000047683716
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "warbreaker",
+    "find": "off",
+    "firstUsableMs": 327,
+    "blocks": 7280,
+    "loadMs": 1495,
+    "batches": 64,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 15,
+      "p95": 20
+    },
+    "elapsedMs": {
+      "median": 21,
+      "p95": 32
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 203,
+    "blocks": 7280,
+    "loadMs": 1706,
+    "batches": 65,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 16,
+      "p95": 22
+    },
+    "elapsedMs": {
+      "median": 24,
+      "p95": 33
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "war-and-peace",
+    "find": "off",
+    "firstUsableMs": 238,
+    "blocks": 11718,
+    "loadMs": 4233,
+    "batches": 131,
+    "batchSize": {
+      "min": 3,
+      "median": 92,
+      "max": 128
+    },
+    "workMs": {
+      "median": 20,
+      "p95": 30
+    },
+    "elapsedMs": {
+      "median": 29,
+      "p95": 46
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 242,
+    "blocks": 11718,
+    "loadMs": 4576,
+    "batches": 129,
+    "batchSize": {
+      "min": 32,
+      "median": 92,
+      "max": 128
+    },
+    "workMs": {
+      "median": 20,
+      "p95": 28
+    },
+    "elapsedMs": {
+      "median": 34,
+      "p95": 45
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "warbreaker",
+    "find": "off",
+    "firstUsableMs": 277,
+    "blocks": 7280,
+    "loadMs": 994,
+    "batches": 59,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 10,
+      "p95": 12
+    },
+    "elapsedMs": {
+      "median": 16,
+      "p95": 17
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 266,
+    "blocks": 7280,
+    "loadMs": 1026,
+    "batches": 59,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 10,
+      "p95": 13
+    },
+    "elapsedMs": {
+      "median": 16,
+      "p95": 18
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "war-and-peace",
+    "find": "off",
+    "firstUsableMs": 307,
+    "blocks": 11718,
+    "loadMs": 1986,
+    "batches": 101,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 13,
+      "p95": 17
+    },
+    "elapsedMs": {
+      "median": 18,
+      "p95": 25
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 307,
+    "blocks": 11718,
+    "loadMs": 2406,
+    "batches": 106,
+    "batchSize": {
+      "min": 11,
+      "median": 116,
+      "max": 128
+    },
+    "workMs": {
+      "median": 14,
+      "p95": 17
+    },
+    "elapsedMs": {
+      "median": 20,
+      "p95": 29
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  }
+]

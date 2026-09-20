@@ -1,0 +1,16 @@
+[package]
+name = "gprose-owned-shaper"
+version = "0.1.0"
+edition = "2024"
+publish = false
+[lib]
+crate-type = ["cdylib"]
+[dependencies]
+harfrust = "=0.3.2"
+read-fonts = "=0.35.0"
+unicode-linebreak = "=0.1.5"
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"

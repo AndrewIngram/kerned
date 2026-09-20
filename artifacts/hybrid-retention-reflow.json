@@ -1,0 +1,4344 @@
+{
+  "recordedAt": "2026-09-19T15:56:35.242Z",
+  "cpu": "Apple M4 Pro",
+  "trials": [
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "trial": 0,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1774.2000000476837,
+      "firstPaintMs": 16.299999952316284,
+      "completeMs": 1199.7000000476837,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 5.1000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8863
+        },
+        {
+          "workMs": 4.099999904632568,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8735
+        },
+        {
+          "workMs": 4.099999904632568,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8607
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8479
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8351
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8223
+        },
+        {
+          "workMs": 3.0999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8095
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7967
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7839
+        },
+        {
+          "workMs": 3.1999998092651367,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7711
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7583
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7455
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7327
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7199
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7071
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6943
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6815
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6687
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6559
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6431
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6303
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6175
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6047
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5919
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5791
+        },
+        {
+          "workMs": 3.6999998092651367,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5663
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5535
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5407
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5279
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5151
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5023
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4895
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4767
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4639
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4511
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4383
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4255
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4127
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3999
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3871
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3743
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3615
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3487
+        },
+        {
+          "workMs": 3.8000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3359
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3231
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3103
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2975
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2847
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2719
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2591
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2463
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2335
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2207
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2079
+        },
+        {
+          "workMs": 3.8000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1951
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1823
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1695
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1567
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1439
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1311
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1183
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1055
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 927
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 799
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 671
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 543
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 415
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 287
+        },
+        {
+          "workMs": 4.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 159
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 31
+        },
+        {
+          "workMs": 1.7999999523162842,
+          "layouts": 31,
+          "background": 31,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 16.799999999999727,
+      "framesOver32": 0
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "trial": 0,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1788.8999998569489,
+      "firstPaintMs": 161.70000004768372,
+      "completeMs": 161.70000004768372,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 157.20000004768372,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 133.30000000000018,
+      "framesOver32": 1
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "trial": 1,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1788.2999999523163,
+      "firstPaintMs": 154.29999995231628,
+      "completeMs": 154.29999995231628,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 150.90000009536743,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 133.29999999999995,
+      "framesOver32": 1
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "trial": 1,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1788.2999999523163,
+      "firstPaintMs": 18.200000047683716,
+      "completeMs": 1201.3000001907349,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 4.900000095367432,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8863
+        },
+        {
+          "workMs": 3.8000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8735
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8607
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8479
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8351
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8223
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8095
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7967
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7839
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7711
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7583
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7455
+        },
+        {
+          "workMs": 3.3000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7327
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7199
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7071
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6943
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6815
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6687
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6559
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6431
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6303
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6175
+        },
+        {
+          "workMs": 3.1000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6047
+        },
+        {
+          "workMs": 3.1000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5919
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5791
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5663
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5535
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5407
+        },
+        {
+          "workMs": 3.3000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5279
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5151
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5023
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4895
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4767
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4639
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4511
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4383
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4255
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4127
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3999
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3871
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3743
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3615
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3487
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3359
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3231
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3103
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2975
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2847
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2719
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2591
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2463
+        },
+        {
+          "workMs": 3.8000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2335
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2207
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2079
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1951
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1823
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1695
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1567
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1439
+        },
+        {
+          "workMs": 3.8000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1311
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1183
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1055
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 927
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 799
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 671
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 543
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 415
+        },
+        {
+          "workMs": 4.1000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 287
+        },
+        {
+          "workMs": 4.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 159
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 31
+        },
+        {
+          "workMs": 1.6000001430511475,
+          "layouts": 31,
+          "background": 31,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 16.799999999999955,
+      "framesOver32": 0
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "trial": 2,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1754.5999999046326,
+      "firstPaintMs": 19,
+      "completeMs": 1200.2000000476837,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 4.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8863
+        },
+        {
+          "workMs": 3.6999998092651367,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8735
+        },
+        {
+          "workMs": 3.3000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8607
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8479
+        },
+        {
+          "workMs": 3.0999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8351
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8223
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8095
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7967
+        },
+        {
+          "workMs": 3.3000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7839
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7711
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7583
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7455
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7327
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7199
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7071
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6943
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6815
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6687
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6559
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6431
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6303
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6175
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6047
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5919
+        },
+        {
+          "workMs": 2.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5791
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5663
+        },
+        {
+          "workMs": 3.200000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5535
+        },
+        {
+          "workMs": 3.3000001907348633,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5407
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5279
+        },
+        {
+          "workMs": 3.1999998092651367,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5151
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5023
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4895
+        },
+        {
+          "workMs": 3.3999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4767
+        },
+        {
+          "workMs": 3.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4639
+        },
+        {
+          "workMs": 3.1999998092651367,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4511
+        },
+        {
+          "workMs": 3.4000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4383
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4255
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4127
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3999
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3871
+        },
+        {
+          "workMs": 3.5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3743
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3615
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3487
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3359
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3231
+        },
+        {
+          "workMs": 3.6999998092651367,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3103
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2975
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2847
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2719
+        },
+        {
+          "workMs": 3.6000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2591
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2463
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2335
+        },
+        {
+          "workMs": 3.9000000953674316,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2207
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2079
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1951
+        },
+        {
+          "workMs": 3.700000047683716,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1823
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1695
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1567
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1439
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1311
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1183
+        },
+        {
+          "workMs": 4.1000001430511475,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1055
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 927
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 799
+        },
+        {
+          "workMs": 3.8999998569488525,
+          "layouts": 128,
+          "background": 128,
+          "pending": 671
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 543
+        },
+        {
+          "workMs": 3.799999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 415
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 287
+        },
+        {
+          "workMs": 4.299999952316284,
+          "layouts": 128,
+          "background": 128,
+          "pending": 159
+        },
+        {
+          "workMs": 3.5999999046325684,
+          "layouts": 128,
+          "background": 128,
+          "pending": 31
+        },
+        {
+          "workMs": 1.5999999046325684,
+          "layouts": 31,
+          "background": 31,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 16.799999999999955,
+      "framesOver32": 0
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "trial": 2,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1803.9000000953674,
+      "firstPaintMs": 158.09999990463257,
+      "completeMs": 158.09999990463257,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 154.70000004768372,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 133.39999999999986,
+      "framesOver32": 1
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "trial": 0,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 2422,
+      "firstPaintMs": 15,
+      "completeMs": 1301,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 4,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 7,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8863
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8735
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8607
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8479
+        },
+        {
+          "workMs": 9,
+          "layouts": 10,
+          "background": 10,
+          "pending": 8469
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8341
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8213
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8085
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7957
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7829
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7701
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7573
+        },
+        {
+          "workMs": 7,
+          "layouts": 24,
+          "background": 24,
+          "pending": 7549
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7421
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7293
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7165
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7037
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6909
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6781
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6653
+        },
+        {
+          "workMs": 9,
+          "layouts": 17,
+          "background": 17,
+          "pending": 6636
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6508
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6380
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6252
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6124
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5996
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5868
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5740
+        },
+        {
+          "workMs": 7,
+          "layouts": 16,
+          "background": 16,
+          "pending": 5724
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5596
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5468
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5340
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5212
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5084
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4956
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4828
+        },
+        {
+          "workMs": 8,
+          "layouts": 17,
+          "background": 17,
+          "pending": 4811
+        },
+        {
+          "workMs": 9,
+          "layouts": 120,
+          "background": 120,
+          "pending": 4691
+        },
+        {
+          "workMs": 8,
+          "layouts": 100,
+          "background": 100,
+          "pending": 4591
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4463
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4335
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4207
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4079
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3951
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3823
+        },
+        {
+          "workMs": 9,
+          "layouts": 107,
+          "background": 107,
+          "pending": 3716
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3588
+        },
+        {
+          "workMs": 6,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3460
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3332
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3204
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3076
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2948
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2820
+        },
+        {
+          "workMs": 7,
+          "layouts": 116,
+          "background": 116,
+          "pending": 2704
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2576
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2448
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2320
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2192
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2064
+        },
+        {
+          "workMs": 5,
+          "layouts": 124,
+          "background": 124,
+          "pending": 1940
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1812
+        },
+        {
+          "workMs": 8,
+          "layouts": 121,
+          "background": 121,
+          "pending": 1691
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1563
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1435
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1307
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1179
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1051
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 923
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 795
+        },
+        {
+          "workMs": 8,
+          "layouts": 117,
+          "background": 117,
+          "pending": 678
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 550
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 422
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 294
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 166
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 38
+        },
+        {
+          "workMs": 1,
+          "layouts": 38,
+          "background": 38,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 17.559999999999945,
+      "framesOver32": 0
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "trial": 0,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 2292,
+      "firstPaintMs": 202,
+      "completeMs": 202,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 195,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 200,
+      "framesOver32": 1
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "trial": 1,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 2243,
+      "firstPaintMs": 195,
+      "completeMs": 195,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 192,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 183.3399999999997,
+      "framesOver32": 1
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "trial": 1,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 2305,
+      "firstPaintMs": 13,
+      "completeMs": 1253,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 3,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 8,
+          "layouts": 39,
+          "background": 39,
+          "pending": 8952
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8824
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8696
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8568
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8440
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8312
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8184
+        },
+        {
+          "workMs": 8,
+          "layouts": 9,
+          "background": 9,
+          "pending": 8175
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8047
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7919
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7791
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7663
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7535
+        },
+        {
+          "workMs": 10,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7407
+        },
+        {
+          "workMs": 6,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7279
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7151
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7023
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6895
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6767
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6639
+        },
+        {
+          "workMs": 7,
+          "layouts": 121,
+          "background": 121,
+          "pending": 6518
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6390
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6262
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6134
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6006
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5878
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5750
+        },
+        {
+          "workMs": 8,
+          "layouts": 122,
+          "background": 122,
+          "pending": 5628
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5500
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5372
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5244
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5116
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4988
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4860
+        },
+        {
+          "workMs": 7,
+          "layouts": 121,
+          "background": 121,
+          "pending": 4739
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4611
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4483
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4355
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4227
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4099
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3971
+        },
+        {
+          "workMs": 7,
+          "layouts": 124,
+          "background": 124,
+          "pending": 3847
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3719
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3591
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3463
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3335
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3207
+        },
+        {
+          "workMs": 4,
+          "layouts": 112,
+          "background": 112,
+          "pending": 3095
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2967
+        },
+        {
+          "workMs": 6,
+          "layouts": 45,
+          "background": 45,
+          "pending": 2922
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2794
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2666
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2538
+        },
+        {
+          "workMs": 6,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2410
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2282
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2154
+        },
+        {
+          "workMs": 7,
+          "layouts": 94,
+          "background": 94,
+          "pending": 2060
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1932
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1804
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1676
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1548
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1420
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1292
+        },
+        {
+          "workMs": 6,
+          "layouts": 125,
+          "background": 125,
+          "pending": 1167
+        },
+        {
+          "workMs": 11,
+          "layouts": 124,
+          "background": 124,
+          "pending": 1043
+        },
+        {
+          "workMs": 7,
+          "layouts": 128,
+          "background": 128,
+          "pending": 915
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 787
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 659
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 531
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 403
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 275
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 147
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 19
+        },
+        {
+          "workMs": 2,
+          "layouts": 19,
+          "background": 19,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 17.420000000000073,
+      "framesOver32": 0
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "trial": 2,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 2276,
+      "firstPaintMs": 14,
+      "completeMs": 1316,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 4,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8863
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8735
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8607
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8479
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8351
+        },
+        {
+          "workMs": 9,
+          "layouts": 6,
+          "background": 6,
+          "pending": 8345
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8217
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8089
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7961
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7833
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7705
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7577
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7449
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7321
+        },
+        {
+          "workMs": 13,
+          "layouts": 127,
+          "background": 127,
+          "pending": 7194
+        },
+        {
+          "workMs": 6,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7066
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6938
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6810
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6682
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6554
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6426
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6298
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6170
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6042
+        },
+        {
+          "workMs": 6,
+          "layouts": 1,
+          "background": 1,
+          "pending": 6041
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5913
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5785
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5657
+        },
+        {
+          "workMs": 4,
+          "layouts": 124,
+          "background": 124,
+          "pending": 5533
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5405
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5277
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5149
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5021
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4893
+        },
+        {
+          "workMs": 5,
+          "layouts": 6,
+          "background": 6,
+          "pending": 4887
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4759
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4631
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4503
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4375
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4247
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4119
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3991
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3863
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3735
+        },
+        {
+          "workMs": 5,
+          "layouts": 5,
+          "background": 5,
+          "pending": 3730
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3602
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3474
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3346
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3218
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3090
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2962
+        },
+        {
+          "workMs": 5,
+          "layouts": 124,
+          "background": 124,
+          "pending": 2838
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2710
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2582
+        },
+        {
+          "workMs": 6,
+          "layouts": 12,
+          "background": 12,
+          "pending": 2570
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2442
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2314
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2186
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2058
+        },
+        {
+          "workMs": 4,
+          "layouts": 116,
+          "background": 116,
+          "pending": 1942
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1814
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1686
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1558
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1430
+        },
+        {
+          "workMs": 6,
+          "layouts": 19,
+          "background": 19,
+          "pending": 1411
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1283
+        },
+        {
+          "workMs": 7,
+          "layouts": 23,
+          "background": 23,
+          "pending": 1260
+        },
+        {
+          "workMs": 8,
+          "layouts": 100,
+          "background": 100,
+          "pending": 1160
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1032
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 904
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 776
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 648
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 520
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 392
+        },
+        {
+          "workMs": 5,
+          "layouts": 128,
+          "background": 128,
+          "pending": 264
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 136
+        },
+        {
+          "workMs": 6,
+          "layouts": 35,
+          "background": 35,
+          "pending": 101
+        },
+        {
+          "workMs": 4,
+          "layouts": 101,
+          "background": 101,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 17.420000000000073,
+      "framesOver32": 0
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "trial": 2,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 2287,
+      "firstPaintMs": 196,
+      "completeMs": 196,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 192,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 183.34000000000015,
+      "framesOver32": 1
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "trial": 0,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1774,
+      "firstPaintMs": 17,
+      "completeMs": 1200,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 2,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8863
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8735
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8607
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8479
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8351
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8223
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8095
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7967
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7839
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7711
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7583
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7455
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7327
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7199
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7071
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6943
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6815
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6687
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6559
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6431
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6303
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6175
+        },
+        {
+          "workMs": 2,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6047
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5919
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5791
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5663
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5535
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5407
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5279
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5151
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5023
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4895
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4767
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4639
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4511
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4383
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4255
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4127
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3999
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3871
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3743
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3615
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3487
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3359
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3231
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3103
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2975
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2847
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2719
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2591
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2463
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2335
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2207
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2079
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1951
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1823
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1695
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1567
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1439
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1311
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1183
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1055
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 927
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 799
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 671
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 543
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 415
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 287
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 159
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 31
+        },
+        {
+          "workMs": 1,
+          "layouts": 31,
+          "background": 31,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 18,
+      "framesOver32": 0
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "trial": 0,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1734,
+      "firstPaintMs": 127,
+      "completeMs": 127,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 124,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 127,
+      "framesOver32": 1
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "trial": 1,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1708,
+      "firstPaintMs": 130,
+      "completeMs": 130,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 126,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 130,
+      "framesOver32": 1
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "trial": 1,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1707,
+      "firstPaintMs": 17,
+      "completeMs": 1200,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 2,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8863
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8735
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8607
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8479
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8351
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8223
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8095
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7967
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7839
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7711
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7583
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7455
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7327
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7199
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7071
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6943
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6815
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6687
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6559
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6431
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6303
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6175
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6047
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5919
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5791
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5663
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5535
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5407
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5279
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5151
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5023
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4895
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4767
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4639
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4511
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4383
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4255
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4127
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3999
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3871
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3743
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3615
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3487
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3359
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3231
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3103
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2975
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2847
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2719
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2591
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2463
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2335
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2207
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2079
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1951
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1823
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1695
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1567
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1439
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1311
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1183
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1055
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 927
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 799
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 671
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 543
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 415
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 287
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 159
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 31
+        },
+        {
+          "workMs": 2,
+          "layouts": 31,
+          "background": 31,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 18,
+      "framesOver32": 0
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "trial": 2,
+      "mode": "viewport",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1710,
+      "firstPaintMs": 17,
+      "completeMs": 1200,
+      "initialLayouts": 8,
+      "batches": [
+        {
+          "workMs": 2,
+          "layouts": 8,
+          "background": 0,
+          "pending": 8991
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8863
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8735
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8607
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8479
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8351
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8223
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 8095
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7967
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7839
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7711
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7583
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7455
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7327
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7199
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 7071
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6943
+        },
+        {
+          "workMs": 2,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6815
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6687
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6559
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6431
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6303
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6175
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 6047
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5919
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5791
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5663
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5535
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5407
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5279
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5151
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 5023
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4895
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4767
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4639
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4511
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4383
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4255
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 4127
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3999
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3871
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3743
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3615
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3487
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3359
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3231
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 3103
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2975
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2847
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2719
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2591
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2463
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2335
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2207
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 2079
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1951
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1823
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1695
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1567
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1439
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1311
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1183
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 1055
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 927
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 799
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 671
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 543
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 415
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 287
+        },
+        {
+          "workMs": 4,
+          "layouts": 128,
+          "background": 128,
+          "pending": 159
+        },
+        {
+          "workMs": 3,
+          "layouts": 128,
+          "background": 128,
+          "pending": 31
+        },
+        {
+          "workMs": 2,
+          "layouts": 31,
+          "background": 31,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 18,
+      "framesOver32": 0
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "trial": 2,
+      "mode": "eager",
+      "generation": 2,
+      "width": 610,
+      "blocks": 10000,
+      "started": 1754,
+      "firstPaintMs": 129,
+      "completeMs": 129,
+      "initialLayouts": 8999,
+      "batches": [
+        {
+          "workMs": 125,
+          "layouts": 8999,
+          "background": 0,
+          "pending": 0
+        }
+      ],
+      "frameMaxMs": 129,
+      "framesOver32": 1
+    }
+  ]
+}

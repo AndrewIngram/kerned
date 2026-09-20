@@ -1,0 +1,30 @@
+{
+  "title": "Warbreaker",
+  "author": "Brandon Sanderson",
+  "version": "6.1",
+  "source": "WarbreakerFull6.1.prc",
+  "sourceSha256": "bca262769db010fc07549da15b9bcff6d44fcf1fe2640bedf8726ea095dddbe0",
+  "sourceEncoding": "cp1252",
+  "htmlSha256": "a6ffd8bf1eba4bdcfd42ac8351c054845615df6a948806347a619f1a2afb8bb4",
+  "blocks": 8619,
+  "headings": 80,
+  "words": 236364,
+  "elements": {
+    "a": 3,
+    "body": 1,
+    "br": 131,
+    "em": 12,
+    "h1": 69,
+    "h2": 11,
+    "p": 8539,
+    "strong": 25,
+    "sup": 1,
+    "table": 1,
+    "td": 33,
+    "tr": 11,
+    "u": 2216
+  },
+  "textVerified": true,
+  "contents": "Complete supplied file, including introduction, rights, revisions and sample chapters of other books.",
+  "normalization": "Whitespace, indentation and empty layout paragraphs removed; pagebreak markers removed; b/i converted to strong/em. Text, underline, links and table cells preserved."
+}

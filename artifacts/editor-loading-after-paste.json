@@ -1,0 +1,86 @@
+[
+  {
+    "browser": "chromium",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 283,
+    "blocks": 11718,
+    "loadMs": 3053.4000000953674,
+    "batches": 108,
+    "batchSize": {
+      "min": 32,
+      "median": 111,
+      "max": 128
+    },
+    "workMs": {
+      "median": 17.300000190734863,
+      "p95": 22.200000047683716
+    },
+    "elapsedMs": {
+      "median": 25.299999952316284,
+      "p95": 36.200000047683716
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 389,
+    "blocks": 11718,
+    "loadMs": 5249,
+    "batches": 138,
+    "batchSize": {
+      "min": 26,
+      "median": 85,
+      "max": 128
+    },
+    "workMs": {
+      "median": 21,
+      "p95": 34
+    },
+    "elapsedMs": {
+      "median": 36,
+      "p95": 50
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 333,
+    "blocks": 11718,
+    "loadMs": 2485,
+    "batches": 103,
+    "batchSize": {
+      "min": 8,
+      "median": 124,
+      "max": 128
+    },
+    "workMs": {
+      "median": 15,
+      "p95": 19
+    },
+    "elapsedMs": {
+      "median": 22,
+      "p95": 30
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  }
+]

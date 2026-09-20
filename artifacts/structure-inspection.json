@@ -1,0 +1,1406 @@
+[
+  {
+    "browser": "chromium",
+    "version": "153.0.8010.12",
+    "errors": [],
+    "structured": [
+      {
+        "name": "CanvasKit",
+        "lines": [
+          {
+            "start": 0,
+            "end": 34,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 362.29998779296875
+          },
+          {
+            "start": 0,
+            "end": 64,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 617.5800170898438
+          },
+          {
+            "start": 64,
+            "end": 107,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 370.70001220703125
+          },
+          {
+            "start": 0,
+            "end": 21,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 193.4600067138672
+          },
+          {
+            "start": 0,
+            "end": 33,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 303.3399963378906
+          },
+          {
+            "start": 0,
+            "end": 47,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 453.239990234375
+          },
+          {
+            "start": 0,
+            "end": 24,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 232.5399932861328
+          },
+          {
+            "start": 0,
+            "end": 44,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 440.4800109863281
+          },
+          {
+            "start": 0,
+            "end": 57,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 536.3400268554688
+          },
+          {
+            "start": 57,
+            "end": 74,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 170.5
+          },
+          {
+            "start": 0,
+            "end": 61,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 577.47998046875
+          },
+          {
+            "start": 61,
+            "end": 72,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 116.72000122070312
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 14.700000047683716,
+        "adapterMs": 15.90000033378601,
+        "paragraphs": [
+          {
+            "id": 112,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 0,
+            "text": "A document with room for structure",
+            "top": 32,
+            "height": 32
+          },
+          {
+            "id": 113,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 35,
+            "text": "Lists, quotes, and media share the same document in both panes. Try Enter in a list, then Tab or Shift+Tab.",
+            "top": 84,
+            "height": 64
+          },
+          {
+            "id": 115,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 143,
+            "text": "Start with a thought.",
+            "top": 168,
+            "height": 32
+          },
+          {
+            "id": 117,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 165,
+            "text": "Give the details their own space.",
+            "top": 220,
+            "height": 32
+          },
+          {
+            "id": 119,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 199,
+            "text": "Nested items wrap within their own indentation.",
+            "top": 272,
+            "height": 32
+          },
+          {
+            "id": 122,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 247,
+            "text": "Keep the words editable.",
+            "top": 324,
+            "height": 32
+          },
+          {
+            "id": 125,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 272,
+            "text": "A quote can contain more than one paragraph.",
+            "top": 376,
+            "height": 32
+          },
+          {
+            "id": 126,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 317,
+            "text": "Its structure belongs to the document, while each engine shapes the words.",
+            "top": 428,
+            "height": 64
+          },
+          {
+            "id": 127,
+            "kind": "embed",
+            "left": 32,
+            "start": 392,
+            "text": "￼",
+            "top": 512,
+            "height": 86
+          },
+          {
+            "id": 128,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 394,
+            "text": "Insert an image from your computer, or add another link card with Embed.",
+            "top": 618,
+            "height": 64
+          }
+        ],
+        "width": 683
+      },
+      {
+        "name": "Parley",
+        "lines": [
+          {
+            "start": 0,
+            "end": 34,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 362.29998779296875
+          },
+          {
+            "start": 0,
+            "end": 64,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 622.7799072265625
+          },
+          {
+            "start": 64,
+            "end": 107,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 370.70001220703125
+          },
+          {
+            "start": 0,
+            "end": 21,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 193.4600067138672
+          },
+          {
+            "start": 0,
+            "end": 33,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 303.3399963378906
+          },
+          {
+            "start": 0,
+            "end": 47,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 453.239990234375
+          },
+          {
+            "start": 0,
+            "end": 24,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 232.54000854492188
+          },
+          {
+            "start": 0,
+            "end": 44,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 440.4798889160156
+          },
+          {
+            "start": 0,
+            "end": 57,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 541.5399780273438
+          },
+          {
+            "start": 57,
+            "end": 74,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 170.5
+          },
+          {
+            "start": 0,
+            "end": 61,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 582.679931640625
+          },
+          {
+            "start": 61,
+            "end": 72,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 116.72000122070312
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 6.200000286102295,
+        "adapterMs": 9.800000190734863,
+        "paragraphs": [
+          {
+            "id": 112,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 0,
+            "text": "A document with room for structure",
+            "top": 32,
+            "height": 32
+          },
+          {
+            "id": 113,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 35,
+            "text": "Lists, quotes, and media share the same document in both panes. Try Enter in a list, then Tab or Shift+Tab.",
+            "top": 84,
+            "height": 64
+          },
+          {
+            "id": 115,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 143,
+            "text": "Start with a thought.",
+            "top": 168,
+            "height": 32
+          },
+          {
+            "id": 117,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 165,
+            "text": "Give the details their own space.",
+            "top": 220,
+            "height": 32
+          },
+          {
+            "id": 119,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 199,
+            "text": "Nested items wrap within their own indentation.",
+            "top": 272,
+            "height": 32
+          },
+          {
+            "id": 122,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 247,
+            "text": "Keep the words editable.",
+            "top": 324,
+            "height": 32
+          },
+          {
+            "id": 125,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 272,
+            "text": "A quote can contain more than one paragraph.",
+            "top": 376,
+            "height": 32
+          },
+          {
+            "id": 126,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 317,
+            "text": "Its structure belongs to the document, while each engine shapes the words.",
+            "top": 428,
+            "height": 64
+          },
+          {
+            "id": 127,
+            "kind": "embed",
+            "left": 32,
+            "start": 392,
+            "text": "￼",
+            "top": 512,
+            "height": 86.4000015258789
+          },
+          {
+            "id": 128,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 394,
+            "text": "Insert an image from your computer, or add another link card with Embed.",
+            "top": 618.4000015258789,
+            "height": 64
+          }
+        ],
+        "width": 682
+      }
+    ],
+    "image": [
+      {
+        "name": "CanvasKit",
+        "lines": [],
+        "missing": 0,
+        "layoutMs": 0.2999999523162842,
+        "adapterMs": 0.39999985694885254,
+        "paragraphs": [
+          {
+            "id": 129,
+            "kind": "image",
+            "left": 32,
+            "start": 0,
+            "text": "￼",
+            "top": 32,
+            "height": 306.4
+          },
+          {
+            "id": 130,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 2,
+            "text": "",
+            "top": 358.4,
+            "height": 32
+          }
+        ],
+        "width": 683
+      },
+      {
+        "name": "Parley",
+        "lines": [
+          {
+            "start": 0,
+            "end": 0,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 5.199999809265137
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 0.10000014305114746,
+        "adapterMs": 0.20000004768371582,
+        "paragraphs": [
+          {
+            "id": 129,
+            "kind": "image",
+            "left": 32,
+            "start": 0,
+            "text": "￼",
+            "top": 32,
+            "height": 306.40000076293944
+          },
+          {
+            "id": 130,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 2,
+            "text": "",
+            "top": 358.40000076293944,
+            "height": 32
+          }
+        ],
+        "width": 682
+      }
+    ]
+  },
+  {
+    "browser": "firefox",
+    "version": "155.0",
+    "errors": [],
+    "structured": [
+      {
+        "name": "CanvasKit",
+        "lines": [
+          {
+            "start": 0,
+            "end": 34,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 362.29998779296875
+          },
+          {
+            "start": 0,
+            "end": 64,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 617.5800170898438
+          },
+          {
+            "start": 64,
+            "end": 107,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 370.70001220703125
+          },
+          {
+            "start": 0,
+            "end": 21,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 193.4600067138672
+          },
+          {
+            "start": 0,
+            "end": 33,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 303.3399963378906
+          },
+          {
+            "start": 0,
+            "end": 47,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 453.239990234375
+          },
+          {
+            "start": 0,
+            "end": 24,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 232.5399932861328
+          },
+          {
+            "start": 0,
+            "end": 44,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 440.4800109863281
+          },
+          {
+            "start": 0,
+            "end": 57,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 536.3400268554688
+          },
+          {
+            "start": 57,
+            "end": 74,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 170.5
+          },
+          {
+            "start": 0,
+            "end": 61,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 577.47998046875
+          },
+          {
+            "start": 61,
+            "end": 72,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 116.72000122070312
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 4,
+        "adapterMs": 4,
+        "paragraphs": [
+          {
+            "id": 112,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 0,
+            "text": "A document with room for structure",
+            "top": 32,
+            "height": 32
+          },
+          {
+            "id": 113,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 35,
+            "text": "Lists, quotes, and media share the same document in both panes. Try Enter in a list, then Tab or Shift+Tab.",
+            "top": 84,
+            "height": 64
+          },
+          {
+            "id": 115,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 143,
+            "text": "Start with a thought.",
+            "top": 168,
+            "height": 32
+          },
+          {
+            "id": 117,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 165,
+            "text": "Give the details their own space.",
+            "top": 220,
+            "height": 32
+          },
+          {
+            "id": 119,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 199,
+            "text": "Nested items wrap within their own indentation.",
+            "top": 272,
+            "height": 32
+          },
+          {
+            "id": 122,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 247,
+            "text": "Keep the words editable.",
+            "top": 324,
+            "height": 32
+          },
+          {
+            "id": 125,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 272,
+            "text": "A quote can contain more than one paragraph.",
+            "top": 376,
+            "height": 32
+          },
+          {
+            "id": 126,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 317,
+            "text": "Its structure belongs to the document, while each engine shapes the words.",
+            "top": 428,
+            "height": 64
+          },
+          {
+            "id": 127,
+            "kind": "embed",
+            "left": 32,
+            "start": 392,
+            "text": "￼",
+            "top": 512,
+            "height": 86
+          },
+          {
+            "id": 128,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 394,
+            "text": "Insert an image from your computer, or add another link card with Embed.",
+            "top": 618,
+            "height": 64
+          }
+        ],
+        "width": 683
+      },
+      {
+        "name": "Parley",
+        "lines": [
+          {
+            "start": 0,
+            "end": 34,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 362.29998779296875
+          },
+          {
+            "start": 0,
+            "end": 64,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 622.7799072265625
+          },
+          {
+            "start": 64,
+            "end": 107,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 370.70001220703125
+          },
+          {
+            "start": 0,
+            "end": 21,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 193.4600067138672
+          },
+          {
+            "start": 0,
+            "end": 33,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 303.3399963378906
+          },
+          {
+            "start": 0,
+            "end": 47,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 453.239990234375
+          },
+          {
+            "start": 0,
+            "end": 24,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 232.54000854492188
+          },
+          {
+            "start": 0,
+            "end": 44,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 440.4798889160156
+          },
+          {
+            "start": 0,
+            "end": 57,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 541.5399780273438
+          },
+          {
+            "start": 57,
+            "end": 74,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 170.5
+          },
+          {
+            "start": 0,
+            "end": 61,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 582.679931640625
+          },
+          {
+            "start": 61,
+            "end": 72,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 116.72000122070312
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 0,
+        "adapterMs": 1,
+        "paragraphs": [
+          {
+            "id": 112,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 0,
+            "text": "A document with room for structure",
+            "top": 32,
+            "height": 32
+          },
+          {
+            "id": 113,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 35,
+            "text": "Lists, quotes, and media share the same document in both panes. Try Enter in a list, then Tab or Shift+Tab.",
+            "top": 84,
+            "height": 64
+          },
+          {
+            "id": 115,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 143,
+            "text": "Start with a thought.",
+            "top": 168,
+            "height": 32
+          },
+          {
+            "id": 117,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 165,
+            "text": "Give the details their own space.",
+            "top": 220,
+            "height": 32
+          },
+          {
+            "id": 119,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 199,
+            "text": "Nested items wrap within their own indentation.",
+            "top": 272,
+            "height": 32
+          },
+          {
+            "id": 122,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 247,
+            "text": "Keep the words editable.",
+            "top": 324,
+            "height": 32
+          },
+          {
+            "id": 125,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 272,
+            "text": "A quote can contain more than one paragraph.",
+            "top": 376,
+            "height": 32
+          },
+          {
+            "id": 126,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 317,
+            "text": "Its structure belongs to the document, while each engine shapes the words.",
+            "top": 428,
+            "height": 64
+          },
+          {
+            "id": 127,
+            "kind": "embed",
+            "left": 32,
+            "start": 392,
+            "text": "￼",
+            "top": 512,
+            "height": 86.4000015258789
+          },
+          {
+            "id": 128,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 394,
+            "text": "Insert an image from your computer, or add another link card with Embed.",
+            "top": 618.4000015258789,
+            "height": 64
+          }
+        ],
+        "width": 682
+      }
+    ],
+    "image": [
+      {
+        "name": "CanvasKit",
+        "lines": [],
+        "missing": 0,
+        "layoutMs": 0,
+        "adapterMs": 0,
+        "paragraphs": [
+          {
+            "id": 129,
+            "kind": "image",
+            "left": 32,
+            "start": 0,
+            "text": "￼",
+            "top": 32,
+            "height": 306.4
+          },
+          {
+            "id": 130,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 2,
+            "text": "",
+            "top": 358.4,
+            "height": 32
+          }
+        ],
+        "width": 683
+      },
+      {
+        "name": "Parley",
+        "lines": [
+          {
+            "start": 0,
+            "end": 0,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 5.199999809265137
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 1,
+        "adapterMs": 1,
+        "paragraphs": [
+          {
+            "id": 129,
+            "kind": "image",
+            "left": 32,
+            "start": 0,
+            "text": "￼",
+            "top": 32,
+            "height": 306.40000076293944
+          },
+          {
+            "id": 130,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 2,
+            "text": "",
+            "top": 358.40000076293944,
+            "height": 32
+          }
+        ],
+        "width": 682
+      }
+    ]
+  },
+  {
+    "browser": "webkit",
+    "version": "26.6",
+    "errors": [],
+    "structured": [
+      {
+        "name": "CanvasKit",
+        "lines": [
+          {
+            "start": 0,
+            "end": 34,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 362.29998779296875
+          },
+          {
+            "start": 0,
+            "end": 64,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 617.5800170898438
+          },
+          {
+            "start": 64,
+            "end": 107,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 370.70001220703125
+          },
+          {
+            "start": 0,
+            "end": 21,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 193.4600067138672
+          },
+          {
+            "start": 0,
+            "end": 33,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 303.3399963378906
+          },
+          {
+            "start": 0,
+            "end": 47,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 453.239990234375
+          },
+          {
+            "start": 0,
+            "end": 24,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 232.5399932861328
+          },
+          {
+            "start": 0,
+            "end": 44,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 440.4800109863281
+          },
+          {
+            "start": 0,
+            "end": 57,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 536.3400268554688
+          },
+          {
+            "start": 57,
+            "end": 74,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 170.5
+          },
+          {
+            "start": 0,
+            "end": 61,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 577.47998046875
+          },
+          {
+            "start": 61,
+            "end": 72,
+            "top": 32.00000190734863,
+            "bottom": 64.00000190734863,
+            "baseline": 55.76000213623047,
+            "width": 116.72000122070312
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 12,
+        "adapterMs": 13,
+        "paragraphs": [
+          {
+            "id": 112,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 0,
+            "text": "A document with room for structure",
+            "top": 32,
+            "height": 32
+          },
+          {
+            "id": 113,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 35,
+            "text": "Lists, quotes, and media share the same document in both panes. Try Enter in a list, then Tab or Shift+Tab.",
+            "top": 84,
+            "height": 64
+          },
+          {
+            "id": 115,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 143,
+            "text": "Start with a thought.",
+            "top": 168,
+            "height": 32
+          },
+          {
+            "id": 117,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 165,
+            "text": "Give the details their own space.",
+            "top": 220,
+            "height": 32
+          },
+          {
+            "id": 119,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 199,
+            "text": "Nested items wrap within their own indentation.",
+            "top": 272,
+            "height": 32
+          },
+          {
+            "id": 122,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 247,
+            "text": "Keep the words editable.",
+            "top": 324,
+            "height": 32
+          },
+          {
+            "id": 125,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 272,
+            "text": "A quote can contain more than one paragraph.",
+            "top": 376,
+            "height": 32
+          },
+          {
+            "id": 126,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 317,
+            "text": "Its structure belongs to the document, while each engine shapes the words.",
+            "top": 428,
+            "height": 64
+          },
+          {
+            "id": 127,
+            "kind": "embed",
+            "left": 32,
+            "start": 392,
+            "text": "￼",
+            "top": 512,
+            "height": 86
+          },
+          {
+            "id": 128,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 394,
+            "text": "Insert an image from your computer, or add another link card with Embed.",
+            "top": 618,
+            "height": 64
+          }
+        ],
+        "width": 683
+      },
+      {
+        "name": "Parley",
+        "lines": [
+          {
+            "start": 0,
+            "end": 34,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 362.29998779296875
+          },
+          {
+            "start": 0,
+            "end": 64,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 622.7799072265625
+          },
+          {
+            "start": 64,
+            "end": 107,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 370.70001220703125
+          },
+          {
+            "start": 0,
+            "end": 21,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 193.4600067138672
+          },
+          {
+            "start": 0,
+            "end": 33,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 303.3399963378906
+          },
+          {
+            "start": 0,
+            "end": 47,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 453.239990234375
+          },
+          {
+            "start": 0,
+            "end": 24,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 232.54000854492188
+          },
+          {
+            "start": 0,
+            "end": 44,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 440.4798889160156
+          },
+          {
+            "start": 0,
+            "end": 57,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 541.5399780273438
+          },
+          {
+            "start": 57,
+            "end": 74,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 170.5
+          },
+          {
+            "start": 0,
+            "end": 61,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 582.679931640625
+          },
+          {
+            "start": 61,
+            "end": 72,
+            "top": 32.000003814697266,
+            "bottom": 64,
+            "baseline": 55.76000213623047,
+            "width": 116.72000122070312
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 2,
+        "adapterMs": 5,
+        "paragraphs": [
+          {
+            "id": 112,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 0,
+            "text": "A document with room for structure",
+            "top": 32,
+            "height": 32
+          },
+          {
+            "id": 113,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 35,
+            "text": "Lists, quotes, and media share the same document in both panes. Try Enter in a list, then Tab or Shift+Tab.",
+            "top": 84,
+            "height": 64
+          },
+          {
+            "id": 115,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 143,
+            "text": "Start with a thought.",
+            "top": 168,
+            "height": 32
+          },
+          {
+            "id": 117,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 165,
+            "text": "Give the details their own space.",
+            "top": 220,
+            "height": 32
+          },
+          {
+            "id": 119,
+            "kind": "paragraph",
+            "left": 88,
+            "start": 199,
+            "text": "Nested items wrap within their own indentation.",
+            "top": 272,
+            "height": 32
+          },
+          {
+            "id": 122,
+            "kind": "paragraph",
+            "left": 60,
+            "start": 247,
+            "text": "Keep the words editable.",
+            "top": 324,
+            "height": 32
+          },
+          {
+            "id": 125,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 272,
+            "text": "A quote can contain more than one paragraph.",
+            "top": 376,
+            "height": 32
+          },
+          {
+            "id": 126,
+            "kind": "paragraph",
+            "left": 54,
+            "start": 317,
+            "text": "Its structure belongs to the document, while each engine shapes the words.",
+            "top": 428,
+            "height": 64
+          },
+          {
+            "id": 127,
+            "kind": "embed",
+            "left": 32,
+            "start": 392,
+            "text": "￼",
+            "top": 512,
+            "height": 86.4000015258789
+          },
+          {
+            "id": 128,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 394,
+            "text": "Insert an image from your computer, or add another link card with Embed.",
+            "top": 618.4000015258789,
+            "height": 64
+          }
+        ],
+        "width": 682
+      }
+    ],
+    "image": [
+      {
+        "name": "CanvasKit",
+        "lines": [],
+        "missing": 0,
+        "layoutMs": 0,
+        "adapterMs": 0,
+        "paragraphs": [
+          {
+            "id": 129,
+            "kind": "image",
+            "left": 32,
+            "start": 0,
+            "text": "￼",
+            "top": 32,
+            "height": 306.4
+          },
+          {
+            "id": 130,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 2,
+            "text": "",
+            "top": 358.4,
+            "height": 32
+          }
+        ],
+        "width": 683
+      },
+      {
+        "name": "Parley",
+        "lines": [
+          {
+            "start": 0,
+            "end": 0,
+            "top": 0,
+            "bottom": 32,
+            "baseline": 23.760000228881836,
+            "width": 5.199999809265137
+          }
+        ],
+        "missing": 0,
+        "layoutMs": 0,
+        "adapterMs": 0,
+        "paragraphs": [
+          {
+            "id": 129,
+            "kind": "image",
+            "left": 32,
+            "start": 0,
+            "text": "￼",
+            "top": 32,
+            "height": 306.40000076293944
+          },
+          {
+            "id": 130,
+            "kind": "paragraph",
+            "left": 32,
+            "start": 2,
+            "text": "",
+            "top": 358.40000076293944,
+            "height": 32
+          }
+        ],
+        "width": 682
+      }
+    ]
+  }
+]

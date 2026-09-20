@@ -1,0 +1,29 @@
+[
+  {
+    "browser": "chromium",
+    "blocks": 7280,
+    "handlerMs": 29.200000047683716,
+    "paintMs": 54.700000047683716,
+    "undoHandlerMs": 6,
+    "undoPaintMs": 47.700000047683716,
+    "restored": true
+  },
+  {
+    "browser": "firefox",
+    "blocks": 7280,
+    "handlerMs": 28,
+    "paintMs": 37,
+    "undoHandlerMs": 9,
+    "undoPaintMs": 58,
+    "restored": true
+  },
+  {
+    "browser": "webkit",
+    "blocks": 7280,
+    "handlerMs": 30,
+    "paintMs": 35,
+    "undoHandlerMs": 6,
+    "undoPaintMs": 40,
+    "restored": true
+  }
+]

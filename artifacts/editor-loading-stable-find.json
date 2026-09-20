@@ -1,0 +1,30 @@
+[
+  {
+    "browser": "chromium",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 252,
+    "blocks": 11718,
+    "loadMs": 21494.5,
+    "batches": 1108,
+    "batchSize": {
+      "min": 6,
+      "median": 8,
+      "max": 51
+    },
+    "workMs": {
+      "median": 8.799999952316284,
+      "p95": 11.700000047683716
+    },
+    "elapsedMs": {
+      "median": 17.799999952316284,
+      "p95": 23.299999952316284
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  }
+]

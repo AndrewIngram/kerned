@@ -1,0 +1,200 @@
+{
+  "chromium": [
+    {
+      "storage": "carets",
+      "styled": false,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "carets",
+      "styled": true,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "shaping",
+      "styled": false,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "shaping",
+      "styled": true,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    }
+  ],
+  "firefox": [
+    {
+      "storage": "carets",
+      "styled": false,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "carets",
+      "styled": true,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "shaping",
+      "styled": false,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "shaping",
+      "styled": true,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    }
+  ],
+  "webkit": [
+    {
+      "storage": "carets",
+      "styled": false,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "carets",
+      "styled": true,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "shaping",
+      "styled": false,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    },
+    {
+      "storage": "shaping",
+      "styled": true,
+      "chunks": 79,
+      "characters": 4709,
+      "checks": {
+        "fragments:boundedComposition": true,
+        "fragments-vs-cold:lines": true,
+        "fragments-vs-cold:height": true,
+        "fragments-vs-cold:caret": true,
+        "fragments-vs-cold:hit": true,
+        "fragments-vs-cold:move": true,
+        "fragments-vs-cold:pixels": true,
+        "fragments:oldSnapshot": true
+      }
+    }
+  ]
+}

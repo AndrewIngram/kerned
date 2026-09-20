@@ -1,0 +1,25 @@
+{
+  "title": "War and Peace",
+  "author": "Leo Tolstoy",
+  "translators": [
+    "Louise Maude",
+    "Aylmer Maude"
+  ],
+  "sourceUrl": "https://www.gutenberg.org/ebooks/2600",
+  "downloadUrl": "https://www.gutenberg.org/ebooks/2600.html.images",
+  "fullHtml": "war-and-peace-full.html",
+  "sourceSha256": "f93c2ea811d8b9e1ed9951e314561bdb660d51a45943f5a461a2af73348187fc",
+  "htmlSha256": "c6e9a936ea6cc8541faa3a92a5ef5ccc3f73c21b449203e63233172febc96bfc",
+  "blocks": 11718,
+  "words": 562489,
+  "books": 17,
+  "chapters": 365,
+  "footnotes": 136,
+  "poems": 12,
+  "preformatted": 2,
+  "italicPassages": 976,
+  "textVerified": true,
+  "headings": 382,
+  "contents": "Complete novel, Book One through the Second Epilogue, including footnotes. The original download, credits, navigation and licence are preserved in the full HTML.",
+  "normalization": "Books and epilogues use h2, chapters use h3; i becomes em; preformatted passages become italic paragraphs with line breaks; empty layout paragraphs are removed; indentation and repeated whitespace, including fixed-column spacing, are normalized."
+}

@@ -1,0 +1,2931 @@
+{
+  "recordedAt": "2026-09-19T13:27:56.130Z",
+  "cpu": "Apple M4 Pro",
+  "version": "153.0.8010.12",
+  "runs": [
+    {
+      "name": "resize-objects",
+      "scenario": "resize",
+      "variant": 0,
+      "iterations": 300,
+      "cpuRun": {
+        "elapsedMs": 902.6999998092651,
+        "checksum": 7199999.999999969,
+        "before": [
+          {
+            "shapeCalls": 1000,
+            "cacheHits": 10000,
+            "paragraphs": 11000,
+            "lines": 27000,
+            "compositions": 11000,
+            "compositionHits": 0,
+            "renderBuffers": 11000
+          },
+          {
+            "shapeCalls": 1000,
+            "cacheHits": 0,
+            "paragraphs": 1000,
+            "lines": 2000,
+            "compositions": 1000,
+            "compositionHits": 0,
+            "renderBuffers": 1000
+          }
+        ],
+        "after": [
+          {
+            "shapeCalls": 1000,
+            "cacheHits": 160000,
+            "paragraphs": 161000,
+            "lines": 402000,
+            "compositions": 161000,
+            "compositionHits": 0,
+            "renderBuffers": 161000
+          },
+          {
+            "shapeCalls": 1000,
+            "cacheHits": 0,
+            "paragraphs": 1000,
+            "lines": 2000,
+            "compositions": 1000,
+            "compositionHits": 0,
+            "renderBuffers": 1000
+          }
+        ]
+      },
+      "heapRun": {
+        "elapsedMs": 1004.3999998569489,
+        "checksum": 7199999.999999969,
+        "before": [
+          {
+            "shapeCalls": 1500,
+            "cacheHits": 160000,
+            "paragraphs": 161500,
+            "lines": 403000,
+            "compositions": 161500,
+            "compositionHits": 0,
+            "renderBuffers": 161500
+          },
+          {
+            "shapeCalls": 1500,
+            "cacheHits": 0,
+            "paragraphs": 1500,
+            "lines": 3000,
+            "compositions": 1500,
+            "compositionHits": 0,
+            "renderBuffers": 1500
+          }
+        ],
+        "after": [
+          {
+            "shapeCalls": 1500,
+            "cacheHits": 310000,
+            "paragraphs": 311500,
+            "lines": 778000,
+            "compositions": 311500,
+            "compositionHits": 0,
+            "renderBuffers": 311500
+          },
+          {
+            "shapeCalls": 1500,
+            "cacheHits": 0,
+            "paragraphs": 1500,
+            "lines": 3000,
+            "compositions": 1500,
+            "compositionHits": 0,
+            "renderBuffers": 1500
+          }
+        ]
+      },
+      "functions": [
+        {
+          "functionName": "composeParagraph",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 3,
+          "columnNumber": 32,
+          "samples": 2618,
+          "positionTicks": [
+            {
+              "line": 128,
+              "ticks": 1
+            },
+            {
+              "line": 46,
+              "ticks": 1
+            },
+            {
+              "line": 23,
+              "ticks": 1
+            },
+            {
+              "line": 45,
+              "ticks": 2
+            },
+            {
+              "line": 22,
+              "ticks": 1
+            },
+            {
+              "line": 56,
+              "ticks": 1
+            },
+            {
+              "line": 23,
+              "ticks": 1
+            },
+            {
+              "line": 56,
+              "ticks": 1
+            },
+            {
+              "line": 41,
+              "ticks": 1
+            },
+            {
+              "line": 123,
+              "ticks": 1
+            },
+            {
+              "line": 56,
+              "ticks": 6
+            },
+            {
+              "line": 73,
+              "ticks": 1
+            },
+            {
+              "line": 64,
+              "ticks": 1
+            },
+            {
+              "line": 25,
+              "ticks": 1
+            },
+            {
+              "line": 17,
+              "ticks": 1
+            },
+            {
+              "line": 99,
+              "ticks": 2
+            },
+            {
+              "line": 15,
+              "ticks": 1
+            },
+            {
+              "line": 25,
+              "ticks": 2
+            },
+            {
+              "line": 96,
+              "ticks": 6
+            },
+            {
+              "line": 67,
+              "ticks": 6
+            },
+            {
+              "line": 97,
+              "ticks": 18
+            },
+            {
+              "line": 154,
+              "ticks": 1
+            },
+            {
+              "line": 68,
+              "ticks": 6
+            },
+            {
+              "line": 17,
+              "ticks": 26
+            },
+            {
+              "line": 54,
+              "ticks": 34
+            },
+            {
+              "line": 44,
+              "ticks": 15
+            },
+            {
+              "line": 26,
+              "ticks": 2
+            },
+            {
+              "line": 6,
+              "ticks": 1
+            },
+            {
+              "line": 43,
+              "ticks": 38
+            },
+            {
+              "line": 119,
+              "ticks": 1
+            },
+            {
+              "line": 24,
+              "ticks": 3
+            },
+            {
+              "line": 5,
+              "ticks": 3
+            },
+            {
+              "line": 71,
+              "ticks": 3
+            },
+            {
+              "line": 100,
+              "ticks": 16
+            },
+            {
+              "line": 18,
+              "ticks": 21
+            },
+            {
+              "line": 63,
+              "ticks": 15
+            },
+            {
+              "line": 98,
+              "ticks": 8
+            },
+            {
+              "line": 44,
+              "ticks": 15
+            },
+            {
+              "line": 56,
+              "ticks": 18
+            },
+            {
+              "line": 61,
+              "ticks": 22
+            },
+            {
+              "line": 66,
+              "ticks": 3
+            },
+            {
+              "line": 57,
+              "ticks": 25
+            },
+            {
+              "line": 73,
+              "ticks": 1
+            },
+            {
+              "line": 55,
+              "ticks": 22
+            },
+            {
+              "line": 46,
+              "ticks": 2
+            },
+            {
+              "line": 56,
+              "ticks": 2
+            },
+            {
+              "line": 20,
+              "ticks": 18
+            },
+            {
+              "line": 101,
+              "ticks": 19
+            },
+            {
+              "line": 56,
+              "ticks": 12
+            },
+            {
+              "line": 55,
+              "ticks": 52
+            },
+            {
+              "line": 12,
+              "ticks": 6
+            },
+            {
+              "line": 17,
+              "ticks": 22
+            },
+            {
+              "line": 56,
+              "ticks": 63
+            },
+            {
+              "line": 4,
+              "ticks": 4
+            },
+            {
+              "line": 44,
+              "ticks": 21
+            },
+            {
+              "line": 15,
+              "ticks": 35
+            },
+            {
+              "line": 54,
+              "ticks": 22
+            },
+            {
+              "line": 69,
+              "ticks": 1
+            },
+            {
+              "line": 7,
+              "ticks": 1
+            },
+            {
+              "line": 99,
+              "ticks": 68
+            },
+            {
+              "line": 6,
+              "ticks": 183
+            },
+            {
+              "line": 60,
+              "ticks": 12
+            },
+            {
+              "line": 99,
+              "ticks": 671
+            },
+            {
+              "line": 11,
+              "ticks": 138
+            },
+            {
+              "line": 15,
+              "ticks": 23
+            },
+            {
+              "line": 43,
+              "ticks": 45
+            },
+            {
+              "line": 56,
+              "ticks": 6
+            },
+            {
+              "line": 16,
+              "ticks": 13
+            },
+            {
+              "line": 98,
+              "ticks": 137
+            },
+            {
+              "line": 55,
+              "ticks": 21
+            },
+            {
+              "line": 10,
+              "ticks": 212
+            },
+            {
+              "line": 97,
+              "ticks": 71
+            },
+            {
+              "line": 60,
+              "ticks": 124
+            },
+            {
+              "line": 54,
+              "ticks": 50
+            },
+            {
+              "line": 61,
+              "ticks": 65
+            },
+            {
+              "line": 17,
+              "ticks": 6
+            },
+            {
+              "line": 15,
+              "ticks": 1
+            },
+            {
+              "line": 8,
+              "ticks": 1
+            },
+            {
+              "line": 62,
+              "ticks": 8
+            },
+            {
+              "line": 78,
+              "ticks": 128
+            }
+          ]
+        },
+        {
+          "functionName": "(garbage collector)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 985
+        },
+        {
+          "functionName": "layout",
+          "scriptId": "12",
+          "url": "http://127.0.0.1:5173/src/owned-layout.ts",
+          "lineNumber": 93,
+          "columnNumber": 8,
+          "samples": 803,
+          "positionTicks": [
+            {
+              "line": 109,
+              "ticks": 1
+            },
+            {
+              "line": 109,
+              "ticks": 1
+            },
+            {
+              "line": 121,
+              "ticks": 1
+            },
+            {
+              "line": 117,
+              "ticks": 2
+            },
+            {
+              "line": 184,
+              "ticks": 1
+            },
+            {
+              "line": 103,
+              "ticks": 2
+            },
+            {
+              "line": 109,
+              "ticks": 3
+            },
+            {
+              "line": 178,
+              "ticks": 19
+            },
+            {
+              "line": 170,
+              "ticks": 1
+            },
+            {
+              "line": 172,
+              "ticks": 1
+            },
+            {
+              "line": 181,
+              "ticks": 1
+            },
+            {
+              "line": 187,
+              "ticks": 1
+            },
+            {
+              "line": 114,
+              "ticks": 98
+            },
+            {
+              "line": 98,
+              "ticks": 3
+            },
+            {
+              "line": 108,
+              "ticks": 3
+            },
+            {
+              "line": 115,
+              "ticks": 1
+            },
+            {
+              "line": 119,
+              "ticks": 106
+            },
+            {
+              "line": 109,
+              "ticks": 3
+            },
+            {
+              "line": 171,
+              "ticks": 1
+            },
+            {
+              "line": 178,
+              "ticks": 1
+            },
+            {
+              "line": 170,
+              "ticks": 2
+            },
+            {
+              "line": 183,
+              "ticks": 6
+            },
+            {
+              "line": 95,
+              "ticks": 1
+            },
+            {
+              "line": 193,
+              "ticks": 4
+            },
+            {
+              "line": 120,
+              "ticks": 4
+            },
+            {
+              "line": 119,
+              "ticks": 17
+            },
+            {
+              "line": 99,
+              "ticks": 3
+            },
+            {
+              "line": 108,
+              "ticks": 15
+            },
+            {
+              "line": 172,
+              "ticks": 20
+            },
+            {
+              "line": 185,
+              "ticks": 1
+            },
+            {
+              "line": 116,
+              "ticks": 1
+            },
+            {
+              "line": 174,
+              "ticks": 479
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 77,
+          "columnNumber": 27,
+          "samples": 544,
+          "positionTicks": [
+            {
+              "line": 81,
+              "ticks": 1
+            },
+            {
+              "line": 78,
+              "ticks": 11
+            },
+            {
+              "line": 80,
+              "ticks": 241
+            },
+            {
+              "line": 81,
+              "ticks": 1
+            },
+            {
+              "line": 78,
+              "ticks": 3
+            },
+            {
+              "line": 81,
+              "ticks": 287
+            }
+          ]
+        },
+        {
+          "functionName": "append",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 27,
+          "columnNumber": 17,
+          "samples": 333,
+          "positionTicks": [
+            {
+              "line": 32,
+              "ticks": 3
+            },
+            {
+              "line": 37,
+              "ticks": 4
+            },
+            {
+              "line": 34,
+              "ticks": 4
+            },
+            {
+              "line": 35,
+              "ticks": 20
+            },
+            {
+              "line": 37,
+              "ticks": 54
+            },
+            {
+              "line": 29,
+              "ticks": 21
+            },
+            {
+              "line": 33,
+              "ticks": 24
+            },
+            {
+              "line": 38,
+              "ticks": 9
+            },
+            {
+              "line": 38,
+              "ticks": 64
+            },
+            {
+              "line": 31,
+              "ticks": 130
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 59,
+          "columnNumber": 25,
+          "samples": 147,
+          "positionTicks": [
+            {
+              "line": 60,
+              "ticks": 16
+            },
+            {
+              "line": 60,
+              "ticks": 45
+            },
+            {
+              "line": 60,
+              "ticks": 43
+            },
+            {
+              "line": 60,
+              "ticks": 21
+            },
+            {
+              "line": 60,
+              "ticks": 1
+            },
+            {
+              "line": 60,
+              "ticks": 20
+            },
+            {
+              "line": 60,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 23,
+          "columnNumber": 63,
+          "samples": 107,
+          "positionTicks": [
+            {
+              "line": 27,
+              "ticks": 1
+            },
+            {
+              "line": 26,
+              "ticks": 3
+            },
+            {
+              "line": 26,
+              "ticks": 4
+            },
+            {
+              "line": 28,
+              "ticks": 1
+            },
+            {
+              "line": 26,
+              "ticks": 2
+            },
+            {
+              "line": 30,
+              "ticks": 5
+            },
+            {
+              "line": 27,
+              "ticks": 2
+            },
+            {
+              "line": 24,
+              "ticks": 77
+            },
+            {
+              "line": 28,
+              "ticks": 1
+            },
+            {
+              "line": 28,
+              "ticks": 5
+            },
+            {
+              "line": 29,
+              "ticks": 4
+            },
+            {
+              "line": 30,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "placeParagraphs",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 9,
+          "columnNumber": 31,
+          "samples": 51,
+          "positionTicks": [
+            {
+              "line": 12,
+              "ticks": 2
+            },
+            {
+              "line": 24,
+              "ticks": 49
+            }
+          ]
+        },
+        {
+          "functionName": "(program)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 46
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 23,
+          "columnNumber": 34,
+          "samples": 25,
+          "positionTicks": [
+            {
+              "line": 24,
+              "ticks": 18
+            },
+            {
+              "line": 31,
+              "ticks": 7
+            }
+          ]
+        },
+        {
+          "functionName": "run",
+          "scriptId": "7",
+          "url": "http://127.0.0.1:5173/src/owned-profile.ts",
+          "lineNumber": 20,
+          "columnNumber": 5,
+          "samples": 18,
+          "positionTicks": [
+            {
+              "line": 37,
+              "ticks": 1
+            },
+            {
+              "line": 29,
+              "ticks": 17
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 11,
+          "columnNumber": 35,
+          "samples": 18,
+          "positionTicks": [
+            {
+              "line": 19,
+              "ticks": 4
+            },
+            {
+              "line": 18,
+              "ticks": 1
+            },
+            {
+              "line": 16,
+              "ticks": 1
+            },
+            {
+              "line": 20,
+              "ticks": 1
+            },
+            {
+              "line": 13,
+              "ticks": 7
+            },
+            {
+              "line": 12,
+              "ticks": 3
+            },
+            {
+              "line": 15,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "append",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 27,
+          "columnNumber": 17,
+          "samples": 12,
+          "positionTicks": [
+            {
+              "line": 31,
+              "ticks": 4
+            },
+            {
+              "line": 38,
+              "ticks": 2
+            },
+            {
+              "line": 37,
+              "ticks": 6
+            }
+          ]
+        },
+        {
+          "functionName": "(idle)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 8
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 10,
+          "columnNumber": 45,
+          "samples": 7,
+          "positionTicks": [
+            {
+              "line": 11,
+              "ticks": 6
+            },
+            {
+              "line": 11,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 9,
+          "columnNumber": 42,
+          "samples": 6,
+          "positionTicks": [
+            {
+              "line": 10,
+              "ticks": 1
+            },
+            {
+              "line": 10,
+              "ticks": 1
+            },
+            {
+              "line": 10,
+              "ticks": 4
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-to-js",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 5
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 10,
+          "columnNumber": 45,
+          "samples": 3,
+          "positionTicks": [
+            {
+              "line": 11,
+              "ticks": 3
+            }
+          ]
+        },
+        {
+          "functionName": "js-to-wasm::i",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 5311234,
+          "samples": 2,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[5317]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 3102821,
+          "samples": 2,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "composeParagraph",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 3,
+          "columnNumber": 32,
+          "samples": 2,
+          "positionTicks": [
+            {
+              "line": 94,
+              "ticks": 1
+            },
+            {
+              "line": 4,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "69",
+          "url": "",
+          "lineNumber": 0,
+          "columnNumber": 0,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "beginLine",
+          "scriptId": "23",
+          "url": "http://127.0.0.1:5173/src/owned-carets.ts",
+          "lineNumber": 56,
+          "columnNumber": 11,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 58,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3679,
+          "columnNumber": 25,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 3695,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-to-js",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 1
+        },
+        {
+          "functionName": "w",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4705,
+          "columnNumber": 7,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 4710,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4722,
+          "columnNumber": 21,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 4724,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "nb",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3440,
+          "columnNumber": 14,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 3442,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4722,
+          "columnNumber": 21,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 4724,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "f",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4566,
+          "columnNumber": 15,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 4568,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "Mc",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3864,
+          "columnNumber": 29,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 3867,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "Wb",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3710,
+          "columnNumber": 11,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 3721,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[1595]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 590289,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[2064]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 837646,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[2055]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 835148,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[1270]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 425913,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "i",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4747,
+          "columnNumber": 7,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 4752,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "now",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 95,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "font",
+          "scriptId": "12",
+          "url": "http://127.0.0.1:5173/src/owned-layout.ts",
+          "lineNumber": 36,
+          "columnNumber": 14,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 38,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "serialize",
+          "scriptId": "33",
+          "url": "",
+          "lineNumber": 174,
+          "columnNumber": 18,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 184,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "serialize",
+          "scriptId": "33",
+          "url": "",
+          "lineNumber": 174,
+          "columnNumber": 18,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 177,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 77,
+          "columnNumber": 27,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 82,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 9,
+          "columnNumber": 42,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 10,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "composeParagraph",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 3,
+          "columnNumber": 32,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 94,
+              "ticks": 1
+            }
+          ]
+        }
+      ],
+      "allocations": [
+        {
+          "functionName": "composeParagraph",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 3,
+          "columnNumber": 32,
+          "sampledBytes": 2001014460
+        },
+        {
+          "functionName": "set",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 538706336
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 23,
+          "columnNumber": 34,
+          "sampledBytes": 55165768
+        },
+        {
+          "functionName": "layout",
+          "scriptId": "12",
+          "url": "http://127.0.0.1:5173/src/owned-layout.ts",
+          "lineNumber": 93,
+          "columnNumber": 8,
+          "sampledBytes": 49971720
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 77,
+          "columnNumber": 27,
+          "sampledBytes": 49089328
+        },
+        {
+          "functionName": "flatMap",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 13573204
+        },
+        {
+          "functionName": "Map",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 13527320
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 10,
+          "columnNumber": 45,
+          "sampledBytes": 10157680
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 11,
+          "columnNumber": 35,
+          "sampledBytes": 7166444
+        },
+        {
+          "functionName": "flatMap",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 5420232
+        },
+        {
+          "functionName": "set",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 4263812
+        },
+        {
+          "functionName": "split",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 3556636
+        },
+        {
+          "functionName": "from",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 3444840
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 23,
+          "columnNumber": 63,
+          "sampledBytes": 901584
+        },
+        {
+          "functionName": "map",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 626496
+        },
+        {
+          "functionName": "f",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4737,
+          "columnNumber": 7,
+          "sampledBytes": 573800
+        },
+        {
+          "functionName": "placeParagraphs",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 9,
+          "columnNumber": 31,
+          "sampledBytes": 229636
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 11,
+          "columnNumber": 35,
+          "sampledBytes": 213216
+        },
+        {
+          "functionName": "map",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 147532
+        },
+        {
+          "functionName": "Float32Array",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 82092
+        },
+        {
+          "functionName": "Set",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 49300
+        },
+        {
+          "functionName": "Uint16Array",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 49260
+        },
+        {
+          "functionName": "i",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4747,
+          "columnNumber": 7,
+          "sampledBytes": 49200
+        },
+        {
+          "functionName": "J",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4712,
+          "columnNumber": 7,
+          "sampledBytes": 49192
+        },
+        {
+          "functionName": "",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3758,
+          "columnNumber": 28,
+          "sampledBytes": 49176
+        },
+        {
+          "functionName": "(V8 API)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 32940
+        },
+        {
+          "functionName": "Map",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 32832
+        },
+        {
+          "functionName": "Float32Array",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 32812
+        },
+        {
+          "functionName": "E",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4738,
+          "columnNumber": 7,
+          "sampledBytes": 16408
+        },
+        {
+          "functionName": "",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3679,
+          "columnNumber": 25,
+          "sampledBytes": 16400
+        },
+        {
+          "functionName": "next",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 16400
+        },
+        {
+          "functionName": "run",
+          "scriptId": "7",
+          "url": "http://127.0.0.1:5173/src/owned-profile.ts",
+          "lineNumber": 20,
+          "columnNumber": 5,
+          "sampledBytes": 16392
+        },
+        {
+          "functionName": "Mc",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3864,
+          "columnNumber": 29,
+          "sampledBytes": 16392
+        }
+      ]
+    },
+    {
+      "name": "resize-carets",
+      "scenario": "resize",
+      "variant": 1,
+      "iterations": 300,
+      "cpuRun": {
+        "elapsedMs": 619.3999998569489,
+        "checksum": 7199999.999999969,
+        "before": [
+          {
+            "shapeCalls": 2500,
+            "cacheHits": 310000,
+            "paragraphs": 312500,
+            "lines": 780000,
+            "compositions": 312500,
+            "compositionHits": 0,
+            "renderBuffers": 312500
+          },
+          {
+            "shapeCalls": 2500,
+            "cacheHits": 10000,
+            "paragraphs": 12500,
+            "lines": 30000,
+            "compositions": 12500,
+            "compositionHits": 0,
+            "renderBuffers": 12500
+          }
+        ],
+        "after": [
+          {
+            "shapeCalls": 2500,
+            "cacheHits": 310000,
+            "paragraphs": 312500,
+            "lines": 780000,
+            "compositions": 312500,
+            "compositionHits": 0,
+            "renderBuffers": 312500
+          },
+          {
+            "shapeCalls": 2500,
+            "cacheHits": 160000,
+            "paragraphs": 162500,
+            "lines": 405000,
+            "compositions": 162500,
+            "compositionHits": 0,
+            "renderBuffers": 162500
+          }
+        ]
+      },
+      "heapRun": {
+        "elapsedMs": 712.0999999046326,
+        "checksum": 7199999.999999969,
+        "before": [
+          {
+            "shapeCalls": 3000,
+            "cacheHits": 310000,
+            "paragraphs": 313000,
+            "lines": 781000,
+            "compositions": 313000,
+            "compositionHits": 0,
+            "renderBuffers": 313000
+          },
+          {
+            "shapeCalls": 3000,
+            "cacheHits": 160000,
+            "paragraphs": 163000,
+            "lines": 406000,
+            "compositions": 163000,
+            "compositionHits": 0,
+            "renderBuffers": 163000
+          }
+        ],
+        "after": [
+          {
+            "shapeCalls": 3000,
+            "cacheHits": 310000,
+            "paragraphs": 313000,
+            "lines": 781000,
+            "compositions": 313000,
+            "compositionHits": 0,
+            "renderBuffers": 313000
+          },
+          {
+            "shapeCalls": 3000,
+            "cacheHits": 310000,
+            "paragraphs": 313000,
+            "lines": 781000,
+            "compositions": 313000,
+            "compositionHits": 0,
+            "renderBuffers": 313000
+          }
+        ]
+      },
+      "functions": [
+        {
+          "functionName": "composeParagraph",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 3,
+          "columnNumber": 32,
+          "samples": 1568,
+          "positionTicks": [
+            {
+              "line": 7,
+              "ticks": 2
+            },
+            {
+              "line": 15,
+              "ticks": 1
+            },
+            {
+              "line": 23,
+              "ticks": 1
+            },
+            {
+              "line": 17,
+              "ticks": 1
+            },
+            {
+              "line": 62,
+              "ticks": 5
+            },
+            {
+              "line": 71,
+              "ticks": 2
+            },
+            {
+              "line": 5,
+              "ticks": 1
+            },
+            {
+              "line": 24,
+              "ticks": 3
+            },
+            {
+              "line": 25,
+              "ticks": 2
+            },
+            {
+              "line": 73,
+              "ticks": 1
+            },
+            {
+              "line": 56,
+              "ticks": 2
+            },
+            {
+              "line": 88,
+              "ticks": 1
+            },
+            {
+              "line": 56,
+              "ticks": 1
+            },
+            {
+              "line": 17,
+              "ticks": 14
+            },
+            {
+              "line": 73,
+              "ticks": 3
+            },
+            {
+              "line": 60,
+              "ticks": 21
+            },
+            {
+              "line": 6,
+              "ticks": 1
+            },
+            {
+              "line": 43,
+              "ticks": 51
+            },
+            {
+              "line": 26,
+              "ticks": 1
+            },
+            {
+              "line": 44,
+              "ticks": 26
+            },
+            {
+              "line": 54,
+              "ticks": 13
+            },
+            {
+              "line": 84,
+              "ticks": 1
+            },
+            {
+              "line": 24,
+              "ticks": 1
+            },
+            {
+              "line": 18,
+              "ticks": 21
+            },
+            {
+              "line": 6,
+              "ticks": 21
+            },
+            {
+              "line": 63,
+              "ticks": 5
+            },
+            {
+              "line": 57,
+              "ticks": 42
+            },
+            {
+              "line": 27,
+              "ticks": 1
+            },
+            {
+              "line": 66,
+              "ticks": 7
+            },
+            {
+              "line": 46,
+              "ticks": 4
+            },
+            {
+              "line": 20,
+              "ticks": 24
+            },
+            {
+              "line": 56,
+              "ticks": 2
+            },
+            {
+              "line": 44,
+              "ticks": 29
+            },
+            {
+              "line": 56,
+              "ticks": 82
+            },
+            {
+              "line": 17,
+              "ticks": 24
+            },
+            {
+              "line": 4,
+              "ticks": 7
+            },
+            {
+              "line": 74,
+              "ticks": 1
+            },
+            {
+              "line": 56,
+              "ticks": 5
+            },
+            {
+              "line": 54,
+              "ticks": 36
+            },
+            {
+              "line": 61,
+              "ticks": 21
+            },
+            {
+              "line": 56,
+              "ticks": 18
+            },
+            {
+              "line": 44,
+              "ticks": 38
+            },
+            {
+              "line": 56,
+              "ticks": 10
+            },
+            {
+              "line": 55,
+              "ticks": 19
+            },
+            {
+              "line": 68,
+              "ticks": 4
+            },
+            {
+              "line": 46,
+              "ticks": 1
+            },
+            {
+              "line": 15,
+              "ticks": 24
+            },
+            {
+              "line": 67,
+              "ticks": 2
+            },
+            {
+              "line": 88,
+              "ticks": 1
+            },
+            {
+              "line": 43,
+              "ticks": 1
+            },
+            {
+              "line": 16,
+              "ticks": 10
+            },
+            {
+              "line": 60,
+              "ticks": 141
+            },
+            {
+              "line": 64,
+              "ticks": 2
+            },
+            {
+              "line": 23,
+              "ticks": 1
+            },
+            {
+              "line": 11,
+              "ticks": 1
+            },
+            {
+              "line": 61,
+              "ticks": 74
+            },
+            {
+              "line": 54,
+              "ticks": 40
+            },
+            {
+              "line": 55,
+              "ticks": 10
+            },
+            {
+              "line": 55,
+              "ticks": 37
+            },
+            {
+              "line": 43,
+              "ticks": 61
+            },
+            {
+              "line": 12,
+              "ticks": 6
+            },
+            {
+              "line": 11,
+              "ticks": 144
+            },
+            {
+              "line": 78,
+              "ticks": 253
+            },
+            {
+              "line": 10,
+              "ticks": 166
+            },
+            {
+              "line": 6,
+              "ticks": 17
+            }
+          ]
+        },
+        {
+          "functionName": "(garbage collector)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 557
+        },
+        {
+          "functionName": "layout",
+          "scriptId": "12",
+          "url": "http://127.0.0.1:5173/src/owned-layout.ts",
+          "lineNumber": 93,
+          "columnNumber": 8,
+          "samples": 539,
+          "positionTicks": [
+            {
+              "line": 180,
+              "ticks": 1
+            },
+            {
+              "line": 98,
+              "ticks": 1
+            },
+            {
+              "line": 109,
+              "ticks": 2
+            },
+            {
+              "line": 108,
+              "ticks": 1
+            },
+            {
+              "line": 170,
+              "ticks": 1
+            },
+            {
+              "line": 172,
+              "ticks": 1
+            },
+            {
+              "line": 109,
+              "ticks": 1
+            },
+            {
+              "line": 187,
+              "ticks": 2
+            },
+            {
+              "line": 119,
+              "ticks": 8
+            },
+            {
+              "line": 117,
+              "ticks": 3
+            },
+            {
+              "line": 178,
+              "ticks": 21
+            },
+            {
+              "line": 189,
+              "ticks": 1
+            },
+            {
+              "line": 174,
+              "ticks": 306
+            },
+            {
+              "line": 95,
+              "ticks": 1
+            },
+            {
+              "line": 109,
+              "ticks": 2
+            },
+            {
+              "line": 109,
+              "ticks": 2
+            },
+            {
+              "line": 114,
+              "ticks": 93
+            },
+            {
+              "line": 170,
+              "ticks": 1
+            },
+            {
+              "line": 108,
+              "ticks": 9
+            },
+            {
+              "line": 172,
+              "ticks": 13
+            },
+            {
+              "line": 176,
+              "ticks": 1
+            },
+            {
+              "line": 183,
+              "ticks": 2
+            },
+            {
+              "line": 119,
+              "ticks": 66
+            }
+          ]
+        },
+        {
+          "functionName": "createPackedCarets",
+          "scriptId": "23",
+          "url": "http://127.0.0.1:5173/src/owned-carets.ts",
+          "lineNumber": 2,
+          "columnNumber": 34,
+          "samples": 348,
+          "positionTicks": [
+            {
+              "line": 66,
+              "ticks": 1
+            },
+            {
+              "line": 99,
+              "ticks": 1
+            },
+            {
+              "line": 5,
+              "ticks": 2
+            },
+            {
+              "line": 6,
+              "ticks": 1
+            },
+            {
+              "line": 4,
+              "ticks": 5
+            },
+            {
+              "line": 3,
+              "ticks": 3
+            },
+            {
+              "line": 4,
+              "ticks": 335
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 77,
+          "columnNumber": 27,
+          "samples": 333,
+          "positionTicks": [
+            {
+              "line": 82,
+              "ticks": 1
+            },
+            {
+              "line": 81,
+              "ticks": 1
+            },
+            {
+              "line": 81,
+              "ticks": 1
+            },
+            {
+              "line": 78,
+              "ticks": 4
+            },
+            {
+              "line": 80,
+              "ticks": 139
+            },
+            {
+              "line": 78,
+              "ticks": 2
+            },
+            {
+              "line": 81,
+              "ticks": 185
+            }
+          ]
+        },
+        {
+          "functionName": "append",
+          "scriptId": "23",
+          "url": "http://127.0.0.1:5173/src/owned-carets.ts",
+          "lineNumber": 59,
+          "columnNumber": 8,
+          "samples": 170,
+          "positionTicks": [
+            {
+              "line": 64,
+              "ticks": 11
+            },
+            {
+              "line": 63,
+              "ticks": 1
+            },
+            {
+              "line": 61,
+              "ticks": 77
+            },
+            {
+              "line": 63,
+              "ticks": 37
+            },
+            {
+              "line": 64,
+              "ticks": 4
+            },
+            {
+              "line": 62,
+              "ticks": 40
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 59,
+          "columnNumber": 25,
+          "samples": 100,
+          "positionTicks": [
+            {
+              "line": 60,
+              "ticks": 9
+            },
+            {
+              "line": 60,
+              "ticks": 22
+            },
+            {
+              "line": 60,
+              "ticks": 15
+            },
+            {
+              "line": 60,
+              "ticks": 2
+            },
+            {
+              "line": 60,
+              "ticks": 16
+            },
+            {
+              "line": 60,
+              "ticks": 36
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 5,
+          "columnNumber": 93,
+          "samples": 86,
+          "positionTicks": [
+            {
+              "line": 6,
+              "ticks": 48
+            },
+            {
+              "line": 6,
+              "ticks": 15
+            },
+            {
+              "line": 6,
+              "ticks": 23
+            }
+          ]
+        },
+        {
+          "functionName": "append",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 27,
+          "columnNumber": 17,
+          "samples": 75,
+          "positionTicks": [
+            {
+              "line": 29,
+              "ticks": 24
+            },
+            {
+              "line": 29,
+              "ticks": 44
+            },
+            {
+              "line": 38,
+              "ticks": 7
+            }
+          ]
+        },
+        {
+          "functionName": "placeParagraphs",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 9,
+          "columnNumber": 31,
+          "samples": 56,
+          "positionTicks": [
+            {
+              "line": 24,
+              "ticks": 50
+            },
+            {
+              "line": 12,
+              "ticks": 6
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 23,
+          "columnNumber": 63,
+          "samples": 46,
+          "positionTicks": [
+            {
+              "line": 29,
+              "ticks": 1
+            },
+            {
+              "line": 30,
+              "ticks": 1
+            },
+            {
+              "line": 29,
+              "ticks": 3
+            },
+            {
+              "line": 26,
+              "ticks": 2
+            },
+            {
+              "line": 24,
+              "ticks": 39
+            }
+          ]
+        },
+        {
+          "functionName": "(program)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 17
+        },
+        {
+          "functionName": "run",
+          "scriptId": "7",
+          "url": "http://127.0.0.1:5173/src/owned-profile.ts",
+          "lineNumber": 20,
+          "columnNumber": 5,
+          "samples": 9,
+          "positionTicks": [
+            {
+              "line": 29,
+              "ticks": 9
+            }
+          ]
+        },
+        {
+          "functionName": "(idle)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 7
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 23,
+          "columnNumber": 34,
+          "samples": 7,
+          "positionTicks": [
+            {
+              "line": 24,
+              "ticks": 1
+            },
+            {
+              "line": 24,
+              "ticks": 6
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 11,
+          "columnNumber": 35,
+          "samples": 7,
+          "positionTicks": [
+            {
+              "line": 13,
+              "ticks": 1
+            },
+            {
+              "line": 19,
+              "ticks": 4
+            },
+            {
+              "line": 12,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "append",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 27,
+          "columnNumber": 17,
+          "samples": 5,
+          "positionTicks": [
+            {
+              "line": 29,
+              "ticks": 3
+            },
+            {
+              "line": 38,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 9,
+          "columnNumber": 42,
+          "samples": 5,
+          "positionTicks": [
+            {
+              "line": 10,
+              "ticks": 5
+            }
+          ]
+        },
+        {
+          "functionName": "append",
+          "scriptId": "23",
+          "url": "http://127.0.0.1:5173/src/owned-carets.ts",
+          "lineNumber": 59,
+          "columnNumber": 8,
+          "samples": 3,
+          "positionTicks": [
+            {
+              "line": 64,
+              "ticks": 1
+            },
+            {
+              "line": 63,
+              "ticks": 1
+            },
+            {
+              "line": 61,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 10,
+          "columnNumber": 45,
+          "samples": 3,
+          "positionTicks": [
+            {
+              "line": 11,
+              "ticks": 1
+            },
+            {
+              "line": 11,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "J",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4712,
+          "columnNumber": 7,
+          "samples": 3,
+          "positionTicks": [
+            {
+              "line": 4716,
+              "ticks": 1
+            },
+            {
+              "line": 4716,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 77,
+          "columnNumber": 27,
+          "samples": 3,
+          "positionTicks": [
+            {
+              "line": 82,
+              "ticks": 3
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-to-js",
+          "scriptId": "-1",
+          "url": "",
+          "lineNumber": 0,
+          "columnNumber": 0,
+          "samples": 2,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[5289]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 3082864,
+          "samples": 2,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 2
+            }
+          ]
+        },
+        {
+          "functionName": "evaluate",
+          "scriptId": "33",
+          "url": "",
+          "lineNumber": 304,
+          "columnNumber": 10,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 313,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "beginLine",
+          "scriptId": "23",
+          "url": "http://127.0.0.1:5173/src/owned-carets.ts",
+          "lineNumber": 56,
+          "columnNumber": 11,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 58,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "js-to-wasm:ii:i",
+          "scriptId": "27",
+          "url": "wasm://wasm/gprose_owned_shaper.wasm-002f636e",
+          "lineNumber": 0,
+          "columnNumber": 20415,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[1801]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 720134,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "g",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4753,
+          "columnNumber": 7,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 4755,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "yb",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3468,
+          "columnNumber": 15,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 3470,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[9831]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 4980898,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-function[1270]",
+          "scriptId": "25",
+          "url": "http://127.0.0.1:5173/engines/canvaskit.wasm",
+          "lineNumber": 0,
+          "columnNumber": 425913,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "wasm-to-js",
+          "scriptId": "-1",
+          "url": "",
+          "lineNumber": 0,
+          "columnNumber": 0,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 1,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "now",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 95,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "font",
+          "scriptId": "12",
+          "url": "http://127.0.0.1:5173/src/owned-layout.ts",
+          "lineNumber": 36,
+          "columnNumber": 14,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 39,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "serializeAsCallArgument",
+          "scriptId": "33",
+          "url": "",
+          "lineNumber": 171,
+          "columnNumber": 32,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 173,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 11,
+          "columnNumber": 35,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 20,
+              "ticks": 1
+            }
+          ]
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 10,
+          "columnNumber": 45,
+          "samples": 1,
+          "positionTicks": [
+            {
+              "line": 11,
+              "ticks": 1
+            }
+          ]
+        }
+      ],
+      "allocations": [
+        {
+          "functionName": "composeParagraph",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 3,
+          "columnNumber": 32,
+          "sampledBytes": 1267094420
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 23,
+          "columnNumber": 34,
+          "sampledBytes": 55345788
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 77,
+          "columnNumber": 27,
+          "sampledBytes": 49991504
+        },
+        {
+          "functionName": "layout",
+          "scriptId": "12",
+          "url": "http://127.0.0.1:5173/src/owned-layout.ts",
+          "lineNumber": 93,
+          "columnNumber": 8,
+          "sampledBytes": 49308568
+        },
+        {
+          "functionName": "flatMap",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 14481360
+        },
+        {
+          "functionName": "from",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 12073360
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 10,
+          "columnNumber": 45,
+          "sampledBytes": 9802416
+        },
+        {
+          "functionName": "",
+          "scriptId": "20",
+          "url": "http://127.0.0.1:5173/src/owned-paragraph.ts",
+          "lineNumber": 9,
+          "columnNumber": 42,
+          "sampledBytes": 9392624
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 11,
+          "columnNumber": 35,
+          "sampledBytes": 7396188
+        },
+        {
+          "functionName": "flatMap",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 5590208
+        },
+        {
+          "functionName": "set",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 3800820
+        },
+        {
+          "functionName": "split",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 3706884
+        },
+        {
+          "functionName": "map",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 572616
+        },
+        {
+          "functionName": "f",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4737,
+          "columnNumber": 7,
+          "sampledBytes": 262308
+        },
+        {
+          "functionName": "",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 23,
+          "columnNumber": 63,
+          "sampledBytes": 245892
+        },
+        {
+          "functionName": "placeParagraphs",
+          "scriptId": "18",
+          "url": "http://127.0.0.1:5173/src/owned-document.ts",
+          "lineNumber": 9,
+          "columnNumber": 31,
+          "sampledBytes": 98456
+        },
+        {
+          "functionName": "f",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4737,
+          "columnNumber": 7,
+          "sampledBytes": 98372
+        },
+        {
+          "functionName": "Set",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 65700
+        },
+        {
+          "functionName": "Float32Array",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 32832
+        },
+        {
+          "functionName": "Map",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 32816
+        },
+        {
+          "functionName": "Uint16Array",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 32812
+        },
+        {
+          "functionName": "run",
+          "scriptId": "7",
+          "url": "http://127.0.0.1:5173/src/owned-profile.ts",
+          "lineNumber": 20,
+          "columnNumber": 5,
+          "sampledBytes": 32800
+        },
+        {
+          "functionName": "",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3679,
+          "columnNumber": 25,
+          "sampledBytes": 32792
+        },
+        {
+          "functionName": "Float32Array",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 16440
+        },
+        {
+          "functionName": "Nc",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 3867,
+          "columnNumber": 11,
+          "sampledBytes": 16416
+        },
+        {
+          "functionName": "next",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 16400
+        },
+        {
+          "functionName": "map",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 16400
+        },
+        {
+          "functionName": "Float32Array",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1,
+          "sampledBytes": 16392
+        },
+        {
+          "functionName": "J",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4712,
+          "columnNumber": 7,
+          "sampledBytes": 16392
+        },
+        {
+          "functionName": "i",
+          "scriptId": "16",
+          "url": "http://127.0.0.1:5173/node_modules/.vite/deps/canvaskit-wasm.js?v=60f8d552",
+          "lineNumber": 4747,
+          "columnNumber": 7,
+          "sampledBytes": 16392
+        }
+      ]
+    }
+  ]
+}

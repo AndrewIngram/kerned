@@ -1,0 +1,200 @@
+[
+  {
+    "browser": "chromium",
+    "width": 1100,
+    "core": {
+      "assertions": 169,
+      "checks": "passed"
+    },
+    "extensions": {
+      "assertions": 16,
+      "checks": "passed"
+    },
+    "containers": {
+      "assertions": 54,
+      "checks": "passed",
+      "markers": [
+        {
+          "id": 100,
+          "depth": 0,
+          "label": "4."
+        },
+        {
+          "id": 102,
+          "depth": 0,
+          "label": "6."
+        }
+      ]
+    },
+    "selections": {
+      "assertions": 48,
+      "checks": "passed"
+    },
+    "checks": "passed"
+  },
+  {
+    "browser": "chromium",
+    "width": 420,
+    "core": {
+      "assertions": 169,
+      "checks": "passed"
+    },
+    "extensions": {
+      "assertions": 16,
+      "checks": "passed"
+    },
+    "containers": {
+      "assertions": 54,
+      "checks": "passed",
+      "markers": [
+        {
+          "id": 100,
+          "depth": 0,
+          "label": "4."
+        },
+        {
+          "id": 102,
+          "depth": 0,
+          "label": "6."
+        }
+      ]
+    },
+    "selections": {
+      "assertions": 48,
+      "checks": "passed"
+    },
+    "checks": "passed"
+  },
+  {
+    "browser": "firefox",
+    "width": 1100,
+    "core": {
+      "assertions": 169,
+      "checks": "passed"
+    },
+    "extensions": {
+      "assertions": 16,
+      "checks": "passed"
+    },
+    "containers": {
+      "assertions": 54,
+      "checks": "passed",
+      "markers": [
+        {
+          "id": 100,
+          "depth": 0,
+          "label": "4."
+        },
+        {
+          "id": 102,
+          "depth": 0,
+          "label": "6."
+        }
+      ]
+    },
+    "selections": {
+      "assertions": 48,
+      "checks": "passed"
+    },
+    "checks": "passed"
+  },
+  {
+    "browser": "firefox",
+    "width": 420,
+    "core": {
+      "assertions": 169,
+      "checks": "passed"
+    },
+    "extensions": {
+      "assertions": 16,
+      "checks": "passed"
+    },
+    "containers": {
+      "assertions": 54,
+      "checks": "passed",
+      "markers": [
+        {
+          "id": 100,
+          "depth": 0,
+          "label": "4."
+        },
+        {
+          "id": 102,
+          "depth": 0,
+          "label": "6."
+        }
+      ]
+    },
+    "selections": {
+      "assertions": 48,
+      "checks": "passed"
+    },
+    "checks": "passed"
+  },
+  {
+    "browser": "webkit",
+    "width": 1100,
+    "core": {
+      "assertions": 169,
+      "checks": "passed"
+    },
+    "extensions": {
+      "assertions": 16,
+      "checks": "passed"
+    },
+    "containers": {
+      "assertions": 54,
+      "checks": "passed",
+      "markers": [
+        {
+          "id": 100,
+          "depth": 0,
+          "label": "4."
+        },
+        {
+          "id": 102,
+          "depth": 0,
+          "label": "6."
+        }
+      ]
+    },
+    "selections": {
+      "assertions": 48,
+      "checks": "passed"
+    },
+    "checks": "passed"
+  },
+  {
+    "browser": "webkit",
+    "width": 420,
+    "core": {
+      "assertions": 169,
+      "checks": "passed"
+    },
+    "extensions": {
+      "assertions": 16,
+      "checks": "passed"
+    },
+    "containers": {
+      "assertions": 54,
+      "checks": "passed",
+      "markers": [
+        {
+          "id": 100,
+          "depth": 0,
+          "label": "4."
+        },
+        {
+          "id": 102,
+          "depth": 0,
+          "label": "6."
+        }
+      ]
+    },
+    "selections": {
+      "assertions": 48,
+      "checks": "passed"
+    },
+    "checks": "passed"
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "browser": "chromium",
+    "sample": "warbreaker",
+    "find": "off",
+    "firstUsableMs": 205,
+    "blocks": 7280,
+    "loadMs": 6699.200000047684,
+    "batches": 400,
+    "batchSize": {
+      "min": 3,
+      "median": 10,
+      "max": 48
+    },
+    "workMs": {
+      "median": 8.099999904632568,
+      "p95": 9.199999809265137
+    },
+    "elapsedMs": {
+      "median": 16.399999856948853,
+      "p95": 17.200000047683716
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  },
+  {
+    "browser": "chromium",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 205,
+    "blocks": 7280,
+    "loadMs": 4770.200000047684,
+    "batches": 286,
+    "batchSize": {
+      "min": 8,
+      "median": 19,
+      "max": 77
+    },
+    "workMs": {
+      "median": 8.099999904632568,
+      "p95": 11.100000143051147
+    },
+    "elapsedMs": {
+      "median": 16.200000047683716,
+      "p95": 18.200000047683716
+    },
+    "layouts": 7311,
+    "vanished": 92,
+    "decreased": 30,
+    "busyFrames": 92,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "chromium",
+    "sample": "war-and-peace",
+    "find": "off",
+    "firstUsableMs": 243,
+    "blocks": 11718,
+    "loadMs": 17121.10000014305,
+    "batches": 941,
+    "batchSize": {
+      "min": 5,
+      "median": 8,
+      "max": 66
+    },
+    "workMs": {
+      "median": 9.5,
+      "p95": 12.399999856948853
+    },
+    "elapsedMs": {
+      "median": 16.700000047683716,
+      "p95": 22.700000047683716
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  },
+  {
+    "browser": "chromium",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 251,
+    "blocks": 11718,
+    "loadMs": 21795.400000095367,
+    "batches": 1233,
+    "batchSize": {
+      "min": 4,
+      "median": 8,
+      "max": 40
+    },
+    "workMs": {
+      "median": 9.000000238418579,
+      "p95": 12.400000095367432
+    },
+    "elapsedMs": {
+      "median": 16.40000009536743,
+      "p95": 20.899999856948853
+    },
+    "layouts": 11750,
+    "vanished": 936,
+    "decreased": 72,
+    "busyFrames": 936,
+    "matches": 47140,
+    "stalePaints": 0
+  }
+]

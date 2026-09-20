@@ -1,0 +1,77 @@
+{
+  "passed": 9,
+  "cases": [
+    {
+      "browser": "chromium",
+      "width": 1100,
+      "dpr": 1,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    },
+    {
+      "browser": "chromium",
+      "width": 420,
+      "dpr": 1.5,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    },
+    {
+      "browser": "chromium",
+      "width": 760,
+      "dpr": 2,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    },
+    {
+      "browser": "firefox",
+      "width": 1100,
+      "dpr": 1,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    },
+    {
+      "browser": "firefox",
+      "width": 420,
+      "dpr": 1.5,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    },
+    {
+      "browser": "firefox",
+      "width": 760,
+      "dpr": 2,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    },
+    {
+      "browser": "webkit",
+      "width": 1100,
+      "dpr": 1,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    },
+    {
+      "browser": "webkit",
+      "width": 420,
+      "dpr": 1.5,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    },
+    {
+      "browser": "webkit",
+      "width": 760,
+      "dpr": 2,
+      "inlineAssertions": 334,
+      "mounted": 1,
+      "shapeCalls": 168
+    }
+  ]
+}

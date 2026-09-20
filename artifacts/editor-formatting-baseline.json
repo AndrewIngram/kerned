@@ -1,0 +1,173 @@
+[
+  {
+    "browser": "chromium",
+    "trial": 0,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 8678.100000143051,
+    "paintedMs": 9208.799999952316,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 9219.799999952316,
+    "maxFrameGapMs": 9196.232000047683,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 503.7000000476837,
+      "restored": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "trial": 1,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 8583.299999952316,
+    "paintedMs": 9125.199999809265,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 9134.699999809265,
+    "maxFrameGapMs": 9113.301999809266,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 503.2000000476837,
+      "restored": true
+    }
+  },
+  {
+    "browser": "chromium",
+    "trial": 2,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 8424.399999856949,
+    "paintedMs": 8953,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 8964.699999809265,
+    "maxFrameGapMs": 8930.075999856948,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 486.59999990463257,
+      "restored": true
+    }
+  },
+  {
+    "browser": "firefox",
+    "trial": 0,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 16878,
+    "paintedMs": 17514,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 17521,
+    "maxFrameGapMs": 17494.38,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 821,
+      "restored": true
+    }
+  },
+  {
+    "browser": "firefox",
+    "trial": 1,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 16936,
+    "paintedMs": 17597,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 17604,
+    "maxFrameGapMs": 17579.14,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 858,
+      "restored": true
+    }
+  },
+  {
+    "browser": "firefox",
+    "trial": 2,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 17223,
+    "paintedMs": 17820,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 17834,
+    "maxFrameGapMs": 17806.14,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 810,
+      "restored": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "trial": 0,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 5837,
+    "paintedMs": 6300,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 6306,
+    "maxFrameGapMs": 6289,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 793,
+      "restored": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "trial": 1,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 5966,
+    "paintedMs": 6440,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 6448,
+    "maxFrameGapMs": 6423,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 735,
+      "restored": true
+    }
+  },
+  {
+    "browser": "webkit",
+    "trial": 2,
+    "blocks": 7279,
+    "characters": 1109728,
+    "handlerMs": 6037,
+    "paintedMs": 6498,
+    "layouts": 7278,
+    "pending": 0,
+    "bold": true,
+    "selectionPreserved": true,
+    "completeMs": 6504,
+    "maxFrameGapMs": 6488,
+    "stalePaints": 0,
+    "undo": {
+      "paintedMs": 725,
+      "restored": true
+    }
+  }
+]

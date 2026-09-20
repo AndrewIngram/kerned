@@ -1,0 +1,68 @@
+[
+  {
+    "browser": "chromium",
+    "boldReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 56,
+      "checks": "passed"
+    },
+    "undoReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 56,
+      "checks": "passed"
+    },
+    "finalReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 111,
+      "checks": "passed"
+    },
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "boldReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 56,
+      "checks": "passed"
+    },
+    "undoReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 56,
+      "checks": "passed"
+    },
+    "finalReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 111,
+      "checks": "passed"
+    },
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "boldReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 56,
+      "checks": "passed"
+    },
+    "undoReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 56,
+      "checks": "passed"
+    },
+    "finalReference": {
+      "blocks": 7280,
+      "paragraphs": 7279,
+      "hydrated": 111,
+      "checks": "passed"
+    },
+    "stalePaints": 0
+  }
+]

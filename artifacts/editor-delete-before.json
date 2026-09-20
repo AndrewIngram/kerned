@@ -1,0 +1,11 @@
+[
+  {
+    "browser": "chromium",
+    "blocks": 7280,
+    "handlerMs": 40999.09999990463,
+    "paintMs": 41016.89999985695,
+    "undoHandlerMs": 228.39999985694885,
+    "undoPaintMs": 270.7000000476837,
+    "restored": true
+  }
+]

@@ -1,0 +1,170 @@
+[
+  {
+    "browser": "chromium",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 207,
+    "blocks": 7280,
+    "loadMs": 1276.7999999523163,
+    "batches": 60,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 13.300000190734863,
+      "p95": 15.899999856948853
+    },
+    "elapsedMs": {
+      "median": 18.700000047683716,
+      "p95": 23.899999856948853
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "chromium",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 256,
+    "blocks": 11718,
+    "loadMs": 3007.100000143051,
+    "batches": 109,
+    "batchSize": {
+      "min": 32,
+      "median": 110,
+      "max": 128
+    },
+    "workMs": {
+      "median": 16.700000047683716,
+      "p95": 21.899999856948853
+    },
+    "elapsedMs": {
+      "median": 24.40000009536743,
+      "p95": 35.799999952316284
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 330,
+    "blocks": 7280,
+    "loadMs": 1701,
+    "batches": 64,
+    "batchSize": {
+      "min": 3,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 16,
+      "p95": 22
+    },
+    "elapsedMs": {
+      "median": 24,
+      "p95": 37
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 260,
+    "blocks": 11718,
+    "loadMs": 4761,
+    "batches": 130,
+    "batchSize": {
+      "min": 32,
+      "median": 88,
+      "max": 128
+    },
+    "workMs": {
+      "median": 21,
+      "p95": 29
+    },
+    "elapsedMs": {
+      "median": 33,
+      "p95": 47
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 287,
+    "blocks": 7280,
+    "loadMs": 1026,
+    "batches": 59,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 10,
+      "p95": 12
+    },
+    "elapsedMs": {
+      "median": 16,
+      "p95": 19
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 314,
+    "blocks": 11718,
+    "loadMs": 2410,
+    "batches": 105,
+    "batchSize": {
+      "min": 20,
+      "median": 116,
+      "max": 128
+    },
+    "workMs": {
+      "median": 14,
+      "p95": 18
+    },
+    "elapsedMs": {
+      "median": 20,
+      "p95": 30
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  }
+]

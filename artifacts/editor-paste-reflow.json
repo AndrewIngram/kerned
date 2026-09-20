@@ -1,0 +1,32 @@
+[
+  {
+    "browser": "chromium",
+    "reference": {
+      "blocks": 14560,
+      "paragraphs": 14558,
+      "hydrated": 110,
+      "checks": "passed"
+    },
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "reference": {
+      "blocks": 14560,
+      "paragraphs": 14558,
+      "hydrated": 110,
+      "checks": "passed"
+    },
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "reference": {
+      "blocks": 14560,
+      "paragraphs": 14558,
+      "hydrated": 110,
+      "checks": "passed"
+    },
+    "stalePaints": 0
+  }
+]

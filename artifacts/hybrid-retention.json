@@ -1,0 +1,637 @@
+{
+  "recordedAt": "2026-09-19T15:55:14.161Z",
+  "cases": [
+    {
+      "total": 2000,
+      "retention": "all",
+      "baseline": {
+        "usedSize": 4263048,
+        "totalSize": 5046272,
+        "embedderHeapUsedSize": 534264,
+        "backingStorageSize": 733251
+      },
+      "loaded": {
+        "usedSize": 18050612,
+        "totalSize": 18677760,
+        "embedderHeapUsedSize": 534240,
+        "backingStorageSize": 18367192
+      },
+      "afterCycles": {
+        "usedSize": 23472996,
+        "totalSize": 23920640,
+        "embedderHeapUsedSize": 552352,
+        "backingStorageSize": 23151573
+      },
+      "delta": {
+        "usedSize": 13787564,
+        "backingStorageSize": 17633941
+      },
+      "initialMemory": {
+        "caretBufferBytes": 3009694,
+        "caretUsedBytes": 3009694,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 229854,
+        "caretCount": 229854,
+        "lineCapacity": 3598,
+        "lineCount": 3598,
+        "glyphBufferBytes": 2243580,
+        "shapingBufferBytes": 12695860,
+        "wasmLinearBytes": 3604480,
+        "paragraphs": 1800,
+        "composedParagraphs": 1800
+      },
+      "finalMemory": {
+        "caretBufferBytes": 3009694,
+        "caretUsedBytes": 3009694,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 229854,
+        "caretCount": 229854,
+        "lineCapacity": 3598,
+        "lineCount": 3598,
+        "glyphBufferBytes": 2243580,
+        "shapingBufferBytes": 12695860,
+        "wasmLinearBytes": 3604480,
+        "paragraphs": 1800,
+        "composedParagraphs": 1800
+      },
+      "scrolls": [
+        {
+          "cycle": 0,
+          "id": 1006,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 1799,
+            "checks": "passed"
+          },
+          "sceneMs": 0.5,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 0,
+          "id": 2005,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 1799,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 0,
+          "id": 1,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 1799,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 1,
+          "id": 1006,
+          "sceneMs": 0,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 1,
+          "id": 2005,
+          "sceneMs": 0,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 1,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 2,
+          "id": 1006,
+          "sceneMs": 0,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 2,
+          "id": 2005,
+          "sceneMs": 0,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 2,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 1799,
+          "shapeCalls": 10981,
+          "layoutCalls": 1826
+        }
+      ],
+      "reference": {
+        "blocks": 2000,
+        "paragraphs": 1799,
+        "hydrated": 1799,
+        "checks": "passed"
+      },
+      "resizedReference": {
+        "blocks": 2000,
+        "paragraphs": 1799,
+        "hydrated": 1799,
+        "checks": "passed"
+      }
+    },
+    {
+      "total": 2000,
+      "retention": "viewport",
+      "baseline": {
+        "usedSize": 4264796,
+        "totalSize": 4784128,
+        "embedderHeapUsedSize": 534264,
+        "backingStorageSize": 733251
+      },
+      "loaded": {
+        "usedSize": 13342808,
+        "totalSize": 13697024,
+        "embedderHeapUsedSize": 533632,
+        "backingStorageSize": 13784560
+      },
+      "afterCycles": {
+        "usedSize": 13961864,
+        "totalSize": 14483456,
+        "embedderHeapUsedSize": 552616,
+        "backingStorageSize": 14005488
+      },
+      "delta": {
+        "usedSize": 9078012,
+        "backingStorageSize": 13051309
+      },
+      "initialMemory": {
+        "caretBufferBytes": 74487,
+        "caretUsedBytes": 74487,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 5687,
+        "caretCount": 5687,
+        "lineCapacity": 92,
+        "lineCount": 92,
+        "glyphBufferBytes": 55470,
+        "shapingBufferBytes": 12695860,
+        "wasmLinearBytes": 3604480,
+        "paragraphs": 1800,
+        "composedParagraphs": 47
+      },
+      "finalMemory": {
+        "caretBufferBytes": 76137,
+        "caretUsedBytes": 76137,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 5813,
+        "caretCount": 5813,
+        "lineCapacity": 94,
+        "lineCount": 94,
+        "glyphBufferBytes": 56700,
+        "shapingBufferBytes": 12695860,
+        "wasmLinearBytes": 3604480,
+        "paragraphs": 1800,
+        "composedParagraphs": 48
+      },
+      "scrolls": [
+        {
+          "cycle": 0,
+          "id": 1006,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 9,
+            "checks": "passed"
+          },
+          "sceneMs": 0.20000004768371582,
+          "resident": 9,
+          "shapeCalls": 10981,
+          "layoutCalls": 1834
+        },
+        {
+          "cycle": 0,
+          "id": 2005,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 9,
+            "checks": "passed"
+          },
+          "sceneMs": 0.2999999523162842,
+          "resident": 9,
+          "shapeCalls": 10981,
+          "layoutCalls": 1842
+        },
+        {
+          "cycle": 0,
+          "id": 1,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 4,
+            "checks": "passed"
+          },
+          "sceneMs": 0.20000004768371582,
+          "resident": 4,
+          "shapeCalls": 10981,
+          "layoutCalls": 1845
+        },
+        {
+          "cycle": 1,
+          "id": 1006,
+          "sceneMs": 0.40000009536743164,
+          "resident": 9,
+          "shapeCalls": 10981,
+          "layoutCalls": 1853
+        },
+        {
+          "cycle": 1,
+          "id": 2005,
+          "sceneMs": 0.40000009536743164,
+          "resident": 9,
+          "shapeCalls": 10981,
+          "layoutCalls": 1861
+        },
+        {
+          "cycle": 1,
+          "id": 1,
+          "sceneMs": 0.20000004768371582,
+          "resident": 4,
+          "shapeCalls": 10981,
+          "layoutCalls": 1864
+        },
+        {
+          "cycle": 2,
+          "id": 1006,
+          "sceneMs": 0.2999999523162842,
+          "resident": 9,
+          "shapeCalls": 10981,
+          "layoutCalls": 1872
+        },
+        {
+          "cycle": 2,
+          "id": 2005,
+          "sceneMs": 0.39999985694885254,
+          "resident": 9,
+          "shapeCalls": 10981,
+          "layoutCalls": 1880
+        },
+        {
+          "cycle": 2,
+          "id": 1,
+          "sceneMs": 0.19999980926513672,
+          "resident": 4,
+          "shapeCalls": 10981,
+          "layoutCalls": 1883
+        }
+      ],
+      "reference": {
+        "blocks": 2000,
+        "paragraphs": 1799,
+        "hydrated": 4,
+        "checks": "passed"
+      },
+      "resizedReference": {
+        "blocks": 2000,
+        "paragraphs": 1799,
+        "hydrated": 46,
+        "checks": "passed"
+      }
+    },
+    {
+      "total": 10000,
+      "retention": "all",
+      "baseline": {
+        "usedSize": 4263728,
+        "totalSize": 5046272,
+        "embedderHeapUsedSize": 533096,
+        "backingStorageSize": 733251
+      },
+      "loaded": {
+        "usedSize": 71925104,
+        "totalSize": 72908800,
+        "embedderHeapUsedSize": 536432,
+        "backingStorageSize": 90693462
+      },
+      "afterCycles": {
+        "usedSize": 97914784,
+        "totalSize": 100696064,
+        "embedderHeapUsedSize": 553880,
+        "backingStorageSize": 114369973
+      },
+      "delta": {
+        "usedSize": 67661376,
+        "backingStorageSize": 89960211
+      },
+      "initialMemory": {
+        "caretBufferBytes": 15113294,
+        "caretUsedBytes": 15113294,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1154254,
+        "caretCount": 1154254,
+        "lineCapacity": 17998,
+        "lineCount": 17998,
+        "glyphBufferBytes": 11267580,
+        "shapingBufferBytes": 63777460,
+        "wasmLinearBytes": 3604480,
+        "paragraphs": 9000,
+        "composedParagraphs": 9000
+      },
+      "finalMemory": {
+        "caretBufferBytes": 15113294,
+        "caretUsedBytes": 15113294,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1154254,
+        "caretCount": 1154254,
+        "lineCapacity": 17998,
+        "lineCount": 17998,
+        "glyphBufferBytes": 11267580,
+        "shapingBufferBytes": 63777460,
+        "wasmLinearBytes": 3604480,
+        "paragraphs": 9000,
+        "composedParagraphs": 9000
+      },
+      "scrolls": [
+        {
+          "cycle": 0,
+          "id": 5006,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 8999,
+            "checks": "passed"
+          },
+          "sceneMs": 1.4000000953674316,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 0,
+          "id": 10005,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 8999,
+            "checks": "passed"
+          },
+          "sceneMs": 0.09999990463256836,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 0,
+          "id": 1,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 8999,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 1,
+          "id": 5006,
+          "sceneMs": 0,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 1,
+          "id": 10005,
+          "sceneMs": 0,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 1,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 2,
+          "id": 5006,
+          "sceneMs": 0.09999990463256836,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 2,
+          "id": 10005,
+          "sceneMs": 0,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 2,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 8999,
+          "shapeCalls": 54981,
+          "layoutCalls": 9026
+        }
+      ],
+      "reference": {
+        "blocks": 10000,
+        "paragraphs": 8999,
+        "hydrated": 8999,
+        "checks": "passed"
+      },
+      "resizedReference": {
+        "blocks": 10000,
+        "paragraphs": 8999,
+        "hydrated": 8999,
+        "checks": "passed"
+      }
+    },
+    {
+      "total": 10000,
+      "retention": "viewport",
+      "baseline": {
+        "usedSize": 4263956,
+        "totalSize": 4784128,
+        "embedderHeapUsedSize": 533096,
+        "backingStorageSize": 733251
+      },
+      "loaded": {
+        "usedSize": 47830108,
+        "totalSize": 48529408,
+        "embedderHeapUsedSize": 535192,
+        "backingStorageSize": 67237636
+      },
+      "afterCycles": {
+        "usedSize": 49560408,
+        "totalSize": 50364416,
+        "embedderHeapUsedSize": 552648,
+        "backingStorageSize": 67493088
+      },
+      "delta": {
+        "usedSize": 43566152,
+        "backingStorageSize": 66504385
+      },
+      "initialMemory": {
+        "caretBufferBytes": 74487,
+        "caretUsedBytes": 74487,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 5687,
+        "caretCount": 5687,
+        "lineCapacity": 92,
+        "lineCount": 92,
+        "glyphBufferBytes": 55470,
+        "shapingBufferBytes": 63777460,
+        "wasmLinearBytes": 3604480,
+        "paragraphs": 9000,
+        "composedParagraphs": 47
+      },
+      "finalMemory": {
+        "caretBufferBytes": 76137,
+        "caretUsedBytes": 76137,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 5813,
+        "caretCount": 5813,
+        "lineCapacity": 94,
+        "lineCount": 94,
+        "glyphBufferBytes": 56700,
+        "shapingBufferBytes": 63777460,
+        "wasmLinearBytes": 3604480,
+        "paragraphs": 9000,
+        "composedParagraphs": 48
+      },
+      "scrolls": [
+        {
+          "cycle": 0,
+          "id": 5006,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 9,
+            "checks": "passed"
+          },
+          "sceneMs": 0.7999999523162842,
+          "resident": 9,
+          "shapeCalls": 54981,
+          "layoutCalls": 9034
+        },
+        {
+          "cycle": 0,
+          "id": 10005,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 9,
+            "checks": "passed"
+          },
+          "sceneMs": 2,
+          "resident": 9,
+          "shapeCalls": 54981,
+          "layoutCalls": 9042
+        },
+        {
+          "cycle": 0,
+          "id": 1,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 4,
+            "checks": "passed"
+          },
+          "sceneMs": 1.9000000953674316,
+          "resident": 4,
+          "shapeCalls": 54981,
+          "layoutCalls": 9045
+        },
+        {
+          "cycle": 1,
+          "id": 5006,
+          "sceneMs": 1.1999998092651367,
+          "resident": 9,
+          "shapeCalls": 54981,
+          "layoutCalls": 9053
+        },
+        {
+          "cycle": 1,
+          "id": 10005,
+          "sceneMs": 0.9000000953674316,
+          "resident": 9,
+          "shapeCalls": 54981,
+          "layoutCalls": 9061
+        },
+        {
+          "cycle": 1,
+          "id": 1,
+          "sceneMs": 0.7000000476837158,
+          "resident": 4,
+          "shapeCalls": 54981,
+          "layoutCalls": 9064
+        },
+        {
+          "cycle": 2,
+          "id": 5006,
+          "sceneMs": 0.7999999523162842,
+          "resident": 9,
+          "shapeCalls": 54981,
+          "layoutCalls": 9072
+        },
+        {
+          "cycle": 2,
+          "id": 10005,
+          "sceneMs": 0.9000000953674316,
+          "resident": 9,
+          "shapeCalls": 54981,
+          "layoutCalls": 9080
+        },
+        {
+          "cycle": 2,
+          "id": 1,
+          "sceneMs": 0.8000001907348633,
+          "resident": 4,
+          "shapeCalls": 54981,
+          "layoutCalls": 9083
+        }
+      ],
+      "reference": {
+        "blocks": 10000,
+        "paragraphs": 8999,
+        "hydrated": 4,
+        "checks": "passed"
+      },
+      "resizedReference": {
+        "blocks": 10000,
+        "paragraphs": 8999,
+        "hydrated": 46,
+        "checks": "passed"
+      }
+    }
+  ]
+}
