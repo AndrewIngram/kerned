@@ -25,8 +25,8 @@ The remaining costs are whole-document reflow and retained layout. Width changes
 ## Reproduce
 
 ~~~sh
-npm run build:hybrid
-npx vite preview --config vite.hybrid.config.ts --host 127.0.0.1 --port 5176
+npm run build
+npm run preview
 node scripts/check-hybrid-large.mjs
 node scripts/benchmark-hybrid-large.mjs
 node scripts/report-hybrid-large.mjs

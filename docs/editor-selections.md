@@ -53,7 +53,7 @@ The hybrid demo retains independent text anchor and head positions across paragr
 
 ## Verification
 
-`npm run build:hybrid` type-checks and builds the migrated demo. `npm run check:editor-boundaries` checks core dependencies and public-only extension fixtures.
+`npm run build` type-checks and builds the migrated demo. `npm run check:editor-boundaries` checks core dependencies and public-only extension fixtures.
 
 `npm run check:transactions` runs 48 selection assertions alongside container, extension and transaction assertions in Chromium, Firefox and WebKit at wide and narrow viewports. Selection coverage includes cross-block forward/backward ranges, sibling replacement, content extraction, split mapping, node moves and deletion, empty/atom-only documents, schema selectability, malformed codecs, stable-key restoration with different local handles, bookmarks, disjoint cell edits, spans, column growth, cache reuse and undo/redo. The existing browser interaction tests exercise typing, split/join and streamed arrivals.
 

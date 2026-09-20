@@ -29,7 +29,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await page.getByLabel('Reply').fill('Keep this focused.');assert.equal((await read()).stats.shapeCalls,shape);await page.keyboard.press('Escape');
   const block=page.locator('[data-widget="3"]');await block.getByRole('button').click();await page.waitForFunction(()=>window.hybridSpike.read().scene.find(p=>p.id===3).height>250);
   await block.getByLabel('Block notes').fill('Persist through virtualization.');await block.getByLabel('Review the examples').check();await settle();
-  const state=await read();assert.equal(state.stats.shapeCalls,shape);const place=state.scene.find(p=>p.id===3),next=state.scene.find(p=>p.id===4);assert.equal(next.y,place.y+place.height+24);
+  const state=await read();assert.equal(state.stats.shapeCalls,shape);const place=state.scene.find(p=>p.id===3),next=state.scene.find(p=>p.id===4);assert.equal(next.y,place.y+Math.ceil(place.height/4)*4+24,'Checklist spacing includes 4px grid alignment');
   // A focused DOM widget stays mounted outside the visible range.
   await block.getByLabel('Block notes').focus();await settle();await page.locator('.document-scroll').evaluate(el=>el.scrollTop=el.scrollHeight);await settle();assert.ok((await read()).mounted.includes('3'));
   await page.getByRole('button',{name:'Undo',exact:true}).focus();await settle();assert.ok(!(await read()).mounted.includes('3'));

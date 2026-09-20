@@ -8,7 +8,7 @@ function verify(name, bytes) {
   const checksum = createHash("sha256").update(bytes).digest("hex");
   if (checksum !== checksums[name]?.sha256)
     throw new Error(
-      `${name}: checksum mismatch; review upstream changes before updating the experiment.`,
+      `${name}: checksum mismatch; review upstream changes before updating the editor.`,
     );
 }
 
@@ -36,22 +36,6 @@ const sources = [
     "https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-BoldItalic.ttf",
   ],
   [
-    "NotoSansArabic-Regular.ttf",
-    "https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSansArabic/NotoSansArabic-Regular.ttf",
-  ],
-  [
-    "NotoSansHebrew-Regular.ttf",
-    "https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSansHebrew/NotoSansHebrew-Regular.ttf",
-  ],
-  [
-    "NotoSansDevanagari-Regular.ttf",
-    "https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSansDevanagari/NotoSansDevanagari-Regular.ttf",
-  ],
-  [
-    "NotoSansCJKjp-Regular.otf",
-    "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf",
-  ],
-  [
     "NotoColorEmoji.ttf",
     "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf",
   ],
@@ -76,10 +60,6 @@ for (const [name, url] of [
   [
     "LICENSE-Noto.txt",
     "https://raw.githubusercontent.com/notofonts/noto-fonts/main/LICENSE",
-  ],
-  [
-    "LICENSE-CJK.txt",
-    "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/LICENSE",
   ],
   [
     "LICENSE-Emoji.txt",

@@ -132,8 +132,8 @@ Editing never changes the canonical HTML.
 ## Verify
 
 ```sh
-npm run build:hybrid
-npx vite preview --config vite.hybrid.config.ts --port 5176
+npm run build
+npm run preview
 npm run check:hybrid-book
 npm run check:hybrid-table
 npm run check:hybrid

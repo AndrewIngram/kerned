@@ -5,25 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build:wasm": "node scripts/build-wasm.mjs",
-    "build": "npm run build:wasm && tsc --noEmit && vite build",
+    "build:wasm": "node scripts/build-shaper.mjs",
+    "build": "npm run setup && npm run check:project && tsc --noEmit && vite build",
     "test": "playwright test",
     "setup": "node scripts/setup-assets.mjs && npm run build:wasm",
-    "setup:glyph": "node scripts/setup-glyph-spike.mjs",
-    "inspect:glyph": "node scripts/inspect-glyph-spike.mjs",
-    "spike:glyph": "vite --host 127.0.0.1 --open /glyph-spike.html",
-    "build:glyph": "tsc --noEmit && vite build --config vite.glyph-spike.config.ts",
-    "build:owned": "node scripts/build-owned.mjs && tsc --noEmit && vite build --config vite.owned.config.ts",
-    "spike:owned": "node scripts/build-owned.mjs && vite --host 127.0.0.1 --open /owned-layout.html",
-    "inspect:owned": "node scripts/inspect-owned.mjs",
-    "benchmark:owned": "node scripts/benchmark-owned.mjs",
-    "validate:owned": "node scripts/validate-owned-sizes.mjs",
-    "profile:owned": "node scripts/profile-owned.mjs",
-    "benchmark:storage": "node scripts/repeat-owned-storage.mjs",
-    "check:carets": "node scripts/check-owned-carets.mjs",
-    "memory:owned": "node scripts/measure-owned-memory.mjs",
-    "build:hybrid": "node scripts/build-owned.mjs && tsc --noEmit && vite build --config vite.hybrid.config.ts",
-    "spike:hybrid": "vite --host 127.0.0.1 --open /hybrid-editor.html",
     "check:hybrid": "node scripts/check-hybrid.mjs",
     "check:hybrid-book": "node scripts/check-hybrid-book.mjs",
     "check:war-and-peace": "node scripts/check-war-and-peace.mjs",
@@ -62,21 +47,20 @@
     "check:editor-select-all": "node scripts/check-editor-select-all.mjs",
     "check:editor-book-paste": "node scripts/check-editor-book-paste.mjs",
     "check:editor-rich-paste": "node scripts/check-editor-rich-paste.mjs",
-    "check:editor-unicode": "node scripts/check-editor-unicode.mjs"
+    "check:editor-unicode": "node scripts/check-editor-unicode.mjs",
+    "preview": "vite preview --host 127.0.0.1 --port 5176",
+    "check:project": "node scripts/check-project.mjs && npm run check:editor-boundaries",
+    "demo:extensions": "vite --host 127.0.0.1 --open /hybrid-editor.html"
   },
   "dependencies": {
     "canvaskit-wasm": "0.42.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "zod": "^4.3.6"
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
-    "@pmndrs/glyph": "0.1.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@types/three": "0.185.0",
-    "three": "0.185.0",
     "typescript": "~5.9.2",
     "vite": "8.3.0"
   }

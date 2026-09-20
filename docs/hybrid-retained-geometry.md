@@ -41,7 +41,7 @@ Validation covers:
 
 ## Reproduce
 
-Build with `npm run build:hybrid` and serve the production preview on port 5176. The default `/hybrid-editor.html?stream=10000` uses viewport retention. Add `retention=all` for the compacted full-retention comparison.
+Build with `npm run build` and serve the production preview on port 5176. The default `/hybrid-editor.html?stream=10000` uses viewport retention. Add `retention=all` for the compacted full-retention comparison.
 
 Run `npm run memory:hybrid` for memory and rehydration checks. Run `npm run check:hybrid`, `npm run check:hybrid-large`, and `npm run check:hybrid-reflow` for interaction coverage. Run `node scripts/check-hybrid-retention-pixels.mjs` to compare rendered document pixels across policies.
 

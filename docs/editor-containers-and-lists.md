@@ -20,7 +20,7 @@ Lists contain nonempty items. An item starts with a block and may contain more b
 
 Enter splits an item and moves its trailing content into the new item. Enter on a single empty text block exits or lifts the item. Backspace at the first block's start joins the preceding item or outdents the first item. The host decides when to invoke these commands and supplies transaction metadata.
 
-This is a headless API milestone. The hybrid demo does not yet render these nested lists or bind their commands to its toolbar and keyboard. The older comparison editor has a separate list implementation.
+The writing demo wires these commands through `src/extensions/blocks.ts` and its Blocks menu. See [current block interactions](editor-block-ui.md).
 
 ## Tables: tree structure is not selection geometry
 

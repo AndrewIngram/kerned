@@ -16,10 +16,10 @@ type PreparedParagraph = { shaped: Shaped | PackedShaping; composed: ComposedPar
 export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 'objects') {
   async function binary(path: string) {
     const response = await fetch(path);
-    if (!response.ok) throw new Error(`Could not load ${path}. Run npm run build:owned.`);
+    if (!response.ok) throw new Error(`Could not load ${path}. Run npm run setup.`);
     return response.arrayBuffer();
   }
-  const [wasm, data] = await Promise.all([binary('/engines/owned.wasm'), Promise.all([...fontFiles.slice(0, 4),fontFiles[8]].map(f => binary(`/fonts/${f}`)))]);
+  const [wasm, data] = await Promise.all([binary('/engines/owned.wasm'), Promise.all(fontFiles.map(f => binary(`/fonts/${f}`)))]);
   const { instance } = await WebAssembly.instantiate(wasm);
   const exports = instance.exports;
   const exportedMemory = exports.memory;

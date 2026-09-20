@@ -52,8 +52,8 @@ React schedules one background pass per animation frame. Width changes supersede
 ## Reproduce
 
 ~~~sh
-npm run build:hybrid
-npx vite preview --config vite.hybrid.config.ts --host 127.0.0.1 --port 5176
+npm run build
+npm run preview
 npm run check:hybrid-reflow
 npm run benchmark:hybrid-reflow
 node scripts/report-hybrid-reflow.mjs
