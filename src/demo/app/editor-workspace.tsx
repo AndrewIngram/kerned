@@ -17,8 +17,8 @@ import type { Rect } from '../../engines';
 import { captureComment } from '../../extensions/comment';
 import { demoSchema } from '../../extensions/demo-schema';
 import { OutlineMenu } from '../../extensions/outline-view';
-import { starterExtensions } from '../../extensions/starter-kit';
 import { BlockLayer } from '../../extensions/starter-kit/block-layer';
+import { starterBrowserExtensions } from '../../extensions/starter-kit/browser';
 import { createStarterDocumentQuery } from '../../extensions/starter-kit/document';
 import { createStarterKitInput, focusStarterKitInput } from '../../extensions/starter-kit/input';
 import { useDocumentLayout } from '../../extensions/starter-kit/use-document-layout';
@@ -34,7 +34,9 @@ import { useFind, useFindReveal } from './use-find';
 import { useOutline } from './use-outline';
 import { recordSampleLayout, recordSamplePaint, useSampleStream } from './use-sample-stream';
 
-const editorSchema = createSchema({ extensions: starterExtensions });
+const editorSchema = createSchema({
+  extensions: starterBrowserExtensions({ imageDelay: streamConfig.imageDelay }),
+});
 
 type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
 
@@ -475,7 +477,7 @@ export function EditorWorkspace({
                   aria-label="Canvas document"
                 />
                 <BlockLayer
-                  imageDelay={streamConfig.imageDelay}
+                  editor={editor}
                   {...{
                     doc,
                     actions,

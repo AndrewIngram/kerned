@@ -1,0 +1,468 @@
+{
+  "recordedAt": "2026-09-21T10:07:08.497Z",
+  "cpu": "Apple M4 Pro",
+  "cases": [
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "total": 2000,
+      "width": 1100,
+      "dpr": 1,
+      "checks": "passed",
+      "firstCanvasFlushMs": 139.10000014305115,
+      "firstLoaded": 32,
+      "maxMounted": 3,
+      "maxSubmitted": 8,
+      "layoutCalls": 2259,
+      "cachedParagraphs": 1799,
+      "memory": {
+        "caretBufferBytes": 15019,
+        "caretUsedBytes": 15019,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1147,
+        "caretCount": 1147,
+        "lineCapacity": 18,
+        "lineCount": 18,
+        "glyphBufferBytes": 11200,
+        "shapingBufferBytes": 12695252,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 1799,
+        "composedParagraphs": 9
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 0.3000001907348633
+        },
+        {
+          "blocks": 2000,
+          "workMs": 2.1999998092651367
+        }
+      ],
+      "editPaintMs": [
+        17.200000047683716,
+        8.900000095367432,
+        32.299999952316284,
+        14.200000047683716,
+        15.399999856948853,
+        15.5,
+        4.400000095367432,
+        15.700000047683716,
+        15,
+        17,
+        15.599999904632568
+      ]
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "total": 10000,
+      "width": 1100,
+      "dpr": 1,
+      "checks": "passed",
+      "firstCanvasFlushMs": 137.09999990463257,
+      "firstLoaded": 32,
+      "maxMounted": 3,
+      "maxSubmitted": 8,
+      "layoutCalls": 9715,
+      "cachedParagraphs": 8999,
+      "memory": {
+        "caretBufferBytes": 15045,
+        "caretUsedBytes": 15045,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1149,
+        "caretCount": 1149,
+        "lineCapacity": 18,
+        "lineCount": 18,
+        "glyphBufferBytes": 11220,
+        "shapingBufferBytes": 63776852,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 8999,
+        "composedParagraphs": 9
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 0.2999999523162842
+        },
+        {
+          "blocks": 10000,
+          "workMs": 5.8999998569488525
+        }
+      ],
+      "editPaintMs": [
+        17.199999809265137,
+        7.200000047683716,
+        33.10000014305115,
+        15.200000047683716,
+        16.299999952316284,
+        15.400000095367432,
+        8.100000143051147,
+        22.799999952316284,
+        14.400000095367432,
+        22.90000009536743,
+        14.299999952316284
+      ]
+    },
+    {
+      "browser": "chromium",
+      "version": "153.0.8010.12",
+      "total": 10000,
+      "width": 420,
+      "dpr": 1.5,
+      "checks": "passed",
+      "firstCanvasFlushMs": 139.79999995231628,
+      "firstLoaded": 32,
+      "maxMounted": 2,
+      "maxSubmitted": 5,
+      "layoutCalls": 9702,
+      "cachedParagraphs": 8999,
+      "memory": {
+        "caretBufferBytes": 10221,
+        "caretUsedBytes": 10221,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 777,
+        "caretCount": 777,
+        "lineCapacity": 24,
+        "lineCount": 24,
+        "glyphBufferBytes": 7470,
+        "shapingBufferBytes": 63776852,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 8999,
+        "composedParagraphs": 6
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 0.2999999523162842
+        },
+        {
+          "blocks": 10000,
+          "workMs": 5.3999998569488525
+        }
+      ],
+      "editPaintMs": [
+        18.299999952316284,
+        4.900000095367432,
+        32.90000009536743,
+        16.799999952316284,
+        15,
+        16.300000190734863,
+        8.5,
+        10.599999904632568,
+        24.199999809265137,
+        14.400000095367432,
+        26.5,
+        17.200000047683716
+      ]
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "total": 2000,
+      "width": 1100,
+      "dpr": 1,
+      "checks": "passed",
+      "firstCanvasFlushMs": 259,
+      "firstLoaded": 32,
+      "maxMounted": 3,
+      "maxSubmitted": 8,
+      "layoutCalls": 2325,
+      "cachedParagraphs": 1799,
+      "memory": {
+        "caretBufferBytes": 15019,
+        "caretUsedBytes": 15019,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1147,
+        "caretCount": 1147,
+        "lineCapacity": 18,
+        "lineCount": 18,
+        "glyphBufferBytes": 11200,
+        "shapingBufferBytes": 12695252,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 1799,
+        "composedParagraphs": 9
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 1
+        },
+        {
+          "blocks": 2000,
+          "workMs": 2
+        }
+      ],
+      "editPaintMs": [
+        18,
+        4,
+        4,
+        5,
+        6,
+        14,
+        6,
+        21,
+        16,
+        23,
+        9
+      ]
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "total": 10000,
+      "width": 1100,
+      "dpr": 1,
+      "checks": "passed",
+      "firstCanvasFlushMs": 180,
+      "firstLoaded": 32,
+      "maxMounted": 3,
+      "maxSubmitted": 8,
+      "layoutCalls": 9961,
+      "cachedParagraphs": 8999,
+      "memory": {
+        "caretBufferBytes": 15045,
+        "caretUsedBytes": 15045,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1149,
+        "caretCount": 1149,
+        "lineCapacity": 18,
+        "lineCount": 18,
+        "glyphBufferBytes": 11220,
+        "shapingBufferBytes": 63776852,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 8999,
+        "composedParagraphs": 9
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 0
+        },
+        {
+          "blocks": 10000,
+          "workMs": 6
+        }
+      ],
+      "editPaintMs": [
+        22,
+        9,
+        13,
+        4,
+        13,
+        16,
+        7,
+        12,
+        46,
+        27,
+        47,
+        34
+      ]
+    },
+    {
+      "browser": "firefox",
+      "version": "155.0",
+      "total": 10000,
+      "width": 420,
+      "dpr": 1.5,
+      "checks": "passed",
+      "firstCanvasFlushMs": 181,
+      "firstLoaded": 32,
+      "maxMounted": 2,
+      "maxSubmitted": 5,
+      "layoutCalls": 9952,
+      "cachedParagraphs": 8999,
+      "memory": {
+        "caretBufferBytes": 10221,
+        "caretUsedBytes": 10221,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 777,
+        "caretCount": 777,
+        "lineCapacity": 24,
+        "lineCount": 24,
+        "glyphBufferBytes": 7470,
+        "shapingBufferBytes": 63776852,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 8999,
+        "composedParagraphs": 6
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 0
+        },
+        {
+          "blocks": 10000,
+          "workMs": 6
+        }
+      ],
+      "editPaintMs": [
+        25,
+        7,
+        4,
+        6,
+        5,
+        16,
+        6,
+        13,
+        58,
+        27,
+        50,
+        23
+      ]
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "total": 2000,
+      "width": 1100,
+      "dpr": 1,
+      "checks": "passed",
+      "firstCanvasFlushMs": 215,
+      "firstLoaded": 32,
+      "maxMounted": 3,
+      "maxSubmitted": 8,
+      "layoutCalls": 2259,
+      "cachedParagraphs": 1799,
+      "memory": {
+        "caretBufferBytes": 15019,
+        "caretUsedBytes": 15019,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1147,
+        "caretCount": 1147,
+        "lineCapacity": 18,
+        "lineCount": 18,
+        "glyphBufferBytes": 11200,
+        "shapingBufferBytes": 12695252,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 1799,
+        "composedParagraphs": 9
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 0
+        },
+        {
+          "blocks": 2000,
+          "workMs": 1
+        }
+      ],
+      "editPaintMs": [
+        17,
+        7,
+        14,
+        14,
+        15,
+        14,
+        14,
+        15,
+        13,
+        16,
+        14
+      ]
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "total": 10000,
+      "width": 1100,
+      "dpr": 1,
+      "checks": "passed",
+      "firstCanvasFlushMs": 206,
+      "firstLoaded": 32,
+      "maxMounted": 3,
+      "maxSubmitted": 8,
+      "layoutCalls": 9715,
+      "cachedParagraphs": 8999,
+      "memory": {
+        "caretBufferBytes": 15045,
+        "caretUsedBytes": 15045,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1149,
+        "caretCount": 1149,
+        "lineCapacity": 18,
+        "lineCount": 18,
+        "glyphBufferBytes": 11220,
+        "shapingBufferBytes": 63776852,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 8999,
+        "composedParagraphs": 9
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 0
+        },
+        {
+          "blocks": 10000,
+          "workMs": 4
+        }
+      ],
+      "editPaintMs": [
+        19,
+        8,
+        13,
+        14,
+        15,
+        14,
+        4,
+        18,
+        13,
+        31,
+        12
+      ]
+    },
+    {
+      "browser": "webkit",
+      "version": "26.6",
+      "total": 10000,
+      "width": 420,
+      "dpr": 1.5,
+      "checks": "passed",
+      "firstCanvasFlushMs": 208,
+      "firstLoaded": 32,
+      "maxMounted": 2,
+      "maxSubmitted": 5,
+      "layoutCalls": 9702,
+      "cachedParagraphs": 8999,
+      "memory": {
+        "caretBufferBytes": 10221,
+        "caretUsedBytes": 10221,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 777,
+        "caretCount": 777,
+        "lineCapacity": 24,
+        "lineCount": 24,
+        "glyphBufferBytes": 7470,
+        "shapingBufferBytes": 63776852,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 8999,
+        "composedParagraphs": 6
+      },
+      "widthChanges": [
+        {
+          "blocks": 32,
+          "workMs": 1
+        },
+        {
+          "blocks": 10000,
+          "workMs": 4
+        }
+      ],
+      "editPaintMs": [
+        18,
+        6,
+        15,
+        13,
+        17,
+        15,
+        4,
+        19,
+        13,
+        20,
+        14
+      ]
+    }
+  ]
+}

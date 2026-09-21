@@ -8,15 +8,15 @@ remaining complete-view and package migration; this page describes current code.
 
 ## What belongs where
 
-| Owner                                     | Responsibility                                                                                                   |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication                  |
-| `src/core`                                | Composed headless session, named commands/queries, extension lifetime and view attachment                        |
-| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                                  |
-| `src/editor-react`                        | Optional subscriptions and attachment adapters for input, painting and viewport observation                      |
-| `src/editor-canvas`                       | Framework-independent asset lifetime, surfaces, painters, selection/highlight/caret drawing and frame scheduling |
-| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering           |
-| `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                              |
+| Owner                                     | Responsibility                                                                                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication                        |
+| `src/core`                                | Composed headless session, named commands/queries, typed adapter contributions, extension lifetime and view attachment |
+| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                                        |
+| `src/editor-react`                        | Optional subscriptions and attachment adapters for input, painting and viewport observation                            |
+| `src/editor-canvas`                       | Framework-independent asset lifetime, surfaces, painters, selection/highlight/caret drawing and frame scheduling       |
+| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering                 |
+| `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                                    |
 
 The headless modules import neither React nor browser code. Browser and canvas
 modules are independent of React, and generic adapters do not import a particular
@@ -33,7 +33,12 @@ native event -> browser/input adapter -> named session command
 
 Toolbar, native input and programmatic calls share named session commands.
 `EditorWorkspace` still assembles the rendering, input and layout adapters; the
-complete mounted-view interface must take over that assembly. Comment threads
+complete mounted-view interface must take over that assembly. The browser starter
+kit adds image rendering through the same extension tuple as schema and commands.
+`createNodeViews` reads those session contributions, binds renderers to schema
+definition families and owns per-node cleanup when the session is destroyed.
+`NodeViewContent` adapts that native lifecycle to React. Other block and inline
+renderers still await migration from the separate React registrations. Comment threads
 remain external to document state.
 
 Custom rendering can use `createTextInteraction().bind(...)` with its own text

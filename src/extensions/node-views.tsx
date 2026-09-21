@@ -3,14 +3,12 @@ import type { ComponentProps } from 'react';
 import { createReactRenderers } from '../editor-react';
 import { Checklist } from './checklist-view';
 import type { StarterLeaf } from './demo-model';
-import { ImageBlock } from './image-view';
 import { TableBlock } from './table-view';
 import { ParagraphExtensions } from './text-block-view';
 
 type NodeViewValue = {
   node: StarterLeaf;
   table: Omit<ComponentProps<typeof TableBlock>, 'node'>;
-  image: Omit<ComponentProps<typeof ImageBlock>, 'node'>;
   checklist: Omit<ComponentProps<typeof Checklist>, 'node'>;
   text: ComponentProps<typeof ParagraphExtensions>;
 };
@@ -23,14 +21,6 @@ export const DemoNodeView = createReactRenderers<NodeViewValue>([
       if (value.node.kind !== 'table') throw new Error('Expected table');
 
       return <TableBlock {...value.table} node={value.node} />;
-    },
-  },
-  {
-    name: 'image',
-    component: ({ value }) => {
-      if (value.node.kind !== 'image') throw new Error('Expected image');
-
-      return <ImageBlock {...value.image} node={value.node} />;
     },
   },
   {

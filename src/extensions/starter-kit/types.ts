@@ -5,4 +5,9 @@ import type { starterExtensions } from './index';
 
 export type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
 
-export type EditorSession = Editor<typeof starterExtensions, StarterNode>;
+type StarterSession = Editor<typeof starterExtensions, StarterNode>;
+
+/** Consumers need starter capabilities, not an exact assembly tuple. */
+export type EditorSession = Omit<StarterSession, 'schema'> & {
+  readonly schema: Omit<StarterSession['schema'], 'definitions'>;
+};

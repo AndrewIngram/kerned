@@ -1332,3 +1332,52 @@ uncommitted tree.
 This is an implementation checkpoint, not milestone 4 acceptance. The complete
 mounted view, browser-extension composition and remaining DOM-overlay ownership
 still precede its independent architecture judge.
+
+### Milestone 4 typed browser contributions
+
+`defineContribution` lets an adapter define a typed contribution key without a
+core-to-adapter import. Extension setup provides values through its context;
+commands and queries keep their existing checked return contracts. Registration
+is session-local, preserves definition order and configured options, and closes
+before adapters can read the frozen contribution list. Late registration is
+rejected, including during failed-initialization cleanup. Destruction clears
+stored values and prevents reads. Setup is never repeated to obtain view behavior.
+
+The first consumer is native node rendering. `defineNodeView` binds a renderer to
+an installed definition family and passes its normalized, typed attributes.
+`createNodeViews` resolves the session's contributions once per view and rejects
+conflicting renderers and same-name foreign definitions. Mounted nodes subscribe
+to session destruction; their cleanup is idempotent and unsubscribes when culled.
+The generic React `NodeViewContent` adapter tolerates Strict Mode remounts and
+updates after borrowed-session destruction without reviving disposed views.
+
+The browser starter kit now composes image rendering with the headless extension
+tuple. The demo configures one assembly and no longer registers images in its
+parallel React renderer list. Its image-specific React wrapper was deleted.
+Starter consumers now require the schema operations and command capabilities they
+use, rather than an exact definition tuple that rejects additional extensions.
+The native image controller compares render-relevant values when skipping an
+unchanged frame, so attribute adaptation adds no redundant measurement.
+
+Validation: `pnpm run check` passes with 360 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. Production build passes. New tests
+cover typed contribution values, ordering, configuration, two sessions,
+failed-setup cleanup, a non-starter node with normalized attributes, native
+interactive controls, duplicate/foreign definitions, image loading cancellation,
+and React Strict Mode and borrowed lifetime. The large-document audit passes all
+nine cases. Three serial production trials in
+`artifacts/public-interface-m4/node-contributions/baseline.json` pass every
+unchanged budget: worst first usable 178 ms, streaming 1,062.9 ms, paste handler
+56.1 ms, paste to paint 116.9 ms, typing 32.2 ms, paging 32.6 ms and loaded JS heap
+28,959,676 bytes. The report identifies `9dbbe9f` and measures this checkpoint's
+uncommitted tree; `large-documents.json` records the large-document audit.
+
+Milestone 4 remains open. Tables, checklists, inline/mark/decorations and input
+policies still need composition through the extension/view contracts, and the
+complete public mount must own their placement and lifecycle. The milestone judge
+follows that exit, not this first consumer of the contribution mechanism.
+
+Consumer-interface follow-up: inline boolean option defaults can infer a literal
+`false` instead of `boolean`. A separately declared defaults object currently
+avoids this, but the final extension-author examples should support ordinary
+boolean reconfiguration without that workaround.

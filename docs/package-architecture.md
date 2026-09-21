@@ -70,8 +70,11 @@ A comments extension owns its discussion data and durable ranges; visual
 decorations consume those ranges through the view interface. Neither belongs in
 the generic model or state implementation.
 
-Core composition registers headless contributions. View contributions are
-registered through the view contract. Extension packages may offer separate
+Core composition registers headless contributions. Adapter packages define typed
+contribution keys; extension setup supplies values through its context. The core
+stores them per session without importing their implementation. Registration closes
+after construction, reads require a live session, and teardown releases the values.
+View contributions are registered through the view contract. Extension packages may offer separate
 headless and view entry points so a server importing table commands does not
 load React, the DOM or CanvasKit. The default browser setup composes both for
 consumers; they do not manually reconcile two registries.

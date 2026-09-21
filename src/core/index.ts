@@ -30,3 +30,9 @@ export {
 export type { EditorEvents } from '../state';
 
 export { connectEditorView, type EditorViewSession, type EditorViewDelegate } from './view-effects';
+
+export {
+  defineContribution,
+  type ExtensionContribution,
+  type ContributionContext,
+} from './contributions';

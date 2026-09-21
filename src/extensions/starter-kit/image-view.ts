@@ -92,7 +92,9 @@ export function createImageRenderer({ delay = 0 }: { delay?: number } = {}) {
         if (destroyed) throw new Error('Image view is destroyed');
 
         if (
-          frame?.node === next.node &&
+          frame?.node.id === next.node.id &&
+          frame.node.src === next.node.src &&
+          frame.node.alt === next.node.alt &&
           frame.width === next.width &&
           frame.onMeasure === next.onMeasure
         )

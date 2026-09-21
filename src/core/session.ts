@@ -30,11 +30,12 @@ import {
   type NamedChain,
   type CommandStateQuery,
 } from './commands';
+import { createContributions, type ContributionContext } from './contributions';
 import { createExtensionLifetime } from './extension-lifetime';
 import { queryRegistry, type QueryDefinitions, type NamedQueries } from './queries';
 import { createViewEffects, registerViewEffects, type ViewCommands } from './view-effects';
 
-export type ExtensionContext<N extends NodeIdentity> = {
+export type ExtensionContext<N extends NodeIdentity> = ContributionContext & {
   readonly schema: Schema<N>;
   /** Register resource cleanup immediately; late registrations clean up at once. */
   onDestroy(this: void, cleanup: () => void): void;
@@ -194,6 +195,7 @@ export function createEditor(
   if (result.issues) throw new Error(result.issues.map((issue) => issue.message).join('; '));
 
   const lifetime = createExtensionLifetime();
+  const adapters = createContributions(lifetime.onDestroy);
 
   try {
     const contributions = schema.definitions.flatMap((definition) => {
@@ -206,7 +208,11 @@ export function createEditor(
         context: ExtensionContext<DocumentNode<readonly SchemaDefinition[]>>,
       ) => SessionContribution<DocumentNode<readonly SchemaDefinition[]>> | undefined;
 
-      const contribution = setup({ schema, onDestroy: lifetime.onDestroy });
+      const contribution = setup({
+        schema,
+        onDestroy: lifetime.onDestroy,
+        provide: adapters.context.provide,
+      });
 
       return contribution ? [{ ...contribution, name: definition.name }] : [];
     });
@@ -237,7 +243,10 @@ export function createEditor(
 
     const effects = createViewEffects(editor);
     editor.on('destroy', () => effects.destroy());
-    editor.on('destroy', () => lifetime.dispose());
+    editor.on('destroy', () => {
+      adapters.dispose();
+      lifetime.dispose();
+    });
     const registry = commandRegistry(editor, contributions, effects.commands);
 
     const session: Editor<
@@ -291,10 +300,13 @@ export function createEditor(
       },
     };
 
+    adapters.attach(session);
     registerViewEffects(session, effects);
 
     return session;
   } catch (error) {
+    adapters.dispose();
+
     try {
       lifetime.dispose();
     } catch (cleanupError) {

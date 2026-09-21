@@ -2,8 +2,10 @@ import { type CanvasKit } from 'canvaskit-wasm';
 import { useMemo, type ComponentProps } from 'react';
 
 import type { BrowserViewOptions } from '../../editor-browser';
+import { createNodeViews } from '../../editor-browser/node-views';
 import { createTextLabels } from '../../editor-canvas/text-labels';
 import type { Viewport } from '../../editor-react';
+import { NodeViewContent } from '../../editor-react/node-view';
 import { demoSchema } from '../../extensions/demo-schema';
 import { DemoNodeView } from '../../extensions/node-views';
 import { type CommentHighlight } from '../../extensions/text-block-view';
@@ -11,12 +13,11 @@ import { type FindState, type Selection } from '../../state';
 import type { StarterNode } from '../demo-model';
 import type { EditorDocument } from './document';
 import type { DocumentLayout, DocumentLayoutSnapshot } from './document-layout';
-import { createImageRenderer } from './image-view';
 import type { InputActions } from './input';
-import type { Owned } from './types';
+import type { Owned, EditorSession } from './types';
 
 type BlockLayerProps = {
-  imageDelay?: number;
+  editor: EditorSession;
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   doc: EditorDocument;
   actions: Pick<InputActions, 'replaceText' | 'restore' | 'toggleFormat' | 'replaceCells'> & {
@@ -37,7 +38,7 @@ type BlockLayerProps = {
 };
 
 export function BlockLayer({
-  imageDelay,
+  editor,
   doc,
   clipboard,
   actions,
@@ -55,7 +56,7 @@ export function BlockLayer({
   onOpen,
 }: BlockLayerProps) {
   const labels = useMemo(() => createTextLabels(owned), [owned]);
-  const imageRenderer = useMemo(() => createImageRenderer({ delay: imageDelay }), [imageDelay]);
+  const nodeViews = useMemo(() => createNodeViews(editor), [editor]);
   const { projection, editorState, context, selectedRange } = doc;
   const { replaceText, restore, toggleFormat, replaceCells, update } = actions;
   const { visible, contentWidth, onMeasure, scene } = layout;
@@ -90,7 +91,6 @@ export function BlockLayer({
           onFormat: toggleFormat,
           onReplace: replaceCells,
         },
-        image: { width: contentWidth, onMeasure, renderer: imageRenderer },
         checklist: { width: contentWidth, onMeasure, onChange: update },
         text: {
           comments: commentsByNode.get(p.node.id),
@@ -102,7 +102,6 @@ export function BlockLayer({
       })),
     [
       visible,
-      imageRenderer,
       clipboard,
       findMatches,
       findOpen,
@@ -158,7 +157,16 @@ export function BlockLayer({
         ) : null;
       })}
       {visible.map((p, index) => {
-        const view = (
+        const renderer = nodeViews.find(p.node);
+
+        const view = renderer ? (
+          <NodeViewContent
+            renderer={renderer}
+            node={p.node}
+            width={contentWidth}
+            onMeasure={onMeasure}
+          />
+        ) : (
           <DemoNodeView
             key={p.node.id}
             type={demoSchema.resolve(p.node).name}
