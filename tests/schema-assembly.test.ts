@@ -323,13 +323,15 @@ test('derived codecs reject unknown node, mark and inline versions', () => {
     codec.decode({ version: 1, nodes: [{ ...versioned.nodes[0], version: 99 }] }),
   ).toThrow(/Unsupported line version/);
 
-  const token = defineInline({
-    name: 'token',
-    version: 1,
-    options: {},
-    schema: () => ({ attributes: z.null() }),
-    plainText: () => 'Token',
-  });
+  const token = defineInline(
+    {
+      name: 'token',
+      version: 1,
+      options: {},
+      schema: () => ({ attributes: z.null() }),
+    },
+    () => 'Token',
+  );
 
   const rich = defineNode({
     name: 'rich',

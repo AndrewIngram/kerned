@@ -61,15 +61,17 @@ test('null mark attributes remain distinguishable from a nonmatching value', () 
 });
 
 test('inline bindings recognize configured families and reject unrelated or missing definitions', () => {
-  const badge = defineInline({
-    name: 'badge',
-    version: 1,
-    options: { label: 'Badge' },
-    schema: (options) => ({
-      attributes: z.strictObject({ label: z.string().default(options.label) }),
-    }),
-    plainText: (attrs) => attrs.label,
-  });
+  const badge = defineInline(
+    {
+      name: 'badge',
+      version: 1,
+      options: { label: 'Badge' },
+      schema: (options) => ({
+        attributes: z.strictObject({ label: z.string().default(options.label) }),
+      }),
+    },
+    (attrs) => attrs.label,
+  );
 
   const schema = createSchema({ extensions: [text, badge.configure({ label: 'Configured' })] });
   const value = schema.inline.create('badge', 'one', 0, {});

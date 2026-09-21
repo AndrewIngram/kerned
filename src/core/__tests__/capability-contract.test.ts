@@ -208,13 +208,15 @@ test('editor schema preserves typed mark and inline factories from the assembly'
     schema: () => ({ attributes: z.null() }),
   });
 
-  const mention = defineInline({
-    name: 'mention',
-    version: 1,
-    options: {},
-    schema: () => ({ attributes: z.strictObject({ user: z.string() }) }),
-    plainText: (attrs) => `@${attrs.user}`,
-  });
+  const mention = defineInline(
+    {
+      name: 'mention',
+      version: 1,
+      options: {},
+      schema: () => ({ attributes: z.strictObject({ user: z.string() }) }),
+    },
+    (attrs) => `@${attrs.user}`,
+  );
 
   const schema = createSchema({ extensions: [note, bold, mention] });
   const editor = createEditor({ schema, content: [] });

@@ -262,15 +262,17 @@ test('foreign inline extensions own attributes, layout and versioned serializati
 
     const { inline: values } = createSchema({
       extensions: [
-        defineInline({
-          plainText: (attrs) => attrs.formula,
-          name: 'equation',
-          version: 3,
-          options: {},
-          schema: () => ({
-            attributes: z.strictObject({ formula: z.string() }),
-          }),
-        }),
+        defineInline(
+          {
+            name: 'equation',
+            version: 3,
+            options: {},
+            schema: () => ({
+              attributes: z.strictObject({ formula: z.string() }),
+            }),
+          },
+          (attrs) => attrs.formula,
+        ),
       ],
     });
 

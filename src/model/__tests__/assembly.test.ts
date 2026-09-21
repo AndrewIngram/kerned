@@ -32,13 +32,15 @@ const link = defineMark({
   schema: () => ({ attributes: z.strictObject({ href: z.string().startsWith('/') }) }),
 });
 
-const mention = defineInline({
-  name: 'mention',
-  version: 1,
-  options: {},
-  schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
-  plainText: (attrs) => attrs.label,
-});
+const mention = defineInline(
+  {
+    name: 'mention',
+    version: 1,
+    options: {},
+    schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
+  },
+  (attrs) => attrs.label,
+);
 
 const schema = createSchema({ extensions: [paragraph, quote, link, mention] });
 

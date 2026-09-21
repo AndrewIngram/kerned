@@ -137,13 +137,15 @@ test('copying a subtree respects custom storage and renews node and inline ident
     schema: () => ({ attributes: z.null() }),
   });
 
-  const reference = defineInline({
-    name: 'reference',
-    version: 1,
-    options: {},
-    plainText: (attrs) => attrs.label,
-    schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
-  });
+  const reference = defineInline(
+    {
+      name: 'reference',
+      version: 1,
+      options: {},
+      schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
+    },
+    (attrs) => attrs.label,
+  );
 
   const compiled = createSchema({ extensions: [text, group, style, reference] });
 

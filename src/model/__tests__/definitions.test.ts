@@ -207,17 +207,19 @@ test('configured options expose immutable nested values without sharing caller o
 });
 
 test('inline projections infer normalized attributes and receive configured options', () => {
-  const token = defineInline({
-    name: 'token',
-    version: 1,
-    options: { prefix: '@' },
-    schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
-    plainText: (attrs, options) => {
+  const token = defineInline(
+    {
+      name: 'token',
+      version: 1,
+      options: { prefix: '@' },
+      schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
+    },
+    (attrs, options) => {
       expectTypeOf(attrs).toEqualTypeOf<{ readonly label: string }>();
 
       return options.prefix + attrs.label;
     },
-  });
+  );
 
   const configured = token.configure({ prefix: '#' });
   expect(configured.spec.plainText({ label: 'tag' })).toBe('#tag');
@@ -243,15 +245,63 @@ test('inline projections infer normalized attributes and receive configured opti
       options: {},
       schema: () => ({ attributes: z.number(), outputAttributes: z.string() }),
     });
-    // @ts-expect-error Canonical inline attributes must agree with normalized output.
-    defineInline({
-      name: 'bad',
-      version: 1,
-      options: {},
-      schema: () => ({ attributes: z.number(), outputAttributes: z.string() }),
-      plainText: () => '',
-    });
+    defineInline(
+      // @ts-expect-error Canonical inline attributes must agree with normalized output.
+      {
+        name: 'bad',
+        version: 1,
+        options: {},
+        schema: () => ({ attributes: z.number(), outputAttributes: z.string() }),
+      },
+      () => '',
+    );
   }
 
   void invalidCanonicalValidators;
+});
+
+test('inline projections infer option-dependent defaults and nested readonly output', () => {
+  const config = {
+    name: 'configuredToken',
+    version: 1,
+    options: { label: 'Default' },
+    schema: (options: { readonly label: string }) => ({
+      attributes: z.strictObject({
+        label: z.string().default(options.label),
+        aliases: z.array(z.string()).default([]),
+      }),
+    }),
+  };
+
+  const token = defineInline(config, (attrs, options) => {
+    expectTypeOf(attrs).toEqualTypeOf<{
+      readonly label: string;
+      readonly aliases: readonly string[];
+    }>();
+    expectTypeOf(options).toEqualTypeOf<{ readonly label: string }>();
+
+    function invalidMutation() {
+      // @ts-expect-error Projection attributes remain deeply readonly.
+      attrs.aliases.push('Changed');
+      // @ts-expect-error Options remain readonly.
+      options.label = 'Changed';
+    }
+
+    void invalidMutation;
+
+    return `${attrs.label}:${attrs.aliases.join(',')}`;
+  });
+
+  expect(
+    token
+      .configure({ label: 'Configured' })
+      .spec.plainText({ label: 'Canonical', aliases: ['one'] }),
+  ).toBe('Canonical:one');
+
+  function invalidProjection() {
+    // @ts-expect-error Projection parameter annotations cannot override the schema's output.
+    defineInline(config, (_attrs: { label: number }) => 'Invalid');
+  }
+
+  void invalidProjection;
 });

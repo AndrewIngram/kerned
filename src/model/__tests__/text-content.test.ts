@@ -3,13 +3,15 @@ import { z } from 'zod';
 
 import { createSchema, defineNode, defineInline, textContent } from '../index';
 
-const label = defineInline({
-  name: 'label',
-  version: 1,
-  options: {},
-  schema: () => ({ attributes: z.strictObject({ title: z.string() }) }),
-  plainText: (attrs) => attrs.title,
-});
+const label = defineInline(
+  {
+    name: 'label',
+    version: 1,
+    options: {},
+    schema: () => ({ attributes: z.strictObject({ title: z.string() }) }),
+  },
+  (attrs) => attrs.title,
+);
 
 const note = defineNode({
   name: 'note',

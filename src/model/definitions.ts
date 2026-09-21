@@ -241,15 +241,13 @@ export function defineInline<
   Contribution extends object = {},
   Args extends unknown[] = [],
 >(
-  config: DefinitionConfig<Name, Options, Spec, Contribution, Args> &
-    OutputCompatibility<Spec> & {
-      plainText: (
-        attrs: Immutable<StandardSchemaV1.InferOutput<NoInfer<Spec['attributes']>>>,
-        options: Immutable<Options>,
-      ) => string;
-    },
+  config: DefinitionConfig<Name, Options, Spec, Contribution, Args> & OutputCompatibility<Spec>,
+  plainText: (
+    attrs: Immutable<StandardSchemaV1.InferOutput<NoInfer<Spec['attributes']>>>,
+    options: Immutable<NoInfer<Options>>,
+  ) => string,
 ) {
-  const { schema, plainText } = config;
+  const { schema } = config;
 
   return definition<
     'inline',

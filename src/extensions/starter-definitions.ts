@@ -23,20 +23,22 @@ export const underline = defineMark({
   schema: () => ({ attributes: z.null() }),
 });
 
-export const mentionDefinition = defineInline({
-  plainText: (attrs) => attrs.label,
-  name: 'mention',
-  version: 1,
-  options: {},
-  schema: () => ({
-    attributes: z.strictObject({
-      label: z.string(),
-      width: z.number().nonnegative(),
-      ascent: z.number().nonnegative(),
-      descent: z.number().nonnegative(),
+export const mentionDefinition = defineInline(
+  {
+    name: 'mention',
+    version: 1,
+    options: {},
+    schema: () => ({
+      attributes: z.strictObject({
+        label: z.string(),
+        width: z.number().nonnegative(),
+        ascent: z.number().nonnegative(),
+        descent: z.number().nonnegative(),
+      }),
     }),
-  }),
-});
+  },
+  (attrs) => attrs.label,
+);
 
 export const paragraph = defineNode({
   name: 'paragraph',

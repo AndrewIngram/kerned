@@ -43,6 +43,27 @@ versioned document codecs. `defineMark` and `defineInline` share configuration a
 attribute validation conventions. Definitions and their options are reusable;
 validated documents have immutable ownership.
 
+`defineInline(config, plainText)` takes its plain-text projection as a required
+second argument. TypeScript infers the complete schema before checking that
+callback, including defaults that depend on configured options:
+
+```ts
+const badge = defineInline(
+  {
+    name: 'badge',
+    version: 1,
+    options: { label: 'Untitled' },
+    schema: (options) => ({
+      attributes: z.object({ label: z.string().default(options.label) }),
+    }),
+  },
+  (attributes) => attributes.label,
+);
+```
+
+The callback receives normalized, deeply readonly attributes and options. It
+does not need attribute annotations or a particular configuration property order.
+
 The core generates text replacement, splitting, joining and child traversal. It
 checks grapheme boundaries, identity preservation and text conservation. Unknown
 node kinds, duplicate extension names and missing dependencies are errors.

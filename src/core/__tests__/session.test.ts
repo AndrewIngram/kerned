@@ -443,14 +443,16 @@ test('node, mark and inline definitions own typed contributions through configur
     setup: (options) => ({ queries: { emphasisLabel: () => options.label } }),
   }).configure({ label: 'Strong' });
 
-  const mention = defineInline({
-    name: 'mention',
-    version: 1,
-    options: { prefix: '@' },
-    schema: () => ({ attributes: z.string() }),
-    plainText: (name, options) => options.prefix + name,
-    setup: (options) => ({ queries: { mentionPrefix: () => options.prefix } }),
-  }).configure({ prefix: '#' });
+  const mention = defineInline(
+    {
+      name: 'mention',
+      version: 1,
+      options: { prefix: '@' },
+      schema: () => ({ attributes: z.string() }),
+      setup: (options) => ({ queries: { mentionPrefix: () => options.prefix } }),
+    },
+    (name, options) => options.prefix + name,
+  ).configure({ prefix: '#' });
 
   const assembled = createSchema({ extensions: [contributedNote, emphasis, mention] });
   const first = createEditor({ schema: assembled, content: [{ kind: 'note', text: 'First' }] });

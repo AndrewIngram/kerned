@@ -33,13 +33,15 @@ const note = defineNode({
   }),
 });
 
-const badge = defineInline({
-  name: 'badge',
-  version: 1,
-  options: {},
-  plainText: (attrs) => attrs.label,
-  schema: () => ({ attributes: z.strictObject({ label: z.string().default('Badge') }) }),
-});
+const badge = defineInline(
+  {
+    name: 'badge',
+    version: 1,
+    options: {},
+    schema: () => ({ attributes: z.strictObject({ label: z.string().default('Badge') }) }),
+  },
+  (attrs) => attrs.label,
+);
 
 const highlight = defineMark({
   name: 'highlight',

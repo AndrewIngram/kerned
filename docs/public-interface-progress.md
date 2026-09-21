@@ -2588,3 +2588,18 @@ default can produce TypeScript's excessive-instantiation error when `plainText`
 appears before `schema`; placing `schema` first currently avoids it. The new
 configured-binding fixture uses that order. Resolve this before the milestone
 judge rather than treating an ordering workaround as the final author interface.
+
+### Milestone 6 checkpoint: inline author inference
+
+`defineInline(config, plainText)` now infers the schema before checking the
+projection callback. This removes the excessive-instantiation failure for
+option-dependent defaults without weakening normalized attribute types or deep
+readonly guarantees. All 13 definitions use the new required second argument;
+there is no compatibility overload or property-order workaround.
+
+Type fixtures cover inferred configured defaults, nested readonly values and
+rejection of incompatible callback annotations. `pnpm run check` passes with
+722 Vitest tests, one unchanged collaboration TODO and 42 end-to-end cases.
+This constructor-interface change does not alter layout or rendering algorithms;
+the previous checkpoint's performance evidence remains the latest measurement.
+M6 remains open for widgets, content slots and selection/editability contracts.

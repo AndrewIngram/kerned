@@ -25,16 +25,18 @@ const score = defineMark({
   }),
 });
 
-const token = defineInline({
-  plainText: (attrs) => String(attrs.value),
-  name: 'token',
-  version: 1,
-  options: {},
-  schema: () => ({
-    attributes: z.strictObject({ value: z.string().transform(Number) }),
-    outputAttributes: z.strictObject({ value: z.number() }),
-  }),
-});
+const token = defineInline(
+  {
+    name: 'token',
+    version: 1,
+    options: {},
+    schema: () => ({
+      attributes: z.strictObject({ value: z.string().transform(Number) }),
+      outputAttributes: z.strictObject({ value: z.number() }),
+    }),
+  },
+  (attrs) => String(attrs.value),
+);
 
 test('normalization runs only at import and creation, never during editing or persistence', () => {
   const schema = createSchema({ extensions: [line, score, token] });
