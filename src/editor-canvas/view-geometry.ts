@@ -98,17 +98,21 @@ export function createViewGeometry<N extends NodeIdentity>({
     if (destroyed || !frame || frame.document.editorState.nodes !== editor.state.nodes) return null;
     const span = frame.document.spanFor(id);
 
-    if (!span || span.from === span.to) return null;
+    if (!span) return null;
     const { scene, inset, contentWidth } = frame.layout;
+    const flow = scene.flows.get(span.node.id);
     const first = scene.placements[span.from];
     const last = scene.placements[span.to - 1];
 
-    if (!first || !last) return null;
-    const top = first.y;
-    const height = last.y + last.height - top;
-    const indent = frame.document.projection.decorations.get(span.node.id)?.inset ?? 0;
-    const left = inset + indent;
-    const width = allocatedBlockWidth(contentWidth, indent);
+    if (!flow && (!first || !last || span.from === span.to)) return null;
+    const inherited = frame.document.projection.decorations.get(span.node.id);
+    const top = flow?.bounds.top ?? first.y;
+    const height = flow?.bounds.height ?? last.y + last.height - top;
+    const left = inset + (flow?.bounds.left ?? inherited?.inset ?? 0);
+
+    const width =
+      flow?.bounds.width ??
+      allocatedBlockWidth(contentWidth, inherited?.inset ?? 0, inherited?.endInset ?? 0);
 
     if (coordinates === 'client') {
       const canvas = bounds();

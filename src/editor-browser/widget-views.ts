@@ -165,7 +165,7 @@ export function createWidgetViews<N extends NodeIdentity>(
               : {
                   left: block.inset,
                   top: at.edge === 'start' ? 0 : block.height,
-                  width: allocatedBlockWidth(block.width, block.inset),
+                  width: allocatedBlockWidth(block.width, block.inset, block.endInset),
                   height: 0,
                 };
 

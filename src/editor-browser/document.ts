@@ -21,6 +21,7 @@ export function createDocumentQuery<N extends NodeIdentity, Block extends N, Con
     const nodes: Block[] = [];
     const decorations = new Map<number, Context>();
     const containers = new Map<number, ProjectedSpan<N>>();
+    const flowEvents: { kind: 'open' | 'close'; at: number; node: N }[] = [];
 
     function visit(node: N, inherited: Context) {
       decorations.set(node.id, inherited);
@@ -30,15 +31,17 @@ export function createDocumentQuery<N extends NodeIdentity, Block extends N, Con
       } else {
         const span = { node, from: nodes.length, to: nodes.length };
         containers.set(node.id, span);
+        flowEvents.push({ kind: 'open', at: nodes.length, node });
         schema
           .children(node)
           .forEach((child, index) => visit(child, policy.child(node, index, inherited)));
         span.to = nodes.length;
+        flowEvents.push({ kind: 'close', at: nodes.length, node });
       }
     }
 
     roots.forEach((node) => visit(node, policy.initial));
-    const projection = { nodes, decorations };
+    const projection = { nodes, decorations, flowEvents };
     const tree = indexTree(schema, roots);
     const context = selectionContext(schema, roots, tree);
     const nodeIndexes = new Map(projection.nodes.map((node, index) => [node.id, index]));

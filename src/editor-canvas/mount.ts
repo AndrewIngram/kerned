@@ -4,6 +4,7 @@ import './mount.css';
 import { mountEditorView, createEditorViewport, type BrowserViewOptions } from '../editor-browser';
 import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import { createCanvasInput } from '../editor-browser/canvas-input';
+import { createContentSlot } from '../editor-browser/content-slot';
 import {
   inputPolicies,
   type ViewSession,
@@ -82,13 +83,13 @@ export function mountEditor<N extends NodeIdentity>(
   const canvas = document.createElement('canvas');
   const overlay = document.createElement('div');
   const nativeNodes = document.createElement('div');
-  nativeNodes.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
-  overlay.append(nativeNodes);
+  nativeNodes.style.cssText =
+    'position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;';
   const input = document.createElement('textarea');
   const notice = document.createElement('div');
   notice.setAttribute('role', 'status');
   notice.style.cssText =
-    'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);';
+    'position:absolute;left:0;top:0;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);';
   const page = options.scroll === 'page';
   root.dataset.editorView = '';
   space.dataset.editorContent = '';
@@ -107,17 +108,28 @@ export function mountEditor<N extends NodeIdentity>(
   input.autocomplete = 'off';
   input.spellcheck = false;
   input.tabIndex = -1;
-  space.append(canvas, overlay);
+  space.append(nativeNodes, canvas, overlay);
   root.append(space, input, notice);
 
   let status: 'loading' | 'ready' | 'failed' | 'destroyed' = 'loading';
-  const cleanup: (() => void)[] = [];
+  const cleanup: (() => void)[] = [() => presentation.clear()];
   let failure: Error | undefined;
   let focusPending = false;
   let focused = false;
   let layout: ReturnType<typeof createDocumentLayout<N>> | undefined;
   let diagnostics: ReturnType<typeof connectViewDiagnostics> | undefined;
-  const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
+
+  const blocks = new Map<
+    number,
+    {
+      host: HTMLDivElement;
+      view: NodeView<N>;
+      name: string;
+      key: string;
+      slot: ReturnType<typeof createContentSlot> | null;
+    }
+  >();
+
   let layers: ReturnType<typeof createViewLayers<N>> | undefined;
   let drawing: ReturnType<typeof createLayerDrawing> | undefined;
   let textStyle: ReturnType<typeof createTextStyles> | undefined;
@@ -230,7 +242,7 @@ export function mountEditor<N extends NodeIdentity>(
     const active = document.activeElement;
 
     const host =
-      active instanceof Element && overlay.contains(active)
+      active instanceof Element && (overlay.contains(active) || nativeNodes.contains(active))
         ? active.closest('[data-editor-node],[data-editor-focus-node]')
         : null;
 
@@ -297,12 +309,6 @@ export function mountEditor<N extends NodeIdentity>(
     }
   }
 
-  function backgroundColor(): [number, number, number] {
-    const color = resources.read().kit.parseColorString(configuration.background);
-
-    return [color[0] * 255, color[1] * 255, color[2] * 255];
-  }
-
   function publish() {
     if (!layout || status === 'destroyed' || status === 'failed') return;
     const snapshot = layout.getSnapshot();
@@ -318,10 +324,34 @@ export function mountEditor<N extends NodeIdentity>(
     overlay.style.width = `${port.width / port.zoom}px`;
     overlay.style.height = `${scene.height}px`;
     overlay.style.transform = `scale(${port.zoom})`;
-    const active = new Set(visible.map((p) => p.node.id));
+    nativeNodes.style.width = overlay.style.width;
+    nativeNodes.style.height = overlay.style.height;
+    nativeNodes.style.transform = overlay.style.transform;
+
+    const renderable = [
+      ...snapshot.flows.map((flow) => ({ node: flow.node, bounds: flow.bounds, flow })),
+      ...visible.map((placement) => {
+        const inherited = doc.projection.decorations.get(placement.node.id);
+        const indent = inherited?.inset ?? 0;
+
+        return {
+          node: placement.node,
+          bounds: {
+            left: indent,
+            top: placement.y,
+            width: allocatedBlockWidth(contentWidth, indent, inherited?.endInset ?? 0),
+            height: placement.height,
+          },
+          flow: null,
+        };
+      }),
+    ];
+
+    const active = new Set(renderable.map((p) => p.node.id));
 
     for (const [id, block] of blocks) {
       if (active.has(id)) continue;
+      block.slot?.destroy();
       block.view.destroy();
       block.host.remove();
       blocks.delete(id);
@@ -329,12 +359,18 @@ export function mountEditor<N extends NodeIdentity>(
 
     let nativeIndex = 0;
 
-    for (const placement of visible) {
+    for (const placement of renderable) {
       const renderer = renderers.find(placement.node);
       const id = placement.node.id;
       let block = blocks.get(id);
 
-      if (block && block.name !== renderer?.name) {
+      if (
+        block &&
+        (block.name !== renderer?.name ||
+          block.key !== placement.node.key ||
+          (block.slot !== null) !== (placement.flow !== null))
+      ) {
+        block.slot?.destroy();
         block.view.destroy();
         block.host.remove();
         blocks.delete(id);
@@ -342,7 +378,7 @@ export function mountEditor<N extends NodeIdentity>(
       }
 
       if (!renderer) {
-        if (presentation.present(placement.node).kind === 'box')
+        if (!placement.flow && presentation.present(placement.node).kind === 'box')
           throw new Error(`Missing node view for ${editor.schema.resolve(placement.node).name}`);
         continue;
       }
@@ -350,11 +386,42 @@ export function mountEditor<N extends NodeIdentity>(
       if (!block) {
         const host = document.createElement('div');
         host.style.cssText = 'position:absolute;pointer-events:auto;';
-        host.dataset.editorNode = String(id);
+
+        if (placement.flow) host.dataset.editorFocusNode = String(id);
+        else host.dataset.editorNode = String(id);
         nativeNodes.append(host);
         const content = document.createElement('div');
+        content.style.display = 'flow-root';
         host.append(content);
-        block = { host, view: renderer.mount(content), name: renderer.name };
+
+        const slot = placement.flow
+          ? createContentSlot({
+              root: content,
+              onError: fail,
+              measure(insets) {
+                const current = presentation.query(editor.state).tree.byId.get(id)?.node;
+
+                if (!current || current.key !== placement.node.key) return;
+
+                if (presentation.measure(current, insets)) updateLayout();
+              },
+            })
+          : null;
+
+        try {
+          block = {
+            host,
+            view: renderer.mount(content),
+            name: renderer.name,
+            key: placement.node.key,
+            slot,
+          };
+        } catch (error) {
+          slot?.destroy();
+          host.remove();
+          throw error;
+        }
+
         blocks.set(id, block);
       }
 
@@ -368,14 +435,16 @@ export function mountEditor<N extends NodeIdentity>(
       }
 
       nativeIndex++;
-      const indent = doc.projection.decorations.get(id)?.inset ?? 0;
-      const nodeWidth = allocatedBlockWidth(contentWidth, indent);
-      block.host.style.left = `${inset + indent}px`;
-      block.host.style.top = `${placement.y}px`;
+      const nodeWidth = placement.bounds.width;
+      block.host.style.left = `${inset + placement.bounds.left}px`;
+      block.host.style.top = `${placement.bounds.top}px`;
       block.host.style.width = `${nodeWidth}px`;
+
+      if (placement.flow) block.slot?.update(nodeWidth, placement.flow.content.height);
       block.host.dataset.selected = String(!!doc.selectedRange(placement.node));
       block.view.update({
         node: placement.node,
+        content: block.slot?.content ?? null,
         width: nodeWidth,
         onMeasure: layout.measure,
         selection: editor.state.selection,
@@ -412,7 +481,7 @@ export function mountEditor<N extends NodeIdentity>(
       height: port.viewportHeight,
       zoom: port.zoom,
       top: snapshot.top,
-      background: backgroundColor(),
+      background: null,
       blocks: visible.map((placement) => {
         const style = presentation.present(placement.node);
 
@@ -528,6 +597,7 @@ export function mountEditor<N extends NodeIdentity>(
         createTextLabels(native.layout),
       );
       layers = createViewLayers(overlay, editor, drawing, {
+        eventRoot: root,
         onError: fail,
         onTextPointer: capture.onTextPointer,
       });
@@ -550,6 +620,7 @@ export function mountEditor<N extends NodeIdentity>(
 
         for (const block of blocks.values()) {
           try {
+            block.slot?.destroy();
             block.view.destroy();
           } catch (error) {
             errors.push(error);
@@ -600,11 +671,11 @@ export function mountEditor<N extends NodeIdentity>(
         });
       };
 
-      overlay.addEventListener('focusin', trackFocus, true);
-      overlay.addEventListener('focusout', trackFocus, true);
+      root.addEventListener('focusin', trackFocus, true);
+      root.addEventListener('focusout', trackFocus, true);
       cleanup.push(() => {
-        overlay.removeEventListener('focusin', trackFocus, true);
-        overlay.removeEventListener('focusout', trackFocus, true);
+        root.removeEventListener('focusin', trackFocus, true);
+        root.removeEventListener('focusout', trackFocus, true);
       });
 
       const events: NonNullable<BrowserViewOptions['input']> = {

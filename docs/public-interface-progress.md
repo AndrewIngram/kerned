@@ -2782,3 +2782,42 @@ allocation; it does not yet expose a content-slot attachment or React component.
 M6 remains open for chrome measurement, shared slot lifetime, paint ordering,
 React integration and their interaction/virtualization regressions. The milestone
 judge follows completion of that work. Milestones 7 and 8 remain pending.
+
+### Milestone 6 checkpoint: shared editable content slots
+
+Flowing node renderers now receive `content: ContentSlot | null`. Vanilla views
+attach an empty DOM element; React views use `NodeViewContent`. The shared owner
+reserves the canvas descendant height and measures surrounding chrome, including
+DOM changes that move the slot without resizing its outer wrapper. The view
+keeps numeric estimates across culling, prunes removed identities and releases
+attachments, observers, queued reports and projection caches during disposal.
+Slot cleanup is idempotent and cannot detach a successor.
+
+The scene walks ordered container entry/exit events alongside its leaf sequence.
+It reserves nested headers, footers and horizontal padding in foreground and
+background layout. Empty containers receive chrome bounds without inventing a
+text child. Native blocks, outlines and node-edge widgets use the same left/right
+allocation. Flow chrome paints behind the transparent text canvas; interactive
+inline/decorative overlays remain in front. There is still one canvas and input
+owner. Container backgrounds use ordinary closest-line text selection.
+
+Tests exercise nested and empty slots, resizing and zoom, React context and
+Strict Mode, scoped selection, live permissions, focused controls, offscreen
+culling/remounting, identity replacement, stale attachment cleanup, rich copy,
+typing and undo across a container edge. Browser screenshots verify DOM chrome
+behind rendered canvas text. The geometry checks also exposed unwanted anchoring
+when chrome appeared at the document start and a one-pixel scroll overflow from
+the hidden status element; both are fixed without loosening coordinate checks.
+
+`pnpm run check` passes with 789 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes with its existing chunk-size
+warning. Three serial production trials in
+`artifacts/public-interface-m6/content-slots/` pass every original budget: worst
+first usable 239 ms, streaming 1,227.4 ms, paste handler 58.9 ms, paste paint
+121 ms, typing 32.2 ms, paging 32.3 ms and loaded heap 27,921,908 bytes. Reports
+record parent `a278acd` and measure this checkpoint's uncommitted tree.
+
+M6 remains open for a dedicated large nested-slot/background-reflow and movement
+stress case, then the required committed milestone architecture judge and any
+agreed fixes. Milestones 7 and 8 remain pending. The checklist extension remains
+removed.

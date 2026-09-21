@@ -99,3 +99,5 @@ export function useCommandState<State, Request extends unknown[]>(
 export { useCanvasInput } from './use-canvas-input';
 
 export { useEditorViewport, type Viewport } from './use-viewport';
+
+export { NodeViewContent } from './node-view-content';

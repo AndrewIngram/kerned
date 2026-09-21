@@ -216,3 +216,5 @@ export {
   type RangeViewContext,
   type RangeViewMount,
 } from './range-views';
+
+export type { ContentSlot } from './content-slot';

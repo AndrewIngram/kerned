@@ -9,7 +9,10 @@ type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
 
 /** Canonical attributes are inferred from the registered definition, including defaults. */
 export type ReactNodeViewProps<Definition extends NodeDefinition> = Readonly<
-  Pick<NodeRenderFrame<Definition>, 'node' | 'attributes' | 'width' | 'selection' | 'access'>
+  Pick<
+    NodeRenderFrame<Definition>,
+    'node' | 'attributes' | 'width' | 'selection' | 'access' | 'content'
+  >
 >;
 
 /** Register a measured React block with the same lifecycle as native node views. */
@@ -27,7 +30,7 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
     let destroyed = false;
 
     const observer = new ResizeObserver(() => {
-      if (destroyed || !current) return;
+      if (destroyed || !current || current.content) return;
       current.onMeasure(current.node.id, current.width, element.offsetHeight);
     });
 
@@ -39,6 +42,7 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
           !current ||
           current.node !== frame.node ||
           current.width !== frame.width ||
+          current.content !== frame.content ||
           current.access !== frame.access ||
           !equalScopedSelection(current.selection, frame.selection);
 
@@ -49,6 +53,7 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
           element,
           <Component
             node={frame.node}
+            content={frame.content}
             attributes={frame.attributes}
             width={frame.width}
             selection={frame.selection}

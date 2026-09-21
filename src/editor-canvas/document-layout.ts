@@ -3,6 +3,7 @@ import type { createDocumentQuery } from '../editor-browser/document';
 import type { Rect } from '../engines';
 import type { NodeIdentity } from '../model';
 import { RangeSelection } from '../state';
+import type { FlowLayoutEvent, FlowPlacement } from './flow-layout';
 import {
   createEditorScene,
   type Measurement,
@@ -16,16 +17,12 @@ type LayoutResult<N extends NodeIdentity> = ReturnType<
 >;
 
 type LayoutDocument<N extends NodeIdentity> = Pick<
-  ReturnType<ReturnType<typeof createDocumentQuery<N, N, { inset: number }>>>,
-  | 'nodes'
-  | 'nodeIndexes'
-  | 'projection'
-  | 'textSelection'
-  | 'focusId'
-  | 'selection'
-  | 'collapsed'
-  | 'blockFor'
->;
+  ReturnType<ReturnType<typeof createDocumentQuery<N, N, { inset: number; endInset?: number }>>>,
+  'nodes' | 'nodeIndexes' | 'textSelection' | 'focusId' | 'selection' | 'collapsed' | 'blockFor'
+> & {
+  projection: { decorations: ReadonlyMap<number, { inset: number; endInset?: number }> };
+  flows?: readonly FlowLayoutEvent<N>[];
+};
 
 export type DocumentLayoutSource<N extends NodeIdentity> = {
   getSnapshot(this: void): LayoutDocument<N>;
@@ -53,6 +50,7 @@ export type DocumentLayoutSnapshot<N extends NodeIdentity> = {
   inset: number;
   scene: Scene<N>;
   visible: Placement<N>[];
+  flows: readonly FlowPlacement<N>[];
   top: number;
   bottom: number;
   contentWidth: number;
@@ -66,6 +64,7 @@ function emptySnapshot<N extends NodeIdentity>(): DocumentLayoutSnapshot<N> {
     inset: 28,
     scene: {
       placements: [],
+      flows: new Map(),
       height: 50,
       width: 0,
       top: 0,
@@ -75,6 +74,7 @@ function emptySnapshot<N extends NodeIdentity>(): DocumentLayoutSnapshot<N> {
       paddingTop: 0,
     },
     visible: [],
+    flows: [],
     top: 0,
     bottom: 0,
     contentWidth: 150,
@@ -204,6 +204,7 @@ export function createDocumentLayout<N extends NodeIdentity>({
         retainAll: current.retainAll,
       },
       projection.decorations,
+      doc.flows,
     );
 
     const scene = result.scene;
@@ -262,6 +263,11 @@ export function createDocumentLayout<N extends NodeIdentity>({
       inset,
       scene,
       visible: visible.toSorted((a, b) => a.y - b.y),
+      flows: [...scene.flows.values()].filter(
+        (flow) =>
+          (flow.bounds.top + flow.bounds.height >= top - 160 && flow.bounds.top < bottom + 160) ||
+          pinned.includes(flow.node.id),
+      ),
       top,
       bottom,
       contentWidth,
@@ -356,6 +362,7 @@ export function createDocumentLayout<N extends NodeIdentity>({
           allocatedBlockWidth(
             snapshot.contentWidth,
             document?.projection.decorations.get(id)?.inset ?? 0,
+            document?.projection.decorations.get(id)?.endInset ?? 0,
           ) ||
         !Number.isFinite(height) ||
         height <= 0 ||

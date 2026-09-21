@@ -1,6 +1,7 @@
 import { defineContribution } from '../core';
 import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '../model';
 import type { NodeAccess, ScopedSelection, Selection, SelectionContext } from '../state';
+import type { ContentSlot } from './content-slot';
 import type { ViewSession } from './input-contributions';
 import { createTextDecorations, type ReadTextDecorations } from './text-decorations';
 import type { ReadTextStyle } from './text-style';
@@ -19,6 +20,7 @@ type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
 
 export type NodeViewFrame<N> = {
   node: N;
+  content?: ContentSlot | null;
   selection: Selection;
   context: SelectionContext;
   width: number;
@@ -62,10 +64,11 @@ export type NodeViewAttributes<Definition extends NodeDefinition> = NonNullable<
 /** Schema-bound renderer data. The imperative editor remains available in the factory. */
 export type NodeRenderFrame<Definition extends NodeDefinition> = Omit<
   NodeViewFrame<NodeIdentity>,
-  'node' | 'selection' | 'context'
+  'node' | 'selection' | 'context' | 'content'
 > & {
   node: Readonly<NodeIdentity>;
   attributes: NodeViewAttributes<Definition>;
+  content: ContentSlot | null;
   access: NodeAccess;
   selection: ScopedSelection;
 };
@@ -110,6 +113,7 @@ export function defineNodeView<Definition extends NodeDefinition>(
                 throw new Error('Cannot render a node outside the current document');
               view.update({
                 node: frame.node,
+                content: frame.content ?? null,
                 width: frame.width,
                 textDecorations: frame.textDecorations,
                 textStyle: frame.textStyle,

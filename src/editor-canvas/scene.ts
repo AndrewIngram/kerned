@@ -3,6 +3,7 @@ import type { LaidOut, LayoutInput, Rect } from '../engines';
 import type { NodeIdentity } from '../model';
 import type { InlineAtom } from '../owned-inline';
 import type { createOwnedEngine } from '../owned-layout';
+import { createFlowLayout, type FlowLayoutEvent, type FlowPlacement } from './flow-layout';
 
 type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
 
@@ -40,6 +41,7 @@ export type Placement<N extends NodeIdentity> = {
 
 export type Scene<N extends NodeIdentity> = {
   placements: Placement<N>[];
+  flows: ReadonlyMap<number, FlowPlacement<N>>;
   height: number;
   width: number;
   top: number;
@@ -51,7 +53,9 @@ export type Scene<N extends NodeIdentity> = {
 
 export type Measurement = { width: number; height: number };
 
-const emptyInsets: ReadonlyMap<number, { inset: number }> = new Map();
+const emptyFlows: readonly never[] = [];
+
+const emptyInsets: ReadonlyMap<number, { inset: number; endInset?: number }> = new Map();
 
 type View = {
   top: number;
@@ -88,6 +92,7 @@ export function createEditorScene<N extends NodeIdentity>(
 
   let previous: Scene<N> = {
     placements: [],
+    flows: new Map(),
     height: 50,
     width: 0,
     top: 0,
@@ -101,6 +106,7 @@ export function createEditorScene<N extends NodeIdentity>(
     previousDecorations = emptyInsets;
 
   let presentationVersion = 0;
+  let previousFlows: readonly FlowLayoutEvent<N>[] | undefined;
 
   let previousNodes: readonly N[] = [],
     previousMeasurements: ReadonlyMap<number, Measurement> = new Map();
@@ -162,9 +168,17 @@ export function createEditorScene<N extends NodeIdentity>(
       width: number,
       measurements: ReadonlyMap<number, Measurement>,
       view: View,
-      decorations: ReadonlyMap<number, { inset: number }> = emptyInsets,
+      decorations: ReadonlyMap<number, { inset: number; endInset?: number }> = emptyInsets,
+      flows: readonly FlowLayoutEvent<N>[] = emptyFlows,
     ) {
       currentDecorations = decorations;
+
+      const availableWidth = (id: number) =>
+        allocatedBlockWidth(
+          width,
+          decorations.get(id)?.inset ?? 0,
+          decorations.get(id)?.endInset ?? 0,
+        );
 
       const started = performance.now(),
         layoutIds: number[] = [];
@@ -181,8 +195,7 @@ export function createEditorScene<N extends NodeIdentity>(
         dirty.clear();
 
         for (const [id, value] of cache)
-          if (value.width !== allocatedBlockWidth(width, decorations.get(id)?.inset ?? 0))
-            dirty.set(id, value.node);
+          if (value.width !== availableWidth(id)) dirty.set(id, value.node);
       }
 
       // Resident scrolls reuse the scene. Crossing the resident window hydrates
@@ -204,6 +217,7 @@ export function createEditorScene<N extends NodeIdentity>(
         width === previous.width &&
         measurements === previousMeasurements &&
         decorations === previousDecorations &&
+        flows === previousFlows &&
         !paddingChanged &&
         !dirty.size &&
         viewportReady
@@ -251,10 +265,11 @@ export function createEditorScene<N extends NodeIdentity>(
         newLayouts = 0;
 
       const placements: Placement<N>[] = [];
+      let flow = createFlowLayout(flows, width);
 
       function update(node: N) {
         const startedValue = performance.now(),
-          value = compose(node, allocatedBlockWidth(width, decorations.get(node.id)?.inset ?? 0));
+          value = compose(node, availableWidth(node.id));
 
         compositionMs += performance.now() - startedValue;
         cache.set(node.id, value);
@@ -269,9 +284,9 @@ export function createEditorScene<N extends NodeIdentity>(
       for (let index = 0; index < nodes.length; index++) {
         const node = nodes[index],
           inset = decorations.get(node.id)?.inset ?? 0,
-          layoutWidth = allocatedBlockWidth(width, inset);
+          layoutWidth = availableWidth(node.id);
 
-        if (index > 0) y += gap(nodes[index - 1], node);
+        y = flow.boundary(index, y, index > 0 ? gap(nodes[index - 1], node) : 0);
 
         if (index === anchorIndex) anchorY = y;
 
@@ -358,6 +373,7 @@ export function createEditorScene<N extends NodeIdentity>(
         y += value.height;
       }
 
+      y = flow.boundary(nodes.length, y, 0);
       let background = 0;
 
       // Only scheduled ticks spend the background budget. Scroll and input merely
@@ -379,12 +395,13 @@ export function createEditorScene<N extends NodeIdentity>(
       // Publish fresh positions after the batch; earlier snapshots stay immutable.
       if (background) {
         y = 32 + padding;
+        flow = createFlowLayout(flows, width);
 
         for (let index = 0; index < placements.length; index++) {
           const p = placements[index],
             value = present(p.node).kind === 'text' ? cache.get(p.node.id) : undefined;
 
-          if (index > 0) y += gap(nodes[index - 1], p.node);
+          y = flow.boundary(index, y, index > 0 ? gap(nodes[index - 1], p.node) : 0);
 
           if (index === anchorIndex) anchorY = y;
           const inset = decorations.get(p.node.id)?.inset ?? 0;
@@ -405,10 +422,12 @@ export function createEditorScene<N extends NodeIdentity>(
         }
       }
 
+      if (background) y = flow.boundary(nodes.length, y, 0);
+
       const newAnchor = placements[anchorIndex];
-      // Preserve the reading position when view chrome adds top space, except
-      // at the document's beginning, where that space must remain visible.
-      const keepStart = paddingChanged && view.top < (previous.placements[0]?.y ?? 32);
+      // At the document's beginning, new chrome must remain visible instead of
+      // being scrolled away by the reading-anchor adjustment.
+      const keepStart = view.top < (previous.placements[0]?.y ?? 32);
 
       const top =
         anchor && !keepStart ? anchorY + Math.min(offset, newAnchor?.height ?? offset) : view.top;
@@ -442,6 +461,7 @@ export function createEditorScene<N extends NodeIdentity>(
 
       previous = {
         placements,
+        flows: flow.placements,
         height: y + 24,
         width,
         top,
@@ -455,6 +475,7 @@ export function createEditorScene<N extends NodeIdentity>(
       previousNodes = nodes;
       previousMeasurements = measurements;
       previousDecorations = decorations;
+      previousFlows = flows;
 
       return {
         scene: previous,
@@ -473,7 +494,11 @@ export function createEditorScene<N extends NodeIdentity>(
 
       const value = cache.get(id),
         inset = currentDecorations.get(id)?.inset ?? 0,
-        width = allocatedBlockWidth(previous.width, inset);
+        width = allocatedBlockWidth(
+          previous.width,
+          inset,
+          currentDecorations.get(id)?.endInset ?? 0,
+        );
 
       if (value?.layout && value.width === width && value.node === placement.node)
         return offsetLayout(value.layout, inset);
@@ -505,6 +530,7 @@ export function createEditorScene<N extends NodeIdentity>(
       previousNodes = [];
       previous = {
         placements: [],
+        flows: new Map(),
         height: 50,
         width: 0,
         top: 0,
@@ -516,6 +542,7 @@ export function createEditorScene<N extends NodeIdentity>(
       previousMeasurements = new Map();
       currentDecorations = emptyInsets;
       previousDecorations = emptyInsets;
+      previousFlows = undefined;
     },
     get cachedParagraphs() {
       return cache.size;

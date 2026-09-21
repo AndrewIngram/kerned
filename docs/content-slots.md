@@ -1,9 +1,9 @@
 # Editable content slots
 
-Status: milestone 6 is in progress. The view can query nonempty flowing-container
-bounds and places native descendants within their inherited indentation. The
-content-slot registration and React component described below are still to be
-implemented. Existing native tables continue to own their cell text rendering.
+Status: milestone 6 is in progress. Vanilla and React renderers can attach a
+content slot to a flowing container. The mounted view measures its chrome and
+positions canvas-owned descendants inside it. Existing native tables continue
+to own their cell text rendering; this is not a grid-layout replacement.
 
 ## Ownership
 
@@ -13,12 +13,11 @@ input, scrolling and virtualization. A slot identifies where those descendants
 belong inside the chrome. It does not create another editor, graphics owner,
 document session, hidden input or editable DOM subtree.
 
-The intended React author experience is a node component with a content-slot prop
-and a `NodeViewContent` child alongside ordinary React controls. Vanilla renderers
+A React node component receives a `content` prop and renders a `NodeViewContent`
+child alongside ordinary React controls. Vanilla renderers
 attach the same slot to a DOM element. Neither adapter walks the document,
 positions individual paragraphs nor shapes text. A slot contains the node's child
-sequence; it cannot reorder or duplicate document children. The first contract
-will have one slot per flowing node. Native grid views retain their existing
+sequence; it cannot reorder or duplicate document children. There is one slot per flowing node. Native grid views retain their existing
 explicit ownership contract rather than pretending that a grid is one vertical
 flow.
 
@@ -32,52 +31,80 @@ Container geometry can use the first and last placement without traversing or
 composing descendants during each query. It includes internal paragraph spacing
 and retains estimated offscreen heights while composition proceeds.
 
-The remaining layout work must reserve the chrome around a slot. The view will
-assign the slot's descendant height; the slot attachment will report its offset,
-available width and the surrounding chrome dimensions. Those measurements must
-be local to the mounted view and tied to the current node/width/configuration.
-They must not become document attributes or pass through the shaping boundary.
-Unchanged chrome measurements must not recompose paragraphs when only selection
-or access changes. Nested slots must compose their offsets. Width changes reflow
-descendants and preserve the existing reading anchor.
+The view assigns the slot's descendant height. The attachment reports the chrome
+around that rectangle in unscaled document units. Measurements belong to the
+mounted view, not document attributes, and do not cross the shaping boundary.
+Nested slots accumulate horizontal padding and reserve headers and footers around
+the leaf sequence. Width changes reflow descendants using the existing reading
+anchor. At the document start, adding chrome leaves scroll at the start.
+
+Resize and DOM mutation observers detect size and offset changes. Unchanged
+chrome measurements do not invalidate layout. Selection and access updates reuse
+the compiled flow projection. Empty containers appear in the same ordered flow
+walk, including containers with no text descendants.
 
 An empty slot still needs wrapper geometry. It does not imply an editable text
 position: the schema or extension must supply a text child before a caret can be
 placed within text. The generic view must not insert a starter-kit paragraph.
-Missing, culled and destroyed slot attachments must release their observers and
-measurements, and stale asynchronous reports must not resize a successor view.
+Culling and destruction release the attachment, observers and scheduled reports.
+Numeric chrome estimates remain with the view while their node identity exists,
+so culling does not collapse document geometry. Removal prunes those estimates;
+reattachment measures current DOM. Stale cleanup cannot detach a successor slot.
 
 ## Painting and interaction
 
-Container chrome backgrounds must paint behind canvas descendants. The current
-single overlay above an opaque text canvas cannot support an ordinary opaque
-React wrapper background. The implementation must establish a DOM chrome plane
-behind a transparent text plane, while preserving the foreground overlay used by
-inline controls and decorations. It must retain one viewport paint owner and
-existing resource disposal. Splitting this ownership into nested editor views
-would duplicate input, selection and layout lifetimes, so that approach is ruled
-out.
+Container chrome paints in a DOM plane behind a transparent text canvas. Inline
+controls and decorations retain their foreground overlay. The configured page
+background belongs to the editor root. There is still one viewport paint owner
+and one input owner.
 
 Clicks within a slot continue through the editor's existing closest-line policy.
-Chrome buttons retain native behavior. Container backgrounds must not cause the
-whole subtree to be selected when the user intended to place a text caret.
-Container focus pins must keep the relevant chrome mounted without composing
-all offscreen descendants. Nested native nodes and decoration widgets must share
-the same allocated bounds after indentation, zoom and reflow.
+Chrome buttons retain native behavior. Flow hosts do not carry the atomic-node
+pointer marker, so clicking the slot selects text using the closest-line policy.
+Focus pins keep chrome mounted without composing all offscreen descendants. Native
+nodes, outlines and node-edge widgets share left and right padding allocation.
 
-## Completion evidence still required
+## Authoring contract
 
-- A real vanilla container and a React container, each with canvas-owned text
-  descendants and interactive chrome, using the same slot owner.
-- React context, scoped selection and live access changes inside the wrapper.
-- Typing, cross-node selection, clipboard and undo across slot boundaries.
-- Header/footer resizing, nested containers, width/zoom changes, empty content,
-  node movement/removal and stale measurement rejection.
-- Correct background/text/foreground paint order, verified from the rendered
-  artifact, and unchanged native table behavior.
-- Offscreen culling and remounting, focused controls, Strict Mode and cleanup.
-- Large-document loading, reflow, retained memory and existing performance gates.
+The schema definition must be a container with a `flow` presentation. A bound
+node-render frame exposes `content: ContentSlot | null`; box views receive null.
+The renderer does not iterate its children.
 
-These are completion requirements for the content-slot work, not deferred product
-features. Milestone 6 remains open until they are implemented and verified, then
-committed and independently judged.
+```tsx
+function Callout({ content, attributes }: ReactNodeViewProps<typeof callout>) {
+  return (
+    <section className="callout">
+      <header>{attributes.title}</header>
+      <NodeViewContent content={content} />
+      <footer>Ordinary interactive controls</footer>
+    </section>
+  );
+}
+```
+
+A vanilla renderer creates an empty element inside its mounted root and calls
+`content.attach(element)` once. Keep and call the returned cleanup function when
+replacing that element or destroying the renderer. The shared owner sets and
+restores its inline height. Duplicate attachments and attachment outside the
+renderer root throw. Attachments can be released and replaced, including React
+Strict Mode's effect replay; destruction is terminal.
+
+Use ordinary vertical DOM flow. Put borders, padding, headers and footers on the
+surrounding chrome. Keep the slot empty and undecorated, with no fixed height,
+independent scrolling, clipping or transform. A rotated or independently scaled
+slot is not supported. Use the mounted editor's zoom setting. The one slot
+represents the entire child sequence, not a portal for arbitrary DOM children.
+
+## Verification
+
+Colocated tests cover nested and empty flow geometry, vanilla and React chrome,
+header resizing, offset changes without outer resize, inherited padding, zoom,
+identity replacement, stale cleanup, context, scoped selection, live permissions,
+Strict Mode, focus retention and culling/remounting. The integration test in
+`tests/content-slots.browser.test.ts` exercises the starter schema's real pointer
+selection, typing, rich copy and undo across a quote boundary. Rendered screenshots
+are in `artifacts/public-interface-m6/content-slots/`.
+
+Milestone 6 remains open pending the full verification/performance gates and its
+independent architecture judge. Movement during background reflow and very large
+nested slot documents still need a dedicated stress case before final acceptance.

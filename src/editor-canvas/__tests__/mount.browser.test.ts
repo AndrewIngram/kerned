@@ -706,7 +706,8 @@ test('a centered column keeps outer editor margins clickable and updates paint i
   view.update({ background: '#fffef9' });
   await frame();
   expect(diagnostics.read()?.stats.compositions).toBe(compositions);
-  expect([...canvas.getContext('2d')!.getImageData(0, 0, 1, 1).data]).toEqual([255, 254, 249, 255]);
+  expect(getComputedStyle(root).backgroundColor).toBe('rgb(255, 254, 249)');
+  expect([...canvas.getContext('2d')!.getImageData(0, 0, 1, 1).data]).toEqual([0, 0, 0, 0]);
   const client = view.blockBounds(2, 'client');
   expect(client?.top).toBeCloseTo(point.top, 0);
   view.update({ maxWidth: null });

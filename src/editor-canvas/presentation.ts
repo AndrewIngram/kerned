@@ -8,6 +8,7 @@ import type {
   Schema,
   SchemaDefinition,
 } from '../model';
+import { emptySlotInsets, type SlotInsets, type FlowLayoutEvent } from './flow-layout';
 import type { BlockPresentation } from './scene';
 import { createThemeStyles, type ViewTheme } from './theme';
 
@@ -101,6 +102,7 @@ export function createDocumentPresentation<N extends NodeIdentity>(
   let style = createThemeStyles(editor.schema, theme, validateColor);
   let cache = new WeakMap<N, NodePresentation>();
   let version = 0;
+  const chrome = new Map<number, { key: string; insets: SlotInsets }>();
 
   function read(node: N) {
     let result = cache.get(node);
@@ -125,20 +127,61 @@ export function createDocumentPresentation<N extends NodeIdentity>(
   }
 
   function createQuery() {
-    return createDocumentQuery<N, N, FlowContext>(editor.schema, {
-      initial: { inset: 0 },
+    return createDocumentQuery<N, N, FlowContext & { endInset: number }>(editor.schema, {
+      initial: { inset: 0, endInset: 0 },
       isBlock: (node): node is N => read(node).kind !== 'flow',
       child(node, index, context) {
         const value = read(node);
 
         if (value.kind !== 'flow') throw new Error('Only flowing containers project children');
 
-        return value.child(index, context);
+        const child = value.child(index, context);
+        const measured = chrome.get(node.id);
+        const insets = measured?.key === node.key ? measured.insets : emptySlotInsets;
+
+        return { inset: child.inset + insets.left, endInset: context.endInset + insets.right };
       },
     });
   }
 
   let query = createQuery();
+
+  let compiled:
+    | { projection: ReturnType<typeof query>['projection']; flows: readonly FlowLayoutEvent<N>[] }
+    | undefined;
+
+  function queryDocument(state: Parameters<typeof query>[0]) {
+    const result = query(state);
+
+    if (compiled?.projection !== result.projection) {
+      for (const [id, value] of chrome) {
+        if (result.tree.byId.get(id)?.node.key !== value.key) chrome.delete(id);
+      }
+
+      const flows = result.projection.flowEvents.map((event): FlowLayoutEvent<N> => {
+        if (event.kind === 'close') return { kind: 'close', at: event.at, id: event.node.id };
+        const inherited = result.projection.decorations.get(event.node.id);
+        const measured = chrome.get(event.node.id);
+
+        return {
+          kind: 'open',
+          at: event.at,
+          to: result.spanFor(event.node.id)?.to ?? event.at,
+          node: event.node,
+          inset: inherited?.inset ?? 0,
+          endInset: inherited?.endInset ?? 0,
+          chrome: measured?.key === event.node.key ? measured.insets : emptySlotInsets,
+        };
+      });
+
+      compiled = { projection: result.projection, flows };
+    }
+
+    return { ...result, flows: compiled.flows };
+  }
+
+  // Preserve snapshot identity across repeated reads by the layout owner.
+  let snapshot: ReturnType<typeof queryDocument> | undefined;
 
   return {
     get version() {
@@ -150,8 +193,38 @@ export function createDocumentPresentation<N extends NodeIdentity>(
       cache = new WeakMap();
       query = createQuery();
       version++;
+      snapshot = undefined;
     },
-    query: (state: Parameters<typeof query>[0]) => query(state),
+    query(state: Parameters<typeof query>[0]) {
+      if (snapshot?.editorState !== state) snapshot = queryDocument(state);
+
+      return snapshot;
+    },
+    measure(node: N, insets: SlotInsets) {
+      if (read(node).kind !== 'flow') throw new Error('Content slots require a flowing container');
+      const previous = chrome.get(node.id);
+
+      if (
+        previous?.key === node.key &&
+        previous.insets.top === insets.top &&
+        previous.insets.right === insets.right &&
+        previous.insets.bottom === insets.bottom &&
+        previous.insets.left === insets.left
+      )
+        return false;
+      chrome.set(node.id, { key: node.key, insets });
+      query = createQuery();
+      snapshot = undefined;
+      version++;
+
+      return true;
+    },
+    clear() {
+      snapshot = undefined;
+      compiled = undefined;
+      chrome.clear();
+      query = createQuery();
+    },
     present(node: N): BlockPresentation {
       const value = read(node);
 

@@ -233,3 +233,40 @@ test('rules capture fixed configuration and reject invalid values and unavailabl
   ).toThrow(/No node factory registered for section/);
   expect(() => view.update(JSON.parse('{"rules":[{"name":"note"}]}'))).toThrow(/rules/);
 });
+
+test('slot measurements remain view-local, reuse the selection projection and release with the view cache', ({
+  onTestFinished,
+}) => {
+  const f = extension();
+
+  const editor = createEditor({
+    schema: createSchema({ extensions: [note, section, f.view] }),
+    content: [
+      { kind: 'section', id: 2, inset: 24, items: [{ kind: 'note', id: 1, body: 'Body' }] },
+    ],
+  });
+
+  onTestFinished(() => editor.destroy());
+  const view = createDocumentPresentation(editor);
+  const original = view.query(editor.state);
+  const parent = editor.state.nodes[0];
+  const chrome = { top: 20, right: 12, bottom: 8, left: 16 };
+  expect(view.measure(parent, chrome)).toBe(true);
+  const measured = view.query(editor.state);
+  expect(measured.projection.decorations.get(1)).toEqual({ inset: 40, endInset: 12 });
+  expect(measured.flows[0]).toMatchObject({ kind: 'open', at: 0, to: 1, chrome });
+  expect(original.projection.decorations.get(1)).toEqual({ inset: 24, endInset: 0 });
+  expect(editor.state.revision).toBe(0);
+  expect(view.measure(parent, chrome)).toBe(false);
+  expect(view.query(editor.state)).toBe(measured);
+  editor.select(textSelection(1, 2));
+  expect(view.query(editor.state).flows).toBe(measured.flows);
+  expect(view.query(editor.state).projection).toBe(measured.projection);
+  view.clear();
+  expect(view.query(editor.state).projection.decorations.get(1)).toEqual({
+    inset: 24,
+    endInset: 0,
+  });
+  expect(view.query(editor.state).flows).not.toBe(measured.flows);
+  expect(measured.projection.decorations.get(1)).toEqual({ inset: 40, endInset: 12 });
+});

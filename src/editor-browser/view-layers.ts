@@ -21,6 +21,7 @@ export type LayerBlock<N> = {
   readonly width: number;
   readonly height: number;
   readonly inset: number;
+  readonly endInset?: number;
   readonly text: BlockTextGeometry | null;
   readonly inline: readonly InlineBounds[];
   readonly ancestors: readonly {
@@ -71,9 +72,15 @@ export function createViewLayers<N extends NodeIdentity>(
   element: HTMLElement,
   editor: ViewSession<N>,
   drawing: LayerDrawing,
-  options: { onError?: (error: Error) => void; onTextPointer?: ObserveTextPointer } = {},
+  options: {
+    eventRoot?: HTMLElement;
+    onError?: (error: Error) => void;
+    onTextPointer?: ObserveTextPointer;
+  } = {},
 ) {
   if (editor.isDestroyed) throw new Error('Editor is destroyed');
+
+  const eventRoot = options.eventRoot ?? element;
 
   const contributions = [
     ...decorationContributions(editor).map(decorationLayer),
@@ -100,7 +107,7 @@ export function createViewLayers<N extends NodeIdentity>(
   let scheduled = 0;
   let destroyed = false;
   let tree: TreeIndex<N> | undefined;
-  let insets: ReadonlyMap<number, { inset: number }> | undefined;
+  let insets: ReadonlyMap<number, { inset: number; endInset?: number }> | undefined;
   const ancestors = new Map<number, LayerBlock<N>['ancestors']>();
   let detach: (() => void) | undefined;
 
@@ -197,10 +204,10 @@ export function createViewLayers<N extends NodeIdentity>(
           },
           listen(type, listener) {
             if (!active || destroyed) throw new Error('View layer is destroyed');
-            element.addEventListener(type, listener);
+            eventRoot.addEventListener(type, listener);
 
             const release = () => {
-              element.removeEventListener(type, listener);
+              eventRoot.removeEventListener(type, listener);
               listeners.delete(release);
             };
 
@@ -209,7 +216,7 @@ export function createViewLayers<N extends NodeIdentity>(
             return release;
           },
           nodeAt(target) {
-            if (!active || destroyed || !(target instanceof Element) || !element.contains(target))
+            if (!active || destroyed || !(target instanceof Element) || !eventRoot.contains(target))
               return null;
             const id = target.closest('[data-editor-node]')?.getAttribute('data-editor-node');
 
@@ -259,7 +266,7 @@ export function createViewLayers<N extends NodeIdentity>(
     update(frame: {
       tree: TreeIndex<N>;
       textStyle?: ReadTextStyle;
-      insets: ReadonlyMap<number, { inset: number }>;
+      insets: ReadonlyMap<number, { inset: number; endInset?: number }>;
       blocks: readonly {
         node: N;
         y: number;
@@ -307,6 +314,7 @@ export function createViewLayers<N extends NodeIdentity>(
           width: frame.width,
           height: block.height,
           inset: frame.insets.get(block.node.id)?.inset ?? 0,
+          endInset: frame.insets.get(block.node.id)?.endInset ?? 0,
           text: block.text,
           inline: block.inline,
           ancestors: path,

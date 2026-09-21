@@ -24,7 +24,7 @@ export type CanvasFrame<N> = {
   height: number;
   zoom: number;
   top: number;
-  background: readonly [number, number, number];
+  background: readonly [number, number, number] | null;
   blocks: readonly CanvasBlock<N>[];
   selectedRange: (node: N) => { from: number; to: number } | null;
   caret: Rect | undefined;
@@ -111,7 +111,7 @@ export function createCanvasRenderer<N>({ onError }: { onError?: (error: Error) 
     const canvas = surface.getCanvas(),
       dpr = window.devicePixelRatio || 1;
 
-    canvas.clear(kit.Color(...current.background));
+    canvas.clear(current.background ? kit.Color(...current.background) : kit.TRANSPARENT);
     canvas.save();
 
     try {

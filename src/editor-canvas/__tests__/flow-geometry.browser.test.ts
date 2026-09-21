@@ -1,4 +1,5 @@
 import { expect, test } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
@@ -126,11 +127,51 @@ const rendering = defineExtension({
   },
 });
 
-const schema = createSchema({ extensions: [note, group, card, rendering] });
+const groupViewOptions = { enabled: true };
 
-function fixture() {
+const groupViews = defineExtension({
+  name: 'group-views',
+  options: groupViewOptions,
+  setup(options, context: ContributionContext) {
+    if (!options.enabled) return {};
+    context.provide(
+      nodeViews,
+      defineNodeView(group, () => (element) => {
+        element.style.cssText =
+          'display:flow-root;background:rgb(245, 235, 220);padding:10px 12px 14px 16px;box-sizing:border-box';
+        const header = document.createElement('button');
+        header.textContent = 'Expand header';
+        header.style.cssText = 'display:block;height:20px;padding:0;border:0';
+        header.addEventListener('click', () => {
+          header.style.height = '60px';
+        });
+        const body = document.createElement('div');
+        body.dataset.slotBody = '';
+        element.append(header, body);
+        let release: (() => void) | undefined;
+
+        return {
+          update({ node, content }) {
+            element.dataset.group = String(node.id);
+
+            if (!release && content) release = content.attach(body);
+          },
+          destroy() {
+            release?.();
+          },
+        };
+      }),
+    );
+
+    return {};
+  },
+});
+
+function fixture(slots = false) {
   const editor = createEditor({
-    schema,
+    schema: createSchema({
+      extensions: [note, group, card, rendering, groupViews.configure({ enabled: slots })],
+    }),
     content: [
       { kind: 'note', id: 0, text: 'Before' },
       {
@@ -194,7 +235,7 @@ test('flow bounds span nested descendants and native views use their inherited w
   expect(f.view.blockBounds(3)).toMatchObject({ id: 3, left: 52, width: 340 });
   expect(f.view.blockBounds(4)).toMatchObject({ id: 4, left: 68, width: 324 });
   expect(f.view.blockBounds(8)).toEqual(f.view.blockBounds(4));
-  expect(f.view.blockBounds(6)).toBeNull();
+  expect(f.view.blockBounds(6)).toMatchObject({ id: 6, height: 0 });
   const native = f.element.querySelector<HTMLElement>('[data-card]');
   const bounds = f.view.blockBounds(4, 'client');
 
@@ -269,4 +310,89 @@ test('flow bounds follow edits, culling, scrolling and deletion without traversi
   await expect.poll(() => f.view.blockBounds(7)?.top).toBe(68);
   expect(f.view.blockBounds(1)).toBeNull();
   expect(f.view.blockBounds(3)).toBeNull();
+});
+
+test('vanilla content slots reserve nested chrome, preserve the canvas caret and remeasure after interaction and zoom', async ({
+  onTestFinished,
+}) => {
+  const f = fixture(true);
+  onTestFinished(() => f.destroy());
+  await f.view.ready;
+  await expect.poll(() => f.view.blockBounds(2)?.left).toBe(68);
+  await expect.poll(() => f.view.blockBounds(4)?.width).toBe(268);
+  const outer = f.element.querySelector<HTMLElement>('[data-group="1"]');
+  const body = outer?.querySelector<HTMLElement>('[data-slot-body]');
+  const button = outer?.querySelector('button');
+
+  if (!outer || !body || !button) throw new Error('Missing slot chrome');
+  const first = f.view.blockBounds(2, 'client');
+
+  if (!first) throw new Error('Missing slot content');
+  expect(first.top).toBeCloseTo(body.getBoundingClientRect().top);
+  expect(first.left).toBeCloseTo(body.getBoundingClientRect().left + 24);
+  const start = f.view.blockBounds(2)?.top ?? 0;
+  const revision = f.editor.state.revision;
+  button.focus();
+  await userEvent.keyboard('{Enter}');
+  await expect.poll(() => f.view.blockBounds(2)?.top).toBe(start + 40);
+  expect(f.editor.state.revision).toBe(revision);
+  expect(document.activeElement).toBe(button);
+  expect(f.view.coordsAt({ id: 2, offset: 3 })?.top).toBeGreaterThanOrEqual(
+    body.getBoundingClientRect().top,
+  );
+  f.view.update({ zoom: 1.25 });
+  await expect.poll(() => f.view.blockBounds(4)?.width).toBe(184);
+  const resized = f.view.blockBounds(2, 'client');
+
+  if (!resized) throw new Error('Missing resized content');
+  expect(resized.top).toBeCloseTo(body.getBoundingClientRect().top);
+  expect(resized.left).toBeCloseTo(body.getBoundingClientRect().left + 24 * 1.25);
+  await f.view.reveal({ id: 5, offset: 0 });
+  await expect.poll(() => f.view.blockBounds(6)?.height).toBe(44);
+  expect(f.element.querySelectorAll('canvas')).toHaveLength(1);
+  expect(f.element.querySelectorAll('[data-editor-input]')).toHaveLength(1);
+  const root = f.element.querySelector('[data-editor-content]');
+  expect(root?.children[0].contains(outer)).toBe(true);
+  expect(root?.children[1].tagName).toBe('CANVAS');
+});
+
+test('replacing a flowing node identity cancels the old slot and measures the successor', async ({
+  onTestFinished,
+}) => {
+  const f = fixture(true);
+  onTestFinished(() => f.destroy());
+  await f.view.ready;
+  await expect.poll(() => f.view.blockBounds(2)?.left).toBe(68);
+  const old = f.element.querySelector<HTMLElement>('[data-group="1"]');
+
+  if (!old) throw new Error('Missing original');
+  old.style.paddingTop = '80px';
+
+  const child = f.editor.schema
+    .node(note)
+    .create({ id: 9, key: 'new-child' }, { text: 'Replacement' });
+
+  const replacement = f.editor.schema
+    .node(group)
+    .create({ id: 1, key: 'new-group' }, { indent: 0 }, [child]);
+
+  f.editor.transact((draft) => {
+    draft.step({ kind: 'replaceChildren', parent: null, index: 1, count: 1, nodes: [] });
+
+    return true;
+  });
+  f.editor.transact((draft) => {
+    draft.step({ kind: 'replaceChildren', parent: null, index: 1, count: 0, nodes: [replacement] });
+
+    return true;
+  });
+  await expect.poll(() => f.view.blockBounds(9)?.top).toBe(98);
+  const current = f.element.querySelector<HTMLElement>('[data-group="1"]');
+  expect(current).not.toBe(old);
+  expect(old.isConnected).toBe(false);
+  const header = current?.querySelector('button');
+
+  if (!header) throw new Error('Missing replacement header');
+  header.style.height = '70px';
+  await expect.poll(() => f.view.blockBounds(9)?.top).toBe(148);
 });
