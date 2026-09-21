@@ -22,6 +22,13 @@ export {
 export { selectedValue, type SelectedValue } from './queries';
 
 export {
+  createPendingEdit,
+  type PendingEdit,
+  type PendingEditTarget,
+  type PendingEditResult,
+} from './pending-edit';
+
+export {
   defineCommand,
   defineQuery,
   defineDocumentCommand,

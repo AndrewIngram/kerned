@@ -2882,3 +2882,31 @@ The full quality gate and production build pass again after these follow-up
 fixes. Final serial production trials include the complete fix tree and pass all
 original budgets. Milestone 6 is complete with this judge-fix commit; milestone 7
 can now begin. Milestone 8 remains pending.
+
+### Milestone 7 checkpoint: durable delayed edits
+
+M6's implementation was reviewed at `1e0b97c`; agreed architecture findings and
+follow-up edge cases were validated and committed in `cfe828f` before M7 began.
+
+The public core now provides `createPendingEdit(editor, selection?)`. It captures
+a durable caret or contiguous range without retaining a document snapshot,
+exposes an AbortSignal, and cancels automatically on session destruction. A
+single-use commit resolves that target against the current document and opens a
+fresh transaction. The ordinary transaction permission policy decides whether the
+actual steps are permitted, including the existing distinction between editing
+read-only content and deleting an unlocked node. Rejected, deleted, unavailable,
+cancelled and already-settled outcomes remain explicit.
+
+Node tests cover movement and split before insertion, selection preservation,
+separate undo, inserted content inside a captured range, deletion, changed access,
+read-only unlocked node deletion, cancellation, destruction, exceptions and an
+empty document. Unsupported noncontiguous selections do not produce a target.
+Static codecs, deterministic shortcut/input-rule composition and consumer
+migration remain open M7 work. This checkpoint does not complete the milestone
+or replace its required final architecture judge.
+
+Checkpoint validation: `pnpm run check` passes with 806 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. The production build passes with the
+existing chunk-size warning. The new helper is opt-in and does not change demo
+input or rendering paths. A second lint-fix/format pass leaves tracked and
+untracked files unchanged.
