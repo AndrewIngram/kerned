@@ -166,6 +166,10 @@ const notes = createEditor(schema, result.value, textSelection(result.value[0].i
 Content types derive from the installed extension tuple. Validation assigns missing
 identities and returns immutable content. Attribute validators may normalize
 imports; edits preserve position mappings and reject text-changing normalization.
+For transformations whose output cannot be parsed unchanged by the input schema,
+provide `outputAttributes` as a canonical validator. Edits and persistence check
+that validator without normalizing values again.
+
 Zod is used here as a Standard Schema implementation; it is not required in an
 extension author's code.
 

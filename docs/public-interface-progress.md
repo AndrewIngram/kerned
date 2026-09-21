@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status      | Required outcome                                                               |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | In progress | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Pending     | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Pending     | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Pending     | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending     | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending     | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending     | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status   | Required outcome                                                               |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Pending  | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Pending  | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Pending  | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -465,3 +465,50 @@ unchanged convergence todo, and 39 Playwright passes**. `pnpm run build` passed.
 The test-discovery audit preserved all 105 baseline Vitest identities and all
 39 E2E identities before the two added behavior tests. The public registration
 migration has no remaining array-constructor callers in source, tests or scripts.
+
+### Milestone 2 architecture review
+
+Implementation commit: `634fe99`. The independent judge requested three fixes:
+canonical attribute validation, inferred inline projection attributes, and
+immutable compiled descriptors. All three are accepted. The review confirmed
+that behavior setup is a valid milestone 2 foundation and automatic session
+composition remains milestone 3.
+
+The attribute module now distinguishes import normalization from canonical
+validation. Definitions with non-idempotent transformations supply
+`outputAttributes`; its output type must agree with the import validator's output.
+Import normalizes once and proves the result canonical. Edits, stored marks,
+encoding and decoding validate canonical attributes without transforming them.
+Without an explicit output validator, normalized output must pass the import
+validator unchanged; otherwise validation reports the missing canonical contract.
+Structural comparison avoids serializing attributes on the editing path.
+
+`defineInline` takes `plainText` alongside `schema`, inferring normalized readonly
+attributes from that schema and passing owned configured options. One private
+adapter restores the erased attribute type after canonical validation. Authors
+can write `attrs.label` directly instead of parsing their own known attributes.
+
+Compiled node descriptors, editing/mark/codec/container functions, registries and
+manifests are owned and frozen. The corresponding exposed types are readonly.
+Regression tests cover normalized node/mark/inline round trips, non-idempotent
+transforms, incompatible canonical types, configured inline callbacks, and
+attempted descriptor mutation. Final verification and the post-review commit
+remain pending at this checkpoint.
+
+### Milestone 2 accepted fixes and final gate
+
+The judge passed the follow-up review. Canonical validators now receive a
+separate JSON value so a third-party validator cannot mutate persisted attributes
+in place, including when it throws. Tests exercise both return and throw paths.
+The final gate passed `pnpm run check`: **153 Vitest passes, one unchanged
+convergence todo, and 39 Playwright passes**. The production build passed.
+
+Three serial production trials after the review fixes are retained in
+`artifacts/public-interface-m2/judge-fixes/baseline.json`. All established budgets
+pass. Worst trial results: first usable 171ms, complete stream 1042.8ms, paste
+handler 36.4ms, paste paint 78ms, typing frame 32.3ms, paging frame 32.3ms, and
+loaded heap 28,764,216 bytes. Reports identify implementation commit `634fe99`;
+they measure the working tree containing the accepted fixes before their commit.
+
+The implementation and review cycle for milestone 2 is complete with this
+post-review changeset. Session contribution composition remains milestone 3.

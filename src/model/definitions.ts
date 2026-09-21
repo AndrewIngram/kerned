@@ -1,5 +1,6 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
+import { validateAttributes } from './attribute-validation';
 import { freezeJson, type Immutable } from './immutable-json';
 import { jsonValue, type JsonValue } from './schema-codec';
 
@@ -33,6 +34,7 @@ export type NodeSpec = {
   groups?: readonly string[];
   selectable?: boolean;
   attributes: AttributeSchema;
+  outputAttributes?: AttributeSchema;
   content: TextContent | ChildContent | { kind: 'atom' };
   /** Optional adapter for an established wire representation; identity and children stay core-owned. */
   persistence?: {
@@ -43,12 +45,14 @@ export type NodeSpec = {
 
 export type MarkSpec = {
   attributes: StandardSchemaV1<unknown, JsonValue>;
+  outputAttributes?: StandardSchemaV1<unknown, JsonValue>;
   inclusiveStart?: boolean;
   inclusiveEnd?: boolean;
 };
 
 export type InlineSpec = {
   attributes: StandardSchemaV1<unknown, JsonValue>;
+  outputAttributes?: StandardSchemaV1<unknown, JsonValue>;
   plainText: (attributes: JsonValue) => string;
 };
 
@@ -131,12 +135,20 @@ function definition<
   });
 }
 
+type OutputCompatibility<Spec extends { attributes: StandardSchemaV1 }> = Spec extends {
+  outputAttributes: infer Output extends StandardSchemaV1;
+}
+  ? StandardSchemaV1.InferOutput<Output> extends StandardSchemaV1.InferOutput<Spec['attributes']>
+    ? unknown
+    : { readonly outputAttributesMustMatchNormalizedAttributes: never }
+  : unknown;
+
 /** Definitions are reusable. Configuring one creates another; no session state lives here. */
 export function defineNode<
   const Name extends string,
   Options extends DefinitionOptions,
   const Spec extends NodeSpec,
->(config: DefinitionConfig<Name, Options, Spec>) {
+>(config: DefinitionConfig<Name, Options, Spec> & OutputCompatibility<Spec>) {
   return definition('node', config);
 }
 
@@ -144,16 +156,51 @@ export function defineMark<
   const Name extends string,
   Options extends DefinitionOptions,
   const Spec extends MarkSpec,
->(config: DefinitionConfig<Name, Options, Spec>) {
+>(config: DefinitionConfig<Name, Options, Spec> & OutputCompatibility<Spec>) {
   return definition('mark', config);
 }
 
 export function defineInline<
   const Name extends string,
   Options extends DefinitionOptions,
-  const Spec extends InlineSpec,
->(config: DefinitionConfig<Name, Options, Spec>) {
-  return definition('inline', config);
+  const Spec extends Omit<InlineSpec, 'plainText'>,
+>(
+  config: DefinitionConfig<Name, Options, Spec> &
+    OutputCompatibility<Spec> & {
+      plainText: (
+        attrs: Immutable<StandardSchemaV1.InferOutput<NoInfer<Spec['attributes']>>>,
+        options: Immutable<Options>,
+      ) => string;
+    },
+) {
+  const { schema, plainText } = config;
+
+  return definition<'inline', Name, Options, Spec & { plainText: (attrs: JsonValue) => string }>(
+    'inline',
+    {
+      ...config,
+      schema(options) {
+        const spec = schema(options);
+
+        return {
+          ...spec,
+          plainText(attrs: JsonValue) {
+            const result = validateAttributes(spec, attrs, []);
+
+            if ('issues' in result)
+              throw new Error(result.issues.map((issue) => issue.message).join('; '));
+
+            return plainText(
+              // SAFETY: Canonical validation above establishes this definition's normalized output. The private registry erases the concrete attribute type.
+              // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Restore the definition-specific output type after its canonical validator accepts it unchanged.
+              result.value as Immutable<StandardSchemaV1.InferOutput<Spec['attributes']>>,
+              options,
+            );
+          },
+        };
+      },
+    },
+  );
 }
 
 /** Non-content behavior is retained by assembly and instantiated by each session. */

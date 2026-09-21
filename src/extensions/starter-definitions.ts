@@ -24,6 +24,7 @@ export const underline = defineMark({
 });
 
 export const mentionDefinition = defineInline({
+  plainText: (attrs) => attrs.label,
   name: 'mention',
   version: 1,
   options: {},
@@ -34,7 +35,6 @@ export const mentionDefinition = defineInline({
       ascent: z.number().nonnegative(),
       descent: z.number().nonnegative(),
     }),
-    plainText: (attrs) => z.object({ label: z.string() }).parse(attrs).label,
   }),
 });
 

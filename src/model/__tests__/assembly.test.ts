@@ -36,7 +36,8 @@ const mention = defineInline({
   name: 'mention',
   version: 1,
   options: {},
-  schema: () => ({ attributes: z.strictObject({ label: z.string() }), plainText: () => 'mention' }),
+  schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
+  plainText: (attrs) => attrs.label,
 });
 
 const schema = createSchema({ extensions: [paragraph, quote, link, mention] });
@@ -400,4 +401,46 @@ test('content groups select installed members and preserve inferred children', (
       null,
     ),
   ).toThrow(/child/i);
+});
+
+test('compiled descriptors cannot diverge from the assembled definitions', () => {
+  const result = schema['~standard'].validate([{ kind: 'paragraph', text: 'Hello' }]);
+
+  if (result.issues) throw new Error(JSON.stringify(result.issues));
+  const node = result.value[0];
+  const descriptor = schema.resolve(node);
+  expect(Object.isFrozen(descriptor)).toBe(true);
+  expect(Object.isFrozen(descriptor.codec)).toBe(true);
+  expect(Object.isFrozen(schema.manifest)).toBe(true);
+  expect(Object.isFrozen(schema.manifest[0])).toBe(true);
+  expect(Object.isFrozen(schema.marks)).toBe(true);
+  expect(Object.isFrozen(schema.inline)).toBe(true);
+
+  if (descriptor.kind !== 'text') throw new Error('Expected text descriptor');
+  expect(Object.isFrozen(descriptor.editing)).toBe(true);
+  expect(Object.isFrozen(descriptor.editing.marks)).toBe(true);
+  expect(() =>
+    Object.defineProperty(descriptor.editing, 'text', { value: () => 'corrupted' }),
+  ).toThrow(/redefine/);
+  expect(schema.text(node)).toBe('Hello');
+  const container = schema.resolve({ kind: 'quote', id: 2, key: 'quote', children: [] });
+
+  if (container.kind !== 'container') throw new Error('Expected container descriptor');
+  expect(Object.isFrozen(container.content)).toBe(true);
+
+  function invalidMutation() {
+    if (descriptor.kind !== 'text') return;
+    // @ts-expect-error Executable descriptors are readonly.
+    descriptor.editing.text = () => 'corrupted';
+    // @ts-expect-error Codec implementations are readonly.
+    descriptor.codec!.encode = () => null;
+    // @ts-expect-error Mark registries are readonly.
+    schema.marks.create = schema.marks.create.bind(schema.marks);
+    // @ts-expect-error Inline registries are readonly.
+    schema.inline.decode = schema.inline.decode.bind(schema.inline);
+    // @ts-expect-error The persistence manifest is readonly.
+    schema.manifest.push({ name: 'unknown', version: 1 });
+  }
+
+  void invalidMutation;
 });

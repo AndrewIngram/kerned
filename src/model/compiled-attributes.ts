@@ -1,10 +1,14 @@
-import { validateValue } from './attribute-validation';
+import { parseAttributes, validateAttributes } from './attribute-validation';
 import type { RuntimeDocumentNode, SchemaDefinition } from './definitions';
 import { jsonRecord } from './schema-codec';
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
 
-export function nodeAttributes(definition: NodeDefinition, node: RuntimeDocumentNode) {
+export function nodeAttributes(
+  definition: NodeDefinition,
+  node: RuntimeDocumentNode,
+  mode: 'canonical' | 'input' = 'canonical',
+) {
   const content = definition.spec.content;
   const reserved = new Set(['id', 'key', 'kind', 'locked']);
 
@@ -16,9 +20,11 @@ export function nodeAttributes(definition: NodeDefinition, node: RuntimeDocument
     if (content.inline) reserved.add(content.inline);
   }
 
-  const result = validateValue(
-    definition.spec.attributes,
-    Object.fromEntries(Object.entries(node).filter(([key]) => !reserved.has(key))),
+  const validate = mode === 'input' ? parseAttributes : validateAttributes;
+
+  const result = validate(
+    definition.spec,
+    jsonRecord(Object.fromEntries(Object.entries(node).filter(([key]) => !reserved.has(key)))),
     [],
   );
 

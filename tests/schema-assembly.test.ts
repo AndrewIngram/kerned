@@ -174,7 +174,8 @@ test('ordinary typing never revalidates the document or unrelated node attribute
   );
 
   if (result.issues) throw new Error(JSON.stringify(result.issues));
-  expect(attributeValidations).toBe(2000);
+  // Import normalizes and then proves the output is canonical; edits still validate only one node.
+  expect(attributeValidations).toBe(4000);
   attributeValidations = 0;
 
   const edited = applySteps(
@@ -326,7 +327,8 @@ test('derived codecs reject unknown node, mark and inline versions', () => {
     name: 'token',
     version: 1,
     options: {},
-    schema: () => ({ attributes: z.null(), plainText: () => 'Token' }),
+    schema: () => ({ attributes: z.null() }),
+    plainText: () => 'Token',
   });
 
   const rich = defineNode({

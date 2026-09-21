@@ -14,6 +14,7 @@ type InlineValueProgram = {
   name: string;
   version: number;
   parse: (attrs: JsonValue) => JsonValue;
+  validate: (attrs: JsonValue) => JsonValue;
   plainText: (attrs: JsonValue) => string;
 };
 
@@ -39,19 +40,33 @@ export function createInlineValues(extensions: readonly InlineValueProgram[]) {
     return extension;
   }
 
-  function create(type: string, id: string, index: number, attrs: JsonValue): InlineValue {
+  function make(
+    type: string,
+    id: string,
+    index: number,
+    attrs: JsonValue,
+    mode: 'input' | 'canonical',
+  ): InlineValue {
     if (!id || !Number.isSafeInteger(index) || index < 0)
       throw new Error('Invalid inline identity or offset');
 
-    return { type, id, index, attrs: jsonValue(resolve(type).parse(attrs)) };
+    const extension = resolve(type);
+
+    return {
+      type,
+      id,
+      index,
+      attrs: jsonValue(mode === 'input' ? extension.parse(attrs) : extension.validate(attrs)),
+    };
   }
 
-  return {
-    create,
+  return Object.freeze({
+    create: (type: string, id: string, index: number, attrs: JsonValue) =>
+      make(type, id, index, attrs, 'input'),
     plainText: (value: InlineValue) => resolve(value.type).plainText(value.attrs),
     encode(values: readonly InlineValue[]): JsonValue[] {
       return values.map((value) => ({
-        ...create(value.type, value.id, value.index, value.attrs),
+        ...make(value.type, value.id, value.index, value.attrs, 'canonical'),
         version: resolve(value.type).version,
       }));
     },
@@ -62,12 +77,12 @@ export function createInlineValues(extensions: readonly InlineValueProgram[]) {
 
         if (value.version !== resolve(type).version) throw new Error('Unsupported inline version');
 
-        return create(type, jsonString(value.id), jsonNumber(value.index), value.attrs);
+        return make(type, jsonString(value.id), jsonNumber(value.index), value.attrs, 'canonical');
       });
 
       validateInlineObjects(text, values);
 
       return values;
     },
-  };
+  });
 }

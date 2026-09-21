@@ -1,7 +1,13 @@
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
-import { defineMark, defineNode, type DocumentInput, type DocumentOutput } from '../definitions';
+import {
+  defineMark,
+  defineNode,
+  defineInline,
+  type DocumentInput,
+  type DocumentOutput,
+} from '../definitions';
 
 const note = defineNode({
   name: 'note',
@@ -198,4 +204,54 @@ test('configured options expose immutable nested values without sharing caller o
   }
 
   void invalidMutation;
+});
+
+test('inline projections infer normalized attributes and receive configured options', () => {
+  const token = defineInline({
+    name: 'token',
+    version: 1,
+    options: { prefix: '@' },
+    schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
+    plainText: (attrs, options) => {
+      expectTypeOf(attrs).toEqualTypeOf<{ readonly label: string }>();
+
+      return options.prefix + attrs.label;
+    },
+  });
+
+  const configured = token.configure({ prefix: '#' });
+  expect(configured.spec.plainText({ label: 'tag' })).toBe('#tag');
+  expect(token.spec.plainText({ label: 'tag' })).toBe('@tag');
+  expect(() => configured.spec.plainText({ label: 4 })).toThrow(/string/);
+
+  function invalidCanonicalValidators() {
+    // @ts-expect-error Canonical node attributes must agree with normalized output.
+    defineNode({
+      name: 'bad',
+      version: 1,
+      options: {},
+      schema: () => ({
+        attributes: z.strictObject({ count: z.number() }),
+        outputAttributes: z.strictObject({ count: z.string() }),
+        content: { kind: 'atom' },
+      }),
+    });
+    // @ts-expect-error Canonical mark attributes must agree with normalized output.
+    defineMark({
+      name: 'bad',
+      version: 1,
+      options: {},
+      schema: () => ({ attributes: z.number(), outputAttributes: z.string() }),
+    });
+    // @ts-expect-error Canonical inline attributes must agree with normalized output.
+    defineInline({
+      name: 'bad',
+      version: 1,
+      options: {},
+      schema: () => ({ attributes: z.number(), outputAttributes: z.string() }),
+      plainText: () => '',
+    });
+  }
+
+  void invalidCanonicalValidators;
 });

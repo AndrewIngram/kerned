@@ -19,6 +19,7 @@ export type MarkExtension = {
   version: number;
   /** Parse and normalize attributes at the schema boundary. */
   parse(attrs: JsonValue): JsonValue;
+  validate(attrs: JsonValue): JsonValue;
   inclusiveStart?: boolean;
   inclusiveEnd?: boolean;
 };
@@ -154,12 +155,15 @@ export function createMarkSchema(extensions: readonly MarkExtension[]) {
     registry.set(extension.name, extension);
   }
 
-  function create(type: string, attrs: JsonValue): Mark {
+  function value(type: string, attrs: JsonValue, mode: 'input' | 'canonical'): Mark {
     const extension = registry.get(type);
 
     if (!extension) throw new Error(`Unknown mark: ${type}`);
 
-    return { type, attrs: jsonValue(extension.parse(attrs)) };
+    return {
+      type,
+      attrs: jsonValue(mode === 'input' ? extension.parse(attrs) : extension.validate(attrs)),
+    };
   }
 
   function validate(text: string, ranges: readonly MarkRange[]): MarkRange[] {
@@ -167,12 +171,12 @@ export function createMarkSchema(extensions: readonly MarkExtension[]) {
       ranges.map((range) => {
         validateTextRange(text, range.from, range.to);
 
-        return { ...range, mark: create(range.mark.type, range.mark.attrs) };
+        return { ...range, mark: value(range.mark.type, range.mark.attrs, 'canonical') };
       }),
     );
   }
 
-  return {
+  return Object.freeze({
     boundary(this: void, mark: Mark, edge: 'start' | 'end'): boolean | undefined {
       const extension = registry.get(mark.type);
 
@@ -182,7 +186,7 @@ export function createMarkSchema(extensions: readonly MarkExtension[]) {
     },
     encode(ranges: readonly MarkRange[]): JsonValue[] {
       return ranges.map((range) => {
-        const mark = create(range.mark.type, range.mark.attrs);
+        const mark = value(range.mark.type, range.mark.attrs, 'canonical');
 
         return {
           from: range.from,
@@ -191,10 +195,10 @@ export function createMarkSchema(extensions: readonly MarkExtension[]) {
         };
       });
     },
-    decode(text: string, value: JsonValue): MarkRange[] {
+    decode(text: string, encoded: JsonValue): MarkRange[] {
       return validate(
         text,
-        jsonArray(value).map((valueValue) => {
+        jsonArray(encoded).map((valueValue) => {
           const range = jsonRecord(valueValue),
             data = jsonRecord(range.mark),
             type = jsonString(data.type),
@@ -206,13 +210,16 @@ export function createMarkSchema(extensions: readonly MarkExtension[]) {
           return {
             from: jsonNumber(range.from),
             to: jsonNumber(range.to),
-            mark: create(type, data.attrs),
+            mark: value(type, data.attrs, 'canonical'),
           };
         }),
       );
     },
-    manifest: extensions.map(({ name, version }) => ({ name, version })),
-    create,
+    manifest: Object.freeze(
+      extensions.map(({ name, version }) => Object.freeze({ name, version })),
+    ),
+    validateMark: (mark: Mark) => value(mark.type, mark.attrs, 'canonical'),
+    create: (type: string, attrs: JsonValue) => value(type, attrs, 'input'),
     validate,
-  };
+  });
 }

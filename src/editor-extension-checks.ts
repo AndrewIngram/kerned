@@ -129,7 +129,8 @@ export function checkExtensions() {
     let rejected = false;
 
     try {
-      createEditor(createSchema({ extensions }), [original], textSelection(1, 0, 0));
+      const candidate = createSchema({ extensions });
+      candidate.resolve(original);
     } catch {
       rejected = true;
     }

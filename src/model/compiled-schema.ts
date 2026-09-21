@@ -1,4 +1,4 @@
-import { validateValue } from './attribute-validation';
+import { attributeFunctions } from './attribute-validation';
 import { nodeAttributes } from './compiled-attributes';
 import { compileNodeCodec } from './compiled-codecs';
 import {
@@ -36,14 +36,7 @@ export function compileSchema(definitions: readonly SchemaDefinition[]) {
               version: definition.version,
               inclusiveStart: definition.spec.inclusiveStart,
               inclusiveEnd: definition.spec.inclusiveEnd,
-              parse(value) {
-                const result = validateValue(definition.spec.attributes, value, []);
-
-                if ('issues' in result)
-                  throw new Error(result.issues.map((issue) => issue.message).join('; '));
-
-                return result.value;
-              },
+              ...attributeFunctions(definition.spec),
             },
           ]
         : [],
@@ -58,14 +51,7 @@ export function compileSchema(definitions: readonly SchemaDefinition[]) {
               name: definition.name,
               version: definition.version,
               plainText: definition.spec.plainText,
-              parse(value) {
-                const parsed = validateValue(definition.spec.attributes, value, []);
-
-                if ('issues' in parsed)
-                  throw new Error(parsed.issues.map((issue) => issue.message).join('; '));
-
-                return parsed.value;
-              },
+              ...attributeFunctions(definition.spec),
             },
           ]
         : [],
@@ -174,11 +160,15 @@ export function compileSchema(definitions: readonly SchemaDefinition[]) {
           throw new Error('Empty split requires a text node');
         const targetContent = target.spec.content;
 
-        const value = nodeAttributes(target, {
-          ...rightIdentity,
-          kind: target.name,
-          [targetContent.field]: '',
-        });
+        const value = nodeAttributes(
+          target,
+          {
+            ...rightIdentity,
+            kind: target.name,
+            [targetContent.field]: '',
+          },
+          'input',
+        );
 
         const next = Object.assign(value, rightIdentity, { kind: target.name });
 
@@ -220,23 +210,26 @@ export function compileSchema(definitions: readonly SchemaDefinition[]) {
     const field = content.marks;
 
     if (field)
-      behavior.marks = {
-        validate: (values) =>
-          values.map((mark) => {
-            if (content.allowedMarks && !content.allowedMarks.includes(mark.type))
-              throw new Error(`Unsupported mark: ${mark.type}`);
+      return {
+        ...behavior,
+        marks: {
+          validate: (values) =>
+            values.map((mark) => {
+              if (content.allowedMarks && !content.allowedMarks.includes(mark.type))
+                throw new Error(`Unsupported mark: ${mark.type}`);
 
-            return marks.create(mark.type, mark.attrs);
-          }),
-        boundary: marks.boundary,
-        read: (node) => marksOf(node, content),
-        write(node, values) {
-          return write(
-            node,
-            textOf(node, content),
-            marks.validate(textOf(node, content), values),
-            inlineOf(node, content),
-          );
+              return marks.validateMark(mark);
+            }),
+          boundary: marks.boundary,
+          read: (node) => marksOf(node, content),
+          write(node, values) {
+            return write(
+              node,
+              textOf(node, content),
+              marks.validate(textOf(node, content), values),
+              inlineOf(node, content),
+            );
+          },
         },
       };
 

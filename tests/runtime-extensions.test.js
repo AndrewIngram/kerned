@@ -254,7 +254,6 @@ test('foreign inline extensions own attributes, layout and versioned serializati
       defineInline,
       jsonArray,
       jsonRecord,
-      jsonString,
       replaceInlineObjects,
       sliceInlineObjects,
     } = await import('../src/model/index.ts');
@@ -262,12 +261,12 @@ test('foreign inline extensions own attributes, layout and versioned serializati
     const { inline: values } = createSchema({
       extensions: [
         defineInline({
+          plainText: (attrs) => attrs.formula,
           name: 'equation',
           version: 3,
           options: {},
           schema: () => ({
             attributes: z.strictObject({ formula: z.string() }),
-            plainText: (attrs) => jsonString(jsonRecord(attrs).formula),
           }),
         }),
       ],

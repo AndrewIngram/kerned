@@ -1,7 +1,7 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { z } from 'zod';
 
-import { validateValue } from './attribute-validation';
+import { parseAttributes } from './attribute-validation';
 import { compileSchema } from './compiled-schema';
 import { childPolicy } from './content-policy';
 import type {
@@ -61,29 +61,40 @@ function prefixed(issues: readonly Issue[], path: Path): Issue[] {
 
 type TypedMarks<D extends readonly SchemaDefinition[]> = string extends D[number]['name']
   ? ReturnType<typeof createMarkSchema>
-  : Omit<ReturnType<typeof createMarkSchema>, 'create' | 'validate' | 'decode'> & {
-      create<Type extends DocumentMark<D>['type']>(
-        type: Type,
-        attrs: Extract<DocumentMark<D, 'input'>, { type: Type }>['attrs'],
-      ): Extract<DocumentMark<D>, { type: Type }>;
-      validate(
-        text: string,
-        ranges: readonly MarkRange[],
-      ): { from: number; to: number; mark: DocumentMark<D> }[];
-      decode(text: string, value: JsonValue): { from: number; to: number; mark: DocumentMark<D> }[];
-    };
+  : Readonly<
+      Omit<
+        ReturnType<typeof createMarkSchema>,
+        'create' | 'validate' | 'validateMark' | 'decode'
+      > & {
+        create<Type extends DocumentMark<D>['type']>(
+          type: Type,
+          attrs: Extract<DocumentMark<D, 'input'>, { type: Type }>['attrs'],
+        ): Extract<DocumentMark<D>, { type: Type }>;
+        validateMark(mark: MarkRange['mark']): DocumentMark<D>;
+        validate(
+          text: string,
+          ranges: readonly MarkRange[],
+        ): { from: number; to: number; mark: DocumentMark<D> }[];
+        decode(
+          text: string,
+          value: JsonValue,
+        ): { from: number; to: number; mark: DocumentMark<D> }[];
+      }
+    >;
 
 type TypedInline<D extends readonly SchemaDefinition[]> = string extends D[number]['name']
   ? ReturnType<typeof createInlineValues>
-  : Omit<ReturnType<typeof createInlineValues>, 'create' | 'decode'> & {
-      create<Type extends DocumentInline<D>['type']>(
-        type: Type,
-        id: string,
-        index: number,
-        attrs: Extract<DocumentInline<D, 'input'>, { type: Type }>['attrs'],
-      ): Extract<DocumentInline<D>, { type: Type }>;
-      decode(text: string, value: JsonValue): DocumentInline<D>[];
-    };
+  : Readonly<
+      Omit<ReturnType<typeof createInlineValues>, 'create' | 'decode'> & {
+        create<Type extends DocumentInline<D>['type']>(
+          type: Type,
+          id: string,
+          index: number,
+          attrs: Extract<DocumentInline<D, 'input'>, { type: Type }>['attrs'],
+        ): Extract<DocumentInline<D>, { type: Type }>;
+        decode(text: string, value: JsonValue): DocumentInline<D>[];
+      }
+    >;
 
 export type AssembledSchema<Definitions extends readonly SchemaDefinition[]> = Schema<
   DocumentNode<Definitions>
@@ -203,7 +214,7 @@ export function createSchema(config: {
 
     // oxlint-disable-next-line anti-slop/no-unknown-parameters -- A node field from external structured content has not been validated yet.
     function attributes(definition: NodeDefinition | ValueDefinition, value: unknown, path: Path) {
-      const result = validateValue(definition.spec.attributes, value, path);
+      const result = parseAttributes(definition.spec, value, path);
 
       if ('issues' in result) {
         issues.push(...result.issues);
