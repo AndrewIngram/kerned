@@ -41,6 +41,7 @@ export type DocumentLayoutFrame<N extends NodeIdentity = NodeIdentity> = {
   };
   pinned: readonly number[];
   paddingTop: number;
+  presentationVersion?: number;
   eager: boolean;
   retainAll: boolean;
   onLayout: (result: LayoutResult<N>, width: number) => void;
@@ -195,6 +196,7 @@ export function createDocumentLayout<N extends NodeIdentity>({
         height: viewportHeight / zoom,
         zoom,
         paddingTop: current.paddingTop,
+        presentationVersion: current.presentationVersion,
         pinned,
         advance,
         eager: current.eager,
@@ -326,6 +328,7 @@ export function createDocumentLayout<N extends NodeIdentity>({
         previous.viewport.zoom === next.viewport.zoom &&
         previous.viewport.viewportHeight === next.viewport.viewportHeight &&
         previous.paddingTop === next.paddingTop &&
+        previous.presentationVersion === next.presentationVersion &&
         previous.pinned.length === next.pinned.length &&
         previous.pinned.every((id, index) => id === next.pinned[index]) &&
         previous.eager === next.eager &&

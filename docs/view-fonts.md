@@ -1,7 +1,8 @@
 # View font configuration
 
-Status: first milestone 5 slice. Configurable canvas faces are implemented.
-Shared DOM typography, theme rules and live font replacement remain in milestone 5.
+Status: milestone 5 is in progress. Configurable canvas faces and live node-style
+rules are implemented. Shared DOM typography, text colors and live font replacement
+remain in milestone 5.
 
 A view accepts a font configuration without exposing graphics or shaping handles:
 
@@ -63,7 +64,9 @@ appearance matters.
 
 Resolved face identities participate in shaping and metrics cache keys. Changing
 a paragraph's face cannot reuse shaping from its previous face; changing only
-its width retains shaping. Glyph drawing preserves text order across faces,
+its width, line height or baseline grid retains shaping. Composition separately
+keys width, line height and baseline, so retained glyph data cannot reuse stale
+line or caret positions. Glyph drawing preserves text order across faces,
 including overlapping ink, rather than ordering paint by native registration ID.
 The draw runs borrow subarrays of the existing numeric buffers.
 
@@ -71,6 +74,74 @@ This slice treats `fonts` as attachment configuration. Changing the React `fonts
 prop currently replaces the native attachment while retaining the supplied
 session. In-place font replacement and coordinated canvas/table/list styling are
 still required before milestone 5 is complete.
+
+## Live node-style rules
+
+Themes belong to a mounted view, independently of the session's content and schema.
+A rule binds to an installed node definition, including its configured variants,
+and infers that definition's normalized attributes:
+
+```ts
+import { defineStyleRule } from '../src/editor-canvas';
+import { paragraph, heading, list } from '../src/extensions/starter-definitions';
+
+view.update({
+  theme: {
+    baselineGrid: 0,
+    rules: [
+      defineStyleRule(paragraph, {
+        size: 20,
+        lineHeight: 32,
+        after: 20,
+      }),
+      defineStyleRule(heading, ({ level }) => ({
+        size: [40, 32, 26, 22][level - 1],
+        lineHeight: [48, 40, 32, 28][level - 1],
+        font: { weight: 400 },
+      })),
+      defineStyleRule(list, { indent: 36 }),
+    ],
+  },
+});
+```
+
+Custom node definitions use the same API. There is no central list of recognized
+node names. Rule handles preserve definition identity; a same-named but unrelated
+definition cannot impersonate an installed node.
+
+Text rules accept `size`, `lineHeight`, `font`, `before`, `after` and
+`baselineGrid`. Box rules accept spacing and grid settings. Flowing containers
+accept `indent`, the amount added to the inherited horizontal inset. Dimensions
+are document units, before zoom. Sizes and line heights must be positive; spacing,
+indentation and grid steps must be nonnegative. A grid step of zero disables
+baseline snapping. Adjacent block margins retain the existing maximum-margin
+behavior.
+
+Extension presentations supply defaults. Matching rules apply in array order;
+the last defined field wins, with font family, weight and style merged individually.
+A node's explicit grid rule overrides the theme-wide grid. Authored bold and italic
+marks apply after the resulting base font selection. Starter headings use a base
+weight of 700 rather than injecting a synthetic document-wide bold span, allowing
+the theme to override heading weight while retaining authored marks.
+
+Fixed rule values are validated and copied when the rule is created. Callback
+results are validated and cached per immutable node for each view configuration.
+Callbacks should be pure. Replace the theme object when configuration changes;
+`view.update({ theme: {} })` restores extension defaults. The React `Editor`
+accepts the same `theme` prop; removing it restores defaults without remounting.
+
+A theme change clears resolved style/projection caches while preserving the
+extension's presentation factory and default cache. It starts a viewport-first
+reflow generation and updates input geometry without editing content, selection,
+undo history or native element identity. Unchanged native blocks retain their
+measured heights; their renderers report actual changes through the existing
+measurement contract. Spacing-only changes reuse shaping in both plain text and
+text with inline atoms.
+
+Current scope: these rules reach canvas text, document spacing and flowing-container
+indentation. Native table text/editing and list marker styling still need the
+shared resolved-style contract; they do not yet consume all these settings.
+Text color rules and in-place font-source replacement are also outstanding.
 
 ## Ownership decision
 

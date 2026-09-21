@@ -9,6 +9,7 @@ import type {
   SchemaDefinition,
 } from '../model';
 import type { BlockPresentation } from './scene';
+import { createThemeStyles, type ViewTheme } from './theme';
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
 
@@ -83,6 +84,7 @@ export function defineNodePresentation<D extends NodeDefinition>(
 /** Compile once per mounted view. Canonical nodes and snapshots remain owned by the session. */
 export function createDocumentPresentation<N extends NodeIdentity>(
   editor: Parameters<typeof presentations.read>[0] & { readonly schema: Schema<N> },
+  theme?: ViewTheme,
 ) {
   const renderers = new Map<string, PresentationRenderer<N>>();
 
@@ -94,7 +96,10 @@ export function createDocumentPresentation<N extends NodeIdentity>(
     renderers.set(renderer.name, renderer);
   }
 
-  const cache = new WeakMap<N, NodePresentation>();
+  const defaults = new WeakMap<N, NodePresentation>();
+  let style = createThemeStyles(editor.schema, theme);
+  let cache = new WeakMap<N, NodePresentation>();
+  let version = 0;
 
   function read(node: N) {
     let result = cache.get(node);
@@ -104,15 +109,22 @@ export function createDocumentPresentation<N extends NodeIdentity>(
       const renderer = renderers.get(name);
 
       if (!renderer) throw new Error(`Missing node presentation: ${name}`);
-      result = renderer.read(node);
+      let base = defaults.get(node);
+
+      if (!base) {
+        base = renderer.read(node);
+        defaults.set(node, base);
+      }
+
+      result = style(node, base);
       cache.set(node, result);
     }
 
     return result;
   }
 
-  return {
-    query: createDocumentQuery<N, N, FlowContext>(editor.schema, {
+  function createQuery() {
+    return createDocumentQuery<N, N, FlowContext>(editor.schema, {
       initial: { inset: 0 },
       isBlock: (node): node is N => read(node).kind !== 'flow',
       child(node, index, context) {
@@ -122,7 +134,23 @@ export function createDocumentPresentation<N extends NodeIdentity>(
 
         return value.child(index, context);
       },
-    }),
+    });
+  }
+
+  let query = createQuery();
+
+  return {
+    get version() {
+      return version;
+    },
+    update(configuration: ViewTheme | undefined) {
+      const next = createThemeStyles(editor.schema, configuration);
+      style = next;
+      cache = new WeakMap();
+      query = createQuery();
+      version++;
+    },
+    query: (state: Parameters<typeof query>[0]) => query(state),
     present(node: N): BlockPresentation {
       const value = read(node);
 

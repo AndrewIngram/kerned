@@ -314,7 +314,12 @@ export async function createOwnedEngine(
 
     let composed = cached?.composed;
 
-    if (composed?.width === width) stats.compositionHits++;
+    if (
+      composed?.width === width &&
+      composed.lineHeight === lineHeight &&
+      composed.baseline === baseline
+    )
+      stats.compositionHits++;
     else {
       composed = composeParagraph(
         paragraphGlyphs,
@@ -463,14 +468,7 @@ export async function createOwnedEngine(
               end: Math.min(text.length, s.end - offset),
             }));
 
-          const key = JSON.stringify([
-            text,
-            spans,
-            input.size,
-            input.lineHeight,
-            input.baselineGrid,
-            faces.key,
-          ]);
+          const key = JSON.stringify([text, spans, input.size, faces.key]);
 
           const cached = retained.get(key) ?? previous?.get(key);
 
@@ -522,15 +520,7 @@ export async function createOwnedEngine(
 
         const faces = input.font ? nativeFonts.resolve(input.font) : nativeFonts.defaults;
 
-        const key = JSON.stringify([
-          input.text,
-          input.spans,
-          input.atoms,
-          input.size,
-          input.lineHeight,
-          input.baselineGrid,
-          faces.key,
-        ]);
+        const key = JSON.stringify([input.text, input.spans, input.atoms, input.size, faces.key]);
 
         const previous = documents.get(input.id)?.get(key);
 
@@ -563,7 +553,9 @@ export async function createOwnedEngine(
           : rawHeight;
 
         const composed =
-          previous?.composed?.width === input.width
+          previous?.composed?.width === input.width &&
+          previous.composed.lineHeight === lineHeight &&
+          previous.composed.baseline === baseline
             ? previous.composed
             : composeParagraph(
                 paragraphGlyphs,

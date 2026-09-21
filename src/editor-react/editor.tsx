@@ -15,6 +15,8 @@ type EditorProps<N extends NodeIdentity> = MountEditorOptions<N> &
     onError?: (error: Error) => void;
   };
 
+const defaultTheme = Object.freeze({});
+
 /** Optional React attachment to the same native view used by vanilla applications. */
 export function Editor<N extends NodeIdentity>({
   editor,
@@ -27,6 +29,7 @@ export function Editor<N extends NodeIdentity>({
   paddingTop = 0,
   maxWidth = null,
   background = '#ffffff',
+  theme = defaultTheme,
   onReady,
   onError,
   onNotice,
@@ -34,20 +37,20 @@ export function Editor<N extends NodeIdentity>({
 }: EditorProps<N>) {
   const host = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ onReady, onError, onNotice });
-  const configuration = useRef({ zoom, paddingTop, maxWidth, background });
+  const configuration = useRef({ zoom, paddingTop, maxWidth, background, theme });
   const view = useRef<MountedEditor | undefined>(undefined);
   const [error, setError] = useState<Error | null>(null);
 
   useLayoutEffect(() => {
     callbacks.current = { onReady, onError, onNotice };
-    configuration.current = { zoom, paddingTop, maxWidth, background };
+    configuration.current = { zoom, paddingTop, maxWidth, background, theme };
   });
   useLayoutEffect(() => {
     const mounted = view.current;
 
     if (mounted?.isDestroyed) view.current = undefined;
-    else mounted?.update({ zoom, paddingTop, maxWidth, background });
-  }, [zoom, paddingTop, maxWidth, background]);
+    else mounted?.update({ zoom, paddingTop, maxWidth, background, theme });
+  }, [zoom, paddingTop, maxWidth, background, theme]);
   useLayoutEffect(() => {
     const element = host.current;
 

@@ -16,7 +16,7 @@ export type TextPresentation = BlockSpacing &
 
 export type BlockPresentation = TextPresentation | (BlockSpacing & { kind: 'box'; height: number });
 
-/** Presentation values are immutable for the lifetime of their document node. */
+/** Presentation values are immutable within each view configuration version. */
 export type PresentBlock<N extends NodeIdentity> = (node: N) => BlockPresentation;
 
 export type Placement<N extends NodeIdentity> = {
@@ -60,6 +60,7 @@ type View = {
   eager: boolean;
   retainAll: boolean;
   paddingTop?: number;
+  presentationVersion?: number;
 };
 
 // Width is unknown until an inserted paragraph has been composed.
@@ -94,6 +95,8 @@ export function createEditorScene<N extends NodeIdentity>(
 
   let currentDecorations = emptyInsets,
     previousDecorations = emptyInsets;
+
+  let presentationVersion = 0;
 
   let previousNodes: readonly N[] = [],
     previousMeasurements: ReadonlyMap<number, Measurement> = new Map();
@@ -167,7 +170,8 @@ export function createEditorScene<N extends NodeIdentity>(
       const padding = view.paddingTop ?? 0,
         paddingChanged = padding !== previous.paddingTop;
 
-      const reflow = previous.width !== width && previous.placements.length > 0;
+      const styleChanged = presentationVersion !== (view.presentationVersion ?? 0);
+      const reflow = (previous.width !== width || styleChanged) && previous.placements.length > 0;
       const generation = previous.generation + Number(reflow);
 
       if (reflow) {
@@ -191,6 +195,7 @@ export function createEditorScene<N extends NodeIdentity>(
         });
 
       if (
+        !styleChanged &&
         nodes === previousNodes &&
         width === previous.width &&
         measurements === previousMeasurements &&
@@ -434,6 +439,7 @@ export function createEditorScene<N extends NodeIdentity>(
         generation,
         paddingTop: padding,
       };
+      presentationVersion = view.presentationVersion ?? 0;
       previousNodes = nodes;
       previousMeasurements = measurements;
       previousDecorations = decorations;
@@ -472,6 +478,7 @@ export function createEditorScene<N extends NodeIdentity>(
       textLayout = undefined;
       cache.clear();
       dirty.clear();
+      presentationVersion = 0;
       previousNodes = [];
       previous = {
         placements: [],

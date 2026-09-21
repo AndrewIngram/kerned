@@ -5,7 +5,12 @@ import { expect, test } from 'vitest';
 import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
-import { defineNodePresentation, presentations, type MountedEditor } from '../../editor-canvas';
+import {
+  defineNodePresentation,
+  defineStyleRule,
+  presentations,
+  type MountedEditor,
+} from '../../editor-canvas';
 import { createViewDiagnostics } from '../../editor-canvas/diagnostics';
 import { createSchema, defineNode } from '../../model';
 import { Editor } from '../editor';
@@ -44,6 +49,10 @@ const view = defineExtension({
 });
 
 const size = { width: 400, height: 260 };
+
+const initialTheme = { rules: [defineStyleRule(note, { lineHeight: 40 })] };
+
+const nextTheme = { rules: [defineStyleRule(note, { lineHeight: 48 })] };
 
 const invalidAsset = () => 'data:application/wasm,invalid';
 
@@ -247,4 +256,35 @@ test('React remounts on session replacement and tolerates updates after borrowed
   expect(() => second.editor.commands.focus()).toThrow(/destroyed/);
   flushSync(() => first.root.render(<Editor key="closed" editor={second.editor} style={size} />));
   expect(first.element.querySelector('canvas')).toBeNull();
+});
+
+test('React applies and removes a theme without remounting or leaking it into DOM attributes', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  flushSync(() =>
+    f.root.render(<Editor editor={f.editor} style={size} onReady={f.ready} theme={initialTheme} />),
+  );
+  const mounted = await f.readiness;
+  const point = { id: f.editor.state.nodes[0].id, offset: 0 };
+  expect(mounted.coordsAt(point)?.height).toBe(40);
+  const canvas = f.element.querySelector('canvas');
+  mounted.focus();
+  const input = f.element.querySelector('textarea');
+  const selection = f.editor.state.selection;
+  flushSync(() =>
+    f.root.render(
+      <Editor editor={f.editor} style={size} onReady={unexpectedRemount} theme={nextTheme} />,
+    ),
+  );
+  expect(mounted.coordsAt(point)?.height).toBe(48);
+  flushSync(() =>
+    f.root.render(<Editor editor={f.editor} style={size} onReady={unexpectedRemount} />),
+  );
+  expect(mounted.coordsAt(point)?.height).toBe(28);
+  expect(f.element.querySelector('canvas')).toBe(canvas);
+  expect(document.activeElement).toBe(input);
+  expect(f.editor.state.selection).toBe(selection);
+  expect(f.element.querySelector('[theme]')).toBeNull();
 });

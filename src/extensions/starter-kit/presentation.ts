@@ -23,11 +23,10 @@ export function createStarterPresentation(size: number): PresentBlock<StarterLea
       const style = typography(node, size);
       const spans = formattingSpans(node.marks);
 
-      if (node.kind === 'heading' && node.text.length)
-        spans.push({ start: 0, end: node.text.length, bold: true, italic: false });
       value = {
         kind: 'text',
         ...style,
+        font: node.kind === 'heading' ? { weight: 700 } : undefined,
         baselineGrid: 4,
         text: node.text,
         spans,
@@ -79,12 +78,10 @@ export const starterPresentation = defineExtension({
       defineNodePresentation(heading, () => (attrs, node) => {
         const spans = formattingSpans(node.marks);
 
-        if (attrs.text.length)
-          spans.push({ start: 0, end: attrs.text.length, bold: true, italic: false });
-
         return {
           kind: 'text',
           ...typography({ kind: 'heading', level: attrs.level }, bodySize),
+          font: { weight: 700 },
           baselineGrid: 4,
           text: attrs.text,
           spans,

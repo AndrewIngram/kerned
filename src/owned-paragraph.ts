@@ -192,7 +192,17 @@ export function composeParagraph(
     positions: coordinates[font].subarray(from * 2, to * 2),
   }));
 
-  return finishParagraph(width, textLength, lineHeight, lines, runs, numericCarets, stops, rows);
+  return finishParagraph(
+    width,
+    textLength,
+    lineHeight,
+    baseline,
+    lines,
+    runs,
+    numericCarets,
+    stops,
+    rows,
+  );
 }
 
 // Keep snapshot closures outside the composition scope. Otherwise captured
@@ -201,6 +211,7 @@ function finishParagraph(
   width: number,
   textLength: number,
   lineHeight: number,
+  baseline: number,
   lines: Line[],
   runs: { font: number; glyphs: Uint16Array; positions: Float32Array }[],
   numericCarets: ReturnType<typeof createPackedCarets> | undefined,
@@ -215,6 +226,8 @@ function finishParagraph(
       inkBottom: lines.length * lineHeight,
       width,
       textLength,
+      lineHeight,
+      baseline,
       height: lines.length * lineHeight,
       lines,
       runs,
@@ -258,6 +271,8 @@ function finishParagraph(
     inkBottom: lines.length * lineHeight,
     width,
     textLength,
+    lineHeight,
+    baseline,
     height: lines.length * lineHeight,
     lines,
     runs,

@@ -312,3 +312,21 @@ test('detach cancels work and releases its owner; remount ignores stale cleanup 
     f.destroy();
   }
 });
+
+test('theme reflow retains measured native box heights when their width and content have not changed', async ({
+  onTestFinished,
+}) => {
+  const f = await fixture([
+    { kind: 'image', id: 500, key: 'image-500', src: '/test.svg', alt: 'Measured block' },
+    ...paragraphs(3),
+  ]);
+
+  onTestFinished(() => f.destroy());
+  f.controller.update(f.frame({ presentationVersion: 0 }));
+  f.controller.measure(500, f.controller.getSnapshot().contentWidth, 400);
+  await nextFrame();
+  expect(f.controller.getSnapshot().scene.placements[0].height).toBe(400);
+  f.controller.update(f.frame({ presentationVersion: 1 }));
+  expect(f.controller.getSnapshot().scene.placements[0].height).toBe(400);
+  expect(f.controller.diagnostics.measurements.get(500)?.height).toBe(400);
+});

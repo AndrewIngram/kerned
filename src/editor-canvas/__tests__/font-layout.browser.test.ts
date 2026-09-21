@@ -131,3 +131,80 @@ test('semantic family, weight and style changes invalidate retained shaping at t
   const fallback = layout.layout({ ...input, font: { family: 'Unavailable' } });
   expect(pixels(resources, fallback)).toEqual(pixels(resources, regular));
 });
+
+test('leading and baseline grid reuse shaping while updating plain and inline geometry', async ({
+  onTestFinished,
+}) => {
+  const owner = createViewResources();
+  onTestFinished(() => owner.destroy());
+  await owner.ready;
+  const { layout: engine } = owner.read();
+  const layout = engine.createLayout();
+
+  const input = {
+    id: 1,
+    text: 'First line\nSecond line',
+    spans: [],
+    width: 260,
+    size: 22,
+    lineHeight: 32,
+    baselineGrid: 4,
+  };
+
+  const first = layout.layout(input);
+  const calls = engine.stats.glyphCalls;
+  const second = layout.layout({ ...input, lineHeight: 43, baselineGrid: 0 });
+  expect(engine.stats.glyphCalls).toBe(calls);
+  expect(second.height).toBe(86);
+  expect(second.lines[0].baseline % 4).not.toBe(0);
+  expect(first.height).toBe(64);
+  expect(second.geometry(0, 0, false).caret[3]).toBe(43);
+  const compositions = engine.stats.compositions;
+  layout.layout({ ...input, lineHeight: 43, baselineGrid: 0 });
+  expect(engine.stats.compositions).toBe(compositions);
+
+  const inlineInput = {
+    ...input,
+    id: 2,
+    text: 'Before \ufffc after',
+    atoms: [{ id: 'token', index: 7, label: 'Token', width: 40, ascent: 20, descent: 6 }],
+  };
+
+  const inline = layout.layoutInline(inlineInput);
+  const inlineCalls = engine.stats.glyphCalls;
+  const changed = layout.layoutInline({ ...inlineInput, lineHeight: 50, baselineGrid: 0 });
+  expect(engine.stats.glyphCalls).toBe(inlineCalls);
+  expect(changed.height).toBe(50);
+  expect(changed.inlineBoxes[0].y).toBeGreaterThan(inline.inlineBoxes[0].y);
+  expect(changed.inlineBoxes[0].x).toBe(inline.inlineBoxes[0].x);
+  expect(changed.hit(changed.inlineBoxes[0].x, 25).index).toBe(7);
+});
+
+test('a semantic heading weight preserves the previous bold-span default geometry and pixels', async ({
+  onTestFinished,
+}) => {
+  const owner = createViewResources();
+  onTestFinished(() => owner.destroy());
+  await owner.ready;
+  const resources = owner.read();
+  const layout = resources.layout.createLayout();
+
+  const input = {
+    id: 1,
+    text: 'Heading text',
+    size: 36,
+    width: 260,
+    lineHeight: 44,
+    baselineGrid: 4,
+    spans: [{ start: 0, end: 7, bold: false, italic: true }],
+  };
+
+  const oldHeading = layout.layout({
+    ...input,
+    spans: [...input.spans, { start: 0, end: input.text.length, bold: true, italic: false }],
+  });
+
+  const heading = layout.layout({ ...input, font: { weight: 700 } });
+  expect(heading.lines).toEqual(oldHeading.lines);
+  expect(pixels(resources, heading)).toEqual(pixels(resources, oldHeading));
+});

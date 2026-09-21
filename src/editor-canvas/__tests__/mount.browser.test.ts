@@ -9,7 +9,7 @@ import { createSchema, defineNode } from '../../model';
 import { TextSelection, textSelection } from '../../state';
 import { createViewDiagnostics, type DiagnosticEvent } from '../diagnostics';
 import { defaultFonts } from '../font-catalog';
-import { mountEditor, defineNodePresentation, presentations } from '../index';
+import { mountEditor, defineNodePresentation, defineStyleRule, presentations } from '../index';
 
 const note = defineNode({
   name: 'note',
@@ -743,4 +743,99 @@ test('public mounts resolve their configured font family independently', async (
   display.destroy();
   expect(regular.coordsAt(end)).not.toBeNull();
   expect(regular.coordsAt(end)!.left - regular.coordsAt(start)!.left).toBe(regularWidth);
+});
+
+test('live themes preserve selection and native node identity with independent per-view metrics', async ({
+  onTestFinished,
+}) => {
+  const first = fixture();
+  const second = fixture();
+  onTestFinished(() => {
+    first.destroy();
+    second.destroy();
+  });
+  const diagnostics = createViewDiagnostics();
+  const a = mountEditor(first.element, { editor: first.editor, diagnostics });
+  const b = mountEditor(second.element, { editor: second.editor });
+  a.update({ theme: { baselineGrid: 0, rules: [defineStyleRule(note, { lineHeight: 40 })] } });
+  await Promise.all([a.ready, b.ready]);
+  const plain = b.coordsAt({ id: 1, offset: 5 });
+  expect(a.coordsAt({ id: 1, offset: 5 })?.height).toBe(40);
+  expect(plain?.height).toBe(28);
+  const canvas = first.element.querySelector('canvas');
+  const input = capture(first.element);
+  const button = first.element.querySelector('button');
+  const original = first.editor.state;
+  const glyphs = diagnostics.read()?.stats.glyphCalls;
+  a.focus();
+  a.update({
+    theme: { baselineGrid: 0, rules: [defineStyleRule(note, { lineHeight: 48, after: 24 })] },
+  });
+  expect(a.coordsAt({ id: 1, offset: 5 })?.height).toBe(48);
+  expect(diagnostics.read()?.stats.glyphCalls).toBe(glyphs);
+  expect(first.editor.state).toBe(original);
+  expect(document.activeElement).toBe(input);
+  expect(first.element.querySelector('canvas')).toBe(canvas);
+  expect(first.element.querySelector('button')).toBe(button);
+  expect(b.coordsAt({ id: 1, offset: 5 })).toEqual(plain);
+  const next = a.getSnapshot();
+  expect(() => a.update({ theme: { baselineGrid: -1 } })).toThrow(/baselineGrid/);
+  expect(a.getSnapshot()).toBe(next);
+  expect(a.status).toBe('ready');
+  button?.focus();
+  a.update({ theme: { rules: [defineStyleRule(note, { size: 26, font: { weight: 700 } })] } });
+  expect(first.element.querySelector('button')).toBe(button);
+  expect(document.activeElement).toBe(button);
+  expect(a.coordsAt({ id: 1, offset: 5 })?.left).toBeGreaterThan(plain?.left ?? 0);
+  expect(diagnostics.read()?.stats.glyphCalls).toBeGreaterThan(glyphs ?? 0);
+  a.update({ theme: {} });
+  expect(a.coordsAt({ id: 1, offset: 5 })?.height).toBe(28);
+});
+
+test('metric theme changes reflow around a distant scroll anchor without changing the selected position', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  f.editor.transact((draft) => {
+    draft.step({
+      kind: 'replaceChildren',
+      parent: null,
+      index: 3,
+      count: 0,
+      nodes: Array.from({ length: 500 }, (_, index) =>
+        schema.node(note).create(
+          { id: index + 4, key: `theme-${index}` },
+          {
+            body: `Paragraph ${index} with words that wrap onto several lines when the type grows. `.repeat(
+              3,
+            ),
+          },
+        ),
+      ),
+    });
+
+    return true;
+  });
+  const diagnostics = createViewDiagnostics();
+  const view = mountEditor(f.element, { editor: f.editor, diagnostics });
+  await view.ready;
+  f.editor.select(textSelection(400, 3));
+  await view.reveal({ id: 400, offset: 3 }, { align: 'start' });
+  const selection = f.editor.state.selection;
+  const before = view.blockBounds(400, 'client');
+  const generation = diagnostics.read()?.generation ?? 0;
+  view.update({
+    theme: {
+      baselineGrid: 0,
+      rules: [defineStyleRule(note, { size: 22, lineHeight: 36, after: 20 })],
+    },
+  });
+  expect(f.editor.state.selection).toBe(selection);
+  expect(diagnostics.read()?.generation).toBe(generation + 1);
+  expect(view.coordsAt({ id: 400, offset: 3 })?.height).toBe(36);
+  await expect.poll(() => diagnostics.read()?.pending).toBe(0);
+  expect(view.blockBounds(400, 'client')?.top).toBeCloseTo(before?.top ?? 0, 0);
+  expect(view.getSnapshot()?.viewport.top).toBeGreaterThan(1000);
+  expect(f.editor.state.selection).toBe(selection);
 });

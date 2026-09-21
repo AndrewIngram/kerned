@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import type { ViewTheme } from './theme';
+
 const configuration = z.strictObject({
   zoom: z.number().finite().positive().optional(),
   paddingTop: z.number().finite().nonnegative().optional(),
@@ -8,7 +10,7 @@ const configuration = z.strictObject({
 });
 
 /** View settings can change without replacing the session, input or resource owner. */
-export type ViewConfiguration = z.infer<typeof configuration>;
+export type ViewConfiguration = z.infer<typeof configuration> & { theme?: ViewTheme };
 
 const revealOptions = z.strictObject({
   align: z.enum(['nearest', 'start', 'center', 'end']).default('nearest'),
@@ -24,19 +26,27 @@ export function readRevealOptions(input: RevealOptions) {
 
 export function readViewConfiguration(
   input: ViewConfiguration,
-  current: { zoom: number; paddingTop: number; maxWidth: number | null; background: string } = {
+  current: {
+    zoom: number;
+    paddingTop: number;
+    maxWidth: number | null;
+    background: string;
+    theme?: ViewTheme;
+  } = {
     zoom: 1,
     paddingTop: 0,
     maxWidth: null,
     background: '#ffffff',
   },
 ) {
-  const value = configuration.parse(input);
+  const { theme, ...settings } = input;
+  const value = configuration.parse(settings);
 
   return {
     zoom: value.zoom ?? current.zoom,
     paddingTop: value.paddingTop ?? current.paddingTop,
     maxWidth: value.maxWidth === undefined ? current.maxWidth : value.maxWidth,
     background: value.background ?? current.background,
+    theme: theme ?? current.theme,
   };
 }

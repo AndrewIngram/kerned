@@ -13,13 +13,13 @@ const face = z.strictObject({
   asset: z.templateLiteral(['fonts/', z.string().min(1)]),
 });
 
-const selection = z.strictObject({
+export const fontSelectionSchema = z.strictObject({
   family: family.optional(),
-  weight: weight.default(400),
-  style: style.default('normal'),
+  weight: weight.optional(),
+  style: style.optional(),
 });
 
-export type FontSelection = Readonly<z.input<typeof selection>>;
+export type FontSelection = Readonly<z.input<typeof fontSelectionSchema>>;
 
 export type FontSource = Readonly<z.infer<typeof face>>;
 
@@ -82,7 +82,8 @@ export function createFontCatalog(input: FontConfiguration = defaultFonts) {
   const cache = new Map<string, FontSource>();
 
   function select(request: FontSelection = {}) {
-    const requested = selection.parse(request);
+    const parsed = fontSelectionSchema.parse(request);
+    const requested = { ...parsed, weight: parsed.weight ?? 400, style: parsed.style ?? 'normal' };
     const name = (requested.family ?? value.defaultFamily).toLowerCase();
     const key = `${name}/${requested.weight}/${requested.style}`;
     const cached = cache.get(key);

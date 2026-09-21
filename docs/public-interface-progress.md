@@ -2229,3 +2229,47 @@ Milestone 5 remains open: shared canvas/DOM typography, configurable node rules,
 font readiness/replacement during live updates, metric/paint invalidation and
 scroll-preserving theme changes are still required. This checkpoint is not the
 milestone completion or its architecture-judge gate.
+
+### Milestone 5 checkpoint: live canvas typography rules
+
+Views now accept a `theme` with typed `defineStyleRule` handles bound to installed
+node definitions. Rules support fixed values or normalized-attribute callbacks,
+including custom nodes, deterministic field-level precedence and partial font
+selection. Per-node rules override extension defaults; a theme-wide baseline grid
+can be disabled or overridden per node. Flowing containers accept indentation
+rules. The React `theme` prop updates the existing mount and restores defaults
+when removed.
+
+Resolved styles and document projections are versioned per view. Changes keep the
+session, content, selection, history, presentation factory, native nodes, input and
+canvas intact, while starting the existing viewport-first reflow. Default heading
+weight now comes from the base font rather than an artificial bold span, allowing
+weight overrides without deleting author marks. Exact geometry and pixel tests
+confirm that the default heading appearance is unchanged.
+
+Shaping keys no longer include leading or baseline grid. Composition independently
+checks width, line height and baseline, retaining glyph data across these metric
+changes while refreshing line, caret and inline-box geometry. Tests also cover
+independent simultaneous themes, callback caching and attribute inference, invalid
+configuration, captured fixed rules, restored defaults, React attachment identity,
+and a distant scroll anchor during a 500-block reflow.
+
+Review found that clearing all native measurements on a style-version change would
+silently replace unchanged image heights with their estimates: unchanged native
+views need not report the same size again. A regression reproduced 400 becoming
+96 in all three browsers. The layout now retains these measurements; native views
+continue to report actual dimension changes through their existing contract.
+
+`pnpm run check` passes with 581 Vitest tests, one unchanged collaboration TODO and
+42 end-to-end cases. The production build passes. A second lint fix/format pass
+leaves files unchanged. Three serial production trials pass every unchanged budget:
+worst first usable 217 ms, streaming 1,170.8 ms, paste handler 57.7 ms, paste to paint
+114.2 ms, typing 32.1 ms, paging 32.2 ms and loaded heap 26,973,144 bytes. Evidence
+in `artifacts/public-interface-m5/theme-metrics/` identifies `7924d09` and measures
+the uncommitted theme implementation. The subsequent measurement fix only affects
+explicit live theme changes, which that baseline workload does not perform.
+
+Milestone 5 is still open. Next is the shared resolved-style contract for native
+table text/editing and list markers, followed by paint-only color updates and
+in-place font-source replacement. Full Warbreaker theme-change validation and the
+milestone's independent architecture review remain required before completion.

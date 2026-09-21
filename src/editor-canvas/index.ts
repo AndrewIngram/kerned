@@ -14,3 +14,5 @@ export {
   type FontSelection,
   type FontSource,
 } from './font-catalog';
+
+export { defineStyleRule, type StyleRule, type NodeStyle, type ViewTheme } from './theme';

@@ -49,9 +49,10 @@ export function mountEditor<N extends NodeIdentity>(
     paddingTop: options.paddingTop,
     maxWidth: options.maxWidth,
     background: options.background,
+    theme: options.theme,
   });
 
-  const presentation = createDocumentPresentation(editor);
+  const presentation = createDocumentPresentation(editor, configuration.theme);
   // Resolve the initial projection before allocating native resources or changing the host.
   presentation.query(editor.state);
   const policies: ReturnType<InputContribution['create']>[] = [];
@@ -224,6 +225,7 @@ export function mountEditor<N extends NodeIdentity>(
       viewport: frameViewport(),
       pinned: [...geometry.pinned(), ...(focusedNode === undefined ? [] : [focusedNode])],
       paddingTop: configuration.paddingTop,
+      presentationVersion: presentation.version,
       eager: diagnostics?.options.composition === 'eager',
       retainAll: diagnostics?.options.retention === 'all',
       onLayout(result, width) {
@@ -256,10 +258,13 @@ export function mountEditor<N extends NodeIdentity>(
       next.zoom === configuration.zoom &&
       next.paddingTop === configuration.paddingTop &&
       next.maxWidth === configuration.maxWidth &&
-      next.background === configuration.background
+      next.background === configuration.background &&
+      next.theme === configuration.theme
     )
       return;
     const repaint = next.background !== configuration.background;
+
+    if (next.theme !== configuration.theme) presentation.update(next.theme);
     configuration = next;
     space.style.maxWidth = next.maxWidth === null ? '' : `${next.maxWidth}px`;
     root.style.background = next.background;
