@@ -84,10 +84,12 @@ export function createDocumentLayout<N extends NodeIdentity>({
   owned,
   present,
   source,
+  onError,
 }: {
   owned: Parameters<typeof createEditorScene>[0];
   present: PresentBlock<N>;
   source: DocumentLayoutSource<N>;
+  onError?: (error: Error) => void;
 }) {
   const sceneCache = createEditorScene(owned, present);
   const listeners = new Set<() => void>();
@@ -120,7 +122,7 @@ export function createDocumentLayout<N extends NodeIdentity>({
       if (detach !== attachment || scheduled !== 'queued') return;
       scheduled = requestAnimationFrame(() => {
         scheduled = undefined;
-        build(true);
+        backgroundBuild(true);
       });
     });
   }
@@ -132,8 +134,17 @@ export function createDocumentLayout<N extends NodeIdentity>({
     // Coalesce synchronous transactions; layout does not extend their call stack.
     queueMicrotask(() => {
       if (detach !== attachment || !invalidated) return;
-      build(false);
+      backgroundBuild(false);
     });
+  }
+
+  function backgroundBuild(advance: boolean) {
+    try {
+      build(advance);
+    } catch (error) {
+      if (!onError) throw error;
+      onError(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
   function build(advance: boolean) {

@@ -49,7 +49,7 @@ function dispose(resources: Resources) {
 
 /** One paint owner, independent of framework lifetimes. Attachments may be replaced;
  * destruction is terminal. Neither detach nor a stale registration can affect a successor. */
-export function createCanvasRenderer<N>() {
+export function createCanvasRenderer<N>({ onError }: { onError?: (error: Error) => void } = {}) {
   let attachment: { kit: CanvasKit; canvas: HTMLCanvasElement; resources?: Resources } | undefined;
   let frame: CanvasFrame<N> | undefined;
   let scheduled = 0;
@@ -187,7 +187,13 @@ export function createCanvasRenderer<N>() {
     if (!attachment || !frame || scheduled || destroyed) return;
     scheduled = requestAnimationFrame(() => {
       scheduled = 0;
-      draw();
+
+      try {
+        draw();
+      } catch (error) {
+        if (!onError) throw error;
+        onError(error instanceof Error ? error : new Error(String(error)));
+      }
     });
   }
 

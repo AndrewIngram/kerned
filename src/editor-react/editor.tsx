@@ -1,37 +1,76 @@
-import { useLayoutEffect, useRef, type ComponentPropsWithoutRef } from 'react';
+import { useLayoutEffect, useRef, useState, type ComponentPropsWithoutRef } from 'react';
 
-import { mountEditorView, type BrowserViewOptions } from '../editor-browser';
+import { mountEditor, type MountEditorOptions, type MountedEditor } from '../editor-canvas';
+import type { NodeIdentity } from '../model';
 
-/** Optional React host. The caller owns the session and supplies its renderer as children. */
-export function Editor({
-  view,
-  children,
+type EditorProps<N extends NodeIdentity> = MountEditorOptions<N> &
+  Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'onError'> & {
+    onReady?: (view: MountedEditor) => void;
+    onError?: (error: Error) => void;
+  };
+
+/** Optional React attachment to the same native view used by vanilla applications. */
+export function Editor<N extends NodeIdentity>({
+  editor,
+  resolveAsset,
+  scroll,
+  toolbar,
+  onReady,
+  onError,
   ...props
-}: ComponentPropsWithoutRef<'div'> & { view: BrowserViewOptions }) {
-  const element = useRef<HTMLDivElement>(null),
-    runtime = useRef<ReturnType<typeof mountEditorView> | null>(null);
+}: EditorProps<N>) {
+  const host = useRef<HTMLDivElement>(null);
+  const callbacks = useRef({ onReady, onError });
+  const [error, setError] = useState<Error | null>(null);
 
-  const currentView = useRef(view);
   useLayoutEffect(() => {
-    currentView.current = view;
+    callbacks.current = { onReady, onError };
   });
   useLayoutEffect(() => {
-    if (!element.current || view.session?.isDestroyed) return undefined;
-    const mounted = mountEditorView(element.current, currentView.current);
-    runtime.current = mounted;
+    const element = host.current;
+
+    if (!element || editor.isDestroyed) return undefined;
+    let mounted: MountedEditor | undefined;
+    let active = true;
+    let reported = false;
+
+    function report(failure: Error) {
+      if (!active) return;
+      reported = true;
+      setError(failure);
+      callbacks.current.onError?.(failure);
+    }
+
+    async function initialize(target: HTMLElement) {
+      await Promise.resolve();
+
+      if (!active || editor.isDestroyed) return;
+
+      try {
+        mounted = mountEditor(target, { editor, resolveAsset, scroll, toolbar, onError: report });
+        await mounted.ready;
+
+        if (active && !mounted.isDestroyed) {
+          setError(null);
+          callbacks.current.onReady?.(mounted);
+        }
+      } catch (reason) {
+        if (!reported) report(reason instanceof Error ? reason : new Error(String(reason)));
+      }
+    }
+
+    void initialize(element);
 
     return () => {
-      mounted.destroy();
-      runtime.current = null;
+      active = false;
+      mounted?.destroy();
     };
-  }, [view.session]);
-  useLayoutEffect(() => {
-    if (runtime.current && !runtime.current.isDestroyed) runtime.current.update(view);
-  });
+  }, [editor, resolveAsset, scroll, toolbar]);
 
   return (
-    <div {...props} ref={element}>
-      {children}
-    </div>
+    <>
+      <div {...props} ref={host} />
+      {error && <div role="alert">{error.message}</div>}
+    </>
   );
 }

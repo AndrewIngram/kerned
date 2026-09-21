@@ -5,11 +5,11 @@ import { createEditor } from '../../core';
 import { FindBar } from '../../demo/find-bar';
 import {
   CanvasLayerProvider,
-  Editor,
   useCanvasInput,
   useEditorViewport,
   useEditorState,
 } from '../../editor-react';
+import { EditorEventHost } from '../../editor-react/editor-event-host';
 import { useCanvasRenderer } from '../../editor-react/use-canvas-renderer';
 import { useDocumentLayout } from '../../editor-react/use-document-layout';
 import { type EditorSample } from '../../editor-samples';
@@ -441,7 +441,7 @@ export function EditorWorkspace({
             toolbarHeight={toolbarHeight}
           />
         )}
-        <Editor className="editor-surface" view={editorView}>
+        <EditorEventHost className="editor-surface" view={editorView}>
           <div
             className="editor-frame"
             onKeyDown={(e) => {
@@ -513,7 +513,7 @@ export function EditorWorkspace({
               onClose={closePanel}
             />
           </div>
-        </Editor>
+        </EditorEventHost>
         <p className="input-notice" role="status">
           {inputNotice}
         </p>

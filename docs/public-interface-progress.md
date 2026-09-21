@@ -1617,3 +1617,55 @@ Milestone 4 remains open. The complete public mount still needs to compose these
 controllers with extension-owned input and presentation contributions, expose
 supported geometry queries and remove kit/owned from the demo. The architecture
 judge follows completion of that milestone, not this intermediate extraction.
+
+### Milestone 4 checkpoint: contributed native mount and React attachment
+
+Added `mountEditor(element, { editor })` in `editor-canvas`. It discovers typed
+presentation, native node-view and input-policy contributions from the composed
+session, then owns asset readiness, DOM, scrolling, projection, reflow, paint,
+hidden input and cleanup. No caller supplies graphics handles or assembles the
+controllers. The mount reserves its session attachment while loading, cancels
+on destruction, and releases failed mounts for retry. Two sessions with the same
+local node IDs keep independent resources. `coordsAt` provides resident canvas
+caret positions in client coordinates; widget geometry remains separate work.
+
+Presentation factories bind to installed definition families and infer normalized
+attribute types. They can describe text, native boxes or flowing containers,
+with immutable node values cached per view. Keyboard/clipboard policies compose
+in extension order; text input has one owner. Background layout and paint errors
+now reach the mounted lifetime, which records the failure and releases resources.
+
+The public React `Editor` mounts this same controller. It borrows its session,
+handles Strict Mode and cancellation, retains the mount through callback-only
+rerenders, and reports initialization/runtime errors. The former React event
+wrapper is now the private `EditorEventHost`, used only by the existing demo
+composition and its legacy listener tests. No public `view` prop accepts a
+hand-assembled pointer/input/renderer graph anymore.
+
+New real-browser tests cover custom-schema editing, real Shift-click across
+paragraphs, native interactive controls, client caret coordinates, page scrolling
+to distant selections, independent editors, duplicate mounts, cancel/retry,
+background failure and React lifetime. Unit tests exercise typed presentation
+binding, configured definitions, flow context, per-view caches and conflicts.
+The API and current limitations are documented in `docs/mounted-editor.md`.
+
+`pnpm run check` passes with 435 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes. The React tests await the
+actual readiness/error callbacks and DOM commits; test timeouts and parallelism
+remain unchanged. The legacy event-listener fixture now imports the private host
+explicitly, preserving its existing assertions.
+
+Three serial production trials preserve every existing demo budget: worst first
+usable 178 ms, streaming 1,077.8 ms, paste handler 56.4 ms, paste to paint 120 ms,
+typing 32.4 ms, paging 32.9 ms and loaded heap 29,265,708 bytes. Evidence in
+`artifacts/public-interface-m4/native-mount/` identifies `f9f90e0` and measures
+this checkpoint's uncommitted tree. These measurements cover the existing demo
+and shared controllers; they are not a claim that the demo has migrated to the
+new public mount.
+
+Milestone 4 remains open: the starter kit must contribute its input, tables and
+inline/decorations through the mounted composition; the demo's search, comments,
+outline and diagnostic consumers need supported view contracts before removing
+its remaining kit/owned props. The native mount is working with custom schemas,
+but this checkpoint does not claim the writing demo uses it yet. The milestone
+judge remains due after those exit conditions are met.

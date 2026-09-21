@@ -5,6 +5,9 @@ HTML files load `src/demo/app/main.tsx`. The entry starts a private view-resourc
 initial sample, then mounts `App`. Run `pnpm run demo` to open the writing route.
 The [public-interface plan](public-interface-implementation-plan.md) defines the
 remaining complete-view and package migration; this page describes current code.
+The [mounted editor interface](mounted-editor.md) now provides a complete native
+lifetime for contributed custom schemas and the public React `Editor`. The demo
+still uses an internal event host while its starter contributions are migrated.
 
 ## What belongs where
 
@@ -33,7 +36,7 @@ native event -> browser/input adapter -> named session command
 
 Toolbar, native input and programmatic calls share named session commands.
 `EditorWorkspace` still assembles the rendering, input and layout adapters; the
-complete mounted-view interface must take over that assembly. The browser starter
+new mounted-view interface must take over that assembly in the demo. The browser starter
 kit adds image rendering through the same extension tuple as schema and commands.
 `createNodeViews` reads those session contributions, binds renderers to schema
 definition families and owns per-node cleanup when the session is destroyed.

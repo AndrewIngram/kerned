@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { createEditor } from '../../core';
 import { createSchema, defineNode } from '../../model';
-import { Editor } from '../editor';
+import { EditorEventHost } from '../editor-event-host';
 
 const schema = createSchema({
   extensions: [
@@ -46,23 +46,23 @@ test('React remounts on session replacement and tolerates updates after borrowed
   const secondView = view(second, () => observed.push('second'));
 
   try {
-    flushSync(() => root.render(<Editor view={firstView}>First</Editor>));
+    flushSync(() => root.render(<EditorEventHost view={firstView}>First</EditorEventHost>));
     first.commands.focus();
     expect(observed).toEqual(['first']);
-    flushSync(() => root.render(<Editor view={secondView}>Second</Editor>));
+    flushSync(() => root.render(<EditorEventHost view={secondView}>Second</EditorEventHost>));
     first.commands.focus();
     second.commands.focus();
     expect(observed).toEqual(['first', 'second']);
     expect(first.isDestroyed).toBe(false);
     second.destroy();
-    flushSync(() => root.render(<Editor view={secondView}>Closed</Editor>));
+    flushSync(() => root.render(<EditorEventHost view={secondView}>Closed</EditorEventHost>));
     expect(host.textContent).toBe('Closed');
     expect(() => second.commands.focus()).toThrow(/destroyed/);
     flushSync(() =>
       root.render(
-        <Editor key="closed" view={secondView}>
+        <EditorEventHost key="closed" view={secondView}>
           Still closed
-        </Editor>,
+        </EditorEventHost>,
       ),
     );
     expect(host.textContent).toBe('Still closed');
