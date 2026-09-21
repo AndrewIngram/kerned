@@ -1,41 +1,51 @@
-import { indexTree, type Schema } from '../model';
+import { indexTree, type NodeIdentity, type Schema } from '../model';
 import { selectionContext, type EditorState } from '../state';
 import { type Step } from '../transform';
 import type { StarterNode, HeadingLevel } from './demo-model';
+import { paragraph, heading } from './starter-definitions';
 
 /** Change block semantics without replacing text identities or relative positions. */
-export function setTextBlockType(
-  schema: Schema<StarterNode>,
-  state: EditorState<StarterNode>,
+export function setTextBlockType<N extends NodeIdentity>(
+  schema: Schema<N>,
+  state: EditorState<N>,
   ids: readonly number[],
   level: HeadingLevel | null,
   tree = indexTree(schema, state.nodes),
-): Step<StarterNode>[] {
-  return ids.flatMap((id) => {
+): Step<N>[] {
+  const paragraphs = schema.node(paragraph);
+  const headings = schema.node(heading);
+
+  const selected = new Set<number>();
+  const pending = [...ids];
+
+  while (pending.length) {
+    const id = pending.pop();
+    const entry = id === undefined ? undefined : tree.byId.get(id);
+
+    if (!entry || selected.has(entry.node.id)) continue;
+    selected.add(entry.node.id);
+    pending.push(...schema.children(entry.node).map((child) => child.id));
+  }
+
+  return [...selected].flatMap((id) => {
     const entry = tree.byId.get(id);
 
     if (!entry) return [];
     const node = entry.node;
+    const current = headings.read(node);
 
-    if (node.kind !== 'paragraph' && node.kind !== 'heading') return [];
+    if (!paragraphs.matches(node) && !current) return [];
 
-    if (
-      (level === null && node.kind === 'paragraph') ||
-      (node.kind === 'heading' && node.level === level)
-    )
-      return [];
+    if ((level === null && paragraphs.matches(node)) || current?.level === level) return [];
 
-    const content = {
-      id: node.id,
-      key: node.key,
-      locked: node.locked,
-      text: node.text,
-      marks: node.marks,
-      inline: node.inline,
-    };
+    const target =
+      level === null
+        ? paragraphs.create(node, { text: '' })
+        : headings.create(node, { text: '', level });
 
-    const next: StarterNode =
-      level === null ? { ...content, kind: 'paragraph' } : { ...content, kind: 'heading', level };
+    // Joining into an empty target transfers text, marks and inline objects through
+    // the target's editing policy, including its configured content restrictions.
+    const next = schema.editing(target).join(target, node);
 
     return [
       {

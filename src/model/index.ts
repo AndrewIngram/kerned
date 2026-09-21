@@ -88,4 +88,6 @@ export {
   type DocumentOutput,
 } from './definitions';
 
-export { createSchema } from './assembly';
+export { createSchema, type AssembledSchema } from './assembly';
+
+export { type NodeBinding } from './node-binding';

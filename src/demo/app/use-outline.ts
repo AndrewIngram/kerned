@@ -5,7 +5,7 @@ import { type Scene } from '../../editor-scene';
 import { plainText } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { createOutlineExtension, type OutlineEntry } from '../../extensions/outline';
-import type { EditorDocument } from '../../extensions/starter-kit/types';
+import type { EditorDocument } from '../../extensions/starter-kit/document';
 
 type OutlineOptions = Pick<EditorDocument, 'editorState' | 'tree'> & {
   sample: EditorSample;

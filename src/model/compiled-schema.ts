@@ -1,6 +1,7 @@
 import { attributeFunctions } from './attribute-validation';
 import { nodeAttributes } from './compiled-attributes';
 import { compileNodeCodec } from './compiled-codecs';
+import { compileNodeFactory } from './compiled-node-factory';
 import {
   childrenOf,
   inlineOf,
@@ -242,6 +243,8 @@ export function compileSchema(definitions: readonly SchemaDefinition[]) {
     const common = {
       name: definition.name,
       version: definition.version,
+      factory: compileNodeFactory(definition),
+      groups: definition.spec.groups,
       selectable: definition.spec.selectable,
       codec: compileNodeCodec(definition, marks, inlineValues),
       validateUpdate(before: RuntimeDocumentNode, after: RuntimeDocumentNode) {

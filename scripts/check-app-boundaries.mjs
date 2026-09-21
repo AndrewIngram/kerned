@@ -53,7 +53,12 @@ for (const group of groups) {
         );
       }
 
-      if (file === 'src/extensions/starter-kit/actions.ts') {
+      if (
+        [
+          'src/extensions/starter-kit/commands.ts',
+          'src/extensions/starter-kit/document.ts',
+        ].includes(file)
+      ) {
         assert.ok(
           !/src\/editor-(browser|react|canvas)/.test(target),
           `${file} depends on a view adapter: ${specifier}`,

@@ -6,7 +6,7 @@ test('selection projection preserves node, container, cell and empty selections'
 
     const { selectionView, selectionContext, NodeSelection, AllSelection } = Object.assign(
       {},
-      await import('../../editor-browser/index.ts'),
+      await import('../index.ts'),
       await import('../selection.ts'),
     );
 

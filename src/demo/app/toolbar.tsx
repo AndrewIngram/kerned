@@ -2,10 +2,11 @@ import { useEffect, type Dispatch, type RefObject, type SetStateAction } from 'r
 
 import { FindIcon } from '../../demo/find-bar';
 import { bookSamples, type EditorSample } from '../../editor-samples';
-import type { StarterActions } from '../../extensions/starter-kit/actions';
-import type { EditorDocument, EditorSession } from '../../extensions/starter-kit/types';
+import type { EditorDocument } from '../../extensions/starter-kit/document';
+import type { EditorSession } from '../../extensions/starter-kit/types';
+import type { EditorControls } from './editor-controls';
 
-type ToolbarProps = { doc: EditorDocument; actions: StarterActions } & {
+type ToolbarProps = { doc: EditorDocument; actions: EditorControls } & {
   minimal: boolean;
   toolbarRef: RefObject<HTMLElement | null>;
   addComment: () => void;

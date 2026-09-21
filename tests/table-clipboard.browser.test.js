@@ -13,7 +13,7 @@ test('clipboard HTML is a cropped rectangle and TSV preserves empty and quoted c
 
     let next = 1;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
-    const table = createTable(allocate, 3, 3);
+    const table = structuredClone(createTable(demoSchema, allocate, 3, 3));
     table.rows[1][1].paragraphs[0].text = 'Bold';
     table.rows[1][1].paragraphs[0].marks = [
       { from: 0, to: 4, mark: { type: 'bold', attrs: null } },

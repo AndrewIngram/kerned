@@ -41,7 +41,7 @@ export type SelectionContext = {
 
 export function selectionContext<N extends NodeIdentity>(
   schema: Schema<N>,
-  nodes: N[],
+  nodes: readonly N[],
   tree: TreeIndex<N> = indexTree(schema, nodes),
 ): SelectionContext {
   return {

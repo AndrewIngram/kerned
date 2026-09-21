@@ -114,6 +114,6 @@ export {
   type NavigationKey,
 } from './keyboard-navigation';
 
-export { selectionView, textSelectionAtClick } from './selection-view';
+export { textSelectionAtClick } from './selection-view';
 
 export { textBoundaryNearNode, moveNodeSelection, type NavigationNode } from './node-navigation';

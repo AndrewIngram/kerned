@@ -51,7 +51,7 @@ export function toggleMarkCommand<N extends NodeIdentity>(
   mark: Mark,
 ): CommandDefinition<N> {
   return {
-    activity: (state) => markActivity(schema, state, mark),
+    activity: ({ state }) => markActivity(schema, state, mark),
     execute(context) {
       const { state } = context,
         selection = state.selection,

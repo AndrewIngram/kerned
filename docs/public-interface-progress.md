@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status   | Required outcome                                                               |
-| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Pending  | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Pending  | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Pending  | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status      | Required outcome                                                               |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Complete    | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | In progress | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Pending     | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Pending     | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending     | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending     | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending     | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -512,3 +512,262 @@ they measure the working tree containing the accepted fixes before their commit.
 
 The implementation and review cycle for milestone 2 is complete with this
 post-review changeset. Session contribution composition remains milestone 3.
+
+## Milestone 3: session composition and publication (in progress)
+
+Milestone 2's accepted review fixes were committed as `c3cdf8b` before this work.
+
+`src/core` now owns the object-configured `createEditor({ schema, content })`
+entry point. It composes behavior factories retained by the schema into named
+commands, queries, selection extensions and fresh per-session state fields.
+The public interface is explicit; it does not spread the state module's entire
+implementation interface into the consumer's type. An imperative `transact`
+command and raw `dispatch` remain available alongside named commands.
+
+Named direct calls, chains and dry runs retain each installed command's argument
+types. Command collisions report both owners. Queries are inferred separately;
+`getCommandState` returns availability and activity independently, and
+`selectedValue` distinguishes none, uniform and mixed values. Captured callbacks
+read current state rather than a React render snapshot.
+
+The session depends on the model's validated-content and editing contracts,
+not its entire assembled mark/inline registry type. This prevents recursive
+schema-type expansion while retaining input and output inference. Fixtures
+include the complete starter schema with a table inside a quote.
+
+At the state layer, nested commands now share the current draft. A nested false
+result or a failed draft operation prevents partial publication, even if the
+outer command ignores the result. Deferred effects run only after successful
+publication and never during a dry run. Semantic `onUpdate` notifications precede
+view invalidation subscriptions. Both channels snapshot their subscribers and
+reject reentrant writes during publication.
+
+Focused checks currently pass: **15 new tests** across the core session and
+state publication fixtures, plus TypeScript's positive and negative consumer
+contracts. The full `pnpm run check` gate passed for this checkpoint: **168
+Vitest passes, one unchanged convergence todo, and 39 Playwright passes**.
+The production build also passed, and a second lint-fix/format pass made no changes.
+At that checkpoint, the main demo still used the existing action assembly.
+The subsequent migration is recorded below.
+
+Remaining before milestone 3 can be judged:
+
+- Complete native input and history command migration. Toolbar and input must
+  invoke the same session commands. Prove StarterKit composes with foreign node
+  definitions, including nested content, through the public authoring interface.
+- Complete typed content/selection/lifecycle events, disposal and deferred
+  focus/reveal behavior with one explicitly owned mounted view.
+- Resolve history-provider capability ownership and conflicts.
+- Retain permissions and durable-reference behavior through the remaining input
+  and lifecycle migrations.
+- Run complete quality, build, consumer and performance gates; commit, run the
+  independent architecture judge, and commit any accepted fixes.
+
+### Milestone 3 demo migration and draft consistency
+
+The demo now constructs the public session with `starterExtensions` and canonical
+`document` content. The old `starter-kit/actions.ts` and `use-editor-document.ts`
+assemblies are deleted. Toolbar formatting, headings, quotes, lists, table edits,
+selection replacement and rich fragment insertion use installed named commands.
+A per-session document query owns tree and selection projection caches. The demo
+adapter retains only feedback and focus around these commands. Native keyboard,
+clipboard routing and history still need their complete migration.
+
+Canonical `document` initialization validates persisted attributes without
+running import normalization again. Command drafts own identity allocation, so
+availability queries never consume persistent node handles. Starter composition
+receives its assembled schema through the setup context. Table formatting keeps
+focus in the selected cell's textarea, verified in all three browsers.
+
+Draft fields now reduce the cumulative transaction from its original snapshot,
+while document transformation applies only newly appended steps. Multiple draft
+steps share one revision. The final preview has the same transaction metadata,
+position maps and field values as publication. Stored-mark-only commands retain
+their existing notification kind and revision. Tests cover nested edits, retained
+intermediate snapshots, dry runs and the final published event. The full gate at
+this checkpoint passed 175 Vitest tests, the unchanged convergence todo, all 39
+Playwright scenarios and the production build.
+
+Node, mark and inline definitions now accept per-session `setup` contributions,
+with the same configured-option and command/query inference as behavior
+extensions. The model retains factories without importing session contracts;
+core executes installed factories from the single assembled definition list.
+Consumer tests cover configured contributions and isolated transactional fields
+in two sessions sharing the same schema.
+
+The first production performance attempt caught an expensive select-all toolbar
+query during the large-document paste/undo sequence. A minimized headless
+regression observed 812 range resolutions for 200 selected paragraphs. Caching
+the document projection by immutable editor snapshot prevents each ancestor
+query from recomputing the complete selection. The regression now passes with a
+bounded number of range resolutions. The complete check and production build
+passed afterward: **177 Vitest passes, one unchanged convergence todo, and 39
+Playwright passes**.
+
+Three serial production trials are retained in
+`artifacts/public-interface-m3/toolbar-migration/baseline.json`. They exercise
+copy/paste of the complete book, duplicate-content checks, undo/redo, typing,
+paging and retained heap. All existing budgets pass. Worst trial results:
+first usable 174ms, complete stream 1037.9ms, paste handler 42ms, paste paint
+79.1ms, typing and paging frames 32.3ms, loaded heap 28,909,668 bytes. Reports
+identify `c3cdf8b` but measure this uncommitted milestone 3 working tree. Milestone
+3 remains in progress and has not yet received its commit/judge cycle.
+
+A temporary compile-only consumer probe also confirmed a remaining composition
+problem: adding a foreign `banner` node to `starterExtensions` makes session
+construction fail with `incompatibleSessionContribution`. The starter editing
+factory still assumes the closed `StarterNode` union. The probe was removed after
+recording this evidence. The next authoring change must let concrete policies
+operate safely alongside foreign nodes and nested containers; weakening the
+compatibility check or asserting the broader document to `StarterNode` would
+hide the problem. This remains a milestone 3 requirement, alongside native input,
+history ownership and lifecycle effects.
+
+### Milestone 3 portable contributions and structural policies
+
+Commands, activity checks and queries now receive the executing schema with the
+current state. The public `defineCommand` and `defineQuery` builders preserve
+portable generic callbacks while inferring user-facing arguments and results.
+Capturing a generic schema in the configuration wrapper had erased its node
+parameter; execution context avoids that loss. Closed-schema contributions remain
+checked against the assembled document rather than being widened by assertion.
+
+Starter formatting is a separate contribution and uses the active schema's text
+and mark capabilities. It no longer imports the global demo schema. A typed
+consumer installs it alongside a node-owned command, a custom text node with
+`value`/`styles` storage, and a custom atom inside a quote. Availability, activity,
+clearing, undo and inferred arguments work through the public session.
+
+Quote/list structural algorithms now accept a concrete node policy and the
+executing schema. List construction no longer captures a second schema's child
+writer. A second policy uses `quotation`, `sequence` and `entry` node names with
+`body`, `items` and `blocks` child fields. Named commands preserve nested custom
+atoms through wrapping, indentation, toggles, undo and redo. This exercises the
+same algorithm as the starter implementation.
+
+That test exposed a quote bug: a selection spanning list items chose the list as
+its insertion container and replaced its items with a quote. The command now
+lifts that insertion to the list's parent, keeping the list intact inside the
+quote. Non-sibling list wrapping returns unavailable without throwing.
+
+The complete starter factory is not yet portable. Its constructors, heading and
+table edits, document projection and clipboard policies still use `StarterNode`.
+This checkpoint removes shared algorithm and formatting assumptions; it does not
+claim the complete StarterKit/custom-node composition requirement is finished.
+
+A second regression test measures work for quoting a large sibling selection.
+The old parent-range scan read identities 20,500 times for 200 nodes. A child
+index replaces that quadratic scan; the test enforces a linear visit budget.
+A compile-only negative case also confirms closed-node commands are still
+rejected when mixed with foreign nodes. Portable builders do not weaken that
+check.
+
+Verification passed **183 Vitest tests, one unchanged convergence todo, all 39
+Playwright scenarios, and the production build**. Three additional serial
+production trials are retained in
+`artifacts/public-interface-m3/portable-formatting/baseline.json`; all existing
+budgets pass. Worst results: first usable 173ms, complete stream 1053.9ms, paste
+handler 41.9ms, paste paint 91.6ms, typing 32.3ms, paging 32.4ms, loaded heap
+28,955,056 bytes. These artifacts identify `c3cdf8b` and measure this uncommitted
+milestone 3 working tree. No milestone 3 completion or judge pass is claimed.
+
+### Milestone 3 schema-bound construction and structural contributions
+
+`schema.node(definition)` now binds typed attribute creation and reads to the
+installed definition family. Configured variants retain their installed
+validators; a different definition reusing the same name is rejected. Input
+attributes are normalized once, cloned and frozen. Reads expose only canonical
+attributes, excluding identity and storage fields, and use a weak cache rather
+than repeated validation. Constructors own their child sequences and initialize
+text storage; document insertion validates structural placement and identities.
+
+Starter heading, quote/list and table contributions now use the executing schema.
+Heading conversion transfers text, marks and inline mentions through the target
+editing policy while retaining identity, locks and durable positions. It handles
+selected containers and leaves custom text node types unchanged. Table insertion
+and row/column growth preserve foreign cell content, rectangular selections and
+unchanged cell identities. All table-builder callers migrated to schema-bound
+construction; mutable clipboard fixtures explicitly clone the resulting values.
+
+Portable consumer tests exercise custom `value`/`styles` text, custom atoms,
+nested wrapping, heading conversion with inline mentions, table cell formatting,
+structural changes, dry runs and atomic undo/redo. The browser gate caught a
+regression where the final empty cell of a rectangular selection was treated as
+an excluded text endpoint. Endpoint exclusion now applies only to contiguous
+text/range selections, with a headless regression covering both empty end cells.
+
+The full check passed **191 Vitest tests, one unchanged convergence todo, and all
+39 Playwright scenarios**; the production build passed. The complete starter kit
+still needs portable document projection and clipboard policies, along with the
+remaining native-input, history-ownership and lifecycle work. Milestone 3 is not
+yet complete and has not received its commit/judge cycle.
+
+Three serial production trials are retained in
+`artifacts/public-interface-m3/schema-bound-commands/baseline.json`. All existing
+budgets pass. Worst results: first usable 180ms, complete stream 1088.8ms, paste
+handler 42.3ms, paste paint 106.2ms, typing and paging 32.3ms, loaded heap
+28,903,240 bytes. Paste paint is higher than the preceding 91.6ms checkpoint,
+within the unchanged 123.1ms budget; repeated structural query indexing remains
+an optimization candidate as document projection moves out of the closed starter
+factory. These artifacts identify `c3cdf8b` and measure the uncommitted milestone
+3 working tree.
+
+### Milestone 3 generic clipboard algorithms and live input routing
+
+The model now owns canonical subtree copying through `schema.copy(node, allocate)`.
+It traverses declared child storage, refreshes node and inline identities, retains
+locks and canonical attributes, and does not replay import normalization. Tests
+cover alternative text/mark/inline fields and a non-idempotent attribute importer.
+
+Rich fragment insertion, rectangular table paste, plain paragraph insertion and
+cross-container replacement now accept the executing schema's node type. Custom
+text survives inline paste and table growth with marks and inline mentions intact;
+untouched source nodes and destination cells retain identity. Cross-container
+replacement handles custom text and intervening atoms. Headless consumer tests
+exercise these operations through the public transaction API, including undo and
+redo. Browser codecs remain tied to starter definitions and still need migration.
+
+Renderer document projection is no longer registered as a session query. The
+view consumer owns its cached projector. Native handlers no longer receive a
+captured document snapshot or use the global demo schema. Rich and rectangular
+paste route through the named session paste command. A retained-handler browser
+regression verifies current-selection copy, rich paste and atomic undo without
+React rendering or handler rebinding, in Chromium, Firefox and WebKit.
+
+The full check and production build passed: **198 Vitest tests, one unchanged
+convergence todo, and 39 Playwright scenarios**. The remaining starter factory
+constraint is its node-valued command arguments (`updateNode` and `paste`), which
+still declare the closed starter node union. Generic implementation alone does
+not satisfy the complete StarterKit/custom-schema composition requirement.
+Native text/split/delete commands, history ownership and lifecycle publication
+also remain before milestone 3 can be committed and judged.
+
+The first three production trials through the shared paste command passed the
+unchanged budgets but approached the paste limit: 61ms handler and 117.4ms paint
+(`artifacts/public-interface-m3/portable-clipboard/baseline.json`). The native
+handler had unnecessarily projected the whole document before a rich paste.
+It now projects only for plain-text fallback; keyboard shortcuts/navigation also
+run before structural projection.
+
+`CommandContext.apply({ steps, selection, storedMarks })` now applies a complete
+edit in one draft transition. Paste, replacement, list indentation and table
+insertion use it instead of separate content and selection previews. The
+primitive also replaces duplicated implementations of step/selection/stored-mark
+updates. A transactional-field regression requires inserted content and its
+selection to arrive together, and verifies dry-run isolation and atomic undo.
+
+The complete check and production build passed afterward: **199 Vitest tests,
+one unchanged convergence todo, and all 39 Playwright scenarios**.
+
+Three final production trials are retained in
+`artifacts/public-interface-m3/atomic-clipboard/baseline.json`. All unchanged
+budgets pass: first usable 175ms, complete stream 1082.7ms, paste handler 55.3ms,
+paste paint 113.6ms, typing 29.5ms, paging 32.7ms, loaded heap 28,995,904 bytes.
+The combined draft operation and delayed projection reduce the preceding 61ms
+paste-handler result while keeping the shared session-command route. Reports
+identify `c3cdf8b` and measure this milestone 3 checkpoint before its commit.
+
+This is an implementation checkpoint, not milestone 3 completion. The milestone
+judge must review all work since the milestone 2 reviewed baseline `c3cdf8b`,
+including this checkpoint and the remaining implementation, after milestone 3's
+full exit criteria are met.

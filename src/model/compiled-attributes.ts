@@ -9,16 +9,7 @@ export function nodeAttributes(
   node: RuntimeDocumentNode,
   mode: 'canonical' | 'input' = 'canonical',
 ) {
-  const content = definition.spec.content;
-  const reserved = new Set(['id', 'key', 'kind', 'locked']);
-
-  if (content.kind === 'container') reserved.add(content.field);
-
-  if (content.kind === 'text') {
-    if (content.marks) reserved.add(content.marks);
-
-    if (content.inline) reserved.add(content.inline);
-  }
+  const reserved = reservedNodeFields(definition);
 
   const validate = mode === 'input' ? parseAttributes : validateAttributes;
 
@@ -36,4 +27,19 @@ export function nodeAttributes(
     throw new Error('Attribute validator returned a reserved node field');
 
   return normalized;
+}
+
+export function reservedNodeFields(definition: NodeDefinition) {
+  const content = definition.spec.content;
+  const reserved = new Set(['id', 'key', 'kind', 'locked']);
+
+  if (content.kind === 'container') reserved.add(content.field);
+
+  if (content.kind === 'text') {
+    if (content.marks) reserved.add(content.marks);
+
+    if (content.inline) reserved.add(content.inline);
+  }
+
+  return reserved;
 }

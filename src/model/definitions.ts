@@ -4,6 +4,9 @@ import { validateAttributes } from './attribute-validation';
 import { freezeJson, type Immutable } from './immutable-json';
 import { jsonValue, type JsonValue } from './schema-codec';
 
+/** Internal identity shared by configured variants of a definition. */
+export const definitionFamily = Symbol('definitionFamily');
+
 /** Attribute schemas normalize imported data; they never run on each frame or glyph. */
 export type AttributeSchema = StandardSchemaV1<unknown, Readonly<Record<string, JsonValue>>>;
 
@@ -58,12 +61,19 @@ export type InlineSpec = {
 
 type DefinitionOptions = Readonly<Record<string, JsonValue>>;
 
-type DefinitionConfig<Name extends string, Options extends DefinitionOptions, Spec> = {
+type DefinitionConfig<
+  Name extends string,
+  Options extends DefinitionOptions,
+  Spec,
+  Contribution extends object,
+  Args extends unknown[],
+> = {
   name: Name;
   version: number;
   options: Options;
   requires?: readonly string[];
   schema: (options: Immutable<Options>) => Spec;
+  setup?: (options: Immutable<Options>, ...args: Args) => Contribution;
 };
 
 function definition<
@@ -71,7 +81,13 @@ function definition<
   const Name extends string,
   Options extends DefinitionOptions,
   Spec extends NodeSpec | MarkSpec | InlineSpec,
->(category: Category, config: DefinitionConfig<Name, Options, Spec>) {
+  Contribution extends object,
+  Args extends unknown[],
+>(
+  category: Category,
+  config: DefinitionConfig<Name, Options, Spec, Contribution, Args>,
+  family: symbol = Symbol(config.name),
+) {
   if (!config.name || !Number.isSafeInteger(config.version) || config.version < 1)
     throw new Error('Extensions require a name and positive schema version');
 
@@ -79,7 +95,7 @@ function definition<
   const options = structuredClone(config.options);
   jsonValue(options);
   const ownedOptions = freezeJson(options);
-  const { name, version, schema } = config;
+  const { name, version, schema, setup } = config;
   const requires = Object.freeze([...(config.requires ?? [])]);
   const spec = { ...schema(ownedOptions) };
 
@@ -119,18 +135,25 @@ function definition<
   return Object.freeze({
     category,
     name,
+    [definitionFamily]: family,
     version,
     options: ownedOptions,
     requires,
     spec,
+    setup: (...args: Args) => setup?.(ownedOptions, ...args),
     configure(next: Partial<Options>) {
-      return definition(category, {
-        name,
-        version,
-        requires,
-        schema,
-        options: { ...options, ...next },
-      });
+      return definition(
+        category,
+        {
+          name,
+          version,
+          requires,
+          schema,
+          setup,
+          options: { ...options, ...next },
+        },
+        family,
+      );
     },
   });
 }
@@ -148,7 +171,9 @@ export function defineNode<
   const Name extends string,
   Options extends DefinitionOptions,
   const Spec extends NodeSpec,
->(config: DefinitionConfig<Name, Options, Spec> & OutputCompatibility<Spec>) {
+  Contribution extends object = {},
+  Args extends unknown[] = [],
+>(config: DefinitionConfig<Name, Options, Spec, Contribution, Args> & OutputCompatibility<Spec>) {
   return definition('node', config);
 }
 
@@ -156,7 +181,9 @@ export function defineMark<
   const Name extends string,
   Options extends DefinitionOptions,
   const Spec extends MarkSpec,
->(config: DefinitionConfig<Name, Options, Spec> & OutputCompatibility<Spec>) {
+  Contribution extends object = {},
+  Args extends unknown[] = [],
+>(config: DefinitionConfig<Name, Options, Spec, Contribution, Args> & OutputCompatibility<Spec>) {
   return definition('mark', config);
 }
 
@@ -164,8 +191,10 @@ export function defineInline<
   const Name extends string,
   Options extends DefinitionOptions,
   const Spec extends Omit<InlineSpec, 'plainText'>,
+  Contribution extends object = {},
+  Args extends unknown[] = [],
 >(
-  config: DefinitionConfig<Name, Options, Spec> &
+  config: DefinitionConfig<Name, Options, Spec, Contribution, Args> &
     OutputCompatibility<Spec> & {
       plainText: (
         attrs: Immutable<StandardSchemaV1.InferOutput<NoInfer<Spec['attributes']>>>,
@@ -175,32 +204,36 @@ export function defineInline<
 ) {
   const { schema, plainText } = config;
 
-  return definition<'inline', Name, Options, Spec & { plainText: (attrs: JsonValue) => string }>(
+  return definition<
     'inline',
-    {
-      ...config,
-      schema(options) {
-        const spec = schema(options);
+    Name,
+    Options,
+    Spec & { plainText: (attrs: JsonValue) => string },
+    Contribution,
+    Args
+  >('inline', {
+    ...config,
+    schema(options) {
+      const spec = schema(options);
 
-        return {
-          ...spec,
-          plainText(attrs: JsonValue) {
-            const result = validateAttributes(spec, attrs, []);
+      return {
+        ...spec,
+        plainText(attrs: JsonValue) {
+          const result = validateAttributes(spec, attrs, []);
 
-            if ('issues' in result)
-              throw new Error(result.issues.map((issue) => issue.message).join('; '));
+          if ('issues' in result)
+            throw new Error(result.issues.map((issue) => issue.message).join('; '));
 
-            return plainText(
-              // SAFETY: Canonical validation above establishes this definition's normalized output. The private registry erases the concrete attribute type.
-              // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Restore the definition-specific output type after its canonical validator accepts it unchanged.
-              result.value as Immutable<StandardSchemaV1.InferOutput<Spec['attributes']>>,
-              options,
-            );
-          },
-        };
-      },
+          return plainText(
+            // SAFETY: Canonical validation above establishes this definition's normalized output. The private registry erases the concrete attribute type.
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Restore the definition-specific output type after its canonical validator accepts it unchanged.
+            result.value as Immutable<StandardSchemaV1.InferOutput<Spec['attributes']>>,
+            options,
+          );
+        },
+      };
     },
-  );
+  });
 }
 
 /** Non-content behavior is retained by assembly and instantiated by each session. */
@@ -208,11 +241,12 @@ export function defineExtension<
   const Name extends string,
   Options extends DefinitionOptions,
   Contribution extends object,
+  Args extends unknown[],
 >(config: {
   name: Name;
   options: Options;
   requires?: readonly string[];
-  setup: (options: Immutable<Options>) => Contribution;
+  setup: (options: Immutable<Options>, ...args: Args) => Contribution;
 }) {
   if (!config.name) throw new Error('Extensions require a name');
   const { name, setup } = config;
@@ -226,15 +260,23 @@ export function defineExtension<
     name,
     options: ownedOptions,
     requires,
-    setup: () => setup(ownedOptions),
+    setup: (...args: Args) => setup(ownedOptions, ...args),
     configure(next: Partial<Options>) {
       return defineExtension({ name, requires, setup, options: { ...options, ...next } });
     },
   });
 }
 
-export type SchemaDefinition =
-  | { category: 'behavior'; name: string; requires: readonly string[]; setup: () => object }
+export type SchemaDefinition = {
+  readonly [definitionFamily]?: symbol;
+  setup?: (...args: never[]) => object | undefined;
+} & (
+  | {
+      category: 'behavior';
+      name: string;
+      requires: readonly string[];
+      setup: (...args: never[]) => object;
+    }
   | { category: 'node'; name: string; version: number; requires: readonly string[]; spec: NodeSpec }
   | { category: 'mark'; name: string; version: number; requires: readonly string[]; spec: MarkSpec }
   | {
@@ -243,7 +285,8 @@ export type SchemaDefinition =
       version: number;
       requires: readonly string[];
       spec: InlineSpec;
-    };
+    }
+);
 
 type Normalized<Value, Mode extends 'input' | 'output'> = Mode extends 'input'
   ? Value

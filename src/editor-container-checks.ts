@@ -69,7 +69,6 @@ const lists = createListCommands<Node>({
   list: (n) => (n.kind === 'list' ? n : null),
   item: (n) => (n.kind === 'item' ? n : null),
   isBlock: (n) => n.kind === 'text',
-  withChildren: schema.withChildren,
   createList: (identity, settings) => ({ ...identity, kind: 'list', ...settings, children: [] }),
   createItem: (identity) => ({ ...identity, kind: 'item', children: [] }),
 });

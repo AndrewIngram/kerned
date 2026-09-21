@@ -2,14 +2,9 @@ import { indexTree, type NodeIdentity, type Schema } from '../model';
 import { supportsOwnedText } from '../owned-text-support';
 import { selectionContext, TextSelection, type EditorState } from '../state';
 import { type Step } from '../transform';
-import {
-  plainText,
-  type StarterNode,
-  type TableNode,
-  type TableCell,
-  type TextBlockNode,
-} from './demo-model';
-import { tableCells } from './table';
+import { plainText, type StarterNode, type TableNode, type TableCell } from './demo-model';
+import { table as tableDefinition, tableCell, paragraph } from './starter-definitions';
+import { tableCells, tableRows } from './table';
 
 /** Copy a logical rectangle rather than a tree slice ordered by the active cell. */
 export function copyCellRectangle(
@@ -77,7 +72,7 @@ export function cellRectangleText(table: TableNode): string {
   return occupied.map((row) => row.map((value) => escape(value ?? '')).join('\t')).join('\n');
 }
 
-export function cellPasteTarget(schema: Schema<StarterNode>, state: EditorState<StarterNode>) {
+export function cellPasteTarget<N extends NodeIdentity>(schema: Schema<N>, state: EditorState<N>) {
   const context = selectionContext(schema, state.nodes),
     selection = state.selection;
 
@@ -99,7 +94,13 @@ export function cellPasteTarget(schema: Schema<StarterNode>, state: EditorState<
   const table =
     cell?.parent === null || cell?.parent === undefined ? undefined : tree.byId.get(cell.parent);
 
-  if (cell?.node.kind !== 'tableCell' || table?.node.kind !== 'table') return null;
+  if (
+    !cell ||
+    !table ||
+    !schema.node(tableCell).matches(cell.node) ||
+    !schema.node(tableDefinition).matches(table.node)
+  )
+    return null;
 
   const map = tableCells.grid(context, table.node.id),
     bounds = map.bounds.get(cell.node.id);
@@ -108,10 +109,10 @@ export function cellPasteTarget(schema: Schema<StarterNode>, state: EditorState<
 }
 
 /** Schema-owned rectangular replacement; browser and React adapters only dispatch it. */
-export function pasteCellRectangle(
-  schema: Schema<StarterNode>,
-  state: EditorState<StarterNode>,
-  source: TableNode,
+export function pasteCellRectangle<N extends NodeIdentity>(
+  schema: Schema<N>,
+  state: EditorState<N>,
+  source: N,
   allocate: () => NodeIdentity,
 ) {
   const target = cellPasteTarget(schema, state);
@@ -121,66 +122,83 @@ export function pasteCellRectangle(
   const tree = indexTree(schema, state.nodes),
     table = tree.byId.get(target.tableId)?.node;
 
-  if (table?.kind !== 'table') throw new Error('Missing destination table');
+  if (!table || !schema.node(tableDefinition).matches(table))
+    throw new Error('Missing destination table');
+  const sourceRows = tableRows(schema, source);
+  const targetRows = tableRows(schema, table);
+  const cells = schema.node(tableCell);
+  const paragraphs = schema.node(paragraph);
+
+  function attributes(cell: N) {
+    const attrs = cells.read(cell);
+
+    if (!attrs) throw new Error('Expected table cell');
+
+    return attrs;
+  }
 
   if (
-    source.rows.some((row) => row.some((cell) => cell.colspan !== 1 || cell.rowspan !== 1)) ||
-    table.rows.some((row) => row.some((cell) => cell.colspan !== 1 || cell.rowspan !== 1))
+    [...sourceRows, ...targetRows].some((row) =>
+      row.some((cell) => {
+        const attrs = attributes(cell);
+
+        return attrs.colspan !== 1 || attrs.rowspan !== 1;
+      }),
+    )
   )
     throw new Error('Rectangular paste currently requires tables without merged cells.');
 
-  const width = source.rows[0]?.length ?? 0,
-    height = source.rows.length;
+  const width = sourceRows[0]?.length ?? 0,
+    height = sourceRows.length;
 
-  if (!width || !height || source.rows.some((row) => row.length !== width))
+  if (!width || !height || sourceRows.some((row) => row.length !== width))
     throw new Error('Clipboard table must be rectangular.');
 
-  function clone(paragraph: TextBlockNode): TextBlockNode {
-    if (!supportsOwnedText(paragraph.text))
+  function clone(node: N): N {
+    const text = schema.text(node);
+
+    if (text !== null && !supportsOwnedText(text))
       throw new Error('This study currently supports Latin text and emoji.');
 
-    return {
-      ...paragraph,
-      ...allocate(),
-      inline: paragraph.inline.map((value) => ({ ...value, id: crypto.randomUUID() })),
-    };
+    return schema.copy(node, allocate);
   }
 
-  function empty(row: number, header: boolean): TableCell {
-    return {
-      kind: 'tableCell',
-      ...allocate(),
-      row,
-      header,
-      colspan: 1,
-      rowspan: 1,
-      paragraphs: [{ kind: 'paragraph', ...allocate(), text: '', marks: [], inline: [] }],
-    };
+  function empty(row: number, header: boolean): N {
+    const identity = allocate();
+
+    return cells.create(identity, { row, header, colspan: 1, rowspan: 1 }, [
+      paragraphs.create(allocate(), { text: '' }),
+    ]);
   }
 
   const columns = Math.max(target.map.width, target.column + width),
     rows = Math.max(target.map.height, target.row + height);
 
-  const result: TableCell[][] = table.rows.map((row) => [...row]),
-    steps: Step<StarterNode>[] = [];
+  const result = targetRows.map((row) => [...row]),
+    steps: Step<N>[] = [];
 
   for (let y = 0; y < rows; y++) {
     const row = result[y] ?? (result[y] = []);
 
     for (let x = row.length; x < columns; x++)
-      row.push(empty(y, y < target.map.height && table.rows[y].every((cell) => cell.header)));
+      row.push(
+        empty(y, y < target.map.height && targetRows[y].every((cell) => attributes(cell).header)),
+      );
   }
 
   for (let y = 0; y < height; y++)
     for (let x = 0; x < width; x++) {
       const cell = result[target.row + y][target.column + x],
-        content = source.rows[y][x].paragraphs.map(clone);
+        content = schema.children(sourceRows[y][x]).map(clone);
 
-      result[target.row + y][target.column + x] = {
-        ...cell,
-        header: source.rows[y][x].header,
-        paragraphs: content,
-      };
+      result[target.row + y][target.column + x] = cells.create(
+        cell,
+        {
+          ...attributes(cell),
+          header: attributes(sourceRows[y][x]).header,
+        },
+        content,
+      );
     }
 
   // Replace only the affected row slices, retaining destination cell identities.
@@ -197,7 +215,7 @@ export function pasteCellRectangle(
 
   // Insert new cells in descending flat-tree order so existing row indexes stay valid.
   for (let y = rows - 1; y >= 0; y--) {
-    const old = table.rows[y]?.length ?? 0,
+    const old = targetRows[y]?.length ?? 0,
       added = result[y].slice(old);
 
     if (added.length)

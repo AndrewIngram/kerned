@@ -13,7 +13,7 @@ test('cell rectangles preserve formatting, grow tables, retain unaffected identi
 
     let next = 1;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
-    const source = createTable(allocate, 3, 3);
+    const source = structuredClone(createTable(demoSchema, allocate, 3, 3));
     source.rows.forEach((row, y) =>
       row.forEach((cell, x) => {
         cell.paragraphs[0].text = `${y},${x}`;
@@ -45,7 +45,7 @@ test('cell rectangles preserve formatting, grow tables, retain unaffected identi
     const copied = copyCellRectangle(demoSchema, from.state),
       plain = cellRectangleText(copied);
 
-    const target = createTable(allocate, 2, 2),
+    const target = structuredClone(createTable(demoSchema, allocate, 2, 2)),
       original = structuredClone(target);
 
     const to = createEditor(
@@ -121,9 +121,9 @@ test('rectangle paste uses source size and rejects protected targets and merged 
 
     let next = 1;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
-    const table = createTable(allocate, 3, 3);
+    const table = structuredClone(createTable(demoSchema, allocate, 3, 3));
     table.rows.forEach((row) => row.forEach((c) => (c.paragraphs[0].text = 'keep')));
-    const source = createTable(allocate, 1, 1);
+    const source = structuredClone(createTable(demoSchema, allocate, 1, 1));
     source.rows[0][0].paragraphs[0].text = 'only';
 
     const selection = new tableCells.CellSelection(
@@ -152,7 +152,7 @@ test('rectangle paste uses source size and rejects protected targets and merged 
     );
 
     const before = JSON.stringify(secure.state.nodes),
-      wide = createTable(allocate, 1, 2);
+      wide = structuredClone(createTable(demoSchema, allocate, 1, 2));
 
     let denied = false;
 
@@ -168,7 +168,7 @@ test('rectangle paste uses source size and rejects protected targets and merged 
       denied = true;
     }
 
-    const merged = createTable(allocate, 3, 2);
+    const merged = structuredClone(createTable(demoSchema, allocate, 3, 2));
     merged.rows[1] = [{ ...merged.rows[1][0], colspan: 2 }];
 
     const whole = createEditor(
@@ -233,8 +233,8 @@ test('large rectangles expand in both dimensions and retain header formatting', 
     let next = 1;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
 
-    const target = createTable(allocate, 24, 24),
-      source = createTable(allocate, 32, 32);
+    const target = structuredClone(createTable(demoSchema, allocate, 24, 24)),
+      source = structuredClone(createTable(demoSchema, allocate, 32, 32));
 
     source.rows.forEach((row, y) =>
       row.forEach((cell, x) => (cell.paragraphs[0].text = `${y}:${x}`)),

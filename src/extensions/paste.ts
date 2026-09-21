@@ -2,12 +2,12 @@ import { indexTree, type NodeIdentity, type Schema } from '../model';
 import { TextSelection, textSelection, type EditorState } from '../state';
 import { type Step } from '../transform';
 import { replaceStructuredText } from './blocks';
-import type { StarterNode } from './demo-model';
+import { paragraph } from './starter-definitions';
 
 /** Plain-text clipboard paragraphs, inserted together as one undoable transaction. */
-export function pasteParagraphs(
-  schema: Schema<StarterNode>,
-  state: EditorState<StarterNode>,
+export function pasteParagraphs<N extends NodeIdentity>(
+  schema: Schema<N>,
+  state: EditorState<N>,
   text: string,
   allocate: () => NodeIdentity,
 ) {
@@ -25,15 +25,10 @@ export function pasteParagraphs(
   const tail = allocate(),
     last = lines[lines.length - 1];
 
-  const middle: StarterNode[] = lines.slice(1, -1).map((textValue) => ({
-    kind: 'paragraph',
-    ...allocate(),
-    text: textValue,
-    marks: [],
-    inline: [],
-  }));
+  const paragraphs = schema.node(paragraph);
+  const middle = lines.slice(1, -1).map((value) => paragraphs.create(allocate(), { text: value }));
 
-  const steps: Step<StarterNode>[] = [
+  const steps: Step<N>[] = [
     ...replacement.steps,
     {
       kind: 'split',

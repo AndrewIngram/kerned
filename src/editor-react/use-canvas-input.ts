@@ -25,7 +25,9 @@ type CanvasInputOptions<N extends NodeIdentity> = {
   context: SelectionContext;
   inset: number;
   schema: Schema<N>;
-  editor: ReturnType<typeof createEditor<N>>;
+  editor: Pick<ReturnType<typeof createEditor<N>>, 'state' | 'breakHistory'> & {
+    select(this: void, selection: Selection): void;
+  };
   selection: Selection;
   nodes: readonly N[];
   node: (id: number) => N | undefined;

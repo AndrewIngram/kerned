@@ -65,6 +65,8 @@ export {
   commandActivity,
   type Command,
   type CommandContext,
+  type CommandEdit,
+  type ReadContext,
   type CommandDefinition,
   type CommandActivity,
   type CommandState,
@@ -94,3 +96,5 @@ export { inputMarks } from './stored-marks';
 export { markActivity, toggleMarkCommand } from './formatting-commands';
 
 export { type DocumentRangeResult } from './document-ranges';
+
+export { selectionView } from './selection-view';

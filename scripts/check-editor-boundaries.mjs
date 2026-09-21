@@ -4,9 +4,14 @@ import path from 'node:path';
 
 import { dependencies } from './import-dependencies.mjs';
 
-const layers = new Set(['model', 'transform', 'state']);
+const layers = new Set(['model', 'transform', 'state', 'core']);
 
-const allowed = { model: [], transform: ['model'], state: ['model', 'transform'] };
+const allowed = {
+  model: [],
+  transform: ['model'],
+  state: ['model', 'transform'],
+  core: ['model', 'transform', 'state'],
+};
 
 const sources = ['src', 'tests', 'scripts'].flatMap((root) =>
   readdirSync(root, { recursive: true })

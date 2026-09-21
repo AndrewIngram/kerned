@@ -7,14 +7,18 @@ import { demoSchema } from '../../extensions/demo-schema';
 import { DemoNodeView } from '../../extensions/node-views';
 import { type CommentHighlight } from '../../extensions/text-block-view';
 import { type FindState, textSelection, type Selection } from '../../state';
-import type { StarterActions } from './actions';
-import type { EditorDocument, Owned } from './types';
+import type { StarterNode } from '../demo-model';
+import type { EditorDocument } from './document';
+import type { InputActions } from './input';
+import type { Owned } from './types';
 import type { useDocumentLayout } from './use-document-layout';
 
 type BlockLayerProps = {
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   doc: EditorDocument;
-  actions: StarterActions;
+  actions: Pick<InputActions, 'dispatch' | 'restore' | 'toggleFormat' | 'replaceCells'> & {
+    update(this: void, node: StarterNode): boolean;
+  };
   layout: ReturnType<typeof useDocumentLayout>;
   viewport: Viewport;
   kit: CanvasKit;

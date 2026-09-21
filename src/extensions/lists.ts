@@ -8,7 +8,6 @@ export type ListAdapter<N extends NodeIdentity> = {
   list(node: N): ({ children: readonly N[] } & ListSettings) | null;
   item(node: N): { children: readonly N[] } | null;
   isBlock(node: N): boolean;
-  withChildren(this: void, node: N, children: N[]): N;
   createList(identity: NodeIdentity, settings: ListSettings): N;
   createItem(identity: NodeIdentity): N;
 };
@@ -51,10 +50,10 @@ export function createListCommands<N extends NodeIdentity>(adapter: ListAdapter<
         throw new Error('Wrap requires block siblings');
 
       const items = children.map((node) =>
-        adapter.withChildren(adapter.createItem(allocate()), [node]),
+        schema.withChildren(adapter.createItem(allocate()), [node]),
       );
 
-      const list = adapter.withChildren(adapter.createList(allocate(), settings), items);
+      const list = schema.withChildren(adapter.createList(allocate(), settings), items);
 
       return { steps: [{ kind: 'replaceChildren', parent, index, count, nodes: [list] }] };
     },

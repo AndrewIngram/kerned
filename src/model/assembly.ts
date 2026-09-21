@@ -1,7 +1,7 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 import { z } from 'zod';
 
-import { parseAttributes } from './attribute-validation';
+import { parseAttributes, validateAttributes } from './attribute-validation';
 import { compileSchema } from './compiled-schema';
 import { childPolicy } from './content-policy';
 import type {
@@ -18,7 +18,7 @@ import type { createInlineValues } from './inline-schema';
 import { normalizeMarks, type MarkRange } from './marks';
 import type { createMarkSchema } from './marks';
 import type { Schema } from './schema';
-import { jsonRecord, type JsonValue } from './schema-codec';
+import { jsonRecord, jsonValue, type JsonValue } from './schema-codec';
 import { validateTextRange } from './text';
 
 type Issue = StandardSchemaV1.Issue;
@@ -102,6 +102,12 @@ export type AssembledSchema<Definitions extends readonly SchemaDefinition[]> = S
   readonly marks: TypedMarks<Definitions>;
   readonly inline: TypedInline<Definitions>;
   readonly definitions: Readonly<Definitions>;
+  /** Validate canonical nodes without replaying import normalization. */
+  // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Persisted normalized content still needs validation at the document boundary.
+  readonly validateDocument: (
+    // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Canonical document validation is an external content boundary.
+    input: unknown,
+  ) => StandardSchemaV1.Result<DocumentOutput<Definitions>>;
   readonly '~standard': Omit<
     StandardSchemaV1.Props<DocumentInput<Definitions>, DocumentOutput<Definitions>>,
     'validate'
@@ -201,6 +207,7 @@ export function createSchema(config: {
   function validate(
     // oxlint-disable-next-line anti-slop/no-unknown-parameters -- This is the official unknown-input Standard Schema boundary.
     input: unknown,
+    canonical = false,
   ): StandardSchemaV1.Result<DocumentOutput<readonly SchemaDefinition[]>> {
     const issues: Issue[] = [];
     const drafts: NodeDraft[] = [];
@@ -214,7 +221,17 @@ export function createSchema(config: {
 
     // oxlint-disable-next-line anti-slop/no-unknown-parameters -- A node field from external structured content has not been validated yet.
     function attributes(definition: NodeDefinition | ValueDefinition, value: unknown, path: Path) {
-      const result = parseAttributes(definition.spec, value, path);
+      let result;
+
+      try {
+        result = canonical
+          ? validateAttributes(definition.spec, jsonValue(value), path)
+          : parseAttributes(definition.spec, value, path);
+      } catch (error) {
+        issue(error instanceof Error ? error.message : String(error), path);
+
+        return null;
+      }
 
       if ('issues' in result) {
         issues.push(...result.issues);
@@ -297,6 +314,12 @@ export function createSchema(config: {
 
       if (!meta.success) {
         issues.push(...prefixed(meta.error.issues, path));
+
+        return null;
+      }
+
+      if (canonical && (meta.data.id === undefined || meta.data.key === undefined)) {
+        issue('Canonical document nodes require id and key', path);
 
         return null;
       }
@@ -559,7 +582,7 @@ export function createSchema(config: {
     'validate'
   > & {
     validate: typeof validate;
-  } = { version: 1, vendor: 'gprose', validate };
+  } = { version: 1, vendor: 'gprose', validate: (input) => validate(input) };
 
   const runtime = compileSchema(definitions);
 
@@ -567,5 +590,7 @@ export function createSchema(config: {
     ...runtime,
     definitions: Object.freeze(definitions),
     '~standard': Object.freeze(standard),
+    // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Canonical persisted content is an external validation boundary.
+    validateDocument: (input: unknown) => validate(input, true),
   });
 }

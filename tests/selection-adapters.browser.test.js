@@ -4,16 +4,21 @@ test('starter commands target the selected node and disjoint cells, never the fi
   const result = await (async () => {
     const { React, createRoot, flushSync } = await import('./fixtures/selection-probe.js');
 
-    const { createEditor, NodeSelection, textSelection, selectionContext } =
+    const { NodeSelection, textSelection, selectionContext } =
       await import('../src/state/index.ts');
 
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     const { createTable, tableCells } = await import('../src/extensions/table.ts');
 
-    const { useEditorDocument } =
-      await import('../src/extensions/starter-kit/use-editor-document.ts');
+    const { createEditor } = await import('../src/core/index.ts');
+    const { createSchema } = await import('../src/model/index.ts');
+    const { starterExtensions } = await import('../src/extensions/starter-kit/index.ts');
+    const { useEditorState } = await import('../src/editor-react/index.tsx');
 
-    const { createStarterKitActions } = await import('../src/extensions/starter-kit/actions.ts');
+    const { createStarterDocumentQuery } =
+      await import('../src/extensions/starter-kit/document.ts');
+
+    const { createEditorControls } = await import('../src/demo/app/editor-controls.ts');
     const { createStarterKitInput } = await import('../src/extensions/starter-kit/input.ts');
     const { createTextInput } = await import('../src/editor-browser/text-input.ts');
     let next = 10;
@@ -28,19 +33,23 @@ test('starter commands target the selected node and disjoint cells, never the fi
       inline: [],
     });
 
-    const table = createTable(allocate);
+    const table = structuredClone(createTable(demoSchema, allocate));
 
-    const editor = createEditor(
-      demoSchema,
-      [paragraph(1, 'First'), { id: 2, key: 'image', kind: 'image', src: '', alt: 'Image' }, table],
-      textSelection(1, 2),
-      [tableCells.extension],
-    );
+    const editor = createEditor({
+      schema: createSchema({ extensions: starterExtensions }),
+      document: [
+        paragraph(1, 'First'),
+        { id: 2, key: 'image', kind: 'image', src: '', alt: 'Image' },
+        table,
+      ],
+      selection: textSelection(1, 2),
+    });
 
     let doc;
+    const projectDocument = createStarterDocumentQuery(editor.schema);
 
     function Probe() {
-      const nextDocument = useEditorDocument(editor);
+      const nextDocument = useEditorState(editor, projectDocument);
       React.useLayoutEffect(() => {
         doc = nextDocument;
       }, [nextDocument]);
@@ -55,9 +64,8 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const notices = [];
 
     const actions = () =>
-      createStarterKitActions({
+      createEditorControls({
         editor,
-        document: doc,
         onEdit() {},
         notice: (m) => notices.push(m),
         closePanel() {},
@@ -85,7 +93,6 @@ test('starter commands target the selected node and disjoint cells, never the fi
 
     const events = createStarterKitInput({
       editor,
-      document: doc,
       actions: actions(),
       textInput: capture,
       input: () => input,

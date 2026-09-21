@@ -183,6 +183,16 @@ export function applyTransaction<N extends NodeIdentity>(
   };
 }
 
+function notifyListener(listener: () => void) {
+  try {
+    listener();
+  } catch (error) {
+    queueMicrotask(() => {
+      throw error;
+    });
+  }
+}
+
 /** Local history only. A collaboration adapter must rebase operations and history;
  * stale transactions are rejected rather than silently replayed over newer state. */
 export function createEditor<N extends NodeIdentity>(
@@ -209,7 +219,9 @@ export function createEditor<N extends NodeIdentity>(
   const fields = [...new Set(options.fields ?? [])];
 
   for (const field of fields) field.initialize(state);
-  let preparing = false;
+
+  let preparing = false,
+    publishing = false;
 
   function prepareFields(event: ExtensionUpdate<N>) {
     if (preparing) throw new Error('Extension reducers cannot change editor state');
@@ -224,6 +236,8 @@ export function createEditor<N extends NodeIdentity>(
 
   function assertWritable() {
     if (preparing) throw new Error('Extension reducers cannot change editor state');
+
+    if (publishing) throw new Error('Editor subscribers cannot change state during publication');
   }
 
   const positions = createRelativePositions(
@@ -238,19 +252,21 @@ export function createEditor<N extends NodeIdentity>(
   let allocationNodes: readonly N[] | undefined;
   let occupiedIds: ReadonlySet<number> = new Set();
   const listeners = new Set<() => void>();
+  const updateListeners = new Set<(update: ExtensionUpdate<N>) => void>();
 
-  function notify() {
-    // Snapshot registration so subscriptions changed by callbacks take effect next time.
-    const pending = [...listeners];
+  function notify(update: ExtensionUpdate<N>) {
+    // Snapshot both channels before callbacks. Semantic updates precede view invalidation.
+    const updates = [...updateListeners],
+      pending = [...listeners];
 
-    for (const listener of pending) {
-      try {
-        listener();
-      } catch (error) {
-        queueMicrotask(() => {
-          throw error;
-        });
-      }
+    publishing = true;
+
+    try {
+      for (const listener of updates) notifyListener(() => listener(update));
+
+      for (const listener of pending) notifyListener(listener);
+    } finally {
+      publishing = false;
     }
   }
 
@@ -315,12 +331,14 @@ export function createEditor<N extends NodeIdentity>(
       maps: redo ? entry.positionMaps : [...entry.positionMaps].toReversed().map(invertPositionMap),
     };
 
-    prepareFields({
+    const update: ExtensionUpdate<N> = {
       kind: redo ? 'redo' : 'undo',
       before: state,
       after: next,
       mapping: positionMapping,
-    });
+    };
+
+    prepareFields(update);
     positions.advance(next, maps, { operations: entry.operations, redo });
     source.pop();
     target.push(entry);
@@ -328,7 +346,7 @@ export function createEditor<N extends NodeIdentity>(
     journal.push({ from: state.revision, to: state.revision + 1, maps });
 
     state = next;
-    notify();
+    notify(update);
 
     return { state, changedIds, positionMapping };
   }
@@ -336,6 +354,15 @@ export function createEditor<N extends NodeIdentity>(
   const editor = {
     get state() {
       return state;
+    },
+    /** Runs after atomic publication and before view subscriptions. Dispatch from
+     * a subscriber is rejected; schedule a subsequent edit after publication. */
+    onUpdate(listener: (update: ExtensionUpdate<N>) => void) {
+      updateListeners.add(listener);
+
+      return () => {
+        updateListeners.delete(listener);
+      };
     },
     subscribe(listener: () => void) {
       listeners.add(listener);
@@ -359,7 +386,7 @@ export function createEditor<N extends NodeIdentity>(
           .can()
           .command(command.execute, ...args)
           .run(),
-        activity: command.activity?.(state, ...args) ?? 'inactive',
+        activity: command.activity?.({ state, schema }, ...args) ?? 'inactive',
       };
     },
     documentId,
@@ -419,11 +446,12 @@ export function createEditor<N extends NodeIdentity>(
         storedMarks: state.selection.eq(next) ? state.storedMarks : null,
       };
 
-      prepareFields({ kind: 'selection', before: state, after });
+      const update: ExtensionUpdate<N> = { kind: 'selection', before: state, after };
+      prepareFields(update);
 
       if (!state.selection.eq(next)) boundary = true;
       state = after;
-      notify();
+      notify(update);
 
       return state;
     },
@@ -460,23 +488,27 @@ export function createEditor<N extends NodeIdentity>(
       if (checked && new Set(checked.map((mark) => mark.type)).size !== checked.length)
         throw new Error('Duplicate stored mark type');
       const after = { ...state, storedMarks: checked === null ? null : structuredClone(checked) };
-      prepareFields({ kind: 'storedMarks', before: state, after });
+      const update: ExtensionUpdate<N> = { kind: 'storedMarks', before: state, after };
+      prepareFields(update);
       state = after;
       boundary = true;
-      notify();
+      notify(update);
 
       return state;
     },
     dispatch(tx: Transaction<N>) {
       assertWritable();
       const result = applyTransaction(schema, state, tx, selections, options.permissions);
-      prepareFields({
+
+      const update: ExtensionUpdate<N> = {
         kind: 'transaction',
         before: state,
         after: result.state,
         transaction: tx,
         mapping: result.positionMapping,
-      });
+      };
+
+      prepareFields(update);
       const operations = positions.advance(result.state, result.anchorMaps);
 
       if (tx.origin === 'local' && result.changes.length) {
@@ -523,7 +555,7 @@ export function createEditor<N extends NodeIdentity>(
 
       journal.push({ from: state.revision, to: result.state.revision, maps: result.anchorMaps });
       state = result.state;
-      notify();
+      notify(update);
 
       return result;
     },
@@ -532,19 +564,67 @@ export function createEditor<N extends NodeIdentity>(
   };
 
   function commandHost() {
+    const base = state;
+
+    const drafts = new WeakMap<
+      EditorState<N>,
+      {
+        steps: readonly Step<N>[];
+        maps: readonly PositionMap[];
+        marks: readonly Mark[] | null | undefined;
+      }
+    >();
+
     return {
+      schema,
+      nodeIds: (draft: EditorState<N>) => indexTree(schema, draft.nodes).byId.keys(),
       get state() {
         return state;
       },
       preview(draft: EditorState<N>, tx: Transaction<N>) {
         const result = applyTransaction(schema, draft, tx, selections, options.permissions);
-        prepareFields({
-          kind: 'transaction',
-          before: draft,
-          after: result.state,
-          transaction: tx,
-          mapping: result.positionMapping,
-        });
+        const prefix = drafts.get(draft);
+        const steps = [...(prefix?.steps ?? []), ...tx.steps];
+        const maps = [...(prefix?.maps ?? []), ...result.maps];
+
+        const marks =
+          tx.storedMarks !== undefined
+            ? tx.storedMarks
+            : draft.selection.eq(result.state.selection)
+              ? prefix?.marks
+              : undefined;
+
+        const marksOnly =
+          !steps.length && base.selection.eq(result.state.selection) && marks !== undefined;
+
+        // Apply only the new steps, but project fields from the chain's original
+        // snapshot. Intermediate commands belong to one transaction and revision.
+        result.state.revision = base.revision + (marksOnly ? 0 : 1);
+
+        const transaction = {
+          ...tx,
+          baseRevision: base.revision,
+          steps,
+          selection: result.state.selection,
+          storedMarks: marks,
+        };
+
+        prepareFields(
+          marksOnly
+            ? {
+                kind: 'storedMarks',
+                before: base,
+                after: result.state,
+              }
+            : {
+                kind: 'transaction',
+                before: base,
+                after: result.state,
+                transaction,
+                mapping: { before: base, after: result.state, maps },
+              },
+        );
+        drafts.set(result.state, { steps, maps, marks });
 
         return result.state;
       },

@@ -3,7 +3,8 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Viewport } from '../../editor-react';
 import { createEditorScene, type Placement, type Scene } from '../../editor-scene';
 import { RangeSelection } from '../../state';
-import type { EditorDocument, Owned } from './types';
+import type { EditorDocument } from './document';
+import type { Owned } from './types';
 
 type LayoutResult = ReturnType<ReturnType<typeof createEditorScene>['build']>;
 

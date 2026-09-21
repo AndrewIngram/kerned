@@ -1,23 +1,38 @@
 import { createTextInput, type BrowserViewOptions } from '../../editor-browser';
 import { listCommands, replaceStructuredText } from '../../extensions/blocks';
-import { pasteFragment, readClipboard, writeClipboard } from '../../extensions/clipboard';
+import { readClipboard, writeClipboard, type ClipboardFragment } from '../../extensions/clipboard';
 import { plainText, type StarterNode } from '../../extensions/demo-model';
-import { demoSchema } from '../../extensions/demo-schema';
 import { pasteParagraphs } from '../../extensions/paste';
 import { tablePlainText } from '../../extensions/table';
-import { boundaries } from '../../model';
+import { boundaries, type NodeIdentity, type Schema } from '../../model';
 import { supportsOwnedText } from '../../owned-text-support';
-import { TextSelection, textSelection } from '../../state';
+import { TextSelection, textSelection, type Selection } from '../../state';
 import { type Step } from '../../transform';
+import type { TextFormat } from '../formatting';
 import { tableCells } from '../table';
-import { pasteCellRectangle, plainCellRectangle } from '../table-clipboard';
-import type { StarterActions } from './actions';
-import type { EditorDocument, EditorSession } from './types';
+import { plainCellRectangle } from '../table-clipboard';
+import { createStarterDocumentQuery } from './document';
+import type { EditorSession } from './types';
+
+export type InputActions = {
+  dispatch: (
+    steps: Step<StarterNode>[],
+    history?: 'separate' | { group: string },
+    selection?: Selection,
+    input?: boolean,
+  ) => boolean;
+  allocate: () => NodeIdentity;
+  blocks: { item: number | undefined };
+  structure: (change: () => Step<StarterNode>[]) => boolean;
+  restore: (redo?: boolean) => boolean;
+  toggleFormat: (format: TextFormat) => boolean;
+  replaceCells: (text: string) => boolean;
+  paste: (fragment: ClipboardFragment) => boolean;
+};
 
 type InputOptions = {
   editor: EditorSession;
-  document: EditorDocument;
-  actions: StarterActions;
+  actions: InputActions;
   textInput: ReturnType<typeof createTextInput<StarterNode>>;
   input: () => HTMLTextAreaElement | null;
   notice: (message: string) => void;
@@ -31,7 +46,6 @@ type InputOptions = {
  * without this adapter, a textarea, or React. */
 export function createStarterKitInput({
   editor,
-  document,
   actions,
   textInput,
   input,
@@ -41,21 +55,8 @@ export function createStarterKitInput({
   selectAll,
   navigate,
 }: InputOptions) {
-  const {
-    editorState,
-    tree,
-    nodes,
-    textSelection: selection,
-    nonTextSelection,
-    start,
-    end,
-
-    crossNode,
-    collapsed,
-    active,
-  } = document;
-
-  const { dispatch, allocate, blocks, structure, restore, toggleFormat, replaceCells } = actions;
+  const project = createStarterDocumentQuery(editor.schema);
+  const { dispatch, allocate, structure, restore, toggleFormat, replaceCells, paste } = actions;
 
   function syncInput() {
     const element = input();
@@ -64,6 +65,15 @@ export function createStarterKitInput({
   }
 
   function replace(from: number, to: number, value: string, separate = false, paragraphs = false) {
+    const {
+      editorState,
+      textSelection: selection,
+      start,
+      end,
+      active,
+      crossNode,
+    } = project(editor.state);
+
     if (!selection || !start || !end) {
       replaceCells(value);
 
@@ -87,7 +97,7 @@ export function createStarterKitInput({
     }
 
     if (paragraphs && clean.includes('\n')) {
-      const command = pasteParagraphs(demoSchema, editorState, clean, allocate);
+      const command = pasteParagraphs(editor.schema, editorState, clean, allocate);
       dispatch(command.steps, 'separate', command.selection);
       closePanel();
 
@@ -95,7 +105,7 @@ export function createStarterKitInput({
     }
 
     if (crossNode) {
-      const command = replaceStructuredText(demoSchema, editorState, clean);
+      const command = replaceStructuredText(editor.schema, editorState, clean);
 
       const history = separate
         ? 'separate'
@@ -126,6 +136,9 @@ export function createStarterKitInput({
   }
 
   function copyText() {
+    const document = project(editor.state);
+    const { tree } = document;
+
     return document.ranges
       .map((range) => {
         const node = tree.byId.get(range.id)?.node;
@@ -134,7 +147,7 @@ export function createStarterKitInput({
 
         return range.kind === 'text' && (node.kind === 'paragraph' || node.kind === 'heading')
           ? plainText(node, range.from, range.to)
-          : nodeText(node);
+          : nodeText(node, editor.schema);
       })
       .join('\n');
   }
@@ -142,7 +155,10 @@ export function createStarterKitInput({
   function key(event: KeyboardEvent) {
     if (event.isComposing || textInput.composing) return;
 
-    if (nonTextSelection && (event.key === 'Backspace' || event.key === 'Delete')) {
+    if (
+      !(editor.state.selection instanceof TextSelection) &&
+      (event.key === 'Backspace' || event.key === 'Delete')
+    ) {
       event.preventDefault();
       replaceCells('');
 
@@ -185,7 +201,18 @@ export function createStarterKitInput({
 
     if (navigate(event)) return;
 
+    const {
+      editorState,
+      tree,
+      nodes,
+      textSelection: selection,
+      crossNode,
+      collapsed,
+      active,
+    } = project(editor.state);
+
     if (!selection) return;
+    const blocks = actions.blocks;
 
     if (event.key === 'Backspace' || event.key === 'Delete') {
       event.preventDefault();
@@ -213,7 +240,7 @@ export function createStarterKitInput({
 
         if (back && blocks.item !== undefined) {
           try {
-            const command = listCommands.backspace(demoSchema, editorState, active.id, allocate);
+            const command = listCommands.backspace(editor.schema, editorState, active.id, allocate);
             dispatch(command.steps, 'separate', command.selection);
           } catch (error) {
             notice(String(error));
@@ -250,7 +277,7 @@ export function createStarterKitInput({
       structure(
         () =>
           (event.shiftKey ? listCommands.outdent : listCommands.indent)(
-            demoSchema,
+            editor.schema,
             editorState,
             blocks.item!,
             allocate,
@@ -266,7 +293,7 @@ export function createStarterKitInput({
 
         try {
           const command = listCommands.enter(
-            demoSchema,
+            editor.schema,
             editorState,
             active.id,
             selection.head.offset,
@@ -300,7 +327,7 @@ export function createStarterKitInput({
 
       const command = collapsed
         ? { steps: [], selection }
-        : replaceStructuredText(demoSchema, editorState, '');
+        : replaceStructuredText(editor.schema, editorState, '');
 
       const caret = command.selection;
 
@@ -335,7 +362,7 @@ export function createStarterKitInput({
       if (!e.clipboardData) return;
 
       try {
-        writeClipboard(e.clipboardData, demoSchema, editorState, copyText());
+        writeClipboard(e.clipboardData, editor.schema, editor.state, copyText());
       } catch (error) {
         notice(error instanceof Error ? error.message : String(error));
 
@@ -343,12 +370,13 @@ export function createStarterKitInput({
       }
     },
     cut: (e) => {
+      const { nonTextSelection, collapsed, start, end } = project(editor.state);
       e.preventDefault();
 
       if (!e.clipboardData) return;
 
       try {
-        writeClipboard(e.clipboardData, demoSchema, editorState, copyText());
+        writeClipboard(e.clipboardData, editor.schema, editor.state, copyText());
       } catch (error) {
         notice(error instanceof Error ? error.message : String(error));
 
@@ -359,6 +387,8 @@ export function createStarterKitInput({
       else if (!collapsed && start && end) replace(start.offset, end.offset, '', true);
     },
     paste: (e) => {
+      const editorState = editor.state;
+
       if (!e.clipboardData) return;
 
       try {
@@ -401,23 +431,20 @@ export function createStarterKitInput({
             }
           }
 
-          const command = pasteCellRectangle(demoSchema, editorState, source, allocate);
-
-          if (command) {
-            dispatch(command.steps, 'separate', command.selection);
-            closePanel();
-          }
+          if (paste({ nodes: [source], inline: false })) closePanel();
 
           return;
         }
 
         if (fragment) {
-          const command = pasteFragment(demoSchema, editorState, fragment, allocate);
-          dispatch(command.steps, 'separate', command.selection);
-          closePanel();
-        } else if (start && end)
-          replace(start.offset, end.offset, e.clipboardData.getData('text/plain'), true, true);
-        else replaceCells(e.clipboardData.getData('text/plain'));
+          if (paste(fragment)) closePanel();
+        } else {
+          const { start, end } = project(editorState);
+
+          if (start && end)
+            replace(start.offset, end.offset, e.clipboardData.getData('text/plain'), true, true);
+          else replaceCells(e.clipboardData.getData('text/plain'));
+        }
       } catch (error) {
         e.preventDefault();
         notice(error instanceof Error ? error.message : String(error));
@@ -443,7 +470,7 @@ export function focusStarterKitInput(
   (cell ?? input)?.focus({ preventScroll: true });
 }
 
-function nodeText(node: StarterNode): string {
+function nodeText(node: StarterNode, schema: Schema<StarterNode>): string {
   return node.kind === 'paragraph' || node.kind === 'heading'
     ? plainText(node)
     : node.kind === 'image'
@@ -452,5 +479,8 @@ function nodeText(node: StarterNode): string {
         ? tablePlainText(node)
         : node.kind === 'checklist'
           ? node.notes || '[Checklist]'
-          : demoSchema.children(node).map(nodeText).join('\n');
+          : schema
+              .children(node)
+              .map((child) => nodeText(child, schema))
+              .join('\n');
 }

@@ -1,4 +1,5 @@
 import type { Mark, MarkRange } from './marks';
+import { bindNode, type NodeBinding, type NodeDefinition, type NodeFactory } from './node-binding';
 import type { NodeCodec } from './schema-codec';
 
 export type NodeIdentity = { id: number; key: string; locked?: boolean };
@@ -19,6 +20,8 @@ export type TextBehavior<N> = Readonly<{
 export type NodeType<N> = Readonly<
   {
     selectable?: boolean;
+    groups?: readonly string[];
+    factory?: NodeFactory<N>;
     codec?: Readonly<NodeCodec<N>>;
     name: string;
     version: number;
@@ -39,18 +42,32 @@ export type NodeType<N> = Readonly<
 
 /** Own executable descriptors so consumers cannot change the meaning of an assembled schema. */
 function ownType<N>(type: NodeType<N>): NodeType<N> {
+  const groups = type.groups ? Object.freeze([...type.groups]) : undefined;
+  const factory = type.factory ? Object.freeze({ ...type.factory }) : undefined;
   const codec = type.codec ? Object.freeze({ ...type.codec }) : undefined;
 
   if (type.kind === 'text') {
     const marks = type.editing.marks ? Object.freeze({ ...type.editing.marks }) : undefined;
 
-    return Object.freeze({ ...type, codec, editing: Object.freeze({ ...type.editing, marks }) });
+    return Object.freeze({
+      ...type,
+      codec,
+      factory,
+      groups,
+      editing: Object.freeze({ ...type.editing, marks }),
+    });
   }
 
   if (type.kind === 'container')
-    return Object.freeze({ ...type, codec, content: Object.freeze({ ...type.content }) });
+    return Object.freeze({
+      ...type,
+      codec,
+      factory,
+      groups,
+      content: Object.freeze({ ...type.content }),
+    });
 
-  return Object.freeze({ ...type, codec });
+  return Object.freeze({ ...type, codec, factory, groups });
 }
 
 /** Registration happens once. No schema name is privileged by the engine. */
@@ -68,12 +85,36 @@ export function createRuntimeSchema<N extends NodeIdentity & { kind: string }>(
     return type;
   }
 
+  function copy(node: N, allocate: () => NodeIdentity): N {
+    const type = resolve(node);
+
+    if (!type.factory) throw new Error(`No node factory registered for ${type.name}`);
+    const cloned = type.factory.copy(node, allocate());
+
+    return type.kind === 'container'
+      ? type.content.withChildren(
+          cloned,
+          type.content.children(node).map((child) => copy(child, allocate)),
+        )
+      : cloned;
+  }
+
   return {
     extensions: Object.freeze([...registered]),
     manifest: Object.freeze(
       registered.map(({ name, version }) => Object.freeze({ name, version })),
     ),
     resolve,
+    copy,
+    node<const Definition extends NodeDefinition>(
+      definition: Definition,
+    ): NodeBinding<N, Definition> {
+      const type = registry.get(definition.name);
+
+      if (!type?.factory) throw new Error(`No node factory registered for ${definition.name}`);
+
+      return bindNode(type.factory, definition, (node) => resolve(node) === type);
+    },
     children(node: N): readonly N[] {
       const extension = resolve(node);
 
@@ -122,6 +163,10 @@ export function createRuntimeSchema<N extends NodeIdentity & { kind: string }>(
 }
 
 export type Schema<N> = {
+  readonly copy: (this: void, node: N, allocate: () => NodeIdentity) => N;
+  readonly node: <const Definition extends NodeDefinition>(
+    definition: Definition,
+  ) => NodeBinding<N, Definition>;
   readonly extensions: readonly NodeType<N>[];
   readonly manifest: readonly Readonly<{ name: string; version: number }>[];
   readonly resolve: (this: void, node: N) => NodeType<N>;

@@ -1,29 +1,39 @@
 import { type CanvasKit } from 'canvaskit-wasm';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import { createEditor } from '../../core';
 import { FindBar } from '../../demo/find-bar';
 import { useCanvasRenderer } from '../../editor-canvas/use-canvas-renderer';
-import { CanvasLayerProvider, Editor, useCanvasInput, useEditorViewport } from '../../editor-react';
+import {
+  CanvasLayerProvider,
+  Editor,
+  useCanvasInput,
+  useEditorViewport,
+  useEditorState,
+} from '../../editor-react';
 import { bookSamples, type EditorSample } from '../../editor-samples';
 import type { Rect } from '../../engines';
 import { captureComment } from '../../extensions/comment';
 import { demoSchema } from '../../extensions/demo-schema';
 import { OutlineMenu } from '../../extensions/outline-view';
-import { createStarterKitActions } from '../../extensions/starter-kit/actions';
+import { starterExtensions } from '../../extensions/starter-kit';
 import { BlockLayer } from '../../extensions/starter-kit/block-layer';
+import { createStarterDocumentQuery } from '../../extensions/starter-kit/document';
 import { createStarterKitInput, focusStarterKitInput } from '../../extensions/starter-kit/input';
 import { useDocumentLayout } from '../../extensions/starter-kit/use-document-layout';
-import { useEditorDocument } from '../../extensions/starter-kit/use-editor-document';
-import { tableCells } from '../../extensions/table';
+import { createSchema } from '../../model';
 import { createOwnedEngine } from '../../owned-layout';
-import { createEditor, textSelection, type Selection } from '../../state';
+import { textSelection, type Selection } from '../../state';
 import { AnnotationPanel, type ActivePanel } from './annotation-panel';
+import { createEditorControls } from './editor-controls';
 import { Toolbar } from './toolbar';
 import { useComments } from './use-comments';
 import { useDiagnostics } from './use-diagnostics';
 import { useFind, useFindReveal } from './use-find';
 import { useOutline } from './use-outline';
 import { recordSampleLayout, recordSamplePaint, useSampleStream } from './use-sample-stream';
+
+const editorSchema = createSchema({ extensions: starterExtensions });
 
 type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
 
@@ -45,10 +55,15 @@ export function EditorWorkspace({
   const renderStarted = performance.now();
 
   const [editor] = useState(() =>
-    createEditor(demoSchema, sample.initial, textSelection(1, 0), [tableCells.extension]),
+    createEditor({
+      schema: editorSchema,
+      document: sample.initial,
+      selection: textSelection(1, 0),
+    }),
   );
 
-  const doc = useEditorDocument(editor);
+  const projectDocument = useMemo(() => createStarterDocumentQuery(editor.schema), [editor]);
+  const doc = useEditorState(editor, projectDocument);
   const { editorState, nodes, tree, nodeIndexes, selection, selectedRange } = doc;
 
   const setSelection = useCallback(
@@ -309,10 +324,14 @@ export function EditorWorkspace({
 
   // The factory stores callbacks for later events; it does not invoke them during render.
   // oxlint-disable-next-line react/refs
-  const actions = createStarterKitActions({
+  const actions = createEditorControls({
     editor,
-    document: doc,
-    focus: (id) => focusStarterKitInput(scroller.current, inputRef.current, id),
+    focus: () =>
+      focusStarterKitInput(
+        scroller.current,
+        inputRef.current,
+        projectDocument(editor.state).focusId ?? undefined,
+      ),
     syncInput: () => {
       if (inputRef.current) textInput.sync(inputRef.current);
     },
@@ -327,7 +346,6 @@ export function EditorWorkspace({
   // oxlint-disable-next-line react/refs -- Input bindings capture DOM getters without invoking them.
   const inputEvents = createStarterKitInput({
     editor,
-    document: doc,
     actions,
     textInput,
     input: () => inputRef.current,

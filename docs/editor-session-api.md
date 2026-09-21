@@ -1,6 +1,110 @@
 # Implemented editor session APIs
 
-Session and selection interfaces are exported from `src/state/index.ts`. Schema, content and durable-reference value codecs are exported from `src/model/index.ts`; document operations and mappings are exported from `src/transform/index.ts`. These modules are headless; React is optional. They describe the current implementation, while [the broader API proposal](editor-api-proposal.md) includes work not yet implemented.
+The composed session interface is exported from `src/core/index.ts`. The lower-level
+transaction, selection and history implementation is exported from
+`src/state/index.ts`. Schema, content and durable-reference codecs live in
+`src/model/index.ts`; document operations and mappings live in
+`src/transform/index.ts`. These modules are headless. The
+[implementation plan](public-interface-implementation-plan.md) distinguishes
+shipped interfaces from the remaining view, lifecycle and package work.
+
+## Composed sessions and reusable extensions
+
+Assemble definitions once and pass the resulting schema to the session. Nodes,
+marks, inline objects and behavior extensions may contribute commands and queries
+through `setup`. Each session runs its own factories. Configuration belongs to
+the definition; transactional state belongs to registered fields.
+
+```ts
+import { createEditor, defineCommand, defineExtension } from './src/core';
+import { createSchema, indexTree } from './src/model';
+import { paragraph } from './src/extensions/starter-definitions';
+
+const Append = defineExtension({
+  name: 'append',
+  options: {},
+  setup: () => ({
+    commands: {
+      appendText: defineCommand({
+        execute(context, id: number, text: string) {
+          const { schema, state } = context;
+          const node = indexTree(schema, state.nodes).byId.get(id)?.node;
+          const value = node ? schema.text(node) : null;
+          if (value === null) return false;
+          context.step({ kind: 'replaceText', id, from: value.length, to: value.length, text });
+          return true;
+        },
+      }),
+    },
+  }),
+});
+
+const schema = createSchema({ extensions: [paragraph, Append] });
+const editor = createEditor({
+  schema,
+  content: [{ kind: 'paragraph', id: 1, text: 'Draft' }],
+});
+
+editor.can().appendText(1, '!');
+editor.chain().appendText(1, '!').appendText(1, '?').run();
+```
+
+`defineCommand` contextually types a reusable command against the document in
+which it executes. It does not capture a fixed node union. The installed name and
+argument tuple determine `commands`, `chain`, `can` and `getCommandState` types.
+`defineQuery` does the same for read callbacks. Queries and activity checks
+receive `{ schema, state }`; commands additionally receive draft operations.
+Query return values retain their inferred types.
+
+`content` is import input and applies schema defaults and normalization.
+`document` accepts canonical content, preserving existing identities and checking
+normalized attributes without replaying import transforms. Both construction
+paths validate once at the session boundary.
+
+Starter formatting, heading, list, quote and table contributions compose with
+foreign text and atom definitions. The complete starter editing factory still
+still declares node-valued command arguments against the closed starter node
+union. The underlying paste and structural algorithms now operate on the executing
+schema; typed command contribution assembly and browser codecs still need their
+complete migration. Renderer projection is owned by the view consumer, not a
+session query. Rich browser paste uses the named session command, while native
+text, splitting and deletion still use some raw transactions.
+
+`schema.node(definition)` binds construction and attribute reads to the installed
+configuration of that definition:
+
+```ts
+const headings = schema.node(heading);
+const node = headings.create(identity, { text: 'Introduction', level: 2 });
+const attrs = headings.read(node); // Typed canonical attributes, or null for another node type.
+```
+
+The binding recognizes configured variants of the same definition and rejects an
+unrelated definition that reuses its name. Constructor attributes use the
+validator's input type; reads use its output type. Construction applies defaults
+and normalization, owns attribute data and the child sequence, and validates
+identity. Child placement and document-wide identity constraints are checked
+when the command draft inserts the node. Container constructors accept children
+as their third argument; text constructors initialize empty marks and inline
+objects. Reads use canonical nodes and do not re-run validators.
+
+Reusable commands obtain bindings through `context.schema` and identities through
+`context.allocate()`. Heading changes preserve existing text, marks, inline
+objects and durable positions through the target's editing policy. Lists, quotes
+and tables retain foreign descendants through the executing schema's child
+operations. `queries.selectedTable()` returns the selected table's `{ id, key }`
+or `null`, without requiring a renderer projection.
+
+`schema.copy(node, allocate)` copies a canonical subtree using its declared child
+and inline storage. The allocator supplies new node identities; inline objects
+receive fresh IDs. Copying retains canonical attributes, formatting and locks
+without importing or normalizing them again. Paste uses this operation rather
+than assuming field names or serializing content through a codec.
+
+Browser handlers created by `createStarterKitInput` read current editor state
+when invoked. They no longer accept a captured `document` snapshot. Holding the
+same handler across selection changes does not require a React render to update
+its target.
 
 ## Commands
 
@@ -22,9 +126,15 @@ Each command reads the draft produced by preceding commands. `run()` publishes o
 
 An intervening editor change invalidates a prepared chain. Current permissions are checked again at execution, including after revocation. Permission failures return false. Invalid schema operations still throw rather than being hidden as ordinary command unavailability. The imperative `dispatch` API remains available and rejects unauthorized transactions before publishing any state.
 
-The demo routes formatting and structural toolbar actions through command chains. Command definitions pair `execute` with an optional `activity(state)` query. `editor.commandState(definition, ...args)` returns `{available, activity}`, with activity `active`, `inactive` or `mixed`. Chains accept functions or definitions. `context.effect(callback)` defers view effects such as focus/scroll until a successful commit; `can()`, failed commands, permission rejection and stale chains do not run them. Effect exceptions are reported asynchronously after commit. Commands and extension reducers must be pure apart from draft operations and queued effects.
+The demo routes formatting and structural toolbar actions through command chains. Command definitions pair `execute` with an optional `activity({ schema, state })` query. `editor.commandState(definition, ...args)` returns `{available, activity}`, with activity `active`, `inactive` or `mixed`. Chains accept functions or definitions. `context.effect(callback)` defers view effects such as focus/scroll until a successful commit; `can()`, failed commands, permission rejection and stale chains do not run them. Effect exceptions are reported asynchronously after commit. Commands and extension reducers must be pure apart from draft operations and queued effects.
 
 `toggleMarkCommand(schema, mark)` handles ranges and caret stored marks. `markActivity` distinguishes partial coverage within one text node as well as mixed blocks. `chain.storedMarks(marks)` participates in validation and atomic publication. A standalone caret-only mark command retains the existing no-revision/no-history behavior. The demo formatting buttons use this command and report mixed coverage through `aria-pressed`.
+
+`context.apply({ steps, selection, storedMarks })` applies content and its resulting
+selection/marks in one draft transition. Use it when an operation returns both
+steps and a selection, such as paste, rather than previewing those separately.
+Extension fields see the complete transition, and subsequent commands see its
+result. `step`, `steps`, `select` and `storedMarks` use the same implementation.
 
 `chain.steps(steps)` previews a batch together and commits it with the rest of the chain as one transaction. Prefer it for a command that already produces many steps; repeated `step` calls each create a separate draft preview.
 

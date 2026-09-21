@@ -12,15 +12,16 @@ import { type Step } from '../transform';
 import { replaceStructuredText } from './blocks';
 import { plainText, type StarterNode } from './demo-model';
 import { importHtml } from './html';
+import { paragraph, table } from './starter-definitions';
 import { copyCellRectangle, cellRectangleText, pasteCellRectangle } from './table-clipboard';
 
-type Fragment = { nodes: StarterNode[]; inline: boolean };
+export type ClipboardFragment<N = StarterNode> = { nodes: readonly N[]; inline: boolean };
 
 const mime = 'application/x-gprose-fragment';
 
 // The token refers only to immutable fragments created in this page. Untrusted
 // clipboard JSON never becomes editor state; other pages use the inert HTML importer.
-const fragments = new Map<string, Fragment>();
+const fragments = new Map<string, ClipboardFragment>();
 
 const escape = (text: string) =>
   text
@@ -154,7 +155,7 @@ export function writeClipboard(
   data.setData(mime, token);
 }
 
-export function readClipboard(data: DataTransfer): Fragment | null {
+export function readClipboard(data: DataTransfer): ClipboardFragment | null {
   const local = fragments.get(data.getData(mime));
 
   if (local) return local;
@@ -168,34 +169,19 @@ export function readClipboard(data: DataTransfer): Fragment | null {
   return { nodes, inline: nodes.length === 1 && nodes[0].kind === 'paragraph' };
 }
 
-export function pasteFragment(
-  schema: Schema<StarterNode>,
-  state: EditorState<StarterNode>,
-  fragment: Fragment,
+export function pasteFragment<N extends NodeIdentity>(
+  schema: Schema<N>,
+  state: EditorState<N>,
+  fragment: ClipboardFragment<N>,
   allocate: () => NodeIdentity,
 ) {
-  if (fragment.nodes.length === 1 && fragment.nodes[0].kind === 'table') {
+  if (fragment.nodes.length === 1 && schema.node(table).matches(fragment.nodes[0])) {
     const rectangle = pasteCellRectangle(schema, state, fragment.nodes[0], allocate);
 
     if (rectangle) return rectangle;
   }
 
-  function clone(node: StarterNode): StarterNode {
-    const children = schema.children(node);
-
-    const copy: StarterNode =
-      node.kind === 'paragraph' || node.kind === 'heading'
-        ? {
-            ...node,
-            ...allocate(),
-            inline: node.inline.map((a) => ({ ...a, id: crypto.randomUUID() })),
-          }
-        : { ...node, ...allocate() };
-
-    return children.length ? schema.withChildren(copy, children.map(clone)) : copy;
-  }
-
-  const inserted = fragment.nodes.map(clone);
+  const inserted = fragment.nodes.map((node) => schema.copy(node, allocate));
   const all = indexTree(schema, inserted).order;
 
   for (const { node } of all) {
@@ -208,7 +194,7 @@ export function pasteFragment(
   const ranges = state.selection.ranges(selectionContext(schema, state.nodes)),
     selected = new Map(ranges.map((r) => [r.id, r]));
 
-  function covered(node: StarterNode): boolean {
+  function covered(node: N): boolean {
     const r = selected.get(node.id);
 
     if (r?.kind === 'node') return true;
@@ -223,7 +209,7 @@ export function pasteFragment(
   let target = [...all].toReversed().find((entry) => schema.text(entry.node) !== null)?.node;
 
   if (!target) {
-    target = { kind: 'paragraph', ...allocate(), text: '', marks: [], inline: [] };
+    target = schema.node(paragraph).create(allocate(), { text: '' });
     inserted.push(target);
   }
 
@@ -238,7 +224,7 @@ export function pasteFragment(
           index: 0,
           count: state.nodes.length,
           nodes: inserted,
-        } satisfies Step<StarterNode>,
+        } satisfies Step<N>,
       ],
       selection,
     };
@@ -255,7 +241,7 @@ export function pasteFragment(
           ...location,
           count: 1,
           nodes: inserted,
-        } satisfies Step<StarterNode>,
+        } satisfies Step<N>,
       ],
       selection,
     };
@@ -281,7 +267,7 @@ export function pasteFragment(
           parent: location.parent,
           index,
           nodes: inserted,
-        } satisfies Step<StarterNode>,
+        } satisfies Step<N>,
       ],
       selection,
     };
@@ -307,7 +293,7 @@ export function pasteFragment(
   const tail = allocate(),
     length = schema.text(entry.node)?.length ?? 0;
 
-  const steps: Step<StarterNode>[] = [
+  const steps: Step<N>[] = [
     ...removal.steps,
     { kind: 'split', id: caret.id, at: caret.from, rightId: tail.id, rightKey: tail.key },
   ];
