@@ -30,4 +30,6 @@ export type TextFragment = DrawingRect & Readonly<{ baseline: number }>;
 /** Immutable geometry in block-local coordinates, including its inherited text inset. */
 export type BlockTextGeometry = {
   fragments(from: number, to: number): readonly TextFragment[];
+  /** UTF-16 offset; upstream chooses the preceding line at a soft wrap. */
+  caret(offset: number, upstream?: boolean): DrawingRect;
 };

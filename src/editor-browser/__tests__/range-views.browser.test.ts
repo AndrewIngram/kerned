@@ -44,9 +44,14 @@ test('mark projection caches evict culled geometry even while the document retai
   });
 
   const element = document.createElement('div');
+  let painters = 0;
 
   const layers = createViewLayers(element, editor, {
-    register: () => () => {},
+    register() {
+      painters++;
+
+      return () => {};
+    },
     prepareText() {
       throw new Error('No labels in this fixture');
     },
@@ -59,6 +64,7 @@ test('mark projection caches evict culled geometry even while the document retai
   let projections = 0;
 
   const text = {
+    caret: () => ({ left: 0, top: 0, width: 1, height: 24 }),
     fragments() {
       projections++;
 
@@ -86,6 +92,7 @@ test('mark projection caches evict culled geometry even while the document retai
   expect(projections).toBe(2);
   show(0);
   expect(projections).toBe(3);
+  expect(painters).toBe(0);
 });
 
 const review = defineMark({

@@ -12,6 +12,8 @@ export { createEditorContext } from './context';
 
 export { defineReactNodeView, type ReactNodeViewProps } from './node-view';
 
+export { defineReactWidgetView, type ReactWidgetViewProps } from './widget-view';
+
 export {
   defineReactInlineView,
   defineReactMarkView,

@@ -8,6 +8,7 @@ import {
 } from './decorations';
 import type { DrawingRect, TextFragment } from './drawing';
 import type { LayerBlock, ViewLayerContribution } from './view-layers';
+import { createWidgetViews } from './widget-views';
 
 function place(element: HTMLElement, rect: DrawingRect) {
   element.style.left = `${rect.left}px`;
@@ -20,7 +21,8 @@ function place(element: HTMLElement, rect: DrawingRect) {
 export function decorationLayer(provider: DecorationContribution): ViewLayerContribution {
   return {
     name: `decorations:${provider.name}`,
-    create({ editor, element, paint, invalidate, listen, nodeAt, onTextPointer }) {
+    create(context) {
+      const { editor, element, paint, invalidate, listen, nodeAt, onTextPointer } = context;
       const controls = new Map<string, HTMLButtonElement>();
       const outlines = new Map<string, HTMLDivElement>();
       const active = new Map<number, readonly Decoration[]>();
@@ -42,12 +44,14 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
           .get(event.point.id)
           ?.find(
             (value) =>
+              value.kind !== 'widget' &&
               !!value.activation &&
               (value.kind === 'node' ||
                 (event.point.offset >= value.from && event.point.offset <= value.to)),
           );
 
-        decoration?.activation?.onActivate({
+        if (!decoration || decoration.kind === 'widget') return;
+        decoration.activation?.onActivate({
           nodeId: event.point.id,
           key: decoration.key,
           offset: decoration.kind === 'text' ? event.point.offset : 0,
@@ -78,7 +82,7 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
         const value =
           node && active.get(node.id)?.find((value) => value.kind === 'node' && value.activation);
 
-        if (node && value)
+        if (node && value?.kind === 'node')
           value.activation?.onActivate({
             nodeId: node.id,
             key: value.key,
@@ -88,9 +92,11 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
       });
 
       const source = createDecorationSource(provider, editor, invalidate);
+      const widgets = createWidgetViews(context, (id) => active.get(id) ?? []);
 
       return {
-        update({ blocks }) {
+        update(frame) {
+          const { blocks } = frame;
           source.begin();
           active.clear();
           hits.clear();
@@ -192,6 +198,8 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
             source.end();
           }
 
+          widgets.update(frame);
+
           for (const id of geometry.keys()) if (!present.has(id)) geometry.delete(id);
 
           for (const [key, control] of controls)
@@ -216,8 +224,18 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
           );
         },
         destroy() {
+          const failures: unknown[] = [];
+
           try {
             source.destroy();
+          } catch (error) {
+            failures.push(error);
+          }
+
+          try {
+            widgets.destroy();
+          } catch (error) {
+            failures.push(error);
           } finally {
             controls.clear();
             outlines.clear();
@@ -226,6 +244,9 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
             geometry.clear();
             element.replaceChildren();
           }
+
+          if (failures.length)
+            throw new AggregateError(failures, 'Decoration layer cleanup failed');
         },
       };
     },

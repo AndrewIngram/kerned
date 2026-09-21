@@ -171,8 +171,9 @@ It coalesces external invalidations, prunes composed-range caches to resident te
 and releases subscriptions and scheduled work on destruction. Errors reach the
 mounted view's error handler. Comments and search exercise the same contract;
 native renderers contain no comment/search-specific branches. Sources can target
-invalidation to particular node IDs and declare node-local dependencies. Arbitrary
-decoration widgets and editable content slots remain milestone 6 work. Semantic
+invalidation to particular node IDs and declare node-local dependencies.
+[Decoration widgets](decorations.md#widgets) use the same sources and shared range
+owner, including React registrations. Editable content slots remain milestone 6 work. Semantic
 marks and inline objects have separate schema-bound rendering registrations.
 
 The layer owns its DOM and styling. The host ignores pointer events by default;

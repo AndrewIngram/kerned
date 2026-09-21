@@ -2603,3 +2603,43 @@ rejection of incompatible callback annotations. `pnpm run check` passes with
 This constructor-interface change does not alter layout or rendering algorithms;
 the previous checkpoint's performance evidence remains the latest measurement.
 M6 remains open for widgets, content slots and selection/editability contracts.
+
+### Milestone 6 checkpoint: decoration widgets
+
+`defineWidgetView<Data>` and `defineReactWidgetView` create typed widget
+factories whose descriptors participate in the existing decoration sources.
+Text anchors use the shared caret geometry, including upstream wrap affinity;
+node anchors use the block's start or end. Content-sized DOM hosts do not reserve
+text space. Schema attributes and persistent document content remain separate
+from these view-only descriptors.
+
+Widget projections use the same range owner as inline and mark renderers for
+placement, focus pinning, residency, cache eviction and destruction. DOM-only
+renderers allocate no canvas paint registrations. Factory identity and the source,
+node and decoration key identify each mounted instance. Data and offset changes
+preserve controls; replacing a factory creates a separate host so React can
+unmount its previous portal safely. No erased-data casts or React imports enter
+the browser implementation.
+
+Tests cover wrapped caret placement, resize, targeted invalidation, unrelated
+updates, interactive clicks preserving editor selection, renderer replacement,
+Strict Mode, inherited context, readiness, focused controls across scrolling,
+external state through culling and cleanup when a destructor fails. React widgets
+reject vanilla mounts with full cleanup. Declaration emission exposed an inferred
+private-symbol return type; the React adapter now names the browser factory's
+return contract explicitly.
+
+`pnpm run check` passes with 737 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes. Three serial production
+trials in `artifacts/public-interface-m6/widgets/` pass every original budget:
+worst first usable 233 ms, streaming 1,197.7 ms, paste handler 58.2 ms, paste paint
+117.3 ms, typing 32.2 ms, paging 32.5 ms and loaded heap 27,144,428 bytes. The report
+records parent `ea99c12` and measures this checkpoint's uncommitted tree. These
+measurements protect the existing production demo; they are not a throughput
+benchmark for thousands of custom React widgets.
+
+Text widgets currently need canvas text geometry. Native blocks support node-edge
+widgets, while controls inside native table-cell text await the content-slot
+work. M6 remains open for explicit editable content slots and complete
+selection/editability contracts. Its independent milestone judge is still due
+after those requirements are implemented and validated.

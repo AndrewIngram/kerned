@@ -1,6 +1,6 @@
 # Decorations
 
-Decorations add view-only text highlights or node outlines. They do not change
+Decorations add view-only text highlights, node outlines or widgets. They do not change
 the schema, document, history or selection. Comments and search both use this
 public contribution, in canvas text and native table cells.
 
@@ -112,7 +112,76 @@ Setup and update errors fail the view and reach its error handler. The session
 remains available. Cleanup attempts every owned resource even if one disposer
 throws. A pending invalidation cannot update geometry from an older editor state.
 
-Arbitrary decoration-widget registrations and editable content slots remain
-milestone 6 work. This API currently supplies text backgrounds, node outlines and
-activation. Semantic marks and inline objects have separate
+Editable content slots remain milestone 6 work. Semantic marks and inline objects have separate
 [canvas and React rendering registrations](rendering-extensions.md).
+
+## Widgets
+
+`defineWidgetView<Data>(create)` from `src/editor-browser` creates a typed widget
+factory. Call it to produce a decoration, then return that descriptor from the
+same source as your highlights. No schema node, mark or document mutation is needed.
+
+```ts
+const reviewWidget = defineWidgetView<{ label: string }>((host) => {
+  const button = host.ownerDocument.createElement('button');
+  button.style.pointerEvents = 'auto';
+  host.append(button);
+  return {
+    update({ data }) {
+      button.textContent = data.label;
+    },
+    destroy() {
+      // Release any listeners or external subscriptions allocated by this instance.
+    },
+  };
+});
+
+const decoration = reviewWidget({
+  key: 'review:42',
+  at: { kind: 'text', offset: 12 },
+  data: { label: 'Open discussion' },
+});
+```
+
+Text anchors use UTF-16 offsets. `upstream: true` chooses the preceding line at
+a soft wrap; the default chooses the following line. The host starts at that
+caret's top-left. `{ kind: 'node', edge: 'start' | 'end' }` anchors at the block's
+top-left or bottom-left, including native blocks. Text anchors currently require
+canvas text geometry; they do not insert controls into native table-cell text.
+The frame includes the owning node, `data`, `at` and a block-local `anchor`
+rectangle. `BlockTextGeometry.caret` exposes the same geometry to custom layers.
+
+Hosts size to their DOM content. Widgets are overlays and do not reserve text
+space or change document height. Use semantic inline objects when content must
+participate in text flow. Children opt into pointer events; buttons and inputs
+retain their usual native interaction. Focus pins the owning block during scroll.
+
+Create the widget factory once per registration or source lifetime. Keep its key
+stable within a source and node. The mounted control then survives changes to
+its data and anchor. A different factory replaces the renderer with a new host.
+Unchanged descriptors and geometry skip renderer updates; moving a whole block
+only repositions its host. Treat descriptor data as immutable and invalidate its
+source when external data changes. Descriptors contain renderer closures and are
+not persistence payloads. Persist the semantic data and durable target separately.
+
+For React, use `defineReactWidgetView(Component)` from `src/editor-react`:
+
+```tsx
+function ReviewButton({ data }: ReactWidgetViewProps<{ label: string }>) {
+  const theme = useContext(ApplicationTheme);
+  return (
+    <button className={theme.button} style={{ pointerEvents: 'auto' }}>
+      {data.label}
+    </button>
+  );
+}
+
+const reviewWidget = defineReactWidgetView(ReviewButton);
+```
+
+Its factory produces the same decoration type. `EditorContent` preserves context
+and waits for initial widget portals before calling `onReady`. A vanilla mount
+rejects React widgets explicitly. The shared owner handles geometry and lifetime
+for both adapters. Culling drops mounted local state and releases subscriptions;
+remounting reads current semantic data from the source. Factories that throw
+before returning a view must release their own partially allocated resources.

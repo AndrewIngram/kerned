@@ -2,6 +2,7 @@ import { defineContribution } from '../core';
 import type { NodeIdentity } from '../model';
 import type { EditorState } from '../state';
 import type { ViewSession } from './input-contributions';
+import type { WidgetDecoration } from './widget-views';
 
 export type DecorationActivation = Readonly<{
   nodeId: number;
@@ -37,7 +38,7 @@ export type NodeDecoration = Readonly<{
   activation?: Pick<Activation, 'onActivate'>;
 }>;
 
-export type Decoration = TextDecoration | NodeDecoration;
+export type Decoration = TextDecoration | NodeDecoration | WidgetDecoration;
 
 /** Omit IDs for global invalidation; supplied IDs replace only those node results. */
 export type InvalidateDecorations = (ids?: readonly number[]) => void;

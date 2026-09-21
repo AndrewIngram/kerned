@@ -8,14 +8,15 @@ type Item<Frame> = { key: string; nodeId: number; bounds: DrawingRect; frame: Fr
 type Surface<Frame> = {
   item: Item<Frame>;
   overlay: HTMLDivElement | undefined;
+  size: 'bounds' | 'content';
   active: boolean;
 };
 
-function place(overlay: HTMLElement, bounds: DrawingRect) {
+function place(overlay: HTMLElement, bounds: DrawingRect, size: 'bounds' | 'content') {
   overlay.style.left = `${bounds.left}px`;
   overlay.style.top = `${bounds.top}px`;
-  overlay.style.width = `${bounds.width}px`;
-  overlay.style.height = `${bounds.height}px`;
+  overlay.style.width = size === 'content' ? 'max-content' : `${bounds.width}px`;
+  overlay.style.height = size === 'content' ? 'auto' : `${bounds.height}px`;
 }
 
 export function createRangeViews<N extends NodeIdentity, Frame>(
@@ -25,6 +26,7 @@ export function createRangeViews<N extends NodeIdentity, Frame>(
   projectionCache: Pick<Map<NodeIdentity, unknown>, 'keys' | 'delete' | 'clear'>,
 ) {
   let dirty = false;
+  let painted = false;
 
   const create = createRenderer({
     editor: context.editor,
@@ -58,10 +60,21 @@ export function createRangeViews<N extends NodeIdentity, Frame>(
   }
 
   function paint() {
+    let drawable = false;
+
+    for (const { view } of instances.values())
+      if (view.draw) {
+        drawable = true;
+        break;
+      }
+
+    if (!drawable && !painted) return;
+    painted = drawable;
+
     for (const layer of ['background', 'content'] as const)
       context.paint(
         layer,
-        instances.size
+        drawable
           ? (drawing) => {
               for (const { surface, view } of instances.values()) {
                 if (!view.draw) continue;
@@ -105,20 +118,25 @@ export function createRangeViews<N extends NodeIdentity, Frame>(
             const created: Surface<Frame> = {
               item,
               overlay: undefined,
+              size: 'bounds',
               active: true,
             };
 
             try {
               const view = create({
-                createOverlay() {
+                createOverlay({ size = 'bounds' } = { size: 'bounds' }) {
                   if (!created.active) throw new Error('Range view is destroyed');
 
+                  if (created.overlay && created.size !== size)
+                    throw new Error('An overlay cannot change its sizing policy');
+
                   if (!created.overlay) {
+                    created.size = size;
                     created.overlay = context.element.ownerDocument.createElement('div');
                     created.overlay.style.cssText = 'position:absolute;pointer-events:none;';
                     created.overlay.dataset.editorFocusNode = String(item.nodeId);
                     context.element.append(created.overlay);
-                    place(created.overlay, created.item.bounds);
+                    place(created.overlay, created.item.bounds, created.size);
                   }
 
                   return created.overlay;
@@ -136,7 +154,8 @@ export function createRangeViews<N extends NodeIdentity, Frame>(
 
           instance.surface.item = item;
 
-          if (instance.surface.overlay) place(instance.surface.overlay, item.bounds);
+          if (instance.surface.overlay)
+            place(instance.surface.overlay, item.bounds, instance.surface.size);
 
           if (force || previous !== item.frame) instance.view.update(item.frame);
         }

@@ -39,7 +39,9 @@ export type RangeViewContext<N extends NodeIdentity> = Pick<
 >;
 
 /** The view owns overlay placement and removal. Canvas-only instances need no DOM. */
-export type RangeViewMount = { createOverlay(this: void): HTMLDivElement };
+export type RangeViewMount = {
+  createOverlay(this: void, options?: { size: 'bounds' | 'content' }): HTMLDivElement;
+};
 
 export type RangeView<Frame> = {
   update(frame: Frame): void;

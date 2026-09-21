@@ -78,7 +78,7 @@ the app's find hook owns opening, focus and controls.
 - Node views own decoding, measurement and cancellation. Culled DOM does not own
   semantic state. React node views and public decoration contributions share the
   mounted lifetime. Canvas and React mark/inline views share schema binding,
-  placement and culling. Decoration widgets, editable content slots and complete
+  placement and culling, also used by decoration widgets. Editable content slots and complete
   selection/editability props remain milestone 6 work.
 - `useSampleStream` owns sample append scheduling and cancels work on unmount. Its
   controller measures new composition work rather than total document size.

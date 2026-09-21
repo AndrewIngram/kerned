@@ -388,8 +388,9 @@ See [React integration](react-integration.md) and [app ownership](editor-app-arc
 `defineReactNodeView(definition, Component)` contributes a typed React block to
 `nodeViews`. `EditorContent` reconciles it through portals in the application
 React tree, with automatic measurement and native view culling/cleanup. The old
-standalone renderer registry is removed. General mark/widget rendering, editable
-content slots and public decorations remain milestone 6 work. See
+standalone renderer registry is removed. Mark/inline renderers and decoration
+widgets use the same mounted ownership, with optional React registrations.
+Editable content slots and complete selection/editability props remain milestone 6 work. See
 [React extensions](react-extensions.md) for the implemented contract.
 
 ## History ownership

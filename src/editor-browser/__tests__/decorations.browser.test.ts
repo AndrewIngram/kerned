@@ -1,4 +1,5 @@
-import { expect, test } from 'vitest';
+import { expect, expectTypeOf, test } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
@@ -7,11 +8,167 @@ import { createSchema, defineNode } from '../../model';
 import { textSelection } from '../../state';
 import {
   decorations,
+  defineWidgetView,
   type Decoration,
   type DecorationActivation,
   type DecorationContribution,
   type InvalidateDecorations,
 } from '../index';
+
+test('widget keys preserve controls through data changes, wrapped caret placement and reflow', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  let updates = 0;
+  let created = 0;
+  let destroyed = 0;
+  let clicks = 0;
+
+  const widget = defineWidgetView<{ label: string }>((host) => {
+    created++;
+    const button = document.createElement('button');
+    button.style.pointerEvents = 'auto';
+    button.dataset.widget = 'review';
+    button.addEventListener('click', () => {
+      clicks++;
+    });
+    host.append(button);
+
+    return {
+      update({ data, node, at, anchor }) {
+        expectTypeOf(data.label).toEqualTypeOf<string>();
+        expect(node.id).toBe(1);
+        expect(anchor.height).toBeGreaterThan(0);
+        expect(at.kind).toBe('text');
+        updates++;
+        button.textContent = data.label;
+      },
+      destroy() {
+        destroyed++;
+      },
+    };
+  });
+
+  function show(offset: number, label: string, upstream = false) {
+    f.values.set(1, [
+      widget({ key: 'review', at: { kind: 'text', offset, upstream }, data: { label } }),
+    ]);
+    f.invalidate([1]);
+  }
+
+  show(0, 'First');
+  await f.view.ready;
+  const button = f.element.querySelector<HTMLButtonElement>('[data-widget]');
+
+  if (!button) throw new Error('Widget did not mount');
+  const host = button.parentElement;
+
+  if (!host) throw new Error('Missing widget host');
+  const selection = f.editor.state.selection;
+  await userEvent.click(button);
+  expect(clicks).toBe(1);
+  expect(f.editor.state.selection).toBe(selection);
+  const before = updates;
+  f.editor.select(textSelection(2, 3));
+  await frame();
+  await frame();
+  expect(updates).toBe(before);
+  show(80, 'Moved');
+  await expect.poll(() => button.textContent).toBe('Moved');
+  expect(created).toBe(1);
+  expect(f.element.querySelector('[data-widget]')).toBe(button);
+
+  const checkPosition = (offset: number) => {
+    const caret = f.view.coordsAt({ id: 1, offset });
+
+    if (!caret) throw new Error('Missing caret geometry');
+    const rect = host.getBoundingClientRect();
+    expect(rect.left).toBeCloseTo(caret.left, 1);
+    expect(rect.top).toBeCloseTo(caret.top, 1);
+  };
+
+  checkPosition(80);
+  let wrap = 0;
+
+  for (let offset = 1; offset < 80; offset++) {
+    const preceding = f.view.coordsAt({ id: 1, offset: offset - 1 });
+    const following = f.view.coordsAt({ id: 1, offset });
+
+    if (preceding && following && preceding.top !== following.top) {
+      wrap = offset;
+      break;
+    }
+  }
+
+  expect(wrap).toBeGreaterThan(0);
+  show(wrap, 'Upstream', true);
+  await expect.poll(() => button.textContent).toBe('Upstream');
+  const preceding = f.view.coordsAt({ id: 1, offset: wrap - 1 });
+  expect(host.getBoundingClientRect().top).toBeCloseTo(preceding?.top ?? -1, 1);
+  expect(host.getBoundingClientRect().left).toBeGreaterThan(preceding?.left ?? -1);
+  show(wrap, 'Downstream');
+  await expect.poll(() => button.textContent).toBe('Downstream');
+  checkPosition(wrap);
+  const oldTop = host.getBoundingClientRect().top;
+  f.element.style.width = '600px';
+  await expect.poll(() => host.getBoundingClientRect().top).not.toBe(oldTop);
+  checkPosition(wrap);
+  f.values.delete(1);
+  f.invalidate([1]);
+  await expect.poll(() => button.isConnected).toBe(false);
+  expect(destroyed).toBe(1);
+});
+
+test('widgets preserve external state across culling and release other instances after a destructor throws', async ({
+  onTestFinished,
+}) => {
+  const f = fixture('node', 100);
+  onTestFinished(() => f.destroy());
+  let created = 0;
+  let destroyed = 0;
+  let fail = false;
+
+  const widget = defineWidgetView<string>((host) => {
+    created++;
+    const button = document.createElement('button');
+    button.style.pointerEvents = 'auto';
+    host.append(button);
+
+    return {
+      update({ data }) {
+        button.textContent = data;
+      },
+      destroy() {
+        destroyed++;
+
+        if (fail && button.textContent === 'One') throw new Error('Widget cleanup failed');
+      },
+    };
+  });
+
+  f.values.set(
+    1,
+    ['One', 'Two'].map((data) => widget({ key: data, at: { kind: 'node', edge: 'end' }, data })),
+  );
+  await f.view.ready;
+  expect(created).toBe(2);
+  f.editor.select(textSelection(100, 0));
+  await f.view.reveal({ id: 100, offset: 0 });
+  await expect.poll(() => destroyed).toBe(2);
+  f.editor.select(textSelection(1, 0));
+  await f.view.reveal({ id: 1, offset: 0 });
+  await expect.poll(() => created).toBe(4);
+  expect(f.element.textContent).toContain('OneTwo');
+  fail = true;
+  f.values.delete(1);
+  f.invalidate([1]);
+  await expect.poll(() => f.view.status).toBe('failed');
+  expect(destroyed).toBe(4);
+  expect(f.listeners.size).toBe(0);
+  expect(f.destroyed).toBe(1);
+  expect(f.element.children.length).toBe(0);
+});
 
 const note = defineNode({
   name: 'note',

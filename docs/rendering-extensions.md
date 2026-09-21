@@ -52,7 +52,10 @@ change those metrics; update the document/presentation to change allocation.
 Factories receive the imperative editor, `prepareText` and `invalidate`. They
 return an instance factory receiving `createOverlay()`. This method lazily creates
 one positioned DOM host and returns the same host on subsequent calls. Canvas-only
-renderers allocate no overlay. The view removes the host on culling, destruction
+renderers allocate no overlay. Pass `{ size: 'content' }` on the first call for a
+host sized by its DOM children; the default is the supplied bounds. The sizing
+policy is fixed for that instance. Subsequent calls must use the same policy.
+The view removes the host on culling, destruction
 or failure. Calls after destruction throw. Overlays default to
 `pointer-events: none`; interactive children opt in with their own CSS. The shared
 pointer policy leaves buttons and inputs alone. A noninteractive mark overlay
@@ -114,7 +117,8 @@ same name fails. Reading a canonical value returns its inferred attributes witho
 rerunning validation or transforms. Input still enters through schema validation.
 
 These contracts currently render canvas text's inline objects and mark ranges.
-Native text views retain their native rendering policy. Editable content slots,
-complete selection/editability props and arbitrary decoration-widget registrations
-remain milestone 6 work. These renderers do not claim to replace native text input
+Native text views retain their native rendering policy. View-only controls use
+[decoration widgets](decorations.md#widgets), including React registrations.
+Editable content slots and complete selection/editability props remain milestone
+6 work. These renderers do not claim to replace native text input
 or implement a second editable DOM tree.

@@ -16,6 +16,16 @@ export function createLayerGeometry() {
 
     if (!value) {
       value = {
+        caret(offset, upstream = false) {
+          const rect = layout.geometry(offset, offset, upstream).caret;
+
+          return {
+            left: rect[0],
+            top: rect[1],
+            width: rect[2] - rect[0],
+            height: rect[3] - rect[1],
+          };
+        },
         fragments(from, to) {
           return layout.geometry(from, to, false).rects.map((rect) => {
             let low = 0;

@@ -198,6 +198,14 @@ export {
 } from './decorations';
 
 export {
+  defineWidgetView,
+  type WidgetAnchor,
+  type WidgetDecoration,
+  type WidgetView,
+  type WidgetViewFrame,
+} from './widget-views';
+
+export {
   defineInlineView,
   defineMarkView,
   type InlineViewFrame,
