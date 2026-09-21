@@ -1,9 +1,9 @@
 import type { ComponentProps } from 'react';
 
-import { ImageBlock } from '../editor-image';
 import { createReactRenderers } from '../editor-react';
 import { Checklist } from './checklist-view';
 import type { StarterLeaf } from './demo-model';
+import { ImageBlock } from './image-view';
 import { TableBlock } from './table-view';
 import { ParagraphExtensions } from './text-block-view';
 

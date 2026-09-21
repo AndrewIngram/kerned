@@ -12,6 +12,7 @@ import {
 } from '../../editor-react';
 import { useCanvasRenderer } from '../../editor-react/use-canvas-renderer';
 import { bookSamples, type EditorSample } from '../../editor-samples';
+import { streamConfig } from '../../editor-stream';
 import type { Rect } from '../../engines';
 import { captureComment } from '../../extensions/comment';
 import { demoSchema } from '../../extensions/demo-schema';
@@ -474,6 +475,7 @@ export function EditorWorkspace({
                   aria-label="Canvas document"
                 />
                 <BlockLayer
+                  imageDelay={streamConfig.imageDelay}
                   {...{
                     doc,
                     actions,

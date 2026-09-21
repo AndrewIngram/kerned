@@ -1,6 +1,7 @@
 import type { CanvasKit } from 'canvaskit-wasm';
 import { useMemo } from 'react';
 
+import type { TextLabels } from '../editor-canvas/text-labels';
 import {
   CanvasPrimitive,
   createReactRenderers,
@@ -27,13 +28,13 @@ export function ParagraphExtensions({
   placement: p,
   comments = noComments,
   kit,
-  owned,
+  labels,
   open,
 }: {
   placement: TextPlacement;
   comments?: readonly CommentHighlight[];
   kit: CanvasKit;
-  owned: Owned;
+  labels: TextLabels;
   open: (kind: 'mention' | 'comment', atomId: string, index: number) => void;
 }) {
   const node = p.node;
@@ -84,10 +85,10 @@ export function ParagraphExtensions({
         box,
         y: p.y,
         kit,
-        owned,
+        labels,
         onOpen: () => open('mention', box.id, box.index),
       })),
-    [p.boxes, p.y, kit, owned, open],
+    [p.boxes, p.y, kit, labels, open],
   );
 
   return (
@@ -104,24 +105,23 @@ export function ParagraphExtensions({
 function Mention({
   box,
   y,
-  owned,
+  labels,
   onOpen,
 }: {
   box: InlineBox;
   y: number;
   kit: CanvasKit;
-  owned: Owned;
+  labels: TextLabels;
   onOpen: () => void;
 }) {
   const label = useMemo(
     () =>
-      owned.layoutText({
+      labels({
         text: box.label,
-        spans: [],
         width: box.width - 12,
         size: 18,
       }),
-    [owned, box.label, box.width],
+    [labels, box.label, box.width],
   );
 
   const background = useMemo<Painter>(

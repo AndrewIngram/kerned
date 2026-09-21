@@ -71,6 +71,13 @@ frames. Neither depends on paragraph or heading names.
   command publishes the actual clamped position immediately; callers do not
   synchronize a separate React scroll state. Repeated native events preserve
   snapshot identity when the viewport is unchanged.
+- Image views own decoding, measurement and cancellation outside React. Their
+  adapter attaches and supplies frames; demo loading delays are explicit app input.
+  Each mounted editor retains a bounded image-dimension cache. Source changes reset
+  loading state, and obsolete decoding cannot update a successor or its measurements.
+- Mention labels use a bounded view-owned snapshot cache, independent of document
+  node IDs. Viewport eviction no longer reshapes a label when its view remounts.
+  Cached snapshots borrow the layout resource owner's fonts and survive cache eviction.
 - The input adapter positions the hidden textarea beside the visible caret.
   Placing it at the document origin can make native typing jump to the top.
 - `useSampleStream` owns append scheduling and cancels work on unmount. Its batch

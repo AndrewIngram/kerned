@@ -1,0 +1,23 @@
+
+> gprose-engine-prototype@0.0.0 check:editor-large /Users/andrewingram/Code/gprose
+> node scripts/check-editor-large.mjs
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+10992 !== 10991
+
+    at file:///Users/andrewingram/Code/gprose/scripts/check-editor-large.mjs:154:16 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 10992,
+  expected: 10991,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.21.0
+ ELIFECYCLE  Command failed with exit code 1.

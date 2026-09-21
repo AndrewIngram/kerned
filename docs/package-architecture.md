@@ -119,7 +119,10 @@ The remaining view/package differences are:
   complete editing surface. Painting, native input and document layout now have
   framework-independent controllers, as does viewport observation and scrolling.
   React subscribes and attaches. Asset loading now owns readiness and cancellation;
-  integrating that lifetime and DOM overlays still needs the complete mounted view.
+  Image decoding and measurement also have a native view with a React adapter;
+  bounded image and mention-label caches belong to the mounted editor.
+  Integrating these lifetimes and the remaining DOM overlays still needs the
+  complete mounted view.
 - Scenes have independent cache owners. Sample changes no longer require a
   synchronous unmount to coordinate shared cache cleanup.
 - Starter commands compose with foreign node definitions, but browser codecs,

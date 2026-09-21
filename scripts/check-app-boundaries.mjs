@@ -74,7 +74,13 @@ for (const group of groups) {
         );
       }
 
-      if (group === 'editor-canvas' || file === 'src/extensions/starter-kit/document-layout.ts') {
+      if (
+        group === 'editor-canvas' ||
+        [
+          'src/extensions/starter-kit/document-layout.ts',
+          'src/extensions/starter-kit/image-view.ts',
+        ].includes(file)
+      ) {
         assert.ok(
           !['react', 'react-dom'].some(
             (module) => target === module || target.startsWith(module + '/'),

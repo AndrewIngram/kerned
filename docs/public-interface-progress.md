@@ -1293,3 +1293,42 @@ uncommitted tree.
 Milestone 4 remains open for browser-extension composition, complete DOM-overlay
 ownership and public mounting, including cancellation and isolation verified
 through that final interface. Its independent judge follows that full exit gate.
+
+### Milestone 4 image views and viewport label reuse
+
+Image decoding, loading/error presentation, height measurement and cancellation now
+belong to a framework-independent image renderer. Its React adapter only mounts,
+updates and destroys the native view. The renderer retains at most 128 decoded
+image dimensions per mounted editor. Source replacement clears the previous
+state; obsolete decoding and queued observation cannot update a destroyed view
+or a successor using the same host. Demo delays are explicit app configuration,
+not an import from the image implementation. The superseded `editor-image.tsx`
+was removed, and the dependency check prohibits React inside the native image view.
+
+The large-document audit also exposed a pre-existing shaping regression: mention
+labels were recomposed when viewport culling remounted their React views. An
+isolated production build of committed `f581bfa` reproduced the same extra shaping
+call. Labels now use a bounded, view-owned snapshot cache keyed by text and layout
+metrics. This retains no document IDs and no independent native resources;
+snapshots borrow the resource owner's fonts. Eviction leaves published snapshots
+readable. The regression and its correction are recorded in
+`artifacts/public-interface-m4/image-view/baseline-large-audit.txt` and
+`large-documents.json` in the same directory.
+
+Validation: `pnpm run check` passes with 346 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. Production build passes. Seven new
+real-browser cases run across Chromium, Firefox and WebKit for image source,
+width and alt updates, failed-image recovery, dimension-cache isolation,
+obsolete loading/destruction, label reuse and bounded label eviction. The
+large-document audit passes all nine combinations of 2,000/10,000 blocks and
+wide/narrow layouts, including delayed images, viewport culling, live edits,
+undo/redo, retained-widget reflow and unchanged shaping counts during scrolling.
+
+Three serial production trials in
+`artifacts/public-interface-m4/image-view/baseline.json` pass every unchanged
+performance budget. The report identifies `f581bfa` and measures this checkpoint's
+uncommitted tree.
+
+This is an implementation checkpoint, not milestone 4 acceptance. The complete
+mounted view, browser-extension composition and remaining DOM-overlay ownership
+still precede its independent architecture judge.

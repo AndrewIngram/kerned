@@ -2,6 +2,7 @@ import { type CanvasKit } from 'canvaskit-wasm';
 import { useMemo, type ComponentProps } from 'react';
 
 import type { BrowserViewOptions } from '../../editor-browser';
+import { createTextLabels } from '../../editor-canvas/text-labels';
 import type { Viewport } from '../../editor-react';
 import { demoSchema } from '../../extensions/demo-schema';
 import { DemoNodeView } from '../../extensions/node-views';
@@ -10,10 +11,12 @@ import { type FindState, type Selection } from '../../state';
 import type { StarterNode } from '../demo-model';
 import type { EditorDocument } from './document';
 import type { DocumentLayout, DocumentLayoutSnapshot } from './document-layout';
+import { createImageRenderer } from './image-view';
 import type { InputActions } from './input';
 import type { Owned } from './types';
 
 type BlockLayerProps = {
+  imageDelay?: number;
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   doc: EditorDocument;
   actions: Pick<InputActions, 'replaceText' | 'restore' | 'toggleFormat' | 'replaceCells'> & {
@@ -34,6 +37,7 @@ type BlockLayerProps = {
 };
 
 export function BlockLayer({
+  imageDelay,
   doc,
   clipboard,
   actions,
@@ -50,6 +54,8 @@ export function BlockLayer({
   setFocusedWidget,
   onOpen,
 }: BlockLayerProps) {
+  const labels = useMemo(() => createTextLabels(owned), [owned]);
+  const imageRenderer = useMemo(() => createImageRenderer({ delay: imageDelay }), [imageDelay]);
   const { projection, editorState, context, selectedRange } = doc;
   const { replaceText, restore, toggleFormat, replaceCells, update } = actions;
   const { visible, contentWidth, onMeasure, scene } = layout;
@@ -84,18 +90,19 @@ export function BlockLayer({
           onFormat: toggleFormat,
           onReplace: replaceCells,
         },
-        image: { width: contentWidth, onMeasure },
+        image: { width: contentWidth, onMeasure, renderer: imageRenderer },
         checklist: { width: contentWidth, onMeasure, onChange: update },
         text: {
           comments: commentsByNode.get(p.node.id),
           placement: p,
           kit,
-          owned,
+          labels,
           open: (kind, atomId, index) => onOpen(kind, p.node.id, atomId, index),
         },
       })),
     [
       visible,
+      imageRenderer,
       clipboard,
       findMatches,
       findOpen,
@@ -112,7 +119,7 @@ export function BlockLayer({
       update,
       commentsByNode,
       kit,
-      owned,
+      labels,
       onOpen,
     ],
   );
