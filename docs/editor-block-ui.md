@@ -30,8 +30,8 @@ Rows and columns can be appended from Blocks while a table is active.
   remains the renderer for paragraphs, quotes and lists. There is no contenteditable.
 - Row/column insertion supports unmerged tables. Imported colspan/rowspan data is
   preserved; merging, splitting and deleting rows/columns have no commands yet.
-- Table clipboard output is plain text. Pasting into a rectangular selection clears
-  that selection and inserts text into its primary cell, rather than distributing TSV.
+- Rectangular clipboard supports rich HTML, local fragments and TSV, with table expansion
+  and atomic undo. Pasting merged grids remains unsupported; see `clipboard.md`.
 - Comments are currently exposed for canvas text, not table cells.
 - Structural replacement handles quote/list boundaries but is not a general rich
   slice/paste algorithm. Arbitrary schema joins still need extension policy.

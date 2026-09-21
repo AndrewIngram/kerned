@@ -1,7 +1,7 @@
 # React extensions
 
 The writing demo at `/editor.html` and extension diagnostics at
-`/hybrid-editor.html` share `src/hybrid-spike.tsx`. Both use the same editing core,
+`/hybrid-editor.html` share `src/demo/app/main.tsx`. Both use the same editing core,
 owned layout engine, and extension schema. The diagnostics page keeps fixtures
 for extension behavior that the writing demo does not expose.
 

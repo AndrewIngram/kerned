@@ -18,18 +18,19 @@ as `/editor.html` through Vite:
 	</head>
 	<body data-demo="minimal">
 		<div id="root">Loading editor…</div>
-		<script type="module" src="/src/hybrid-spike.tsx"></script>
+		<script type="module" src="/src/demo/app/main.tsx"></script>
 	</body>
 </html>
 ```
 
-The host loads fonts and WebAssembly assets, creates the editor, and mounts its
-canvas, toolbar, and React controls. It currently selects the writing view by the
-`/editor.html` pathname. A configurable mount function or exported `<Editor>`
-component is not available yet.
+The Vite entry loads engine assets and the initial sample, then mounts the React
+app. The app owns sample navigation; the editor packages own selection, input,
+commands and rendering. Both `/editor.html` and `/hybrid-editor.html` use this app.
 
-[`src/hybrid-spike.tsx`](src/hybrid-spike.tsx) is the reference for building your
-own host. It connects the APIs below to rendering, input, selection, and focus.
+See [editor app ownership](docs/editor-app-architecture.md) for the module map,
+execution flow and lifecycle constraints. The optional React `Editor` component
+mounts native event handling around a caller-supplied renderer; it does not select
+a schema or create a document session for you.
 
 ## Create editor state
 
@@ -47,7 +48,7 @@ const editor = createEditor(
 	demoSchema,
 	[{
 		kind: 'paragraph', id: 1, key: 'intro', text: 'Hello world',
-		spans: [], atoms: [], comments: [],
+		marks: [], inline: [],
 	}],
 	textSelection(1, 0),
 	[tableCells.extension],

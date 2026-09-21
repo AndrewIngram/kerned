@@ -11,7 +11,7 @@ The remaining coupling is largely in the demo and its assembly:
 - `src/extensions/demo-model.ts` gives text blocks fixed formatting spans, mentions and comments.
 - `src/extensions/demo-schema.ts` coordinates their split/join/edit behavior separately.
 - `src/extensions/formatting.ts` understands a fixed set of styles rather than registered mark types.
-- `src/hybrid-spike.tsx` assembles input, React state synchronization, commands and the view.
+- `src/demo/app/editor-workspace.tsx` assembles input, React state synchronization, commands and the view.
 - `src/editor/transactions.ts` installs find directly and owns local history. It has no general extension-state or subscription contract.
 - `src/editor-react/index.tsx` supplies canvas registration and pointer support, but not a standalone editor runtime with a React adapter.
 

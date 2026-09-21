@@ -50,7 +50,7 @@ Commands should compose core operations and supply transaction metadata. A futur
 
 `src/extensions/text-block-view.tsx` draws highlights and mention labels using public `CanvasPrimitive` registration from `src/editor-react`, with geometry and activation callbacks supplied by the host. It no longer imports the application's private rendering context. React providers such as the demo's team context remain application concerns.
 
-The demo still stores its current comment ranges with text blocks. Public durable anchors are available for a separate annotation store, but automatic binding between persisted anchors, projected range decorations and a backend has not been implemented.
+The demo stores comments separately from document nodes and resolves their durable ranges through the public decoration API. Text and whole-block comments use the same position checkpoint. Backend discussion persistence remains an application responsibility.
 
 ## Alternatives considered
 

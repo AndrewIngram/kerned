@@ -51,14 +51,16 @@
     "check:editor-rich-paste": "node scripts/check-editor-rich-paste.mjs",
     "check:editor-unicode": "node scripts/check-editor-unicode.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 5176",
-    "check:project": "node scripts/check-project.mjs && npm run check:editor-boundaries",
+    "check:project": "node scripts/check-project.mjs && npm run check:editor-boundaries && npm run check:app-boundaries",
     "demo:extensions": "vite --host 127.0.0.1 --open /hybrid-editor.html",
     "check:editor-navigation": "node scripts/check-editor-navigation.mjs",
     "check:editor-foundation": "playwright test tests/foundation.spec.js",
     "benchmark:editor-foundation": "node scripts/benchmark-editor-foundation.mjs",
     "benchmark:schema-codecs": "node scripts/benchmark-schema-codecs.mjs",
     "benchmark:relative-positions": "node scripts/benchmark-relative-positions.mjs",
-    "check:editor-performance": "node scripts/check-editor-performance.mjs"
+    "check:editor-performance": "node scripts/check-editor-performance.mjs",
+    "check:app-boundaries": "node scripts/check-app-boundaries.mjs",
+    "format:editor": "prettier --write --single-quote --print-width 100 src/demo/app src/extensions/starter-kit src/editor-canvas src/editor-react/use-canvas-input.ts src/editor-react/use-viewport.ts src/editor-browser/text-interaction.ts src/editor/selection-view.ts"
   },
   "dependencies": {
     "canvaskit-wasm": "0.42.0",
@@ -70,7 +72,9 @@
     "@playwright/test": "^1.55.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "1.83.0",
+    "prettier": "^3.9.8",
     "typescript": "~5.9.2",
     "vite": "8.3.0"
   }

@@ -423,21 +423,21 @@ test('command capability checks respect current permissions without mutating sta
 test('external comment threads produce decorations without changing schema or range storage', async ({page}) => {
   const result = await page.evaluate(async () => {
     const {fixture, dispatch, capture} = await import('/tests/fixtures/editor-foundation.js');
-    const {resolveDecorations} = await import('/src/editor/index.ts');
+    const {resolveRangeDecorations} = await import('/src/editor/index.ts');
     const {commentDecorations} = await import('/src/extensions/comment.ts');
     const editor = fixture();
     const threads = [{id: 'discussion', range: capture(editor, 3, 1, 5), messages: ['Keep this wording']}];
     const stored = JSON.stringify(threads);
     dispatch(editor, [{kind: 'replaceText', id: 3, from: 2, to: 2, text: 'new'}]);
-    const current = resolveDecorations(commentDecorations(JSON.parse(stored)), editor.positions);
+    const current = resolveRangeDecorations(commentDecorations(JSON.parse(stored)), editor.positions);
     dispatch(editor, [{kind: 'replaceText', id: 3, from: 0, to: 8, text: ''}]);
-    const orphaned = resolveDecorations(commentDecorations(threads), editor.positions);
-    editor.undo(); const restored = resolveDecorations(commentDecorations(threads), editor.positions);
+    const orphaned = resolveRangeDecorations(commentDecorations(threads), editor.positions);
+    editor.undo(); const restored = resolveRangeDecorations(commentDecorations(threads), editor.positions);
     return {range: current.resolved[0].ranges, orphaned: orphaned.unresolved, restored: restored.resolved[0].ranges,
       unchanged: JSON.stringify(threads) === stored, noSchemaField: !JSON.stringify(editor.state.nodes).includes('discussion')};
   });
-  expect(result).toEqual({range: [{id: 3, from: 1, to: 8}], orphaned: [{id: 'discussion', result: {status: 'deleted'}}],
-    restored: [{id: 3, from: 1, to: 8}], unchanged: true, noSchemaField: true});
+  expect(result).toEqual({range: [{kind:'text',id: 3, from: 1, to: 8}], orphaned: [{id: 'discussion', result: {status: 'deleted'}}],
+    restored: [{kind:'text',id: 3, from: 1, to: 8}], unchanged: true, noSchemaField: true});
 });
 
 test('React state hook subscribes to a headless editor and unmounts cleanly', async ({page}) => {
@@ -608,7 +608,12 @@ test('mapping shortcuts retain boundary deletion and mixed-delta semantics', asy
       const from = seed % 20, length = i % 2 ? 0 : 2;
       dispatch(editor, [{kind: 'replaceText', id: 4, from, to: from + length, text: i % 2 ? 'abc' : ''}]);
     }
-    for (const range of ranges) cases.push([editor.positions.resolveRange(range), replayRange(schema, editor, range)]);
+    for (const range of ranges) {
+      const expected=replayRange(schema,editor,range);
+      cases.push([editor.positions.resolveRange(range),expected]);
+      const mixed=editor.positions.resolveDocumentRange(range);
+      cases.push([mixed.status==='resolved'?{...mixed,ranges:mixed.ranges.map(({kind,...range})=>range)}:mixed,expected]);
+    }
     return cases;
   });
   for (const [actual, expected] of results) expect(actual).toEqual(expected);

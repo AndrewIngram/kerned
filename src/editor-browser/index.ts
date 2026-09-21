@@ -21,6 +21,8 @@ export type BrowserViewOptions={
 export function mountEditorView(element:HTMLElement,initial:BrowserViewOptions){
   let options=initial,destroyed=false;
   const pointer=createPointerSelection({
+    context: ()=>options.pointer.context?.(),
+    nodeAt:target=>options.pointer.nodeAt?.(target)??null,
     hitTest:(x,y)=>options.pointer.hitTest(x,y),selection:()=>options.pointer.selection(),
     onSelect:selection=>options.pointer.onSelect(selection),focus:()=>options.pointer.focus(),
     selectRange:(hit,clicks)=>options.pointer.selectRange?.(hit,clicks)??null,
@@ -50,3 +52,4 @@ export function mountEditorView(element:HTMLElement,initial:BrowserViewOptions){
     destroy(){if(destroyed)return;destroyed=true;pointer.onPointerCancel();for(const dispose of cleanup)dispose();},
   };
 }
+export {createTextInteraction,positionTextInput} from './text-interaction';

@@ -1,3 +1,4 @@
+import {removalBoundaries} from './relative-boundaries';
 import {inputMarks,markInsertedText} from './stored-marks';
 import type {Mark} from './marks';
 import {createCommandChain,type CommandDefinition,type CommandState} from './commands';
@@ -68,7 +69,7 @@ export function applyTransaction<N extends NodeIdentity>(schema:Schema<N>,state:
       if(after.byKey.has(node.key))next={key:node.key,offset:0};
       else {const entry=byKey.get(node.key);if(entry)entry.after=next;}
     }
-    return {kind:'remove',keys,fallbacks};
+    return {kind:'remove',keys,fallbacks,boundaries:removalBoundaries(schema,before,after)};
   }
   function publish(next:N[],structural:boolean){
     const oldTree=treeFor(nodes),newTree=treeFor(next);

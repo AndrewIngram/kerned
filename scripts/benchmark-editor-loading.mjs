@@ -8,7 +8,7 @@ for(const name of (process.env.BROWSERS??'chromium').split(',')){
   try{for(const sample of (process.env.SAMPLES??'warbreaker,war-and-peace').split(','))for(const find of (process.env.FIND??'off,on').split(',')){
     const page=await browser.newPage({viewport:{width:1100,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
     await page.routeWebSocket(url=>url.pathname==='/',()=>{});
-    if(process.env.BASELINE==='1')await page.route('**/src/hybrid-spike.tsx*',async route=>{
+    if(process.env.BASELINE==='1')await page.route('**/src/demo/app/use-sample-stream.ts*',async route=>{
       const response=await route.fetch(),body=await response.text();
       const old=body.replace(/batch\.done\(m\.compositionMs\s*-\s*batch\.compositionMs\)/,'batch.done(work)');
       assert.notEqual(old,body,'Baseline must restore the previous batch controller');

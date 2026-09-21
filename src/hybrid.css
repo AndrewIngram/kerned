@@ -63,3 +63,5 @@ body[data-demo="minimal"] .table-block{font-size:18px}body[data-demo="minimal"] 
 @media(max-width:600px){.toolbar-inner{gap:4px}.toolbar-inner>button,.toolbar-trailing>button{width:30px}.blocks-menu summary span{max-width:none}.minimal-toolbar .sample-picker{max-width:105px;flex:none}}
 
 .editor-surface{cursor:text;touch-action:none}
+
+.block-position[data-commented="true"]{box-shadow:0 0 0 3px #e9cb7880;border-radius:8px}

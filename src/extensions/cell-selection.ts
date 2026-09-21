@@ -34,6 +34,7 @@ export function createCellSelectionExtension(adapter:TableSelectionAdapter){
     const map=grid(context,selection.tableId),anchor=map.bounds.get(selection.anchorCell),head=map.bounds.get(selection.headCell);
     if(!anchor||!head)throw new Error('Selection cells must belong to the same table');
     const rect={left:Math.min(anchor.left,head.left),top:Math.min(anchor.top,head.top),right:Math.max(anchor.right,head.right),bottom:Math.max(anchor.bottom,head.bottom)};
+    if(selection.extent==='row'){rect.left=0;rect.right=map.width;}if(selection.extent==='column'){rect.top=0;rect.bottom=map.height;}
     return {map,rect};
   }
   class CellSelection extends Selection{
@@ -44,7 +45,6 @@ export function createCellSelectionExtension(adapter:TableSelectionAdapter){
     validate(context:SelectionContext){rectangle(context,this);}
     cells(context:SelectionContext){
       const {map,rect}=rectangle(context,this);
-      if(this.extent==='row'){rect.left=0;rect.right=map.width;}if(this.extent==='column'){rect.top=0;rect.bottom=map.height;}
       const ids=new Set<number>();
       for(let y=rect.top;y<rect.bottom;y++)for(let x=rect.left;x<rect.right;x++){
         const cell=map.cells[map.slots[y*map.width+x]],bounds=map.bounds.get(cell.id);
@@ -84,5 +84,5 @@ export function createCellSelectionExtension(adapter:TableSelectionAdapter){
     if(typeof value!=='object'||value===null||!('table'in value)||!('anchor'in value)||!('head'in value)||!('extent'in value)||typeof value.table!=='string'||typeof value.anchor!=='string'||typeof value.head!=='string'||(value.extent!=='rectangle'&&value.extent!=='row'&&value.extent!=='column'))throw new Error('Invalid cell selection');
     const table=context.byKey(value.table),anchor=context.byKey(value.anchor),head=context.byKey(value.head);if(!table||!anchor||!head)throw new Error('Missing cell selection keys');return new CellSelection(table.id,anchor.id,head.id,value.extent);
   }};
-  return {CellSelection,extension,grid};
+  return {CellSelection,extension,grid,rectangle};
 }

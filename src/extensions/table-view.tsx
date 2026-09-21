@@ -1,3 +1,4 @@
+import type {BrowserViewOptions} from '../editor-browser';
 import {typography} from './typography';
 import {useLayoutEffect,useRef,useState} from 'react';
 import {TextSelection,textSelection,type Selection,type SelectionContext,type FindMatch} from '../editor';
@@ -17,7 +18,7 @@ function CellText({paragraph,matches=[],activeMatch}:{paragraph:TableCell['parag
 }
 
 /** DOM editing surface backed by the same model, selections, and transactions. */
-export function TableBlock({findMatches,activeMatch,node,width,onMeasure,selection,context,onSelect,onText,onUndo,onReplace,onFormat}:{findMatches?:ReadonlyMap<number,readonly FindMatch[]>;activeMatch?:FindMatch|null;node:TableNode;width:number;onMeasure:(id:number,width:number,height:number)=>void;selection:Selection;context:SelectionContext;onSelect:(selection:Selection)=>void;onText:(id:number,from:number,to:number,text:string,caret:number)=>void;onUndo:(redo:boolean)=>void;onFormat:(key:TextFormat)=>void;onReplace:(text:string)=>void}){
+export function TableBlock({findMatches,activeMatch,node,width,onMeasure,selection,context,onSelect,onText,onUndo,onReplace,onFormat,clipboard}:{findMatches?:ReadonlyMap<number,readonly FindMatch[]>;activeMatch?:FindMatch|null;node:TableNode;width:number;onMeasure:(id:number,width:number,height:number)=>void;selection:Selection;context:SelectionContext;onSelect:(selection:Selection)=>void;onText:(id:number,from:number,to:number,text:string,caret:number)=>void;onUndo:(redo:boolean)=>void;onFormat:(key:TextFormat)=>void;onReplace:(text:string)=>void;clipboard:Pick<NonNullable<BrowserViewOptions['input']>,'copy'|'cut'|'paste'>}){
   const [editing,setEditing]=useState<number|null>(null);
   const textRef=useRef<HTMLTextAreaElement>(null);
   const selected=selection instanceof tableCells.CellSelection&&selection.tableId===node.id?new Set(selection.cells(context)):new Set<number>();
@@ -44,7 +45,7 @@ export function TableBlock({findMatches,activeMatch,node,width,onMeasure,selecti
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'){e.preventDefault();onUndo(e.shiftKey);return;}
     if(selected.size&&(e.key==='Backspace'||e.key==='Delete')){e.preventDefault();onReplace('');}
     if(e.key==='Escape'){setEditing(null);}
-  }} onCopy={e=>{if(!selected.size)return;e.preventDefault();e.clipboardData.setData('text/plain',node.rows.map(row=>row.filter(c=>selected.has(c.id)).map(c=>c.paragraphs.map(p=>p.text).join('\n')).join('\t')).filter(Boolean).join('\n'));}} onPaste={e=>{if(!selected.size)return;e.preventDefault();onReplace(e.clipboardData.getData('text/plain'));}}>
+  }} onCopy={e=>{if(selected.size)clipboard.copy?.(e.nativeEvent);}} onCut={e=>{if(selected.size)clipboard.cut?.(e.nativeEvent);}} onPaste={e=>clipboard.paste?.(e.nativeEvent)}>
     <table aria-label={node.caption||'Table'} style={{minWidth:Math.max(1,node.rows[0]?.reduce((total,cell)=>total+cell.colspan,0)??1)*100}}>
       {node.caption&&<caption>{node.caption}</caption>}
       <tbody>{node.rows.map((row,rowIndex)=><tr key={rowIndex}>{row.map((cell,cellIndex)=>{

@@ -139,3 +139,21 @@ test('framework-free text capture handles a foreign schema and nested selection'
  });
  expect(result.selected).toEqual(['Alpha 😀 beta',2,5]);expect(result.changes).toEqual([[2,5,'X'],[0,0,'replacement']]);expect(result.composing&&result.ended).toBe(true);expect(result.all).toBe(0);
 });
+
+test('selection projection and multiclick ranges work with a foreign schema',async({page})=>{
+ const result=await page.evaluate(async()=>{
+  const {createSchema,indexTree,selectionContext,selectionView,TextSelection,textSelectionAtClick}=await import('/src/editor/index.ts');
+  const schema=createSchema([{name:'foreign',version:1,kind:'text',accepts:()=>true,validateUpdate(){},editing:{text:node=>node.body,replace:node=>node,split:node=>[node,node],join:node=>node}}]);
+  const nodes=[{id:71,key:'one',body:'First words'},{id:99,key:'two',body:'Second sentence'}];
+  const tree=indexTree(schema,nodes),context=selectionContext(schema,nodes,tree),indexes=new Map(nodes.map((node,index)=>[node.id,index]));
+  const forward=selectionView(schema,new TextSelection({id:71,offset:6},{id:99,offset:6}),context,indexes);
+  const backward=selectionView(schema,new TextSelection({id:99,offset:6},{id:71,offset:6}),context,indexes);
+  const word=textSelectionAtClick(nodes[1].body,99,9,false,2),block=textSelectionAtClick(nodes[1].body,99,9,false,3);
+  return {forward:nodes.map(forward.selectedRange),backward:nodes.map(backward.selectedRange),word:[word.anchor,word.head],block:[block.anchor,block.head],single:textSelectionAtClick(nodes[0].body,71,4,false,1)};
+ });
+ expect(result.forward).toEqual([{from:6,to:11},{from:0,to:6}]);
+ expect(result.backward).toEqual(result.forward);
+ expect(result.word).toEqual([{id:99,offset:7},{id:99,offset:15}]);
+ expect(result.block).toEqual([{id:99,offset:0},{id:99,offset:15}]);
+ expect(result.single).toBeNull();
+});

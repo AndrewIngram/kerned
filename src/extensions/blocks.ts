@@ -67,9 +67,25 @@ export function blockCommands(schema:Schema<HybridNode>,state:EditorState<Hybrid
  };
 }
 
-import {TextSelection,textSelection,type SelectionRange} from '../editor';
+import {RangeSelection,selectionContext,TextSelection,textSelection,type SelectionRange} from '../editor';
 /** Join selected text across quote/list boundaries without flattening the document. */
 export function replaceStructuredText(schema:Schema<HybridNode>,state:EditorState<HybridNode>,text:string){
+ if(state.selection instanceof RangeSelection){
+  const edit=state.selection.replace(selectionContext(schema,state.nodes),text);
+  const tree=indexTree(schema,state.nodes);
+  return {...edit,steps:edit.steps.map(step=>{
+    if(step.kind!=='replaceRanges')return step;
+    const prune=new Set<number>();
+    for(const range of step.ranges){
+      let entry=tree.byId.get(range.id);
+      while(entry){
+        if(entry.node.kind==='quote'||entry.node.kind==='list'||entry.node.kind==='listItem')prune.add(entry.node.id);
+        entry=entry.parent===null?undefined:tree.byId.get(entry.parent);
+      }
+    }
+    return {...step,pruneEmpty:[...prune]};
+  })};
+ }
  if(!(state.selection instanceof TextSelection))throw new Error('Expected text selection');
  const selection=state.selection,leaves=projectBlocks(state.nodes).nodes;
  const ai=leaves.findIndex(n=>n.id===selection.anchor.id),hi=leaves.findIndex(n=>n.id===selection.head.id);

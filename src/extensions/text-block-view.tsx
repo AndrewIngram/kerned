@@ -9,7 +9,7 @@ type InlineBox=Pick<ReturnType<Owned['layoutInline']>['inlineBoxes'][number],'id
 type TextPlacement={node:HybridNode;y:number;layout:LaidOut|null;boxes:InlineBox[]};
 export type CommentHighlight={id:string;from:number;to:number};
 const noComments:readonly CommentHighlight[]=[];
-export function ParagraphExtensions({placement:p,comments=noComments,kit,owned,open}:{placement:TextPlacement;comments?:readonly CommentHighlight[];kit:CanvasKit;owned:Owned;open:(kind:'mention'|'comment',atomId:string|undefined,index:number)=>void}){
+export function ParagraphExtensions({placement:p,comments=noComments,kit,owned,open}:{placement:TextPlacement;comments?:readonly CommentHighlight[];kit:CanvasKit;owned:Owned;open:(kind:'mention'|'comment',atomId:string,index:number)=>void}){
   const node=p.node;
   const decorations=useMemo(()=>(node.kind==='paragraph'||node.kind==='heading')&&p.layout?comments.flatMap(c=>p.layout?.geometry(c.from,c.to,false).rects.map(rect=>({comment:c,rect}))??[]):[],[p.layout,node,comments]);
   const underlines=useMemo(()=>(node.kind==='paragraph'||node.kind==='heading')&&p.layout?node.marks.filter(s=>s.mark.type==='underline').flatMap(s=>p.layout?.geometry(s.from,s.to,false).rects.map(rect=>({rect,baseline:p.layout?.lines.find(line=>line.top<=rect[1]&&line.bottom>rect[1])?.baseline??rect[3]-6}))??[]):[],[p.layout,node]);
@@ -23,7 +23,7 @@ function Mention({box,y,owned,onOpen}:{box:InlineBox;y:number;kit:CanvasKit;owne
   return <><CanvasPrimitive id={`mention-background-${box.id}`} paint={background} layer="background"/><CanvasPrimitive id={`mention-${box.id}`} paint={labelPainter}/><button className="mention-hit" data-mention={box.id} aria-label={`Open ${box.label}`} style={{left:28+box.x,top:y+box.y,width:box.width,height:box.height}} onClick={onOpen}/></>;
 }
 
-type CommentViewProps={id:number;y:number;decorations:{comment:CommentHighlight;rect:number[]}[];open:(kind:'mention'|'comment',id:string|undefined,index:number)=>void};
+type CommentViewProps={id:number;y:number;decorations:{comment:CommentHighlight;rect:number[]}[];open:(kind:'mention'|'comment',id:string,index:number)=>void};
 const DecorationView=createReactRenderers<CommentViewProps>([{name:'comment',component:({value})=>{
   const {id,y,decorations,open}=value;
   const paint=useMemo<Painter>(()=>(canvas,k,brush)=>{brush.setColor(k.Color(246,234,180));for(const {rect:r} of decorations)canvas.drawRect(k.XYWHRect(r[0],y+r[1],r[2]-r[0],r[3]-r[1]),brush);},[decorations,y]);

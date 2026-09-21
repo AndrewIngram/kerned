@@ -55,6 +55,6 @@ An initial regression rebuilt the full tree for each toolbar mark query. Reusing
 - Permission-aware client update transport, revocation handling, restricted reference resolution and protected-text/mark semantics. Projection must run at a trusted boundary, and application-defined metadata must not duplicate hidden descendant content.
 - Automatic schema migrations and application persistence. The starter-kit paragraph/heading codecs are version 2; older serialized inline payloads require migration.
 - Packaging the application-owned CanvasKit scene and starter-kit shortcuts into a configurable ready-made editor assembly. The generic browser runtime and React host are implemented and used, but consumers still supply these policies and their renderer.
-- Durable mixed text/structural range semantics, if needed by future features. Structural gaps follow surviving edge identities; both-edge deletion is explicit. Text comments retain their existing durable range behavior.
+- Concurrent operation transformation and convergence remain outstanding. Durable mixed text/structural ranges now use the shared position checkpoint and support external comments spanning atomic blocks; see `editor-session-api.md`.
 
 These are remaining engineering tasks, not requests for another round of routine decisions. Offline guarantees and trust/encryption assumptions still belong at the collaboration architecture gate.

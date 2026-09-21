@@ -38,3 +38,5 @@ export function useCommandState<N extends NodeIdentity,Args extends unknown[]>(e
 },command:CommandDefinition<N,Args>,...args:Args):CommandState{
   return useEditorState(editor,()=>editor.commandState(command,...args),(a,b)=>a.available===b.available&&a.activity===b.activity);
 }
+export {useCanvasInput} from './use-canvas-input';
+export {useEditorViewport,type Viewport} from './use-viewport';

@@ -1,3 +1,7 @@
+import { Selection } from './selection-base';
+import { readRangeSelection, mapRangeEndpoint, type RangeEndpoint } from './range-selection';
+export { Selection } from './selection-base';
+export { RangeSelection, rangeSelection, endpointOffset, extendSelection, selectionAnchor, type RangeEndpoint, type SelectionAnchor } from './range-selection';
 import type {NodeIdentity,Schema} from './schema';
 import {indexTree,type TreeIndex} from './tree';
 import {validateTextRange} from './text';
@@ -25,9 +29,10 @@ export function selectionContext<N extends NodeIdentity>(schema:Schema<N>,nodes:
     order:()=>tree.order.map(entry=>entry.node),
   };
 }
-export type SelectionMapping={point(point:TextPoint):TextPoint;node(id:number):number|null;near(id:number):TextPoint|null};
+export type SelectionMapping={endpoint(point:RangeEndpoint):RangeEndpoint|null;point(point:TextPoint):TextPoint;node(id:number):number|null;near(id:number):TextPoint|null};
 export function selectionMapping(before:SelectionContext,after:SelectionContext,maps:readonly PositionMap[]):SelectionMapping{
   return {
+    endpoint:point=>mapRangeEndpoint(before,after,maps,point),
     point(point){let next={id:point.id,index:point.offset};for(const map of maps)next=mapPosition(next.id,next.index,1,map);return {id:next.id,offset:next.index};},
     node:id=>after.node(id)?id:null,
     near(id){
@@ -46,24 +51,7 @@ export type SelectionContent={type:string;fragments:readonly SelectionFragment[]
 export type SelectionJSON={type:string;version:1;data:unknown};
 export type SelectionExtension={type:string;read(context:SelectionContext,data:unknown):Selection};
 
-/** Runtime protocol. Codecs are only used when crossing a persistence boundary. */
-export abstract class Selection{
-  abstract readonly type:string;
-  abstract eq(other:Selection):boolean;
-  abstract validate(context:SelectionContext):void;
-  abstract ranges(context:SelectionContext):readonly SelectionRange[];
-  isEmpty(context:SelectionContext):boolean{return this.ranges(context).every(range=>range.kind==='text'&&range.from===range.to);}
-  content(context:SelectionContext):SelectionContent{
-    const fragments:SelectionFragment[]=this.ranges(context).map(range=>{
-      const node=context.node(range.id);if(!node)throw new Error('Missing selected content');
-      return range.kind==='node'?{kind:'node',node}:{kind:'text',node,from:range.from,to:range.to,text:(context.text(range.id)??'').slice(range.from,range.to)};
-    });return {type:this.type,fragments};
-  }
-  abstract getBookmark():SelectionBookmark;
-  abstract encode(context:SelectionContext):SelectionJSON;
-  abstract replace(context:SelectionContext,text:string):SelectionEdit;
-  map(context:SelectionContext,mapping:SelectionMapping):Selection{return this.getBookmark().map(mapping).resolve(context);}
-}
+
 function validPoint(context:SelectionContext,point:TextPoint){const text=context.text(point.id);if(text===null)throw new Error('Selection requires a text endpoint');validateTextRange(text,point.offset,point.offset);}
 export function selectionNear(context:SelectionContext,point?:TextPoint|null):Selection{
   if(point&&context.text(point.id)!==null){const text=context.text(point.id)??'';if(point.offset>=0&&point.offset<=text.length){try{validPoint(context,point);return new TextSelection(point,point);}catch{ /* A removed grapheme boundary needs a valid cursor. */ }}return textSelection(point.id,0);}
@@ -141,6 +129,7 @@ function readPoint(context:SelectionContext,value:unknown):TextPoint{const data=
 export function createSelectionRegistry(extensions:readonly SelectionExtension[]=[]){
   const registered=new Map<string,SelectionExtension>();
   const builtins:SelectionExtension[]=[
+    {type:'range',read:readRangeSelection},
     {type:'text',read(context,value){const data=record(value);if(typeof data.upstream!=='boolean')throw new Error('Invalid selection affinity');return new TextSelection(readPoint(context,data.anchor),readPoint(context,data.head),data.upstream);}},
     {type:'node',read(context,value){const data=record(value);if(typeof data.key!=='string')throw new Error('Invalid node key');const node=context.byKey(data.key);if(!node)throw new Error('Missing node key');return new NodeSelection(node.id);}},
     {type:'all',read(_context,value){if(value!==null)throw new Error('Invalid all selection');return new AllSelection();}},

@@ -11,18 +11,42 @@ source identities are replaced, so repeated pastes cannot duplicate block IDs.
 Inline insertion uses split/join transactions to map surviving positions, and
 each paste creates one history entry.
 
-Local fragments retain the extension model, including mentions, comments,
+Local fragments retain the extension model, including mentions,
 images and checklist data. The page retains up to eight immutable fragments;
 unknown or expired tokens use HTML instead. Custom extension data is therefore
 not yet portable across reloads or separate tabs. In exported HTML, mentions
 become their labels, images their alternative text and checklists their notes.
 Comments are not exported. Portable extension serialization remains separate
-work. Table-cell clipboard controls still use their existing plain-text path.
+work. Table-cell controls use the same rich clipboard adapter.
 
 Run `npm run check:editor-rich-paste` for local and HTML round-trips, nested
 blocks, partial inline formatting, undo/redo and the complete Warbreaker book
 in Chromium, Firefox and WebKit. `npm run check:editor-book-paste` covers the
 plain-text fallback.
+
+## Rectangular cell clipboard
+
+`src/extensions/table-clipboard.ts` owns schema-specific rectangular copy and paste commands.
+The selection extension supplies logical grid bounds, including row/column selections. Copy uses
+visual row/column order even when the active cell is the bottom-right corner. It writes a cropped
+HTML table, the local rich fragment and spreadsheet TSV. Empty cells remain present; TSV quotes
+embedded tabs, newlines and quotes.
+
+Paste starts at the top-left of a cell selection, or at the cell containing a native text caret.
+The source rectangle determines the affected area. It expands the table to the right or bottom as
+needed, leaves other cells intact, and selects the pasted rectangle. It preserves paragraphs,
+headings, marks and local inline extension content. Existing destination cell identities remain
+stable; pasted text blocks and inline objects receive fresh identities. The whole operation uses one
+transaction and undo entry. Permissions validate the complete result before publication.
+
+Cells currently accept paragraphs and headings. Nested lists, quotes and embedded blocks are not
+accepted cell content. Copying complete merged cells retains their spans; copying a rectangle that
+bisects a merged cell is rejected. Rectangular paste currently requires unmerged source and
+destination tables. It never silently falls back to destructive plain text after a rejected rich paste.
+Ordinary plain-text paste inside a native cell textarea keeps native text-editing behavior.
+
+Run `npm test -- tests/table-clipboard.spec.js` for headless command and actual table-view tests in
+Chromium, Firefox and WebKit, including external HTML, TSV, expansion, permissions, cut and undo.
 
 ## Book-size paste
 
@@ -94,3 +118,9 @@ already mirrored from the model, preserving deliberate paragraph selections.
 `npm run check:editor-select-all` covers both keyboard and native selection
 paths. The Safari fix was also verified in the actual desktop browser by
 clicking document text, pressing Cmd-A, and inspecting the canvas highlights.
+
+The command batches replacements by row rather than issuing one transaction step per cell.
+A headless browser check pasting 1,024 cells into a 24×24 table, expanding it to 52×52, measured
+about 101 ms in Chromium, 159 ms in Firefox and 80 ms in WebKit in one local run. These are command
+construction/application timings, not rendering latency or a stable performance budget. The same
+check validates unique identities, all 1,024 selected cells, header formatting and exact undo.

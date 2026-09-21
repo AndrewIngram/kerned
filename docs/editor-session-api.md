@@ -50,18 +50,31 @@ The hook uses React's external-store contract and cleans up on unmount. `useEdit
 
 ## External comments and decorations
 
-A comment thread stores its own discussion ID, messages and a `RelativeRange`. Its ID identifies the discussion, not a range registered in the document. Persist thread records wherever the application stores discussions.
+A comment thread stores its own discussion ID, messages and a `DocumentRange`. Its ID identifies the discussion, not a range registered in the document. Persist thread records wherever the application stores discussions.
 
 ```ts
-const thread: CommentThread<Message> = {
-  id: discussionId,
-  range: editor.positions.range(editor.positions.at(fromId, from, 1), editor.positions.at(toId, to, -1)),
-  messages,
-};
-const {resolved, unresolved} = resolveDecorations(commentDecorations([thread]), editor.positions);
+const range = editor.positions.captureRange(editor.state.selection);
+if (range) {
+  const thread = {id: 'discussion-17', messages: ['Keep this wording'], range};
+  const {resolved, unresolved} = resolveRangeDecorations(
+    commentDecorations([thread]), editor.positions,
+  );
+}
 ```
 
-`CommentThread` and `commentDecorations` come from `src/extensions/comment.ts`; the generic decoration resolver is in core. Resolved decorations carry node-local text intervals for the renderer. Unresolved decorations retain the reason so the application can show an orphaned discussion or diagnose missing history. They are not silently removed from external storage. The demo uses this path for its highlights and reply panel; document nodes no longer have a comments field. `captureComment(schema, editor, id, messages)` captures a nonempty text or all-document selection. `createCommentStore(initial)` supplies a stable snapshot and subscription, plus `put`, `putAll` and `remove`; it can be observed with the optional React hook. Replacing a thread to edit its messages does not change document revision or text undo history. Discussion records still need application persistence; the demo store is in memory.
+`captureRange` accepts nonempty text, node, contiguous mixed and all-document selections. It normalizes backwards selections. Empty selections and extension-defined selections such as rectangular cells return `null`; a rectangle is not a contiguous document interval. Callers can capture a constructed selection without changing editor selection state.
+
+`parseDocumentRange` validates JSON at the persistence boundary. Each endpoint stores a stable node key, document ID, capture revision and association, plus a text offset or node side. References contain no runtime IDs, range IDs, registered handles or list of covered nodes. Existing serialized `RelativeRange` values remain accepted. `resolveDocumentRange` returns ordered text slices and whole-node fragments, or an explicit `deleted`/`unavailable` result. `resolveRange` remains the text-only projection API.
+
+Text insertion strictly inside a range expands it. Capture excludes insertion exactly at either text edge. Whole-node references follow moves, wrapping and unwrapping. Node edges follow splits and joins. When an endpoint is deleted, the range shrinks toward its surviving content, including atomic nodes. Deleting all covered content reports `deleted`; undo can resolve the original reference again. Moving endpoints into reversed document order reports `deleted` rather than including unrelated content between them.
+
+The document position checkpoint now also retains surviving structural neighbours at deletion boundaries. Save it with the document ID, revision and stable node keys as before. The checkpoint stores edit metadata independent of the number of comments. Reloading can assign different runtime IDs. Older checkpoints remain readable, but structural deletion information absent from those checkpoints cannot be reconstructed.
+
+`CommentThread` and `commentDecorations` come from `src/extensions/comment.ts`; the generic decoration resolver is in core. Whole-container fragments remain structural until a renderer projects them into its visual blocks. Unresolved decorations retain their reason and do not remove external discussion records. The demo projects comments into text highlights and whole-block outlines, and opens the existing reply panel for images too.
+
+`captureComment(editor, id, messages)` uses the public range API. `createCommentStore(initial)` supplies a stable snapshot and subscription, plus `put`, `putAll` and `remove`; it can be observed with the optional React hook. Editing discussion messages does not change document revision or text undo history. The demo's discussion store is in memory; durable storage remains the application's responsibility.
+
+These references resolve against the editor's accepted revision order. They do not implement concurrent operation transformation or establish OT convergence. The existing concurrent split/insert test remains skipped pending that work.
 
 ## Access and projection
 
@@ -101,7 +114,7 @@ Text extensions can provide a mark-storage adapter, and node extensions can prov
 
 `mountEditorView(element, options)` from `src/editor-browser` owns pointer selection, native input/key/composition/clipboard routing and focus events. `update(options)` changes callbacks without reinstalling listeners; `destroy()` releases them and cancels dragging. Embedded controls opt out of canvas hit testing. Input events are routed only from the configured capture textarea, so interactive overlays retain their native behavior. `createTextInput(schema, editor)` owns schema-independent textarea synchronization, diffing, composition and native Select All observation. Call `sync` after selection/text changes outside composition, route native input through `read`, and release the cleanup returned by `mount`. `observeEditorViewport` handles page scrolling with a sticky toolbar or an embedded scrollport and returns cleanup.
 
-`Editor` from `src/editor-react` mounts this runtime around its children. The caller supplies `view.pointer`, optional `view.input`, and a renderer as children. The editor session belongs to the caller and survives React unmount/remount. Both demos use this host and the native runtime. Schema-specific shortcuts, clipboard codecs and CanvasKit scene assembly remain in the application; this is not a zero-configuration rich-text widget.
+`Editor` from `src/editor-react` mounts this runtime around its children. The caller supplies `view.pointer`, optional `view.input`, and a renderer as children. The editor session belongs to the caller and survives React unmount/remount. Both demos use this host and the native runtime. Schema-specific commands and clipboard policy live in the starter-kit extensions. Generic canvas painting, viewport lifecycle, multiclick policy and navigation binding live in reusable adapters. The demo assembles these pieces; this is not a zero-configuration rich-text widget. See [app ownership](editor-app-architecture.md).
 
 `createReactRenderers<Value>([{name, component}])` creates a typed `ExtensionView` taking `{type, value}`. Build registries outside render so components retain their identity. Components may return DOM, `CanvasPrimitive` registrations, or both. Duplicate names and missing registrations reject explicitly. The starter kit registers block renderers, a mention inline renderer, underline drawing, and external comment decorations through this public interface. Layout geometry is passed by the host; React is absent from core and from the browser runtime.
 

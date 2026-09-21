@@ -1,5 +1,6 @@
+import {copyCellRectangle,cellRectangleText,pasteCellRectangle} from './table-clipboard';
 import {supportsOwnedText} from '../owned-text-support';
-import {applyTransaction,indexTree,selectionContext,textSelection,type EditorState,type NodeIdentity,type Schema,type Step} from '../editor';
+import {RangeSelection,NodeSelection,applyTransaction,indexTree,selectionContext,textSelection,type EditorState,type NodeIdentity,type Schema,type Step} from '../editor';
 import {replaceStructuredText} from './blocks';
 import {plainText,type HybridNode} from './demo-model';
 import {importHtml} from './html';
@@ -38,10 +39,11 @@ export function writeClipboard(data:DataTransfer,schema:Schema<HybridNode>,state
   const children=schema.children(node);if(!children.length)return [];
   const selected=children.flatMap(slice);return selected.length?[schema.withChildren(node,selected)]:[];
  }
- const nodes=state.nodes.flatMap(slice),context=selectionContext(schema,state.nodes);
+ const rectangle=copyCellRectangle(schema,state);
+ const nodes=rectangle?[rectangle]:state.nodes.flatMap(slice),context=selectionContext(schema,state.nodes);
  const inline=nodes.length===1&&(nodes[0].kind==='paragraph'||nodes[0].kind==='heading')&&ranges.some(r=>r.kind==='text'&&(r.from>0||r.to<(context.text(r.id)?.length??0)));
  const token=crypto.randomUUID();fragments.set(token,{nodes,inline});if(fragments.size>8){const first=fragments.keys().next().value;if(first)fragments.delete(first);}
- data.setData('text/plain',text);data.setData('text/html',nodes.map(html).join(''));data.setData(mime,token);
+ data.setData('text/plain',rectangle?cellRectangleText(rectangle):text);data.setData('text/html',nodes.map(html).join(''));data.setData(mime,token);
 }
 export function readClipboard(data:DataTransfer):Fragment|null{
  const local=fragments.get(data.getData(mime));if(local)return local;
@@ -50,6 +52,7 @@ export function readClipboard(data:DataTransfer):Fragment|null{
  return {nodes,inline:nodes.length===1&&nodes[0].kind==='paragraph'};
 }
 export function pasteFragment(schema:Schema<HybridNode>,state:EditorState<HybridNode>,fragment:Fragment,allocate:()=>NodeIdentity){
+ if(fragment.nodes.length===1&&fragment.nodes[0].kind==='table'){const rectangle=pasteCellRectangle(schema,state,fragment.nodes[0],allocate);if(rectangle)return rectangle;}
  function clone(node:HybridNode):HybridNode{
   const children=schema.children(node);
   const copy:HybridNode=node.kind==='paragraph'||node.kind==='heading'?{...node,...allocate(),inline:node.inline.map(a=>({...a,id:crypto.randomUUID()}))}:{...node,...allocate()};
@@ -64,6 +67,14 @@ export function pasteFragment(schema:Schema<HybridNode>,state:EditorState<Hybrid
  if(!target){target={kind:'paragraph',...allocate(),text:'',marks:[],inline:[]};inserted.push(target);}
  const selection=textSelection(target.id,schema.text(target)?.length??0);
  if(state.nodes.every(covered))return {steps:[{kind:'replaceChildren',parent:null,index:0,count:state.nodes.length,nodes:inserted} satisfies Step<HybridNode>],selection};
+ if(state.selection instanceof NodeSelection){const location=selectionContext(schema,state.nodes).location(state.selection.id);if(!location)throw new Error('Missing paste destination');return {steps:[{kind:'replaceChildren',...location,count:1,nodes:inserted} satisfies Step<HybridNode>],selection};}
+ if(state.selection instanceof RangeSelection&&!ranges.some(range=>range.kind==='text')){
+  const first=ranges[0],point=state.selection.anchor,location=selectionContext(schema,state.nodes).location(first?.id??point.id);
+  if(!location)throw new Error('Missing structural paste destination');
+  const index=location.index+(!first&&point.kind==='node'&&point.side==='after'?1:0);
+  const removal=state.selection.replace(selectionContext(schema,state.nodes),'');
+  return {steps:[...removal.steps,{kind:'insertChildren',parent:location.parent,index,nodes:inserted} satisfies Step<HybridNode>],selection};
+ }
  const removal=replaceStructuredText(schema,state,'');
  const preview=applyTransaction(schema,state,{baseRevision:state.revision,origin:'local',history:'separate',time:0,...removal}).state;
  const caret=preview.selection.ranges(selectionContext(schema,preview.nodes))[0];

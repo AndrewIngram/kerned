@@ -1,3 +1,7 @@
+import {captureDocumentRange,resolvedDocumentRange,type RelativeEndpoint,type DocumentRange,type DocumentRangeResult} from './document-ranges';
+import {mapBoundary,projectBoundaryRange,type BoundaryPoint,type RemovedBoundary,type NodeEdge} from './relative-boundaries';
+import {selectionContext,type Selection} from './selection';
+import type {RangeEndpoint} from './range-selection';
 import {createMappingIndex,createRevisionMappingIndex,combineEffects,projectOutside,mayCoverRange} from './mapping-index';
 import {invertAnchorMap, type AnchorMap} from './anchors';
 import type {NodeIdentity, Schema} from './schema';
@@ -50,9 +54,22 @@ function parseMap(value: unknown): AnchorMap {
       const keys = data.keys.map(string);
       if (data.kind === 'insert') return {kind: 'insert', keys};
       const point = (value: unknown): Point | null => {if (value === null) return null; const p = record(value); return {key: string(p.key), offset: integer(p.offset)};};
-      if (data.fallbacks === undefined) return {kind: 'remove', keys};
+      let boundaries: RemovedBoundary[] | undefined;
+      if (data.boundaries !== undefined) {
+        if (!Array.isArray(data.boundaries)) throw new Error('Invalid removal boundaries');
+        const edge = (value: unknown): NodeEdge => {
+          const p = record(value);
+          if (p.side !== 'before' && p.side !== 'after') throw new Error('Invalid boundary side');
+          return {key:string(p.key),side:p.side};
+        };
+        boundaries = data.boundaries.map(value => {
+          const b = record(value), p = edge(b);
+          return {...p,left:b.left === null ? null : edge(b.left),right:b.right === null ? null : edge(b.right)};
+        });
+      }
+      if (data.fallbacks === undefined) return {kind: 'remove', keys, boundaries};
       if (!Array.isArray(data.fallbacks)) throw new Error('Invalid removal boundaries');
-      return {kind: 'remove', keys, fallbacks: data.fallbacks.map(value => {const f = record(value); return {key: string(f.key), before: point(f.before), after: point(f.after)};})};
+      return {kind: 'remove', keys, boundaries, fallbacks: data.fallbacks.map(value => {const f = record(value); return {key: string(f.key), before: point(f.before), after: point(f.after)};})};
     }
     default: throw new Error('Unknown position mapping');
   }
@@ -121,7 +138,7 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
     }
     if (active.size !== definitions.size) throw new Error('Unused mapping definition');
   }
-  function check(position: RelativePosition): Exclude<RelativePositionResult, {status: 'resolved'}> | null {
+  function check(position: Pick<RelativePosition,'documentId'|'revision'>): Exclude<RelativePositionResult, {status: 'resolved'}> | null {
     if (position.documentId !== documentId) return {status: 'unavailable', reason: 'document-mismatch'};
     if (position.revision > state.revision) return {status: 'unavailable', reason: 'future-revision'};
     if (position.revision < since) return {status: 'unavailable', reason: 'history-unavailable'};
@@ -216,8 +233,96 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
     }
     return resolvePoint(point, position.association);
   }
+  let rangeContext: ReturnType<typeof selectionContext<N>> | undefined,
+    rangeNodes: readonly N[] | undefined;
+  function context() {
+    if (rangeNodes !== state.nodes || !rangeContext) {
+      rangeNodes = state.nodes;
+      rangeContext = selectionContext(schema, [...state.nodes], tree());
+    }
+    return rangeContext;
+  }
+  function endpoint(point: RangeEndpoint, bias: -1 | 1): RelativeEndpoint {
+    if (point.kind === 'text') return api.at(point.id, point.offset, bias);
+    const node = tree().byId.get(point.id)?.node;
+    if (!node) throw new Error('Missing boundary node');
+    return Object.freeze({
+      version: 1,
+      documentId,
+      revision: state.revision,
+      key: node.key,
+      side: point.side,
+      association: bias,
+    });
+  }
+  function snapshotBoundary(point: BoundaryPoint | null, bias: -1 | 1): RangeEndpoint | null {
+    if (!point) return null;
+    if ('side' in point) {
+      const node = tree().byKey.get(point.key)?.node;
+      return node ? { kind: 'node', id: node.id, side: point.side } : null;
+    }
+    const result = resolvePoint(point, bias);
+    return result.status === 'resolved' ? { kind: 'text', ...result.point } : null;
+  }
+  function resolveDocumentRange(range: DocumentRange): DocumentRangeResult {
+    const error = check(range.start) ?? check(range.end);
+    if (error) return error;
+    if (range.start.revision !== range.end.revision)
+      throw new Error('Range endpoints must share a revision');
+    let start: BoundaryPoint | null = range.start,
+      end: BoundaryPoint | null = range.end;
+    const index = changesAfter(range.start.revision);
+    // Skip safe history at both the revision and chunk levels, as text ranges do.
+    const fast = projectBoundaryRange(
+      index.effects,
+      start,
+      end,
+      range.start.association,
+      range.end.association,
+    );
+    if (fast !== false) {
+      start = fast.start;
+      end = fast.end;
+    } else
+      for (const chunk of index.chunks()) {
+        const fast = projectBoundaryRange(
+          chunk.effects,
+          start,
+          end,
+          range.start.association,
+          range.end.association,
+        );
+        if (fast !== false) {
+          start = fast.start;
+          end = fast.end;
+          continue;
+        }
+        for (const map of chunk.maps) {
+          if (
+            start &&
+            end &&
+            !('side' in start) &&
+            !('side' in end) &&
+            start.key === end.key &&
+            map.kind === 'replace' &&
+            map.key === start.key &&
+            map.to > map.from &&
+            map.from <= start.offset &&
+            map.to >= end.offset
+          )
+            return { status: 'deleted' };
+          start = mapBoundary(start, map, range.start.association, 'start');
+          end = mapBoundary(end, map, range.end.association, 'end');
+        }
+      }
+    const a = snapshotBoundary(start, range.start.association),
+      b = snapshotBoundary(end, range.end.association);
+    return a && b ? resolvedDocumentRange(context(), a, b) : { status: 'deleted' };
+  }
   const api = Object.freeze({
     ...createStructuralPositions(schema,documentId,()=>state.nodes),
+    captureRange(selection: Selection): DocumentRange | null {return captureDocumentRange(selection,context(),endpoint);},
+    resolveDocumentRange,
     at(id: number, offset: number, bias: -1 | 1 = 1): RelativePosition {
       association(bias);
       const node = tree().byId.get(id)?.node, text = node ? schema.text(node) : null;
@@ -268,7 +373,7 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
     if (next.revision !== state.revision + 1) throw new Error('Position index requires consecutive revisions');
     const operations: readonly MappingOperation[] = restore ? (restore.redo ? restore.operations : [...restore.operations].reverse().map(op => ({id: op.id, inverse: !op.inverse})))
       : maps.length ? [{id: next.revision, inverse: false}] : [];
-    if (!restore && maps.length) definitions.set(next.revision, maps.map(map => map.kind === 'remove' ? {...map, keys: [...map.keys], fallbacks: map.fallbacks?.map(f => ({key: f.key, before: f.before && {...f.before}, after: f.after && {...f.after}}))} : map.kind === 'insert' ? {...map, keys: [...map.keys]} : {...map}));
+    if (!restore && maps.length) definitions.set(next.revision, maps.map(map => map.kind === 'remove' ? {...map, keys: [...map.keys], boundaries:map.boundaries?.map(b=>({...b,left:b.left&&{...b.left},right:b.right&&{...b.right}})), fallbacks: map.fallbacks?.map(f => ({key: f.key, before: f.before && {...f.before}, after: f.after && {...f.after}}))} : map.kind === 'insert' ? {...map, keys: [...map.keys]} : {...map}));
     if (operations.length) events.push({revision: next.revision, operations: operations.map(op => ({...op}))});
     state = next; suffixes.clear(); suffixWeight = 0; historyGroups = undefined;
     return operations;
