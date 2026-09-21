@@ -1,24 +1,37 @@
+import type { createDocumentQuery } from '../editor-browser/document';
+import type { Rect } from '../engines';
+import type { NodeIdentity } from '../model';
+import { RangeSelection } from '../state';
 import {
   createEditorScene,
   type Measurement,
   type Placement,
   type Scene,
-} from '../../editor-canvas/scene';
-import type { Rect } from '../../engines';
-import { RangeSelection } from '../../state';
-import type { StarterLeaf } from '../demo-model';
-import type { EditorDocument } from './document';
-import { createStarterPresentation } from './presentation';
-import type { Owned } from './types';
+  type PresentBlock,
+} from './scene';
 
-type LayoutResult = ReturnType<ReturnType<typeof createEditorScene<StarterLeaf>>['build']>;
+type LayoutResult<N extends NodeIdentity> = ReturnType<
+  ReturnType<typeof createEditorScene<N>>['build']
+>;
 
-export type DocumentLayoutSource = {
-  getSnapshot(this: void): EditorDocument;
+type LayoutDocument<N extends NodeIdentity> = Pick<
+  ReturnType<ReturnType<typeof createDocumentQuery<N, N, { inset: number }>>>,
+  | 'nodes'
+  | 'nodeIndexes'
+  | 'projection'
+  | 'textSelection'
+  | 'focusId'
+  | 'selection'
+  | 'collapsed'
+  | 'blockFor'
+>;
+
+export type DocumentLayoutSource<N extends NodeIdentity> = {
+  getSnapshot(this: void): LayoutDocument<N>;
   subscribe(this: void, listener: () => void): () => void;
 };
 
-export type DocumentLayoutFrame = {
+export type DocumentLayoutFrame<N extends NodeIdentity = NodeIdentity> = {
   viewport: {
     width: number;
     zoom: number;
@@ -26,27 +39,25 @@ export type DocumentLayoutFrame = {
     readScroll: () => number;
     scrollDocumentTo: (top: number) => void;
   };
-  panelId: number | undefined;
-  focusedWidget: number | null;
-  findBlockId: number | undefined;
-  findOpen: boolean;
+  pinned: readonly number[];
+  paddingTop: number;
   eager: boolean;
   retainAll: boolean;
-  onLayout: (result: LayoutResult, width: number) => void;
+  onLayout: (result: LayoutResult<N>, width: number) => void;
 };
 
-export type DocumentLayoutSnapshot = {
+export type DocumentLayoutSnapshot<N extends NodeIdentity> = {
   inset: number;
-  scene: Scene<StarterLeaf>;
-  visible: Placement<StarterLeaf>[];
+  scene: Scene<N>;
+  visible: Placement<N>[];
   top: number;
   bottom: number;
   contentWidth: number;
-  activePlacement: Placement<StarterLeaf> | undefined;
+  activePlacement: Placement<N> | undefined;
   caret: Rect | undefined;
 };
 
-function emptySnapshot(): DocumentLayoutSnapshot {
+function emptySnapshot<N extends NodeIdentity>(): DocumentLayoutSnapshot<N> {
   return {
     inset: 28,
     scene: {
@@ -69,22 +80,22 @@ function emptySnapshot(): DocumentLayoutSnapshot {
 }
 
 /** Owns scene publication, measurements and background reflow for one mounted document. */
-export function createDocumentLayout({
+export function createDocumentLayout<N extends NodeIdentity>({
   owned,
-  size,
+  present,
   source,
 }: {
-  owned: Owned;
-  size: number;
-  source: DocumentLayoutSource;
+  owned: Parameters<typeof createEditorScene>[0];
+  present: PresentBlock<N>;
+  source: DocumentLayoutSource<N>;
 }) {
-  const sceneCache = createEditorScene(owned, createStarterPresentation(size));
+  const sceneCache = createEditorScene(owned, present);
   const listeners = new Set<() => void>();
-  let snapshot = emptySnapshot();
+  let snapshot = emptySnapshot<N>();
   let presented = snapshot;
   let measurements = new Map<number, Measurement>();
-  let frame: DocumentLayoutFrame | undefined;
-  let document: EditorDocument | undefined;
+  let frame: DocumentLayoutFrame<N> | undefined;
+  let document: LayoutDocument<N> | undefined;
   let detach: (() => void) | undefined;
   let scheduled: number | 'queued' | undefined;
   let invalidated = false;
@@ -136,9 +147,20 @@ export function createDocumentLayout({
     }
 
     document = doc;
-    const { viewport, panelId, focusedWidget, findBlockId, findOpen } = current;
+    const { viewport } = current;
     const { zoom, viewportHeight, readScroll } = viewport;
     const { nodes, projection, textSelection: selection, focusId } = doc;
+
+    const endpoints = selection
+      ? [selection.anchor.id, selection.head.id]
+      : focusId === null
+        ? []
+        : [focusId];
+
+    const pinned = [
+      ...new Set([...endpoints, ...current.pinned].map((id) => doc.blockFor(id)?.id ?? id)),
+    ];
+
     const inset = 28;
     const contentWidth = Math.max(150, viewport.width / zoom - 2 * inset);
     const liveScroll = readScroll();
@@ -159,17 +181,8 @@ export function createDocumentLayout({
         top: viewportTop,
         height: viewportHeight / zoom,
         zoom,
-        paddingTop: findOpen ? 56 / zoom : 0,
-        pinned: [
-          ...(selection
-            ? [selection.anchor.id, selection.head.id]
-            : focusId === null
-              ? []
-              : [focusId]),
-          ...(findBlockId === undefined ? [] : [findBlockId]),
-          ...(panelId === undefined ? [] : [panelId]),
-          ...(focusedWidget === null ? [] : [focusedWidget]),
-        ],
+        paddingTop: current.paddingTop,
+        pinned,
         advance,
         eager: current.eager,
         retainAll: current.retainAll,
@@ -178,7 +191,8 @@ export function createDocumentLayout({
     );
 
     const scene = result.scene;
-    const activePlacement = scene.placements.find((p) => p.node.id === focusId);
+    const activeId = focusId === null ? null : (doc.blockFor(focusId)?.id ?? focusId);
+    const activePlacement = scene.placements.find((p) => p.node.id === activeId);
     const rangeHead = doc.selection instanceof RangeSelection ? doc.selection.head : null;
 
     const caret = selection
@@ -216,15 +230,15 @@ export function createDocumentLayout({
       else hi = mid;
     }
 
-    const visible: Placement<StarterLeaf>[] = [];
+    const visible: Placement<N>[] = [];
 
     for (let i = lo; i < placements.length && placements[i].y < bottom + 160; i++)
       visible.push(placements[i]);
 
-    for (const id of [focusedWidget, panelId, findBlockId]) {
-      const pinned = placements.find((p) => p.node.id === id);
+    for (const id of pinned) {
+      const placement = placements.find((p) => p.node.id === id);
 
-      if (pinned && !visible.includes(pinned)) visible.push(pinned);
+      if (placement && !visible.includes(placement)) visible.push(placement);
     }
 
     snapshot = {
@@ -275,7 +289,7 @@ export function createDocumentLayout({
         measurements = new Map();
         measured = false;
         sceneCache.clear();
-        snapshot = emptySnapshot();
+        snapshot = emptySnapshot<N>();
         presented = snapshot;
         lastScroll = 0;
         notify();
@@ -286,7 +300,7 @@ export function createDocumentLayout({
 
       return release;
     },
-    update(next: DocumentLayoutFrame) {
+    update(next: DocumentLayoutFrame<N>) {
       assertAlive();
       const previous = frame;
       frame = next;
@@ -297,10 +311,9 @@ export function createDocumentLayout({
         previous.viewport.width === next.viewport.width &&
         previous.viewport.zoom === next.viewport.zoom &&
         previous.viewport.viewportHeight === next.viewport.viewportHeight &&
-        previous.panelId === next.panelId &&
-        previous.focusedWidget === next.focusedWidget &&
-        previous.findBlockId === next.findBlockId &&
-        previous.findOpen === next.findOpen &&
+        previous.paddingTop === next.paddingTop &&
+        previous.pinned.length === next.pinned.length &&
+        previous.pinned.every((id, index) => id === next.pinned[index]) &&
         previous.eager === next.eager &&
         previous.retainAll === next.retainAll &&
         lastScroll === next.viewport.readScroll() &&
@@ -330,7 +343,7 @@ export function createDocumentLayout({
       schedule();
     },
     /** The host calls this after applying the snapshot's document height to the DOM. */
-    present(value: DocumentLayoutSnapshot) {
+    present(value: DocumentLayoutSnapshot<N>) {
       assertAlive();
 
       if (value !== snapshot || !frame || !detach) return;
@@ -383,4 +396,6 @@ export function createDocumentLayout({
   };
 }
 
-export type DocumentLayout = ReturnType<typeof createDocumentLayout>;
+export type DocumentLayout<N extends NodeIdentity = NodeIdentity> = ReturnType<
+  typeof createDocumentLayout<N>
+>;

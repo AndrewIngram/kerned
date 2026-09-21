@@ -4,19 +4,24 @@ import {
   createDocumentLayout,
   type DocumentLayoutFrame,
   type DocumentLayoutSource,
-} from './document-layout';
-import type { Owned } from './types';
+} from '../editor-canvas/document-layout';
+import type { PresentBlock } from '../editor-canvas/scene';
+import type { NodeIdentity } from '../model';
 
 /** React supplies committed inputs and subscribes to the controller's immutable scene. */
-export function useDocumentLayout({
+export function useDocumentLayout<N extends NodeIdentity>({
   owned,
-  size,
+  present,
   source,
   ...frame
-}: DocumentLayoutFrame & { owned: Owned; size: number; source: DocumentLayoutSource }) {
+}: DocumentLayoutFrame<N> & {
+  owned: Parameters<typeof createDocumentLayout>[0]['owned'];
+  present: PresentBlock<N>;
+  source: DocumentLayoutSource<N>;
+}) {
   const controller = useMemo(
-    () => createDocumentLayout({ owned, size, source }),
-    [owned, size, source],
+    () => createDocumentLayout({ owned, present, source }),
+    [owned, present, source],
   );
 
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot);

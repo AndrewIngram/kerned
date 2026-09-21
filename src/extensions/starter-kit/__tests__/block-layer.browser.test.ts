@@ -7,6 +7,10 @@ import { beforeAll, expect, test } from 'vitest';
 import { createEditor } from '../../../core';
 import { createTextInput } from '../../../editor-browser';
 import { createCanvasRenderer } from '../../../editor-canvas/canvas-renderer';
+import {
+  createDocumentLayout,
+  type DocumentLayoutFrame,
+} from '../../../editor-canvas/document-layout';
 import { CanvasLayerProvider } from '../../../editor-react';
 import { createSchema } from '../../../model';
 import { createOwnedEngine } from '../../../owned-layout';
@@ -14,10 +18,10 @@ import { createFind, textSelection } from '../../../state';
 import { createSampleDocument, type StarterNode } from '../../demo-model';
 import { BlockLayer } from '../block-layer';
 import { starterBrowserExtensions } from '../browser';
-import { createStarterDocumentQuery } from '../document';
-import { createDocumentLayout, type DocumentLayoutFrame } from '../document-layout';
+import { createStarterDocumentQuery } from '../browser-document';
 import { createStarterKitInput } from '../input';
 import { createBlockLayer, type BlockLayerFrame } from '../native-block-layer';
+import { createStarterPresentation } from '../presentation';
 
 let kit: CanvasKit;
 
@@ -48,7 +52,7 @@ async function fixture() {
 
   const layout = createDocumentLayout({
     owned,
-    size: 20,
+    present: createStarterPresentation(20),
     source: { getSnapshot: () => project(editor.state), subscribe: editor.subscribe },
   });
 
@@ -80,10 +84,8 @@ async function fixture() {
       readScroll: () => 0,
       scrollDocumentTo: () => {},
     },
-    panelId: undefined,
-    focusedWidget: null,
-    findBlockId: undefined,
-    findOpen: false,
+    pinned: [],
+    paddingTop: 0,
     eager: true,
     retainAll: false,
     onLayout: () => {},

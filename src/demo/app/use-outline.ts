@@ -6,7 +6,7 @@ import type { StarterLeaf } from '../../extensions/demo-model';
 import { plainText } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { createOutlineExtension, type OutlineEntry } from '../../extensions/outline';
-import type { EditorDocument } from '../../extensions/starter-kit/document';
+import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
 
 type OutlineOptions = Pick<EditorDocument, 'editorState' | 'tree'> & {
   sample: EditorSample;

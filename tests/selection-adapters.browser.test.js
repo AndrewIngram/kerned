@@ -16,7 +16,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const { useEditorState } = await import('../src/editor-react/index.tsx');
 
     const { createStarterDocumentQuery } =
-      await import('../src/extensions/starter-kit/document.ts');
+      await import('../src/extensions/starter-kit/browser-document.ts');
 
     const { createStarterKitInput } = await import('../src/extensions/starter-kit/input.ts');
     const { createTextInput } = await import('../src/editor-browser/text-input.ts');

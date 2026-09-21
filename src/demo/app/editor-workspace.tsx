@@ -11,6 +11,7 @@ import {
   useEditorState,
 } from '../../editor-react';
 import { useCanvasRenderer } from '../../editor-react/use-canvas-renderer';
+import { useDocumentLayout } from '../../editor-react/use-document-layout';
 import { type EditorSample } from '../../editor-samples';
 import { streamConfig } from '../../editor-stream';
 import type { Rect } from '../../engines';
@@ -19,9 +20,9 @@ import { demoSchema } from '../../extensions/demo-schema';
 import { OutlineMenu } from '../../extensions/outline-view';
 import { BlockLayer } from '../../extensions/starter-kit/block-layer';
 import { starterBrowserExtensions } from '../../extensions/starter-kit/browser';
-import { createStarterDocumentQuery } from '../../extensions/starter-kit/document';
+import { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
 import { createStarterKitInput, focusStarterKitInput } from '../../extensions/starter-kit/input';
-import { useDocumentLayout } from '../../extensions/starter-kit/use-document-layout';
+import { createStarterPresentation } from '../../extensions/starter-kit/presentation';
 import { createSchema } from '../../model';
 import { createOwnedEngine } from '../../owned-layout';
 import { textSelection, type Selection } from '../../state';
@@ -76,7 +77,7 @@ export function EditorWorkspace({
     [editor, projectDocument],
   );
 
-  const { editorState, nodes, tree, nodeIndexes, selection, selectedRange } = doc;
+  const { editorState, nodes, tree, selection, selectedRange } = doc;
 
   const setSelection = useCallback(
     (next: Selection) => {
@@ -130,25 +131,24 @@ export function EditorWorkspace({
   const stream = useSampleStream(editor, sample, seedComments);
   const { loadedCount, metrics, paused, recordRender } = stream;
   const editStarted = useRef<number | null>(null);
-  let findEntry = findOpen && findState.active ? tree.byId.get(findState.active.id) : undefined;
 
-  while (findEntry && !nodeIndexes.has(findEntry.node.id))
-    findEntry = findEntry.parent === null ? undefined : tree.byId.get(findEntry.parent);
-  const findBlockId = findEntry?.node.id;
+  const findBlockId =
+    findOpen && findState.active ? doc.blockFor(findState.active.id)?.id : undefined;
+
   const current = useRef({ nodes, selection, width });
   useLayoutEffect(() => {
     current.current = { nodes, selection, width };
   }, [nodes, selection, width]);
 
+  const presentation = useMemo(() => createStarterPresentation(minimal ? 18 : 20), [minimal]);
+
   const layout = useDocumentLayout({
     owned,
-    size: minimal ? 18 : 20,
+    present: presentation,
     source: layoutSource,
     viewport,
-    panelId: panel?.nodeId,
-    focusedWidget,
-    findBlockId,
-    findOpen,
+    pinned: [panel?.nodeId, focusedWidget, findBlockId].filter((id) => id != null),
+    paddingTop: findOpen ? 56 / zoom : 0,
     eager: new URLSearchParams(location.search).get('reflow') === 'eager',
     retainAll: new URLSearchParams(location.search).get('retention') === 'all',
     onLayout: (result, widthValue) =>

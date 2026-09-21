@@ -1,23 +1,58 @@
-import { indexTree, type Schema } from '../../model';
-import { selectionContext, selectionView, type EditorState } from '../../state';
-import { projectBlocks } from '../blocks';
-import type { StarterNode } from '../demo-model';
-import { selectedBlockLabel } from '../headings';
+import { indexTree, type Schema, type NodeIdentity } from '../model';
+import { selectionContext, selectionView, type EditorState } from '../state';
 
-/** Projection caches belong to one extension instance; draft snapshots can be collected. */
-export function createStarterDocumentQuery(schema: Schema<StarterNode>) {
-  const contents = new WeakMap<readonly StarterNode[], ReturnType<typeof content>>();
+type ProjectionPolicy<N, Block extends N, Context> = {
+  initial: Context;
+  isBlock(this: void, node: N): node is Block;
+  child(this: void, parent: N, index: number, context: Context): Context;
+};
 
-  function content(roots: readonly StarterNode[]) {
-    const projection = projectBlocks(roots);
+/** One view projection owns its snapshot caches; discarded drafts can be collected. */
+export function createDocumentQuery<N extends NodeIdentity, Block extends N, Context>(
+  schema: Schema<N>,
+  policy: ProjectionPolicy<N, Block, Context>,
+) {
+  const contents = new WeakMap<readonly N[], ReturnType<typeof content>>();
+
+  function content(roots: readonly N[]) {
+    const nodes: Block[] = [];
+    const decorations = new Map<number, Context>();
+
+    function visit(node: N, inherited: Context) {
+      if (policy.isBlock(node)) {
+        nodes.push(node);
+        decorations.set(node.id, inherited);
+      } else {
+        schema
+          .children(node)
+          .forEach((child, index) => visit(child, policy.child(node, index, inherited)));
+      }
+    }
+
+    roots.forEach((node) => visit(node, policy.initial));
+    const projection = { nodes, decorations };
     const tree = indexTree(schema, roots);
     const context = selectionContext(schema, roots, tree);
     const nodeIndexes = new Map(projection.nodes.map((node, index) => [node.id, index]));
 
-    return { projection, tree, context, nodeIndexes };
+    /** An atomic rendered container owns the geometry of all its descendants. */
+    function blockFor(id: number): Block | undefined {
+      let entry = tree.byId.get(id);
+
+      while (entry) {
+        const index = nodeIndexes.get(entry.node.id);
+
+        if (index !== undefined) return nodes[index];
+        entry = entry.parent === null ? undefined : tree.byId.get(entry.parent);
+      }
+
+      return undefined;
+    }
+
+    return { projection, tree, context, nodeIndexes, blockFor };
   }
 
-  function projectState(editorState: EditorState<StarterNode>) {
+  function projectState(editorState: EditorState<N>) {
     let current = contents.get(editorState.nodes);
 
     if (!current) {
@@ -29,7 +64,7 @@ export function createStarterDocumentQuery(schema: Schema<StarterNode>) {
     const { nodes } = projection;
     const view = selectionView(schema, editorState.selection, context, nodeIndexes);
     const active = view.focusId === null ? undefined : tree.byId.get(view.focusId)?.node;
-    const selectedBlocks: StarterNode[] = [];
+    const selectedBlocks: N[] = [];
     const seen = new Set<number>();
 
     function include(id: number) {
@@ -73,8 +108,6 @@ export function createStarterDocumentQuery(schema: Schema<StarterNode>) {
           include(range.id);
       }
 
-    const blockLabel = selectedBlockLabel(schema, editorState, tree);
-
     return {
       ...view,
       editorState,
@@ -85,15 +118,15 @@ export function createStarterDocumentQuery(schema: Schema<StarterNode>) {
       nodeIndexes,
       active,
       selectedBlocks,
-      blockLabel,
+      blockFor: current.blockFor,
     };
   }
 
   // Toolbar queries often ask about every selected block. Cache the selection
   // projection as well as the tree so repeated queries stay linear in selection size.
-  const snapshots = new WeakMap<EditorState<StarterNode>, ReturnType<typeof projectState>>();
+  const snapshots = new WeakMap<EditorState<N>, ReturnType<typeof projectState>>();
 
-  return (state: EditorState<StarterNode>) => {
+  return (state: EditorState<N>) => {
     let snapshot = snapshots.get(state);
 
     if (!snapshot) {
@@ -104,5 +137,3 @@ export function createStarterDocumentQuery(schema: Schema<StarterNode>) {
     return snapshot;
   };
 }
-
-export type EditorDocument = ReturnType<ReturnType<typeof createStarterDocumentQuery>>;

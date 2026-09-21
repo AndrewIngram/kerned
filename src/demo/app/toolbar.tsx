@@ -2,7 +2,7 @@ import { useEffect, type RefObject } from 'react';
 
 import { FindIcon } from '../../demo/find-bar';
 import { bookSamples, type EditorSample } from '../../editor-samples';
-import type { EditorDocument } from '../../extensions/starter-kit/document';
+import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 import type { EditorControls } from './editor-controls';
 

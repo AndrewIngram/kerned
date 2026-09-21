@@ -8,7 +8,7 @@ import { TextSelection } from '../../state';
 import type { TextFormat } from '../formatting';
 import { tableCells } from '../table';
 import { plainCellRectangle } from '../table-clipboard';
-import { createStarterDocumentQuery } from './document';
+import { createStarterDocumentQuery } from './browser-document';
 import type { TableFrame } from './table-view';
 import type { EditorSession } from './types';
 

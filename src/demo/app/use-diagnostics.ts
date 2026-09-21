@@ -2,6 +2,7 @@ import { type CanvasKit } from 'canvaskit-wasm';
 import { useEffect, type RefObject } from 'react';
 
 import type { CanvasDiagnostics } from '../../editor-canvas/canvas-renderer';
+import type { DocumentLayout } from '../../editor-canvas/document-layout';
 import { benchmarkContainerEdits, checkContainers } from '../../editor-container-checks';
 import { checkExtensions } from '../../editor-extension-checks';
 import { checkReflow } from '../../editor-reflow-checks';
@@ -11,7 +12,6 @@ import { commentDecorations, createCommentStore } from '../../extensions/comment
 import type { StarterLeaf } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { importHtml } from '../../extensions/html';
-import type { DocumentLayout } from '../../extensions/starter-kit/document-layout';
 import type { EditorSession, Owned } from '../../extensions/starter-kit/types';
 import { parseAnchor } from '../../model';
 import { checkInline } from '../../owned-inline-checks';
@@ -33,7 +33,7 @@ type DiagnosticsOptions = {
   findRef: RefObject<FindState>;
   kit: CanvasKit;
   current: RefObject<{ nodes: StarterLeaf[]; selection: Selection; width: number }>;
-  layoutDiagnostics: DocumentLayout['diagnostics'];
+  layoutDiagnostics: DocumentLayout<StarterLeaf>['diagnostics'];
   paused: StreamState['paused'];
   metrics: StreamState['metrics'];
   owned: Owned;

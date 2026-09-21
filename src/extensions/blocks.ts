@@ -8,7 +8,7 @@ import {
 } from '../state';
 import { type Step } from '../transform';
 import { createBlockCommands } from './block-commands';
-import type { StarterNode, StarterLeaf } from './demo-model';
+import type { StarterNode } from './demo-model';
 import { createListCommands, type ListAdapter } from './lists';
 import { quote, list, listItem, table } from './starter-definitions';
 
@@ -21,56 +21,6 @@ const starterList: ListAdapter<StarterNode> = {
 };
 
 export const listCommands = createListCommands(starterList);
-
-export type BlockDecoration = {
-  inset: number;
-  quotes: readonly { id: number; inset: number }[];
-  marker: string;
-};
-
-export function projectBlocks(roots: readonly StarterNode[]) {
-  const nodes: StarterLeaf[] = [],
-    decorations = new Map<number, BlockDecoration>();
-
-  function visit(
-    node: StarterNode,
-    inset: number,
-    quotes: readonly { id: number; inset: number }[],
-    marker = '',
-  ) {
-    if (node.kind === 'quote') {
-      node.children.forEach((child) =>
-        visit(child, inset + 24, [...quotes, { id: node.id, inset }]),
-      );
-
-      return;
-    }
-
-    if (node.kind === 'list') {
-      node.children.forEach((child, index) =>
-        visit(child, inset + 28, quotes, node.ordered ? `${node.start + index}.` : '•'),
-      );
-
-      return;
-    }
-
-    if (node.kind === 'listItem') {
-      node.children.forEach((child, index) =>
-        visit(child, inset, quotes, index === 0 ? marker : ''),
-      );
-
-      return;
-    }
-
-    if (node.kind === 'tableCell') throw new Error('Table cells must belong to a table');
-    nodes.push(node);
-    decorations.set(node.id, { inset, quotes, marker });
-  }
-
-  roots.forEach((node) => visit(node, 0, []));
-
-  return { nodes, decorations };
-}
 
 export const blockCommands = createBlockCommands<StarterNode>({
   list: starterList,

@@ -5,7 +5,7 @@ import { createSchema } from '../../../model';
 import { textSelection } from '../../../state';
 import { createSampleDocument } from '../../demo-model';
 import { tableCells } from '../../table';
-import { createStarterDocumentQuery } from '../document';
+import { createStarterDocumentQuery } from '../browser-document';
 import { starterExtensions } from '../index';
 import { createTableView, type TableFrame } from '../table-view';
 

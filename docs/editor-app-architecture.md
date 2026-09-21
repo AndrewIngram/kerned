@@ -12,10 +12,10 @@ remaining complete-view and package migration; this page describes current code.
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication                        |
 | `src/core`                                | Composed headless session, named commands/queries, typed adapter contributions, extension lifetime and view attachment |
-| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                                        |
+| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy, keyboard navigation and generic document projection           |
 | `src/editor-react`                        | Optional subscriptions and attachment adapters for input, painting and viewport observation                            |
-| `src/editor-canvas`                       | Framework-independent asset lifetime, surfaces, painters, selection/highlight/caret drawing and frame scheduling       |
-| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering                 |
+| `src/editor-canvas`                       | Framework-independent asset lifetime, scene layout, reflow, surfaces, painters and frame scheduling                    |
+| `src/extensions/starter-kit`              | Standard schema/commands, container presentation, toolbar labels and native block rendering                            |
 | `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                                    |
 
 The headless modules import neither React nor browser code. Browser and canvas
@@ -27,8 +27,8 @@ benchmark fixtures. Project dependency checks enforce these rules.
 
 ```text
 native event -> browser/input adapter -> named session command
-  -> state transaction and publication -> createStarterDocumentQuery
-  -> document layout controller -> canvas controller and native block layer
+  -> state transaction and publication -> shared document query + starter labels
+  -> generic document layout controller -> canvas controller and native block layer
 ```
 
 Toolbar, native input and programmatic calls share named session commands.
@@ -73,7 +73,12 @@ frames. Neither depends on paragraph or heading names.
   to snapshots and acknowledges
   their DOM placement before scroll anchoring. Pending anchor adjustments survive
   multiple publications; live user scrolls take precedence. Document projection
-  shares one indexed snapshot across toolbar queries.
+  shares one indexed snapshot across toolbar queries. `editor-browser/document.ts`
+  walks schema-defined children, maps selections to rendered blocks and resolves
+  a nested position's rendered owner. The starter `browser-document.ts` adds
+  list/quote decoration context and toolbar labels. The generic layout controller
+  takes pinned positions and top padding rather than search/comment panel state.
+  Its React attachment lives in `editor-react/use-document-layout.ts`.
 - The viewport controller owns native measurement, zoom and scrolling. A scroll
   command publishes the actual clamped position immediately; callers do not
   synchronize a separate React scroll state. Repeated native events preserve

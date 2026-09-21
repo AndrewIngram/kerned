@@ -2,12 +2,16 @@ import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 
 import { createEditor } from '../../../core';
+import {
+  createDocumentLayout,
+  type DocumentLayoutFrame,
+} from '../../../editor-canvas/document-layout';
 import { createOwnedEngine } from '../../../owned-layout';
 import { textSelection } from '../../../state';
 import type { StarterNode, TextBlockNode } from '../../demo-model';
 import { demoSchema } from '../../demo-schema';
-import { createStarterDocumentQuery } from '../document';
-import { createDocumentLayout, type DocumentLayoutFrame } from '../document-layout';
+import { createStarterDocumentQuery } from '../browser-document';
+import { createStarterPresentation } from '../presentation';
 
 let kit: CanvasKit;
 
@@ -39,7 +43,7 @@ async function fixture(nodes: StarterNode[]) {
 
   const controller = createDocumentLayout({
     owned,
-    size: 20,
+    present: createStarterPresentation(20),
     source: {
       getSnapshot: () => project(editor.state),
       subscribe: editor.subscribe,
@@ -63,10 +67,8 @@ async function fixture(nodes: StarterNode[]) {
         host.scrollTop = top;
       },
     },
-    panelId: undefined,
-    focusedWidget: null,
-    findBlockId: undefined,
-    findOpen: false,
+    pinned: [],
+    paddingTop: 0,
     eager: false,
     retainAll: false,
     onLayout: (result) => {
@@ -136,7 +138,7 @@ test('publishes caret and culled geometry without React and ignores callback-onl
     expect(publications).toBe(beforeSelection + 1);
     expect(callbackCalls).toBe(1);
     expect(f.controller.getSnapshot().activePlacement?.node.id).toBe(80);
-    f.controller.update(f.frame({ panelId: 90, focusedWidget: 95, findBlockId: 98 }));
+    f.controller.update(f.frame({ pinned: [90, 95, 98] }));
     const pinned = f.controller.getSnapshot();
     expect(pinned.activePlacement?.node.id).toBe(80);
     expect(pinned.caret).toEqual(pinned.activePlacement?.layout?.geometry(10, 10, false).caret);
@@ -252,7 +254,7 @@ test('successive unpublished layouts preserve the pending anchor but do not undo
     f.controller.update({
       ...f.frame(),
       viewport: { ...narrow.viewport, width: 300 },
-      findOpen: true,
+      paddingTop: 56,
     });
     const latest = f.controller.getSnapshot();
     expect(latest.top - latest.scene.placements[60].y).toBeCloseTo(5);

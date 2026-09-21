@@ -1573,3 +1573,47 @@ contracts, complete public mount, geometry queries and removal of kit/owned from
 the demo remain required before the milestone judge. Configurable presentation
 and font resolution remain milestone 5 work; this extraction does not claim they
 are implemented.
+
+### Milestone 4 checkpoint: generic document projection and layout
+
+Moved schema traversal, indexed selection queries and immutable snapshot caching
+into `editor-browser/document.ts`. A projection policy chooses rendered blocks
+and inherited container context. The starter adapter in
+`extensions/starter-kit/browser-document.ts` supplies list markers, quote
+indentation and toolbar labels. Headless block commands no longer own view
+projection. Nested text positions resolve to their rendered owner through
+`blockFor`, including native widgets and blocks whose identity is zero.
+
+Moved the layout controller into `editor-canvas/document-layout.ts` and its React
+attachment into `editor-react/use-document-layout.ts`. Both preserve the caller's
+node type and accept a presentation callback. The controller takes pinned
+positions and document padding; search panels, comments and focused-widget state
+remain with their callers. It resolves selected descendants to rendered owners
+for geometry residency and mounted blocks, keeping an offscreen widget available
+while its child owns the selection.
+
+Foreign-schema tests cover custom text fields, nested flowing containers, atomic
+containers, forward/backward selections, selection-only cache reuse, edits,
+streamed appends, real shaped caret geometry, measurements and controller
+teardown. The full parallel check passes with 409 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. The production build passes.
+
+The parallel gate exposed another issue in legacy unit tests: lazy fixture
+imports could consume the first test's entire timeout before assertions ran.
+Isolated suites passed; temporary probes confirmed failures before imports
+completed. Commit `f6c1e29` moves those imports to module setup in eight unit
+suites. It preserves their assertions, the five-second test timeout and the
+original parallel check configuration. A second lint-fix and format pass left
+files unchanged.
+
+All nine large-document cases and all nine reflow cases pass across Chromium,
+Firefox and WebKit. Three serial production trials pass every unchanged budget:
+worst first usable 179 ms, streaming 1,039.6 ms, paste handler 55.8 ms, paste to
+paint 119.8 ms, typing 32.4 ms, paging 32.5 ms and loaded heap 29,266,252 bytes.
+Evidence is stored in `artifacts/public-interface-m4/document-projection/`; the
+reports identify `f6c1e29` and measure this checkpoint's uncommitted tree.
+
+Milestone 4 remains open. The complete public mount still needs to compose these
+controllers with extension-owned input and presentation contributions, expose
+supported geometry queries and remove kit/owned from the demo. The architecture
+judge follows completion of that milestone, not this intermediate extraction.

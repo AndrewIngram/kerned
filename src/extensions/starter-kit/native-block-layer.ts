@@ -1,11 +1,11 @@
 import type { BrowserViewOptions } from '../../editor-browser';
 import { createNodeViews, type NodeView } from '../../editor-browser/node-views';
 import type { RegisterCanvasPainter } from '../../editor-canvas/canvas-renderer';
+import type { DocumentLayout, DocumentLayoutSnapshot } from '../../editor-canvas/document-layout';
 import { createTextLabels } from '../../editor-canvas/text-labels';
 import type { FindState, Selection } from '../../state';
-import type { StarterNode } from '../demo-model';
-import type { EditorDocument } from './document';
-import type { DocumentLayout, DocumentLayoutSnapshot } from './document-layout';
+import type { StarterNode, StarterLeaf } from '../demo-model';
+import type { EditorDocument } from './browser-document';
 import type { createStarterKitInput } from './input';
 import { createTableView } from './table-view';
 import { createTextBlockView, type CommentHighlight } from './text-block-view';
@@ -15,7 +15,7 @@ export type BlockLayerFrame = {
   doc: EditorDocument;
   tableInput: ReturnType<typeof createStarterKitInput>['table'];
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
-  layout: DocumentLayoutSnapshot & { onMeasure: DocumentLayout['measure'] };
+  layout: DocumentLayoutSnapshot<StarterLeaf> & { onMeasure: DocumentLayout['measure'] };
   viewport: { width: number; zoom: number };
   nodeComments: ReadonlyMap<number, readonly string[]>;
   commentsByNode: ReadonlyMap<number, CommentHighlight[]>;
