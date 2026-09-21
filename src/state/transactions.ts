@@ -18,7 +18,13 @@ import {
   type DocumentChange,
   type Step,
 } from '../transform';
-import { createCommandChain, type CommandDefinition, type CommandState } from './commands';
+import {
+  createCommandChain,
+  type CommandDefinition,
+  type CommandState,
+  type CommandOptions,
+} from './commands';
+import { createEditorEvents, type EditorEvents } from './events';
 import type { StateFieldRegistration, ExtensionUpdate } from './extension-state';
 import { createFind } from './find';
 import { assertEditAllowed, assertContentEditAllowed, type AccessPolicy } from './permissions';
@@ -147,7 +153,8 @@ export function applyTransaction<N extends NodeIdentity>(
     const node = tree.byId.get(selection.head.id)?.node,
       adapter = node ? schema.editing(node).marks : undefined;
 
-    if (!node || !adapter) throw new Error('Text does not support marks');
+    if (!node || (!adapter && tx.storedMarks?.length))
+      throw new Error('Text does not support marks');
 
     if (permissions)
       assertContentEditAllowed(
@@ -164,7 +171,9 @@ export function applyTransaction<N extends NodeIdentity>(
       );
 
     const checked =
-      tx.storedMarks === null ? null : (adapter.validate?.(tx.storedMarks) ?? tx.storedMarks);
+      tx.storedMarks === null || !adapter
+        ? null
+        : (adapter.validate?.(tx.storedMarks) ?? tx.storedMarks);
 
     if (checked && new Set(checked.map((mark) => mark.type)).size !== checked.length)
       throw new Error('Duplicate stored mark type');
@@ -181,16 +190,6 @@ export function applyTransaction<N extends NodeIdentity>(
     changedIds,
     positionMapping: { before: state, after: next, maps },
   };
-}
-
-function notifyListener(listener: () => void) {
-  try {
-    listener();
-  } catch (error) {
-    queueMicrotask(() => {
-      throw error;
-    });
-  }
 }
 
 /** Local history only. A collaboration adapter must rebase operations and history;
@@ -221,7 +220,12 @@ export function createEditor<N extends NodeIdentity>(
   for (const field of fields) field.initialize(state);
 
   let preparing = false,
-    publishing = false;
+    publishing = false,
+    destroyed = false;
+
+  function assertActive() {
+    if (destroyed) throw new Error('Editor is destroyed');
+  }
 
   function prepareFields(event: ExtensionUpdate<N>) {
     if (preparing) throw new Error('Extension reducers cannot change editor state');
@@ -235,6 +239,8 @@ export function createEditor<N extends NodeIdentity>(
   }
 
   function assertWritable() {
+    assertActive();
+
     if (preparing) throw new Error('Extension reducers cannot change editor state');
 
     if (publishing) throw new Error('Editor subscribers cannot change state during publication');
@@ -251,20 +257,13 @@ export function createEditor<N extends NodeIdentity>(
 
   let allocationNodes: readonly N[] | undefined;
   let occupiedIds: ReadonlySet<number> = new Set();
-  const listeners = new Set<() => void>();
-  const updateListeners = new Set<(update: ExtensionUpdate<N>) => void>();
+  const events = createEditorEvents<N>();
 
   function notify(update: ExtensionUpdate<N>) {
-    // Snapshot both channels before callbacks. Semantic updates precede view invalidation.
-    const updates = [...updateListeners],
-      pending = [...listeners];
-
     publishing = true;
 
     try {
-      for (const listener of updates) notifyListener(() => listener(update));
-
-      for (const listener of pending) notifyListener(listener);
+      events.publish(update);
     } finally {
       publishing = false;
     }
@@ -355,27 +354,40 @@ export function createEditor<N extends NodeIdentity>(
     get state() {
       return state;
     },
-    /** Runs after atomic publication and before view subscriptions. Dispatch from
-     * a subscriber is rejected; schedule a subsequent edit after publication. */
-    onUpdate(listener: (update: ExtensionUpdate<N>) => void) {
-      updateListeners.add(listener);
+    get isDestroyed() {
+      return destroyed;
+    },
+    /** Idempotent. The final snapshot remains readable, but all writes and subscriptions stop. */
+    destroy() {
+      if (destroyed) return;
+      assertWritable();
+      destroyed = true;
+      past.length = 0;
+      future.length = 0;
+      journal.length = 0;
+      allocationNodes = undefined;
+      occupiedIds = new Set();
+      events.destroy(state);
+    },
+    on<Key extends keyof EditorEvents<N>>(
+      this: void,
+      name: Key,
+      listener: (event: EditorEvents<N>[Key]) => void,
+    ) {
+      assertActive();
 
-      return () => {
-        updateListeners.delete(listener);
-      };
+      return events.on(name, listener);
     },
     subscribe(listener: () => void) {
-      listeners.add(listener);
+      assertActive();
 
-      return () => {
-        listeners.delete(listener);
-      };
+      return events.subscribe(listener);
     },
-    chain() {
-      return createCommandChain(commandHost());
+    chain(commandOptions?: CommandOptions) {
+      return createCommandChain(commandHost(), false, commandOptions);
     },
-    can() {
-      return createCommandChain(commandHost(), true);
+    can(commandOptions?: CommandOptions) {
+      return createCommandChain(commandHost(), true, commandOptions);
     },
     commandState<Args extends unknown[]>(
       command: CommandDefinition<N, Args>,
@@ -467,7 +479,8 @@ export function createEditor<N extends NodeIdentity>(
         throw new Error('Stored marks require a caret');
       const node = indexTree(schema, state.nodes).byId.get(selectionValue.head.id)?.node;
 
-      if (!node || !schema.editing(node).marks) throw new Error('Text does not support marks');
+      if (!node || (!schema.editing(node).marks && marks?.length))
+        throw new Error('Text does not support marks');
       const adapter = schema.editing(node).marks;
 
       if (options.permissions)
@@ -483,7 +496,7 @@ export function createEditor<N extends NodeIdentity>(
           },
           options.permissions,
         );
-      const checked = marks === null ? null : (adapter?.validate?.(marks) ?? marks);
+      const checked = marks === null || !adapter ? null : (adapter.validate?.(marks) ?? marks);
 
       if (checked && new Set(checked.map((mark) => mark.type)).size !== checked.length)
         throw new Error('Duplicate stored mark type');
@@ -564,6 +577,7 @@ export function createEditor<N extends NodeIdentity>(
   };
 
   function commandHost() {
+    assertActive();
     const base = state;
 
     const drafts = new WeakMap<
@@ -577,6 +591,7 @@ export function createEditor<N extends NodeIdentity>(
 
     return {
       schema,
+      assertActive,
       nodeIds: (draft: EditorState<N>) => indexTree(schema, draft.nodes).byId.keys(),
       get state() {
         return state;

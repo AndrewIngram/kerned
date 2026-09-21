@@ -771,3 +771,52 @@ This is an implementation checkpoint, not milestone 3 completion. The milestone
 judge must review all work since the milestone 2 reviewed baseline `c3cdf8b`,
 including this checkpoint and the remaining implementation, after milestone 3's
 full exit criteria are met.
+
+### Milestone 3 native input drafts and session events
+
+Native input now publishes through `editor.transact`, with history group/time
+options shared by named chains and dry runs. Input edits capture marks from the
+current draft and store them on individual replacement operations. A chain can
+change formatting between insertions, replay the published transaction into a
+second session, and retain identical formatting through undo/redo. Plain text
+nodes accept unmarked input without requiring a mark adapter. Unsupported
+explicit marks reject atomically. Native split/delete policy construction still
+needs migration from browser handlers into extension contributions.
+
+`editor.on(name, listener)` replaces the narrower `onUpdate` interface. Typed
+channels distinguish transaction/mapping updates, content changes, selection
+changes and destruction. All channel listeners are snapshotted before callbacks;
+semantic publication precedes view invalidation. Availability queries remain
+usable during publication, but recursive edits and destruction are rejected.
+Persistence listeners can subscribe to content without receiving caret changes.
+
+Session `destroy()` is idempotent, clears subscriptions/history/journal, and
+rejects future editing, new subscriptions, dry runs and already-prepared command
+chains. The final snapshot and pure queries remain readable. Destroying one
+session leaves another session using the same schema independent. The mounted
+view and extension resource cleanup still need integration with this lifecycle.
+
+The full check and production build passed with **206 Vitest tests, one unchanged
+convergence todo, and all 39 Playwright scenarios**. Tests exercise per-operation
+mark replay, history grouping and preview metadata, public event ordering and
+snapshot listeners, availability during publication, terminal disposal and
+session independence. No lint or test configuration was relaxed.
+
+The input-command performance checkpoint passed every unchanged budget over
+three production trials (`artifacts/public-interface-m3/input-commands/baseline.json`):
+first usable 200ms, complete stream 1067ms, paste handler 55ms, paste paint 112ms,
+typing 29.4ms, paging 32.5ms, loaded heap 28,983,452 bytes. Reports identify
+`93a25b5` and measure the uncommitted input-command implementation.
+
+This remains an intermediate milestone 3 checkpoint. Deferred view effects,
+history provider ownership, fully portable starter command arguments, remaining
+native command contributions and public snapshot contracts still need work.
+The milestone judge must review the complete change since `c3cdf8b` after those
+exit requirements are met.
+
+Final production trials with session events also pass every unchanged budget
+(`artifacts/public-interface-m3/session-events/baseline.json`): first usable
+175ms, complete stream 1078.6ms, paste handler 56ms, paste paint 115.2ms, typing
+29.6ms, paging 32.6ms, loaded heap 28,966,720 bytes. These reports identify
+`93a25b5` and measure this checkpoint before commit. A second lint-fix/format
+pass changed no files.

@@ -17,7 +17,11 @@ export function markInsertedText<N extends NodeIdentity>(
   if (!length) return node;
   const extension = schema.resolve(node);
 
-  if (extension.kind !== 'text' || !extension.editing.marks) return node;
+  if (extension.kind !== 'text' || !extension.editing.marks) {
+    if (marks.length) throw new Error('Text does not support marks');
+
+    return node;
+  }
 
   const adapter = extension.editing.marks,
     stops = boundaries(extension.editing.text(node));

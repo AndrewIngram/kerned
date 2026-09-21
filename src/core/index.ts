@@ -13,6 +13,7 @@ export {
   type Command,
   type CommandContext,
   type CommandEdit,
+  type CommandOptions,
   type ReadContext,
   type CommandDefinition,
 } from '../state';
@@ -20,3 +21,5 @@ export {
 export { selectedValue, type SelectedValue } from './queries';
 
 export { defineCommand, defineQuery } from './definitions';
+
+export type { EditorEvents } from '../state';

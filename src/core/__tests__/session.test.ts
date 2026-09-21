@@ -78,6 +78,71 @@ function session() {
   return createEditor({ schema, content: [{ kind: 'note', text: 'A' }] });
 }
 
+test('public named chains accept history options without changing dry-run state', () => {
+  const editor = session();
+  const options = { history: { group: 'typing:note' }, time: 100 };
+  expect(editor.chain(options).append('B').run()).toBe(true);
+  const before = editor.state;
+  expect(
+    editor
+      .can()
+      .chain({ ...options, time: 200 })
+      .append('C')
+      .run(),
+  ).toBe(true);
+  expect(editor.state).toBe(before);
+  expect(
+    editor
+      .chain({ ...options, time: 200 })
+      .append('C')
+      .run(),
+  ).toBe(true);
+  expect(editor.history.undo).toBe(1);
+  expect(editor.undo()).toBe(true);
+  expect(editor.state.nodes[0].text).toBe('A');
+});
+
+test('input edits support unformatted text and reject unsupported explicit marks atomically', () => {
+  const editor = session();
+  const node = editor.state.nodes[0];
+  editor.select(textSelection(node.id, 1));
+  expect(
+    editor.transact((context) => {
+      context.apply({
+        input: true,
+        steps: [{ kind: 'replaceText', id: node.id, from: 1, to: 1, text: 'B' }],
+        selection: textSelection(node.id, 2),
+      });
+
+      return true;
+    }),
+  ).toBe(true);
+  expect(editor.state.nodes[0].text).toBe('AB');
+  expect(editor.state.storedMarks).toBeNull();
+  const before = editor.state;
+  expect(() =>
+    editor.transact((context) => {
+      context.apply({
+        input: true,
+        steps: [
+          {
+            kind: 'replaceText',
+            id: node.id,
+            from: 2,
+            to: 2,
+            text: 'C',
+            marks: [{ type: 'bold', attrs: null }],
+          },
+        ],
+        selection: textSelection(node.id, 3),
+      });
+
+      return true;
+    }),
+  ).toThrow(/does not support marks/);
+  expect(editor.state).toBe(before);
+});
+
 test('one assembly supplies content, named commands, chains and dry runs with inferred arguments', () => {
   const editor = session();
   const initial = editor.state;
@@ -395,4 +460,129 @@ test('node, mark and inline definitions own typed contributions through configur
   expect(second.queries.edits()).toBe(0);
   expect(first.queries.emphasisLabel()).toBe('Strong');
   expect(first.queries.mentionPrefix()).toBe('#');
+});
+
+test('typed events separate persistence from selection and publish before view invalidation', () => {
+  const editor = session();
+  const node = editor.state.nodes[0];
+  const observed: string[] = [];
+  editor.on('update', (event) => {
+    expect(editor.state).toBe(event.after);
+    expect(() => editor.destroy()).toThrow(/during publication/);
+    expect(editor.getCommandState('append', '!').available).toBe(true);
+    expect(editor.can().append('!')).toBe(true);
+    observed.push(`update:${event.kind}`);
+  });
+  editor.on('transaction', (event) => {
+    expect(event.mapping.after).toBe(editor.state);
+    observed.push(`transaction:${event.kind}`);
+  });
+  editor.on('content', (event) => observed.push(`content:${event.kind}`));
+  editor.on('selection', () => observed.push('selection'));
+  editor.subscribe(() => observed.push('view'));
+  editor.select(textSelection(node.id, 1));
+  expect(observed).toEqual(['update:selection', 'selection', 'view']);
+  observed.length = 0;
+  editor.select(textSelection(node.id, 1));
+  expect(observed).toEqual(['update:selection', 'view']);
+  observed.length = 0;
+  editor.commands.append('B');
+  expect(observed).toEqual([
+    'update:transaction',
+    'transaction:transaction',
+    'content:transaction',
+    'selection',
+    'view',
+  ]);
+  observed.length = 0;
+  editor.undo();
+  expect(observed).toEqual([
+    'update:undo',
+    'transaction:undo',
+    'content:undo',
+    'selection',
+    'view',
+  ]);
+  observed.length = 0;
+  editor.redo();
+  expect(observed).toEqual([
+    'update:redo',
+    'transaction:redo',
+    'content:redo',
+    'selection',
+    'view',
+  ]);
+  observed.length = 0;
+  editor.dispatch({
+    baseRevision: editor.state.revision,
+    origin: 'local',
+    history: 'separate',
+    time: 100,
+    steps: [],
+    selection: textSelection(node.id, 0),
+  });
+  expect(observed).toEqual(['update:transaction', 'transaction:transaction', 'selection', 'view']);
+});
+
+test('content listeners are snapshotted with all other channels, and dry runs publish nothing', () => {
+  const editor = session();
+  const observed: string[] = [];
+  const stopContent = editor.on('content', () => observed.push('existing'));
+
+  const stopUpdate = editor.on('update', () => {
+    stopContent();
+    editor.on('content', () => observed.push('new'));
+  });
+
+  const stopView = editor.subscribe(() => observed.push('view'));
+  expect(editor.can().append('B')).toBe(true);
+  expect(observed).toEqual([]);
+  editor.commands.append('B');
+  expect(observed).toEqual(['existing', 'view']);
+  stopUpdate();
+  stopUpdate();
+  stopView();
+  observed.length = 0;
+  editor.commands.append('C');
+  expect(observed).toEqual(['new']);
+});
+
+test('destroy is terminal and idempotent, retaining a readable final snapshot', () => {
+  const editor = session();
+  const other = session();
+  editor.commands.append('B');
+  const final = editor.state;
+  const staleCommand = editor.commands.append;
+  const pending = editor.chain().append('discard');
+  const pendingDryRun = editor.can().chain().append('discard');
+  const observed: string[] = [];
+  const stopView = editor.subscribe(() => observed.push('view'));
+  editor.on('content', () => observed.push('content'));
+  editor.on('destroy', ({ state }) => {
+    expect(state).toBe(final);
+    expect(editor.isDestroyed).toBe(true);
+    expect(() => editor.select(state.selection)).toThrow(/destroyed/);
+    editor.destroy();
+    observed.push('destroy');
+  });
+  editor.destroy();
+  editor.destroy();
+  stopView();
+  stopView();
+  expect(observed).toEqual(['destroy']);
+  expect(editor.state).toBe(final);
+  expect(editor.queries.textLengths()).toEqual({ kind: 'uniform', value: 2 });
+  expect(editor.history).toEqual({ undo: 0, redo: 0 });
+  expect(() => staleCommand('C')).toThrow(/destroyed/);
+  expect(() => pending.run()).toThrow(/destroyed/);
+  expect(() => pendingDryRun.run()).toThrow(/destroyed/);
+  expect(() => editor.transact(() => true)).toThrow(/destroyed/);
+  expect(() => editor.can().append('C')).toThrow(/destroyed/);
+  expect(() => editor.undo()).toThrow(/destroyed/);
+  expect(() => editor.redo()).toThrow(/destroyed/);
+  expect(() => editor.subscribe(() => undefined)).toThrow(/destroyed/);
+  expect(() => editor.on('content', () => undefined)).toThrow(/destroyed/);
+  expect(editor.state).toBe(final);
+  expect(other.isDestroyed).toBe(false);
+  expect(other.commands.append('C')).toBe(true);
 });

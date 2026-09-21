@@ -13,9 +13,10 @@ import {
   selectionNear,
   type EditorOptions,
   type EditorState,
-  type ExtensionUpdate,
+  type EditorEvents,
   type Transaction,
   type Command,
+  type CommandOptions,
   type Selection,
   type SelectionExtension,
 } from '../state';
@@ -109,9 +110,9 @@ export type Editor<D extends readonly SchemaDefinition[], N extends NodeIdentity
   readonly commands: DirectCommands<Installed<D, 'commands'>>;
   readonly queries: NamedQueries<Installed<D, 'queries'>>;
   readonly getCommandState: CommandStateQuery<Installed<D, 'commands'>>;
-  chain(): NamedChain<Installed<D, 'commands'>>;
+  chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'>>;
   can(): DirectCommands<Installed<D, 'commands'>> & {
-    chain(): NamedChain<Installed<D, 'commands'>>;
+    chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'>>;
   };
   dispatch(transaction: Transaction<N>): ReturnType<StateSession<N>['dispatch']>;
   readonly positions: StateSession<N>['positions'];
@@ -121,12 +122,17 @@ export type Editor<D extends readonly SchemaDefinition[], N extends NodeIdentity
   allocateBlockId(): number;
   selectionEdit(text: string): ReturnType<StateSession<N>['selectionEdit']>;
   setStoredMarks: StateSession<N>['setStoredMarks'];
-  transact(command: Command<N>): boolean;
+  transact(command: Command<N>, options?: CommandOptions): boolean;
   select(this: void, selection: Selection): void;
   undo(): boolean;
   redo(): boolean;
   subscribe(this: void, listener: () => void): () => void;
-  onUpdate(listener: (update: ExtensionUpdate<N>) => void): () => void;
+  on<Key extends keyof EditorEvents<N>>(
+    name: Key,
+    listener: (event: EditorEvents<N>[Key]) => void,
+  ): () => void;
+  readonly isDestroyed: boolean;
+  destroy(): void;
 };
 
 /** Content and installed capabilities come from one compiled extension assembly. */
@@ -192,17 +198,21 @@ export function createEditor(
     dispatch: (transaction: Transaction<DocumentNode<readonly SchemaDefinition[]>>) => {
       return editor.dispatch(transaction);
     },
-    transact: (command: Command<DocumentNode<readonly SchemaDefinition[]>>) =>
-      editor.chain().command(command).run(),
+    transact: (
+      command: Command<DocumentNode<readonly SchemaDefinition[]>>,
+      options?: CommandOptions,
+    ) => editor.chain(options).command(command).run(),
     select: (selection: Selection) => {
       editor.select(selection);
     },
     undo: () => editor.undo() !== null,
     redo: () => editor.redo() !== null,
     subscribe: (listener: () => void) => editor.subscribe(listener),
-    onUpdate: (
-      listener: (update: ExtensionUpdate<DocumentNode<readonly SchemaDefinition[]>>) => void,
-    ) => editor.onUpdate(listener),
+    on: editor.on,
+    destroy: () => editor.destroy(),
+    get isDestroyed() {
+      return editor.isDestroyed;
+    },
     get state() {
       return editor.state;
     },
@@ -213,11 +223,14 @@ export function createEditor(
     commands: registry.direct(),
     getCommandState: registry.state,
     queries: queryRegistry(() => ({ state: editor.state, schema }), contributions),
-    chain() {
-      return registry.chain();
+    chain(options?: CommandOptions) {
+      return registry.chain(false, options);
     },
     can() {
-      return { ...registry.direct(true), chain: () => registry.chain(true) };
+      return {
+        ...registry.direct(true),
+        chain: (options?: CommandOptions) => registry.chain(true, options),
+      };
     },
   };
 }

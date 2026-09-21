@@ -2,7 +2,7 @@ import type { ClipboardFragment } from '../../extensions/clipboard';
 import type { StarterNode } from '../../extensions/demo-model';
 import type { TextFormat } from '../../extensions/formatting';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import type { Selection, Transaction } from '../../state';
+import { TextSelection, type Selection, type Transaction } from '../../state';
 import type { Step } from '../../transform';
 
 /** Demo feedback and focus wrap the editor's public commands; no document policy lives here. */
@@ -48,15 +48,26 @@ export function createEditorControls({
 
     try {
       onEdit();
-      editor.dispatch({
-        baseRevision: editor.state.revision,
-        origin: 'local',
-        history,
-        time: performance.now(),
-        steps,
-        selection,
-        input,
-      });
+
+      const applied = editor.transact(
+        (context) => {
+          if (input) {
+            if (!(selection instanceof TextSelection))
+              throw new Error('Text input requires a resulting caret');
+            context.apply({ steps, selection, input: true });
+          } else context.apply({ steps, selection });
+
+          return true;
+        },
+        { history, time: Date.now() },
+      );
+
+      if (!applied) {
+        syncInput();
+
+        return false;
+      }
+
       notice('');
 
       return true;

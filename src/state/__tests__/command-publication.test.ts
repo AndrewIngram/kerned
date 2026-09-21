@@ -6,6 +6,8 @@ import {
   createEditor,
   createStateField,
   textSelection,
+  TextSelection,
+  type Transaction,
   type Command,
   type ExtensionUpdate,
   type EditorOptions,
@@ -59,7 +61,7 @@ const append: Command<Note, [string]> = (context, text) => {
 test('nested commands share the current draft and publish one undoable edit', () => {
   const editor = session();
   const updates: ExtensionUpdate<Note>[] = [];
-  editor.onUpdate((update) => updates.push(update));
+  editor.on('update', (update) => updates.push(update));
 
   const twice: Command<Note, [string]> = (context, text) =>
     context.command(append, text) && context.command(append, text);
@@ -158,7 +160,7 @@ test('nested dry runs have no notifications, history or effects and enforce perm
   const editor = session();
   const initial = editor.state;
   const observed: string[] = [];
-  editor.onUpdate(() => observed.push('update'));
+  editor.on('update', () => observed.push('update'));
   editor.subscribe(() => observed.push('invalidate'));
 
   expect(
@@ -189,7 +191,7 @@ test('semantic updates precede invalidation and report selection, marks, history
   const observed: string[] = [];
   const updates: ExtensionUpdate<Note>[] = [];
 
-  editor.onUpdate((update) => {
+  editor.on('update', (update) => {
     expect(editor.state).toBe(update.after);
     expect(editor.state).not.toBe(update.before);
     updates.push(update);
@@ -226,7 +228,7 @@ test('subscriptions are snapshotted for publication and unsubscribe is idempoten
   const observed: string[] = [];
   const unsubscribe = editor.subscribe(() => observed.push('existing'));
 
-  const stopUpdate = editor.onUpdate(() => {
+  const stopUpdate = editor.on('update', () => {
     observed.push('update');
     unsubscribe();
     editor.subscribe(() => observed.push('new'));
@@ -254,7 +256,7 @@ test('both semantic and invalidation subscribers cannot recursively publish anot
     observed.push(current.nodes[0].text);
   }
 
-  const stopUpdate = editor.onUpdate(subscriber);
+  const stopUpdate = editor.on('update', subscriber);
   const stopInvalidate = editor.subscribe(subscriber);
   editor.chain().command(append, '?').run();
   expect(observed).toEqual(['A?', 'A?']);
@@ -377,4 +379,119 @@ test('stored mark commands preview the same field event and revision they publis
   expect(editor.state.storedMarks).toEqual([]);
   expect(editor.state.revision).toBe(initial.revision);
   expect(editor.history.undo).toBe(0);
+});
+
+const typeText: Command<Note, [string]> = (context, text) => {
+  const selection = context.state.selection;
+
+  if (!(selection instanceof TextSelection) || selection.anchor.id !== selection.head.id)
+    return false;
+  const from = Math.min(selection.anchor.offset, selection.head.offset);
+  const to = Math.max(selection.anchor.offset, selection.head.offset);
+  context.apply({
+    input: true,
+    steps: [{ kind: 'replaceText', id: selection.head.id, from, to, text }],
+    selection: textSelection(selection.head.id, from + text.length),
+  });
+
+  return true;
+};
+
+test('input records per-operation marks so mixed-format chains replay and undo exactly', () => {
+  const editor = session();
+  const bold = [{ type: 'bold', attrs: null }];
+  let transaction: Transaction<Note> | undefined;
+  editor.on('update', (event) => {
+    if (event.kind === 'transaction') transaction = event.transaction;
+  });
+  const initial = editor.state;
+  expect(
+    editor
+      .can()
+      .storedMarks(bold)
+      .command(typeText, 'B')
+      .storedMarks([])
+      .command(typeText, 'C')
+      .run(),
+  ).toBe(true);
+  expect(editor.state).toBe(initial);
+  expect(
+    editor
+      .chain()
+      .storedMarks(bold)
+      .command(typeText, 'B')
+      .storedMarks([])
+      .command(typeText, 'C')
+      .run(),
+  ).toBe(true);
+  expect(editor.state.nodes[0]).toMatchObject({
+    text: 'ABC',
+    marks: [{ from: 1, to: 2, mark: bold[0] }],
+  });
+  expect(editor.state.storedMarks).toEqual([]);
+
+  if (!transaction) throw new Error('Missing transaction');
+  expect(transaction.steps).toMatchObject([
+    { text: 'B', marks: bold },
+    { text: 'C', marks: [] },
+  ]);
+  const replay = session();
+  replay.dispatch(transaction);
+  expect(replay.state).toEqual(editor.state);
+  editor.undo();
+  expect(editor.state.nodes).toEqual(initial.nodes);
+  editor.redo();
+  expect(editor.state.nodes).toEqual(replay.state.nodes);
+});
+
+test('command history options group typing and publish identical draft and final metadata', () => {
+  const field = createStateField<Note, { group: string | null; time: number }>({
+    create: () => ({ group: null, time: -1 }),
+    update(value, event) {
+      if (event.kind !== 'transaction' || event.transaction.origin !== 'local') return value;
+
+      return {
+        group: event.transaction.history === 'separate' ? null : event.transaction.history.group,
+        time: event.transaction.time,
+      };
+    },
+  });
+
+  const editor = session({ fields: [field] });
+  expect(
+    editor
+      .chain({ history: { group: 'typing:one' }, time: 100 })
+      .command(typeText, 'B')
+      .run(),
+  ).toBe(true);
+  const initial = editor.state;
+  expect(
+    editor
+      .can({ history: { group: 'typing:one' }, time: 200 })
+      .command(typeText, 'C')
+      .run(),
+  ).toBe(true);
+  expect(editor.state).toBe(initial);
+  expect(
+    editor
+      .chain({ history: { group: 'typing:one' }, time: 200 })
+      .command(typeText, 'C')
+      .command((context) => {
+        expect(field.read(context.state)).toEqual({ group: 'typing:one', time: 200 });
+
+        return true;
+      })
+      .run(),
+  ).toBe(true);
+  expect(editor.history.undo).toBe(1);
+  expect(field.read(editor.state)).toEqual({ group: 'typing:one', time: 200 });
+  editor
+    .chain({ history: { group: 'typing:one' }, time: 1000 })
+    .command(typeText, 'D')
+    .run();
+  expect(editor.history.undo).toBe(2);
+  editor.undo();
+  expect(editor.state.nodes[0].text).toBe('ABC');
+  editor.undo();
+  expect(editor.state.nodes[0].text).toBe('A');
 });

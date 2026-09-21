@@ -298,7 +298,7 @@ export function applySteps<N extends NodeIdentity>(
           step.ranges,
           step.text,
           step.pruneEmpty,
-          options.insertedMarks,
+          step.marks ?? options.insertedMarks,
         ),
         after = treeFor(result.nodes);
 
@@ -418,8 +418,10 @@ export function applySteps<N extends NodeIdentity>(
         validateTextRange(editing.text(node), step.from, step.to);
         let next = editing.replace(node, step.from, step.to, step.text);
 
-        if (options.insertedMarks)
-          next = markInsertedText(schema, next, step.from, step.text.length, options.insertedMarks);
+        const insertedMarks = step.marks ?? options.insertedMarks;
+
+        if (insertedMarks)
+          next = markInsertedText(schema, next, step.from, step.text.length, insertedMarks);
 
         if (
           next.id !== node.id ||

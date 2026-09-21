@@ -1,7 +1,9 @@
 import type { Mark, NodeIdentity, Schema } from '../model';
 import type { Step } from '../transform';
 import { PermissionDenied } from './permissions';
+import { TextSelection } from './selection';
 import type { Selection } from './selection-base';
+import { inputMarks } from './stored-marks';
 import type { EditorState, Transaction } from './transactions';
 
 export type ReadContext<N extends NodeIdentity> = {
@@ -9,11 +11,21 @@ export type ReadContext<N extends NodeIdentity> = {
   readonly schema: Schema<N>;
 };
 
+export type CommandOptions = {
+  readonly history?: 'separate' | { group: string };
+  readonly time?: number;
+};
+
 export type CommandEdit<N extends NodeIdentity> = {
   readonly steps: readonly Step<N>[];
-  readonly selection?: Selection;
-  readonly storedMarks?: readonly Mark[] | null;
-};
+} & (
+  | { readonly input: true; readonly selection: TextSelection; readonly storedMarks?: never }
+  | {
+      readonly input?: false;
+      readonly selection?: Selection;
+      readonly storedMarks?: readonly Mark[] | null;
+    }
+);
 
 export type CommandContext<N extends NodeIdentity> = ReadContext<N> & {
   allocate(this: void): NodeIdentity;
@@ -62,6 +74,7 @@ export function commandActivity(values: Iterable<boolean>): CommandActivity {
 }
 
 type Host<N extends NodeIdentity> = {
+  assertActive(): void;
   readonly schema: Schema<N>;
   nodeIds(state: EditorState<N>): Iterable<number>;
   readonly state: EditorState<N>;
@@ -70,9 +83,17 @@ type Host<N extends NodeIdentity> = {
 };
 
 /** Commands see preceding commands' draft state; only run publishes one transaction. */
-export function createCommandChain<N extends NodeIdentity>(host: Host<N>, dryRun = false) {
+export function createCommandChain<N extends NodeIdentity>(
+  host: Host<N>,
+  dryRun = false,
+  options: CommandOptions = {},
+) {
   const initial = host.state,
-    time = Date.now(),
+    time = options.time ?? Date.now(),
+    history =
+      options.history && options.history !== 'separate'
+        ? { group: options.history.group }
+        : 'separate',
     steps: Step<N>[] = [],
     effects: (() => void)[] = [];
 
@@ -104,6 +125,8 @@ export function createCommandChain<N extends NodeIdentity>(host: Host<N>, dryRun
   }
 
   function open() {
+    host.assertActive();
+
     if (finished) throw new Error('Command chain already completed');
   }
 
@@ -124,21 +147,38 @@ export function createCommandChain<N extends NodeIdentity>(host: Host<N>, dryRun
       if (!enabled) return chain;
 
       try {
+        if (
+          edit.input &&
+          (edit.selection.anchor.id !== edit.selection.head.id ||
+            edit.selection.anchor.offset !== edit.selection.head.offset)
+        )
+          throw new Error('Input edits require a caret selection');
+        const insertionMarks = edit.input ? inputMarks(host.schema, draft) : undefined;
+        const storedMarks = insertionMarks ?? edit.storedMarks;
+
+        const batch = insertionMarks
+          ? edit.steps.map((step) =>
+              step.kind === 'replaceText' || step.kind === 'replaceRanges'
+                ? { ...step, marks: step.marks ?? insertionMarks }
+                : step,
+            )
+          : edit.steps;
+
         const previous = draft.selection;
         draft = host.preview(draft, {
           baseRevision: draft.revision,
           origin: 'local',
-          history: 'separate',
+          history,
           time,
-          steps: [...edit.steps],
+          steps: [...batch],
           selection: edit.selection,
-          storedMarks: edit.storedMarks,
+          storedMarks,
         });
 
-        if (edit.storedMarks !== undefined) marks = edit.storedMarks;
+        if (storedMarks !== undefined) marks = storedMarks;
         else if (!previous.eq(draft.selection)) marks = undefined;
 
-        for (const step of edit.steps) steps.push(step);
+        for (const step of batch) steps.push(step);
       } catch (error) {
         enabled = false;
 
@@ -176,7 +216,7 @@ export function createCommandChain<N extends NodeIdentity>(host: Host<N>, dryRun
       const tx: Transaction<N> = {
         baseRevision: initial.revision,
         origin: 'local',
-        history: 'separate',
+        history,
         time,
         steps,
         selection: draft.selection,

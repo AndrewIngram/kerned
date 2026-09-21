@@ -63,12 +63,13 @@ paths validate once at the session boundary.
 
 Starter formatting, heading, list, quote and table contributions compose with
 foreign text and atom definitions. The complete starter editing factory still
-still declares node-valued command arguments against the closed starter node
+declares node-valued command arguments against the closed starter node
 union. The underlying paste and structural algorithms now operate on the executing
 schema; typed command contribution assembly and browser codecs still need their
 complete migration. Renderer projection is owned by the view consumer, not a
-session query. Rich browser paste uses the named session command, while native
-text, splitting and deletion still use some raw transactions.
+session query. Rich browser paste uses the named session command. Native text,
+splitting and deletion now publish through `transact`, but their policy helpers
+still need migration into extension contributions.
 
 `schema.node(definition)` binds construction and attribute reads to the installed
 configuration of that definition:
@@ -118,17 +119,19 @@ const append: Command<MyNode, [number, string]> = (context, id, text) => {
   return true;
 };
 
-const enabled = editor.can().command(append, paragraphId, '!').run();
-editor.chain().command(append, paragraphId, '!').command(append, paragraphId, '?').run();
+editor.transact((context) => {
+  if (!context.command(append, paragraphId, '!')) return false;
+  return context.command(append, paragraphId, '?');
+});
 ```
 
 Each command reads the draft produced by preceding commands. `run()` publishes one transaction, one revision, one notification and one undo event. Returning false abandons the entire chain. Capability checks run against a draft and do not publish, allocate editor IDs or change history/position metadata. Commands themselves must be pure apart from their draft operations; the engine cannot undo arbitrary external side effects in application callbacks.
 
 An intervening editor change invalidates a prepared chain. Current permissions are checked again at execution, including after revocation. Permission failures return false. Invalid schema operations still throw rather than being hidden as ordinary command unavailability. The imperative `dispatch` API remains available and rejects unauthorized transactions before publishing any state.
 
-The demo routes formatting and structural toolbar actions through command chains. Command definitions pair `execute` with an optional `activity({ schema, state })` query. `editor.commandState(definition, ...args)` returns `{available, activity}`, with activity `active`, `inactive` or `mixed`. Chains accept functions or definitions. `context.effect(callback)` defers view effects such as focus/scroll until a successful commit; `can()`, failed commands, permission rejection and stale chains do not run them. Effect exceptions are reported asynchronously after commit. Commands and extension reducers must be pure apart from draft operations and queued effects.
+The demo routes formatting and structural toolbar actions through command chains. Command definitions pair `execute` with an optional `activity({ schema, state })` query. `editor.getCommandState('installedCommand', ...args)` returns `{available, activity}`, with activity `active`, `inactive` or `mixed`. Imperative `context.command` accepts functions or definitions. `context.effect(callback)` defers view effects such as focus/scroll until a successful commit; `can()`, failed commands, permission rejection and stale chains do not run them. Effect exceptions are reported asynchronously after commit. Commands and extension reducers must be pure apart from draft operations and queued effects.
 
-`toggleMarkCommand(schema, mark)` handles ranges and caret stored marks. `markActivity` distinguishes partial coverage within one text node as well as mixed blocks. `chain.storedMarks(marks)` participates in validation and atomic publication. A standalone caret-only mark command retains the existing no-revision/no-history behavior. The demo formatting buttons use this command and report mixed coverage through `aria-pressed`.
+`toggleMarkCommand(schema, mark)` handles ranges and caret stored marks. `markActivity` distinguishes partial coverage within one text node as well as mixed blocks. `context.storedMarks(marks)` participates in validation and atomic publication. A standalone caret-only mark command retains the existing no-revision/no-history behavior. The demo formatting buttons use this command and report mixed coverage through `aria-pressed`.
 
 `context.apply({ steps, selection, storedMarks })` applies content and its resulting
 selection/marks in one draft transition. Use it when an operation returns both
@@ -136,7 +139,22 @@ steps and a selection, such as paste, rather than previewing those separately.
 Extension fields see the complete transition, and subsequent commands see its
 result. `step`, `steps`, `select` and `storedMarks` use the same implementation.
 
-`chain.steps(steps)` previews a batch together and commits it with the rest of the chain as one transaction. Prefer it for a command that already produces many steps; repeated `step` calls each create a separate draft preview.
+`context.steps(steps)` previews a batch together and commits it with the rest of the chain as one transaction. Prefer it for a command that already produces many steps; repeated `step` calls each create a separate draft preview.
+
+`editor.chain(options)`, `editor.can().chain(options)` and
+`editor.transact(command, options)` accept `{ history, time }`. History defaults
+to separate undo entries. Use `{ history: { group: 'typing:node-key' }, time }`
+for adjacent input events; ordinary groups coalesce within 750ms when the
+selection is continuous. `time` defaults to `Date.now()` and is captured once
+for the entire chain, including all preview reducers.
+
+For native input, use `context.apply({ steps, selection, input: true })` with the
+resulting caret selection. It captures marks from the current draft and records
+them on each text operation, preserving formatting changes between insertions in
+one chain and when replaying the published transaction. Explicit step marks
+win over inherited marks. Plain text nodes without mark support accept unmarked
+input; unsupported explicit marks reject the entire edit. The resulting caret
+retains the insertion marks for subsequent typing.
 
 ## Observation and React
 
@@ -145,7 +163,36 @@ const unsubscribe = editor.subscribe(() => render(editor.state));
 unsubscribe();
 ```
 
-Dispatch, selection changes, undo and redo notify subscribers. No React import is present in core. Subscribers receive the current immutable-by-convention session snapshot. Listener exceptions are reported asynchronously after the successful commit; they do not turn an already-published transaction into an apparent failed transaction.
+Use `editor.on(name, listener)` for typed semantic notifications:
+
+| Event         | Published for                                                               |
+| ------------- | --------------------------------------------------------------------------- |
+| `update`      | Every published state transition, including stored marks.                   |
+| `transaction` | Dispatch, undo and redo, with the before/after mapping.                     |
+| `content`     | Those transactions that replace document content; suitable for persistence. |
+| `selection`   | Any transition that changes the selection, including mapping through edits. |
+| `destroy`     | Terminal session disposal, with the final snapshot.                         |
+
+All channels return an idempotent unsubscribe function. Publication order is
+`update`, `transaction`, `content`, `selection`, then `subscribe` callbacks for
+view invalidation. Channels that do not apply are skipped. All listener lists
+are captured before the first callback, so adding or removing listeners affects
+the next publication. Dry runs and rejected edits publish nothing.
+
+Callbacks observe the committed state. Mutation and destruction during
+publication are rejected; schedule a later edit instead. Listener exceptions are
+reported asynchronously without interrupting other notifications or turning an
+already-published transaction into an apparent failed transaction. No React
+import is present in core. Snapshots remain immutable by convention pending the
+public snapshot typing review.
+
+`editor.destroy()` is idempotent and sets `isDestroyed` before invoking destroy
+listeners. It clears subscriptions, history and the revision journal. The final
+state, queries and durable-position reads remain available for inspection.
+Edits, new subscriptions, undo/redo, dry runs and previously prepared chains
+throw after destruction. Destroying one session does not affect another session
+created from the same schema. Session destruction and view unmounting remain
+separate; the complete mounted-view ownership contract is milestone 4 work.
 
 ```tsx
 import { useEditorState } from './src/editor-react';

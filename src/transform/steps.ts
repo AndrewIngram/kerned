@@ -1,11 +1,19 @@
-import type { NodeIdentity, SelectionRange } from '../model';
+import type { Mark, NodeIdentity, SelectionRange } from '../model';
 
 export type Step<N extends NodeIdentity> =
-  | { kind: 'replaceText'; id: number; from: number; to: number; text: string }
+  | {
+      kind: 'replaceText';
+      id: number;
+      from: number;
+      to: number;
+      text: string;
+      marks?: readonly Mark[];
+    }
   | {
       kind: 'replaceRanges';
       ranges: readonly SelectionRange[];
       text: string;
+      marks?: readonly Mark[];
       pruneEmpty: readonly number[];
     }
   | { kind: 'split'; id: number; at: number; rightId: number; rightKey: string }

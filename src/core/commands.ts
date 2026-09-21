@@ -1,5 +1,5 @@
 import type { NodeIdentity } from '../model';
-import type { CommandDefinition, CommandState, createEditor } from '../state';
+import type { CommandDefinition, CommandState, createEditor, CommandOptions } from '../state';
 
 export type CommandDefinitions<N extends NodeIdentity> = Readonly<
   Record<string, CommandDefinition<N, never[]>>
@@ -52,8 +52,8 @@ export function commandRegistry<N extends NodeIdentity>(
     }
   }
 
-  function chain(dryRun = false) {
-    const draft = dryRun ? editor.can() : editor.chain();
+  function chain(dryRun = false, options?: CommandOptions) {
+    const draft = dryRun ? editor.can(options) : editor.chain(options);
 
     const named = Object.fromEntries(
       [...commands].map(([name, command]) => [
