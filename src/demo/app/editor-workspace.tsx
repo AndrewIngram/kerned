@@ -64,6 +64,15 @@ export function EditorWorkspace({
 
   const projectDocument = useMemo(() => createStarterDocumentQuery(editor.schema), [editor]);
   const doc = useEditorState(editor, projectDocument);
+
+  const layoutSource = useMemo(
+    () => ({
+      getSnapshot: () => projectDocument(editor.state),
+      subscribe: editor.subscribe,
+    }),
+    [editor, projectDocument],
+  );
+
   const { editorState, nodes, tree, nodeIndexes, selection, selectedRange } = doc;
 
   const setSelection = useCallback(
@@ -132,7 +141,7 @@ export function EditorWorkspace({
   const layout = useDocumentLayout({
     owned,
     size: minimal ? 18 : 20,
-    document: doc,
+    source: layoutSource,
     viewport,
     panelId: panel?.nodeId,
     focusedWidget,
@@ -140,20 +149,11 @@ export function EditorWorkspace({
     findOpen,
     eager: new URLSearchParams(location.search).get('reflow') === 'eager',
     retainAll: new URLSearchParams(location.search).get('retention') === 'all',
-    onLayout: (result, widthValue) => recordSampleLayout(metrics, result, widthValue, nodes.length),
+    onLayout: (result, widthValue) =>
+      recordSampleLayout(metrics, result, widthValue, result.scene.placements.length),
   });
 
-  const {
-    scene,
-    sceneRef,
-    sceneCache,
-    visible,
-    top,
-    widthRef,
-    measurementsRef,
-    activePlacement,
-    caret,
-  } = layout;
+  const { scene, visible, top, activePlacement, caret, diagnostics: layoutDiagnostics } = layout;
 
   const { outline, outlineAvailable, outlineActive, navigateOutline } = useOutline({
     sample,
@@ -243,7 +243,7 @@ export function EditorWorkspace({
     inputRef,
     node: (id) => tree.byId.get(id)?.node,
     placements: scene.placements,
-    layout: (id) => sceneCache.layoutFor(id),
+    layout: layout.layoutFor,
     caret,
     activeTop: activePlacement?.y,
     viewport,
@@ -390,15 +390,12 @@ export function EditorWorkspace({
     findRef,
     kit,
     current,
-    sceneRef,
-    measurementsRef,
+    layoutDiagnostics,
     paused,
     metrics,
-    sceneCache,
     owned,
     readScroll,
     zoom,
-    widthRef,
     scrollDocumentTo,
     canvasDiagnostics,
     setSelection,

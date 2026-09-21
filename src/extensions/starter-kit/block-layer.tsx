@@ -9,9 +9,9 @@ import { type CommentHighlight } from '../../extensions/text-block-view';
 import { type FindState, type Selection } from '../../state';
 import type { StarterNode } from '../demo-model';
 import type { EditorDocument } from './document';
+import type { DocumentLayout, DocumentLayoutSnapshot } from './document-layout';
 import type { InputActions } from './input';
 import type { Owned } from './types';
-import type { useDocumentLayout } from './use-document-layout';
 
 type BlockLayerProps = {
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
@@ -19,7 +19,7 @@ type BlockLayerProps = {
   actions: Pick<InputActions, 'replaceText' | 'restore' | 'toggleFormat' | 'replaceCells'> & {
     update(this: void, node: StarterNode): boolean;
   };
-  layout: ReturnType<typeof useDocumentLayout>;
+  layout: DocumentLayoutSnapshot & { onMeasure: DocumentLayout['measure'] };
   viewport: Viewport;
   kit: CanvasKit;
   owned: Owned;

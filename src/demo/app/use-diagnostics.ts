@@ -5,13 +5,13 @@ import type { CanvasDiagnostics } from '../../editor-canvas/canvas-renderer';
 import { benchmarkContainerEdits, checkContainers } from '../../editor-container-checks';
 import { checkExtensions } from '../../editor-extension-checks';
 import { checkReflow } from '../../editor-reflow-checks';
-import { createEditorScene, type Scene } from '../../editor-scene';
 import { checkSelections } from '../../editor-selection-checks';
 import { checkTransactions } from '../../editor-transaction-checks';
 import { commentDecorations, createCommentStore } from '../../extensions/comment';
 import type { StarterLeaf } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { importHtml } from '../../extensions/html';
+import type { DocumentLayout } from '../../extensions/starter-kit/document-layout';
 import type { EditorSession, Owned } from '../../extensions/starter-kit/types';
 import { parseAnchor } from '../../model';
 import { checkInline } from '../../owned-inline-checks';
@@ -33,15 +33,12 @@ type DiagnosticsOptions = {
   findRef: RefObject<FindState>;
   kit: CanvasKit;
   current: RefObject<{ nodes: StarterLeaf[]; selection: Selection; width: number }>;
-  sceneRef: RefObject<Scene>;
-  measurementsRef: RefObject<Map<number, { width: number; height: number }>>;
+  layoutDiagnostics: DocumentLayout['diagnostics'];
   paused: StreamState['paused'];
   metrics: StreamState['metrics'];
-  sceneCache: ReturnType<typeof createEditorScene>;
   owned: Owned;
   readScroll: () => number;
   zoom: number;
-  widthRef: RefObject<number>;
   scrollDocumentTo: (top: number) => void;
   canvasDiagnostics: CanvasDiagnostics;
   setSelection: (selection: Selection) => void;
@@ -54,15 +51,12 @@ export function useDiagnostics({
   findRef,
   kit,
   current,
-  sceneRef,
-  measurementsRef,
+  layoutDiagnostics,
   paused,
   metrics,
-  sceneCache,
   owned,
   readScroll,
   zoom,
-  widthRef,
   scrollDocumentTo,
   canvasDiagnostics,
   setSelection,
@@ -89,7 +83,12 @@ export function useDiagnostics({
       benchmarkContainerEdits,
       importHtml,
       verifyReflow: () =>
-        checkReflow(kit, current.current.nodes, sceneRef.current, measurementsRef.current),
+        checkReflow(
+          kit,
+          current.current.nodes,
+          layoutDiagnostics.scene,
+          layoutDiagnostics.measurements,
+        ),
       pause: () => {
         paused.current = true;
       },
@@ -98,14 +97,14 @@ export function useDiagnostics({
       },
       metrics: () => ({
         ...metrics.current,
-        cachedParagraphs: sceneCache.cachedParagraphs,
-        residentParagraphs: sceneCache.residentParagraphs,
+        cachedParagraphs: layoutDiagnostics.cachedParagraphs,
+        residentParagraphs: layoutDiagnostics.residentParagraphs,
         retention: owned.retention(),
         memory: owned.memory(),
       }),
       probe: (ids: number[]) => ({
-        reflowPending: sceneRef.current.pending,
-        generation: sceneRef.current.generation,
+        reflowPending: layoutDiagnostics.scene.pending,
+        generation: layoutDiagnostics.scene.generation,
         stalePaints: metrics.current.stalePaints,
         count: current.current.nodes.length,
         selection:
@@ -129,12 +128,12 @@ export function useDiagnostics({
         complete: !!metrics.current.completedAt,
         scroll: readScroll(),
         zoom,
-        width: widthRef.current,
+        width: layoutDiagnostics.contentWidth,
         mounted: [...document.querySelectorAll('[data-widget], [data-image]')].map((n) =>
           Number(n.getAttribute('data-widget') ?? n.getAttribute('data-image')),
         ),
         nodes: current.current.nodes.filter((n) => ids.includes(n.id)),
-        scene: sceneRef.current.placements
+        scene: layoutDiagnostics.scene.placements
           .filter((p) => ids.includes(p.node.id))
           .map((p) => ({
             id: p.node.id,
@@ -147,7 +146,7 @@ export function useDiagnostics({
         lastLayoutIds: metrics.current.lastLayoutIds,
       }),
       scrollTo: (id: number, offset = 0) => {
-        const p = sceneRef.current.placements.find((p) => p.node.id === id);
+        const p = layoutDiagnostics.scene.placements.find((p) => p.node.id === id);
 
         if (p) scrollDocumentTo((p.y + offset) * zoom);
       },
@@ -170,7 +169,7 @@ export function useDiagnostics({
                   head: current.current.selection.head,
                 }
               : { type: current.current.selection.type },
-        scene: sceneRef.current.placements.map((p) => ({
+        scene: layoutDiagnostics.scene.placements.map((p) => ({
           id: p.node.id,
           y: p.y,
           height: p.height,
@@ -182,7 +181,7 @@ export function useDiagnostics({
           n.getAttribute('data-widget'),
         ),
         zoom,
-        width: widthRef.current,
+        width: layoutDiagnostics.contentWidth,
         scroll: readScroll(),
         paintCount: canvasDiagnostics.painterCount,
       }),
@@ -205,17 +204,14 @@ export function useDiagnostics({
     comments,
     kit,
     current,
-    sceneRef,
-    measurementsRef,
+    layoutDiagnostics,
     paused,
     metrics,
     readScroll,
-    widthRef,
     canvasDiagnostics,
     findRef,
     scrollDocumentTo,
     setSelection,
     inputRef,
-    sceneCache,
   ]);
 }

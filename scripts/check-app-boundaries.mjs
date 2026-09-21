@@ -74,12 +74,12 @@ for (const group of groups) {
         );
       }
 
-      if (group === 'editor-canvas') {
+      if (group === 'editor-canvas' || file === 'src/extensions/starter-kit/document-layout.ts') {
         assert.ok(
           !['react', 'react-dom'].some(
             (module) => target === module || target.startsWith(module + '/'),
           ) && !target.startsWith('src/editor-react/'),
-          `${file} couples canvas lifecycle to React: ${specifier}`,
+          `${file} couples view lifecycle to React: ${specifier}`,
         );
       }
 

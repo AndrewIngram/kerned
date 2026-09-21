@@ -28,7 +28,7 @@ benchmark fixtures. Project dependency checks enforce these rules.
 ```text
 native event -> browser/input adapter -> named session command
   -> state transaction and publication -> createStarterDocumentQuery
-  -> useDocumentLayout -> canvas controller and React BlockLayer
+  -> document layout controller -> canvas controller and React BlockLayer
 ```
 
 Toolbar, native input and programmatic calls share named session commands.
@@ -56,8 +56,13 @@ frames. Neither depends on paragraph or heading names.
 - Graphics/layout resource destruction releases fonts, faces, paint, block
   sessions and the WASM runtime. Pure geometry snapshots remain readable; native
   drawing through a destroyed resource owner is rejected.
-- The layout hook still owns background reflow. Document projection shares one
-  indexed snapshot across toolbar queries.
+- The document layout controller owns background reflow, measured widget heights,
+  viewport culling and caret geometry. It coalesces document notifications in a
+  microtask and schedules background work after paint submission. React subscribes
+  to snapshots and acknowledges
+  their DOM placement before scroll anchoring. Pending anchor adjustments survive
+  multiple publications; live user scrolls take precedence. Document projection
+  shares one indexed snapshot across toolbar queries.
 - The input adapter positions the hidden textarea beside the visible caret.
   Placing it at the document origin can make native typing jump to the top.
 - `useSampleStream` owns append scheduling and cancels work on unmount. Its batch
@@ -65,6 +70,6 @@ frames. Neither depends on paragraph or heading names.
 - `useDiagnostics` is the only app module importing correctness fixtures. Canvas
   diagnostics expose a readonly painter count rather than a mutable registry.
 
-Complete asset readiness/cancellation, layout scheduling and public vanilla
+Complete asset readiness/cancellation, viewport ownership and public vanilla
 mounting remain milestone 4 work. The demo still initializes and passes internal
 engine resources; that is not the intended final consumer interface.

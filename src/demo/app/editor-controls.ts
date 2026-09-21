@@ -77,7 +77,7 @@ export function createEditorControls({
       run(() => (column ? editor.commands.addTableColumn() : editor.commands.addTableRow())),
     replaceCells: (text: string) => run(() => editor.commands.replaceSelection(text)),
     paste: (fragment: ClipboardFragment) => run(() => editor.commands.paste(fragment)),
-    update: (node: StarterNode) => run(() => editor.commands.updateNode(node)),
+    update: (node: StarterNode) => run(() => editor.commands.updateNode(node), false),
     restore: (redo = false) =>
       run(() => {
         const changed = redo ? editor.commands.redo() : editor.commands.undo();

@@ -18,6 +18,13 @@ test('extension diagnostics retain mentions and editable React checklists', asyn
     .toBe(true);
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(checklist.getByLabel('Review the examples')).not.toBeChecked();
+  await checklist.getByRole('button', { name: 'Add block notes' }).click();
+  const notes = checklist.getByLabel('Block notes');
+  await notes.fill('Keep focus');
+  await expect(notes).toBeFocused();
+  await page.keyboard.type(' while typing');
+  await expect(notes).toHaveValue('Keep focus while typing');
+  await expect(notes).toBeFocused();
 });
 
 test('comments remain external through replies, text edits, undo and rich paste', async ({

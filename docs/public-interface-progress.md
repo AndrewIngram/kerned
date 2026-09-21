@@ -1174,3 +1174,48 @@ budget: first usable 174ms, streaming 1074.6ms, paste handler 55.7ms, paste pain
 identifies `8d30c3b` and measures this checkpoint's uncommitted tree. Complete
 mounting, layout scheduling and asset readiness/cancellation remain before the
 milestone 4 architecture review.
+
+### Milestone 4 document layout controller
+
+`createDocumentLayout` now owns document observation, widget measurements, caret
+geometry, viewport culling, scene publication and background reflow. Its source
+contract is a snapshot getter and subscription, with no React dependency. The
+35-line React hook attaches the controller, subscribes to snapshots and
+acknowledges their DOM placement. Demo diagnostics use read-only controller
+getters; the scene cache and mutable measurement/width refs no longer escape.
+
+Document notifications coalesce in a microtask, outside the transaction call
+stack. Background composition queues after the host can submit painting.
+Callback-only frame updates do not rebuild layout. Detaching removes the source
+subscription, cancels queued/RAF work and releases the scene's layout owner.
+Stale cleanup cannot detach a replacement; terminal destruction prevents revival.
+
+The host applies a snapshot's document height before acknowledging it for scroll
+anchoring. Pending anchor adjustments survive further layout publications, while
+new user scrolls take precedence. A resize audit exposed the need for this
+explicit acknowledgement. The audit also found the demo's widget-update wrapper
+forcing focus into the canvas input; updates now retain their native focus, with
+an end-to-end regression check for continued checklist typing.
+
+Validation: `pnpm run check` passes with 298 Vitest tests, one unchanged
+collaboration TODO, and 42 end-to-end cases. Production build passes. Five new
+controller tests run without React in all three browsers, covering coalescing,
+callback freshness, caret/viewport geometry, measurement batching, deferred
+anchoring, live scrolls, background progress and detach/remount/destruction.
+`check:editor-reflow` passes Chromium, Firefox and WebKit for 2,000 and 10,000
+blocks, plus concurrent streaming, comparing final geometry with an independent
+eager reference. Its report is
+`artifacts/public-interface-m4/layout-controller/reflow.json`.
+
+Three serial production trials in
+`artifacts/public-interface-m4/layout-controller/baseline.json` pass every unchanged
+budget. Worst results: first usable 183 ms; streaming 1,097.1 ms; paste handler
+56.9 ms; paste to paint 120.0 ms; typing 32.3 ms; paging 32.6 ms; loaded JS heap
+28,945,532 bytes. The report identifies `043b1db` and measures this checkpoint's
+uncommitted tree. An earlier adapter-only version exceeded the paste-to-paint
+budget; controller-owned coalescing and paint-first scheduling removed that
+regression without changing the limits.
+
+Milestone 4 remains in progress. Complete viewport/DOM-overlay ownership, asset
+readiness and cancellation, browser-extension composition and the public vanilla
+mount are still required before its architecture judge and acceptance.
