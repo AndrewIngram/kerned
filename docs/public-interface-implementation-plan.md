@@ -251,8 +251,8 @@ Exit: no rigid starter-kit typography rules remain inside generic layout.
 
 ## Milestone 6: rendering, decorations and React integration
 
-Remaining content-slot ownership, geometry and completion requirements are
-detailed in [Editable content slots](content-slots.md).
+Content-slot ownership, geometry and verification are detailed in
+[Editable content slots](content-slots.md).
 
 Tasks:
 

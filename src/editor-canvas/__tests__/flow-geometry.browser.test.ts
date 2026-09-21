@@ -12,6 +12,7 @@ import {
 } from '../../editor-browser';
 import { createSchema, defineNode } from '../../model';
 import { textSelection } from '../../state';
+import { createViewDiagnostics } from '../diagnostics';
 import { defineNodePresentation, mountEditor, presentations } from '../index';
 
 const note = defineNode({
@@ -199,12 +200,14 @@ function fixture(slots = false) {
   const element = document.createElement('div');
   element.style.cssText = 'width:420px;height:180px';
   document.body.append(element);
-  const view = mountEditor(element, { editor });
+  const diagnostics = createViewDiagnostics();
+  const view = mountEditor(element, { editor, diagnostics });
 
   return {
     editor,
     element,
     view,
+    diagnostics,
     destroy() {
       view.destroy();
       editor.destroy();
@@ -396,3 +399,101 @@ test('replacing a flowing node identity cancels the old slot and measures the su
   header.style.height = '70px';
   await expect.poll(() => f.view.blockBounds(9)?.top).toBe(148);
 });
+
+test(
+  'large nested slots keep geometry and residency correct during background reflow, subtree moves and edits',
+  { timeout: 20_000 },
+  async ({ onTestFinished }) => {
+    const f = fixture(true);
+    onTestFinished(() => f.destroy());
+    await f.view.ready;
+    await expect.poll(() => f.view.blockBounds(2)?.left).toBe(68);
+
+    const sections = Array.from({ length: 16 }, (_, section) => {
+      const id = 10000 + section * 257;
+
+      const children = Array.from({ length: 256 }, (_unused, index) =>
+        f.editor.schema.node(note).create(
+          { id: id + index + 1, key: `section-${section}-note-${index}` },
+          {
+            text: `Section ${section}, paragraph ${index}. ${'Text reflows inside nested chrome. '.repeat(6)}`,
+          },
+        ),
+      );
+
+      return f.editor.schema
+        .node(group)
+        .create({ id, key: `section-${section}` }, { indent: 8 }, children);
+    });
+
+    f.editor.transact((draft) => {
+      draft.step({ kind: 'replaceChildren', parent: 3, index: 0, count: 2, nodes: sections });
+
+      return true;
+    });
+    await expect.poll(() => f.diagnostics.read()?.pending ?? 0).toBeGreaterThan(0);
+    const moved = sections[7];
+    const firstId = moved.id + 1;
+    const lastId = moved.id + 256;
+    f.editor.select(textSelection(firstId, 0));
+    f.editor.transact((draft) => {
+      draft.step({
+        kind: 'moveChildren',
+        parent: 3,
+        index: 7,
+        count: 1,
+        toParent: null,
+        toIndex: 2,
+      });
+      draft.step({
+        kind: 'replaceText',
+        id: firstId,
+        from: 0,
+        to: 0,
+        text: 'Edited while reflowing. ',
+      });
+
+      return true;
+    });
+    await f.view.reveal({ id: firstId, offset: 0 }, { align: 'start' });
+    await expect.poll(() => f.view.blockBounds(firstId)?.left).toBe(52);
+    const beforeResize = f.view.coordsAt({ id: firstId, offset: 0 });
+
+    if (!beforeResize) throw new Error('Missing moved caret');
+    f.element.style.width = '340px';
+    await expect.poll(() => f.diagnostics.read()?.width).toBe(284);
+    await expect.poll(() => f.diagnostics.read()?.pending ?? 0).toBeGreaterThan(0);
+    await expect.poll(() => f.diagnostics.read()?.pending, { timeout: 15_000 }).toBe(0);
+    await expect
+      .poll(() => f.view.coordsAt({ id: firstId, offset: 0 })?.top)
+      .toBeCloseTo(beforeResize.top, 0);
+    const first = f.view.blockBounds(firstId);
+    const last = f.view.blockBounds(lastId);
+    const bounds = f.view.blockBounds(moved.id);
+
+    if (!first || !last || !bounds) throw new Error('Missing reflowed subtree');
+    expect(first.top).toBe(bounds.top + 30);
+    expect(last.top + last.height).toBe(bounds.top + bounds.height - 14);
+    expect(first.width).toBe(248);
+    expect(bounds.height).toBeGreaterThan(10_000);
+    const wrapper = f.element.querySelector<HTMLElement>(`[data-group="${moved.id}"]`);
+    const body = wrapper?.querySelector<HTMLElement>('[data-slot-body]');
+
+    if (!wrapper || !body) throw new Error('Missing resident slot');
+    expect(body.getBoundingClientRect().height).toBeCloseTo(bounds.height - 44);
+    expect(f.view.blockBounds(firstId, 'client')?.top).toBeCloseTo(
+      body.getBoundingClientRect().top,
+    );
+    expect(f.diagnostics.read()?.residentParagraphs ?? 0).toBeLessThan(256);
+    expect(f.diagnostics.read()?.mounted.length ?? 0).toBeLessThan(16);
+    expect(f.element.querySelectorAll('canvas')).toHaveLength(1);
+    f.editor.transact((draft) => {
+      draft.step({ kind: 'removeChildren', parent: null, index: 2, count: 1 });
+
+      return true;
+    });
+    await expect.poll(() => wrapper.isConnected).toBe(false);
+    expect(f.view.blockBounds(moved.id)).toBeNull();
+    expect(f.view.coordsAt({ id: firstId, offset: 0 })).toBeNull();
+  },
+);

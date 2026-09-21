@@ -105,6 +105,12 @@ Strict Mode, focus retention and culling/remounting. The integration test in
 selection, typing, rich copy and undo across a quote boundary. Rendered screenshots
 are in `artifacts/public-interface-m6/content-slots/`.
 
-Milestone 6 remains open pending the full verification/performance gates and its
-independent architecture judge. Movement during background reflow and very large
-nested slot documents still need a dedicated stress case before final acceptance.
+A 4,096-paragraph nested-slot stress case moves a subtree and edits text while
+background layout is pending, then changes width. It checks the viewport reading
+anchor, parent/child/DOM geometry after background reflow, bounded resident text
+and mounted chrome, and removal of the moved subtree. It runs in Chromium,
+Firefox and WebKit.
+
+Milestone 6 implementation is ready for its independent architecture judge after
+the required validation and commit. Any agreed findings must be resolved before
+starting milestone 7.

@@ -2821,3 +2821,21 @@ M6 remains open for a dedicated large nested-slot/background-reflow and movement
 stress case, then the required committed milestone architecture judge and any
 agreed fixes. Milestones 7 and 8 remain pending. The checklist extension remains
 removed.
+
+### Milestone 6: implementation ready for architecture review
+
+The remaining nested-slot stress case passes in Chromium, Firefox and WebKit.
+It creates 4,096 paragraphs in nested flowing containers, moves a populated
+subtree and edits its text while background layout remains pending, changes the
+view width, and waits for reflow. It verifies the viewport reading anchor,
+parent/child/DOM bounds, fewer than 256 resident paragraph layouts, fewer than 16
+mounted native views, and subtree cleanup after removal. The reading-anchor
+assertion explicitly places its target at the top of the viewport; it does not
+mistake a selected paragraph near the bottom for the viewport's reading anchor.
+
+The full check passes with 792 Vitest tests, one unchanged collaboration TODO and
+42 end-to-end cases. Runtime code is unchanged from `9cdc414`, whose production
+build and three serial trials passed all original budgets. The milestone's
+rendering, decoration, React ownership and content-slot implementation is now
+ready for the required independent architecture judge. Milestone 7 must wait for
+that review and any agreed fixes.
