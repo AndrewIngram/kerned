@@ -69,7 +69,6 @@ test('starter commands target the selected node and disjoint cells, never the fi
         onEdit() {},
         notice: (m) => notices.push(m),
         closePanel() {},
-        focus() {},
         syncInput() {},
       });
 

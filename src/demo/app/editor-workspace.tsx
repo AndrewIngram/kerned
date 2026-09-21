@@ -232,7 +232,7 @@ export function EditorWorkspace({
     recordRender(performance.now() - renderStarted);
   });
 
-  const { textInput, selectAll, pointerSelection, navigate } = useCanvasInput({
+  const { textInput, selectAll, pointerSelection, navigate, revealSelection } = useCanvasInput({
     context: doc.context,
     inset: layout.inset,
     schema: demoSchema,
@@ -326,12 +326,6 @@ export function EditorWorkspace({
   // oxlint-disable-next-line react/refs
   const actions = createEditorControls({
     editor,
-    focus: () =>
-      focusStarterKitInput(
-        scroller.current,
-        inputRef.current,
-        projectDocument(editor.state).focusId ?? undefined,
-      ),
     syncInput: () => {
       if (inputRef.current) textInput.sync(inputRef.current);
     },
@@ -367,8 +361,19 @@ export function EditorWorkspace({
   }, [inputRef]);
 
   const editorView = useMemo(
-    () => ({ pointer: pointerSelection, input: { ...inputEvents, focus: setHasFocus } }),
-    [pointerSelection, inputEvents],
+    () => ({
+      session: editor,
+      pointer: pointerSelection,
+      input: { ...inputEvents, focus: setHasFocus },
+      focusSelection: () =>
+        focusStarterKitInput(
+          scroller.current,
+          inputRef.current,
+          projectDocument(editor.state).focusId ?? undefined,
+        ),
+      revealSelection,
+    }),
+    [editor, pointerSelection, inputEvents, revealSelection, projectDocument, scroller, inputRef],
   );
 
   const openAnnotation = useCallback(

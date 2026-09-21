@@ -1,3 +1,5 @@
+import { connectEditorView, type EditorViewSession } from '../core';
+import type { Selection } from '../state';
 import { createPointerSelection, type PointerSelectionOptions } from './pointer-selection';
 
 export { createPointerSelection, type PointerSelectionOptions } from './pointer-selection';
@@ -7,6 +9,9 @@ export { observeEditorViewport, type EditorViewport } from './viewport';
 export { createTextInput } from './text-input';
 
 export type BrowserViewOptions = {
+  session?: EditorViewSession;
+  focusSelection?: () => void;
+  revealSelection?: (selection: Selection) => void;
   pointer: PointerSelectionOptions;
   input?: {
     element: () => HTMLTextAreaElement | null;
@@ -39,6 +44,8 @@ export function mountEditorView(element: HTMLElement, initial: BrowserViewOption
   });
 
   const cleanup: (() => void)[] = [];
+  const session = initial.session;
+  let detach: (() => void) | undefined;
 
   function listen<K extends keyof HTMLElementEventMap>(
     name: K,
@@ -85,22 +92,46 @@ export function mountEditorView(element: HTMLElement, initial: BrowserViewOption
     if (isInput(event)) options.input?.focus?.(false);
   });
 
-  return {
+  const view = {
+    get isDestroyed() {
+      return destroyed;
+    },
     update(next: BrowserViewOptions) {
       if (destroyed) throw new Error('Editor view is destroyed');
+
+      if (next.session !== session)
+        throw new Error('A mounted view cannot change its editor session');
       options = next;
     },
     focus() {
-      if (!destroyed) options.pointer.focus();
+      if (destroyed) return;
+
+      if (options.focusSelection) options.focusSelection();
+      else options.pointer.focus();
     },
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      detach?.();
       pointer.onPointerCancel();
 
       for (const dispose of cleanup) dispose();
     },
   };
+
+  try {
+    if (session)
+      detach = connectEditorView(session, {
+        focus: () => view.focus(),
+        reveal: (selection) => options.revealSelection?.(selection),
+        destroy: () => view.destroy(),
+      });
+  } catch (error) {
+    view.destroy();
+    throw error;
+  }
+
+  return view;
 }
 
 export { createTextInteraction, positionTextInput } from './text-interaction';

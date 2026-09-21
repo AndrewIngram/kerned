@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useMemo, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useMemo,
+  useReducer,
+  type RefObject,
+} from 'react';
 
 import {
   type NavigationLayout,
@@ -66,6 +74,10 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
   } = options;
 
   const { scroll, zoom, width, viewportHeight, readScroll, scrollDocumentTo, setScroll } = viewport;
+
+  const [revealRequest, requestReveal] = useReducer((value: number) => value + 1, 0);
+
+  const handledRevealRequest = useRef(0);
 
   const revealCaret = useRef(false),
     latest = useRef(options);
@@ -217,7 +229,7 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
     return undefined;
   }, [textInput, selectAll, inputRef]);
   useLayoutEffect(() => {
-    if (!revealCaret.current) return;
+    if (!revealCaret.current && revealRequest === handledRevealRequest.current) return;
 
     const node =
       selection instanceof NodeSelection
@@ -237,6 +249,7 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
 
     if (!bounds) return;
     revealCaret.current = false;
+    handledRevealRequest.current = revealRequest;
 
     const { top, bottom } = bounds,
       currentScroll = readScroll();
@@ -253,6 +266,7 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
       setScroll(readScroll());
     }
   }, [
+    revealRequest,
     selection,
     activeTop,
     caret,
@@ -264,7 +278,10 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
     setScroll,
   ]);
 
+  const revealSelection = useCallback(() => requestReveal(), []);
+
   return {
+    revealSelection,
     textInput,
     selectAll,
     pointerSelection: interaction.pointer,

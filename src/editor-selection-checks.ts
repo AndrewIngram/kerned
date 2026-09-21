@@ -40,7 +40,9 @@ const atomDefinition = defineNode({
   }),
 });
 
-function containerDefinition<const Name extends string>(name: Name) {
+type ContainerKind = 'table' | 'row' | 'cell' | 'group';
+
+function containerDefinition(name: ContainerKind) {
   return defineNode({
     name,
     version: 1,
@@ -70,7 +72,7 @@ const leaf = (id: number, text: string): Node => ({ id, key: `key-${id}`, kind: 
 
 const container = (
   id: number,
-  kind: 'table' | 'row' | 'cell' | 'group',
+  kind: ContainerKind,
   children: Node[],
   colspan = 1,
   rowspan = 1,

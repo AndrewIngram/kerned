@@ -1,6 +1,7 @@
 import type { NodeIdentity } from '../model';
 import type { CommandDefinition, CommandState, createEditor, CommandOptions } from '../state';
 import type { CommandArguments } from './definitions';
+import type { ViewCommands } from './view-effects';
 
 export type CommandDefinitions<N extends NodeIdentity> = Readonly<
   Record<string, CommandDefinition<N, never[]>>
@@ -12,12 +13,11 @@ export type DirectCommands<Definitions, N extends NodeIdentity> = {
   ) => boolean;
 };
 
-export type CommandStateQuery<Definitions, N extends NodeIdentity> = keyof Definitions extends never
-  ? (name: never, ...args: never[]) => CommandState
-  : <Name extends keyof Definitions>(
-      name: Name,
-      ...args: CommandArguments<Definitions[Name], N>
-    ) => CommandState;
+export type CommandStateQuery<Definitions, N extends NodeIdentity> = (
+  ...request: {
+    [Name in keyof Definitions]: [name: Name, ...args: CommandArguments<Definitions[Name], N>];
+  }[keyof Definitions]
+) => CommandState;
 
 export type NamedChain<Definitions, N extends NodeIdentity> = {
   readonly [Name in keyof Definitions]: (
@@ -31,11 +31,12 @@ type StateEditor<N extends NodeIdentity> = ReturnType<typeof createEditor<N>>;
 export function commandRegistry<N extends NodeIdentity>(
   editor: StateEditor<N>,
   contributions: readonly { name: string; commands?: CommandDefinitions<N> }[],
+  viewCommands: ViewCommands,
 ) {
   const commands = new Map<string, CommandDefinition<N, never[]>>();
   const owners = new Map<string, string>();
 
-  for (const contribution of contributions) {
+  for (const contribution of [{ name: 'editorView', commands: viewCommands }, ...contributions]) {
     for (const [name, command] of Object.entries(contribution.commands ?? {})) {
       if (!name || name === 'run' || name === 'chain' || name === 'then')
         throw new Error(`Reserved command name: ${name}`);
@@ -50,28 +51,48 @@ export function commandRegistry<N extends NodeIdentity>(
   function chain(dryRun = false, options?: CommandOptions) {
     const draft = dryRun ? editor.can(options) : editor.chain(options);
 
-    const named = Object.fromEntries(
-      [...commands].map(([name, command]) => [
-        name,
-        (...args: never[]) => {
-          draft.command(command, ...args);
+    function queue(command: CommandDefinition<N, never[]>, args: never[] = []) {
+      draft.command(command, ...args);
 
-          return named;
+      return named;
+    }
+
+    const named: NamedChain<ViewCommands, N> = Object.freeze(
+      Object.assign(
+        Object.fromEntries(
+          [...commands].map(([name, command]) => [
+            name,
+            (...args: never[]) => queue(command, args),
+          ]),
+        ),
+        {
+          focus: () => queue(viewCommands.focus),
+          scrollIntoView: () => queue(viewCommands.scrollIntoView),
+          run: () => draft.run(),
         },
-      ]),
+      ),
     );
 
-    return Object.freeze(Object.assign(named, { run: () => draft.run() }));
+    return named;
   }
 
   function direct(dryRun = false) {
+    function invoke(command: CommandDefinition<N, never[]>, args: never[] = []) {
+      return (dryRun ? editor.can() : editor.chain()).command(command, ...args).run();
+    }
+
     return Object.freeze(
-      Object.fromEntries(
-        [...commands].map(([name, command]) => [
-          name,
-          (...args: never[]) =>
-            (dryRun ? editor.can() : editor.chain()).command(command, ...args).run(),
-        ]),
+      Object.assign(
+        Object.fromEntries(
+          [...commands].map(([name, command]) => [
+            name,
+            (...args: never[]) => invoke(command, args),
+          ]),
+        ),
+        {
+          focus: () => invoke(viewCommands.focus),
+          scrollIntoView: () => invoke(viewCommands.scrollIntoView),
+        },
       ),
     );
   }

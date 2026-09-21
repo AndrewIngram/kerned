@@ -28,3 +28,5 @@ export {
 } from './definitions';
 
 export type { EditorEvents } from '../state';
+
+export { connectEditorView, type EditorViewSession, type EditorViewDelegate } from './view-effects';

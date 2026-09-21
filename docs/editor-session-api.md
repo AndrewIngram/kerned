@@ -197,6 +197,42 @@ These commands observe the current draft, enforce permissions, participate in
 atomic chains and use the same history options as formatting commands. Browser
 input handlers retain normalization, event routing and composition grouping.
 
+## View effects and ownership
+
+Every composed session includes `focus()` and `scrollIntoView()` commands:
+
+```ts
+editor.chain().focus().toggleFormat('bold').scrollIntoView().run();
+```
+
+Effects run after successful publication, in command order. Reveal receives the
+final selection after all draft edits. Dry runs, rejected commands and stale
+chains do not invoke the view. Without a view, both commands succeed as no-ops,
+so shared editing code can also run headlessly. An effect-only chain does not
+create a transaction or history entry.
+
+A session permits one mounted view. The adapter connects through
+`connectEditorView(editor, { focus, reveal, destroy })`; the returned detach
+function is idempotent and does not destroy the session. Duplicate attachments
+are rejected. A queued effect captures the existing attachment and is discarded
+if that view is detached before execution. It never transfers to a replacement
+view, including one mounted after a headless request was queued.
+
+Destroying the session destroys its attached view once, before application
+`destroy` listeners. Unmounting a view leaves the borrowed session alive and
+permits a later mount. Extensions cannot replace the session-owned `focus` and
+`scrollIntoView` command names.
+
+`mountEditorView` accepts `session`, `focusSelection` and `revealSelection`
+bindings. It releases native event listeners on session destruction, cleans up
+listeners after a rejected duplicate mount, and rejects changes to the session
+of an already-mounted view. Callback updates within the same attachment are
+supported. The React host remounts when its session changes and skips updates
+to destroyed views. The React demo supplies those bindings; toolbar focus no longer needs
+a demo callback. Its canvas adapter schedules reveal even when selection and
+content are unchanged. Complete layout/graphics lifetime ownership remains
+milestone 4 work.
+
 ## Observation and React
 
 ```ts
@@ -232,8 +268,9 @@ listeners. It clears subscriptions, history and the revision journal. The final
 state, queries and durable-position reads remain available for inspection.
 Edits, new subscriptions, undo/redo, dry runs and previously prepared chains
 throw after destruction. Destroying one session does not affect another session
-created from the same schema. Session destruction and view unmounting remain
-separate; the complete mounted-view ownership contract is milestone 4 work.
+created from the same schema. Session destruction and view unmounting are separate; an attached view releases
+its native listeners on session destruction. Complete graphics/layout resource
+ownership remains milestone 4 work.
 
 ```tsx
 import { useEditorState } from './src/editor-react';

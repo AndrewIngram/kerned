@@ -10,14 +10,12 @@ export function createEditorControls({
   onEdit,
   notice,
   closePanel,
-  focus,
   syncInput,
 }: {
   editor: EditorSession;
   onEdit: () => void;
   notice: (message: string) => void;
   closePanel: () => void;
-  focus: () => void;
   syncInput: () => void;
 }) {
   function run(action: () => boolean, focusAfter = true) {
@@ -26,7 +24,7 @@ export function createEditorControls({
       const applied = action();
       notice('');
 
-      if (applied && focusAfter) focus();
+      if (applied && focusAfter) editor.commands.focus();
 
       return applied;
     } catch (error) {

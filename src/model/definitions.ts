@@ -123,7 +123,7 @@ function definition<
   category: Category,
   config: DefinitionConfig<Name, Options, Spec, Contribution, Args>,
   family: symbol = Symbol(config.name),
-): ContentDefinition<Category, Name, Options, Spec, Contribution, Args> {
+): NoInfer<ContentDefinition<Category, Name, Options, Spec, Contribution, Args>> {
   if (!config.name || !Number.isSafeInteger(config.version) || config.version < 1)
     throw new Error('Extensions require a name and positive schema version');
 
@@ -283,7 +283,7 @@ export function defineExtension<
   options: Options;
   requires?: readonly string[];
   setup: (options: Immutable<Options>, ...args: Args) => Contribution;
-}): BehaviorDefinition<Name, Options, Contribution, Args> {
+}): NoInfer<BehaviorDefinition<Name, Options, Contribution, Args>> {
   if (!config.name) throw new Error('Extensions require a name');
   const { name, setup } = config;
   const options = structuredClone(config.options);

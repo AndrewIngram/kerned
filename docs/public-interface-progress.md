@@ -873,3 +873,51 @@ all unchanged budgets: first usable 175ms, full stream 1081.5ms, paste handler
 55.5ms, paste paint 114.1ms, typing 32.7ms, paging 32.9ms, loaded heap 28,977,404
 bytes. The report identifies `0e2be8a` and measures this uncommitted native-command
 implementation before its declaration-only contract refinements.
+
+### Milestone 3 session-owned view effects
+
+Every composed session now includes `focus` and `scrollIntoView` commands with
+the same direct, chained and dry-run interfaces as extension commands. Effects
+run after publication, in command order, against the final selection. Headless
+requests are successful no-ops and do not create a transaction or undo entry.
+Failed and stale chains never invoke their queued view effects.
+
+`connectEditorView` gives the adapter one attachment per session. Detachment is
+idempotent and leaves the session alive. Effects capture that attachment and
+never transfer to a replacement view. Session destruction releases its view
+before application lifecycle observers. Duplicate attachment and collisions with
+session-owned command names reject explicitly.
+
+The native view connects this lifecycle, releases event listeners when its
+session is destroyed, cleans up listeners after rejected duplicate mounts, and
+rejects changing sessions in place. The React host remounts when given another
+session, skips updates to a destroyed view, and tolerates rendering or mounting a
+closed borrowed session. The canvas hook schedules explicit reveal requests even
+without a content or selection change. Toolbar focus now uses the session command
+instead of accepting an application focus callback. Layout, font and graphics
+resource ownership still belong to milestone 4's broader view migration.
+
+An inline `defineNode(...)` inside `createSchema(...)` exposed backwards inference
+from the assembly's erased callback type into definition setup arguments. Builder
+return contracts now block that contextual inference while retaining input-driven
+literal names, attributes and contribution types. Browser fixtures exercise the
+inline construction form; existing closed-schema rejection and typed command
+fixtures still pass. The independent selection fixture uses its explicit closed
+container-kind union instead of an unnecessary generic factory parameter.
+
+Milestone 3 remains incomplete. History-provider ownership, extension factory
+cleanup and the public snapshot contract review remain before the milestone
+completion commit and architecture judge. The judge baseline remains `c3cdf8b`.
+
+The final full check, declaration emission and production build passed with
+**231 Vitest tests, one unchanged convergence todo, and all 39 Playwright
+scenarios**. Tests cover effect order, final-selection reveal, pure dry runs,
+headless no-ops, failed/stale chains, attachment replacement, duplicate mounts,
+listener cleanup, session destruction, React session replacement and closed
+session rendering. A second lint-fix/format pass changed no source files.
+
+Three final production trials in
+`artifacts/public-interface-m3/view-effects/baseline.json` pass every unchanged
+budget: first usable 177ms, full stream 1084.1ms, paste handler 55.7ms, paste paint
+116.2ms, typing 32.4ms, paging 32.5ms, loaded heap 29,018,764 bytes. The report
+identifies `9db6201` and measures this checkpoint's uncommitted working tree.

@@ -29,7 +29,6 @@ function inputSession() {
     notice,
     onEdit() {},
     closePanel() {},
-    focus() {},
     syncInput: () => textInput.sync(input),
   });
 

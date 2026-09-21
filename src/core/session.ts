@@ -28,6 +28,7 @@ import {
   type CommandStateQuery,
 } from './commands';
 import { queryRegistry, type QueryDefinitions, type NamedQueries } from './queries';
+import { createViewEffects, registerViewEffects, type ViewCommands } from './view-effects';
 
 export type ExtensionContext<N extends NodeIdentity> = {
   readonly schema: Schema<N>;
@@ -107,12 +108,12 @@ export type Editor<D extends readonly SchemaDefinition[], N extends NodeIdentity
   readonly schema: SessionSchema<D, N>;
   readonly documentId: string;
   readonly history: { undo: number; redo: number };
-  readonly commands: DirectCommands<Installed<D, 'commands'>, N>;
+  readonly commands: DirectCommands<Installed<D, 'commands'> & ViewCommands, N>;
   readonly queries: NamedQueries<Installed<D, 'queries'>>;
-  readonly getCommandState: CommandStateQuery<Installed<D, 'commands'>, N>;
-  chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'>, N>;
-  can(): DirectCommands<Installed<D, 'commands'>, N> & {
-    chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'>, N>;
+  readonly getCommandState: CommandStateQuery<Installed<D, 'commands'> & ViewCommands, N>;
+  chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'> & ViewCommands, N>;
+  can(): DirectCommands<Installed<D, 'commands'> & ViewCommands, N> & {
+    chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'> & ViewCommands, N>;
   };
   dispatch(transaction: Transaction<N>): ReturnType<StateSession<N>['dispatch']>;
   readonly positions: StateSession<N>['positions'];
@@ -182,9 +183,11 @@ export function createEditor(
     },
   );
 
-  const registry = commandRegistry(editor, contributions);
+  const effects = createViewEffects(editor);
+  editor.on('destroy', () => effects.destroy());
+  const registry = commandRegistry(editor, contributions, effects.commands);
 
-  return {
+  const session: Editor<readonly SchemaDefinition[], DocumentNode<readonly SchemaDefinition[]>> = {
     documentId: editor.documentId,
     positions: editor.positions,
     get journal() {
@@ -233,4 +236,8 @@ export function createEditor(
       };
     },
   };
+
+  registerViewEffects(session, effects);
+
+  return session;
 }

@@ -11,19 +11,22 @@ export function Editor({
   const element = useRef<HTMLDivElement>(null),
     runtime = useRef<ReturnType<typeof mountEditorView> | null>(null);
 
-  const initialView = useRef(view);
+  const currentView = useRef(view);
   useLayoutEffect(() => {
-    if (!element.current) return undefined;
-    const mounted = mountEditorView(element.current, initialView.current);
+    currentView.current = view;
+  });
+  useLayoutEffect(() => {
+    if (!element.current || view.session?.isDestroyed) return undefined;
+    const mounted = mountEditorView(element.current, currentView.current);
     runtime.current = mounted;
 
     return () => {
       mounted.destroy();
       runtime.current = null;
     };
-  }, []);
+  }, [view.session]);
   useLayoutEffect(() => {
-    runtime.current?.update(view);
+    if (runtime.current && !runtime.current.isDestroyed) runtime.current.update(view);
   });
 
   return (
