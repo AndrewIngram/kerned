@@ -1,8 +1,9 @@
 import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 
-import { createEditorScene } from '../editor-scene';
+import { createEditorScene } from '../editor-canvas/scene';
 import type { TextBlockNode } from '../extensions/demo-model';
+import { createStarterPresentation } from '../extensions/starter-kit/presentation';
 import { createOwnedEngine } from '../owned-layout';
 
 let kit: CanvasKit;
@@ -67,8 +68,8 @@ test('layout owners isolate shaping, composition eviction and destruction for id
 
 test('scene replacement drops only its own caches and labels retain no reserved document ID', async () => {
   const resources = await createOwnedEngine(kit, 'shaping');
-  const first = createEditorScene(resources);
-  const second = createEditorScene(resources);
+  const first = createEditorScene(resources, createStarterPresentation(20));
+  const second = createEditorScene(resources, createStarterPresentation(20));
 
   const view = {
     top: 0,

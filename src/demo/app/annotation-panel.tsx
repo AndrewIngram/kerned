@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { type Scene } from '../../editor-canvas/scene';
 import type { Viewport } from '../../editor-react';
-import { type Scene } from '../../editor-scene';
 import type { Rect } from '../../engines';
+import type { StarterLeaf } from '../../extensions/demo-model';
 import type { useComments } from './use-comments';
 
 const TeamContext = createContext('');
@@ -31,7 +32,7 @@ type PanelProps = Pick<
   'comments' | 'commentState' | 'decorations'
 > & {
   panel: ActivePanel | null;
-  scene: Scene;
+  scene: Scene<StarterLeaf>;
   viewport: Viewport;
   minimal: boolean;
   onClose: () => void;

@@ -137,7 +137,7 @@ Tiptap's Typography extension performs input substitutions such as smart quotes
 and ellipses. It is not a heading-scale or baseline-grid theme.
 [Typography](https://tiptap.dev/docs/editor/extensions/functionality/typography).
 
-Current gap: `extensions/typography.ts`, `editor-scene.ts`, table rendering and
+Current gap: `extensions/typography.ts`, `extensions/starter-kit/presentation.ts`, table rendering and
 CSS each impose presentation policy. The package plan records their consolidation.
 
 ## Events and subscriptions

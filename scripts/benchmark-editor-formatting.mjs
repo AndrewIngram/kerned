@@ -22,7 +22,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
         for (const path of [
           'state/transactions.ts',
           'transform/apply-steps.ts',
-          'editor-scene.ts',
+          'editor-canvas/scene.ts',
         ]) {
           const source = await readFile(`${process.env.BASELINE_DIR}/${path}`, 'utf8');
 

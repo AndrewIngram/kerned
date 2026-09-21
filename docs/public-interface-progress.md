@@ -1529,3 +1529,47 @@ this checkpoint's uncommitted tree.
 This remains an intermediate milestone 4 checkpoint. Complete mount composition,
 schema-independent presentation contributions, supported geometry queries and
 removing kit/owned from the demo are still required before its architecture judge.
+
+### Milestone 4 checkpoint: schema-independent scene layout
+
+Moved `editor-scene.ts` into `editor-canvas/scene.ts` and removed its dependencies
+on starter nodes, formatting, mentions, typography and structural decorations.
+The scene accepts a presentation callback returning text metrics/inline atoms or
+an estimated box height, with margins and baseline-grid values. Placements retain
+the caller's original node type. Starter-specific conversion now lives in
+`extensions/starter-kit/presentation.ts`, with immutable per-node presentation
+values cached per adapter. This is an internal seam; a consumer still must not
+construct the layout engine or manually wire this controller.
+
+The shared scheduler continues to own placement, viewport-first composition,
+background reflow, scroll anchoring, retained shaping and geometry eviction.
+Changes to indentation now invalidate a resident scene even when the node array
+is unchanged. Replacing text with a box at the same identity releases the old
+layout. Equivalent text on a replacement node reuses geometry for navigation
+without retaining the previous node as its cache identity.
+
+New browser tests use foreign `note` and `media` nodes, including a nonstandard
+text field, a custom inline object, distinct text metrics and a 6px grid. They
+exercise collapsed margins, measured-height replacement, indentation-only reflow,
+snapshot stability, text/box transitions, queued offscreen edits, deferred loading
+and navigation after eviction. The existing eager reference audit remains
+independent of the new presentation adapter.
+
+`pnpm run check` passes with 399 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build and all nine cases in each of the
+large-document and reflow audits pass. Audit evidence is stored in
+`artifacts/public-interface-m4/generic-scene/`.
+
+Three serial production trials pass every unchanged budget: worst first usable
+180 ms, streaming 1,083.9 ms, paste handler 55.9 ms, paste to paint 121.8 ms,
+typing 32.4 ms, paging 32.7 ms and loaded heap 29,862,212 bytes. Cached presentation
+values add about 1 MB against the preceding checkpoint's measured heap, within
+the 36,069,308-byte budget. The reports identify `44f95bc` and measure this
+checkpoint's uncommitted tree.
+
+Milestone 4 remains open. Document projection and the surrounding mounted-view
+composition still use starter-specific contracts. Their extension contribution
+contracts, complete public mount, geometry queries and removal of kit/owned from
+the demo remain required before the milestone judge. Configurable presentation
+and font resolution remain milestone 5 work; this extraction does not claim they
+are implemented.

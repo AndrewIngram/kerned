@@ -52,6 +52,6 @@ node scripts/check-editor-formatting-reflow.mjs
 BROWSERS=chromium,firefox,webkit TRIALS=3 node scripts/benchmark-editor-formatting.mjs
 ```
 
-The benchmark fails if any response exceeds 250 ms. `MAX_PAINT_MS` changes that budget, `REPORT` selects an output file, and `PROFILE` captures a Chromium CPU profile. `BASELINE_DIR` optionally supplies earlier `editor/transactions.ts` and `editor-scene.ts` sources. Playwright injects those modules without overwriting the working files.
+The benchmark fails if any response exceeds 250 ms. `MAX_PAINT_MS` changes that budget, `REPORT` selects an output file, and `PROFILE` captures a Chromium CPU profile. `BASELINE_DIR` optionally supplies earlier `state/transactions.ts`, `transform/apply-steps.ts` and `editor-canvas/scene.ts` sources. Playwright injects those modules without overwriting the working files.
 
 This change does not bound the cost of one enormous paragraph or make history safe for concurrent remote edits. Those remain separate constraints of the editor.

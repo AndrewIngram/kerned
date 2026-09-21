@@ -1,6 +1,6 @@
 import type { CanvasKit } from 'canvaskit-wasm';
 
-import type { Measurement, Scene } from './editor-scene';
+import type { Measurement, Scene } from './editor-canvas/scene';
 import type { StarterLeaf } from './extensions/demo-model';
 import { formattingSpans } from './extensions/formatting';
 import { inlineSchema } from './extensions/mention';
@@ -11,7 +11,7 @@ import { createOwnedEngine } from './owned-layout';
 export async function checkReflow(
   kit: CanvasKit,
   nodes: StarterLeaf[],
-  scene: Scene,
+  scene: Scene<StarterLeaf>,
   measurements: ReadonlyMap<number, Measurement>,
 ) {
   const owned = await createOwnedEngine(kit, 'shaping');

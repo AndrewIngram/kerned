@@ -3,13 +3,15 @@ import {
   type Measurement,
   type Placement,
   type Scene,
-} from '../../editor-scene';
+} from '../../editor-canvas/scene';
 import type { Rect } from '../../engines';
 import { RangeSelection } from '../../state';
+import type { StarterLeaf } from '../demo-model';
 import type { EditorDocument } from './document';
+import { createStarterPresentation } from './presentation';
 import type { Owned } from './types';
 
-type LayoutResult = ReturnType<ReturnType<typeof createEditorScene>['build']>;
+type LayoutResult = ReturnType<ReturnType<typeof createEditorScene<StarterLeaf>>['build']>;
 
 export type DocumentLayoutSource = {
   getSnapshot(this: void): EditorDocument;
@@ -35,12 +37,12 @@ export type DocumentLayoutFrame = {
 
 export type DocumentLayoutSnapshot = {
   inset: number;
-  scene: Scene;
-  visible: Placement[];
+  scene: Scene<StarterLeaf>;
+  visible: Placement<StarterLeaf>[];
   top: number;
   bottom: number;
   contentWidth: number;
-  activePlacement: Placement | undefined;
+  activePlacement: Placement<StarterLeaf> | undefined;
   caret: Rect | undefined;
 };
 
@@ -76,7 +78,7 @@ export function createDocumentLayout({
   size: number;
   source: DocumentLayoutSource;
 }) {
-  const sceneCache = createEditorScene(owned, size);
+  const sceneCache = createEditorScene(owned, createStarterPresentation(size));
   const listeners = new Set<() => void>();
   let snapshot = emptySnapshot();
   let presented = snapshot;
@@ -214,7 +216,7 @@ export function createDocumentLayout({
       else hi = mid;
     }
 
-    const visible: Placement[] = [];
+    const visible: Placement<StarterLeaf>[] = [];
 
     for (let i = lo; i < placements.length && placements[i].y < bottom + 160; i++)
       visible.push(placements[i]);

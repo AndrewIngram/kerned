@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 
+import { type Scene } from '../../editor-canvas/scene';
 import { type EditorSample } from '../../editor-samples';
-import { type Scene } from '../../editor-scene';
+import type { StarterLeaf } from '../../extensions/demo-model';
 import { plainText } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { createOutlineExtension, type OutlineEntry } from '../../extensions/outline';
@@ -10,7 +11,7 @@ import type { EditorDocument } from '../../extensions/starter-kit/document';
 type OutlineOptions = Pick<EditorDocument, 'editorState' | 'tree'> & {
   sample: EditorSample;
   loadedCount: number;
-  scene: Scene;
+  scene: Scene<StarterLeaf>;
   zoom: number;
   scroll: number;
   toolbarHeight: number;

@@ -9,9 +9,9 @@ import {
   type RefObject,
 } from 'react';
 
+import type { Scene } from '../../editor-canvas/scene';
 import type { Viewport } from '../../editor-react';
-import type { Scene } from '../../editor-scene';
-import { type StarterNode } from '../../extensions/demo-model';
+import type { StarterLeaf, StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 import type { FindOptions, FindSnapshot, FindState, EditorState } from '../../state';
 
@@ -165,7 +165,7 @@ export function useFindReveal({
   canvasRef,
   viewport,
 }: {
-  scene: Scene;
+  scene: Scene<StarterLeaf>;
   findOpen: boolean;
   findState: FindState;
   findRequest: number;

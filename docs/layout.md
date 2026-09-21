@@ -18,11 +18,15 @@ and `src/owned-blocks.ts` provides paragraph-local splice updates.
 
 Text and style changes invalidate shaping for affected paragraphs. Width changes
 reuse shaping and rebuild composition. Published snapshots remain readable after
-updates or cache release. The editor's `src/editor-scene.ts` schedules visible
+updates or cache release. The editor's `src/editor-canvas/scene.ts` schedules visible
 paragraphs first and finishes offscreen work in batches. It retains shaping while
-releasing offscreen geometry, then rebuilds that geometry on demand.
+releasing offscreen geometry, then rebuilds that geometry on demand. The scene
+accepts immutable text-or-box presentation values and preserves the original
+node type in placements. It has no dependency on starter node names, marks or
+inline objects. `src/extensions/starter-kit/presentation.ts` translates the
+starter schema into text metrics, inline dimensions and estimated block heights.
 
-`src/engines.ts` defines the layout and geometry contracts. `src/model.ts` holds
+`src/engines.ts` defines the layout and geometry contracts. `src/layout-types.ts` holds
 shared span, position, and direction types and re-exports grapheme boundaries
 from the editor core. Neither module contains the former comparison editors.
 

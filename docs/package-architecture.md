@@ -184,8 +184,9 @@ Current hardcoded policy is spread across several owners:
 
 - `src/extensions/typography.ts` fixes four heading styles, scales everything
   against an 18px body, and rounds spacing and leading to a 4px grid.
-- `src/editor-scene.ts` independently fixes the baseline grid to 4px, forces
-  headings bold and assigns non-text blocks a 24px trailing gap.
+- `src/extensions/starter-kit/presentation.ts` supplies the 4px baseline grid,
+  heading boldness and non-text blocks' 24px trailing gap. The shared scene now
+  consumes resolved text/box metrics without starter-schema imports.
 - `src/extensions/starter-kit/table-view.ts` resolves heading typography against 18px while
   body typography also depends on table CSS in `src/editor.css`.
 - `src/engines.ts` and the shaping implementation fix the available font faces.

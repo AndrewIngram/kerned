@@ -1,15 +1,26 @@
-import type { LaidOut, Rect } from './engines';
-import type { BlockDecoration } from './extensions/blocks';
-import type { StarterLeaf, TextBlockNode } from './extensions/demo-model';
-import { formattingSpans } from './extensions/formatting';
-import { inlineSchema } from './extensions/mention';
-import { typography } from './extensions/typography';
-import type { createOwnedEngine } from './owned-layout';
+import type { LaidOut, LayoutInput, Rect } from '../engines';
+import type { NodeIdentity } from '../model';
+import type { InlineAtom } from '../owned-inline';
+import type { createOwnedEngine } from '../owned-layout';
 
 type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
 
-export type Placement = {
-  node: StarterLeaf;
+type BlockSpacing = { before: number; after: number; baselineGrid: number };
+
+export type TextPresentation = BlockSpacing &
+  Omit<LayoutInput, 'id' | 'width'> & {
+    kind: 'text';
+    lineHeight: number;
+    atoms: readonly InlineAtom[];
+  };
+
+export type BlockPresentation = TextPresentation | (BlockSpacing & { kind: 'box'; height: number });
+
+/** Presentation values are immutable for the lifetime of their document node. */
+export type PresentBlock<N extends NodeIdentity> = (node: N) => BlockPresentation;
+
+export type Placement<N extends NodeIdentity> = {
+  node: N;
   y: number;
   height: number;
   layout: LaidOut | null;
@@ -25,8 +36,8 @@ export type Placement = {
   }[];
 };
 
-export type Scene = {
-  placements: Placement[];
+export type Scene<N extends NodeIdentity> = {
+  placements: Placement<N>[];
   height: number;
   width: number;
   top: number;
@@ -37,6 +48,8 @@ export type Scene = {
 };
 
 export type Measurement = { width: number; height: number };
+
+const emptyInsets: ReadonlyMap<number, { inset: number }> = new Map();
 
 type View = {
   top: number;
@@ -50,21 +63,25 @@ type View = {
 };
 
 // Width is unknown until an inserted paragraph has been composed.
-type Cached = {
-  node: TextBlockNode;
+type Cached<N extends NodeIdentity> = {
+  node: N;
+  presentation: TextPresentation;
   width: number | null;
   height: number;
   layout: LaidOut | null;
-  boxes: Placement['boxes'];
+  boxes: Placement<N>['boxes'];
 };
 
-export function createEditorScene(owned: Owned, size = 20) {
+export function createEditorScene<N extends NodeIdentity>(
+  owned: Pick<Owned, 'createLayout'>,
+  present: PresentBlock<N>,
+) {
   let textLayout: ReturnType<Owned['createLayout']> | undefined;
 
-  const cache = new Map<number, Cached>(),
-    dirty = new Map<number, TextBlockNode>();
+  const cache = new Map<number, Cached<N>>(),
+    dirty = new Map<number, N>();
 
-  let previous: Scene = {
+  let previous: Scene<N> = {
     placements: [],
     height: 50,
     width: 0,
@@ -75,42 +92,46 @@ export function createEditorScene(owned: Owned, size = 20) {
     paddingTop: 0,
   };
 
-  let currentDecorations: ReadonlyMap<number, BlockDecoration> = new Map();
+  let currentDecorations = emptyInsets,
+    previousDecorations = emptyInsets;
 
-  let previousNodes: StarterLeaf[] = [],
+  let previousNodes: readonly N[] = [],
     previousMeasurements: ReadonlyMap<number, Measurement> = new Map();
 
-  function compose(node: TextBlockNode, width: number): Cached {
+  function compose(node: N, width: number): Cached<N> {
+    const presentation = present(node);
+
+    if (presentation.kind !== 'text') throw new Error('Expected text presentation');
     const owner = (textLayout ??= owned.createLayout());
+    const input = { ...presentation, id: node.id, width };
 
-    const style = typography(node, size),
-      spans =
-        node.kind === 'heading' && node.text.length
-          ? [
-              ...formattingSpans(node.marks),
-              { start: 0, end: node.text.length, bold: true, italic: false },
-            ]
-          : formattingSpans(node.marks);
+    if (presentation.atoms.length) {
+      const layout = owner.layoutInline(input);
 
-    const input = {
-      id: node.id,
-      text: node.text,
-      spans,
-      width,
-      size: style.size,
-      lineHeight: style.lineHeight,
-      baselineGrid: 4,
-    };
-
-    if (node.inline.length) {
-      const layout = owner.layoutInline({ ...input, atoms: node.inline.map(inlineSchema.layout) });
-
-      return { node, width, height: layout.height, layout, boxes: layout.inlineBoxes };
+      return {
+        node,
+        presentation,
+        width,
+        height: layout.height,
+        layout,
+        boxes: layout.inlineBoxes,
+      };
     }
 
     const layout = owner.layout(input);
 
-    return { node, width, height: layout.height, layout, boxes: [] };
+    return {
+      node,
+      presentation,
+      width,
+      height: layout.height,
+      layout,
+      boxes: [],
+    };
+  }
+
+  function gap(before: N, after: N) {
+    return Math.max(present(before).after, present(after).before);
   }
 
   function firstAt(y: number) {
@@ -130,11 +151,11 @@ export function createEditorScene(owned: Owned, size = 20) {
 
   return {
     build(
-      nodes: StarterLeaf[],
+      nodes: readonly N[],
       width: number,
       measurements: ReadonlyMap<number, Measurement>,
       view: View,
-      decorations: ReadonlyMap<number, BlockDecoration> = new Map(),
+      decorations: ReadonlyMap<number, { inset: number }> = emptyInsets,
     ) {
       currentDecorations = decorations;
 
@@ -162,9 +183,7 @@ export function createEditorScene(owned: Owned, size = 20) {
       const viewportReady =
         previous.placements
           .slice(firstAt(view.top - 160), firstAt(view.top + view.height + 160) + 1)
-          .every(
-            (p) => (p.node.kind !== 'paragraph' && p.node.kind !== 'heading') || p.layout !== null,
-          ) &&
+          .every((p) => present(p.node).kind !== 'text' || p.layout !== null) &&
         view.pinned.every((id) => {
           const value = cache.get(id);
 
@@ -175,6 +194,7 @@ export function createEditorScene(owned: Owned, size = 20) {
         nodes === previousNodes &&
         width === previous.width &&
         measurements === previousMeasurements &&
+        decorations === previousDecorations &&
         !paddingChanged &&
         !dirty.size &&
         viewportReady
@@ -221,9 +241,9 @@ export function createEditorScene(owned: Owned, size = 20) {
         y = 32 + padding,
         newLayouts = 0;
 
-      const placements: Placement[] = [];
+      const placements: Placement<N>[] = [];
 
-      function update(node: TextBlockNode) {
+      function update(node: N) {
         const startedValue = performance.now(),
           value = compose(node, Math.max(80, width - (decorations.get(node.id)?.inset ?? 0)));
 
@@ -242,52 +262,24 @@ export function createEditorScene(owned: Owned, size = 20) {
           inset = decorations.get(node.id)?.inset ?? 0,
           layoutWidth = Math.max(80, width - inset);
 
-        if (index > 0) {
-          const prev = nodes[index - 1];
-
-          const after =
-            prev.kind === 'paragraph' || prev.kind === 'heading'
-              ? typography(prev, size).after
-              : 24;
-
-          const current = nodes[index];
-
-          const before =
-            current.kind === 'paragraph' || current.kind === 'heading'
-              ? typography(current, size).before
-              : 0;
-
-          y += Math.max(after, before);
-        }
+        if (index > 0) y += gap(nodes[index - 1], node);
 
         if (index === anchorIndex) anchorY = y;
 
-        if (node.kind !== 'paragraph' && node.kind !== 'heading') {
+        const presentation = present(node);
+
+        if (presentation.kind === 'box') {
+          if (cache.delete(node.id)) textLayout?.release(node.id);
+          dirty.delete(node.id);
           const measured = measurements.get(node.id);
-
-          const height =
-            measured?.width === width
-              ? measured.height
-              : node.kind === 'image'
-                ? 96
-                : Math.max(60, node.rows.length * 64);
-
+          const height = measured?.width === width ? measured.height : presentation.height;
           placements.push({ node, y, height, layout: null, layoutWidth: width, boxes: [] });
-          y += Math.ceil(height / 4) * 4;
+          y += snap(height, presentation.baselineGrid);
           continue;
         }
 
         let value = cache.get(node.id);
-
-        const changed =
-          !value ||
-          value.node.kind !== node.kind ||
-          (value.node.kind === 'heading' &&
-            node.kind === 'heading' &&
-            value.node.level !== node.level) ||
-          value.node.text !== node.text ||
-          value.node.marks !== node.marks ||
-          value.node.inline !== node.inline;
+        const changed = !value || !sameText(value.presentation, presentation);
 
         const urgent =
           (index >= first && (index <= anchorIndex || y <= anchorY + offset + view.height + 160)) ||
@@ -303,14 +295,20 @@ export function createEditorScene(owned: Owned, size = 20) {
           if (!value) newLayouts++;
           value = update(node);
         } else if (!value) {
-          const style = typography(node, size),
-            columns = Math.max(1, Math.floor(layoutWidth / (style.size * 0.5)));
+          const columns = Math.max(1, Math.floor(layoutWidth / (presentation.size * 0.5)));
 
-          const lines = node.text
+          const lines = presentation.text
             .split('\n')
             .reduce((total, line) => total + Math.max(1, Math.ceil(line.length / columns)), 0);
 
-          value = { node, width: null, height: lines * style.lineHeight, layout: null, boxes: [] };
+          value = {
+            node,
+            presentation,
+            width: null,
+            height: lines * presentation.lineHeight,
+            layout: null,
+            boxes: [],
+          };
           cache.set(node.id, value);
           dirty.set(node.id, node);
         } else if (changed || value.width !== layoutWidth) {
@@ -323,7 +321,14 @@ export function createEditorScene(owned: Owned, size = 20) {
             cache.set(node.id, value);
             textLayout?.releaseLayout(node.id);
           }
-        } else dirty.delete(node.id);
+        } else {
+          dirty.delete(node.id);
+
+          if (value.node !== node) {
+            value = { ...value, node, presentation };
+            cache.set(node.id, value);
+          }
+        }
 
         if (!value) throw new Error('Missing paragraph layout');
         placements.push({
@@ -361,28 +366,9 @@ export function createEditorScene(owned: Owned, size = 20) {
 
         for (let index = 0; index < placements.length; index++) {
           const p = placements[index],
-            value =
-              p.node.kind === 'paragraph' || p.node.kind === 'heading'
-                ? cache.get(p.node.id)
-                : undefined;
+            value = present(p.node).kind === 'text' ? cache.get(p.node.id) : undefined;
 
-          if (index > 0) {
-            const prev = nodes[index - 1];
-
-            const after =
-              prev.kind === 'paragraph' || prev.kind === 'heading'
-                ? typography(prev, size).after
-                : 24;
-
-            const current = nodes[index];
-
-            const before =
-              current.kind === 'paragraph' || current.kind === 'heading'
-                ? typography(current, size).before
-                : 0;
-
-            y += Math.max(after, before);
-          }
+          if (index > 0) y += gap(nodes[index - 1], p.node);
 
           if (index === anchorIndex) anchorY = y;
           const inset = decorations.get(p.node.id)?.inset ?? 0;
@@ -399,7 +385,7 @@ export function createEditorScene(owned: Owned, size = 20) {
             : { ...p, y };
 
           placements[index] = next;
-          y += Math.ceil(next.height / 4) * 4;
+          y += snap(next.height, present(p.node).baselineGrid);
         }
       }
 
@@ -422,7 +408,7 @@ export function createEditorScene(owned: Owned, size = 20) {
           const p = placements[index];
 
           if (
-            (p.node.kind !== 'paragraph' && p.node.kind !== 'heading') ||
+            present(p.node).kind !== 'text' ||
             pinned.has(p.node.id) ||
             (index >= Math.max(0, first - 48) && index < end + 48)
           )
@@ -450,6 +436,7 @@ export function createEditorScene(owned: Owned, size = 20) {
       };
       previousNodes = nodes;
       previousMeasurements = measurements;
+      previousDecorations = decorations;
 
       return {
         scene: previous,
@@ -463,7 +450,7 @@ export function createEditorScene(owned: Owned, size = 20) {
     layoutFor(id: number) {
       const placement = previous.placements.find((p) => p.node.id === id);
 
-      if (!placement || (placement.node.kind !== 'paragraph' && placement.node.kind !== 'heading'))
+      if (!placement || present(placement.node).kind !== 'text')
         throw new Error('Missing text layout');
 
       const value = cache.get(id),
@@ -497,6 +484,8 @@ export function createEditorScene(owned: Owned, size = 20) {
         paddingTop: 0,
       };
       previousMeasurements = new Map();
+      currentDecorations = emptyInsets;
+      previousDecorations = emptyInsets;
     },
     get cachedParagraphs() {
       return cache.size;
@@ -505,6 +494,46 @@ export function createEditorScene(owned: Owned, size = 20) {
       return [...cache.values()].filter((p) => p.layout).length;
     },
   };
+}
+
+function snap(height: number, grid: number) {
+  return grid > 0 ? Math.ceil(height / grid) * grid : height;
+}
+
+function sameText(a: TextPresentation, b: TextPresentation) {
+  return (
+    a === b ||
+    (a.text === b.text &&
+      a.size === b.size &&
+      a.lineHeight === b.lineHeight &&
+      a.baselineGrid === b.baselineGrid &&
+      (a.spans === b.spans ||
+        (a.spans.length === b.spans.length &&
+          a.spans.every((span, index) => {
+            const next = b.spans[index];
+
+            return (
+              span.start === next.start &&
+              span.end === next.end &&
+              span.bold === next.bold &&
+              span.italic === next.italic
+            );
+          }))) &&
+      (a.atoms === b.atoms ||
+        (a.atoms.length === b.atoms.length &&
+          a.atoms.every((atom, index) => {
+            const next = b.atoms[index];
+
+            return (
+              atom.id === next.id &&
+              atom.index === next.index &&
+              atom.label === next.label &&
+              atom.width === next.width &&
+              atom.ascent === next.ascent &&
+              atom.descent === next.descent
+            );
+          }))))
+  );
 }
 
 function offsetLayout(layout: LaidOut, inset: number): LaidOut {

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 
+import type { createEditorScene, Placement, Scene } from '../../editor-canvas/scene';
 import { type EditorSample } from '../../editor-samples';
-import type { createEditorScene, Placement, Scene } from '../../editor-scene';
 import { createStreamMetrics, streamConfig } from '../../editor-stream';
-import { type StarterNode } from '../../extensions/demo-model';
+import type { StarterLeaf, StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 
 export function useSampleStream(
@@ -157,8 +157,8 @@ export function recordSamplePaint({
 }: {
   stream: StreamState;
   report: PaintReport;
-  scene: Scene;
-  visible: readonly Placement[];
+  scene: Scene<StarterLeaf>;
+  visible: readonly Placement<StarterLeaf>[];
   editStarted: RefObject<number | null>;
   loaded: number;
   revision: number;
