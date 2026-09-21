@@ -13,7 +13,7 @@ import {
   createEditor as createStateEditor,
   selectionContext,
   selectionNear,
-  type EditorOptions,
+  type EditorOptions as StateEditorOptions,
   type EditorState,
   type EditorEvents,
   type Transaction,
@@ -44,7 +44,7 @@ export type ExtensionContext<N extends NodeIdentity> = ContributionContext & {
 export type SessionContribution<N extends NodeIdentity> = {
   commands?: CommandDefinitions<N>;
   queries?: QueryDefinitions<N>;
-  fields?: EditorOptions<N>['fields'];
+  fields?: StateEditorOptions<N>['fields'];
   selections?: readonly SelectionExtension[];
   history?: HistoryOptions;
 };
@@ -139,11 +139,17 @@ type EditorConfig<D extends readonly SchemaDefinition[], N extends NodeIdentity>
   documentId?: string;
   revision?: number;
   positionCheckpoint?: unknown;
-  permissions?: EditorOptions<N>['permissions'];
+  permissions?: StateEditorOptions<N>['permissions'];
 } & (
   | { content: DocumentInput<NoInfer<D>>; document?: never }
   | { document: readonly NoInfer<N>[]; content?: never }
 );
+
+/** Configuration accepted by the headless constructor and framework ownership adapters. */
+export type EditorOptions<
+  D extends readonly SchemaDefinition[],
+  N extends NodeIdentity,
+> = EditorConfig<D, N> & CompatibleContributions<NoInfer<D>, NoInfer<N>>;
 
 type StateSession<N extends NodeIdentity> = ReturnType<typeof createStateEditor<N>>;
 
@@ -180,7 +186,7 @@ export type Editor<D extends readonly SchemaDefinition[], N extends NodeIdentity
 
 /** Content and installed capabilities come from one compiled extension assembly. */
 export function createEditor<const D extends readonly SchemaDefinition[], N extends NodeIdentity>(
-  config: EditorConfig<D, N> & CompatibleContributions<NoInfer<D>, NoInfer<N>>,
+  config: EditorOptions<D, N>,
 ): Editor<D, N>;
 export function createEditor(
   config: EditorConfig<readonly SchemaDefinition[], DocumentNode<readonly SchemaDefinition[]>>,

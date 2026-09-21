@@ -6,7 +6,7 @@ import { expect, test } from 'vitest';
 import { createEditor } from '../../../core';
 import { mountEditor, type MountedEditor } from '../../../editor-canvas';
 import { createViewDiagnostics } from '../../../editor-canvas/diagnostics';
-import { Editor } from '../../../editor-react';
+import { EditorContent } from '../../../editor-react';
 import { createSchema } from '../../../model';
 import { textSelection } from '../../../state';
 import { createCommentStore } from '../../comment';
@@ -206,7 +206,7 @@ test('React strict remounts attach the native block layer without retaining pain
         createElement(
           StrictMode,
           null,
-          createElement(Editor<(typeof f.editor.state.nodes)[number]>, {
+          createElement(EditorContent<(typeof f.editor.state.nodes)[number]>, {
             key,
             editor: f.editor,
             diagnostics: f.diagnostics,

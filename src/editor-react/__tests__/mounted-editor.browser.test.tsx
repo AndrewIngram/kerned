@@ -14,7 +14,7 @@ import {
 } from '../../editor-canvas';
 import { createViewDiagnostics } from '../../editor-canvas/diagnostics';
 import { createSchema, defineNode } from '../../model';
-import { Editor } from '../editor';
+import { EditorContent } from '../editor-content';
 
 const note = defineNode({
   name: 'note',
@@ -129,7 +129,7 @@ test('React strict lifetime uses the vanilla mount and detaches without destroyi
   flushSync(() =>
     f.root.render(
       <StrictMode>
-        <Editor editor={f.editor} style={size} onReady={f.ready} diagnostics={diagnostics} />
+        <EditorContent editor={f.editor} style={size} onReady={f.ready} diagnostics={diagnostics} />
       </StrictMode>,
     ),
   );
@@ -144,7 +144,7 @@ test('React strict lifetime uses the vanilla mount and detaches without destroyi
   flushSync(() =>
     f.root.render(
       <StrictMode>
-        <Editor
+        <EditorContent
           editor={f.editor}
           style={size}
           onReady={unexpectedRemount}
@@ -168,14 +168,18 @@ test('React reports asset failure and can retry without replacing the session', 
   onTestFinished(() => f.destroy());
 
   flushSync(() =>
-    f.root.render(<Editor editor={f.editor} resolveAsset={invalidAsset} onError={f.failed} />),
+    f.root.render(
+      <EditorContent editor={f.editor} resolveAsset={invalidAsset} onError={f.failed} />,
+    ),
   );
   await f.failure;
   expect(f.failures).toHaveLength(1);
   await expect
     .poll(() => f.element.querySelector('[role="alert"]')?.textContent)
     .toMatch(/Invalid graphics/);
-  flushSync(() => f.root.render(<Editor editor={f.editor} style={size} onReady={f.ready} />));
+  flushSync(() =>
+    f.root.render(<EditorContent editor={f.editor} style={size} onReady={f.ready} />),
+  );
   await f.readiness;
   expect(f.mounted?.status).toBe('ready');
   await expect.poll(() => f.element.querySelector('[role="alert"]')).toBeNull();
@@ -188,12 +192,18 @@ test('React updates zoom and padding without replacing its view, including props
   onTestFinished(() => f.destroy());
   flushSync(() =>
     f.root.render(
-      <Editor editor={f.editor} style={size} onReady={f.ready} zoom={1.25} paddingTop={16} />,
+      <EditorContent
+        editor={f.editor}
+        style={size}
+        onReady={f.ready}
+        zoom={1.25}
+        paddingTop={16}
+      />,
     ),
   );
   flushSync(() =>
     f.root.render(
-      <Editor editor={f.editor} style={size} onReady={f.ready} zoom={1.5} paddingTop={32} />,
+      <EditorContent editor={f.editor} style={size} onReady={f.ready} zoom={1.5} paddingTop={32} />,
     ),
   );
   const mounted = await f.readiness;
@@ -206,7 +216,7 @@ test('React updates zoom and padding without replacing its view, including props
   const input = f.element.querySelector('textarea');
   flushSync(() =>
     f.root.render(
-      <Editor
+      <EditorContent
         editor={f.editor}
         style={size}
         onReady={unexpectedRemount}
@@ -220,7 +230,7 @@ test('React updates zoom and padding without replacing its view, including props
   expect(document.activeElement).toBe(input);
   expect(f.element.querySelector('canvas')).toBe(canvas);
   flushSync(() =>
-    f.root.render(<Editor editor={f.editor} style={size} onReady={unexpectedRemount} />),
+    f.root.render(<EditorContent editor={f.editor} style={size} onReady={unexpectedRemount} />),
   );
   expect(mounted.getSnapshot()?.zoom).toBe(1);
   expect(mounted.blockBounds(before.id)?.top).toBeCloseTo(before.top - 32);
@@ -237,14 +247,14 @@ test('React remounts on session replacement and tolerates updates after borrowed
     second.destroy();
   });
   flushSync(() =>
-    first.root.render(<Editor editor={first.editor} style={size} onReady={first.ready} />),
+    first.root.render(<EditorContent editor={first.editor} style={size} onReady={first.ready} />),
   );
   const original = await first.readiness;
   original.focus();
   const oldInput = first.element.querySelector('textarea');
   oldInput?.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
   flushSync(() =>
-    first.root.render(<Editor editor={second.editor} style={size} onReady={second.ready} />),
+    first.root.render(<EditorContent editor={second.editor} style={size} onReady={second.ready} />),
   );
   const replacement = await second.readiness;
   expect(original.isDestroyed).toBe(true);
@@ -258,11 +268,15 @@ test('React remounts on session replacement and tolerates updates after borrowed
   second.editor.destroy();
   expect(replacement.isDestroyed).toBe(true);
   flushSync(() =>
-    first.root.render(<Editor editor={second.editor} style={size} zoom={1.25} paddingTop={24} />),
+    first.root.render(
+      <EditorContent editor={second.editor} style={size} zoom={1.25} paddingTop={24} />,
+    ),
   );
   expect(first.element.querySelector('canvas')).toBeNull();
   expect(() => second.editor.commands.focus()).toThrow(/destroyed/);
-  flushSync(() => first.root.render(<Editor key="closed" editor={second.editor} style={size} />));
+  flushSync(() =>
+    first.root.render(<EditorContent key="closed" editor={second.editor} style={size} />),
+  );
   expect(first.element.querySelector('canvas')).toBeNull();
 });
 
@@ -272,7 +286,9 @@ test('React applies and removes a theme without remounting or leaking it into DO
   const f = fixture();
   onTestFinished(() => f.destroy());
   flushSync(() =>
-    f.root.render(<Editor editor={f.editor} style={size} onReady={f.ready} theme={initialTheme} />),
+    f.root.render(
+      <EditorContent editor={f.editor} style={size} onReady={f.ready} theme={initialTheme} />,
+    ),
   );
   const mounted = await f.readiness;
   const point = { id: f.editor.state.nodes[0].id, offset: 0 };
@@ -283,12 +299,17 @@ test('React applies and removes a theme without remounting or leaking it into DO
   const selection = f.editor.state.selection;
   flushSync(() =>
     f.root.render(
-      <Editor editor={f.editor} style={size} onReady={unexpectedRemount} theme={nextTheme} />,
+      <EditorContent
+        editor={f.editor}
+        style={size}
+        onReady={unexpectedRemount}
+        theme={nextTheme}
+      />,
     ),
   );
   expect(mounted.coordsAt(point)?.height).toBe(48);
   flushSync(() =>
-    f.root.render(<Editor editor={f.editor} style={size} onReady={unexpectedRemount} />),
+    f.root.render(<EditorContent editor={f.editor} style={size} onReady={unexpectedRemount} />),
   );
   expect(mounted.coordsAt(point)?.height).toBe(28);
   expect(f.element.querySelector('canvas')).toBe(canvas);
@@ -302,7 +323,9 @@ test('React font props replace live resources without remounting and restore def
 }) => {
   const f = fixture();
   onTestFinished(() => f.destroy());
-  flushSync(() => f.root.render(<Editor editor={f.editor} style={size} onReady={f.ready} />));
+  flushSync(() =>
+    f.root.render(<EditorContent editor={f.editor} style={size} onReady={f.ready} />),
+  );
   const mounted = await f.readiness;
   const id = f.editor.state.nodes[0].id;
   const caret = mounted.coordsAt({ id, offset: 5 });
@@ -310,7 +333,7 @@ test('React font props replace live resources without remounting and restore def
 
   flushSync(() =>
     f.root.render(
-      <Editor
+      <EditorContent
         editor={f.editor}
         fonts={replacementFonts}
         style={size}
@@ -322,9 +345,27 @@ test('React font props replace live resources without remounting and restore def
   expect(f.element.querySelector('canvas')).toBe(canvas);
   expect(mounted.status).toBe('ready');
   flushSync(() =>
-    f.root.render(<Editor editor={f.editor} style={size} onReady={unexpectedRemount} />),
+    f.root.render(<EditorContent editor={f.editor} style={size} onReady={unexpectedRemount} />),
   );
   await expect.poll(() => mounted.coordsAt({ id, offset: 5 })?.left).toBe(caret?.left);
   expect(f.element.querySelector('canvas')).toBe(canvas);
   expect(f.element.querySelector('[role=alert]')).toBeNull();
+});
+
+test('a nullable React content host waits for its session and detaches when cleared', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  flushSync(() => f.root.render(<EditorContent editor={null} style={size} onReady={f.ready} />));
+  expect(f.element.querySelector('canvas')).toBeNull();
+  flushSync(() =>
+    f.root.render(<EditorContent editor={f.editor} style={size} onReady={f.ready} />),
+  );
+  const mounted = await f.readiness;
+  expect(mounted.status).toBe('ready');
+  flushSync(() => f.root.render(<EditorContent editor={null} style={size} onReady={f.ready} />));
+  expect(mounted.isDestroyed).toBe(true);
+  expect(f.editor.isDestroyed).toBe(false);
+  expect(f.element.querySelector('canvas')).toBeNull();
 });

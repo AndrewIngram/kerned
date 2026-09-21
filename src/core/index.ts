@@ -1,6 +1,7 @@
 export {
   createEditor,
   type Editor,
+  type EditorOptions,
   type ExtensionContext,
   type SessionContribution,
 } from './session';

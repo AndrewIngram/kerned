@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status   | Required outcome                                                               |
-| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Complete | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Complete | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Complete | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status      | Required outcome                                                               |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Complete    | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Complete    | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Complete    | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Complete    | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | In progress | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending     | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending     | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -2414,3 +2414,46 @@ in the fix. See [the review record](milestone-5-architecture-review.md).
 M5 is complete with the post-review fix commit. M6 is next: rendering/decorations
 and React integration. M7 codecs/input policies and M8 built workspace consumers
 remain pending; completing M5 does not complete the overall goal.
+
+### Milestone 6 checkpoint: React session ownership and typed subscriptions
+
+The public React entry now provides `useEditor`, `EditorContent`, schema-bound
+`createEditorContext` and nullable selector hooks. `useEditor` allocates the
+headless session only after React commits and releases it on unmount or schema /
+document identity replacement. Content options initialize the session; ordinary
+rerenders preserve edits. Suspended, abandoned renders and server rendering do
+not allocate extension resources. Strict Mode cleanup and replay balance those
+resources. Externally destroying an owned session publishes a null value.
+
+`EditorContent` accepts the hook's null loading state and mounts the existing
+framework-independent view. It borrows the session. The schema-bound provider
+also borrows, keeps installed commands and content types, and rejects a different
+schema instance. `useEditorState` retains its exact non-null return type for
+existing callers and returns undefined for a null source. `useCommandState` now
+accepts installed command names and inferred arguments, matching the session's
+`getCommandState`; the superseded definition-handle signature has no callers and
+was removed. Both selectors suppress unchanged derived values.
+
+The demo now uses `useEditor`. `EditorWorkspace` assembles its schema and owns
+the session through that hook; `EditorWorkspaceView` receives the committed
+session and owns application UI. All old React `Editor` component callers have
+moved to `EditorContent`. No compatibility alias remains. The Node/server import
+and render test exercises the public React entry without a document global.
+Browser tests cover hydration, Strict Mode, aborted rendering, identity changes,
+external destruction, nullable attachment, borrowed lifetime, inferred command
+arguments and selector equality. The server-renderer dependency is preoptimized
+in the existing Vitest browser configuration to prevent test-page reloads.
+
+`pnpm run check` passes: 664 Vitest tests, one unchanged collaboration TODO and
+42 end-to-end cases. The production build passes. Three serial production trials
+in `artifacts/public-interface-m6/react-ownership/` pass every unchanged budget:
+worst first usable 236 ms, streaming 1,237.5 ms, paste handler 57.2 ms, paste paint
+117.5 ms, typing 32.2 ms, paging 32.3 ms and loaded heap 27,046,664 bytes. The
+report records parent commit `47736ee` and measures this checkpoint's uncommitted
+implementation. A second lint fix/format pass leaves tracked and untracked
+files unchanged.
+
+See [React integration](react-integration.md) for the public usage and ownership
+choices. M6 remains open: React node/mark/widget rendering, context-preserving
+overlays and the general decoration API/migrations still need implementation and
+verification before the milestone commit and independent architecture judge.

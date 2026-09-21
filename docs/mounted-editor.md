@@ -187,9 +187,9 @@ general range-decoration and localized change-range interface remains milestone 
 ## React
 
 ```tsx
-import { Editor } from '../src/editor-react';
+import { EditorContent } from '../src/editor-react';
 
-<Editor editor={editor} style={{ height: 480 }} onReady={(view) => view.focus()} />;
+<EditorContent editor={editor} style={{ height: 480 }} onReady={(view) => view.focus()} />;
 ```
 
 React attaches the same native mount and disposes it on unmount or session
@@ -202,7 +202,9 @@ mount also announces these messages through a status element.
 `zoom` and `paddingTop` props update the existing view, including while assets are
 loading. They preserve its input element, focus and selection. Omitting either
 prop restores its default (`1` and `0` respectively). Changing attachment options
-such as the session, scroll mode, font configuration or asset resolver creates a new view.
+such as the session, scroll mode or asset resolver creates a new view. Font and
+theme changes update the existing view. See [React integration](react-integration.md)
+for owned sessions, context and toolbar selectors.
 
 ## Lifetime and coordinates
 
@@ -335,7 +337,7 @@ Search and comment rendering are shared across canvas and native text. Mention
 rendering is shared between mounts; a general custom-inline presentation contract
 remains future work.
 
-The writing and extension demos now mount the same public React `Editor`. They
+The writing and extension demos now mount the same public React `EditorContent`. They
 create sessions, choose schema/browser extensions and supply application UI;
 engine handles and manual layout, input and painting orchestration are gone.
 Outline, find and annotation panels use geometry/reveal queries. Streaming

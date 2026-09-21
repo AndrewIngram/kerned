@@ -294,8 +294,8 @@ state, queries and durable-position reads remain available for inspection.
 Edits, new subscriptions, undo/redo, dry runs and previously prepared chains
 throw after destruction. Destroying one session does not affect another session
 created from the same schema. Session destruction and view unmounting are separate; an attached view releases
-its native listeners on session destruction. Complete graphics/layout resource
-ownership remains milestone 4 work.
+its native listeners on session destruction. The mounted view owns graphics and layout resources;
+see [mounted editor lifetime](mounted-editor.md).
 
 ```tsx
 import { useEditorState } from './src/editor-react';
@@ -306,7 +306,7 @@ function Revision({ editor }) {
 }
 ```
 
-The hook uses React's external-store contract and cleans up on unmount. `useEditorState(editor, selector, equal = Object.is)` caches the selected value and suppresses renders when it is unchanged. Selectors must be pure; use a stable selector for expensive calculations. `useCommandState(editor, definition, ...args)` observes availability and activity with value equality. Existing canvas primitives and DOM overlays continue to work.
+The hook uses React's external-store contract and cleans up on unmount. `useEditorState(editor, selector, equal = Object.is)` caches the selected value and suppresses renders when it is unchanged. Selectors must be pure; use a stable selector for expensive calculations. `useCommandState(editor, name, ...args)` observes availability and activity with value equality. Existing canvas primitives and DOM overlays continue to work.
 
 ## External comments and decorations
 

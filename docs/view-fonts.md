@@ -149,7 +149,7 @@ the theme to override heading weight while retaining authored marks.
 Fixed rule values are validated and copied when the rule is created. Callback
 results are validated and cached per immutable node for each view configuration.
 Callbacks should be pure. Replace the theme object when configuration changes;
-`view.update({ theme: {} })` restores extension defaults. The React `Editor`
+`view.update({ theme: {} })` restores extension defaults. The React `EditorContent`
 accepts the same `theme` prop; removing it restores defaults without remounting.
 
 A theme change clears resolved style/projection caches while preserving the

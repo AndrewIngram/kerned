@@ -1,16 +1,28 @@
 import { useMemo, useSyncExternalStore } from 'react';
 
-import type { NodeIdentity } from '../model';
-import type { EditorState, CommandDefinition, CommandState } from '../state';
+import type { CommandState } from '../state';
 
 export { usePointerSelection } from './pointer-selection';
 
-export { Editor, useViewState } from './editor';
+export { EditorContent, useViewState, type EditorContentProps } from './editor-content';
+
+export { useEditor } from './use-editor';
+
+export { createEditorContext } from './context';
 
 export { createReactRenderers, type ReactRenderer } from './renderers';
 
+type SnapshotSource<State> = {
+  readonly state: State;
+  subscribe(this: void, listener: () => void): () => void;
+};
+
+const noSnapshot = () => undefined;
+
+const noSubscription = () => () => {};
+
 function createSelectedSnapshot<State, Value>(
-  editor: { readonly state: State; subscribe(this: void, listener: () => void): () => void },
+  editor: SnapshotSource<State>,
   selector: (state: State) => Value,
   equal: (a: Value, b: Value) => boolean = Object.is,
 ) {
@@ -29,31 +41,49 @@ function createSelectedSnapshot<State, Value>(
 
 /** React is an optional subscriber to a headless editor session. */
 export function useEditorState<State, Value>(
-  editor: { readonly state: State; subscribe(this: void, listener: () => void): () => void },
+  editor: SnapshotSource<State>,
+  selector: (state: State) => Value,
+  equal?: (a: Value, b: Value) => boolean,
+): Value;
+export function useEditorState<State, Value>(
+  editor: SnapshotSource<State> | null,
+  selector: (state: State) => Value,
+  equal?: (a: Value, b: Value) => boolean,
+): Value | undefined;
+export function useEditorState<State, Value>(
+  editor: SnapshotSource<State> | null,
   selector: (state: State) => Value,
   equal: (a: Value, b: Value) => boolean = Object.is,
-): Value {
+): Value | undefined {
   const snapshot = useMemo(
-    () => createSelectedSnapshot(editor, selector, equal),
+    () => (editor ? createSelectedSnapshot(editor, selector, equal) : noSnapshot),
     [editor, selector, equal],
   );
 
-  return useSyncExternalStore(editor.subscribe, snapshot, snapshot);
+  return useSyncExternalStore(editor?.subscribe ?? noSubscription, snapshot, snapshot);
 }
 
-export function useCommandState<N extends NodeIdentity, Args extends unknown[]>(
-  editor: {
-    readonly state: EditorState<N>;
-    subscribe(listener: () => void): () => void;
-    commandState(command: CommandDefinition<N, Args>, ...args: Args): CommandState;
-  },
-  command: CommandDefinition<N, Args>,
-  ...args: Args
-): CommandState {
+type CommandSource<State, Request extends unknown[]> = SnapshotSource<State> & {
+  readonly getCommandState: (...request: Request) => CommandState;
+};
+
+/** Observe an installed command by name, with the same inferred arguments as the session. */
+export function useCommandState<State, Request extends unknown[]>(
+  editor: CommandSource<State, Request>,
+  ...request: NoInfer<Request>
+): CommandState;
+export function useCommandState<State, Request extends unknown[]>(
+  editor: CommandSource<State, Request> | null,
+  ...request: NoInfer<Request>
+): CommandState | undefined;
+export function useCommandState<State, Request extends unknown[]>(
+  editor: CommandSource<State, Request> | null,
+  ...request: NoInfer<Request>
+): CommandState | undefined {
   return useEditorState(
     editor,
-    () => editor.commandState(command, ...args),
-    (a, b) => a.available === b.available && a.activity === b.activity,
+    () => editor?.getCommandState(...request),
+    (a, b) => a?.available === b?.available && a?.activity === b?.activity,
   );
 }
 

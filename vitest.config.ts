@@ -5,7 +5,16 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [react({ compiler: true })],
   // Dynamic fixture imports must be optimized before any browser starts its tests.
-  optimizeDeps: { include: ['react', 'react-dom', 'react-dom/client', 'zod', 'canvaskit-wasm'] },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-dom/client',
+      'react-dom/server',
+      'zod',
+      'canvaskit-wasm',
+    ],
+  },
   test: {
     projects: [
       {

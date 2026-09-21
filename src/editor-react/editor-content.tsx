@@ -14,8 +14,9 @@ import {
 } from '../editor-canvas';
 import type { NodeIdentity } from '../model';
 
-type EditorProps<N extends NodeIdentity> = MountEditorOptions<N> &
-  Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'onError'> & {
+export type EditorContentProps<N extends NodeIdentity> = Omit<MountEditorOptions<N>, 'editor'> & {
+  editor: MountEditorOptions<N>['editor'] | null;
+} & Omit<ComponentPropsWithoutRef<'div'>, 'children' | 'onError'> & {
     onReady?: (view: MountedEditor) => void;
     onError?: (error: Error) => void;
   };
@@ -23,7 +24,7 @@ type EditorProps<N extends NodeIdentity> = MountEditorOptions<N> &
 const defaultTheme = Object.freeze({});
 
 /** Optional React attachment to the same native view used by vanilla applications. */
-export function Editor<N extends NodeIdentity>({
+export function EditorContent<N extends NodeIdentity>({
   editor,
   resolveAsset,
   fonts = defaultFonts,
@@ -39,7 +40,7 @@ export function Editor<N extends NodeIdentity>({
   onError,
   onNotice,
   ...props
-}: EditorProps<N>) {
+}: EditorContentProps<N>) {
   const host = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ onReady, onError, onNotice });
   const configuration = useRef({ zoom, paddingTop, maxWidth, background, theme, fonts });
@@ -84,7 +85,8 @@ export function Editor<N extends NodeIdentity>({
   useLayoutEffect(() => {
     const element = host.current;
 
-    if (!element || editor.isDestroyed) return undefined;
+    if (!element || !editor || editor.isDestroyed) return undefined;
+    const session = editor;
     let mounted: MountedEditor | undefined;
     let active = true;
     let reported = false;
@@ -101,11 +103,11 @@ export function Editor<N extends NodeIdentity>({
     async function initialize(target: HTMLElement) {
       await Promise.resolve();
 
-      if (!active || editor.isDestroyed) return;
+      if (!active || session.isDestroyed) return;
 
       try {
         mounted = mountEditor(target, {
-          editor,
+          editor: session,
           resolveAsset,
           scroll,
           toolbar,
@@ -139,7 +141,7 @@ export function Editor<N extends NodeIdentity>({
   return (
     <>
       <div {...props} ref={host} />
-      {error && <div role="alert">{error.message}</div>}
+      {editor && error && <div role="alert">{error.message}</div>}
     </>
   );
 }

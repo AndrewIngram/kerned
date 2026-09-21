@@ -110,27 +110,24 @@ will consume operations and mappings without owning browser state.
 
 ## Current migration state
 
-Milestones 0–3 have separated model, transform, state and core, compiled typed
-Standard Schema assemblies and moved editing to composed session commands. See
+Milestones 0–5 have separated model, transform, state and core, compiled typed
+Standard Schema assemblies, composed session commands, completed the shared view
+lifetime and added per-view typography/font configuration. See
 [verified progress](public-interface-progress.md) for review and validation evidence.
 
-The remaining view/package differences are:
+The demo now uses `useEditor` to own a session after React commits and
+`EditorContent` to attach the framework-independent view. The app entry loads its
+sample and mounts React; it does not allocate or pass internal view resources.
+Scenes have independent cache owners, and sample changes release the previous
+view while retaining shared immutable asset bytes.
 
-- `src/demo/app/main.tsx` starts a private view-resource lifetime and still passes
-  its borrowed resources to the workspace. Public mounting must take over.
-- `src/editor-react/editor.tsx` mounts listeners while the demo assembles the
-  complete editing surface. Painting, native input and document layout now have
-  framework-independent controllers, as does viewport observation and scrolling.
-  React subscribes and attaches. Asset loading now owns readiness and cancellation;
-  Image decoding and measurement also have a native view with a React adapter;
-  bounded image and mention-label caches belong to the mounted editor.
-  Integrating these lifetimes and the remaining DOM overlays still needs the
-  complete mounted view.
-- Scenes have independent cache owners. Sample changes no longer require a
-  synchronous unmount to coordinate shared cache cleanup.
-- Starter commands compose with foreign node definitions, but browser codecs,
-  projection and rendering still need their complete extension-driven migration.
-- Built workspace exports and external consumer fixtures remain milestone 8.
+The remaining differences from the target are:
+
+- Milestone 6: React node/mark/widget rendering, context-preserving overlays and
+  public decoration contributions. The session hook, provider/context, content
+  host and typed selectors are implemented, but do not complete the milestone.
+- Milestone 7: extension codecs/input policies and durable delayed-edit contracts.
+- Milestone 8: built workspace exports, external consumers and final migration.
 
 ## Standard Schema document contract
 
