@@ -93,4 +93,6 @@ export { createSchema, type AssembledSchema, type SchemaValues } from './assembl
 
 export { type NodeBinding } from './node-binding';
 
+export { type ValueBinding } from './value-binding';
+
 export { textContent } from './text-content';

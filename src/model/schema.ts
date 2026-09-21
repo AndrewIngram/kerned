@@ -2,6 +2,7 @@ import type { InlineValue } from './inline-schema';
 import type { Mark, MarkRange } from './marks';
 import { bindNode, type NodeBinding, type NodeDefinition, type NodeFactory } from './node-binding';
 import type { NodeCodec } from './schema-codec';
+import { bindValue, type ValueBinding, type ValueDefinition } from './value-binding';
 
 export type NodeIdentity = { id: number; key: string; locked?: boolean };
 
@@ -82,9 +83,11 @@ function ownType<N>(type: NodeType<N>): NodeType<N> {
 /** Registration happens once. No schema name is privileged by the engine. */
 export function createRuntimeSchema<N extends NodeIdentity & { kind: string }>(
   extensions: readonly NodeType<N>[],
+  values: readonly ValueDefinition[] = [],
 ) {
   const registered = extensions.map(ownType);
   const registry = new Map(registered.map((extension) => [extension.name, extension]));
+  const valueRegistry = new Map(values.map((definition) => [definition.name, definition]));
 
   function resolve(node: N) {
     const type = registry.get(node.kind);
@@ -115,6 +118,9 @@ export function createRuntimeSchema<N extends NodeIdentity & { kind: string }>(
     ),
     resolve,
     copy,
+    value<const Definition extends ValueDefinition>(definition: Definition) {
+      return bindValue(valueRegistry.get(definition.name), definition);
+    },
     node<const Definition extends NodeDefinition>(
       definition: Definition,
     ): NodeBinding<N, Definition> {
@@ -172,6 +178,9 @@ export function createRuntimeSchema<N extends NodeIdentity & { kind: string }>(
 }
 
 export type Schema<N> = {
+  readonly value: <const Definition extends ValueDefinition>(
+    definition: Definition,
+  ) => ValueBinding<Definition>;
   readonly copy: (this: void, node: N, allocate: () => NodeIdentity) => N;
   readonly node: <const Definition extends NodeDefinition>(
     definition: Definition,

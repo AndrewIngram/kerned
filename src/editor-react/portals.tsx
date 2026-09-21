@@ -81,7 +81,7 @@ export function portalHostFor(element: HTMLElement) {
     if (host) return host;
   }
 
-  throw new Error('React node views require EditorContent');
+  throw new Error('React renderers require EditorContent');
 }
 
 /** Portals remain children of the application's providers and error boundaries. */

@@ -309,7 +309,7 @@ test('React node registration requires a React content host instead of creating 
   onTestFinished(() => f.destroy());
   const view = mountEditor(f.element, { editor: f.editor });
   onTestFinished(() => view.destroy());
-  await expect(view.ready).rejects.toThrow(/React node views require EditorContent/);
+  await expect(view.ready).rejects.toThrow(/React renderers require EditorContent/);
   expect(f.element.querySelector('canvas')).toBeNull();
   expect(f.editor.isDestroyed).toBe(false);
 });

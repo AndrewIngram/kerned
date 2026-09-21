@@ -306,5 +306,14 @@ export function compileSchema(definitions: readonly SchemaDefinition[]) {
     };
   });
 
-  return { ...createRuntimeSchema(extensions), marks, inline: inlineValues };
+  return {
+    ...createRuntimeSchema(
+      extensions,
+      definitions.filter(
+        (definition) => definition.category === 'mark' || definition.category === 'inline',
+      ),
+    ),
+    marks,
+    inline: inlineValues,
+  };
 }

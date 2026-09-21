@@ -573,10 +573,14 @@ export function mountEditor<N extends NodeIdentity>(
 
         const host =
           target instanceof Element && overlay.contains(target)
-            ? target.closest('[data-editor-node]')
+            ? target.closest('[data-editor-node],[data-editor-focus-node]')
             : null;
 
-        focusedNode = host ? Number(host.getAttribute('data-editor-node')) : undefined;
+        focusedNode = host
+          ? Number(
+              host.getAttribute('data-editor-node') ?? host.getAttribute('data-editor-focus-node'),
+            )
+          : undefined;
 
         // Moving/replacing a native control can dispatch blur during DOM reconciliation.
         // Publish its retention change after that operation has completed.

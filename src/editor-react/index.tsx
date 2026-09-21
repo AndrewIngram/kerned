@@ -12,6 +12,13 @@ export { createEditorContext } from './context';
 
 export { defineReactNodeView, type ReactNodeViewProps } from './node-view';
 
+export {
+  defineReactInlineView,
+  defineReactMarkView,
+  type ReactInlineViewProps,
+  type ReactMarkViewProps,
+} from './range-view';
+
 type SnapshotSource<State> = {
   readonly state: State;
   subscribe(this: void, listener: () => void): () => void;

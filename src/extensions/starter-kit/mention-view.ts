@@ -1,10 +1,9 @@
 import { defineContribution, defineExtension, type ExtensionContext } from '../../core';
 import {
   viewLayers,
-  type ViewLayerContext,
-  type ViewLayerFrame,
+  defineInlineView,
+  type InlineViewFrame,
   type PreparedText,
-  type DrawingRect,
 } from '../../editor-browser';
 import type { NodeIdentity } from '../../model';
 import { mentionDefinition } from '../starter-definitions';
@@ -29,139 +28,6 @@ export function onMentionActivate(
   return channels[0].subscribe(listener);
 }
 
-function createMentionView<N extends NodeIdentity>(
-  { editor, element, paint, prepareText }: ViewLayerContext<N>,
-  options: { background: string; size: number; padding: number; radius: number },
-  activate: Listener,
-) {
-  const buttons = new Map<string, HTMLButtonElement>();
-  let hits = new Map<string, MentionActivation>();
-  let labels = new Map<N, ReadonlyMap<string, string>>();
-
-  function click(event: MouseEvent) {
-    if (!(event.target instanceof HTMLButtonElement)) return;
-    const hit = hits.get(event.target.dataset.mentionKey ?? '');
-
-    if (hit) activate(hit);
-  }
-
-  element.addEventListener('click', click);
-
-  return {
-    update({ blocks }: ViewLayerFrame<N>) {
-      if (!hits.size && blocks.every((block) => !block.inline.length)) {
-        labels.clear();
-
-        return;
-      }
-
-      const retained = new Map<N, ReadonlyMap<string, string>>();
-      const nextHits = new Map<string, MentionActivation>();
-      const drawing: { bounds: DrawingRect; label: PreparedText }[] = [];
-
-      for (const block of blocks) {
-        if (!block.inline.length) continue;
-        let names = labels.get(block.node);
-
-        if (!names) {
-          const type = editor.schema.resolve(block.node);
-
-          if (type.kind !== 'text') continue;
-          names = new Map(
-            (type.editing.inline?.read(block.node) ?? [])
-              .filter((value) => value.type === mentionDefinition.name)
-              .map((value) => [
-                value.id,
-                mentionDefinition.spec.attributes.parse(value.attrs).label,
-              ]),
-          );
-        }
-
-        retained.set(block.node, names);
-
-        for (const box of block.inline) {
-          const name = names.get(box.id);
-
-          if (name === undefined) continue;
-          const key = `${block.node.id}:${box.id}`;
-
-          const bounds = {
-            left: block.left + box.left,
-            top: block.top + box.top,
-            width: box.width,
-            height: box.height,
-          };
-
-          const label = prepareText({
-            text: name,
-            width: Math.max(1, box.width - options.padding * 2),
-            size: options.size,
-          });
-
-          drawing.push({ bounds, label });
-          nextHits.set(key, { nodeId: block.node.id, id: box.id, index: box.index });
-          let button = buttons.get(key);
-
-          if (!button) {
-            button = element.ownerDocument.createElement('button');
-            button.type = 'button';
-            button.className = 'mention-hit';
-            button.dataset.mentionKey = key;
-            button.dataset.mention = box.id;
-            button.dataset.editorNode = String(block.node.id);
-            element.append(button);
-            buttons.set(key, button);
-          }
-
-          button.setAttribute('aria-label', `Open ${name}`);
-          button.style.left = `${bounds.left}px`;
-          button.style.top = `${bounds.top}px`;
-          button.style.width = `${bounds.width}px`;
-          button.style.height = `${bounds.height}px`;
-        }
-      }
-
-      for (const [key, button] of buttons)
-        if (!nextHits.has(key)) {
-          button.remove();
-          buttons.delete(key);
-        }
-
-      hits = nextHits;
-      labels = retained;
-      paint(
-        'background',
-        drawing.length
-          ? (context) => {
-              for (const { bounds } of drawing)
-                context.rect(bounds, options.background, options.radius);
-            }
-          : null,
-      );
-      paint(
-        'content',
-        drawing.length
-          ? (context) => {
-              for (const { bounds, label } of drawing)
-                context.text(
-                  label,
-                  bounds.left + options.padding,
-                  bounds.top + (bounds.height - label.height) / 2,
-                );
-            }
-          : null,
-      );
-    },
-    destroy() {
-      element.removeEventListener('click', click);
-      buttons.clear();
-      hits.clear();
-      labels.clear();
-      element.replaceChildren();
-    },
-  };
-}
-
 export const mentionView = defineExtension({
   name: 'mentionView',
   requires: [mentionDefinition.name],
@@ -178,16 +44,67 @@ export const mentionView = defineExtension({
         };
       },
     });
-    context.provide(viewLayers, {
-      name: 'mentions',
-      create: (view) =>
-        createMentionView(view, options, (mention) => {
-          // A callback can subscribe or unsubscribe while activation is being delivered.
-          const current = [...listeners];
 
-          for (const listener of current) listener(mention);
-        }),
-    });
+    function activate(mention: MentionActivation) {
+      const current = [...listeners];
+
+      for (const listener of current) listener(mention);
+    }
+
+    context.provide(
+      viewLayers,
+      defineInlineView(mentionDefinition, ({ prepareText }) => ({ createOverlay }) => {
+        const host = createOverlay();
+        const button = host.ownerDocument.createElement('button');
+        button.type = 'button';
+        button.className = 'mention-hit';
+        button.style.cssText = 'inset:0;width:100%;height:100%;';
+        host.append(button);
+        let current: InlineViewFrame<typeof mentionDefinition> | undefined;
+        let label: PreparedText | undefined;
+
+        function click() {
+          if (current) activate({ nodeId: current.node.id, id: current.id, index: current.index });
+        }
+
+        button.addEventListener('click', click);
+
+        return {
+          update(frame) {
+            current = frame;
+            button.dataset.mention = frame.id;
+            button.dataset.editorNode = String(frame.node.id);
+            button.setAttribute('aria-label', `Open ${frame.attributes.label}`);
+            label = prepareText({
+              text: frame.attributes.label,
+              width: Math.max(1, frame.width - options.padding * 2),
+              size: options.size,
+            });
+          },
+          draw(drawing, layer) {
+            if (!current || !label) return;
+
+            if (layer === 'background')
+              drawing.rect(
+                {
+                  left: 0,
+                  top: 0,
+                  width: current.width,
+                  height: current.height,
+                },
+                options.background,
+                options.radius,
+              );
+            else drawing.text(label, options.padding, (current.height - label.height) / 2);
+          },
+          destroy() {
+            button.removeEventListener('click', click);
+            current = undefined;
+            label = undefined;
+          },
+        };
+      }),
+    );
 
     return {};
   },

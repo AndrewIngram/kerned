@@ -110,13 +110,15 @@ test('native block layer paints and positions comments and mentions, preserves l
   });
   expect(comment.hasAttribute('data-editor-text-hit')).toBe(true);
   const placement = f.diagnostics.placements([1])[0];
-  expect(parseFloat(mention.style.left)).toBeCloseTo(28 + placement.boxes[0].x);
-  expect(parseFloat(mention.style.top)).toBeCloseTo(placement.y + placement.boxes[0].y);
   await nextFrame();
   const canvas = f.root.querySelector('canvas');
   const context = canvas?.getContext('2d');
 
-  if (!context) throw new Error('Missing canvas context');
+  if (!canvas || !context) throw new Error('Missing canvas context');
+  const canvasBounds = canvas.getBoundingClientRect();
+  const mentionBounds = mention.getBoundingClientRect();
+  expect(mentionBounds.left - canvasBounds.left).toBeCloseTo(28 + placement.boxes[0].x, 1);
+  expect(mentionBounds.top - canvasBounds.top).toBeCloseTo(placement.y + placement.boxes[0].y, 1);
   expect([
     ...context.getImageData(
       Math.floor((parseFloat(comment.style.left) + 2) * devicePixelRatio),

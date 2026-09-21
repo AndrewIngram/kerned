@@ -100,14 +100,15 @@ drawn by another view, and text preparation rejects calls after layer destructio
 The current label contract uses the view's default font family; per-label font
 resolution remains milestone 5 work.
 
-The starter `underlineView` uses this geometry and drawing contract. It reads mark
-ranges through the installed schema, so custom text and mark fields work without
-paragraph-specific code. Color, baseline offset and thickness are configurable
-extension options. Only resident geometry is retained, and edits or reflow
-invalidate cached fragments.
+The starter `underlineView` uses `defineMarkView`, the schema-bound
+[mark rendering contract](rendering-extensions.md). Custom text and mark fields
+work without paragraph-specific code. Color, baseline offset and thickness are
+configurable extension options. The shared owner retains resident instances and
+updates fragments on edits or reflow; canvas-only underlines allocate no DOM.
 
-The starter `mentionView` reads inline values through schema capabilities and
-renders cached labels, backgrounds and accessible interaction buttons. Its
+The starter `mentionView` uses `defineInlineView` to render cached labels,
+backgrounds and accessible interaction buttons. Placement, culling and configured
+attribute binding belong to the shared renderer owner. Its
 stylesheet belongs to the extension. Both the demo and public mount use it.
 Applications observe activation without supplying callbacks as serialized options:
 
@@ -171,7 +172,8 @@ and releases subscriptions and scheduled work on destruction. Errors reach the
 mounted view's error handler. Comments and search exercise the same contract;
 native renderers contain no comment/search-specific branches. Sources can target
 invalidation to particular node IDs and declare node-local dependencies. Arbitrary
-mark/widget rendering and React registrations remain milestone 6 work.
+decoration widgets and editable content slots remain milestone 6 work. Semantic
+marks and inline objects have separate schema-bound rendering registrations.
 
 The layer owns its DOM and styling. The host ignores pointer events by default;
 interactive descendants can opt in. Nonsemantic decoration layers set their own

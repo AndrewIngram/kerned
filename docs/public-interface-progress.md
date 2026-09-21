@@ -2541,3 +2541,50 @@ records parent commit `bf27167` and measures this checkpoint's uncommitted tree.
 activation, caching and ownership. Milestone 6 remains open for editable content
 slots, complete selection/editability contracts, React marks/widgets and migration
 of mentions and other custom rendering. The milestone judge follows those changes.
+
+### Milestone 6 checkpoint: shared inline and mark renderers
+
+Added `defineInlineView` and `defineMarkView` to the browser interface and
+`defineReactInlineView`/`defineReactMarkView` to React. Registrations use the
+existing view-layer contribution. A shared instance owner handles placement,
+culling, lazy overlays, external invalidation, canvas repaint and cleanup.
+Canvas-only instances allocate no DOM. Inline instances use the node and inline
+ID; semantic mark instances use the node and current range endpoints. Mark
+components receive all wrapped fragments in one frame, and their text remains
+canvas-owned and selectable. Durable semantic state stays outside mounted views.
+
+`schema.value(definition)` binds canonical mark/inline attributes by installed
+definition family. Configured variants preserve inferred normalized attributes;
+unrelated definitions with the same name fail. The renderer no longer parses
+known attributes on each update. Projection caches explicitly retain only
+resident nodes. A regression test proves culling evicts geometry even when the
+document still retains the original node objects, which a weak-key cache alone
+would not ensure.
+
+Mentions and underlines now use the shared contracts. Mention appearance,
+activation and label cache reuse remain covered by canvas pixel and geometry
+checks. Those checks now measure actual element bounds, allowing placement to
+belong to the overlay host rather than the button itself. React tests cover
+inferred attributes, Strict Mode, host context, inline local state when offsets
+move, unchanged-node rendering, wrapped marks after resize, text selection and
+focused controls pinned across scrolling. Browser lifetime tests cover lazy
+overlays, coalesced invalidation, repaint, culling, late calls after destruction
+and cleanup of every instance when one destructor throws.
+
+`pnpm run check` passes with 721 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes. Three serial production
+trials in `artifacts/public-interface-m6/range-renderers/` pass all original budgets:
+worst first usable 229 ms, streaming 1,200.5 ms, paste handler 57.3 ms, paste paint
+117.5 ms, typing 32.4 ms, paging 32.5 ms and loaded heap 27,177,056 bytes. The report
+records parent commit `91d323a` and measures this checkpoint's uncommitted tree.
+These timings cover the migrated production demo, not a large React-widget
+throughput benchmark. [Rendering extensions](rendering-extensions.md) documents
+the interfaces, coordinates, ownership choice and current limitations.
+
+M6 remains open for editable content slots, complete selection/editability
+contracts and arbitrary decoration-widget registrations. One authoring issue
+also remains for the interface review: an option-dependent inline attribute
+default can produce TypeScript's excessive-instantiation error when `plainText`
+appears before `schema`; placing `schema` first currently avoids it. The new
+configured-binding fixture uses that order. Resolve this before the milestone
+judge rather than treating an ordering workaround as the final author interface.

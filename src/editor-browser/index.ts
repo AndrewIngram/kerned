@@ -196,3 +196,14 @@ export {
   type DecorationContribution,
   type InvalidateDecorations,
 } from './decorations';
+
+export {
+  defineInlineView,
+  defineMarkView,
+  type InlineViewFrame,
+  type MarkViewFrame,
+  type ValueViewAttributes,
+  type RangeView,
+  type RangeViewContext,
+  type RangeViewMount,
+} from './range-views';

@@ -112,6 +112,7 @@ Setup and update errors fail the view and reach its error handler. The session
 remains available. Cleanup attempts every owned resource even if one disposer
 throws. A pending invalidation cannot update geometry from an older editor state.
 
-React mark/widget registrations and editable content slots remain milestone 6
-work. This API currently supplies text backgrounds, node outlines and activation;
-it is not a registration mechanism for arbitrary React decoration components.
+Arbitrary decoration-widget registrations and editable content slots remain
+milestone 6 work. This API currently supplies text backgrounds, node outlines and
+activation. Semantic marks and inline objects have separate
+[canvas and React rendering registrations](rendering-extensions.md).

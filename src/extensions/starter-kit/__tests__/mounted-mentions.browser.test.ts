@@ -117,8 +117,10 @@ test('mentions render and activate through a custom inline field with session-lo
   if (!canvas || !context) throw new Error('Missing software canvas');
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   const scale = devicePixelRatio;
-  const left = parseFloat(buttons[0].style.left);
-  const top = parseFloat(buttons[0].style.top);
+  const buttonBounds = buttons[0].getBoundingClientRect();
+  const canvasBounds = canvas.getBoundingClientRect();
+  const left = buttonBounds.left - canvasBounds.left;
+  const top = buttonBounds.top - canvasBounds.top;
   expect([
     ...context.getImageData(Math.floor((left + 3) * scale), Math.floor((top + 10) * scale), 1, 1)
       .data,
