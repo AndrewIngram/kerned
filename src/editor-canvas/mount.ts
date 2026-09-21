@@ -12,12 +12,15 @@ import type { NodeIdentity } from '../model';
 import { RangeSelection } from '../state';
 import type { ResolveEditorAsset } from './assets';
 import { createCanvasRenderer } from './canvas-renderer';
+import { createDiagnosticSource } from './diagnostic-source';
+import type { ViewDiagnostics } from './diagnostics';
 import { createDocumentLayout } from './document-layout';
 import { createLayerDrawing } from './layer-drawing';
 import { createLayerGeometry } from './layer-geometry';
 import { createDocumentPresentation } from './presentation';
 import { createViewResources } from './resources';
 import { createTextLabels } from './text-labels';
+import { connectViewDiagnostics } from './view-diagnostics';
 import { createViewGeometry } from './view-geometry';
 import { readViewConfiguration, type ViewConfiguration } from './view-options';
 
@@ -28,6 +31,7 @@ export type MountEditorOptions<N extends NodeIdentity> = ViewConfiguration & {
   toolbar?: HTMLElement;
   onError?: (error: Error) => void;
   onNotice?: (message: string) => void;
+  diagnostics?: ViewDiagnostics;
 };
 
 /** The view owns its DOM and resources. Its session can be detached and mounted again. */
@@ -90,6 +94,7 @@ export function mountEditor<N extends NodeIdentity>(
   let focused = false;
   let focusedNode: number | undefined;
   let layout: ReturnType<typeof createDocumentLayout<N>> | undefined;
+  let diagnostics: ReturnType<typeof connectViewDiagnostics> | undefined;
   const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
   let layers: ReturnType<typeof createViewLayers<N>> | undefined;
   const layerGeometry = createLayerGeometry();
@@ -202,9 +207,27 @@ export function mountEditor<N extends NodeIdentity>(
       viewport: frameViewport(),
       pinned: [...geometry.pinned(), ...(focusedNode === undefined ? [] : [focusedNode])],
       paddingTop: configuration.paddingTop,
-      eager: false,
-      retainAll: false,
-      onLayout() {},
+      eager: diagnostics?.options.composition === 'eager',
+      retainAll: diagnostics?.options.retention === 'all',
+      onLayout(result, width) {
+        if (!diagnostics?.observed) return;
+        diagnostics.emit(
+          Object.freeze({
+            type: 'layout',
+            at: performance.now(),
+            revision: editor.state.revision,
+            generation: result.scene.generation,
+            pending: result.scene.pending,
+            blocks: result.scene.placements.length,
+            width,
+            duration: result.workMs,
+            compositionMs: result.compositionMs,
+            layoutIds: Object.freeze([...result.layoutIds]),
+            reflow: result.reflow,
+            background: result.background,
+          }),
+        );
+      },
     });
   }
 
@@ -319,7 +342,26 @@ export function mountEditor<N extends NodeIdentity>(
       caret: snapshot.caret,
       caretTop: snapshot.activePlacement?.y ?? 0,
       focused,
-      onPaint() {},
+      onPaint(report) {
+        if (!diagnostics?.observed) return;
+        diagnostics.emit(
+          Object.freeze({
+            ...report,
+            type: 'paint',
+            revision: doc.editorState.revision,
+            generation: scene.generation,
+            pending: scene.pending,
+            blocks: scene.placements.length,
+            width: contentWidth,
+            mounted: blocks.size,
+            stale: visible.some(
+              (placement) =>
+                presentation.present(placement.node).kind === 'text' &&
+                (!placement.layout || placement.layoutWidth !== scene.width),
+            ),
+          }),
+        );
+      },
     });
 
     if (focusPending) focus();
@@ -351,6 +393,27 @@ export function mountEditor<N extends NodeIdentity>(
   let resources: ReturnType<typeof createViewResources>;
 
   try {
+    if (options.diagnostics) {
+      diagnostics = connectViewDiagnostics(
+        options.diagnostics,
+        createDiagnosticSource(() => {
+          const snapshot = geometry.getSnapshot();
+
+          if (status !== 'ready' || !layout || !snapshot) return null;
+
+          return {
+            revision: snapshot.documentRevision,
+            layout: layout.diagnostics,
+            engine: resources.read().layout,
+            mounted: blocks.keys(),
+            painterCount: painter.diagnostics.painterCount,
+          };
+        }),
+      );
+      const lease = diagnostics;
+      cleanup.push(() => lease.destroy());
+    }
+
     element.append(root);
     cleanup.push(() => root.remove());
     resources = createViewResources({ resolveAsset: options.resolveAsset });

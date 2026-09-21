@@ -7,6 +7,7 @@ import { inputPolicies } from '../../editor-browser/input-contributions';
 import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
 import { createSchema, defineNode } from '../../model';
 import { TextSelection, textSelection } from '../../state';
+import { createViewDiagnostics, type DiagnosticEvent } from '../diagnostics';
 import { mountEditor, defineNodePresentation, presentations } from '../index';
 
 const note = defineNode({
@@ -316,16 +317,43 @@ test('destruction during initialization cancels readiness, releases the attachme
 }) => {
   const f = fixture();
   onTestFinished(() => f.destroy());
-  const view = mountEditor(f.element, { editor: f.editor });
+  const diagnostics = createViewDiagnostics();
+  const view = mountEditor(f.element, { editor: f.editor, diagnostics });
   expect(() => mountEditor(f.element, { editor: f.editor })).toThrow(/one mounted view/);
   view.destroy();
   await expect(view.ready).rejects.toMatchObject({ name: 'AbortError' });
   expect(f.element.childElementCount).toBe(0);
-  const next = mountEditor(f.element, { editor: f.editor });
+  expect(diagnostics.read()).toBeNull();
+  const next = mountEditor(f.element, { editor: f.editor, diagnostics });
   await next.ready;
   await frame();
   expect(f.element.querySelectorAll('canvas')).toHaveLength(1);
   expect(next.status).toBe('ready');
+  expect(diagnostics.read()?.blocks).toBe(3);
+});
+
+test('a diagnostics handle rejects simultaneous mounts without releasing the first view', async ({
+  onTestFinished,
+}) => {
+  const first = fixture();
+  const second = fixture();
+  onTestFinished(() => {
+    first.destroy();
+    second.destroy();
+  });
+  const diagnostics = createViewDiagnostics();
+  const view = mountEditor(first.element, { editor: first.editor, diagnostics });
+  await view.ready;
+  expect(() => mountEditor(second.element, { editor: second.editor, diagnostics })).toThrow(
+    /already has a mounted view/,
+  );
+  expect(second.element.childElementCount).toBe(0);
+  expect(diagnostics.read()?.blocks).toBe(3);
+  const independent = mountEditor(second.element, { editor: second.editor });
+  await independent.ready;
+  expect(view.status).toBe('ready');
+  view.destroy();
+  expect(independent.status).toBe('ready');
 });
 
 test('asset failure cleans up the view and permits retry on the same live session', async ({
@@ -333,9 +361,11 @@ test('asset failure cleans up the view and permits retry on the same live sessio
 }) => {
   const f = fixture();
   onTestFinished(() => f.destroy());
+  const diagnostics = createViewDiagnostics();
 
   const view = mountEditor(f.element, {
     editor: f.editor,
+    diagnostics,
     resolveAsset: () => 'data:application/wasm,invalid',
   });
 
@@ -343,10 +373,69 @@ test('asset failure cleans up the view and permits retry on the same live sessio
   expect(view.status).toBe('failed');
   expect(f.element.childElementCount).toBe(0);
   expect(f.editor.isDestroyed).toBe(false);
-  const next = mountEditor(f.element, { editor: f.editor });
+  expect(diagnostics.read()).toBeNull();
+  const next = mountEditor(f.element, { editor: f.editor, diagnostics });
   await next.ready;
   view.destroy();
   expect(next.status).toBe('ready');
+  expect(diagnostics.read()?.blocks).toBe(3);
+});
+
+test('opt-in diagnostics expose copied counters and matching layout/paint reports without native handles', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const diagnostics = createViewDiagnostics({ composition: 'eager', retention: 'all' });
+  const events: DiagnosticEvent[] = [];
+  const unsubscribe = diagnostics.subscribe((event) => events.push(event));
+  const view = mountEditor(f.element, { editor: f.editor, diagnostics });
+  expect(diagnostics.read()).toBeNull();
+  await view.ready;
+  await expect.poll(() => events.some((event) => event.type === 'paint')).toBe(true);
+  const snapshot = diagnostics.read();
+
+  if (!snapshot) throw new Error('Expected diagnostics');
+  expect(snapshot.blocks).toBe(3);
+  expect(snapshot.pending).toBe(0);
+  expect(snapshot.mounted).toEqual([3]);
+  expect(snapshot.memory.wasmLinearBytes).toBeGreaterThan(0);
+  expect(snapshot.stats.paragraphs).toBeGreaterThan(0);
+  const placements = diagnostics.placements([1]);
+  expect(placements).toHaveLength(1);
+  expect(placements[0]).toMatchObject({ id: 1, resident: true });
+  expect(placements[0]).not.toHaveProperty('layout');
+  expect(placements[0]).not.toHaveProperty('node');
+  expect(JSON.parse(JSON.stringify(snapshot))).toEqual(snapshot);
+  expect(Object.isFrozen(snapshot.stats)).toBe(true);
+  expect(Object.isFrozen(placements[0].boxes)).toBe(true);
+  expect(events.every((event) => Object.isFrozen(event))).toBe(true);
+  expect(
+    events.filter((event) => event.type === 'layout').flatMap((event) => event.layoutIds),
+  ).toContain(1);
+  f.editor.transact((draft) => {
+    draft.step({ kind: 'replaceText', id: 1, from: 0, to: 0, text: 'Changed ' });
+
+    return true;
+  });
+  await expect
+    .poll(() =>
+      events.some((event) => event.type === 'paint' && event.revision === f.editor.state.revision),
+    )
+    .toBe(true);
+  expect(snapshot.revision).toBe(0);
+  expect(diagnostics.read()?.revision).toBe(f.editor.state.revision);
+  expect(events.some((event) => event.type === 'paint' && event.stale)).toBe(false);
+  unsubscribe();
+  view.destroy();
+  expect(diagnostics.read()).toBeNull();
+  expect(diagnostics.placements()).toEqual([]);
+  const count = events.length;
+  const next = mountEditor(f.element, { editor: f.editor, diagnostics });
+  await next.ready;
+  await frame();
+  expect(events).toHaveLength(count);
+  expect(diagnostics.read()?.blocks).toBe(3);
 });
 
 test('background presentation failure reports an error and releases the native mount', async ({

@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { defineNodePresentation, presentations, type MountedEditor } from '../../editor-canvas';
+import { createViewDiagnostics } from '../../editor-canvas/diagnostics';
 import { createSchema, defineNode } from '../../model';
 import { Editor } from '../editor';
 
@@ -106,16 +107,18 @@ test('React strict lifetime uses the vanilla mount and detaches without destroyi
 }) => {
   const f = fixture();
   onTestFinished(() => f.destroy());
+  const diagnostics = createViewDiagnostics();
 
   flushSync(() =>
     f.root.render(
       <StrictMode>
-        <Editor editor={f.editor} style={size} onReady={f.ready} />
+        <Editor editor={f.editor} style={size} onReady={f.ready} diagnostics={diagnostics} />
       </StrictMode>,
     ),
   );
   await f.readiness;
   expect(f.mounted?.status).toBe('ready');
+  expect(diagnostics.read()?.blocks).toBe(1);
   expect(f.element.querySelectorAll('canvas')).toHaveLength(1);
   f.editor.commands.focus();
   expect(document.activeElement).toBe(f.element.querySelector('textarea'));
@@ -124,7 +127,12 @@ test('React strict lifetime uses the vanilla mount and detaches without destroyi
   flushSync(() =>
     f.root.render(
       <StrictMode>
-        <Editor editor={f.editor} style={size} onReady={unexpectedRemount} />
+        <Editor
+          editor={f.editor}
+          style={size}
+          onReady={unexpectedRemount}
+          diagnostics={diagnostics}
+        />
       </StrictMode>,
     ),
   );
@@ -133,6 +141,7 @@ test('React strict lifetime uses the vanilla mount and detaches without destroyi
   expect(first?.status).toBe('destroyed');
   expect(f.editor.isDestroyed).toBe(false);
   expect(f.element.querySelector('canvas')).toBeNull();
+  expect(diagnostics.read()).toBeNull();
 });
 
 test('React reports asset failure and can retry without replacing the session', async ({

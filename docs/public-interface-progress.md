@@ -2091,3 +2091,33 @@ canvas and native table input identities remain intact through updates.
 Milestone 4 remains open for the separate diagnostic contract and complete demo
 migration, including outline, annotation placement, search reveal and streaming
 telemetry. The required milestone judge follows those exit conditions.
+
+### Milestone 4 checkpoint: separate view diagnostics
+
+`createViewDiagnostics` is an opt-in instrumentation entry point separate from
+ordinary mounted-view geometry. Its handle attaches to one view at a time and
+can follow sequential mounts. Reads copy counters, retention/buffer statistics
+and placement metadata; consumers never receive scene, node, engine or buffer
+objects. Memory/placement traversal happens only on explicit reads. Event reports
+are allocated only with subscribers and retain the measured work's timestamp,
+revision and generation across deferred delivery.
+
+Layout events report work/composition time, new layout IDs and background/reflow
+state. Paint events report flush time, submitted paragraphs, mounted native views
+and stale visible text geometry. Delivery happens after native work, and detach
+or unsubscribe cancels queued delivery. Optional eager-composition and full-cache
+retention controls live here for comparative benchmarks rather than in ordinary
+view configuration. The React adapter passes the same handle to the native mount.
+
+Validation: `pnpm run check` passes with 536 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. Coverage includes sequential leases,
+rejected simultaneous attachments, observer-triggered detach, copied immutable
+records, actual layout/paint frame identity, loading cancellation, failure/retry,
+and React Strict Mode cleanup. The public-entry reachability check initially
+caught a type import bypassing the new diagnostics entry; the mount now imports
+its public diagnostics type through that entry. No check configuration changed.
+
+The demo still uses its older instrumentation until its mount migration. That
+migration must preserve streaming backpressure and existing audit measurements;
+this checkpoint does not claim demo performance improvements or milestone 4
+completion. No milestone judge has run yet.

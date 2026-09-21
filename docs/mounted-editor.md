@@ -258,6 +258,54 @@ such as the session, scroll mode or asset resolver creates a new view.
 - `resolveAsset` maps graphics, shaping and font asset paths to application URLs.
   Native engine handles stay private to the mounted view.
 
+## Optional diagnostics
+
+Instrumentation is separate from the geometry interface used by editor UI:
+
+```ts
+import { createViewDiagnostics } from '../src/editor-canvas/diagnostics';
+
+const diagnostics = createViewDiagnostics();
+const unsubscribe = diagnostics.subscribe((event) => {
+  if (event.type === 'paint') console.log(event.duration, event.submitted);
+});
+const view = mountEditor(element, { editor, diagnostics });
+await view.ready;
+const counters = diagnostics.read();
+const placements = diagnostics.placements([paragraphId]);
+unsubscribe();
+view.destroy();
+```
+
+`read()` copies layout counts, generation/pending state, mounted native IDs,
+shaping/composition counters, retained cache counts and buffer sizes. Reading memory
+counts can traverse retained buffers, so it is intended for audits rather than
+per-frame UI. `placements(ids?)` copies block and inline-box metadata on demand;
+omitting IDs inspects the whole document. Neither returns nodes, layout objects,
+native resources or mutable buffers. Both return detached values, with `null` and
+an empty array respectively while the view is loading or detached.
+
+Layout reports identify their document revision, generation, rendered block count
+and width, along with total work/composition times, newly composed IDs and reflow
+state. `background` counts blocks composed in the background batch. Paint reports
+carry the same frame identity, flush timing, submitted paragraph/native mount
+counts and whether visible text geometry was stale. A report's `at` timestamp is
+captured when the work finishes; microtask delivery does not affect that timing.
+Reports are delivered after native work completes. Unsubscribing or detaching
+cancels pending delivery. Counters are gathered on demand and event reports are
+created only when subscribed.
+
+One diagnostics handle can follow sequential mounts, including failure/retry, but
+cannot attach to two simultaneous views. Its subscriptions remain application
+owned across remounts; unsubscribe when the application no longer needs them.
+The optional React adapter accepts the same `diagnostics` prop.
+
+For comparative benchmarks, `createViewDiagnostics({ composition: 'eager',
+retention: 'all' })` overrides viewport-first composition and bounded retention.
+Defaults are `'viewport'` for both. These controls belong to instrumentation and
+are not ordinary editor configuration. The view's supported geometry methods
+remain available without diagnostics.
+
 ## Migration status
 
 This interface is exercised with custom-schema vanilla and React editors. The

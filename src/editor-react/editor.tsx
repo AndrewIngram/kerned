@@ -15,6 +15,7 @@ export function Editor<N extends NodeIdentity>({
   resolveAsset,
   scroll,
   toolbar,
+  diagnostics,
   zoom = 1,
   paddingTop = 0,
   onReady,
@@ -63,6 +64,7 @@ export function Editor<N extends NodeIdentity>({
           resolveAsset,
           scroll,
           toolbar,
+          diagnostics,
           ...configuration.current,
           onError: report,
           onNotice: (message) => callbacks.current.onNotice?.(message),
@@ -87,7 +89,7 @@ export function Editor<N extends NodeIdentity>({
       if (view.current === mounted) view.current = undefined;
       mounted?.destroy();
     };
-  }, [editor, resolveAsset, scroll, toolbar]);
+  }, [editor, resolveAsset, scroll, toolbar, diagnostics]);
 
   return (
     <>
