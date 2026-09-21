@@ -1,11 +1,18 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 
 import { chromium } from 'playwright';
 
 const base = process.env.EDITOR_URL ?? 'http://127.0.0.1:5176/extensions.html';
 
-const report = { recordedAt: new Date().toISOString(), cases: [] };
+const report = {
+  recordedAt: new Date().toISOString(),
+  commit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+  editorURL: base,
+  mode: process.env.BENCHMARK_MODE ?? 'production',
+  cases: [],
+};
 
 const browser = await chromium.launch();
 
@@ -114,7 +121,10 @@ try {
         reference,
         resizedReference,
       });
-      await writeFile('artifacts/editor-retention.json', JSON.stringify(report, null, 2) + '\n');
+      await writeFile(
+        process.env.RETENTION_REPORT ?? 'artifacts/editor-retention.json',
+        JSON.stringify(report, null, 2) + '\n',
+      );
       console.log(total, retention, report.cases.at(-1).delta, final.memory.composedParagraphs);
       await page.close();
     }

@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status      | Required outcome                                                               |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | In progress | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Pending     | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Pending     | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Pending     | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Pending     | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Pending     | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending     | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending     | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending     | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status   | Required outcome                                                               |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Pending  | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Pending  | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Pending  | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Pending  | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Pending  | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -159,3 +159,52 @@ Production foundation worst values: firstUsableMs=181.00, streamingMs=1100.20, p
 The historical budget report uses a development baseline; these production values
 pass those existing limits but do not establish a like-for-like speedup. Future
 milestone comparisons use the production baseline collected here.
+
+### Reproducing the production measurements
+
+The foundation and reflow artifacts were captured from runtime revision
+`e23f035`; the retention follow-up uses `df59a78`, which changes measurement
+scripts and documentation only. Each report records the capture time. Retention
+also records its source revision and URL.
+
+Build once, then keep this strict production preview running in a separate shell:
+
+```sh
+pnpm run build
+pnpm exec vite preview --host 127.0.0.1 --port 5176 --strictPort
+```
+
+Run the benchmarks serially, without concurrent tests or development browsers
+performing work. To reproduce without overwriting the committed baseline:
+
+```sh
+mkdir -p artifacts/public-interface-repeat
+BASE_URL=http://127.0.0.1:5176 BENCHMARK_MODE=production REPORT_DIR=artifacts/public-interface-repeat pnpm run benchmark:editor-foundation
+EDITOR_URL=http://127.0.0.1:5176/extensions.html REFLOW_REPORT=artifacts/public-interface-repeat/reflow.json pnpm run benchmark:editor-reflow
+EDITOR_URL=http://127.0.0.1:5176/extensions.html BENCHMARK_MODE=production RETENTION_REPORT=artifacts/public-interface-repeat/retention.json pnpm run memory:editor
+pnpm run check:editor-performance artifacts/public-interface-repeat/baseline.json
+```
+
+The committed capture used `artifacts/public-interface-m0` in place of
+`artifacts/public-interface-repeat`. Foundation defaults to three trials and
+records its environment and measurement method. Reflow runs three trials per
+browser and layout mode. Retention measures 2,000 and 10,000 streamed blocks with
+both full and viewport paragraph retention, repeated scrolling and width changes.
+Its forced-GC JavaScript heap and backing storage figures exclude total process
+and GPU memory.
+
+### Milestone 0 architecture review
+
+Implementation commit: `df59a78`. The independent judge applied
+`improve-codebase-architecture` and accepted the ownership inventory and staged
+consumer scenarios. It requested two changes before milestone 1: capture the
+existing retained-memory benchmark and document exact production reproduction
+commands. Both findings are accepted. The follow-up adds an output-path option
+and revision metadata to the existing retention script, a retained result, and
+the commands above. No runtime or quality-gate behavior changes.
+
+Retention follow-up: all four cases passed with no stale paints or browser errors.
+The viewport cache retained 48 composed paragraphs after scrolling and resizing,
+for both document sizes. The full cache retained 1,800 and 9,000 respectively.
+The complete heap/storage and geometry comparisons are preserved in
+`artifacts/public-interface-m0/retention.json`.

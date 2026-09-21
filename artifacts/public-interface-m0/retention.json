@@ -1,0 +1,640 @@
+{
+  "recordedAt": "2026-09-21T01:52:25.522Z",
+  "commit": "df59a784e47944ac65c1fbc6e31a6c3b169957b2",
+  "editorURL": "http://127.0.0.1:5176/extensions.html",
+  "mode": "production",
+  "cases": [
+    {
+      "total": 2000,
+      "retention": "all",
+      "baseline": {
+        "usedSize": 5531152,
+        "totalSize": 6619136,
+        "embedderHeapUsedSize": 928824,
+        "backingStorageSize": 987212
+      },
+      "loaded": {
+        "usedSize": 21722564,
+        "totalSize": 22364160,
+        "embedderHeapUsedSize": 595640,
+        "backingStorageSize": 18658731
+      },
+      "afterCycles": {
+        "usedSize": 31570604,
+        "totalSize": 32063488,
+        "embedderHeapUsedSize": 621784,
+        "backingStorageSize": 28092212
+      },
+      "delta": {
+        "usedSize": 16191412,
+        "backingStorageSize": 17671519
+      },
+      "initialMemory": {
+        "caretBufferBytes": 3009694,
+        "caretUsedBytes": 3009694,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 229854,
+        "caretCount": 229854,
+        "lineCapacity": 3598,
+        "lineCount": 3598,
+        "glyphBufferBytes": 2243580,
+        "shapingBufferBytes": 12695860,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 1800,
+        "composedParagraphs": 1800
+      },
+      "finalMemory": {
+        "caretBufferBytes": 3009694,
+        "caretUsedBytes": 3009694,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 229854,
+        "caretCount": 229854,
+        "lineCapacity": 3598,
+        "lineCount": 3598,
+        "glyphBufferBytes": 2243580,
+        "shapingBufferBytes": 12695860,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 1800,
+        "composedParagraphs": 1800
+      },
+      "scrolls": [
+        {
+          "cycle": 0,
+          "id": 1006,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 1799,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 0,
+          "id": 2005,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 1799,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 0,
+          "id": 1,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 1799,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 1,
+          "id": 1006,
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 1,
+          "id": 2005,
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 1,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 2,
+          "id": 1006,
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 2,
+          "id": 2005,
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        },
+        {
+          "cycle": 2,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 1799,
+          "glyphCalls": 10981,
+          "layoutCalls": 1826
+        }
+      ],
+      "reference": {
+        "blocks": 2000,
+        "paragraphs": 1799,
+        "hydrated": 1799,
+        "checks": "passed"
+      },
+      "resizedReference": {
+        "blocks": 2000,
+        "paragraphs": 1799,
+        "hydrated": 1799,
+        "checks": "passed"
+      }
+    },
+    {
+      "total": 2000,
+      "retention": "viewport",
+      "baseline": {
+        "usedSize": 5531124,
+        "totalSize": 6619136,
+        "embedderHeapUsedSize": 594416,
+        "backingStorageSize": 987212
+      },
+      "loaded": {
+        "usedSize": 16967660,
+        "totalSize": 17645568,
+        "embedderHeapUsedSize": 594712,
+        "backingStorageSize": 14080601
+      },
+      "afterCycles": {
+        "usedSize": 18359824,
+        "totalSize": 18956288,
+        "embedderHeapUsedSize": 620768,
+        "backingStorageSize": 14372624
+      },
+      "delta": {
+        "usedSize": 11436536,
+        "backingStorageSize": 13093389
+      },
+      "initialMemory": {
+        "caretBufferBytes": 74487,
+        "caretUsedBytes": 74487,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 5687,
+        "caretCount": 5687,
+        "lineCapacity": 92,
+        "lineCount": 92,
+        "glyphBufferBytes": 55470,
+        "shapingBufferBytes": 12695860,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 1800,
+        "composedParagraphs": 47
+      },
+      "finalMemory": {
+        "caretBufferBytes": 76137,
+        "caretUsedBytes": 76137,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 5813,
+        "caretCount": 5813,
+        "lineCapacity": 94,
+        "lineCount": 94,
+        "glyphBufferBytes": 56700,
+        "shapingBufferBytes": 12695860,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 1800,
+        "composedParagraphs": 48
+      },
+      "scrolls": [
+        {
+          "cycle": 0,
+          "id": 1006,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 9,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 9,
+          "glyphCalls": 10981,
+          "layoutCalls": 1834
+        },
+        {
+          "cycle": 0,
+          "id": 2005,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 10,
+            "checks": "passed"
+          },
+          "sceneMs": 0.9000000953674316,
+          "resident": 10,
+          "glyphCalls": 10981,
+          "layoutCalls": 1843
+        },
+        {
+          "cycle": 0,
+          "id": 1,
+          "reference": {
+            "blocks": 2000,
+            "paragraphs": 1799,
+            "hydrated": 4,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 4,
+          "glyphCalls": 10981,
+          "layoutCalls": 1846
+        },
+        {
+          "cycle": 1,
+          "id": 1006,
+          "sceneMs": 0,
+          "resident": 9,
+          "glyphCalls": 10981,
+          "layoutCalls": 1854
+        },
+        {
+          "cycle": 1,
+          "id": 2005,
+          "sceneMs": 0,
+          "resident": 10,
+          "glyphCalls": 10981,
+          "layoutCalls": 1863
+        },
+        {
+          "cycle": 1,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 4,
+          "glyphCalls": 10981,
+          "layoutCalls": 1866
+        },
+        {
+          "cycle": 2,
+          "id": 1006,
+          "sceneMs": 0,
+          "resident": 9,
+          "glyphCalls": 10981,
+          "layoutCalls": 1874
+        },
+        {
+          "cycle": 2,
+          "id": 2005,
+          "sceneMs": 0,
+          "resident": 10,
+          "glyphCalls": 10981,
+          "layoutCalls": 1883
+        },
+        {
+          "cycle": 2,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 4,
+          "glyphCalls": 10981,
+          "layoutCalls": 1886
+        }
+      ],
+      "reference": {
+        "blocks": 2000,
+        "paragraphs": 1799,
+        "hydrated": 4,
+        "checks": "passed"
+      },
+      "resizedReference": {
+        "blocks": 2000,
+        "paragraphs": 1799,
+        "hydrated": 46,
+        "checks": "passed"
+      }
+    },
+    {
+      "total": 10000,
+      "retention": "all",
+      "baseline": {
+        "usedSize": 5531100,
+        "totalSize": 6356992,
+        "embedderHeapUsedSize": 595360,
+        "backingStorageSize": 987212
+      },
+      "loaded": {
+        "usedSize": 81603080,
+        "totalSize": 83869696,
+        "embedderHeapUsedSize": 598696,
+        "backingStorageSize": 90988285
+      },
+      "afterCycles": {
+        "usedSize": 128862840,
+        "totalSize": 130859008,
+        "embedderHeapUsedSize": 624056,
+        "backingStorageSize": 138172612
+      },
+      "delta": {
+        "usedSize": 76071980,
+        "backingStorageSize": 90001073
+      },
+      "initialMemory": {
+        "caretBufferBytes": 15113294,
+        "caretUsedBytes": 15113294,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1154254,
+        "caretCount": 1154254,
+        "lineCapacity": 17998,
+        "lineCount": 17998,
+        "glyphBufferBytes": 11267580,
+        "shapingBufferBytes": 63777460,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 9000,
+        "composedParagraphs": 9000
+      },
+      "finalMemory": {
+        "caretBufferBytes": 15113294,
+        "caretUsedBytes": 15113294,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 1154254,
+        "caretCount": 1154254,
+        "lineCapacity": 17998,
+        "lineCount": 17998,
+        "glyphBufferBytes": 11267580,
+        "shapingBufferBytes": 63777460,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 9000,
+        "composedParagraphs": 9000
+      },
+      "scrolls": [
+        {
+          "cycle": 0,
+          "id": 5006,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 8999,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 0,
+          "id": 10005,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 8999,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 0,
+          "id": 1,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 8999,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 1,
+          "id": 5006,
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 1,
+          "id": 10005,
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 1,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 2,
+          "id": 5006,
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 2,
+          "id": 10005,
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        },
+        {
+          "cycle": 2,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 8999,
+          "glyphCalls": 54981,
+          "layoutCalls": 9026
+        }
+      ],
+      "reference": {
+        "blocks": 10000,
+        "paragraphs": 8999,
+        "hydrated": 8999,
+        "checks": "passed"
+      },
+      "resizedReference": {
+        "blocks": 10000,
+        "paragraphs": 8999,
+        "hydrated": 8999,
+        "checks": "passed"
+      }
+    },
+    {
+      "total": 10000,
+      "retention": "viewport",
+      "baseline": {
+        "usedSize": 5531104,
+        "totalSize": 6094848,
+        "embedderHeapUsedSize": 594432,
+        "backingStorageSize": 987212
+      },
+      "loaded": {
+        "usedSize": 58342128,
+        "totalSize": 60014592,
+        "embedderHeapUsedSize": 597768,
+        "backingStorageSize": 67554551
+      },
+      "afterCycles": {
+        "usedSize": 59599564,
+        "totalSize": 60866560,
+        "embedderHeapUsedSize": 623032,
+        "backingStorageSize": 67860224
+      },
+      "delta": {
+        "usedSize": 52811024,
+        "backingStorageSize": 66567339
+      },
+      "initialMemory": {
+        "caretBufferBytes": 74487,
+        "caretUsedBytes": 74487,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 5687,
+        "caretCount": 5687,
+        "lineCapacity": 92,
+        "lineCount": 92,
+        "glyphBufferBytes": 55470,
+        "shapingBufferBytes": 63777460,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 9000,
+        "composedParagraphs": 47
+      },
+      "finalMemory": {
+        "caretBufferBytes": 76137,
+        "caretUsedBytes": 76137,
+        "caretUnusedBytes": 0,
+        "caretCapacity": 5813,
+        "caretCount": 5813,
+        "lineCapacity": 94,
+        "lineCount": 94,
+        "glyphBufferBytes": 56700,
+        "shapingBufferBytes": 63777460,
+        "wasmLinearBytes": 14286848,
+        "paragraphs": 9000,
+        "composedParagraphs": 48
+      },
+      "scrolls": [
+        {
+          "cycle": 0,
+          "id": 5006,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 9,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 9,
+          "glyphCalls": 54981,
+          "layoutCalls": 9034
+        },
+        {
+          "cycle": 0,
+          "id": 10005,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 10,
+            "checks": "passed"
+          },
+          "sceneMs": 2.799999952316284,
+          "resident": 10,
+          "glyphCalls": 54981,
+          "layoutCalls": 9043
+        },
+        {
+          "cycle": 0,
+          "id": 1,
+          "reference": {
+            "blocks": 10000,
+            "paragraphs": 8999,
+            "hydrated": 4,
+            "checks": "passed"
+          },
+          "sceneMs": 0,
+          "resident": 4,
+          "glyphCalls": 54981,
+          "layoutCalls": 9046
+        },
+        {
+          "cycle": 1,
+          "id": 5006,
+          "sceneMs": 0,
+          "resident": 9,
+          "glyphCalls": 54981,
+          "layoutCalls": 9054
+        },
+        {
+          "cycle": 1,
+          "id": 10005,
+          "sceneMs": 0,
+          "resident": 10,
+          "glyphCalls": 54981,
+          "layoutCalls": 9063
+        },
+        {
+          "cycle": 1,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 4,
+          "glyphCalls": 54981,
+          "layoutCalls": 9066
+        },
+        {
+          "cycle": 2,
+          "id": 5006,
+          "sceneMs": 0,
+          "resident": 9,
+          "glyphCalls": 54981,
+          "layoutCalls": 9074
+        },
+        {
+          "cycle": 2,
+          "id": 10005,
+          "sceneMs": 0,
+          "resident": 10,
+          "glyphCalls": 54981,
+          "layoutCalls": 9083
+        },
+        {
+          "cycle": 2,
+          "id": 1,
+          "sceneMs": 0,
+          "resident": 4,
+          "glyphCalls": 54981,
+          "layoutCalls": 9086
+        }
+      ],
+      "reference": {
+        "blocks": 10000,
+        "paragraphs": 8999,
+        "hydrated": 4,
+        "checks": "passed"
+      },
+      "resizedReference": {
+        "blocks": 10000,
+        "paragraphs": 8999,
+        "hydrated": 46,
+        "checks": "passed"
+      }
+    }
+  ]
+}
