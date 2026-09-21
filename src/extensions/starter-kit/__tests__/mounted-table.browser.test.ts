@@ -5,6 +5,7 @@ import { createEditor } from '../../../core';
 import { mountEditor } from '../../../editor-canvas';
 import { createSchema, defineNode } from '../../../model';
 import { textSelection } from '../../../state';
+import { paragraph } from '../../starter-definitions';
 import { tableCells } from '../../table';
 import { starterBrowserExtensions } from '../browser';
 
@@ -233,4 +234,70 @@ test('mounted tables share rich rectangular clipboard policy and focus the paste
   expect(document.activeElement).toBe(f.cellInput());
   expect(f.notices.filter(Boolean)).toEqual([]);
   expect(f.view.status).toBe('ready');
+});
+
+test('public geometry and reveal locate native cell text without changing selection or focus', async ({
+  onTestFinished,
+}) => {
+  const f = await fixture(onTestFinished);
+  const input = await f.focus();
+  const start = f.view.coordsAt({ id: 3, offset: 0 });
+  const end = f.view.coordsAt({ id: 3, offset: 6 });
+  expect(start?.height).toBeGreaterThan(0);
+  expect(end?.left).toBeGreaterThan(start?.left ?? 0);
+  expect(f.view.coordsAt({ id: 3, offset: 100 })).toBeNull();
+  const original = f.editor.state.selection;
+  f.editor.transact((draft) => {
+    draft.step({
+      kind: 'replaceChildren',
+      parent: null,
+      index: 0,
+      count: 0,
+      nodes: Array.from({ length: 60 }, (_, index) =>
+        f.editor.schema
+          .node(paragraph)
+          .create(
+            { id: index + 10, key: `before-table-${index}` },
+            { text: `Preceding paragraph ${index}` },
+          ),
+      ),
+    });
+
+    return true;
+  });
+  expect(await f.view.reveal({ id: 5, offset: 4 })).toBe(true);
+  const point = f.view.coordsAt({ id: 5, offset: 4 });
+  const bounds = f.host.getBoundingClientRect();
+  expect(point?.top).toBeGreaterThanOrEqual(bounds.top - 1);
+  expect(point?.bottom).toBeLessThanOrEqual(bounds.bottom + 1);
+  expect(document.activeElement).toBe(input);
+  expect(input.selectionStart).toBe(6);
+  expect(f.editor.state.selection.eq(original)).toBe(true);
+  f.editor.select(textSelection(5, 4));
+  f.editor.commands.scrollIntoView();
+  await expect
+    .poll(() => f.view.coordsAt({ id: 5, offset: 4 })?.top)
+    .toBeGreaterThanOrEqual(bounds.top - 1);
+});
+
+test('revealing native text scrolls a narrow table locally', async ({ onTestFinished }) => {
+  const f = await fixture(onTestFinished);
+  f.host.style.width = '180px';
+  const table = f.host.querySelector<HTMLElement>('.table-block');
+
+  if (!table) throw new Error('Missing table');
+  await expect.poll(() => table.clientWidth).toBe(150);
+  const focus = document.activeElement;
+  const selection = f.editor.state.selection;
+  expect(f.view.coordsAt({ id: 5, offset: 6 })?.right).toBeGreaterThan(
+    table.getBoundingClientRect().right,
+  );
+  expect(await f.view.reveal({ id: 5, offset: 6 })).toBe(true);
+  expect(table.scrollLeft).toBeGreaterThan(0);
+  const caret = f.view.coordsAt({ id: 5, offset: 6 });
+  const bounds = table.getBoundingClientRect();
+  expect(caret?.left).toBeGreaterThanOrEqual(bounds.left - 1);
+  expect(caret?.right).toBeLessThanOrEqual(bounds.right + 1);
+  expect(document.activeElement).toBe(focus);
+  expect(f.editor.state.selection.eq(selection)).toBe(true);
 });

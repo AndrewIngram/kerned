@@ -8,12 +8,13 @@ import {
 } from '../editor-browser/input-contributions';
 import { createNodeViews, type NodeView } from '../editor-browser/node-views';
 import type { NodeIdentity } from '../model';
-import type { TextSelection } from '../state';
+import { RangeSelection } from '../state';
 import type { ResolveEditorAsset } from './assets';
 import { createCanvasRenderer } from './canvas-renderer';
 import { createDocumentLayout } from './document-layout';
 import { createDocumentPresentation } from './presentation';
 import { createViewResources } from './resources';
+import { createViewGeometry } from './view-geometry';
 
 export type MountEditorOptions<N extends NodeIdentity> = {
   editor: ViewSession<N>;
@@ -85,6 +86,16 @@ export function mountEditor<N extends NodeIdentity>(
   const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
 
   const renderers = createNodeViews(editor, { clipboard, notice: reportNotice });
+
+  const geometry = createViewGeometry({
+    editor,
+    bounds: () => canvas.getBoundingClientRect(),
+    nodeView: (id) => blocks.get(id)?.view,
+    invalidate: updateLayout,
+    onError: fail,
+  });
+
+  cleanup.push(() => geometry.destroy());
 
   function reportNotice(message: string) {
     notice.textContent = message;
@@ -180,7 +191,7 @@ export function mountEditor<N extends NodeIdentity>(
   function updateLayout() {
     layout?.update({
       viewport: frameViewport(),
-      pinned: focusedNode === undefined ? [] : [focusedNode],
+      pinned: [...geometry.pinned(), ...(focusedNode === undefined ? [] : [focusedNode])],
       paddingTop: 0,
       eager: false,
       retainAll: false,
@@ -251,6 +262,7 @@ export function mountEditor<N extends NodeIdentity>(
     }
 
     layout.present(snapshot);
+    geometry.update({ document: doc, layout: snapshot, viewport: port });
     capture.update({
       context: doc.context,
       inset,
@@ -284,7 +296,26 @@ export function mountEditor<N extends NodeIdentity>(
 
   // Own the session attachment during loading too, so destroy and duplicate mounts are deterministic.
   cleanup.push(
-    connectEditorView(editor, { focus, reveal: () => capture.revealSelection(), destroy }),
+    connectEditorView(editor, {
+      focus,
+      reveal() {
+        const doc = presentation.query(editor.state);
+        const head = doc.selection instanceof RangeSelection ? doc.selection.head : null;
+        const range = doc.ranges[0];
+
+        const point =
+          doc.textSelection?.head ??
+          (head?.kind === 'text'
+            ? head
+            : range?.kind === 'text'
+              ? { id: range.id, offset: range.to }
+              : null);
+
+        if (point) void geometry.reveal(point);
+        else capture.revealSelection();
+      },
+      destroy,
+    }),
   );
   let resources: ReturnType<typeof createViewResources>;
 
@@ -471,24 +502,9 @@ export function mountEditor<N extends NodeIdentity>(
       return status === 'destroyed';
     },
     focus,
-    /** Client coordinates for a resident text position; null until that position has layout. */
-    coordsAt(point: TextSelection['head']): DOMRect | null {
-      if (status !== 'ready' || !layout) return null;
-      const value = layout.getSnapshot();
-      const placement = value.scene.placements.find((p) => p.node.id === point.id);
-
-      if (!placement?.layout) return null;
-      const rect = placement.layout.geometry(point.offset, point.offset, false).caret;
-      const bounds = canvas.getBoundingClientRect();
-      const zoom = viewport.getSnapshot().zoom;
-
-      return new DOMRect(
-        bounds.left + (value.inset + rect[0]) * zoom,
-        bounds.top + (placement.y + rect[1]) * zoom - readScroll(),
-        (rect[2] - rect[0]) * zoom,
-        (rect[3] - rect[1]) * zoom,
-      );
-    },
+    /** Client coordinates for resident canvas or native text; null until layout is current. */
+    coordsAt: geometry.coordsAt,
+    reveal: geometry.reveal,
     destroy,
   };
 }

@@ -1,5 +1,5 @@
 import { defineContribution } from '../core';
-import type { NodeBinding, SchemaDefinition, NodeIdentity } from '../model';
+import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '../model';
 import type { Selection, SelectionContext } from '../state';
 import type { ViewSession } from './input-contributions';
 
@@ -29,6 +29,9 @@ export type NodeView<N> = {
   readonly isDestroyed: boolean;
   update(frame: NodeViewFrame<N>): void;
   focusSelection?(selection: Selection): boolean;
+  coordsAt?(point: TextPoint): DOMRect | null;
+  /** Reveal within the node's own scrollports, without moving document scroll or focus. */
+  reveal?(point: TextPoint): void;
   destroy(): void;
 };
 
@@ -66,6 +69,8 @@ export function defineNodeView<Definition extends NodeDefinition>(
       frame: NodeViewFrame<NodeIdentity> & { attributes: NodeViewAttributes<Definition> },
     ): void;
     focusSelection?(selection: Selection): boolean;
+    coordsAt?(point: TextPoint): DOMRect | null;
+    reveal?(point: TextPoint): void;
     destroy(): void;
   },
 ): NodeViewContribution {
@@ -91,6 +96,8 @@ export function defineNodeView<Definition extends NodeDefinition>(
             focusSelection: view.focusSelection
               ? (selection) => view.focusSelection?.(selection) ?? false
               : undefined,
+            coordsAt: view.coordsAt ? (point) => view.coordsAt?.(point) ?? null : undefined,
+            reveal: view.reveal ? (point) => view.reveal?.(point) : undefined,
             destroy: () => view.destroy(),
           };
         },
@@ -149,6 +156,14 @@ export function createNodeViews<N extends NodeIdentity>(
           focusSelection: view.focusSelection
             ? (selection) =>
                 !destroyed && !editor.isDestroyed && (view.focusSelection?.(selection) ?? false)
+            : undefined,
+          coordsAt: view.coordsAt
+            ? (point) => (destroyed || editor.isDestroyed ? null : (view.coordsAt?.(point) ?? null))
+            : undefined,
+          reveal: view.reveal
+            ? (point) => {
+                if (!destroyed && !editor.isDestroyed) view.reveal?.(point);
+              }
             : undefined,
           destroy,
         };

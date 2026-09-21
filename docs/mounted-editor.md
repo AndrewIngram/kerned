@@ -12,6 +12,7 @@ await view.ready;
 editor.commands.focus();
 
 const caret = view.coordsAt({ id: paragraphId, offset: 3 });
+await view.reveal({ id: paragraphId, offset: 3 }); // Keeps focus and selection unchanged.
 view.destroy(); // The editor session remains usable and can be mounted again.
 ```
 
@@ -45,6 +46,12 @@ extension uses this contract for cell editing and rectangular selection, with
 the same clipboard policy as the canvas capture. Its styles belong to the
 browser extension and do not require the demo stylesheet.
 
+Native views can implement `coordsAt(point)` to supply client caret coordinates
+for their text descendants. They can also implement `reveal(point)` to scroll
+their own containers without changing focus or scrolling the document. The mount
+then handles outer scrolling. Tables implement both, including inactive styled
+cell text and active textareas.
+
 Transient text-highlight ranges can accompany native frames. This is an internal
 rendering contract, not the final extension decoration-authoring interface.
 
@@ -73,10 +80,17 @@ mount also announces these messages through a status element.
   on the same session.
 - Session destruction destroys its mounted view, including pending asset loads.
   Destroying an old view again cannot affect a replacement.
-- `coordsAt` returns client coordinates for a resident canvas text position, or
-  `null` before readiness, after destruction or when no canvas layout is resident.
-  Native widget text needs the widget's geometry contract; this method does not
-  pretend those positions belong to a canvas paragraph.
+- `coordsAt` returns client coordinates for resident canvas or native text. It
+  returns `null` before readiness, after destruction, for invalid positions, when
+  layout is stale, or when the rendered owner has no text geometry. Reading
+  coordinates does not change scroll, native selection or focus.
+- `reveal(point)` retains the target in layout and returns a promise indicating
+  whether it was revealed. It captures a relative position so intervening edits
+  map the target before scrolling. A later reveal supersedes an earlier request;
+  destruction, an unresolvable position or unavailable geometry resolve `false`.
+  Deletion follows the relative-position contract's surviving boundary fallback
+  where one exists. The initial point must be a valid text position. Reveal leaves
+  selection and focus alone.
 - `scroll: 'page'` uses page scrolling and an optional `toolbar` element as the
   sticky inset. The default uses a scroll container inside the supplied host.
   `editor.commands.scrollIntoView()` reveals the current selection.
@@ -100,7 +114,7 @@ the complete starter content can use this mount.
 The writing demo still uses its existing starter composition and an internal
 `EditorEventHost`; it has not switched to this mount yet. It now uses the same
 table node-view contribution as the mount, without a separate table branch.
-Inline/decorations, native text geometry and diagnostic contracts must be completed before that
+Inline/decorations and diagnostic contracts must be completed before that
 switch. The old event host is not a second public editor interface. Milestone 4
 remains open until the demo uses the shared mount and stops passing graphics
 handles through its tree.

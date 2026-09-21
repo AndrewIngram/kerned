@@ -1,7 +1,8 @@
 import './table-view.css';
 import type { BrowserViewOptions } from '../../editor-browser';
+import { nativeTextCaret, revealNativeText } from '../../editor-browser/native-text-geometry';
 import type { TextHighlight } from '../../editor-browser/node-views';
-import type { NodeIdentity, Schema } from '../../model';
+import type { NodeIdentity, Schema, TextPoint } from '../../model';
 import { TextSelection, textSelection, type Selection, type SelectionContext } from '../../state';
 import { formattingSpans, type TextFormat } from '../formatting';
 import { tableCells } from '../table';
@@ -70,6 +71,7 @@ function paintText(element: HTMLElement, paragraph: TableText, matches: readonly
     text.append(span);
   }
 
+  if (paragraph.text.endsWith('\n')) text.append(document.createTextNode('\u200b'));
   element.replaceChildren(text);
 
   if (!paragraph.text) {
@@ -469,6 +471,26 @@ export function createTableView<N extends NodeIdentity>(
       render(true);
 
       return true;
+    },
+    coordsAt(point: TextPoint) {
+      if (destroyed) return null;
+      const paragraph = paragraphs.get(point.id);
+
+      if (!paragraph?.paragraph || point.offset > paragraph.paragraph.text.length) return null;
+
+      return nativeTextCaret(paragraph.element, point.offset);
+    },
+    reveal(point: TextPoint) {
+      if (destroyed) return;
+      const paragraph = paragraphs.get(point.id);
+
+      if (!paragraph?.paragraph || point.offset > paragraph.paragraph.text.length) return;
+      const target = paragraph.element;
+      revealNativeText(
+        target,
+        point.offset,
+        target instanceof HTMLTextAreaElement ? [target, element] : [element],
+      );
     },
     destroy() {
       if (destroyed) return;

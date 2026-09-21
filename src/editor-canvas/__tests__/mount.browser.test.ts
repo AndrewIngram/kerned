@@ -312,6 +312,83 @@ test('page scrolling reveals distant selections and preserves the client coordin
   expect(point?.bottom).toBeLessThanOrEqual(window.innerHeight);
 });
 
+test('public reveal retains selection, follows intervening edits, and cancels superseded or destroyed requests', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  f.editor.transact((draft) => {
+    draft.step({
+      kind: 'replaceChildren',
+      parent: null,
+      index: 3,
+      count: 0,
+      nodes: Array.from({ length: 80 }, (_, index) =>
+        schema
+          .node(note)
+          .create({ id: index + 4, key: `reveal-${index}` }, { body: `Paragraph ${index}` }),
+      ),
+    });
+
+    return true;
+  });
+  const view = mountEditor(f.element, { editor: f.editor });
+  await view.ready;
+  const selection = f.editor.state.selection;
+  const focus = document.activeElement;
+  const first = view.reveal({ id: 70, offset: 3 });
+  const second = view.reveal({ id: 80, offset: 3 });
+  const prefix = 'Inserted line\n'.repeat(30);
+  f.editor.transact((draft) => {
+    draft.step({ kind: 'replaceText', id: 80, from: 0, to: 0, text: prefix });
+
+    return true;
+  });
+  expect(view.coordsAt({ id: 80, offset: 3 })).toBeNull();
+  expect(await first).toBe(false);
+  expect(await second).toBe(true);
+  const caret = view.coordsAt({ id: 80, offset: prefix.length + 3 });
+  const bounds = f.element.getBoundingClientRect();
+  expect(caret?.top).toBeGreaterThanOrEqual(bounds.top - 1);
+  expect(caret?.bottom).toBeLessThanOrEqual(bounds.bottom + 1);
+  expect(view.coordsAt({ id: 80, offset: 3 })?.top).toBeLessThan(bounds.top);
+  expect(f.editor.state.selection.eq(selection)).toBe(true);
+  expect(document.activeElement).toBe(focus);
+  const cancelled = view.reveal({ id: 1, offset: 2 });
+  view.destroy();
+  expect(await cancelled).toBe(false);
+  expect(await view.reveal({ id: 1, offset: 2 })).toBe(false);
+  expect(view.coordsAt({ id: 80, offset: prefix.length + 3 })).toBeNull();
+});
+
+test('reveal follows the durable deletion fallback and cancels when its loading view is destroyed', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const view = mountEditor(f.element, { editor: f.editor });
+  await view.ready;
+  const anchor = f.editor.positions.at(2, 3);
+  const request = view.reveal({ id: 2, offset: 3 });
+  f.editor.transact((draft) => {
+    draft.step({ kind: 'replaceChildren', parent: null, index: 1, count: 1, nodes: [] });
+
+    return true;
+  });
+  const result = f.editor.positions.resolve(anchor);
+
+  if (result.status !== 'resolved') throw new Error('Missing deletion fallback');
+  expect(result.point.id).toBe(1);
+  expect(await request).toBe(true);
+  expect(view.coordsAt(result.point)?.height).toBeGreaterThan(0);
+  view.destroy();
+  const loading = mountEditor(f.element, { editor: f.editor });
+  const cancelled = loading.reveal({ id: 1, offset: 2 });
+  loading.destroy();
+  expect(await cancelled).toBe(false);
+  await expect(loading.ready).rejects.toMatchObject({ name: 'AbortError' });
+});
+
 test('a throwing node-view destructor cannot prevent other views and the mount from being released', async ({
   onTestFinished,
 }) => {

@@ -15,6 +15,7 @@ export type ViewSession<N extends NodeIdentity> = EditorViewSession &
     | 'allocateBlockId'
     | 'on'
     | 'commands'
+    | 'positions'
   > & { readonly schema: Schema<N> };
 
 export type InputContribution = {

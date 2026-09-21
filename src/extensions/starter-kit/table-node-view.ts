@@ -72,6 +72,8 @@ export const tableView = defineExtension({
                 });
               },
               focusSelection: (selection) => view.focusSelection(selection),
+              coordsAt: (point) => view.coordsAt(point),
+              reveal: (point) => view.reveal(point),
               destroy: () => view.destroy(),
             };
           },

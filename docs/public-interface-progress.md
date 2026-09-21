@@ -1756,3 +1756,44 @@ rules, inline/decorations, native geometry/reveal and diagnostics contracts, and
 the full demo migration away from manually assembled controllers and graphics
 props. Normal copy/cut and ordinary text paste in cell textareas still use native
 behavior; this checkpoint does not claim rich clipboard parity for those paths.
+
+### Milestone 4 checkpoint: native text geometry and durable reveal
+
+The public mount now resolves caret coordinates through the rendered node owner,
+including active table textareas and inactive styled cell text. Canvas coordinates
+use the existing projection index instead of scanning all placements. Queries
+return no geometry while layout belongs to an older document snapshot and leave
+focus, native selection and scrolling unchanged.
+
+Native views can contribute caret coordinates and local reveal. The table
+extension scrolls its own overflow before the mount scrolls the outer viewport.
+A browser-owned text measurement helper handles wrapping, padding, UTF-16 offsets,
+empty text, trailing newlines, scaling and native input scroll offsets. Browser
+checks exposed Firefox's upstream collapsed range after a newline and WebKit's
+fractional scroll rounding; both cases now have coverage.
+
+`view.reveal(point)` pins the rendered owner until the target is visible and keeps
+selection and focus unchanged. The request captures a durable relative position,
+so edits made while layout is pending move the target correctly. Deletion follows
+the existing surviving-boundary fallback. Superseded requests and destroyed views
+settle without retaining pending work, including destruction during asset loading.
+The session's text selection reveal command uses this path for native and canvas
+text. Structural selection reveal still uses the existing input controller.
+
+`pnpm run check` passes with 472 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes. Mounted browser tests cover
+native coordinate queries, scrolling to distant cells, horizontal table overflow,
+insertion of thirty lines during a pending reveal, deletion fallback, replacement
+of pending requests and destruction before and after readiness.
+
+Three serial production trials pass every unchanged performance budget: worst
+first usable 176 ms, streaming 1,066 ms, paste handler 57.8 ms, paste to paint
+121.4 ms, typing 32.2 ms, paging 32.8 ms and loaded heap 29,313,548 bytes. Evidence
+is in `artifacts/public-interface-m4/native-text-geometry/`. The report identifies
+`6f159b7` and measures this checkpoint's uncommitted tree. These production trials
+exercise the writing demo; the public geometry/reveal interface is verified by
+the mounted browser tests.
+
+Milestone 4 remains open. List markers, quote rules, inline/decorations, supported
+view update/diagnostic contracts and the complete demo migration remain before
+its commit-and-judge gate. No milestone judge has been claimed for this checkpoint.
