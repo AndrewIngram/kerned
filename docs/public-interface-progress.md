@@ -513,7 +513,7 @@ they measure the working tree containing the accepted fixes before their commit.
 The implementation and review cycle for milestone 2 is complete with this
 post-review changeset. Session contribution composition remains milestone 3.
 
-## Milestone 3: session composition and publication (in progress)
+## Milestone 3: session composition and publication (architecture review pending)
 
 Milestone 2's accepted review fixes were committed as `c3cdf8b` before this work.
 
@@ -550,7 +550,7 @@ The production build also passed, and a second lint-fix/format pass made no chan
 At that checkpoint, the main demo still used the existing action assembly.
 The subsequent migration is recorded below.
 
-Remaining before milestone 3 can be judged:
+Remaining at this initial checkpoint before milestone 3 could be judged:
 
 - Complete native input and history command migration. Toolbar and input must
   invoke the same session commands. Prove StarterKit composes with foreign node
@@ -994,3 +994,57 @@ identifies `b3e09ad` and measures this checkpoint's uncommitted implementation.
 Milestone 3 remains in progress. Undo/redo still need named command contributions
 with accurate dry runs and atomic command semantics before the completion commit
 and independent architecture judge. That judge's baseline remains `c3cdf8b`.
+
+### Milestone 3 implementation completion: named history commands
+
+`localHistory` now contributes typed `commands.undo/redo`, matching chain and dry-run
+forms, and command-state availability. The demo toolbar, keyboard/native input
+callbacks and retained consumers use those commands. Separate composed-session
+`undo/redo` methods were removed; the imperative state module retains its lower-level
+operations.
+
+History commands prepare one replay without moving stacks or publishing. Following
+read-only commands inspect the prepared state. Dry runs, failed commands, stale
+snapshots, changed history boundaries and permission revocation leave document,
+stacks, references and queued effects unchanged. Final publication rechecks current
+permissions and extension reducers. Replays use one prepared document/tree rather
+than reconstructing it for both preview and execution.
+
+The chain contract explicitly distinguishes replay from a new edit. One replay may
+accompany view effects and read-only commands. New content, selection or stored-mark
+edits, or another replay, must be separate calls; mixing them rejects the complete
+chain. Ordinary edit chains still publish as one undoable transaction.
+
+Milestone 3 acceptance evidence:
+
+| Requirement                                                             | Implementation and verification                                                                                                                                        |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| One object-configured session from the assembly                         | `core/session.ts`; compiled positive/negative fixtures and `core/__tests__/session.test.ts`                                                                            |
+| Named, direct, chained and dry-run commands; queries and activity       | `core/commands.ts`, `queries.ts`, `definitions.ts`; session and portable-extension tests                                                                               |
+| Full starter composition and native input migration                     | `extensions/starter-kit`; foreign-node text/clipboard/block fixtures; `tests/starter-input.browser.test.ts`; demo controls and E2E typing/clipboard/structure coverage |
+| Draft visibility, atomic edits, rollback, permissions and stale callers | `state/commands.ts`; state command-publication, core session and history fixtures                                                                                      |
+| Deferred focus/reveal and one view per session                          | `core/view-effects.ts`; headless, native browser and React session-lifetime tests                                                                                      |
+| Typed events, cleanup, ordering and independent extension storage       | `state/events.ts`, core extension-lifetime; publication and factory-lifetime fixtures                                                                                  |
+| Readonly snapshots; options, fields and document data distinct          | readonly state/transform contracts; compiled fixtures and frozen-input structural-sharing tests                                                                        |
+| One history owner with configurable local policy                        | `extensions/history.ts`, `state/local-history.ts`; history ownership, grouping, retention, replay and denial fixtures                                                  |
+
+All milestone 3 implementation checkpoints since `c3cdf8b` belong to the independent
+architecture review, including command composition, portable constructors and
+clipboard, native input, events, disposal, view effects and history. Milestones 4–8
+remain pending. The unchanged concurrent split/insert todo belongs to the separate
+collaboration plan and is not claimed as solved.
+
+Final milestone 3 implementation validation passed: `pnpm run check`, declaration
+emission and production build, with **249 Vitest passes, one unchanged convergence
+todo, and all 39 Playwright scenarios**. The final regression includes invalidating
+a prepared replay when the history boundary changes without a new snapshot.
+
+Three serial final production trials in
+`artifacts/public-interface-m3/history-commands-final/baseline.json` pass every
+unchanged budget: first usable 176ms, full stream 1078.9ms, paste handler 56.5ms,
+paste paint 117.3ms, typing 32.4ms, paging 32.7ms and loaded heap 29,514,128 bytes.
+Removing duplicate restored-document preparation reduced the prior trial's
+122.5ms paste paint to 117.3ms while retaining final permission/field validation.
+Both reports identify `b74f3b0` and measure their respective uncommitted trees.
+The pre-review commit covers the completed implementation; milestone acceptance
+still requires the judge and any agreed fixes.

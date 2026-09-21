@@ -119,7 +119,7 @@ test('a node-owned formatting contribution operates in open nested documents', (
   expect(editor.getCommandState('toggleCaptionBold').activity).toBe('active');
   expect(editor.commands.clearMarks()).toBe(true);
   expect(editor.getCommandState('toggleCaptionBold').activity).toBe('inactive');
-  editor.undo();
+  editor.commands.undo();
   expect(editor.getCommandState('toggleCaptionBold').activity).toBe('active');
   const quote = editor.state.nodes[0];
 
@@ -166,9 +166,9 @@ test('starter list and quote commands compose with foreign nodes through schema-
   expect(list.children[1].children[0]).toMatchObject({ id: 2, label: 'Card' });
   expect(editor.getCommandState('toggleQuote').activity).toBe('active');
   expect(editor.history.undo).toBe(1);
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(original.nodes);
-  expect(editor.redo()).toBe(true);
+  expect(editor.commands.redo()).toBe(true);
   expect(editor.state.nodes[0]).toEqual(quote);
 });
 
@@ -228,7 +228,7 @@ test('heading conversion retains rich text and durable positions in an open sche
   });
   expect(editor.commands.setHeading(null)).toBe(true);
   expect(editor.state.nodes).toEqual(original.nodes);
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(schema.children(editor.state.nodes[0])[1]).toMatchObject({ kind: 'heading', level: 3 });
 });
 
@@ -298,7 +298,7 @@ test('table commands preserve custom cell text and cell selections across edits 
   expect(node.rows[1].map((cell) => cell.header)).toEqual([false, false, false]);
   expect(editor.state.selection.eq(selection)).toBe(true);
   expect(editor.history.undo).toBe(1);
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(original.nodes);
   editor.select(textSelection(1, 0));
   expect(editor.commands.insertTable()).toBe(true);

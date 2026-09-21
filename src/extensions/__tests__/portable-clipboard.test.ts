@@ -78,9 +78,9 @@ test('inline paste uses custom text storage, renews inline identities and undoes
   expect(destination.tokens[0].id).not.toBe('source-mention');
   expect(editor.state.nodes[0]).toBe(source);
   expect(editor.history.undo).toBe(1);
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(original.nodes);
-  expect(editor.redo()).toBe(true);
+  expect(editor.commands.redo()).toBe(true);
   expect(editor.state.nodes[1]).toEqual(destination);
 });
 
@@ -159,7 +159,7 @@ test('rectangular paste retains custom cell content while growing the destinatio
   expect(editor.state.nodes[0]).toBe(source);
   const tree = indexTree(schema, editor.state.nodes);
   expect(new Set(tree.order.map((entry) => entry.node.key)).size).toBe(tree.order.length);
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(original.nodes);
 });
 
@@ -180,7 +180,7 @@ test('cross-container replacement works with custom text and intervening atoms',
   expect(schema.children(editor.state.nodes[0])).toMatchObject([
     { kind: 'caption', id: 1, value: 'AXZ' },
   ]);
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(original.nodes);
 });
 
@@ -206,7 +206,7 @@ test('the complete starter kit binds node-valued commands to the consumer docume
   expect(editor.state).toBe(initial);
   expect(editor.chain().updateNode(changed).run()).toBe(true);
   expect(editor.state.nodes[0]).toMatchObject({ label: 'Changed' });
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(initial.nodes);
 
   editor.select(new NodeSelection(node.id));

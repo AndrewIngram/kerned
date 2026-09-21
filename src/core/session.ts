@@ -130,8 +130,6 @@ export type Editor<D extends readonly SchemaDefinition[], N extends NodeIdentity
   setStoredMarks: StateSession<N>['setStoredMarks'];
   transact(command: Command<N>, options?: CommandOptions): boolean;
   select(this: void, selection: Selection): void;
-  undo(): boolean;
-  redo(): boolean;
   subscribe(this: void, listener: () => void): () => void;
   on<Key extends keyof EditorEvents<N>>(
     name: Key,
@@ -228,8 +226,6 @@ export function createEditor(
       select: (selection: Selection) => {
         editor.select(selection);
       },
-      undo: () => editor.undo() !== null,
-      redo: () => editor.redo() !== null,
       subscribe: (listener: () => void) => editor.subscribe(listener),
       on: editor.on,
       destroy: () => editor.destroy(),

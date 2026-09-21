@@ -99,7 +99,7 @@ test('public named chains accept history options without changing dry-run state'
       .run(),
   ).toBe(true);
   expect(editor.history.undo).toBe(1);
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes[0].text).toBe('A');
 });
 
@@ -155,7 +155,7 @@ test('one assembly supplies content, named commands, chains and dry runs with in
   expect(editor.chain().append('!').appendSuffix().run()).toBe(true);
   expect(editor.state.nodes[0].text).toBe('A!?');
   expect(editor.history.undo).toBe(1);
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes[0].text).toBe('A');
   expect(editor.commands.append('B')).toBe(true);
   expect(editor.state.nodes[0].text).toBe('AB');
@@ -352,7 +352,7 @@ test('the complete recursive starter schema retains typed commands and table sel
   expect(indexTree(demoSchema, editor.state.nodes).byId.get(50)?.node).toMatchObject({
     text: 'Deep Nested',
   });
-  editor.undo();
+  editor.commands.undo();
   expect(indexTree(demoSchema, editor.state.nodes).byId.get(50)?.node).toMatchObject({
     text: 'Nested',
   });
@@ -498,7 +498,7 @@ test('typed events separate persistence from selection and publish before view i
     'view',
   ]);
   observed.length = 0;
-  editor.undo();
+  editor.commands.undo();
   expect(observed).toEqual([
     'update:undo',
     'transaction:undo',
@@ -507,7 +507,7 @@ test('typed events separate persistence from selection and publish before view i
     'view',
   ]);
   observed.length = 0;
-  editor.redo();
+  editor.commands.redo();
   expect(observed).toEqual([
     'update:redo',
     'transaction:redo',
@@ -581,8 +581,8 @@ test('destroy is terminal and idempotent, retaining a readable final snapshot', 
   expect(() => pendingDryRun.run()).toThrow(/destroyed/);
   expect(() => editor.transact(() => true)).toThrow(/destroyed/);
   expect(() => editor.can().append('C')).toThrow(/destroyed/);
-  expect(() => editor.undo()).toThrow(/destroyed/);
-  expect(() => editor.redo()).toThrow(/destroyed/);
+  expect(() => editor.commands.undo()).toThrow(/destroyed/);
+  expect(() => editor.commands.redo()).toThrow(/destroyed/);
   expect(() => editor.subscribe(() => undefined)).toThrow(/destroyed/);
   expect(() => editor.on('content', () => undefined)).toThrow(/destroyed/);
   expect(editor.state).toBe(final);

@@ -80,7 +80,7 @@ export function createEditorControls({
     update: (node: StarterNode) => run(() => editor.commands.updateNode(node)),
     restore: (redo = false) =>
       run(() => {
-        const changed = redo ? editor.redo() : editor.undo();
+        const changed = redo ? editor.commands.redo() : editor.commands.undo();
 
         if (changed) closePanel();
 

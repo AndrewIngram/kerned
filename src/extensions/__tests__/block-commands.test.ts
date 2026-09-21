@@ -176,9 +176,9 @@ test('named structural commands retain foreign content and use the composed chil
   expect(sequence.items.map((item) => item.blocks[0].kind)).toEqual(['text', 'widget']);
   expect(sequence.items[1].blocks[0]).toMatchObject({ id: 3, label: 'Interactive card' });
   expect(editor.history.undo).toBe(1);
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes).toEqual(original.nodes);
-  editor.redo();
+  editor.commands.redo();
   expect(editor.state.nodes[0]).toEqual(panel);
 });
 

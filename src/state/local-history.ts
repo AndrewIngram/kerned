@@ -134,6 +134,7 @@ export function createLocalHistory<N extends NodeIdentity>(options: HistoryOptio
           ? entry.positionMaps
           : entry.positionMaps.toReversed().map(invertPositionMap),
         operations: entry.operations,
+        isCurrent: () => version === preparedAt,
         commit() {
           if (version !== preparedAt) throw new Error('History changed after replay was prepared');
           source.pop();

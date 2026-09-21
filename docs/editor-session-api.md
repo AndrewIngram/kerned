@@ -378,11 +378,26 @@ Collaborative history and concurrent rebasing remain unimplemented. Each session
 creates independent storage even when it shares an extension definition.
 
 Without this capability, edits still publish and durable positions still map,
-but `editor.history` stays empty and `undo()`/`redo()` return false. The lower
+but `editor.history` stays empty and the local-history command names are absent. The lower
 imperative state constructor keeps its default local history for direct users;
 pass `{ history: null }` to disable it. Its `HistoryOptions` accepts the same
-retention and grouping settings. Named undo/redo commands are still the remaining
-milestone 3 migration.
+retention and grouping settings.
+
+`localHistory` contributes `editor.commands.undo()` and `redo()` with matching
+`can()`, `chain()` and `getCommandState()` forms. These prepare a replay, validate
+current permissions and extension fields, then publish once when the chain runs.
+Dry runs do not move stacks, map positions, publish events or execute view effects.
+Permissions and extension fields are checked again at execution. The composed
+session no longer exposes separate `editor.undo()` or `editor.redo()` methods;
+the lower imperative state session still exposes those operations.
+
+A history replay occupies the chain's edit slot. It may accompany focus, reveal
+or read-only commands, such as `editor.chain().focus().undo().run()`. Mixing a
+replay with new content, selection or stored-mark changes, or another replay,
+rejects the whole chain without publication. Invoke those as separate commands
+when both actions are intended. A failed command after replay preparation also
+abandons the replay. Following commands observe the prepared document, selection
+and extension fields.
 
 ## Extension resource lifetime
 

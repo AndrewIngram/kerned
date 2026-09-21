@@ -36,7 +36,7 @@ test('headless starter commands share formatting, heading and quote edits in one
     { level: 2, marks: [{ mark: { type: 'bold' } }] },
   ]);
   expect(editor.getCommandState('toggleQuote').activity).toBe('active');
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes.map((node) => node.kind)).toEqual(['paragraph', 'paragraph']);
 });
 
@@ -110,7 +110,7 @@ test('quoting selected list items wraps their list rather than replacing its ite
   if (list.kind !== 'list') throw new Error('Expected list');
   expect(list.children.map((item) => item.children[0].id)).toEqual([1, 2]);
   expect(editor.history.undo).toBe(1);
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes.map((node) => node.kind)).toEqual(['paragraph', 'paragraph']);
 });
 

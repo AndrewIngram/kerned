@@ -1,10 +1,16 @@
-import { expect, test } from 'vitest';
+import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
 import { localHistory } from '../../extensions/history';
 import { createSchema, defineNode, type NodeIdentity, type DocumentNode } from '../../model';
 import { textSelection, createStateField } from '../../state';
-import { createEditor, defineExtension, defineCommand, type ExtensionContext } from '../index';
+import {
+  createEditor,
+  connectEditorView,
+  defineExtension,
+  defineCommand,
+  type ExtensionContext,
+} from '../index';
 
 const note = defineNode({
   name: 'note',
@@ -49,8 +55,8 @@ test('composed sessions only retain undo history when an extension owns it', () 
   const position = editor.positions.at(1, 1, 1);
   expect(editor.commands.append('B')).toBe(true);
   expect(editor.history).toEqual({ undo: 0, redo: 0 });
-  expect(editor.undo()).toBe(false);
-  expect(editor.redo()).toBe(false);
+  expect('undo' in editor.commands).toBe(false);
+  expect('redo' in editor.commands).toBe(false);
   expect(editor.state.nodes[0].text).toBe('AB');
   expect(editor.positions.resolve(position)).toMatchObject({
     status: 'resolved',
@@ -70,16 +76,16 @@ test('configured local history keeps independent session stacks and obeys retent
   editor.commands.append('D');
   expect(editor.history.undo).toBe(2);
   expect(other.history.undo).toBe(0);
-  expect(editor.undo()).toBe(true);
-  expect(editor.undo()).toBe(true);
-  expect(editor.undo()).toBe(false);
+  expect(editor.commands.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(false);
   expect(editor.state.nodes[0].text).toBe('AB');
-  expect(editor.redo()).toBe(true);
-  expect(editor.redo()).toBe(true);
+  expect(editor.commands.redo()).toBe(true);
+  expect(editor.commands.redo()).toBe(true);
   expect(editor.state.nodes[0].text).toBe('ABCD');
   editor.destroy();
   expect(other.commands.append('!')).toBe(true);
-  expect(other.undo()).toBe(true);
+  expect(other.commands.undo()).toBe(true);
   expect(other.state.nodes[0].text).toBe('A');
 });
 
@@ -97,14 +103,14 @@ test('history group delay is configurable while composition stays one undoable i
   type('C', 110);
   type('D', 150);
   expect(editor.history.undo).toBe(2);
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes[0].text).toBe('ABC');
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes[0].text).toBe('A');
   type('E', 200, 'composition:one');
   type('F', 2000, 'composition:one');
   expect(editor.history.undo).toBe(1);
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes[0].text).toBe('A');
 });
 
@@ -161,19 +167,150 @@ test('rejected history replay preserves its stack and durable-position checkpoin
   editor.commands.append('B');
   const before = editor.state;
   const checkpoint = editor.positions.checkpoint();
-  expect(() => editor.undo()).toThrow('Replay rejected');
+  expect(() => editor.commands.undo()).toThrow('Replay rejected');
   expect(editor.state).toBe(before);
   expect(editor.history).toEqual({ undo: 1, redo: 0 });
   expect(editor.positions.checkpoint()).toEqual(checkpoint);
   reject = false;
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes[0].text).toBe('A');
   reject = true;
   const undone = editor.state;
-  expect(() => editor.redo()).toThrow('Replay rejected');
+  expect(() => editor.commands.redo()).toThrow('Replay rejected');
   expect(editor.state).toBe(undone);
   expect(editor.history).toEqual({ undo: 0, redo: 1 });
   reject = false;
-  expect(editor.redo()).toBe(true);
+  expect(editor.commands.redo()).toBe(true);
   expect(editor.state.nodes[0].text).toBe('AB');
+});
+
+test('named history commands preview without publishing and replay once before queued view effects', () => {
+  const schema = createSchema({ extensions: [note, editing, localHistory] });
+  const editor = createEditor({ schema, content: [...content] });
+  const published: string[] = [];
+  const focused: string[] = [];
+  editor.on('transaction', (event) => published.push(event.kind));
+  connectEditorView(editor, {
+    focus: () => focused.push(editor.state.nodes[0].text),
+    reveal() {},
+    destroy() {},
+  });
+  expectTypeOf(editor.commands.undo).parameters.toEqualTypeOf<[]>();
+  expectTypeOf(editor.can().redo).returns.toEqualTypeOf<boolean>();
+  expect(editor.can().undo()).toBe(false);
+  editor.commands.append('B');
+  const before = editor.state;
+  const checkpoint = editor.positions.checkpoint();
+  expect(editor.getCommandState('undo')).toEqual({ available: true, activity: 'inactive' });
+  expect(editor.can().chain().focus().undo().scrollIntoView().run()).toBe(true);
+  expect(editor.state).toBe(before);
+  expect(editor.positions.checkpoint()).toEqual(checkpoint);
+  expect(editor.history).toEqual({ undo: 1, redo: 0 });
+  expect(focused).toEqual([]);
+  expect(published).toEqual(['transaction']);
+  expect(editor.chain().focus().undo().run()).toBe(true);
+  expect(editor.state.nodes[0].text).toBe('A');
+  expect(editor.state.revision).toBe(before.revision + 1);
+  expect(published).toEqual(['transaction', 'undo']);
+  expect(focused).toEqual(['A']);
+  expect(editor.can().redo()).toBe(true);
+  expect(editor.commands.redo()).toBe(true);
+  expect(editor.state.nodes[0].text).toBe('AB');
+  expect(published).toEqual(['transaction', 'undo', 'redo']);
+});
+
+test('history replay composes with draft inspection and failed or stale chains publish nothing', () => {
+  const checks = defineExtension({
+    name: 'checks',
+    options: {},
+    setup: () => ({
+      commands: {
+        textIs: defineCommand({
+          execute: (context, text: string) => context.schema.text(context.state.nodes[0]) === text,
+        }),
+      },
+    }),
+  });
+
+  const schema = createSchema({ extensions: [note, editing, localHistory, checks] });
+  const editor = createEditor({ schema, content: [...content] });
+  editor.commands.append('B');
+  const before = editor.state;
+  expect(editor.chain().undo().textIs('wrong').run()).toBe(false);
+  expect(editor.state).toBe(before);
+  expect(editor.history).toEqual({ undo: 1, redo: 0 });
+  expect(editor.can().chain().undo().textIs('A').run()).toBe(true);
+  const stale = editor.chain().undo();
+  editor.commands.append('C');
+  expect(stale.run()).toBe(false);
+  expect(editor.state.nodes[0].text).toBe('ABC');
+  expect(editor.history).toEqual({ undo: 2, redo: 0 });
+  expect(editor.chain().undo().textIs('AB').run()).toBe(true);
+});
+
+test('history replay and new edits cannot occupy the same atomic command chain', () => {
+  const schema = createSchema({ extensions: [note, editing, localHistory] });
+  const editor = createEditor({ schema, content: [...content] });
+  editor.commands.append('B');
+  const before = editor.state;
+  const checkpoint = editor.positions.checkpoint();
+  expect(editor.chain().undo().append('C').run()).toBe(false);
+  expect(editor.chain().append('C').undo().run()).toBe(false);
+  expect(editor.chain().undo().redo().run()).toBe(false);
+  expect(editor.state).toBe(before);
+  expect(editor.positions.checkpoint()).toEqual(checkpoint);
+  expect(editor.history).toEqual({ undo: 1, redo: 0 });
+  expect(editor.commands.undo()).toBe(true);
+  expect(editor.commands.append('C')).toBe(true);
+  expect(editor.state.nodes[0].text).toBe('AC');
+  expect(editor.can().redo()).toBe(false);
+});
+
+test('history commands recheck permissions before replay and suppress pending effects after revocation', () => {
+  let writable = true;
+  const schema = createSchema({ extensions: [note, editing, localHistory] });
+
+  const editor = createEditor({
+    schema,
+    content: [...content],
+    permissions: { access: () => (writable ? 'editable' : 'read-only') },
+  });
+
+  let focused = 0;
+  connectEditorView(editor, {
+    focus: () => {
+      focused++;
+    },
+    reveal() {},
+    destroy() {},
+  });
+  editor.commands.append('B');
+  expect(editor.can().undo()).toBe(true);
+  const pending = editor.chain().focus().undo();
+  const before = editor.state;
+  writable = false;
+  expect(pending.run()).toBe(false);
+  expect(editor.can().undo()).toBe(false);
+  expect(editor.commands.undo()).toBe(false);
+  expect(editor.state).toBe(before);
+  expect(editor.history).toEqual({ undo: 1, redo: 0 });
+  expect(focused).toBe(0);
+  writable = true;
+  expect(editor.commands.undo()).toBe(true);
+  expect(editor.state.nodes[0].text).toBe('A');
+});
+
+test('a changed history boundary invalidates prepared replay without partially mapping positions', () => {
+  const schema = createSchema({ extensions: [note, editing, localHistory] });
+  const editor = createEditor({ schema, content: [...content] });
+  editor.commands.append('B');
+  const pending = editor.chain().undo();
+  const before = editor.state;
+  const checkpoint = editor.positions.checkpoint();
+  editor.breakHistory();
+  expect(pending.run()).toBe(false);
+  expect(editor.state).toBe(before);
+  expect(editor.positions.checkpoint()).toEqual(checkpoint);
+  expect(editor.history).toEqual({ undo: 1, redo: 0 });
+  expect(editor.commands.undo()).toBe(true);
 });

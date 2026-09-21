@@ -72,7 +72,7 @@ test('retained clipboard handlers read the current selection and share the sessi
   });
   expect(editor.history.undo).toBe(1);
   expect(notices.filter(Boolean)).toEqual([]);
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(original.nodes);
 
   // The same callback sees a subsequent selection without a React render or rebinding.
@@ -99,8 +99,8 @@ test('retained keyboard and text callbacks invoke current session commands', () 
   handlers.keydown?.(backspace);
   expect(backspace.defaultPrevented).toBe(true);
   expect(editor.state.nodes).toMatchObject([{ text: 'First' }, { text: 'Second' }]);
-  editor.undo();
-  editor.undo();
+  editor.commands.undo();
+  editor.commands.undo();
   expect(editor.state.nodes).toEqual(before.nodes);
   editor.select(textSelection(1, 5));
   textInput.sync(input);

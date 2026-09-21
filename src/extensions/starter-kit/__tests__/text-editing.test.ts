@@ -34,7 +34,7 @@ test('split and deletion use custom text storage, grapheme boundaries and atomic
   expect(editor.chain().deleteBackward().deleteForward().run()).toBe(true);
   expect(editor.state.nodes[0]).toMatchObject({ value: 'Aé' });
   expect(editor.state.selection).toEqual(textSelection(1, 3));
-  expect(editor.undo()).toBe(true);
+  expect(editor.commands.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(initial.nodes);
 
   editor.select(textSelection(1, 3));
@@ -79,8 +79,8 @@ test('list Enter retains stored marks and Backspace joins items with custom text
   expect(editor.commands.deleteBackward()).toBe(true);
   expect(schema.children(editor.state.nodes[0])).toHaveLength(1);
   expect(indexTree(schema, editor.state.nodes).byId.get(1)?.node).toMatchObject({ value: 'AB' });
-  editor.undo();
-  editor.undo();
+  editor.commands.undo();
+  editor.commands.undo();
   expect(editor.state.nodes).toEqual(before.nodes);
   expect(editor.state.storedMarks).toEqual(before.storedMarks);
 });
@@ -99,7 +99,7 @@ test('Enter replaces a cross-block selection and splits as one undoable command'
   expect(editor.commands.splitBlock()).toBe(true);
   expect(editor.state.nodes.map((node) => schema.text(node))).toEqual(['A', 'D']);
   expect(editor.history.undo).toBe(1);
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes).toEqual(before.nodes);
   expect(editor.state.selection).toEqual(before.selection);
 });
@@ -216,7 +216,7 @@ test('typing commands use draft marks across custom text splits and explicit nat
     { value: 'Other' },
   ]);
   expect(editor.history.undo).toBe(1);
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes).toEqual(before.nodes);
   // An explicit native target moves to that text without inheriting unrelated stored marks.
   editor.commands.toggleFormat('italic');
@@ -263,6 +263,6 @@ test('plain text paste creates paragraphs within the current table cell', () => 
   if (!cell) throw new Error('Expected cell');
   expect(schema.children(cell).map((node) => schema.text(node))).toEqual(['Aone', 'two', 'threeB']);
   expect(editor.history.undo).toBe(1);
-  editor.undo();
+  editor.commands.undo();
   expect(editor.state.nodes).toEqual(before.nodes);
 });

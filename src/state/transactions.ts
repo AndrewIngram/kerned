@@ -252,17 +252,17 @@ export function createEditor<N extends NodeIdentity>(
 
   const journal: RevisionMap[] = [];
 
-  function restore(redo: boolean) {
-    assertWritable();
+  function prepareRestore(redo: boolean) {
+    assertActive();
 
     const replay = history?.prepare(state.nodes, redo ? 'redo' : 'undo');
 
     if (!replay) return null;
     const { nodes, changedIds, maps } = replay;
 
-    validateTree(schema, nodes);
+    const tree = validateTree(schema, nodes);
 
-    const context = selectionContext(schema, nodes),
+    const context = selectionContext(schema, nodes, tree),
       nextSelection = replay.selection.resolve(context);
 
     selections.validate(context, nextSelection);
@@ -273,27 +273,6 @@ export function createEditor<N extends NodeIdentity>(
       revision: state.revision + 1,
       storedMarks: replay.storedMarks,
     };
-
-    if (options.permissions) {
-      // Undoing a split joins content again; current source access still applies.
-      const tree = indexTree(schema, state.nodes);
-
-      for (const map of maps)
-        if (map.kind === 'join') {
-          const left = tree.byKey.get(map.key)?.node,
-            right = tree.byKey.get(map.rightKey)?.node;
-
-          if (left && right)
-            assertContentEditAllowed(
-              schema,
-              state.nodes,
-              { kind: 'join', left: left.id, right: right.id },
-              options.permissions,
-            );
-        }
-
-      assertEditAllowed(schema, state.nodes, next.nodes, options.permissions);
-    }
 
     const positionMapping = {
       before: state,
@@ -308,15 +287,58 @@ export function createEditor<N extends NodeIdentity>(
       mapping: positionMapping,
     };
 
-    prepareFields(update);
-    positions.advance(next, maps, { operations: replay.operations, redo });
-    replay.commit();
-    journal.push({ from: state.revision, to: state.revision + 1, maps });
+    const validate = () => {
+      assertActive();
 
-    state = next;
-    notify(update);
+      if (state !== update.before || !replay.isCurrent()) return false;
 
-    return { state, changedIds, positionMapping };
+      if (options.permissions) {
+        // Undoing a split joins content again; current source access still applies.
+        const currentTree = indexTree(schema, state.nodes);
+
+        for (const map of maps)
+          if (map.kind === 'join') {
+            const left = currentTree.byKey.get(map.key)?.node,
+              right = currentTree.byKey.get(map.rightKey)?.node;
+
+            if (left && right)
+              assertContentEditAllowed(
+                schema,
+                state.nodes,
+                { kind: 'join', left: left.id, right: right.id },
+                options.permissions,
+              );
+          }
+
+        assertEditAllowed(schema, state.nodes, next.nodes, options.permissions);
+      }
+
+      prepareFields(update);
+
+      return true;
+    };
+
+    validate();
+
+    return {
+      state: next,
+      validate,
+      publish() {
+        positions.advance(next, maps, { operations: replay.operations, redo });
+        replay.commit();
+        journal.push({ from: state.revision, to: next.revision, maps });
+        state = next;
+        notify(update);
+
+        return { state, changedIds, positionMapping };
+      },
+    };
+  }
+
+  function restore(redo: boolean) {
+    assertWritable();
+
+    return prepareRestore(redo)?.publish() ?? null;
   }
 
   const editor = {
@@ -529,6 +551,25 @@ export function createEditor<N extends NodeIdentity>(
     return {
       schema,
       assertActive,
+      prepareHistory(direction: 'undo' | 'redo') {
+        const redo = direction === 'redo';
+        const prepared = prepareRestore(redo);
+
+        if (!prepared) return null;
+
+        return {
+          state: prepared.state,
+          run(dryRun: boolean) {
+            if (!dryRun) assertWritable();
+
+            if (!prepared.validate()) return false;
+
+            if (!dryRun) prepared.publish();
+
+            return true;
+          },
+        };
+      },
       nodeIds: (draft: EditorState<N>) => indexTree(schema, draft.nodes).byId.keys(),
       get state() {
         return state;

@@ -299,7 +299,7 @@ export function Toolbar({
           <button
             aria-label="Undo"
             title="Undo (⌘Z)"
-            disabled={!editor.history.undo}
+            disabled={!editor.can().undo()}
             onClick={() => restore()}
           >
             <svg
@@ -319,7 +319,7 @@ export function Toolbar({
           <button
             aria-label="Redo"
             title="Redo (⇧⌘Z)"
-            disabled={!editor.history.redo}
+            disabled={!editor.can().redo()}
             onClick={() => restore(true)}
           >
             <svg

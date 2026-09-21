@@ -42,6 +42,8 @@ export type CommandContext<N extends NodeIdentity> = ReadContext<N> & {
   /** Queued until successful publication. Never runs in can(). */
   effect(effect: () => void): void;
   storedMarks(marks: readonly Mark[] | null): void;
+  /** Replay occupies this chain's edit slot; view effects may accompany it. */
+  restoreHistory(direction: 'undo' | 'redo'): boolean;
 };
 
 export type Command<N extends NodeIdentity, Args extends unknown[] = []> = (
@@ -80,6 +82,10 @@ type Host<N extends NodeIdentity> = {
   readonly state: EditorState<N>;
   preview(state: EditorState<N>, tx: Transaction<N>): EditorState<N>;
   dispatch(tx: Transaction<N>): void;
+  prepareHistory(direction: 'undo' | 'redo'): {
+    readonly state: EditorState<N>;
+    run(dryRun: boolean): boolean;
+  } | null;
 };
 
 /** Commands see preceding commands' draft state; only run publishes one transaction. */
@@ -101,6 +107,8 @@ export function createCommandChain<N extends NodeIdentity>(
     enabled = true,
     finished = false,
     marks: readonly Mark[] | null | undefined;
+
+  let replay: ReturnType<Host<N>['prepareHistory']> = null;
 
   let allocationNodes: readonly N[] | undefined;
   let occupiedIds = new Set<number>();
@@ -145,6 +153,12 @@ export function createCommandChain<N extends NodeIdentity>(
       open();
 
       if (!enabled) return chain;
+
+      if (replay) {
+        enabled = false;
+
+        return chain;
+      }
 
       try {
         if (
@@ -224,7 +238,9 @@ export function createCommandChain<N extends NodeIdentity>(
       };
 
       try {
-        if (dryRun) host.preview(initial, tx);
+        if (replay) {
+          if (!replay.run(dryRun)) return false;
+        } else if (dryRun) host.preview(initial, tx);
         else if (steps.length || !draft.selection.eq(initial.selection) || marks !== undefined)
           host.dispatch(tx);
 
@@ -260,6 +276,29 @@ export function createCommandChain<N extends NodeIdentity>(
     select: chain.select,
     effect: chain.effect,
     storedMarks: chain.storedMarks,
+    restoreHistory(direction) {
+      open();
+
+      if (!enabled) return false;
+
+      if (replay || steps.length || !draft.selection.eq(initial.selection) || marks !== undefined) {
+        enabled = false;
+
+        return false;
+      }
+
+      replay = host.prepareHistory(direction);
+
+      if (!replay) {
+        enabled = false;
+
+        return false;
+      }
+
+      draft = replay.state;
+
+      return true;
+    },
   };
 
   function execute<Args extends unknown[]>(
