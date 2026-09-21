@@ -150,3 +150,10 @@ export { textSelectionAtClick } from './selection-view';
 export { textBoundaryNearNode, moveNodeSelection, type NavigationNode } from './node-navigation';
 
 export { inputPolicies, type InputContribution, type ViewSession } from './input-contributions';
+
+export {
+  viewLayers,
+  type ViewLayerContribution,
+  type ViewLayerFrame,
+  type LayerBlock,
+} from './view-layers';

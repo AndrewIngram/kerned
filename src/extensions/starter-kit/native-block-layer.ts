@@ -4,6 +4,7 @@ import {
   type NodeView,
   type TextHighlight,
 } from '../../editor-browser/node-views';
+import { createViewLayers } from '../../editor-browser/view-layers';
 import type { RegisterCanvasPainter } from '../../editor-canvas/canvas-renderer';
 import type { DocumentLayout, DocumentLayoutSnapshot } from '../../editor-canvas/document-layout';
 import { createTextLabels } from '../../editor-canvas/text-labels';
@@ -59,8 +60,7 @@ export function createBlockLayer(
 
   const labels = createTextLabels(owned);
   const mounted = new Map<number, MountedBlock>();
-  const quotes = new Map<number, HTMLSpanElement>();
-  const markers = new Map<number, HTMLDivElement>();
+  const layers = createViewLayers(element, editor);
   let frame: BlockLayerFrame | undefined;
   let destroyed = false;
   let detach: (() => void) | undefined;
@@ -113,43 +113,15 @@ export function createBlockLayer(
       const active = new Set(visible.map((p) => p.node.id));
 
       for (const [id, block] of mounted) if (!active.has(id)) remove(id, block);
-      const rules = new Map<number, { top: number; bottom: number; left: number }>();
-      const activeMarkers = new Set<number>();
+      layers.update({
+        tree: doc.tree,
+        insets: doc.projection.decorations,
+        blocks: visible,
+        inset,
+        width: contentWidth,
+      });
 
       for (const [index, p] of visible.entries()) {
-        const decoration = doc.projection.decorations.get(p.node.id);
-
-        for (const quote of decoration?.quotes ?? []) {
-          rules.set(quote.id, {
-            top: rules.get(quote.id)?.top ?? p.y,
-            bottom: p.y + p.height,
-            left: quote.inset,
-          });
-        }
-
-        if (decoration?.marker) {
-          activeMarkers.add(p.node.id);
-          let marker = markers.get(p.node.id);
-
-          if (!marker) {
-            marker = element.ownerDocument.createElement('div');
-            marker.className = 'block-decoration';
-            marker.dataset.blockDecoration = String(p.node.id);
-            const label = element.ownerDocument.createElement('span');
-            label.className = 'list-marker';
-            marker.append(label);
-            markers.set(p.node.id, marker);
-            element.append(marker);
-          }
-
-          marker.style.left = `${inset}px`;
-          marker.style.top = `${p.y}px`;
-          marker.style.height = `${p.height}px`;
-          marker.style.width = `${decoration.inset}px`;
-
-          if (marker.firstChild) marker.firstChild.textContent = decoration.marker;
-        }
-
         const renderer = renderers.find(p.node);
         const kind = renderer ? 'native' : 'text';
         let block = mounted.get(p.node.id);
@@ -212,35 +184,6 @@ export function createBlockLayer(
             });
         }
       }
-
-      for (const [id, marker] of markers)
-        if (!activeMarkers.has(id)) {
-          marker.remove();
-          markers.delete(id);
-        }
-
-      for (const [id, rule] of rules) {
-        let line = quotes.get(id);
-
-        if (!line) {
-          line = element.ownerDocument.createElement('span');
-          line.className = 'quote-rule';
-          line.dataset.quote = String(id);
-          line.style.pointerEvents = 'none';
-          quotes.set(id, line);
-          element.append(line);
-        }
-
-        line.style.left = `${inset + rule.left}px`;
-        line.style.top = `${rule.top}px`;
-        line.style.height = `${rule.bottom - rule.top}px`;
-      }
-
-      for (const [id, line] of quotes)
-        if (!rules.has(id)) {
-          line.remove();
-          quotes.delete(id);
-        }
     },
     destroy() {
       if (destroyed) return;
@@ -252,8 +195,7 @@ export function createBlockLayer(
       element.removeEventListener('pointerdown', pointer, true);
 
       for (const [id, block] of mounted) remove(id, block);
-      quotes.clear();
-      markers.clear();
+      layers.destroy();
       element.replaceChildren();
       element.classList.remove('dom-layer');
       element.style.removeProperty('width');

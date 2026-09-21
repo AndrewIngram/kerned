@@ -4,37 +4,25 @@ import type { EditorState } from '../../state';
 import type { StarterNode, StarterLeaf } from '../demo-model';
 import { selectedBlockLabel } from '../headings';
 
-type BlockDecoration = {
-  inset: number;
-  quotes: readonly { id: number; inset: number }[];
-  marker: string;
-};
+type BlockDecoration = { inset: number };
 
 /** Starter-specific container appearance and toolbar labels over the shared view projection. */
 export function createStarterDocumentQuery(schema: Schema<StarterNode>) {
   const project = createDocumentQuery<StarterNode, StarterLeaf, BlockDecoration>(schema, {
-    initial: { inset: 0, quotes: [], marker: '' },
+    initial: { inset: 0 },
     isBlock: (node): node is StarterLeaf =>
       node.kind === 'paragraph' ||
       node.kind === 'heading' ||
       node.kind === 'image' ||
       node.kind === 'table',
-    child: (parent, index, context) => {
+    child: (parent, _index, context) => {
       switch (parent.kind) {
         case 'quote':
-          return {
-            inset: context.inset + 24,
-            quotes: [...context.quotes, { id: parent.id, inset: context.inset }],
-            marker: '',
-          };
+          return { inset: context.inset + 24 };
         case 'list':
-          return {
-            ...context,
-            inset: context.inset + 28,
-            marker: parent.ordered ? `${parent.start + index}.` : '•',
-          };
+          return { inset: context.inset + 28 };
         case 'listItem':
-          return { ...context, marker: index === 0 ? context.marker : '' };
+          return context;
         default:
           throw new Error(`Unexpected flowing container: ${parent.kind}`);
       }

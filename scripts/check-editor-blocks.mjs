@@ -11,7 +11,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
         errors = [];
 
       page.on('pageerror', (e) => errors.push(e.message));
-      await page.goto('http://127.0.0.1:5173/editor.html');
+      await page.goto(`${process.env.BASE_URL ?? 'http://127.0.0.1:5173'}/editor.html`);
       await page.waitForFunction(() => window.editorDiagnostics);
 
       const settle = () =>
@@ -38,7 +38,8 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       assert.ok((await read()).nodes[0].text.startsWith('Quoted '));
       await page.getByRole('button', { name: 'Undo', exact: true }).click();
       await page.keyboard.press('Control+a');
-      await page.keyboard.type('Across containers');
+      // Replace the selection in one input event so this assertion covers one undoable edit.
+      await page.keyboard.insertText('Across containers');
       await settle();
       assert.equal((await read()).nodes.length, 1);
       await page.getByRole('button', { name: 'Undo', exact: true }).click();

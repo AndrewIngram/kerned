@@ -2,11 +2,14 @@ import { defineExtension, type ContributionContext } from '../../core';
 import { inputPolicies } from '../../editor-browser';
 import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
 import { image } from '../starter-definitions';
+import { containerDecorations } from './container-decorations';
 import { createImageRenderer } from './image-view';
 import { starterExtensions } from './index';
 import { createStarterKitInput } from './input';
 import { starterPresentation } from './presentation';
 import { tableView } from './table-node-view';
+
+export { containerDecorations } from './container-decorations';
 
 export const imageView = defineExtension({
   name: 'imageView',
@@ -43,6 +46,7 @@ export function starterBrowserExtensions({ imageDelay = 0 }: { imageDelay?: numb
     starterInput,
     tableView,
     starterPresentation,
+    containerDecorations,
   ] as const;
 }
 

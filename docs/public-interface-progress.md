@@ -1797,3 +1797,47 @@ the mounted browser tests.
 Milestone 4 remains open. List markers, quote rules, inline/decorations, supported
 view update/diagnostic contracts and the complete demo migration remain before
 its commit-and-judge gate. No milestone judge has been claimed for this checkpoint.
+
+### Milestone 4 checkpoint: contributed container decorations
+
+List markers and quote rules now come from the starter `containerDecorations`
+extension in both the public mount and the writing demo. The old block layer no
+longer creates these decorations, and their stylesheet no longer belongs to the
+app. The old starter projection stopped generating unused marker/quote metadata.
+
+The browser module owns a per-view layer contribution lifecycle. Factories receive
+the imperative session and a positioned DOM host; updates receive canonical
+resident blocks with document bounds and flowing ancestors. The existing
+projection now retains inherited context for flowing containers as well as
+rendered blocks. Layer frames reuse its document index and cache ancestor paths;
+they do not expose graphics handles, private layouts or mutable index maps.
+
+This keeps numbering, quote ancestry and styling inside the starter extension.
+The alternative of adding label/rule variants to generic canvas presentation was
+rejected because it would put those schema-specific rendering rules into the
+shared view. Per-view layers also avoid making an extension coordinate individual
+culled hosts. This is an overlay lifetime contract; public range decorations,
+external invalidation and React rendering remain milestone 6 work.
+
+`pnpm run check` passes with 481 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes. New browser cases verify
+nested ordered/bullet lists, continuation paragraphs, quote spans inside a custom
+indented container, renumbering without replacing retained DOM, culling and
+remounting, separate view ownership, duplicate names, failed factories and
+exhaustive cleanup when a layer destructor throws.
+
+The existing toolbar audit passes all six production browser/viewport cases.
+It now accepts `BASE_URL`. Its selected-content replacement uses one text-input
+event, matching its assertion that one undo restores the original structure;
+character-by-character typing crosses the existing structural/typing history
+groups. No assertions, timeouts, lint rules or performance budgets were removed.
+
+Three serial production trials pass every unchanged budget: worst first usable
+172 ms, streaming 1,043.5 ms, paste handler 55.3 ms, paste to paint 119.2 ms,
+typing 32.3 ms, paging 33 ms and loaded heap 29,354,640 bytes. Evidence is in
+`artifacts/public-interface-m4/container-decorations/`. The report identifies
+`227e290` and measures this checkpoint's uncommitted tree.
+
+Milestone 4 remains open for inline/mark/decorations, supported view update and
+diagnostic contracts, and migration of the complete demo to the public mount.
+This checkpoint is not the milestone's commit-and-judge gate.

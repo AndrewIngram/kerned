@@ -89,7 +89,10 @@ frames. Neither depends on paragraph or heading names.
   shares one indexed snapshot across toolbar queries. `editor-browser/document.ts`
   walks schema-defined children, maps selections to rendered blocks and resolves
   a nested position's rendered owner. The starter `browser-document.ts` adds
-  list/quote decoration context and toolbar labels. The generic layout controller
+  container indentation and toolbar labels. List markers and quote rules now
+  belong to the starter container-decoration contribution, shared by the demo and
+  public mount through `editor-browser/view-layers.ts`. That owner translates the
+  existing projection into culled layer frames and owns layer cleanup. The generic layout controller
   takes pinned positions and top padding rather than search/comment panel state.
   Its React attachment lives in `editor-react/use-document-layout.ts`.
 - The viewport controller owns native measurement, zoom and scrolling. A scroll
@@ -110,8 +113,9 @@ frames. Neither depends on paragraph or heading names.
 - `useDiagnostics` is the only app module importing correctness fixtures. Canvas
   diagnostics expose a readonly painter count rather than a mutable registry.
 
-Complete DOM-overlay ownership and public vanilla mounting remain milestone 4
-work, including cancellation tests through that mounted view. Asset loading now
+Complete DOM-overlay ownership and demo migration remain milestone 4 work.
+The public vanilla mount now covers native tables and container decorations.
+Asset loading now
 has a private owner with readiness, failure and destruction; the entry no longer
 constructs CanvasKit or chooses engine storage. The demo still passes borrowed
 internal resources through its tree, which the complete mounted view must remove.

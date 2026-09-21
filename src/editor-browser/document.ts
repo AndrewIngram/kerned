@@ -19,9 +19,10 @@ export function createDocumentQuery<N extends NodeIdentity, Block extends N, Con
     const decorations = new Map<number, Context>();
 
     function visit(node: N, inherited: Context) {
+      decorations.set(node.id, inherited);
+
       if (policy.isBlock(node)) {
         nodes.push(node);
-        decorations.set(node.id, inherited);
       } else {
         schema
           .children(node)

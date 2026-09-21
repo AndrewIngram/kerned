@@ -55,6 +55,27 @@ cell text and active textareas.
 Transient text-highlight ranges can accompany native frames. This is an internal
 rendering contract, not the final extension decoration-authoring interface.
 
+Document overlays contribute through `viewLayers` from `src/editor-browser`.
+Each named contribution creates one layer per mounted view and returns `update`
+and `destroy` methods. Its factory receives the imperative session and a positioned
+DOM host. Update frames contain resident blocks, including overscan and pinned
+interaction targets, with unscaled document bounds and flowing ancestors. Each
+ancestor includes its canonical node, child index and inherited inset. The mount
+uses its existing document index and caches these paths; extensions do not receive
+graphics handles or private layout objects.
+
+The layer owns its DOM and styling. The host ignores pointer events by default;
+interactive descendants can opt in. Nonsemantic decoration layers set their own
+`aria-hidden` attribute. Duplicate names fail before allocation, failed factories
+release earlier layers, and destruction attempts every layer's cleanup even when
+one throws. Semantic state belongs outside the culled DOM.
+
+The starter `containerDecorations` extension uses this contract for list markers
+and quote rules. Numbering, nested containers and continuation paragraphs are
+resolved through installed schema definitions. The demo and public mount share
+this extension and its stylesheet. This layer lifecycle does not yet provide the
+planned public range-decoration and external-invalidation interface.
+
 ## React
 
 ```tsx
@@ -108,12 +129,12 @@ native table-cell editing and rich rectangular clipboard operations. Table
 cells can contain custom text-node definitions. Ordinary copy/cut and text
 paste within a native cell textarea still use its native behavior; this does
 not provide rich clipboard parity for every cell text selection yet.
-List markers, quote rules and inline/decorations still require adapters before
+Inline/decorations still require adapters before
 the complete starter content can use this mount.
 
 The writing demo still uses its existing starter composition and an internal
 `EditorEventHost`; it has not switched to this mount yet. It now uses the same
-table node-view contribution as the mount, without a separate table branch.
+table node-view and container-decoration contributions as the mount.
 Inline/decorations and diagnostic contracts must be completed before that
 switch. The old event host is not a second public editor interface. Milestone 4
 remains open until the demo uses the shared mount and stops passing graphics

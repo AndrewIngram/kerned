@@ -7,6 +7,7 @@ import {
   type InputContribution,
 } from '../editor-browser/input-contributions';
 import { createNodeViews, type NodeView } from '../editor-browser/node-views';
+import { createViewLayers } from '../editor-browser/view-layers';
 import type { NodeIdentity } from '../model';
 import { RangeSelection } from '../state';
 import type { ResolveEditorAsset } from './assets';
@@ -84,6 +85,7 @@ export function mountEditor<N extends NodeIdentity>(
   let focusedNode: number | undefined;
   let layout: ReturnType<typeof createDocumentLayout<N>> | undefined;
   const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
+  let layers: ReturnType<typeof createViewLayers<N>> | undefined;
 
   const renderers = createNodeViews(editor, { clipboard, notice: reportNotice });
 
@@ -262,6 +264,13 @@ export function mountEditor<N extends NodeIdentity>(
     }
 
     layout.present(snapshot);
+    layers?.update({
+      tree: doc.tree,
+      insets: doc.projection.decorations,
+      blocks: visible,
+      inset,
+      width: contentWidth,
+    });
     geometry.update({ document: doc, layout: snapshot, viewport: port });
     capture.update({
       context: doc.context,
@@ -322,6 +331,9 @@ export function mountEditor<N extends NodeIdentity>(
   try {
     element.append(root);
     cleanup.push(() => root.remove());
+    layers = createViewLayers(overlay, editor);
+    const installedLayers = layers;
+    cleanup.push(() => installedLayers.destroy());
     resources = createViewResources({ resolveAsset: options.resolveAsset });
     cleanup.push(() => resources.destroy());
     cleanup.push(

@@ -108,6 +108,8 @@ test('projection traverses schema-defined children and stops at rendered contain
   expect(document.nodes.map((node) => node.id)).toEqual([0, 2, 20, 3]);
   expect(document.tree.order.map((entry) => entry.node.id)).toEqual([10, 0, 11, 2, 20, 21, 22, 3]);
   expect(document.projection.decorations.get(2)).toEqual({ depth: 2, path: '/10:1/11:0' });
+  expect(document.projection.decorations.get(10)).toEqual({ depth: 0, path: '' });
+  expect(document.projection.decorations.get(11)).toEqual({ depth: 1, path: '/10:1' });
   expect(document.projection.decorations.get(20)).toEqual({ depth: 0, path: '' });
   expect(document.projection.decorations.has(21)).toBe(false);
   expect(document.blockFor(0)).toBe(document.nodes[0]);
