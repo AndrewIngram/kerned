@@ -1,27 +1,42 @@
-import CanvasKitInit from 'canvaskit-wasm';
 import { createRoot } from 'react-dom/client';
 
-import { loadEditorSample } from '../../editor-samples';
+import { createViewResources } from '../../editor-canvas/resources';
 
 import '../../editor.css';
-import { createOwnedEngine } from '../../owned-layout';
+import { loadEditorSample } from '../../editor-samples';
 import { App } from './app';
 
 const root = document.getElementById('root');
 
 if (!root) throw new Error('Missing root');
 
+const resources = createViewResources();
+
+let reactRoot: ReturnType<typeof createRoot> | undefined;
+
+let disposed = false;
+
+function dispose() {
+  disposed = true;
+  reactRoot?.unmount();
+  reactRoot = undefined;
+  resources.destroy();
+}
+
+import.meta.hot?.dispose(dispose);
+
 (async () => {
   root.textContent = 'Loading sample…';
 
-  const [kit, sample] = await Promise.all([
-    CanvasKitInit({ locateFile: () => '/engines/canvaskit.wasm' }),
-    loadEditorSample(),
-  ]);
+  const [, sample] = await Promise.all([resources.ready, loadEditorSample()]);
 
-  const owned = await createOwnedEngine(kit, 'shaping');
-  createRoot(root).render(<App kit={kit} owned={owned} initial={sample} />);
+  if (disposed) return;
+  const { kit, layout } = resources.read();
+  reactRoot = createRoot(root);
+  reactRoot.render(<App kit={kit} owned={layout} initial={sample} />);
 })().catch((error) => {
+  if (disposed) return;
+  resources.destroy();
   root.setAttribute('role', 'alert');
   root.textContent = String(error);
 });

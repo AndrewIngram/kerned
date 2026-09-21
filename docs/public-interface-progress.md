@@ -1252,3 +1252,44 @@ uncommitted tree.
 This remains a milestone 4 checkpoint. Asset readiness/cancellation, complete
 DOM-overlay ownership, browser-extension composition and public view mounting
 remain before the milestone judge.
+
+### Milestone 4 asset readiness and cancellation
+
+`createViewResources` is a private lifetime for graphics and layout resources.
+It exposes readiness and loading/ready/failed/destroyed status, resolves asset URLs
+through one callback, aborts outstanding fetches on failure or destruction, and
+rejects pending readiness promptly on destruction. Non-cancellable graphics
+initialization may finish internally, but cancellation checks prevent late work
+from creating or publishing usable layout resources. Destroying a ready owner
+releases its fonts, paint, shaping runtime and layout owners.
+
+The packaged CanvasKit declarations advertise `instantiateWasm`, but the shipped
+runtime does not use it. The loader uses the supported `locateFile` path with a
+preloaded, validated graphics blob and revokes its temporary URL after native
+initialization. Corrupt graphics bytes fail before entering CanvasKit. Layout
+asset loading uses the same resolver and abort signal, with cancellation checks
+before and after WASM instantiation. Existing partial-font setup cleanup remains
+inside the layout resource owner.
+
+The demo entry now starts this private lifetime rather than constructing
+CanvasKit or selecting an engine storage mode. Its hot-reload disposal unmounts
+React before releasing native resources, and obsolete asynchronous setup cannot
+mount another root. The app still borrows kit/layout handles for its existing
+adapters; eliminating those props belongs to the complete mounted-view work,
+not to a new public resource-construction API.
+
+Validation: `pnpm run check` passes with 325 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases; production build passes. Seven new
+real-browser tests run across Chromium, Firefox and WebKit for asset resolution,
+actual layout/drawing, destruction before loading, cancellation during font
+loading, failure and fresh retry, corrupt graphics and a corrupt later font
+after partial native setup. Three serial production trials in
+`artifacts/public-interface-m4/asset-lifetime/baseline.json` pass every unchanged
+budget. Worst results: first usable 178 ms, streaming 1,062 ms, paste handler
+56.6 ms, paste to paint 118.4 ms, typing 32.3 ms, paging 33.0 ms and loaded JS heap
+28,941,044 bytes. The report identifies `76ba400` and measures this checkpoint's
+uncommitted tree.
+
+Milestone 4 remains open for browser-extension composition, complete DOM-overlay
+ownership and public mounting, including cancellation and isolation verified
+through that final interface. Its independent judge follows that full exit gate.

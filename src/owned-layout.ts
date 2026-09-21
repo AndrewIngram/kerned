@@ -1,6 +1,7 @@
 import type { CanvasKit, Font, Typeface } from 'canvaskit-wasm';
 import { z } from 'zod';
 
+import { readEditorAsset, type EditorAssetOptions } from './editor-canvas/assets';
 import { fontFiles, type LayoutInput, type LaidOut } from './engines';
 import { boundaries, type Span } from './layout-types';
 import { createBlockSession } from './owned-blocks';
@@ -25,13 +26,19 @@ type PreparedParagraph = {
   packed: PackedGlyphs | undefined;
 };
 
-export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 'objects') {
+export async function createOwnedEngine(
+  kit: CanvasKit,
+  storage: OwnedStorage = 'objects',
+  assets: EditorAssetOptions = {},
+) {
   const [wasm, data] = await Promise.all([
-    binary('/engines/owned.wasm'),
-    Promise.all(fontFiles.map((f) => binary(`/fonts/${f}`))),
+    readEditorAsset('engines/owned.wasm', assets),
+    Promise.all(fontFiles.map((f) => readEditorAsset(`fonts/${f}`, assets))),
   ]);
 
+  assets.signal?.throwIfAborted();
   const { instance } = await WebAssembly.instantiate(wasm);
+  assets.signal?.throwIfAborted();
   const exports = instance.exports;
   const exportedMemory = exports.memory;
 
@@ -748,12 +755,4 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
       };
     },
   };
-}
-
-async function binary(path: string) {
-  const response = await fetch(path);
-
-  if (!response.ok) throw new Error(`Could not load ${path}. Run pnpm run setup.`);
-
-  return response.arrayBuffer();
 }

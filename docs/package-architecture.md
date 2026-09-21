@@ -113,12 +113,13 @@ Standard Schema assemblies and moved editing to composed session commands. See
 
 The remaining view/package differences are:
 
-- `src/demo/app/main.tsx` still initializes CanvasKit and `createOwnedEngine`.
+- `src/demo/app/main.tsx` starts a private view-resource lifetime and still passes
+  its borrowed resources to the workspace. Public mounting must take over.
 - `src/editor-react/editor.tsx` mounts listeners while the demo assembles the
   complete editing surface. Painting, native input and document layout now have
   framework-independent controllers, as does viewport observation and scrolling.
-  React subscribes and attaches; asset and DOM-overlay ownership still needs the
-  complete mounted view.
+  React subscribes and attaches. Asset loading now owns readiness and cancellation;
+  integrating that lifetime and DOM overlays still needs the complete mounted view.
 - Scenes have independent cache owners. Sample changes no longer require a
   synchronous unmount to coordinate shared cache cleanup.
 - Starter commands compose with foreign node definitions, but browser codecs,

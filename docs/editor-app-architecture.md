@@ -1,22 +1,22 @@
 # Editor app ownership
 
 The writing demo and extension study are two routes of one Vite React app. Both
-HTML files load `src/demo/app/main.tsx`. The entry loads engine assets and the
+HTML files load `src/demo/app/main.tsx`. The entry starts a private view-resource lifetime and loads the
 initial sample, then mounts `App`. Run `pnpm run demo` to open the writing route.
 The [public-interface plan](public-interface-implementation-plan.md) defines the
 remaining complete-view and package migration; this page describes current code.
 
 ## What belongs where
 
-| Owner                                     | Responsibility                                                                                         |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication        |
-| `src/core`                                | Composed headless session, named commands/queries, extension lifetime and view attachment              |
-| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                        |
-| `src/editor-react`                        | Optional subscriptions and attachment adapters for input, painting and viewport observation            |
-| `src/editor-canvas`                       | Framework-independent surfaces, painters, selection/highlight/caret drawing and frame scheduling       |
-| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering |
-| `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                    |
+| Owner                                     | Responsibility                                                                                                   |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication                  |
+| `src/core`                                | Composed headless session, named commands/queries, extension lifetime and view attachment                        |
+| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                                  |
+| `src/editor-react`                        | Optional subscriptions and attachment adapters for input, painting and viewport observation                      |
+| `src/editor-canvas`                       | Framework-independent asset lifetime, surfaces, painters, selection/highlight/caret drawing and frame scheduling |
+| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering           |
+| `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                              |
 
 The headless modules import neither React nor browser code. Browser and canvas
 modules are independent of React, and generic adapters do not import a particular
@@ -53,6 +53,10 @@ frames. Neither depends on paragraph or heading names.
 - Each scene retains only its own paragraph shaping/composition. Eviction or
   clearing one scene cannot invalidate another scene with identical node IDs.
   Mention labels use uncached snapshots rather than a reserved document ID.
+- View-resource initialization resolves asset URLs, owns fetch cancellation and
+  publishes readiness only after fonts and shaping initialize. Destruction rejects
+  pending readiness and prevents late work from publishing native handles. A
+  temporary preloaded graphics URL is revoked after CanvasKit initialization.
 - Graphics/layout resource destruction releases fonts, faces, paint, block
   sessions and the WASM runtime. Pure geometry snapshots remain readable; native
   drawing through a destroyed resource owner is rejected.
@@ -74,6 +78,8 @@ frames. Neither depends on paragraph or heading names.
 - `useDiagnostics` is the only app module importing correctness fixtures. Canvas
   diagnostics expose a readonly painter count rather than a mutable registry.
 
-Complete asset readiness/cancellation, DOM-overlay ownership and public vanilla
-mounting remain milestone 4 work. The demo still initializes and passes internal
-engine resources; that is not the intended final consumer interface.
+Complete DOM-overlay ownership and public vanilla mounting remain milestone 4
+work, including cancellation tests through that mounted view. Asset loading now
+has a private owner with readiness, failure and destruction; the entry no longer
+constructs CanvasKit or chooses engine storage. The demo still passes borrowed
+internal resources through its tree, which the complete mounted view must remove.
