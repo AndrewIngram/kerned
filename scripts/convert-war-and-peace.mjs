@@ -1,116 +1,176 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { readFile, writeFile } from 'node:fs/promises';
+import { basename } from 'node:path';
+
 // Normalize the checked-in Gutenberg edition without executing source markup.
 // Usage: node scripts/convert-war-and-peace.mjs [source.html] [output.html]
-import {chromium} from 'playwright';
-import {readFile,writeFile} from 'node:fs/promises';
-import {basename} from 'node:path';
-import {createHash} from 'node:crypto';
-import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
 
-const source=process.argv[2]??'public/samples/war-and-peace-full.html';
+const source = process.argv[2] ?? 'public/samples/war-and-peace-full.html';
 
-const output=process.argv[3]??'public/samples/war-and-peace.html';
+const output = process.argv[3] ?? 'public/samples/war-and-peace.html';
 
-const input=await readFile(source);
+const input = await readFile(source);
 
-const browser=await chromium.launch();
+const browser = await chromium.launch();
 
 let converted;
 
-try{
-  const page=await browser.newPage();
-  converted=await page.evaluate(html=>{
-    const template=document.createElement('template');template.innerHTML=html;
-    const chapters=[...template.content.querySelectorAll('div.chapter')];
+try {
+  const page = await browser.newPage();
+  converted = await page.evaluate((html) => {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const chapters = [...template.content.querySelectorAll('div.chapter')];
 
-    if(chapters.length!==382)throw new Error('Expected 17 books/epilogues and 365 chapters');
-    const clean=text=>text.replace(/\s+/g,' ').trim();
-    const compact=text=>text.replace(/\s/g,'');
-    const escape=text=>text.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+    if (chapters.length !== 382) throw new Error('Expected 17 books/epilogues and 365 chapters');
+    const clean = (text) => text.replace(/\s+/g, ' ').trim();
+    const compact = (text) => text.replace(/\s/g, '');
 
-    function inline(node){
-      if(node.nodeType===Node.TEXT_NODE)return escape(node.textContent.replace(/\s+/g,' '));
+    const escape = (text) =>
+      text
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;');
 
-      if(node.nodeType===Node.COMMENT_NODE)return '';
+    function inline(node) {
+      if (node.nodeType === Node.TEXT_NODE) return escape(node.textContent.replace(/\s+/g, ' '));
 
-      if(!(node instanceof Element))throw new Error('Unexpected source node');
+      if (node.nodeType === Node.COMMENT_NODE) return '';
 
-      if(node.tagName==='BR')return '<br>';
+      if (!(node instanceof Element)) throw new Error('Unexpected source node');
 
-      if(node.tagName==='A'&&!node.textContent.trim())return '';
+      if (node.tagName === 'BR') return '<br>';
 
-      if(node.tagName==='I')return `<em>${[...node.childNodes].map(inline).join('')}</em>`;
+      if (node.tagName === 'A' && !node.textContent.trim()) return '';
+
+      if (node.tagName === 'I') return `<em>${[...node.childNodes].map(inline).join('')}</em>`;
       throw new Error(`Unexpected inline source element ${node.tagName}`);
     }
 
-    const blocks=[],expected=[];
-    let books=0,chapterCount=0,footnotes=0,poems=0,preformatted=0;
+    const blocks = [],
+      expected = [];
 
-    for(const chapter of chapters){
-      if(chapter.firstElementChild?.tagName!=='H2')throw new Error('Missing section heading');
+    let books = 0,
+      chapterCount = 0,
+      footnotes = 0,
+      poems = 0,
+      preformatted = 0;
 
-      for(const node of chapter.childNodes){
-        if(node.nodeType===Node.COMMENT_NODE||node.nodeType===Node.TEXT_NODE&&!node.textContent.trim())continue;
+    for (const chapter of chapters) {
+      if (chapter.firstElementChild?.tagName !== 'H2') throw new Error('Missing section heading');
 
-        if(!(node instanceof Element))throw new Error('Unexpected text outside a source block');
+      for (const node of chapter.childNodes) {
+        if (
+          node.nodeType === Node.COMMENT_NODE ||
+          (node.nodeType === Node.TEXT_NODE && !node.textContent.trim())
+        )
+          continue;
 
-        if(!node.textContent.trim())continue;
+        if (!(node instanceof Element)) throw new Error('Unexpected text outside a source block');
+
+        if (!node.textContent.trim()) continue;
         expected.push(clean(node.textContent));
 
-        if(node.tagName==='H2'){
-          const isChapter=clean(node.textContent).startsWith('CHAPTER ');
+        if (node.tagName === 'H2') {
+          const isChapter = clean(node.textContent).startsWith('CHAPTER ');
 
-          if(isChapter)chapterCount++;else books++;
-          const tag=isChapter?'h3':'h2',id=node.querySelector('a[id]')?.id;
+          if (isChapter) chapterCount++;
+          else books++;
 
-          if(!id)throw new Error('Missing section anchor');
+          const tag = isChapter ? 'h3' : 'h2',
+            id = node.querySelector('a[id]')?.id;
+
+          if (!id) throw new Error('Missing section anchor');
           blocks.push(`<${tag} id="${escape(id)}">${clean(inlineText(node))}</${tag}>`);
-        }else if(node.tagName==='P'){
-          const kind=node.className;
+        } else if (node.tagName === 'P') {
+          const kind = node.className;
 
-          if(kind&&!['footnote','poem','noindent'].includes(kind))throw new Error(`Unexpected paragraph class ${kind}`);
+          if (kind && !['footnote', 'poem', 'noindent'].includes(kind))
+            throw new Error(`Unexpected paragraph class ${kind}`);
 
-          if(kind==='footnote')footnotes++;
+          if (kind === 'footnote') footnotes++;
 
-          if(kind==='poem')poems++;
-          blocks.push(`<p${kind?` class="${kind}"`:''}>${inlineText(node).trim()}</p>`);
-        }else if(node.tagName==='PRE'){
-          if(node.children.length)throw new Error('Unexpected markup in a preformatted passage');
+          if (kind === 'poem') poems++;
+          blocks.push(`<p${kind ? ` class="${kind}"` : ''}>${inlineText(node).trim()}</p>`);
+        } else if (node.tagName === 'PRE') {
+          if (node.children.length) throw new Error('Unexpected markup in a preformatted passage');
+
           // Preserve lines and italics. Fixed-column spacing is normalized.
-          const lines=node.textContent.trim().split(/\r?\n/).map(line=>escape(clean(line)));
-          blocks.push(`<p class="preformatted"><em>${lines.join('<br>')}</em></p>`);preformatted++;
-        }else throw new Error(`Unexpected block ${node.tagName}`);
+          const lines = node.textContent
+            .trim()
+            .split(/\r?\n/)
+            .map((line) => escape(clean(line)));
+
+          blocks.push(`<p class="preformatted"><em>${lines.join('<br>')}</em></p>`);
+          preformatted++;
+        } else throw new Error(`Unexpected block ${node.tagName}`);
       }
     }
 
-    function inlineText(node){return [...node.childNodes].map(inline).join('');}
+    function inlineText(node) {
+      return [...node.childNodes].map(inline).join('');
+    }
 
-    const content=blocks.join('\n');
-    const check=document.createElement('template');check.innerHTML=content;
-    const actual=[...check.content.children].map(node=>clean(node.textContent));
+    const content = blocks.join('\n');
+    const check = document.createElement('template');
+    check.innerHTML = content;
+    const actual = [...check.content.children].map((node) => clean(node.textContent));
 
     // BR creates a word boundary; compare non-whitespace to avoid losing any letters.
-    if(actual.length!==expected.length||actual.some((value,index)=>compact(value)!==compact(expected[index])))throw new Error('Conversion changed book text or block order');
+    if (
+      actual.length !== expected.length ||
+      actual.some((value, index) => compact(value) !== compact(expected[index]))
+    )
+      throw new Error('Conversion changed book text or block order');
 
-    if(compact(chapters.map(chapter=>chapter.textContent).join(''))!==compact(check.content.textContent))throw new Error('Conversion omitted source text');
+    if (
+      compact(chapters.map((chapter) => chapter.textContent).join('')) !==
+      compact(check.content.textContent)
+    )
+      throw new Error('Conversion omitted source text');
 
-    for(const br of check.content.querySelectorAll('br'))br.replaceWith(document.createTextNode('\n'));
-    const texts=[...check.content.children].map(node=>clean(node.textContent));
-    const sourceItalic=chapters.flatMap(chapter=>[...chapter.querySelectorAll('i,pre')]).map(node=>compact(node.textContent)).join('');
-    const outputItalic=[...check.content.querySelectorAll('em')].map(node=>compact(node.textContent)).join('');
+    for (const br of check.content.querySelectorAll('br'))
+      br.replaceWith(document.createTextNode('\n'));
+    const texts = [...check.content.children].map((node) => clean(node.textContent));
 
-    if(sourceItalic!==outputItalic)throw new Error('Conversion changed italic text');
+    const sourceItalic = chapters
+      .flatMap((chapter) => [...chapter.querySelectorAll('i,pre')])
+      .map((node) => compact(node.textContent))
+      .join('');
 
-    return {content,blocks:blocks.length,words:texts.join(' ').split(/\s+/).length,books,chapters:chapterCount,footnotes,poems,preformatted,italicPassages:check.content.querySelectorAll('em').length,textVerified:true};
-  },input.toString('utf8'));
-}finally{await browser.close();}
+    const outputItalic = [...check.content.querySelectorAll('em')]
+      .map((node) => compact(node.textContent))
+      .join('');
 
-assert.equal(converted.books,17);
+    if (sourceItalic !== outputItalic) throw new Error('Conversion changed italic text');
 
-assert.equal(converted.chapters,365);
+    return {
+      content,
+      blocks: blocks.length,
+      words: texts.join(' ').split(/\s+/).length,
+      books,
+      chapters: chapterCount,
+      footnotes,
+      poems,
+      preformatted,
+      italicPassages: check.content.querySelectorAll('em').length,
+      textVerified: true,
+    };
+  }, input.toString('utf8'));
+} finally {
+  await browser.close();
+}
 
-const {content,...counts}=converted;
+assert.equal(converted.books, 17);
 
-const html=`<!doctype html>
+assert.equal(converted.chapters, 365);
+
+const { content, ...counts } = converted;
+
+const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -128,12 +188,27 @@ ${content}
 </html>
 `;
 
-const digest=data=>createHash('sha256').update(data).digest('hex');
+const digest = (data) => createHash('sha256').update(data).digest('hex');
 
-const manifest={title:'War and Peace',author:'Leo Tolstoy',translators:['Louise Maude','Aylmer Maude'],sourceUrl:'https://www.gutenberg.org/ebooks/2600',downloadUrl:'https://www.gutenberg.org/ebooks/2600.html.images',fullHtml:basename(source),sourceSha256:digest(input),htmlSha256:digest(html),...counts,headings:counts.books+counts.chapters,contents:'Complete novel, Book One through the Second Epilogue, including footnotes. The original download, credits, navigation and licence are preserved in the full HTML.',normalization:'Books and epilogues use h2, chapters use h3; i becomes em; preformatted passages become italic paragraphs with line breaks; empty layout paragraphs are removed; indentation and repeated whitespace, including fixed-column spacing, are normalized.'};
+const manifest = {
+  title: 'War and Peace',
+  author: 'Leo Tolstoy',
+  translators: ['Louise Maude', 'Aylmer Maude'],
+  sourceUrl: 'https://www.gutenberg.org/ebooks/2600',
+  downloadUrl: 'https://www.gutenberg.org/ebooks/2600.html.images',
+  fullHtml: basename(source),
+  sourceSha256: digest(input),
+  htmlSha256: digest(html),
+  ...counts,
+  headings: counts.books + counts.chapters,
+  contents:
+    'Complete novel, Book One through the Second Epilogue, including footnotes. The original download, credits, navigation and licence are preserved in the full HTML.',
+  normalization:
+    'Books and epilogues use h2, chapters use h3; i becomes em; preformatted passages become italic paragraphs with line breaks; empty layout paragraphs are removed; indentation and repeated whitespace, including fixed-column spacing, are normalized.',
+};
 
-await writeFile(output,html);
+await writeFile(output, html);
 
-await writeFile(output.replace(/\.html$/,'.json'),JSON.stringify(manifest,null,2)+'\n');
+await writeFile(output.replace(/\.html$/, '.json'), JSON.stringify(manifest, null, 2) + '\n');
 
 console.log(manifest);

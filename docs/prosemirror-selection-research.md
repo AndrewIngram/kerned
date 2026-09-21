@@ -6,11 +6,11 @@ Investigated 2026-09-19 against the upstream source linked below. These findings
 
 ProseMirror's `Selection` base class provides anchor/head, multiple ranges, equality, mapping, content/replacement, JSON and bookmarks. `from`/`to` describe the **first, primary range**, not the bounding extent of every range. Subclasses can override editing semantics. JSON dispatch uses registered type IDs. A bookmark maps without a document and resolves against a later document, with a fallback when necessary. [Selection source](https://github.com/ProseMirror/prosemirror-state/blob/master/src/selection.ts)
 
-| Type | Meaning |
-|---|---|
+| Type            | Meaning                                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `TextSelection` | Directional anchor/head in inline content, potentially in different textblocks; equal endpoints represent a cursor. |
-| `NodeSelection` | One whole selectable non-text node, including a container. It is not limited to atoms. |
-| `AllSelection` | The whole document, including edge blocks that a text selection cannot cover. |
+| `NodeSelection` | One whole selectable non-text node, including a container. It is not limited to atoms.                              |
+| `AllSelection`  | The whole document, including edge blocks that a text selection cannot cover.                                       |
 
 Text mapping falls back when endpoints cease to be valid text positions. Node mapping falls back when the selected node is deleted. All-selection resolves against the entire new document. Custom kinds implement the same protocol; `CellSelection` lives in the table package. [Selection source](https://github.com/ProseMirror/prosemirror-state/blob/master/src/selection.ts)
 

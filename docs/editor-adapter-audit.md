@@ -33,7 +33,7 @@ root or textarea. The existing session remains the sole document-state owner.
 
 ## Verification
 
-`tests/adapter-audit.spec.js` exercises a mounted React host under StrictMode with
+`src/editor-react/__tests__/adapter-audit.browser.test.js` exercises a mounted React host under StrictMode with
 session replacement, composition cleanup, non-default insets, changing scrollports,
 input after replacement, and index reuse/invalidation. It uses the independent
 fixture schema rather than the demo's paragraph shape.
@@ -64,7 +64,8 @@ location. Cell replacement uses the cell-selection extension so it preserves the
 table grid. The later rectangular clipboard implementation replaces the former plain-text
 fallback with rich grid paste; see `clipboard.md`.
 
-`tests/selection-adapters.spec.js` exercises node/container/all/empty projection,
+`src/editor/__tests__/selection-adapters.test.js`, `tests/selection-adapters.browser.test.js`,
+and `tests/e2e/selection-adapters.spec.js` exercise node/container/all/empty projection,
 mounted React command targeting, disjoint cell formatting, native capture cleanup,
 node cut/undo and replacement. No fabricated first-paragraph or ID-zero fallback
 remains in the view adapter.

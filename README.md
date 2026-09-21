@@ -1,5 +1,8 @@
 # gprose
 
+See the [target repository map](docs/repository-map.md) for the pnpm workspace
+layout and package migration, including the lint and test guarantees to preserve.
+
 A canvas text editor with a schema-independent editing core and React extensions.
 The examples below use source imports from this repository.
 
@@ -15,15 +18,15 @@ as `/editor.html` through Vite:
 ```html
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>My editor</title>
-	</head>
-	<body data-demo="minimal">
-		<div id="root">Loading editor…</div>
-		<script type="module" src="/src/demo/app/main.tsx"></script>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My editor</title>
+  </head>
+  <body data-demo="minimal">
+    <div id="root">Loading editor…</div>
+    <script type="module" src="/src/demo/app/main.tsx"></script>
+  </body>
 </html>
 ```
 
@@ -43,19 +46,25 @@ It does not create a view. A custom host can start with the existing document
 schema:
 
 ```ts
-import {createEditor, textSelection, type Step} from './src/editor';
-import {demoSchema} from './src/extensions/demo-schema';
-import {tableCells} from './src/extensions/table';
-import type {StarterNode} from './src/extensions/demo-model';
+import { createEditor, textSelection, type Step } from './src/editor';
+import { demoSchema } from './src/extensions/demo-schema';
+import { tableCells } from './src/extensions/table';
+import type { StarterNode } from './src/extensions/demo-model';
 
 const editor = createEditor(
-	demoSchema,
-	[{
-		kind: 'paragraph', id: 1, key: 'intro', text: 'Hello world',
-		marks: [], inline: [],
-	}],
-	textSelection(1, 0),
-	[tableCells.extension],
+  demoSchema,
+  [
+    {
+      kind: 'paragraph',
+      id: 1,
+      key: 'intro',
+      text: 'Hello world',
+      marks: [],
+      inline: [],
+    },
+  ],
+  textSelection(1, 0),
+  [tableCells.extension],
 );
 ```
 
@@ -73,22 +82,22 @@ Commands return transaction steps. Create commands from the current state, then
 apply their steps with `editor.dispatch`:
 
 ```ts
-import {textCommands} from './src/extensions/text-commands';
+import { textCommands } from './src/extensions/text-commands';
 
 function dispatch(steps: readonly Step<StarterNode>[]) {
-	return editor.dispatch({
-		baseRevision: editor.state.revision,
-		origin: 'local',
-		history: 'separate',
-		time: performance.now(),
-		steps,
-	});
+  return editor.dispatch({
+    baseRevision: editor.state.revision,
+    origin: 'local',
+    history: 'separate',
+    time: performance.now(),
+    steps,
+  });
 }
 
 editor.select(textSelection(1, 0, 5));
 dispatch(textCommands(demoSchema, editor.state).toggle('bold'));
 
-dispatch([{kind: 'replaceText', id: 1, from: 5, to: 5, text: ' canvas'}]);
+dispatch([{ kind: 'replaceText', id: 1, from: 5, to: 5, text: ' canvas' }]);
 
 editor.undo();
 editor.redo();
@@ -103,16 +112,16 @@ Text offsets use UTF-16 positions and must follow grapheme boundaries. A stale
 `baseRevision` rejects the transaction. `history: 'separate'` creates an undo
 boundary; `history: {group: 'typing'}` allows compatible adjacent edits to group.
 
-| Operation | API |
-| --- | --- |
-| Caret or range within one block | `editor.select(textSelection(id, from, to))`; omit `to` for a caret |
-| Range across blocks | `editor.select(new TextSelection(anchor, head))`; each endpoint is `{id, offset}` |
-| Bold, italic, underline | `textCommands(schema, state).toggle('bold' \| 'italic' \| 'underline')` |
-| Toolbar state | `textCommands(schema, state).available` and `.active(format)` |
-| Clear formatting | `textCommands(schema, state).clear()` |
-| Comment on selected text | `textCommands(schema, state).comment(id)` returns `{steps, target}` |
-| Quote or list | `blockCommands(schema, state, ids, allocate).quote()` or `.list(ordered)` |
-| Paragraph or heading | `setTextBlockType(schema, state, ids, level)`; `level` is `1`, `2`, `3`, `4`, or `null` for a paragraph |
+| Operation                       | API                                                                                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Caret or range within one block | `editor.select(textSelection(id, from, to))`; omit `to` for a caret                                     |
+| Range across blocks             | `editor.select(new TextSelection(anchor, head))`; each endpoint is `{id, offset}`                       |
+| Bold, italic, underline         | `textCommands(schema, state).toggle('bold' \| 'italic' \| 'underline')`                                 |
+| Toolbar state                   | `textCommands(schema, state).available` and `.active(format)`                                           |
+| Clear formatting                | `textCommands(schema, state).clear()`                                                                   |
+| Comment on selected text        | `textCommands(schema, state).comment(id)` returns `{steps, target}`                                     |
+| Quote or list                   | `blockCommands(schema, state, ids, allocate).quote()` or `.list(ordered)`                               |
+| Paragraph or heading            | `setTextBlockType(schema, state, ids, level)`; `level` is `1`, `2`, `3`, `4`, or `null` for a paragraph |
 
 Formatting commands require a nonempty text selection. Block commands receive
 selected block IDs and an `allocate` function returning a fresh `{id, key}`.
@@ -131,43 +140,44 @@ A schema registers node behavior independently of rendering. Each node must matc
 exactly one extension's `accepts` function. An extension has a unique name, a
 positive integer version, and one of three capabilities:
 
-| Kind | Contract |
-| --- | --- |
-| `text` | Read, replace, split, and join editable text through `editing` |
-| `atom` | Treat the node as a block without core-editable text |
-| `container` | Read, replace, and validate children through `content` |
+| Kind        | Contract                                                       |
+| ----------- | -------------------------------------------------------------- |
+| `text`      | Read, replace, split, and join editable text through `editing` |
+| `atom`      | Treat the node as a block without core-editable text           |
+| `container` | Read, replace, and validate children through `content`         |
 
 This extension gives a custom `Note` node ordinary text editing and undo:
 
 ```ts
-import {createSchema, createEditor, textSelection, type NodeExtension} from './src/editor';
+import { createSchema, createEditor, textSelection, type NodeExtension } from './src/editor';
 
-type Note = {id: number; key: string; kind: 'note'; text: string};
+type Note = { id: number; key: string; kind: 'note'; text: string };
 
 const noteExtension: NodeExtension<Note> = {
-	name: 'note',
-	version: 1,
-	kind: 'text',
-	accepts: node => node.kind === 'note',
-	validateUpdate() {},
-	editing: {
-		text: node => node.text,
-		replace: (node, from, to, text) => ({
-			...node, text: node.text.slice(0, from) + text + node.text.slice(to),
-		}),
-		split: (node, at, right) => [
-			{...node, text: node.text.slice(0, at)},
-			{...node, ...right, text: node.text.slice(at)},
-		],
-		join: (left, right) => ({...left, text: left.text + right.text}),
-	},
+  name: 'note',
+  version: 1,
+  kind: 'text',
+  accepts: (node) => node.kind === 'note',
+  validateUpdate() {},
+  editing: {
+    text: (node) => node.text,
+    replace: (node, from, to, text) => ({
+      ...node,
+      text: node.text.slice(0, from) + text + node.text.slice(to),
+    }),
+    split: (node, at, right) => [
+      { ...node, text: node.text.slice(0, at) },
+      { ...node, ...right, text: node.text.slice(at) },
+    ],
+    join: (left, right) => ({ ...left, text: left.text + right.text }),
+  },
 };
 
 const schema = createSchema([noteExtension]);
 const notes = createEditor(
-	schema,
-	[{kind: 'note', id: 1, key: 'first-note', text: 'A note'}],
-	textSelection(1, 0),
+  schema,
+  [{ kind: 'note', id: 1, key: 'first-note', text: 'A note' }],
+  textSelection(1, 0),
 );
 ```
 
@@ -183,6 +193,10 @@ and block commands use the `StarterNode` model; a custom schema supplies command
 for its own nodes. See the [extension contracts](docs/editor-extension-boundary.md)
 for containers and validation.
 
+Persistence codecs use Zod internally to validate JSON, selection data and position
+checkpoints. Extension implementations continue to use the editor contracts and
+do not need to depend on Zod.
+
 ## Render extensions
 
 Node registration adds editing behavior. The host supplies canvas or DOM views
@@ -190,16 +204,16 @@ for those nodes. React components can register canvas paint callbacks with
 `CanvasPrimitive`:
 
 ```tsx
-import {useCallback} from 'react';
-import {CanvasPrimitive, type CanvasPainter} from './src/editor-react';
+import { useCallback } from 'react';
+import { CanvasPrimitive, type CanvasPainter } from './src/editor-react';
 
 function Highlight() {
-	const paint = useCallback<CanvasPainter>((canvas, kit, brush) => {
-		brush.setColor(kit.Color(255, 236, 153));
-		canvas.drawRect(kit.XYWHRect(0, 0, 120, 28), brush);
-	}, []);
+  const paint = useCallback<CanvasPainter>((canvas, kit, brush) => {
+    brush.setColor(kit.Color(255, 236, 153));
+    canvas.drawRect(kit.XYWHRect(0, 0, 120, 28), brush);
+  }, []);
 
-	return <CanvasPrimitive id="example-highlight" layer="background" paint={paint} />;
+  return <CanvasPrimitive id="example-highlight" layer="background" paint={paint} />;
 }
 ```
 
@@ -218,16 +232,31 @@ measurements, portals, and focus.
 
 ## Run this repository
 
-Use Node 22.12 or later and Rust 1.93.1 or later:
+Use Node 22.12 or later, pnpm 10.14.0 (pinned in `packageManager`), and Rust 1.93.1 or later:
 
 ```sh
 rustup target add wasm32-unknown-unknown
-npm ci
-npm run setup
-npm run demo
+pnpm install --frozen-lockfile
+pnpm run setup
+pnpm run demo
 ```
 
-Setup prepares fonts and the shaping bridge. `npm run demo:extensions` opens the
-extension fixtures. `npm run build` produces `dist/`, and `npm run preview` serves
-it. Run `npx playwright install chromium firefox webkit` once, then `npm test` for
-browser checks. `npm run check:project` checks source and documentation references.
+Setup prepares fonts and the shaping bridge. `pnpm run demo:extensions` opens the
+extension fixtures. `pnpm run build` produces `dist/`, and `pnpm run preview` serves
+it. Run `pnpm exec playwright install chromium firefox webkit` once, then `pnpm test` for
+Vitest and the existing Playwright suite. `pnpm run check:project` checks source and
+documentation references.
+
+Use `pnpm run test:unit` for Vitest tests in Node, `pnpm run test:browser` for Vitest
+Browser Mode in headless Chromium, Firefox, and WebKit, and `pnpm run test:watch`
+during development. `pnpm run test:e2e` runs Playwright application journeys and
+low-level pointer automation in `tests/e2e/`. Vitest discovers `*.test.js`,
+`*.test.ts`, and `*.test.tsx` in sibling `__tests__` directories under `src/` and
+integration tests in root `tests/`; inserting `.browser` before `.test` selects
+Browser Mode. To select one browser, use
+`pnpm run test:vitest --project browser-firefox` (or `browser-chromium` /
+`browser-webkit`).
+
+Run `pnpm run format` to apply Oxfmt formatting and import sorting, or
+`pnpm run format:check` to check formatting without changing files. Run
+`pnpm run check` for lint, formatting, typecheck, project checks, and all tests.

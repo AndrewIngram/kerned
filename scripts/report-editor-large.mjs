@@ -1,25 +1,34 @@
-import {readFile,writeFile} from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
-const benchmark=JSON.parse(await readFile('artifacts/editor-large-benchmark.json','utf8'));
+const benchmark = JSON.parse(await readFile('artifacts/editor-large-benchmark.json', 'utf8'));
 
-const checks=JSON.parse(await readFile('artifacts/editor-large-checks.json','utf8'));
+const checks = JSON.parse(await readFile('artifacts/editor-large-checks.json', 'utf8'));
 
-const median=a=>[...a].sort((a,b)=>a-b)[Math.floor(a.length/2)];
+const median = (a) => [...a].toSorted((aValue, b) => aValue - b)[Math.floor(a.length / 2)];
 
-const f=n=>n.toFixed(1),mb=n=>(n/1e6).toFixed(1);
+const f = (n) => n.toFixed(1),
+  mb = (n) => (n / 1e6).toFixed(1);
 
-const rows=[];
+const rows = [];
 
-for(const browser of ['chromium','firefox','webkit'])for(const total of [2000,10000]){
- const t=benchmark.trials.filter(t=>t.browser===browser&&t.total===total);
- rows.push(`| ${browser} | ${total.toLocaleString('en-US')} | ${f(median(t.map(t=>t.firstCanvasFlushMs)))} | ${f(median(t.map(t=>t.loadAfterMountMs)))} | ${f(median(t.map(t=>t.chunkWorkMs.p95)))} | ${f(Math.max(...t.map(t=>t.frameGapMs.max)))} |`);
-}
+for (const browser of ['chromium', 'firefox', 'webkit'])
+  for (const total of [2000, 10000]) {
+    const t = benchmark.trials.filter((t) => t.browser === browser && t.total === total);
+    rows.push(
+      `| ${browser} | ${total.toLocaleString('en-US')} | ${f(median(t.map((tValue) => tValue.firstCanvasFlushMs)))} | ${f(median(t.map((tValue2) => tValue2.loadAfterMountMs)))} | ${f(median(t.map((tValue3) => tValue3.chunkWorkMs.p95)))} | ${f(Math.max(...t.map((tValue4) => tValue4.frameGapMs.max)))} |`,
+    );
+  }
 
-const resizing=checks.cases.filter(c=>c.total===10000).map(c=>`| ${c.browser} | ${c.width} | ${f(c.widthChanges.at(-1).workMs)} |`);
+const resizing = checks.cases
+  .filter((c) => c.total === 10000)
+  .map((c) => `| ${c.browser} | ${c.width} | ${f(c.widthChanges.at(-1).workMs)} |`);
 
-const memory=benchmark.memory.map(m=>`| ${m.total.toLocaleString('en-US')} | ${mb(m.delta.usedSize)} | ${mb(m.delta.backingStorageSize)} | ${mb(m.buffers.caretUnusedBytes)} |`);
+const memory = benchmark.memory.map(
+  (m) =>
+    `| ${m.total.toLocaleString('en-US')} | ${mb(m.delta.usedSize)} | ${mb(m.delta.backingStorageSize)} | ${mb(m.buffers.caretUnusedBytes)} |`,
+);
 
-const doc=`# Large editor documents
+const doc = `# Large editor documents
 
 For the current viewport-first resize implementation and paired timing comparisons, see [viewport-first reflow](editor-viewport-reflow.md).
 
@@ -34,8 +43,8 @@ The remaining costs are whole-document reflow and retained layout. Width changes
 ## Reproduce
 
 ~~~sh
-npm run build
-npm run preview
+pnpm run build
+pnpm run preview
 node scripts/check-editor-large.mjs
 node scripts/benchmark-editor-large.mjs
 node scripts/report-editor-large.mjs
@@ -75,7 +84,7 @@ The large cases verify:
 - One-paragraph invalidation for a styled edit, undo restoration, and a combining mark typed at a formatting boundary.
 - Width changes reusing shaping and preserving the current block's screen offset.
 
-The test grows a textarea through its DOM style to exercise the real ResizeObserver and placement path. It does not automate dragging the browser's resize grip. Sampled scroll positions include the start, middle and end. At most ${Math.max(...checks.cases.map(c=>c.maxMounted))} custom block components were mounted, including focused blocks retained outside the viewport. At most ${Math.max(...checks.cases.map(c=>c.maxSubmitted))} text paragraphs were submitted per draw. These are observed counts for this fixture, not universal limits.
+The test grows a textarea through its DOM style to exercise the real ResizeObserver and placement path. It does not automate dragging the browser's resize grip. Sampled scroll positions include the start, middle and end. At most ${Math.max(...checks.cases.map((c) => c.maxMounted))} custom block components were mounted, including focused blocks retained outside the viewport. At most ${Math.max(...checks.cases.map((c) => c.maxSubmitted))} text paragraphs were submitted per draw. These are observed counts for this fixture, not universal limits.
 
 Edit timing in the raw check artifact starts at the local edit commit and ends at the next canvas flush. It includes frame scheduling but excludes the browser input queue and earlier input processing; it is not a complete input-latency benchmark.
 
@@ -115,4 +124,4 @@ Culling reduces drawing and mounted DOM, but does not evict offscreen shaping or
 Placement arrays and block arrays still scan or copy in several updates; this is not yet a tree-backed document store. Per-paragraph layout is retained eagerly as each chunk arrives. The extension demo remains separate from the text-only block session and the original streaming experiment. Full IME support, cross-block selection, accessibility for canvas text and DOM-widget export remain open work.
 `;
 
-await writeFile('docs/editor-large-documents.md',doc);
+await writeFile('docs/editor-large-documents.md', doc);

@@ -1,5 +1,5 @@
-import { rangeSelection, NodeSelection, TextSelection, type Selection } from './selection';
 import type { NavigationKey } from './keyboard-navigation';
+import { rangeSelection, NodeSelection, TextSelection, type Selection } from './selection';
 
 /** Rendered document order, including atomic views of structured nodes. */
 export type NavigationNode = { id: number; text: string | null; selectable: boolean };

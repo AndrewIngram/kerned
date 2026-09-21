@@ -1,5 +1,6 @@
 import type { CanvasKit, Paint } from 'canvaskit-wasm';
 import { useLayoutEffect, useMemo, useRef, type RefObject } from 'react';
+
 import type { CanvasPainter, CanvasPaintLayer } from '../editor-react';
 import type { LaidOut, Rect } from '../engines';
 
@@ -67,7 +68,7 @@ export function useCanvasRenderer<N>(frame: CanvasFrame<N>) {
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
 
-    if (!canvas) return;
+    if (!canvas) return undefined;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
@@ -83,7 +84,7 @@ export function useCanvasRenderer<N>(frame: CanvasFrame<N>) {
       surface.dispose();
       paint.delete();
     };
-  }, [kit, width, height]);
+  }, [kit, width, height, canvasRef]);
   useLayoutEffect(
     () => () => {
       cancelAnimationFrame(scheduled.current);

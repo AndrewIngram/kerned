@@ -10,7 +10,7 @@ const append: Command<MyNode, [number, string]> = (context, id, text) => {
   if (!node) return false;
   const value = schema.text(node);
   if (value === null) return false;
-  context.step({kind: 'replaceText', id, from: value.length, to: value.length, text});
+  context.step({ kind: 'replaceText', id, from: value.length, to: value.length, text });
   return true;
 };
 
@@ -38,10 +38,10 @@ unsubscribe();
 Dispatch, selection changes, undo and redo notify subscribers. No React import is present in core. Subscribers receive the current immutable-by-convention session snapshot. Listener exceptions are reported asynchronously after the successful commit; they do not turn an already-published transaction into an apparent failed transaction.
 
 ```tsx
-import {useEditorState} from './src/editor-react';
+import { useEditorState } from './src/editor-react';
 
-function Revision({editor}) {
-  const revision = useEditorState(editor, state => state.revision);
+function Revision({ editor }) {
+  const revision = useEditorState(editor, (state) => state.revision);
   return <span>{revision}</span>;
 }
 ```
@@ -55,9 +55,10 @@ A comment thread stores its own discussion ID, messages and a `DocumentRange`. I
 ```ts
 const range = editor.positions.captureRange(editor.state.selection);
 if (range) {
-  const thread = {id: 'discussion-17', messages: ['Keep this wording'], range};
-  const {resolved, unresolved} = resolveRangeDecorations(
-    commentDecorations([thread]), editor.positions,
+  const thread = { id: 'discussion-17', messages: ['Keep this wording'], range };
+  const { resolved, unresolved } = resolveRangeDecorations(
+    commentDecorations([thread]),
+    editor.positions,
   );
 }
 ```
@@ -91,13 +92,16 @@ This does not authorize shipping canonical snapshots and hiding them in the UI. 
 ```ts
 const prepared = prepareTextProposal(schema, editor, {
   range,
-  expected: [{key: paragraphKey, text: 'original wording'}],
+  expected: [{ key: paragraphKey, text: 'original wording' }],
   replacement: 'revised wording',
 });
 if (prepared.status === 'ready') {
   editor.dispatch({
-    baseRevision: prepared.baseRevision, steps: prepared.steps,
-    origin: 'local', history: 'separate', time: Date.now(),
+    baseRevision: prepared.baseRevision,
+    steps: prepared.steps,
+    origin: 'local',
+    history: 'separate',
+    time: Date.now(),
   });
 }
 ```
@@ -125,7 +129,7 @@ const stats = createStateField<MyNode, number>({
   create: () => 0,
   update: (count, event) => count + (event.kind === 'transaction' ? 1 : 0),
 });
-const editor = createEditor(schema, nodes, selection, [], {fields: [stats]});
+const editor = createEditor(schema, nodes, selection, [], { fields: [stats] });
 const count = stats.read(editor.state);
 ```
 

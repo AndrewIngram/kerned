@@ -74,7 +74,7 @@ export function createTextInteraction() {
 
       return {
         pointer,
-        keydown(event: KeyboardEvent) {
+        keydown(this: void, event: KeyboardEvent) {
           if (!/^(Arrow(Left|Right|Up|Down)|Home|End|PageUp|PageDown)$/.test(event.key))
             return false;
 

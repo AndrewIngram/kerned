@@ -181,15 +181,15 @@ canvas geometry without requiring an underlying text DOM element.
 
 ## Prioritized implications for our refactor
 
-| Priority | Deliverable | Proof through the consumer interface |
-| --- | --- | --- |
-| 1 | Composed extensions and session commands | Custom schema, omitted extension, command availability, mixed formatting and one-step undo |
-| 1 | Complete view lifetime | Mount/unmount/remount, destruction during loading, two independent editors |
-| 1 | Configurable presentation | Different themes side by side; metric reflow preserves caret and scroll |
-| 2 | React adapter and custom rendering | Selective subscriptions; node/mark/widget cleanup under virtualization |
-| 2 | Typed events and codecs | Autosave ignores selection; rich content survives round trip without a mounted view |
-| 2 | Input and clipboard contribution contracts | Shortcut precedence, IME, paste fidelity, atomic permissions |
-| 3 | Async suggestion/file helpers | Cancelled requests and moving insertion targets |
+| Priority | Deliverable                                | Proof through the consumer interface                                                       |
+| -------- | ------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| 1        | Composed extensions and session commands   | Custom schema, omitted extension, command availability, mixed formatting and one-step undo |
+| 1        | Complete view lifetime                     | Mount/unmount/remount, destruction during loading, two independent editors                 |
+| 1        | Configurable presentation                  | Different themes side by side; metric reflow preserves caret and scroll                    |
+| 2        | React adapter and custom rendering         | Selective subscriptions; node/mark/widget cleanup under virtualization                     |
+| 2        | Typed events and codecs                    | Autosave ignores selection; rich content survives round trip without a mounted view        |
+| 2        | Input and clipboard contribution contracts | Shortcut precedence, IME, paste fidelity, atomic permissions                               |
+| 3        | Async suggestion/file helpers              | Cancelled requests and moving insertion targets                                            |
 
 These priorities sequence the already-approved work; they are not an invitation
 to rebuild the whole Tiptap catalog. Preserve our owned layout, durable references,

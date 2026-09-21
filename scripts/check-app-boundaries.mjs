@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+
 import ts from 'typescript';
 
 const groups = [
@@ -83,8 +84,11 @@ for (const group of groups) {
         );
       }
 
-      if(file==='src/extensions/starter-kit/actions.ts'){
-        assert.ok(!/src\/editor-(browser|react|canvas)/.test(target),`${file} depends on a view adapter: ${specifier}`);
+      if (file === 'src/extensions/starter-kit/actions.ts') {
+        assert.ok(
+          !/src\/editor-(browser|react|canvas)/.test(target),
+          `${file} depends on a view adapter: ${specifier}`,
+        );
       }
 
       if (group === 'editor-browser') {
@@ -96,7 +100,7 @@ for (const group of groups) {
         );
       }
 
-      if (/checks$/.test(target)) {
+      if (target.endsWith('checks')) {
         assert.equal(
           file,
           'src/demo/app/use-diagnostics.ts',

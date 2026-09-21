@@ -1,39 +1,72 @@
-import {useLayoutEffect,useRef,useState} from 'react';
-import type {ImageNode} from './extensions/demo-model';
-import {streamConfig} from './editor-stream';
+import { useLayoutEffect, useRef, useState } from 'react';
 
-const decoded = new Map<string,{width:number;height:number}>();
+import { streamConfig } from './editor-stream';
+import type { ImageNode } from './extensions/demo-model';
 
-export function ImageBlock({node,width,onMeasure}:{node:ImageNode;width:number;onMeasure:(id:number,width:number,height:number)=>void}) {
-  const [size,setSize]=useState(()=>decoded.get(node.src));
-  const [failed,setFailed]=useState(false);
-  const ref=useRef<HTMLDivElement>(null);
-  useLayoutEffect(()=>{
-    if(size)return;
-    let active=true;
+const decoded = new Map<string, { width: number; height: number }>();
 
-    const timer=setTimeout(()=>{
-      const image=new Image();image.src=node.src;
-      image.decode().then(()=>{
-        const next={width:image.naturalWidth,height:image.naturalHeight};decoded.set(node.src,next);
+export function ImageBlock({
+  node,
+  width,
+  onMeasure,
+}: {
+  node: ImageNode;
+  width: number;
+  onMeasure: (id: number, width: number, height: number) => void;
+}) {
+  const [size, setSize] = useState(() => decoded.get(node.src));
+  const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (size) return undefined;
+    let active = true;
 
-        if(active)setSize(next);
-      }).catch(()=>{if(active)setFailed(true);});
-    },streamConfig.imageDelay);
+    const timer = setTimeout(() => {
+      void (async () => {
+        const image = new Image();
+        image.src = node.src;
 
-    return()=>{active=false;clearTimeout(timer);};
-  },[node.src,size]);
-  useLayoutEffect(()=>{
-    const element=ref.current;
+        try {
+          await image.decode();
+          const next = { width: image.naturalWidth, height: image.naturalHeight };
+          decoded.set(node.src, next);
 
-if(!element)return;
-    const report=()=>onMeasure(node.id,width,element.offsetHeight);
-    const observer=new ResizeObserver(report);observer.observe(element);report();
+          if (active) setSize(next);
+        } catch {
+          if (active) setFailed(true);
+        }
+      })();
+    }, streamConfig.imageDelay);
 
-    return()=>observer.disconnect();
-  },[node.id,width,onMeasure]);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [node.src, size]);
+  useLayoutEffect(() => {
+    const element = ref.current;
 
-  return <div ref={ref} data-image={node.id} className="image-block" style={{height:size?width*size.height/size.width:96}}>
-    {size?<img src={node.src} alt={node.alt} width={size.width} height={size.height}/>:<span>{failed?'Image unavailable':'Loading illustration…'}</span>}
-  </div>;
+    if (!element) return undefined;
+    const report = () => onMeasure(node.id, width, element.offsetHeight);
+    const observer = new ResizeObserver(report);
+    observer.observe(element);
+    report();
+
+    return () => observer.disconnect();
+  }, [node.id, width, onMeasure]);
+
+  return (
+    <div
+      ref={ref}
+      data-image={node.id}
+      className="image-block"
+      style={{ height: size ? (width * size.height) / size.width : 96 }}
+    >
+      {size ? (
+        <img src={node.src} alt={node.alt} width={size.width} height={size.height} />
+      ) : (
+        <span>{failed ? 'Image unavailable' : 'Loading illustration…'}</span>
+      )}
+    </div>
+  );
 }

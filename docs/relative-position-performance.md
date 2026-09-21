@@ -14,19 +14,19 @@ Ambiguous queries use exact replay, with summaries over chunks of 64 mappings to
 
 ## Measurements
 
-Run `npm run benchmark:relative-positions` with the development server on port 5173. The script asserts correct resolution and a median under 16 ms, including index construction. It records three serial Chromium trials on the local Apple M4 Pro. Varied workloads have 1,000 distinct ranges across 100 blocks, about 10,000 edits, and 12 passes each preceded by another edit to invalidate the index.
+Run `pnpm run benchmark:relative-positions` with the development server on port 5173. The script asserts correct resolution and a median under 16 ms, including index construction. It records three serial Chromium trials on the local Apple M4 Pro. Varied workloads have 1,000 distinct ranges across 100 blocks, about 10,000 edits, and 12 passes each preceded by another edit to invalidate the index.
 
 [Raw current results](../artifacts/editor-foundation-relative-index/positions.json), [pre-optimization original workload](../artifacts/editor-foundation-relative/positions.json).
 
-| Workload | Median pass including index construction | Largest observed varied pass |
-| --- | ---: | ---: |
-| Original shared-revision reproduction | 3.0 ms | — |
-| Edits before endpoints, including a net shift | 2.3 ms | 7.7 ms |
-| Edits inside ranges | 2.3 ms | 4.0 ms |
-| Edits at range boundaries | 1.3 ms | 2.4 ms |
-| Distributed block edits outside ranges | 1.3 ms | 3.2 ms |
-| Different capture revisions | 1.2 ms | 2.7 ms |
-| Different capture revisions with undo/redo | 1.2 ms | 3.3 ms |
+| Workload                                      | Median pass including index construction | Largest observed varied pass |
+| --------------------------------------------- | ---------------------------------------: | ---------------------------: |
+| Original shared-revision reproduction         |                                   3.0 ms |                            — |
+| Edits before endpoints, including a net shift |                                   2.3 ms |                       7.7 ms |
+| Edits inside ranges                           |                                   2.3 ms |                       4.0 ms |
+| Edits at range boundaries                     |                                   1.3 ms |                       2.4 ms |
+| Distributed block edits outside ranges        |                                   1.3 ms |                       3.2 ms |
+| Different capture revisions                   |                                   1.2 ms |                       2.7 ms |
+| Different capture revisions with undo/redo    |                                   1.2 ms |                       3.3 ms |
 
 The original workload improves by about 40 times including construction. Warm lookup of its 1,000 ranges alone has a 0.3 ms median. These synthetic measurements do not establish physical presentation latency or cover every structural-edit history. Exact replay remains a potentially expensive fallback when summaries cannot establish a safe result.
 

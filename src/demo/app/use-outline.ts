@@ -1,16 +1,15 @@
 import { useMemo, useState } from 'react';
+
+import { type EditorSample } from '../../editor-samples';
+import { type Scene } from '../../editor-scene';
 import { plainText } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { createOutlineExtension, type OutlineEntry } from '../../extensions/outline';
-import { type EditorSample } from '../../editor-samples';
-import { type Scene } from '../../editor-scene';
-
-import type { RefObject } from 'react';
 import type { EditorDocument } from '../../extensions/starter-kit/types';
 
 type OutlineOptions = Pick<EditorDocument, 'editorState' | 'tree'> & {
   sample: EditorSample;
-  sourceLoaded: RefObject<number>;
+  loadedCount: number;
   scene: Scene;
   zoom: number;
   scroll: number;
@@ -22,7 +21,7 @@ type OutlineOptions = Pick<EditorDocument, 'editorState' | 'tree'> & {
 
 export function useOutline({
   sample,
-  sourceLoaded,
+  loadedCount,
   editorState,
   scene,
   tree,
@@ -35,10 +34,9 @@ export function useOutline({
 }: OutlineOptions) {
   const pendingOutline = useMemo(
     () =>
-      sample.outline
-        ?.filter((item) => item.sourceIndex >= sourceLoaded.current)
-        .map((item) => item.entry) ?? [],
-    [sample, editorState.nodes],
+      sample.outline?.filter((item) => item.sourceIndex >= loadedCount).map((item) => item.entry) ??
+      [],
+    [sample, loadedCount],
   );
 
   const [outlineExtension] = useState(() =>

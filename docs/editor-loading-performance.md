@@ -8,11 +8,11 @@ The controller still targets 8 ms, clamps batches to 8–128 blocks, and waits f
 
 Local development server, headless browsers, 1,100 × 900 viewport, 2026-09-20. Times start when loading resumes from the first 32 blocks and end at the final canvas paint. They exclude initial asset fetching and HTML parsing. Each row is a single run, so these are comparisons rather than latency guarantees.
 
-| Browser | Warbreaker, Find closed | War and Peace, Find closed | War and Peace, Find open |
-|---|---:|---:|---:|
-| Chromium | 1.05 s | 2.43 s | 2.86 s |
-| Firefox | 1.50 s | 4.23 s | 4.58 s |
-| WebKit | 0.99 s | 1.99 s | 2.41 s |
+| Browser  | Warbreaker, Find closed | War and Peace, Find closed | War and Peace, Find open |
+| -------- | ----------------------: | -------------------------: | -----------------------: |
+| Chromium |                  1.05 s |                     2.43 s |                   2.86 s |
+| Firefox  |                  1.50 s |                     4.23 s |                   4.58 s |
+| WebKit   |                  0.99 s |                     1.99 s |                   2.41 s |
 
 An unprofiled Chromium comparison restores only the old controller in the test browser. Warbreaker took 6.27 s over 375 batches; War and Peace took 17.32 s over 958 batches. The updated runs use 59 and 107 batches respectively. War and Peace contains 11,718 blocks versus Warbreaker's 7,280; its longer paragraphs add composition work as well as text volume.
 

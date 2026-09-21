@@ -1,3 +1,4 @@
+import { RangeSelection, endpointOffset, type RangeEndpoint } from './range-selection';
 import {
   parseRelativePosition,
   parseRelativeRange,
@@ -13,7 +14,6 @@ import {
   type SelectionContext,
   type SelectionRange,
 } from './selection';
-import { RangeSelection, endpointOffset, type RangeEndpoint } from './range-selection';
 
 export type RelativeNodeBoundary = Readonly<
   Omit<RelativePosition, 'offset'> & { side: 'before' | 'after' }

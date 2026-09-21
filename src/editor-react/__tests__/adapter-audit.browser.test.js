@@ -1,14 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from 'vitest';
 
-test('canvas input follows session, inset and scrollport changes without remounting', async ({
-  page,
-}) => {
-  await page.goto('/editor.html');
-  await page.waitForFunction(() => window.editorDiagnostics);
-
-  const result = await page.evaluate(async () => {
-    const { fixture, dispatch } = await import('/tests/fixtures/editor-foundation.js');
-    const { mountCanvasInputProbe } = await import('/tests/fixtures/canvas-input-probe.js');
+test('canvas input follows session, inset and scrollport changes without remounting', async () => {
+  const result = await (async () => {
+    const { fixture, dispatch } = await import('../../../tests/fixtures/editor-foundation.js');
+    const { mountCanvasInputProbe } = await import('../../../tests/fixtures/canvas-input-probe.js');
 
     const first = fixture(),
       second = fixture();
@@ -40,7 +35,7 @@ test('canvas input follows session, inset and scrollport changes without remount
     probe.update({ page: false });
     host.firstChild.scrollTop = 75;
     host.firstChild.dispatchEvent(new Event('scroll'));
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await expect.poll(() => probe.current.viewport.scroll).toBe(75);
 
     const restored = {
       height: probe.current.viewport.viewportHeight,
@@ -62,7 +57,7 @@ test('canvas input follows session, inset and scrollport changes without remount
       restored,
       changes,
     };
-  });
+  })();
 
   expect(result.value).toBe('Replacement');
   expect(result.oldComposition).toBe(false);
@@ -74,16 +69,13 @@ test('canvas input follows session, inset and scrollport changes without remount
   expect(result.changes).toEqual([[0, 0, '!']]);
 });
 
-test('text capture reuses the document index while the caret moves and refreshes it after edits', async ({
-  page,
-}) => {
-  await page.goto('/editor.html');
-  await page.waitForFunction(() => window.editorDiagnostics);
+test('text capture reuses the document index while the caret moves and refreshes it after edits', async () => {
+  const result = await (async () => {
+    const { fixture, schema, dispatch } =
+      await import('../../../tests/fixtures/editor-foundation.js');
 
-  const result = await page.evaluate(async () => {
-    const { fixture, schema, dispatch } = await import('/tests/fixtures/editor-foundation.js');
-    const { textSelection, selectionContext } = await import('/src/editor/index.ts');
-    const { createTextInput } = await import('/src/editor-browser/index.ts');
+    const { textSelection, selectionContext } = await import('../../editor/index.ts');
+    const { createTextInput } = await import('../../editor-browser/index.ts');
     const editor = fixture();
     let visits = 0;
 
@@ -119,7 +111,7 @@ test('text capture reuses the document index while the caret moves and refreshes
     createTextInput(measuredSchema, editor, () => context).sync(input);
 
     return { initial, afterMovement, refreshed, value, sharedVisits: visits };
-  });
+  })();
 
   expect(result.initial).toBeGreaterThan(0);
   expect(result.afterMovement).toBe(result.initial);

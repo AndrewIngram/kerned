@@ -4,11 +4,11 @@ Batching and viewport scheduling reduced select-all bold in the Warbreaker sampl
 
 Measured on 2026-09-19 on an Apple M4 Pro, using the Vite development server at a 1,100 × 850 viewport. Each number below is the median of three fresh-page trials. Loading and selecting the document finish before the timer starts.
 
-| Browser | Previous response, ms | Current response, ms | Current command handler, ms | Current undo response, ms | Full background layout, ms |
-|---|---:|---:|---:|---:|---:|
-| Chromium | 9,125.2 | 33.5 | 12.2 | 28 | 2,200.5 |
-| Firefox | 17,597 | 56 | 21 | 33 | 2,508 |
-| WebKit | 6,440 | 33 | 13 | 27 | 2,114 |
+| Browser  | Previous response, ms | Current response, ms | Current command handler, ms | Current undo response, ms | Full background layout, ms |
+| -------- | --------------------: | -------------------: | --------------------------: | ------------------------: | -------------------------: |
+| Chromium |               9,125.2 |                 33.5 |                        12.2 |                        28 |                    2,200.5 |
+| Firefox  |                17,597 |                   56 |                          21 |                        33 |                      2,508 |
+| WebKit   |                 6,440 |                   33 |                          13 |                        27 |                      2,114 |
 
 Response time runs from the Bold button click through two animation frames, covering the command, React update, and canvas repaint. It is not a compositor presentation timestamp. All selected text changes synchronously. The viewport and selection endpoints receive current layout immediately. Offscreen heights converge in background batches, so the scrollbar can change until that work finishes.
 
@@ -18,11 +18,11 @@ Raw results: [before](../artifacts/editor-formatting-baseline.json), [after](../
 
 The concurrent formatting-tools task subsequently added controls, block projection, and a title to the sample. A compatibility run on that combined state covered 7,280 blocks and 1,109,761 characters, again with three trials per browser:
 
-| Browser | Response, ms | Command handler, ms | Undo response, ms | Full background layout, ms |
-|---|---:|---:|---:|---:|
-| Chromium | 41.2 | 12.4 | 25.6 | 2,284.1 |
-| Firefox | 66 | 22 | 48 | 4,674 |
-| WebKit | 38 | 11 | 25 | 2,132 |
+| Browser  | Response, ms | Command handler, ms | Undo response, ms | Full background layout, ms |
+| -------- | -----------: | ------------------: | ----------------: | -------------------------: |
+| Chromium |         41.2 |                12.4 |              25.6 |                    2,284.1 |
+| Firefox  |           66 |                  22 |                48 |                      4,674 |
+| WebKit   |           38 |                  11 |                25 |                      2,132 |
 
 These [combined-state results](../artifacts/editor-formatting-with-tools.json) also preserve the full selection and restore all original formatting with one undo. The current formatting-reflow report covers the combined state. The controls and extension commands belong to the concurrent task; this optimization changes transaction batching, scene scheduling, and the scroll-position read.
 

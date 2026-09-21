@@ -1,48 +1,121 @@
-import {formattingSpans} from './extensions/formatting';
-import {typography} from './extensions/typography';
-import {inlineSchema} from './extensions/mention';
-import type {CanvasKit} from 'canvaskit-wasm';
-import {createOwnedEngine} from './owned-layout';
-import type {StarterLeaf} from './extensions/demo-model';
-import type {Measurement,Scene} from './editor-scene';
+import type { CanvasKit } from 'canvaskit-wasm';
+
+import type { Measurement, Scene } from './editor-scene';
+import type { StarterLeaf } from './extensions/demo-model';
+import { formattingSpans } from './extensions/formatting';
+import { inlineSchema } from './extensions/mention';
+import { typography } from './extensions/typography';
+import { createOwnedEngine } from './owned-layout';
 
 /** Independent eager reference: compose each paragraph from scratch at the target width. */
-export async function checkReflow(kit:CanvasKit,nodes:StarterLeaf[],scene:Scene,measurements:ReadonlyMap<number,Measurement>){
-  const owned=await createOwnedEngine(kit,'shaping');
-  let y=32+scene.paddingTop,paragraphs=0,hydrated=0;
+export async function checkReflow(
+  kit: CanvasKit,
+  nodes: StarterLeaf[],
+  scene: Scene,
+  measurements: ReadonlyMap<number, Measurement>,
+) {
+  const owned = await createOwnedEngine(kit, 'shaping');
 
-  try{
-    for(let i=0;i<nodes.length;i++){
-      const node=nodes[i],actual=scene.placements[i];
+  let y = 32 + scene.paddingTop,
+    paragraphs = 0,
+    hydrated = 0;
 
-      if(i){const previous=nodes[i-1];const after=previous.kind==='paragraph'||previous.kind==='heading'?typography(previous,20).after:24;const before=node.kind==='paragraph'||node.kind==='heading'?typography(node,20).before:0;y+=Math.max(after,before);}
+  try {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i],
+        actual = scene.placements[i];
 
-      if(!actual||actual.node!==node||actual.y!==y)throw new Error(`Placement differs at ${node.id}`);
+      if (i) {
+        const previous = nodes[i - 1];
 
-      if((node.kind==='paragraph'||node.kind==='heading')){
-        const style=typography(node,20);
-        const spans=node.kind==='heading'&&node.text.length?[...formattingSpans(node.marks),{start:0,end:node.text.length,bold:true,italic:false}]:formattingSpans(node.marks);
-        const input={id:-1,text:node.text,spans,width:scene.width,size:style.size,lineHeight:style.lineHeight,baselineGrid:4};
-        const expected=node.inline.length?owned.layoutInline({...input,atoms:node.inline.map(inlineSchema.layout)}):owned.engine.layout(input);
-        const geometry=(layout:typeof expected)=>[layout.height,layout.lines,layout.geometry(0,node.text.length,false),layout.move(0,false,'end'),layout.hit(10,10)];
+        const after =
+          previous.kind === 'paragraph' || previous.kind === 'heading'
+            ? typography(previous, 20).after
+            : 24;
 
-        if(actual.height!==expected.height||actual.layoutWidth!==scene.width||actual.layout&&JSON.stringify(geometry(actual.layout))!==JSON.stringify(geometry(expected)))throw new Error(`Geometry differs at ${node.id}`);
+        const before =
+          node.kind === 'paragraph' || node.kind === 'heading' ? typography(node, 20).before : 0;
 
-        if(actual.layout)hydrated++;
+        y += Math.max(after, before);
+      }
 
-        if(actual.layout&&'inlineBoxes' in expected&&JSON.stringify(actual.boxes)!==JSON.stringify(expected.inlineBoxes))throw new Error(`Inline rectangles differ at ${node.id}`);
-        y+=expected.height;paragraphs++;
-      }else{
-        const measured=measurements.get(node.id);
-        const height=measured?.width===scene.width?measured.height:node.kind==='image'?96:node.kind==='table'?Math.max(60,node.rows.length*64):node.expanded?290:190;
+      if (!actual || actual.node !== node || actual.y !== y)
+        throw new Error(`Placement differs at ${node.id}`);
 
-        if(height!==actual.height)throw new Error(`Widget height differs at ${node.id}`);
-        y+=Math.ceil(height/4)*4;
+      if (node.kind === 'paragraph' || node.kind === 'heading') {
+        const style = typography(node, 20);
+
+        const spans =
+          node.kind === 'heading' && node.text.length
+            ? [
+                ...formattingSpans(node.marks),
+                { start: 0, end: node.text.length, bold: true, italic: false },
+              ]
+            : formattingSpans(node.marks);
+
+        const input = {
+          id: -1,
+          text: node.text,
+          spans,
+          width: scene.width,
+          size: style.size,
+          lineHeight: style.lineHeight,
+          baselineGrid: 4,
+        };
+
+        const expected = node.inline.length
+          ? owned.layoutInline({ ...input, atoms: node.inline.map(inlineSchema.layout) })
+          : owned.engine.layout(input);
+
+        const geometry = (layout: typeof expected) => [
+          layout.height,
+          layout.lines,
+          layout.geometry(0, node.text.length, false),
+          layout.move(0, false, 'end'),
+          layout.hit(10, 10),
+        ];
+
+        if (
+          actual.height !== expected.height ||
+          actual.layoutWidth !== scene.width ||
+          (actual.layout &&
+            JSON.stringify(geometry(actual.layout)) !== JSON.stringify(geometry(expected)))
+        )
+          throw new Error(`Geometry differs at ${node.id}`);
+
+        if (actual.layout) hydrated++;
+
+        if (
+          actual.layout &&
+          'inlineBoxes' in expected &&
+          JSON.stringify(actual.boxes) !== JSON.stringify(expected.inlineBoxes)
+        )
+          throw new Error(`Inline rectangles differ at ${node.id}`);
+        y += expected.height;
+        paragraphs++;
+      } else {
+        const measured = measurements.get(node.id);
+
+        const height =
+          measured?.width === scene.width
+            ? measured.height
+            : node.kind === 'image'
+              ? 96
+              : node.kind === 'table'
+                ? Math.max(60, node.rows.length * 64)
+                : node.expanded
+                  ? 290
+                  : 190;
+
+        if (height !== actual.height) throw new Error(`Widget height differs at ${node.id}`);
+        y += Math.ceil(height / 4) * 4;
       }
     }
 
-    if(y+24!==scene.height||scene.pending)throw new Error('Document reflow is incomplete');
+    if (y + 24 !== scene.height || scene.pending) throw new Error('Document reflow is incomplete');
 
-    return {blocks:nodes.length,paragraphs,hydrated,checks:'passed'};
-  }finally{owned.engine.clear();}
+    return { blocks: nodes.length, paragraphs, hydrated, checks: 'passed' };
+  } finally {
+    owned.engine.clear();
+  }
 }

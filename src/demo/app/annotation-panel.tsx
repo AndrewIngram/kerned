@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { Rect } from '../../engines';
-import { type Scene } from '../../editor-scene';
 
 import type { Viewport } from '../../editor-react';
+import { type Scene } from '../../editor-scene';
+import type { Rect } from '../../engines';
 import type { useComments } from './use-comments';
 
 const TeamContext = createContext('');
@@ -103,6 +103,7 @@ export function AnnotationPanel({
   useEffect(() => {
     if (panel?.focus === 'panel')
       portal?.querySelector<HTMLButtonElement>('.close-panel')?.focus({ preventScroll: true });
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Changing the annotation target must refocus the existing panel.
   }, [panel?.kind, panel?.nodeId, panel?.atomId, panel?.focus, portal]);
 
   return (

@@ -34,18 +34,18 @@ This separation is consistent with [ProseMirror's table module](https://github.c
 
 ## Validation and scaling
 
-`npm run check:transactions` checks nested structure through an independent schema using only public APIs. Coverage includes numbering, multi-level indent/outdent, Enter/Backspace, generic structural operations, durable references, atomic rejection, streamed-root preservation, undo/redo, disjoint branch edits, and wrapping 2,000/10,000 blocks. Bulk wrapping is a single `replaceChildren` step, avoiding repeated tree scans per item.
+`pnpm run check:transactions` checks nested structure through an independent schema using only public APIs. Coverage includes numbering, multi-level indent/outdent, Enter/Backspace, generic structural operations, durable references, atomic rejection, streamed-root preservation, undo/redo, disjoint branch edits, and wrapping 2,000/10,000 blocks. Bulk wrapping is a single `replaceChildren` step, avoiding repeated tree scans per item.
 
 Transaction checks passed at wide and narrow viewports in Chromium, Firefox and WebKit. The existing editor, large-document and viewport-reflow suites also passed across all three browsers, including 10,000 blocks and concurrent streaming.
 
-`npm run benchmark:containers` measures `editor.dispatch` directly: one-character edits in 2,000/10,000 text leaves, flat or under one generic container, three warmups and 20 samples per case. The existing edit-to-paint metric starts after dispatch and cannot measure this cost.
+`pnpm run benchmark:containers` measures `editor.dispatch` directly: one-character edits in 2,000/10,000 text leaves, flat or under one generic container, three warmups and 20 samples per case. The existing edit-to-paint metric starts after dispatch and cannot measure this cost.
 
 Measured median / p95 milliseconds in one run:
 
-| Browser | 2k flat | 2k nested | 10k flat | 10k nested |
-|---|---:|---:|---:|---:|
-| Chromium | 0.85 / 1.1 | 0.70 / 0.9 | 3.4 / 4.0 | 3.4 / 3.8 |
-| Firefox | 2 / 2 | 1 / 3 | 7 / 10 | 7 / 11 |
-| WebKit | 1 / 1 | 1 / 1 | 2 / 3 | 2 / 3 |
+| Browser  |    2k flat |  2k nested |  10k flat | 10k nested |
+| -------- | ---------: | ---------: | --------: | ---------: |
+| Chromium | 0.85 / 1.1 | 0.70 / 0.9 | 3.4 / 4.0 |  3.4 / 3.8 |
+| Firefox  |      2 / 2 |      1 / 3 |    7 / 10 |     7 / 11 |
+| WebKit   |      1 / 1 |      1 / 1 |     2 / 3 |      2 / 3 |
 
 Raw browser versions and samples are in `artifacts/editor-container-benchmark.json`. These are transaction costs, not end-to-end input latency or a controlled before/after comparison. Indexes are reused within a transaction, but indexing still scales with total node count. Immutable edits copy sibling arrays and affected ancestor paths. Persistent incremental indexes and structural history compaction remain opportunities before substantially larger documents.

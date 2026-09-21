@@ -1,12 +1,31 @@
-import {useRef} from 'react';
-import {createPointerSelection,type PointerSelectionOptions} from '../editor-browser/pointer-selection';
-import type {TextSelection} from '../editor';
+import { useLayoutEffect, useRef, useState } from 'react';
 
-export function usePointerSelection(options:Omit<PointerSelectionOptions,'selection'>&{selection:TextSelection}){
- const latest=useRef(options);latest.current=options;
- const controller=useRef<ReturnType<typeof createPointerSelection>|null>(null);
+import type { TextSelection } from '../editor';
+import {
+  createPointerSelection,
+  type PointerSelectionOptions,
+} from '../editor-browser/pointer-selection';
 
- if(!controller.current)controller.current=createPointerSelection({selection:()=>latest.current.selection,hitTest:(x,y)=>latest.current.hitTest(x,y),onSelect:value=>latest.current.onSelect(value),focus:()=>latest.current.focus(),selectRange:(hit,clicks)=>latest.current.selectRange?.(hit,clicks)??null,onStart:(hit,clicks)=>latest.current.onStart?.(hit,clicks),onDrag:hit=>latest.current.onDrag?.(hit)});
+export function usePointerSelection(
+  options: Omit<PointerSelectionOptions, 'selection'> & { selection: TextSelection },
+) {
+  const latest = useRef(options);
+  useLayoutEffect(() => {
+    latest.current = options;
+  }, [options]);
 
- return controller.current;
+  // oxlint-disable-next-line react/refs -- The controller stores event callbacks; it does not read their refs during construction.
+  const [controller] = useState(() =>
+    createPointerSelection({
+      selection: () => latest.current.selection,
+      hitTest: (x, y) => latest.current.hitTest(x, y),
+      onSelect: (value) => latest.current.onSelect(value),
+      focus: () => latest.current.focus(),
+      selectRange: (hit, clicks) => latest.current.selectRange?.(hit, clicks) ?? null,
+      onStart: (hit, clicks) => latest.current.onStart?.(hit, clicks),
+      onDrag: (hit) => latest.current.onDrag?.(hit),
+    }),
+  );
+
+  return controller;
 }

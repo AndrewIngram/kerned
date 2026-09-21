@@ -12,13 +12,13 @@ The remaining costs are whole-document reflow and retained layout. At the time o
 
 ## Reproduce
 
-~~~sh
-npm run build
-npm run preview
+```sh
+pnpm run build
+pnpm run preview
 node scripts/check-editor-large.mjs
 node scripts/benchmark-editor-large.mjs
 node scripts/report-editor-large.mjs
-~~~
+```
 
 Open [/extensions.html?stream=10000](http://127.0.0.1:5176/extensions.html?stream=10000). The default page remains the small extension study. The stream parameter accepts 32 through 10,000 blocks. The test-only paused=1 option holds loading after the first 32 blocks; window.editorDiagnostics.resume() continues it. slowImages=1 extends the image decode delay for reflow checks.
 
@@ -28,14 +28,14 @@ The fixture is generated locally, one requested chunk at a time. This tests incr
 
 Each browser/size has three independent page contexts. Columns show medians across trials, except the last column, which is the worst observed frame interval across all three trials.
 
-| Browser | Blocks | First canvas flush, ms | Load after React mount, ms | Median trial p95 chunk work, ms | Worst loading frame interval, ms |
-|---|---:|---:|---:|---:|---:|
-| chromium | 2,000 | 88.2 | 361.6 | 9.6 | 16.7 |
-| chromium | 10,000 | 88.0 | 1530.9 | 8.5 | 16.8 |
-| firefox | 2,000 | 106.0 | 472.0 | 10.0 | 17.4 |
-| firefox | 10,000 | 105.0 | 1932.0 | 11.0 | 17.5 |
-| webkit | 2,000 | 143.0 | 374.0 | 9.0 | 34.0 |
-| webkit | 10,000 | 148.0 | 1492.0 | 9.0 | 22.0 |
+| Browser  | Blocks | First canvas flush, ms | Load after React mount, ms | Median trial p95 chunk work, ms | Worst loading frame interval, ms |
+| -------- | -----: | ---------------------: | -------------------------: | ------------------------------: | -------------------------------: |
+| chromium |  2,000 |                   88.2 |                      361.6 |                             9.6 |                             16.7 |
+| chromium | 10,000 |                   88.0 |                     1530.9 |                             8.5 |                             16.8 |
+| firefox  |  2,000 |                  106.0 |                      472.0 |                            10.0 |                             17.4 |
+| firefox  | 10,000 |                  105.0 |                     1932.0 |                            11.0 |                             17.5 |
+| webkit   |  2,000 |                  143.0 |                      374.0 |                             9.0 |                             34.0 |
+| webkit   | 10,000 |                  148.0 |                     1492.0 |                             9.0 |                             22.0 |
 
 First canvas flush is measured from the navigation time origin and includes local asset loading and engine initialization. It is a proxy for the first usable viewport, not a browser compositor presentation timestamp. Every trial first rendered 32 blocks. Load duration includes frame yields and ends when the last chunk has been painted; it does not mean every offscreen image has decoded.
 
@@ -69,14 +69,14 @@ Canvas and DOM output were visually inspected in the completed document at deskt
 
 These are single measured scene rebuilds from the correctness runs, not repeated timing medians. A desktop viewport changes from 1,100 to 700 pixels; the narrow viewport changes from 420 to 520 pixels. The loaded document contains 10,000 blocks. Shaping counts remain unchanged, but every paragraph is recomposed at the new width.
 
-| Browser | Initial viewport width | Scene rebuild, ms |
-|---|---:|---:|
-| chromium | 1100 | 150.3 |
-| chromium | 420 | 156.4 |
-| firefox | 1100 | 173.0 |
-| firefox | 420 | 174.0 |
-| webkit | 1100 | 131.0 |
-| webkit | 420 | 134.0 |
+| Browser  | Initial viewport width | Scene rebuild, ms |
+| -------- | ---------------------: | ----------------: |
+| chromium |                   1100 |             150.3 |
+| chromium |                    420 |             156.4 |
+| firefox  |                   1100 |             173.0 |
+| firefox  |                    420 |             174.0 |
+| webkit   |                   1100 |             131.0 |
+| webkit   |                    420 |             134.0 |
 
 These pauses are visible enough to justify the next optimization: reflow the viewport and its overscan first, then update the rest in bounded batches while retaining a stable anchor. No worker or new WASM boundary is needed to test that approach.
 
@@ -85,9 +85,9 @@ These pauses are visible enough to justify the next optimization: reflow the vie
 Chromium CDP measurements after two forced collections, relative to the same page paused with 32 blocks. There is one memory trial per size. Values are decimal MB. JavaScript heap and backing storage are separate reported categories; neither is total browser process memory.
 
 | Blocks | Additional JS heap, MB | Additional backing storage, MB | Unused retained caret capacity, MB |
-|---|---:|---:|---:|
-| 2,000 | 13.6 | 21.3 | 3.8 |
-| 10,000 | 67.0 | 108.7 | 18.9 |
+| ------ | ---------------------: | -----------------------------: | ---------------------------------: |
+| 2,000  |                   13.6 |                           21.3 |                                3.8 |
+| 10,000 |                   67.0 |                          108.7 |                               18.9 |
 
 At 10,000 blocks the engine accounts for about 63.8 MB of shaping buffers, 11.3 MB of glyph buffers and 34.0 MB of caret buffers. These engine-side buffer counts are not an independent measurement of total browser memory. Backing storage also includes the existing WASM memory. Native CanvasKit allocations, browser DOM memory and decoded images are not fully described by these figures.
 

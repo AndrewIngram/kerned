@@ -27,9 +27,9 @@ The scene retains shaping while releasing offscreen geometry. See
 [retained geometry](editor-retained-geometry.md) and
 [viewport reflow](editor-viewport-reflow.md).
 
-Run `npm run build`, `npm run preview`, then `npm run check:editor` to check
+Run `pnpm run build`, `pnpm run preview`, then `pnpm run check:editor` to check
 mentions, portals, atomic navigation, copy/paste, widget measurements, focus,
-and inline layout in Chromium, Firefox, and WebKit. `npm run check:transactions`
+and inline layout in Chromium, Firefox, and WebKit. `pnpm run check:transactions`
 also checks independent schemas, containers, selections, and durable anchors.
 The [public extension boundary](editor-extension-boundary.md) describes those
 contracts.

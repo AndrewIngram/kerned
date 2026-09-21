@@ -1,5 +1,7 @@
 import { type CanvasKit } from 'canvaskit-wasm';
 import { useEffect } from 'react';
+import type { RefObject } from 'react';
+
 import type { FindState } from '../../editor';
 import {
   createAnchor,
@@ -14,18 +16,16 @@ import {
 import { benchmarkContainerEdits, checkContainers } from '../../editor-container-checks';
 import { checkExtensions } from '../../editor-extension-checks';
 import { type CanvasPaintLayer, type CanvasPainter as Painter } from '../../editor-react';
+import { checkReflow } from '../../editor-reflow-checks';
+import { createEditorScene, type Scene } from '../../editor-scene';
 import { checkSelections } from '../../editor-selection-checks';
+import { checkTransactions } from '../../editor-transaction-checks';
 import { commentDecorations, createCommentStore } from '../../extensions/comment';
 import type { StarterLeaf } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { importHtml } from '../../extensions/html';
-import { checkReflow } from '../../editor-reflow-checks';
-import { createEditorScene, type Scene } from '../../editor-scene';
-import { checkTransactions } from '../../editor-transaction-checks';
-import { checkInline } from '../../owned-inline-checks';
-
-import type { RefObject } from 'react';
 import type { EditorSession, Owned } from '../../extensions/starter-kit/types';
+import { checkInline } from '../../owned-inline-checks';
 import type { StreamState } from './use-sample-stream';
 
 type DiagnosticsOptions = {
@@ -199,5 +199,24 @@ export function useDiagnostics({
     return () => {
       if (host.editorDiagnostics === diagnostics) delete host.editorDiagnostics;
     };
-  }, [owned, zoom]);
+  }, [
+    owned,
+    zoom,
+    editor,
+    comments,
+    kit,
+    current,
+    sceneRef,
+    measurementsRef,
+    paused,
+    metrics,
+    readScroll,
+    widthRef,
+    painters,
+    findRef,
+    scrollDocumentTo,
+    setSelection,
+    inputRef,
+    sceneCache,
+  ]);
 }

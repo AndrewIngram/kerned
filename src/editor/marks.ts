@@ -1,123 +1,218 @@
-import {validateTextRange} from './text';
-import {jsonValue,jsonArray,jsonRecord,jsonNumber,jsonString,type JsonValue} from './schema-codec';
+import { z } from 'zod';
 
-export type Mark = Readonly<{type:string;attrs:JsonValue}>;
+import {
+  jsonValue,
+  jsonArray,
+  jsonRecord,
+  jsonNumber,
+  jsonString,
+  type JsonValue,
+} from './schema-codec';
+import { validateTextRange } from './text';
 
-export type MarkRange = Readonly<{from:number;to:number;mark:Mark}>;
+export type Mark = Readonly<{ type: string; attrs: JsonValue }>;
+
+export type MarkRange = Readonly<{ from: number; to: number; mark: Mark }>;
 
 export type MarkExtension = {
-  name:string;
-  version:number;
+  name: string;
+  version: number;
   /** Parse and normalize attributes at the schema boundary. */
-  parse(attrs:unknown):JsonValue;
-  inclusiveStart?:boolean;
-  inclusiveEnd?:boolean;
+  parse(attrs: JsonValue): JsonValue;
+  inclusiveStart?: boolean;
+  inclusiveEnd?: boolean;
 };
 
-function key(value:JsonValue):string{
-  if(value===null||typeof value!=='object')return JSON.stringify(value);
+const jsonObject = z.union([z.array(z.unknown()), z.record(z.string(), z.unknown())]);
 
-  if(Array.isArray(value))return `[${value.map(key).join(',')}]`;
+function key(value: JsonValue): string {
+  if (Array.isArray(value)) return `[${value.map(key).join(',')}]`;
+  const record = jsonObject.safeParse(value);
 
-  return `{${Object.keys(value).sort().map(name=>`${JSON.stringify(name)}:${key(value[name])}`).join(',')}}`;
+  if (!record.success) return JSON.stringify(value);
+  const attrs = jsonRecord(value);
+
+  return `{${Object.keys(attrs)
+    .toSorted()
+    .map((name) => `${JSON.stringify(name)}:${key(attrs[name])}`)
+    .join(',')}}`;
 }
 
-export function sameMark(a:Mark,b:Mark){return a.type===b.type&&key(a.attrs)===key(b.attrs);}
+export function sameMark(a: Mark, b: Mark) {
+  return a.type === b.type && key(a.attrs) === key(b.attrs);
+}
 
 /** Different mark types can overlap; one type has at most one value at each point. */
-export function setMark(ranges:readonly MarkRange[],from:number,to:number,mark:Mark):MarkRange[]{
-  if(from===to)return [...ranges];
+export function setMark(
+  ranges: readonly MarkRange[],
+  from: number,
+  to: number,
+  mark: Mark,
+): MarkRange[] {
+  if (from === to) return [...ranges];
 
-  return normalizeMarks([...removeMark(ranges,from,to,mark.type),{from,to,mark}]);
+  return normalizeMarks([...removeMark(ranges, from, to, mark.type), { from, to, mark }]);
 }
 
-export function removeMark(ranges:readonly MarkRange[],from:number,to:number,type?:string):MarkRange[]{
-  if(from===to)return [...ranges];
+export function removeMark(
+  ranges: readonly MarkRange[],
+  from: number,
+  to: number,
+  type?: string,
+): MarkRange[] {
+  if (from === to) return [...ranges];
 
-  return ranges.flatMap(range=>range.to<=from||range.from>=to||type!==undefined&&range.mark.type!==type?[range]:[
-    ...(range.from<from?[{...range,to:from}]:[]),...(range.to>to?[{...range,from:to}]:[]),
-  ]);
+  return ranges.flatMap((range) =>
+    range.to <= from || range.from >= to || (type !== undefined && range.mark.type !== type)
+      ? [range]
+      : [
+          ...(range.from < from ? [{ ...range, to: from }] : []),
+          ...(range.to > to ? [{ ...range, from: to }] : []),
+        ],
+  );
 }
 
-export function hasMark(ranges:readonly MarkRange[],from:number,to:number,mark:Mark):boolean{
-  if(from>=to)return false;
-  let covered=from;
+export function hasMark(
+  ranges: readonly MarkRange[],
+  from: number,
+  to: number,
+  mark: Mark,
+): boolean {
+  if (from >= to) return false;
+  let covered = from;
 
-  for(const range of ranges.filter(range=>sameMark(range.mark,mark)).sort((a,b)=>a.from-b.from)){
-    if(range.from>covered)break;covered=Math.max(covered,range.to);
+  for (const range of ranges
+    .filter((range) => sameMark(range.mark, mark))
+    .toSorted((a, b) => a.from - b.from)) {
+    if (range.from > covered) break;
+    covered = Math.max(covered, range.to);
 
-if(covered>=to)return true;
+    if (covered >= to) return true;
   }
 
   return false;
 }
 
-export function normalizeMarks(ranges:readonly MarkRange[]):MarkRange[]{
-  const sorted=[...ranges].sort((a,b)=>(a.mark.type<b.mark.type?-1:a.mark.type>b.mark.type?1:0)||a.from-b.from||a.to-b.to),result:MarkRange[]=[];
+export function normalizeMarks(ranges: readonly MarkRange[]): MarkRange[] {
+  const sorted = [...ranges].toSorted(
+      (a, b) =>
+        (a.mark.type < b.mark.type ? -1 : a.mark.type > b.mark.type ? 1 : 0) ||
+        a.from - b.from ||
+        a.to - b.to,
+    ),
+    result: MarkRange[] = [];
 
-  for(const range of sorted){
-    if(!Number.isSafeInteger(range.from)||!Number.isSafeInteger(range.to)||range.from<0||range.from>=range.to)throw new Error('Invalid mark range');
-    const previous=result.at(-1);
+  for (const range of sorted) {
+    if (
+      !Number.isSafeInteger(range.from) ||
+      !Number.isSafeInteger(range.to) ||
+      range.from < 0 ||
+      range.from >= range.to
+    )
+      throw new Error('Invalid mark range');
+    const previous = result.at(-1);
 
-    if(previous?.mark.type===range.mark.type&&previous.to>=range.from){
-      if(sameMark(previous.mark,range.mark)){result[result.length-1]={...previous,to:Math.max(previous.to,range.to)};continue;}
+    if (previous?.mark.type === range.mark.type && previous.to >= range.from) {
+      if (sameMark(previous.mark, range.mark)) {
+        result[result.length - 1] = { ...previous, to: Math.max(previous.to, range.to) };
+        continue;
+      }
 
-      if(previous.to>range.from)throw new Error('Conflicting values for a mark type');
+      if (previous.to > range.from) throw new Error('Conflicting values for a mark type');
     }
 
     result.push(range);
   }
 
-  return result.sort((a,b)=>a.from-b.from||a.to-b.to||(a.mark.type<b.mark.type?-1:a.mark.type>b.mark.type?1:0));
+  return result.toSorted(
+    (a, b) =>
+      a.from - b.from ||
+      a.to - b.to ||
+      (a.mark.type < b.mark.type ? -1 : a.mark.type > b.mark.type ? 1 : 0),
+  );
 }
 
-export function sliceMarks(ranges:readonly MarkRange[],from:number,to:number):MarkRange[]{
-  return ranges.flatMap(range=>range.from<to&&range.to>from?[{...range,from:Math.max(range.from,from)-from,to:Math.min(range.to,to)-from}]:[]);
+export function sliceMarks(ranges: readonly MarkRange[], from: number, to: number): MarkRange[] {
+  return ranges.flatMap((range) =>
+    range.from < to && range.to > from
+      ? [{ ...range, from: Math.max(range.from, from) - from, to: Math.min(range.to, to) - from }]
+      : [],
+  );
 }
 
-export function createMarkSchema(extensions:readonly MarkExtension[]){
-  const registry=new Map<string,MarkExtension>();
+export function createMarkSchema(extensions: readonly MarkExtension[]) {
+  const registry = new Map<string, MarkExtension>();
 
-  for(const extension of extensions){
-    if(!extension.name||!Number.isSafeInteger(extension.version)||extension.version<1||registry.has(extension.name))throw new Error('Invalid or duplicate mark extension');
-    registry.set(extension.name,extension);
+  for (const extension of extensions) {
+    if (
+      !extension.name ||
+      !Number.isSafeInteger(extension.version) ||
+      extension.version < 1 ||
+      registry.has(extension.name)
+    )
+      throw new Error('Invalid or duplicate mark extension');
+    registry.set(extension.name, extension);
   }
 
-  function create(type:string,attrs:unknown):Mark{
-    const extension=registry.get(type);
+  function create(type: string, attrs: JsonValue): Mark {
+    const extension = registry.get(type);
 
-if(!extension)throw new Error(`Unknown mark: ${type}`);
+    if (!extension) throw new Error(`Unknown mark: ${type}`);
 
-    return {type,attrs:jsonValue(extension.parse(attrs))};
+    return { type, attrs: jsonValue(extension.parse(attrs)) };
   }
 
-  function validate(text:string,ranges:readonly MarkRange[]):MarkRange[]{
-    return normalizeMarks(ranges.map(range=>{validateTextRange(text,range.from,range.to);
+  function validate(text: string, ranges: readonly MarkRange[]): MarkRange[] {
+    return normalizeMarks(
+      ranges.map((range) => {
+        validateTextRange(text, range.from, range.to);
 
-return {...range,mark:create(range.mark.type,range.mark.attrs)};}));
+        return { ...range, mark: create(range.mark.type, range.mark.attrs) };
+      }),
+    );
   }
 
   return {
-    boundary(mark:Mark,edge:'start'|'end'):boolean|undefined{
-      const extension=registry.get(mark.type);
+    boundary(this: void, mark: Mark, edge: 'start' | 'end'): boolean | undefined {
+      const extension = registry.get(mark.type);
 
-if(!extension)throw new Error(`Unknown mark: ${mark.type}`);
+      if (!extension) throw new Error(`Unknown mark: ${mark.type}`);
 
-      return edge==='start'?extension.inclusiveStart:extension.inclusiveEnd;
+      return edge === 'start' ? extension.inclusiveStart : extension.inclusiveEnd;
     },
-    encode(ranges:readonly MarkRange[]):JsonValue[]{return ranges.map(range=>{
-      const mark=create(range.mark.type,range.mark.attrs);
+    encode(ranges: readonly MarkRange[]): JsonValue[] {
+      return ranges.map((range) => {
+        const mark = create(range.mark.type, range.mark.attrs);
 
-      return {from:range.from,to:range.to,mark:{...mark,version:registry.get(mark.type)!.version}};
-    });},
-    decode(text:string,value:unknown):MarkRange[]{return validate(text,jsonArray(value).map(value=>{
-      const range=jsonRecord(value),data=jsonRecord(range.mark),type=jsonString(data.type),extension=registry.get(type);
+        return {
+          from: range.from,
+          to: range.to,
+          mark: { ...mark, version: registry.get(mark.type)!.version },
+        };
+      });
+    },
+    decode(text: string, value: JsonValue): MarkRange[] {
+      return validate(
+        text,
+        jsonArray(value).map((valueValue) => {
+          const range = jsonRecord(valueValue),
+            data = jsonRecord(range.mark),
+            type = jsonString(data.type),
+            extension = registry.get(type);
 
-      if(!extension||data.version!==extension.version)throw new Error(`Unsupported mark version: ${type}`);
+          if (!extension || data.version !== extension.version)
+            throw new Error(`Unsupported mark version: ${type}`);
 
-      return {from:jsonNumber(range.from),to:jsonNumber(range.to),mark:create(type,data.attrs)};
-    }));},
-    manifest:extensions.map(({name,version})=>({name,version})),create,
+          return {
+            from: jsonNumber(range.from),
+            to: jsonNumber(range.to),
+            mark: create(type, data.attrs),
+          };
+        }),
+      );
+    },
+    manifest: extensions.map(({ name, version }) => ({ name, version })),
+    create,
     validate,
   };
 }

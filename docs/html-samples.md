@@ -33,7 +33,7 @@ It requires the installed Playwright Chromium browser. To refresh the original
 download explicitly, fetch `https://www.gutenberg.org/ebooks/2600.html.images` into
 `public/samples/war-and-peace-full.html`, then rerun the converter.
 
-Run `npm run check:war-and-peace` against the production preview on port 5176.
+Run `pnpm run check:war-and-peace` against the production preview on port 5176.
 It compares every imported block, heading level and italic passage with the HTML
 in Chromium, Firefox and WebKit. It also checks edits during loading, undo,
 navigation to the final chapter, editing the last paragraph, narrow reflow,
@@ -131,12 +131,12 @@ Editing never changes the canonical HTML.
 ## Verify
 
 ```sh
-npm run build
-npm run preview
-npm run check:editor-book
-npm run check:editor-table
-npm run check:editor
-npm run check:transactions
+pnpm run build
+pnpm run preview
+pnpm run check:editor-book
+pnpm run check:editor-table
+pnpm run check:editor
+pnpm run check:transactions
 ```
 
 The book check compares all imported text blocks and underline text with the

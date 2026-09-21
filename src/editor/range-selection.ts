@@ -1,5 +1,5 @@
 import { mapPosition, mapGapPosition, type PositionMap } from './positions';
-import { Selection } from './selection-base';
+import type { NodeIdentity } from './schema';
 import {
   TextSelection,
   NodeSelection,
@@ -13,7 +13,7 @@ import {
   type SelectionEdit,
   type SelectionStep,
 } from './selection';
-import type { NodeIdentity } from './schema';
+import { Selection } from './selection-base';
 import { validateTextRange } from './text';
 
 /** A snapshot endpoint: either within text or immediately outside a node. */
@@ -194,10 +194,14 @@ export class RangeSelection extends Selection {
   encode(context: SelectionContext): SelectionJSON {
     this.validate(context);
 
-    const write = (point: RangeEndpoint) =>
+    type EncodedEndpoint =
+      | { kind: 'text'; key: string; offset: number }
+      | { kind: 'node'; key: string; side: 'before' | 'after' };
+
+    const write = (point: RangeEndpoint): EncodedEndpoint =>
       point.kind === 'text'
-        ? { kind: 'text', key: context.node(point.id)?.key, offset: point.offset }
-        : { kind: 'node', key: context.node(point.id)?.key, side: point.side };
+        ? { kind: 'text', key: context.node(point.id)!.key, offset: point.offset }
+        : { kind: 'node', key: context.node(point.id)!.key, side: point.side };
 
     return {
       type: this.type,
@@ -215,7 +219,7 @@ export class RangeSelection extends Selection {
     const prefix = firstText < 0 ? ranges : ranges.slice(0, firstText),
       steps: SelectionStep[] = [];
 
-    for (const range of [...prefix].reverse()) {
+    for (const range of [...prefix].toReversed()) {
       const location = context.location(range.id);
 
       if (!location) throw new Error('Missing selection node');

@@ -24,7 +24,7 @@ The rail is vertically centered below the toolbar and uses at most 80% of the
 available height. Marks remain 10px apart, with hidden overflow and internal
 scrolling to keep the active mark visible. No headings means no menu. The active entry follows the current section.
 
-Run `npm run check:editor-outline` for generic-schema extraction, nested and
+Run `pnpm run check:editor-outline` for generic-schema extraction, nested and
 skipped levels, cached edits, streamed roots, editing/undo and browser navigation.
 
 For a fully available source loaded into the editor in chunks, `read(nodes,

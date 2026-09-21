@@ -1,31 +1,47 @@
-import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
-import {writeFile} from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 
-const base=process.env.EDITOR_URL??'http://127.0.0.1:5176/extensions.html';
+import { chromium } from 'playwright';
 
-const browser=await chromium.launch(),results=[];
+const base = process.env.EDITOR_URL ?? 'http://127.0.0.1:5176/extensions.html';
 
-try{
- const pages=[];
+const browser = await chromium.launch(),
+  results = [];
 
- for(const retention of ['all','viewport']){
-  const page=await browser.newPage({viewport:{width:1100,height:950}});
-  await page.goto(`${base}?stream=10000&retention=${retention}`);
-  await page.waitForFunction(()=>window.editorDiagnostics?.probe([]).complete);pages.push(page);
- }
+try {
+  const pages = [];
 
- for(const id of [5011,10005,1]){
-  const images=[];
-
-  for(const [i,page] of pages.entries()){
-   await page.evaluate(id=>window.editorDiagnostics.scrollTo(id),id);
-   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
-   images.push(await page.locator('.document-scroll').screenshot({path:`artifacts/editor-retention-${id}-${i}.png`}));
+  for (const retention of ['all', 'viewport']) {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 950 } });
+    await page.goto(`${base}?stream=10000&retention=${retention}`);
+    await page.waitForFunction(() => window.editorDiagnostics?.probe([]).complete);
+    pages.push(page);
   }
 
-  assert.ok(images[0].equals(images[1]),`Rendered pixels differ at ${id}`);results.push({id,identical:true,bytes:images[0].length});
- }
+  for (const id of [5011, 10005, 1]) {
+    const images = [];
 
- await writeFile('artifacts/editor-retention-pixels.json',JSON.stringify(results,null,2)+'\n');console.log(results);
-}finally{await browser.close();}
+    for (const [i, page] of pages.entries()) {
+      await page.evaluate((idValue) => window.editorDiagnostics.scrollTo(idValue), id);
+      await page.evaluate(
+        () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+      );
+      images.push(
+        await page
+          .locator('.document-scroll')
+          .screenshot({ path: `artifacts/editor-retention-${id}-${i}.png` }),
+      );
+    }
+
+    assert.ok(images[0].equals(images[1]), `Rendered pixels differ at ${id}`);
+    results.push({ id, identical: true, bytes: images[0].length });
+  }
+
+  await writeFile(
+    'artifacts/editor-retention-pixels.json',
+    JSON.stringify(results, null, 2) + '\n',
+  );
+  console.log(results);
+} finally {
+  await browser.close();
+}

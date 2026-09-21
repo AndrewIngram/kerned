@@ -54,15 +54,15 @@ Our headless extension contract should avoid requiring browser types.
 
 ## Proposed modules
 
-| Entry point | Owns | Must not know |
-| --- | --- | --- |
-| `model` | Generic tree, node identity, marks, schema contracts, document codecs, snapshot positions and range values | Starter-kit content names, editor session, browser, React |
-| `transform` | Steps, application, inversion, change mappings, structural edits | Mounted view, command UI, history grouping policy |
-| `state` | Selection, transactions, state fields, revision publication, session subscriptions, durable-reference resolution over revision history | Layout, DOM, React, a concrete schema |
-| `view` | Mounted editing surface, native input and IME, geometry, pointer/navigation, decorations, viewport, rendering resources and cleanup | Demo samples, toolbar design, comment storage |
-| `core` | Convenient headless editor session, extension composition, named commands, chains, capability queries and lifecycle | React, CanvasKit objects, fixed starter schema |
-| `starter-kit` | Optional composition of paragraphs, headings, marks, lists, quotes and other standard extensions | Demo application state |
-| `react` | View mounting adapter, subscriptions, toolbar hooks, React rendering registrations | Independent editing semantics or transaction state |
+| Entry point   | Owns                                                                                                                                   | Must not know                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `model`       | Generic tree, node identity, marks, schema contracts, document codecs, snapshot positions and range values                             | Starter-kit content names, editor session, browser, React |
+| `transform`   | Steps, application, inversion, change mappings, structural edits                                                                       | Mounted view, command UI, history grouping policy         |
+| `state`       | Selection, transactions, state fields, revision publication, session subscriptions, durable-reference resolution over revision history | Layout, DOM, React, a concrete schema                     |
+| `view`        | Mounted editing surface, native input and IME, geometry, pointer/navigation, decorations, viewport, rendering resources and cleanup    | Demo samples, toolbar design, comment storage             |
+| `core`        | Convenient headless editor session, extension composition, named commands, chains, capability queries and lifecycle                    | React, CanvasKit objects, fixed starter schema            |
+| `starter-kit` | Optional composition of paragraphs, headings, marks, lists, quotes and other standard extensions                                       | Demo application state                                    |
+| `react`       | View mounting adapter, subscriptions, toolbar hooks, React rendering registrations                                                     | Independent editing semantics or transaction state        |
 
 Individual extensions own their schema rules and editing behavior. A table
 extension owns cell selection, table commands and rectangular clipboard rules.

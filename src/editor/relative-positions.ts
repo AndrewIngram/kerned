@@ -1,247 +1,323 @@
-import {captureDocumentRange,resolvedDocumentRange,type RelativeEndpoint,type DocumentRange,type DocumentRangeResult} from './document-ranges';
-import {mapBoundary,projectBoundaryRange,type BoundaryPoint,type RemovedBoundary,type NodeEdge} from './relative-boundaries';
-import {selectionContext,type Selection} from './selection';
-import type {RangeEndpoint} from './range-selection';
-import {createMappingIndex,createRevisionMappingIndex,combineEffects,projectOutside,mayCoverRange} from './mapping-index';
-import {invertAnchorMap, type AnchorMap} from './anchors';
-import type {NodeIdentity, Schema} from './schema';
-import {indexTree} from './tree';
-import {boundaries, validateTextRange} from './text';
-import {createStructuralPositions} from './structural-positions';
+import { z } from 'zod';
 
-export type RelativePosition = Readonly<{version: 1; documentId: string; revision: number; key: string; offset: number; association: -1 | 1}>;
+import { invertAnchorMap, type AnchorMap } from './anchors';
+import {
+  captureDocumentRange,
+  resolvedDocumentRange,
+  type RelativeEndpoint,
+  type DocumentRange,
+  type DocumentRangeResult,
+} from './document-ranges';
+import {
+  createMappingIndex,
+  createRevisionMappingIndex,
+  combineEffects,
+  projectOutside,
+  mayCoverRange,
+} from './mapping-index';
+import type { RangeEndpoint } from './range-selection';
+import { mapBoundary, projectBoundaryRange, type BoundaryPoint } from './relative-boundaries';
+import type { NodeIdentity, Schema } from './schema';
+import { bindParser } from './schema-codec';
+import { selectionContext, type Selection } from './selection';
+import { createStructuralPositions } from './structural-positions';
+import { boundaries, validateTextRange } from './text';
+import { indexTree } from './tree';
 
-export type RelativeRange = Readonly<{version: 1; start: RelativePosition; end: RelativePosition}>;
+export type RelativePosition = Readonly<{
+  version: 1;
+  documentId: string;
+  revision: number;
+  key: string;
+  offset: number;
+  association: -1 | 1;
+}>;
 
-export type RelativePositionResult = {status: 'resolved'; point: {id: number; offset: number}} | {status: 'deleted'}
-  | {status: 'unavailable'; reason: 'document-mismatch' | 'future-revision' | 'history-unavailable'};
+export type RelativeRange = Readonly<{
+  version: 1;
+  start: RelativePosition;
+  end: RelativePosition;
+}>;
 
-export type RelativeRangeResult = {status: 'resolved'; ranges: readonly {id: number; from: number; to: number}[]} | Exclude<RelativePositionResult, {status: 'resolved'}>;
+export type RelativePositionResult =
+  | { status: 'resolved'; point: { id: number; offset: number } }
+  | { status: 'deleted' }
+  | {
+      status: 'unavailable';
+      reason: 'document-mismatch' | 'future-revision' | 'history-unavailable';
+    };
 
-export type MappingOperation = Readonly<{id: number; inverse: boolean}>;
+export type RelativeRangeResult =
+  | { status: 'resolved'; ranges: readonly { id: number; from: number; to: number }[] }
+  | Exclude<RelativePositionResult, { status: 'resolved' }>;
 
-type State<N> = {nodes: readonly N[]; revision: number};
+export type MappingOperation = Readonly<{ id: number; inverse: boolean }>;
 
-type Point = {key: string; offset: number};
+type State<N> = { nodes: readonly N[]; revision: number };
 
-function record(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected position data');
+type Point = { key: string; offset: number };
 
-  return Object.fromEntries(Object.entries(value));
-}
+const positionInteger = z.number().int().nonnegative();
 
-function integer(value: unknown): number {
-  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) throw new Error('Invalid position integer');
+const identity = z.string().min(1);
 
-  return value;
-}
+const bias = z.union([z.literal(-1), z.literal(1)]);
 
-function string(value: unknown): string {if (typeof value !== 'string' || !value) throw new Error('Invalid position identity');
+const association = bindParser(bias);
 
- return value;}
+const relativePosition = z
+  .object({
+    version: z.literal(1),
+    documentId: identity,
+    revision: positionInteger,
+    key: identity,
+    offset: positionInteger,
+    association: bias,
+  })
+  .readonly();
 
-function association(value: unknown): -1 | 1 {if (value !== -1 && value !== 1) throw new Error('Invalid association');
+export const parseRelativePosition = bindParser(relativePosition);
 
- return value;}
+export const parseRelativeRange = bindParser(
+  z
+    .object({ version: z.literal(1), start: relativePosition, end: relativePosition })
+    .refine(
+      (data) =>
+        data.start.documentId === data.end.documentId && data.start.revision === data.end.revision,
+      'Range endpoints must share a document snapshot',
+    )
+    .readonly(),
+);
 
-export function parseRelativePosition(value: unknown): RelativePosition {
-  const data = record(value);
+const point = z.object({ key: identity, offset: positionInteger });
 
-  if (data.version !== 1) throw new Error('Unsupported relative position version');
+const edge = z.object({ key: identity, side: z.enum(['before', 'after']) });
 
-  return Object.freeze({version: 1, documentId: string(data.documentId), revision: integer(data.revision), key: string(data.key), offset: integer(data.offset), association: association(data.association)});
-}
+const mapping = z.union([
+  z
+    .object({
+      kind: z.literal('replace'),
+      key: identity,
+      from: positionInteger,
+      to: positionInteger,
+      inserted: positionInteger,
+    })
+    .refine((data) => data.to >= data.from, 'Invalid replacement mapping'),
+  z.object({ kind: z.literal('split'), key: identity, at: positionInteger, rightKey: identity }),
+  z.object({ kind: z.literal('join'), key: identity, at: positionInteger, rightKey: identity }),
+  z.object({ kind: z.literal('insert'), keys: z.array(identity) }),
+  z.object({
+    kind: z.literal('remove'),
+    keys: z.array(identity),
+    boundaries: z.array(edge.extend({ left: edge.nullable(), right: edge.nullable() })).optional(),
+    fallbacks: z
+      .array(z.object({ key: identity, before: point.nullable(), after: point.nullable() }))
+      .optional(),
+  }),
+]);
 
-export function parseRelativeRange(value: unknown): RelativeRange {
-  const data = record(value);
+const checkpointSchema = z.object({
+  version: z.literal(1),
+  documentId: identity,
+  revision: positionInteger,
+  since: positionInteger,
+  definitions: z.array(z.object({ id: positionInteger, maps: z.array(mapping) })),
+  events: z.array(
+    z.object({
+      revision: positionInteger,
+      operations: z.array(z.object({ id: positionInteger, inverse: z.boolean() })),
+    }),
+  ),
+});
 
-  if (data.version !== 1) throw new Error('Unsupported relative range version');
-  const start = parseRelativePosition(data.start), end = parseRelativePosition(data.end);
+export type PositionCheckpoint = z.infer<typeof checkpointSchema>;
 
-  if (start.documentId !== end.documentId || start.revision !== end.revision) throw new Error('Range endpoints must share a document snapshot');
+export const parsePositionCheckpoint = bindParser(checkpointSchema);
 
-  return Object.freeze({version: 1, start, end});
-}
+function mapped(
+  pointValue: Point | null,
+  map: AnchorMap,
+  biasValue: -1 | 1,
+  role?: 'start' | 'end',
+): Point | null {
+  if (!pointValue) return null;
 
-function parseMap(value: unknown): AnchorMap {
-  const data = record(value);
+  if (map.kind === 'remove' && map.keys.includes(pointValue.key)) {
+    const f = map.fallbacks?.find((f) => f.key === pointValue.key);
 
-  switch (data.kind) {
-    case 'replace': {
-      const from = integer(data.from), to = integer(data.to);
-
-      if (to < from) throw new Error('Invalid replacement mapping');
-
-      return {kind: 'replace', key: string(data.key), from, to, inserted: integer(data.inserted)};
-    }
-
-    case 'split': case 'join': return {kind: data.kind, key: string(data.key), at: integer(data.at), rightKey: string(data.rightKey)};
-    case 'insert': case 'remove': {
-      if (!Array.isArray(data.keys)) throw new Error('Invalid identity mapping');
-      const keys = data.keys.map(string);
-
-      if (data.kind === 'insert') return {kind: 'insert', keys};
-
-      const point = (value: unknown): Point | null => {if (value === null) return null; const p = record(value);
-
- return {key: string(p.key), offset: integer(p.offset)};};
-
-      let boundaries: RemovedBoundary[] | undefined;
-
-      if (data.boundaries !== undefined) {
-        if (!Array.isArray(data.boundaries)) throw new Error('Invalid removal boundaries');
-
-        const edge = (value: unknown): NodeEdge => {
-          const p = record(value);
-
-          if (p.side !== 'before' && p.side !== 'after') throw new Error('Invalid boundary side');
-
-          return {key:string(p.key),side:p.side};
-        };
-
-        boundaries = data.boundaries.map(value => {
-          const b = record(value), p = edge(b);
-
-          return {...p,left:b.left === null ? null : edge(b.left),right:b.right === null ? null : edge(b.right)};
-        });
-      }
-
-      if (data.fallbacks === undefined) return {kind: 'remove', keys, boundaries};
-
-      if (!Array.isArray(data.fallbacks)) throw new Error('Invalid removal boundaries');
-
-      return {kind: 'remove', keys, boundaries, fallbacks: data.fallbacks.map(value => {const f = record(value);
-
- return {key: string(f.key), before: point(f.before), after: point(f.after)};})};
-    }
-
-    default: throw new Error('Unknown position mapping');
+    return role === 'start' || (!role && biasValue === 1)
+      ? (f?.after ?? f?.before ?? null)
+      : (f?.before ?? f?.after ?? null);
   }
-}
 
-function mapped(point: Point | null, map: AnchorMap, bias: -1 | 1, role?: 'start' | 'end'): Point | null {
-  if (!point) return null;
+  if (
+    map.kind === 'split' &&
+    pointValue.key === map.key &&
+    (pointValue.offset > map.at || (pointValue.offset === map.at && biasValue === 1))
+  )
+    return { key: map.rightKey, offset: pointValue.offset - map.at };
 
-  if (map.kind === 'remove' && map.keys.includes(point.key)) {
-    const f = map.fallbacks?.find(f => f.key === point.key);
+  if (map.kind === 'join' && pointValue.key === map.rightKey)
+    return { key: map.key, offset: pointValue.offset + map.at };
 
-    return (role === 'start' || !role && bias === 1) ? f?.after ?? f?.before ?? null : f?.before ?? f?.after ?? null;
+  if (map.kind === 'replace' && pointValue.key === map.key) {
+    const offset = pointValue.offset;
+
+    return {
+      key: pointValue.key,
+      offset:
+        offset < map.from
+          ? offset
+          : offset > map.to
+            ? offset + map.inserted - (map.to - map.from)
+            : map.from + (biasValue === 1 ? map.inserted : 0),
+    };
   }
 
-  if (map.kind === 'split' && point.key === map.key && (point.offset > map.at || point.offset === map.at && bias === 1)) return {key: map.rightKey, offset: point.offset - map.at};
-
-  if (map.kind === 'join' && point.key === map.rightKey) return {key: map.key, offset: point.offset + map.at};
-
-  if (map.kind === 'replace' && point.key === map.key) {
-    const offset = point.offset;
-
-    return {key: point.key, offset: offset < map.from ? offset : offset > map.to ? offset + map.inserted - (map.to - map.from) : map.from + (bias === 1 ? map.inserted : 0)};
-  }
-
-  return point;
+  return pointValue;
 }
 
 /** Owned OT-candidate position index. Stores document change metadata, never ranges. */
-export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N>, initial: State<N>, documentId: string, checkpoint?: unknown) {
-  let state = initial, since = initial.revision;
+export function createRelativePositions<N extends NodeIdentity>(
+  schema: Schema<N>,
+  initial: State<N>,
+  documentId: string,
+  checkpoint?: PositionCheckpoint,
+) {
+  let state = initial,
+    since = initial.revision;
+
   const definitions = new Map<number, readonly AnchorMap[]>();
-  const events: {revision: number; operations: readonly MappingOperation[]}[] = [];
+  const events: { revision: number; operations: readonly MappingOperation[] }[] = [];
   let indexed: readonly N[] | undefined, cached: ReturnType<typeof indexTree<N>> | undefined;
   let textNodes: N[] = [];
-  const textRanks = new Map<number, number>(), graphemes = new WeakMap<N, readonly number[]>();
+
+  const textRanks = new Map<number, number>(),
+    graphemes = new WeakMap<N, readonly number[]>();
+
   const suffixes = new Map<number, ReturnType<typeof createMappingIndex>>();
   let suffixWeight = 0;
 
-  type HistoryGroup = {kind: 'forward'; index: ReturnType<typeof createRevisionMappingIndex>}
-    | {kind: 'restore'; revisions: readonly number[]; index: ReturnType<typeof createMappingIndex>};
+  type HistoryGroup =
+    | { kind: 'forward'; index: ReturnType<typeof createRevisionMappingIndex> }
+    | {
+        kind: 'restore';
+        revisions: readonly number[];
+        index: ReturnType<typeof createMappingIndex>;
+      };
 
   let historyGroups: HistoryGroup[] | undefined;
   const emptyIndex = createMappingIndex([]);
 
   function tree() {
     if (indexed !== state.nodes || !cached) {
-      cached = indexTree(schema, state.nodes); indexed = state.nodes;
-      textNodes = cached.order.flatMap(({node}) => schema.text(node) === null ? [] : [node]);
-      textRanks.clear(); textNodes.forEach((node, i) => textRanks.set(node.id, i));
+      cached = indexTree(schema, state.nodes);
+      indexed = state.nodes;
+      textNodes = cached.order.flatMap(({ node }) => (schema.text(node) === null ? [] : [node]));
+      textRanks.clear();
+      textNodes.forEach((node, i) => textRanks.set(node.id, i));
     }
 
     return cached;
   }
 
   if (checkpoint !== undefined) {
-    const data = record(checkpoint);
+    const data = checkpoint;
 
-    if (data.version !== 1 || data.documentId !== documentId || data.revision !== state.revision || !Array.isArray(data.definitions) || !Array.isArray(data.events)) throw new Error('Position checkpoint does not match document');
-    since = integer(data.since);
+    if (data.documentId !== documentId || data.revision !== state.revision)
+      throw new Error('Position checkpoint does not match document');
+    since = data.since;
 
     if (since > state.revision) throw new Error('Invalid checkpoint origin');
 
     for (const value of data.definitions) {
-      const d = record(value), id = integer(d.id);
+      const d = value,
+        id = d.id;
 
-      if (id <= since || id > state.revision || definitions.has(id) || !Array.isArray(d.maps)) throw new Error('Invalid mapping definition');
-      definitions.set(id, d.maps.map(parseMap));
+      if (id <= since || id > state.revision || definitions.has(id))
+        throw new Error('Invalid mapping definition');
+      definitions.set(id, d.maps);
     }
 
     let previous = since;
     const active = new Map<number, boolean>();
 
     for (const value of data.events) {
-      const e = record(value), revision = integer(e.revision);
+      const e = value,
+        revision = e.revision;
 
-      if (revision <= previous || revision > state.revision || !Array.isArray(e.operations)) throw new Error('Invalid mapping event');
+      if (revision <= previous || revision > state.revision)
+        throw new Error('Invalid mapping event');
 
-      const operations = e.operations.map(value => {
-        const op = record(value), id = integer(op.id);
+      const operations = e.operations.map((valueValue) => {
+        const op = valueValue,
+          id = op.id;
 
-        if (!definitions.has(id) || id > revision || typeof op.inverse !== 'boolean') throw new Error('Invalid mapping operation');
+        if (!definitions.has(id) || id > revision) throw new Error('Invalid mapping operation');
 
-        if (!active.has(id) && (id !== revision || op.inverse)) throw new Error('Missing original mapping event');
+        if (!active.has(id) && (id !== revision || op.inverse))
+          throw new Error('Missing original mapping event');
 
-        if ((active.get(id) ?? false) !== op.inverse) throw new Error('Invalid mapping undo sequence');
+        if ((active.get(id) ?? false) !== op.inverse)
+          throw new Error('Invalid mapping undo sequence');
         active.set(id, !op.inverse);
 
-        return {id, inverse: op.inverse};
+        return { id, inverse: op.inverse };
       });
 
-      events.push({revision, operations}); previous = revision;
+      events.push({ revision, operations });
+      previous = revision;
     }
 
     if (active.size !== definitions.size) throw new Error('Unused mapping definition');
   }
 
-  function check(position: Pick<RelativePosition,'documentId'|'revision'>): Exclude<RelativePositionResult, {status: 'resolved'}> | null {
-    if (position.documentId !== documentId) return {status: 'unavailable', reason: 'document-mismatch'};
+  function check(
+    position: Pick<RelativePosition, 'documentId' | 'revision'>,
+  ): Exclude<RelativePositionResult, { status: 'resolved' }> | null {
+    if (position.documentId !== documentId)
+      return { status: 'unavailable', reason: 'document-mismatch' };
 
-    if (position.revision > state.revision) return {status: 'unavailable', reason: 'future-revision'};
+    if (position.revision > state.revision)
+      return { status: 'unavailable', reason: 'future-revision' };
 
-    if (position.revision < since) return {status: 'unavailable', reason: 'history-unavailable'};
+    if (position.revision < since) return { status: 'unavailable', reason: 'history-unavailable' };
 
     return null;
   }
 
   function replayAfter(revision: number): ReturnType<typeof createMappingIndex> {
-    const cached = suffixes.get(revision);
+    const cachedValue = suffixes.get(revision);
 
- if (cached) return cached;
+    if (cachedValue) return cachedValue;
+
     // Cancel an operation and its undo only when both are after the captured
     // position. This restores exact old coordinates without remembering ranges.
-    const pending: (MappingOperation | null)[] = [], last = new Map<number, number>();
+    const pending: (MappingOperation | null)[] = [],
+      last = new Map<number, number>();
 
-    for (const event of events) if (event.revision > revision) for (const op of event.operations) {
-      const index = last.get(op.id), prior = index === undefined ? undefined : pending[index];
+    for (const event of events)
+      if (event.revision > revision)
+        for (const op of event.operations) {
+          const index = last.get(op.id),
+            prior = index === undefined ? undefined : pending[index];
 
-      if (prior && prior.inverse !== op.inverse && index !== undefined) {pending[index] = null; last.delete(op.id);}
-      else {last.set(op.id, pending.length); pending.push(op);}
-    }
+          if (prior && prior.inverse !== op.inverse && index !== undefined) {
+            pending[index] = null;
+            last.delete(op.id);
+          } else {
+            last.set(op.id, pending.length);
+            pending.push(op);
+          }
+        }
 
-    const result = pending.flatMap(op => {
+    const result = pending.flatMap((op) => {
       if (!op) return [];
       const maps = definitions.get(op.id);
 
       if (!maps) throw new Error('Missing position mapping');
 
-      return op.inverse ? [...maps].reverse().map(invertAnchorMap) : [...maps];
+      return op.inverse ? [...maps].toReversed().map(invertAnchorMap) : [...maps];
     });
 
     const index = createMappingIndex(result);
@@ -250,116 +326,157 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
       const oldest = suffixes.keys().next().value;
 
       if (oldest === undefined) break;
-      suffixWeight -= suffixes.get(oldest)?.weight ?? 0; suffixes.delete(oldest);
+      suffixWeight -= suffixes.get(oldest)?.weight ?? 0;
+      suffixes.delete(oldest);
     }
 
-    suffixes.set(revision, index); suffixWeight += index.weight;
+    suffixes.set(revision, index);
+    suffixWeight += index.weight;
 
- return index;
+    return index;
   }
 
   function changesAfter(revision: number) {
     if (revision === state.revision) return emptyIndex;
 
     if (!historyGroups) {
-      const occurrences = new Map<number, {revision: number; op: MappingOperation}[]>();
+      const occurrences = new Map<number, { revision: number; op: MappingOperation }[]>();
 
-      for (const event of events) for (const op of event.operations) {
-        let list = occurrences.get(op.id);
+      for (const event of events)
+        for (const op of event.operations) {
+          let list = occurrences.get(op.id);
 
- if (!list) {list = []; occurrences.set(op.id, list);}
+          if (!list) {
+            list = [];
+            occurrences.set(op.id, list);
+          }
 
-        list.push({revision: event.revision, op});
-      }
+          list.push({ revision: event.revision, op });
+        }
 
-      const groups: HistoryGroup[] = []; historyGroups = groups;
-      let forward: {revision: number; maps: readonly AnchorMap[]}[] = [];
+      const groups: HistoryGroup[] = [];
+      historyGroups = groups;
+      let forward: { revision: number; maps: readonly AnchorMap[] }[] = [];
 
       const flush = () => {
-        if (forward.length) groups.push({kind: 'forward', index: createRevisionMappingIndex(forward)});
+        if (forward.length)
+          groups.push({ kind: 'forward', index: createRevisionMappingIndex(forward) });
         forward = [];
       };
 
       // Cancellation leaves the last occurrence iff the suffix contains an odd
       // number of toggles. Shared forward segments exclude restored operations.
-      for (const event of events) for (const op of event.operations) {
-        const list = occurrences.get(op.id), maps = definitions.get(op.id);
+      for (const event of events)
+        for (const op of event.operations) {
+          const list = occurrences.get(op.id),
+            maps = definitions.get(op.id);
 
-        if (!list || !maps) throw new Error('Missing position mapping');
+          if (!list || !maps) throw new Error('Missing position mapping');
 
-        if (list.at(-1)?.op !== op) continue;
+          if (list.at(-1)?.op !== op) continue;
 
-        if (list.length === 1) forward.push({revision: event.revision, maps});
-        else {
-          flush();
-          groups.push({kind: 'restore', revisions: list.map(entry => entry.revision),
-            index: createMappingIndex(op.inverse ? [...maps].reverse().map(invertAnchorMap) : maps)});
+          if (list.length === 1) forward.push({ revision: event.revision, maps });
+          else {
+            flush();
+            groups.push({
+              kind: 'restore',
+              revisions: list.map((entry) => entry.revision),
+              index: createMappingIndex(
+                op.inverse ? [...maps].toReversed().map(invertAnchorMap) : maps,
+              ),
+            });
+          }
         }
-      }
 
       flush();
     }
 
-    const effects = historyGroups.flatMap(group => {
+    const effects = historyGroups.flatMap((group) => {
       if (group.kind === 'forward') return [group.index.at(revision)];
-      let low = 0, high = group.revisions.length;
 
-      while (low < high) {const mid = (low + high) >>> 1;
+      let low = 0,
+        high = group.revisions.length;
 
- if (group.revisions[mid] <= revision) low = mid + 1; else high = mid;}
+      while (low < high) {
+        const mid = (low + high) >>> 1;
+
+        if (group.revisions[mid] <= revision) low = mid + 1;
+        else high = mid;
+      }
 
       return (group.revisions.length - low) % 2 ? [group.index.effects] : [];
     });
 
-    return {effects: {get(key: string) {
-      let result: ReturnType<typeof combineEffects>;
+    return {
+      effects: {
+        get(key: string) {
+          let result: ReturnType<typeof combineEffects>;
 
-      for (const effect of effects) result = combineEffects(result, effect.get(key));
+          for (const effect of effects) result = combineEffects(result, effect.get(key));
 
-      return result;
-    }}, chunks: () => replayAfter(revision).chunks()};
+          return result;
+        },
+      },
+      chunks: () => replayAfter(revision).chunks(),
+    };
   }
 
-  function resolvePoint(point: Point | null, bias: -1 | 1): RelativePositionResult {
-    if (!point) return {status: 'deleted'};
-    const node = tree().byKey.get(point.key)?.node, text = node ? schema.text(node) : null;
+  function resolvePoint(pointValue2: Point | null, biasValue2: -1 | 1): RelativePositionResult {
+    if (!pointValue2) return { status: 'deleted' };
 
-    if (!node || text === null) return {status: 'deleted'};
+    const node = tree().byKey.get(pointValue2.key)?.node,
+      text = node ? schema.text(node) : null;
 
-    if (point.offset < 0 || point.offset > text.length) throw new Error('Position metadata does not match document');
+    if (!node || text === null) return { status: 'deleted' };
+
+    if (pointValue2.offset < 0 || pointValue2.offset > text.length)
+      throw new Error('Position metadata does not match document');
     let stops = graphemes.get(node);
 
- if (!stops) {stops = boundaries(text); graphemes.set(node, stops);}
+    if (!stops) {
+      stops = boundaries(text);
+      graphemes.set(node, stops);
+    }
 
-    let low = 0, high = stops.length;
+    let low = 0,
+      high = stops.length;
 
-    while (low < high) {const mid = (low + high) >>> 1;
+    while (low < high) {
+      const mid = (low + high) >>> 1;
 
- if (stops[mid] < point.offset) low = mid + 1; else high = mid;}
+      if (stops[mid] < pointValue2.offset) low = mid + 1;
+      else high = mid;
+    }
 
-    const offset = stops[low] === point.offset || bias === 1 ? stops[low] : stops[low - 1];
+    const offset =
+      stops[low] === pointValue2.offset || biasValue2 === 1 ? stops[low] : stops[low - 1];
 
     if (offset === undefined) throw new Error('Invalid mapped position');
 
-    return {status: 'resolved', point: {id: node.id, offset}};
+    return { status: 'resolved', point: { id: node.id, offset } };
   }
 
   function resolve(position: RelativePosition): RelativePositionResult {
     const error = check(position);
 
- if (error) return error;
-    let point: Point | null = {key: position.key, offset: position.offset};
-    const index = changesAfter(position.revision), fast = projectOutside(index.effects, point, position.association);
+    if (error) return error;
+    let pointValue3: Point | null = { key: position.key, offset: position.offset };
 
-    if (fast !== false) point = fast;
-    else for (const chunk of index.chunks()) {
-      const fast = projectOutside(chunk.effects, point, position.association);
+    const index = changesAfter(position.revision),
+      fast = projectOutside(index.effects, pointValue3, position.association);
 
-      if (fast !== false) point = fast;
-      else for (const map of chunk.maps) point = mapped(point, map, position.association);
-    }
+    if (fast !== false) pointValue3 = fast;
+    else
+      for (const chunk of index.chunks()) {
+        const fastValue = projectOutside(chunk.effects, pointValue3, position.association);
 
-    return resolvePoint(point, position.association);
+        if (fastValue !== false) pointValue3 = fastValue;
+        else
+          for (const map of chunk.maps)
+            pointValue3 = mapped(pointValue3, map, position.association);
+      }
+
+    return resolvePoint(pointValue3, position.association);
   }
 
   let rangeContext: ReturnType<typeof selectionContext<N>> | undefined,
@@ -374,9 +491,9 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
     return rangeContext;
   }
 
-  function endpoint(point: RangeEndpoint, bias: -1 | 1): RelativeEndpoint {
-    if (point.kind === 'text') return api.at(point.id, point.offset, bias);
-    const node = tree().byId.get(point.id)?.node;
+  function endpoint(pointValue4: RangeEndpoint, biasValue3: -1 | 1): RelativeEndpoint {
+    if (pointValue4.kind === 'text') return api.at(pointValue4.id, pointValue4.offset, biasValue3);
+    const node = tree().byId.get(pointValue4.id)?.node;
 
     if (!node) throw new Error('Missing boundary node');
 
@@ -385,21 +502,24 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
       documentId,
       revision: state.revision,
       key: node.key,
-      side: point.side,
-      association: bias,
+      side: pointValue4.side,
+      association: biasValue3,
     });
   }
 
-  function snapshotBoundary(point: BoundaryPoint | null, bias: -1 | 1): RangeEndpoint | null {
-    if (!point) return null;
+  function snapshotBoundary(
+    pointValue5: BoundaryPoint | null,
+    biasValue4: -1 | 1,
+  ): RangeEndpoint | null {
+    if (!pointValue5) return null;
 
-    if ('side' in point) {
-      const node = tree().byKey.get(point.key)?.node;
+    if ('side' in pointValue5) {
+      const node = tree().byKey.get(pointValue5.key)?.node;
 
-      return node ? { kind: 'node', id: node.id, side: point.side } : null;
+      return node ? { kind: 'node', id: node.id, side: pointValue5.side } : null;
     }
 
-    const result = resolvePoint(point, bias);
+    const result = resolvePoint(pointValue5, biasValue4);
 
     return result.status === 'resolved' ? { kind: 'text', ...result.point } : null;
   }
@@ -431,7 +551,7 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
       end = fast.end;
     } else
       for (const chunk of index.chunks()) {
-        const fast = projectBoundaryRange(
+        const fastValue2 = projectBoundaryRange(
           chunk.effects,
           start,
           end,
@@ -439,9 +559,9 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
           range.end.association,
         );
 
-        if (fast !== false) {
-          start = fast.start;
-          end = fast.end;
+        if (fastValue2 !== false) {
+          start = fastValue2.start;
+          end = fastValue2.end;
           continue;
         }
 
@@ -471,28 +591,46 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
   }
 
   const api = Object.freeze({
-    ...createStructuralPositions(schema,documentId,()=>state.nodes),
-    captureRange(selection: Selection): DocumentRange | null {return captureDocumentRange(selection,context(),endpoint);},
+    ...createStructuralPositions(schema, documentId, () => state.nodes),
+    captureRange(selection: Selection): DocumentRange | null {
+      return captureDocumentRange(selection, context(), endpoint);
+    },
     resolveDocumentRange,
-    at(id: number, offset: number, bias: -1 | 1 = 1): RelativePosition {
-      association(bias);
-      const node = tree().byId.get(id)?.node, text = node ? schema.text(node) : null;
+    at(id: number, offset: number, biasValue5: -1 | 1 = 1): RelativePosition {
+      association(biasValue5);
+
+      const node = tree().byId.get(id)?.node,
+        text = node ? schema.text(node) : null;
 
       if (!node || text === null) throw new Error('Relative position requires text');
       validateTextRange(text, offset, offset);
 
-      return Object.freeze({version: 1, documentId, revision: state.revision, key: node.key, offset, association: bias});
+      return Object.freeze({
+        version: 1,
+        documentId,
+        revision: state.revision,
+        key: node.key,
+        offset,
+        association: biasValue5,
+      });
     },
     range(start: RelativePosition, end: RelativePosition): RelativeRange {
-      const result = parseRelativeRange({version: 1, start, end});
-      const a = resolve(start), b = resolve(end);
+      const result = parseRelativeRange({ version: 1, start, end });
 
-      if (a.status !== 'resolved' || b.status !== 'resolved') throw new Error('Cannot create an unresolved range');
-      tree(); const first = textRanks.get(a.point.id), last = textRanks.get(b.point.id);
+      const a = resolve(start),
+        b = resolve(end);
+
+      if (a.status !== 'resolved' || b.status !== 'resolved')
+        throw new Error('Cannot create an unresolved range');
+      tree();
+
+      const first = textRanks.get(a.point.id),
+        last = textRanks.get(b.point.id);
 
       if (first === undefined || last === undefined) throw new Error('Missing range endpoint');
 
-      if (first > last || first === last && a.point.offset > b.point.offset) throw new Error('Range endpoints are reversed');
+      if (first > last || (first === last && a.point.offset > b.point.offset))
+        throw new Error('Range endpoints are reversed');
 
       return result;
     },
@@ -500,57 +638,156 @@ export function createRelativePositions<N extends NodeIdentity>(schema: Schema<N
     resolveRange(range: RelativeRange): RelativeRangeResult {
       const error = check(range.start) ?? check(range.end);
 
- if (error) return error;
+      if (error) return error;
 
-      if (range.start.revision !== range.end.revision) throw new Error('Range endpoints must share a revision');
-      let start: Point | null = {key: range.start.key, offset: range.start.offset}, end: Point | null = {key: range.end.key, offset: range.end.offset};
+      if (range.start.revision !== range.end.revision)
+        throw new Error('Range endpoints must share a revision');
+
+      let start: Point | null = { key: range.start.key, offset: range.start.offset },
+        end: Point | null = { key: range.end.key, offset: range.end.offset };
+
       const originallyEmpty = start.key === end.key && start.offset === end.offset;
       const index = changesAfter(range.start.revision);
-      const fastStart = projectOutside(index.effects, start, range.start.association), fastEnd = projectOutside(index.effects, end, range.end.association);
 
-      if (fastStart !== false && fastEnd !== false && (originallyEmpty || !mayCoverRange(index.effects, start, end))) {start = fastStart; end = fastEnd;}
-      else for (const chunk of index.chunks()) {
-        const fastStart = projectOutside(chunk.effects, start, range.start.association), fastEnd = projectOutside(chunk.effects, end, range.end.association);
+      const fastStart = projectOutside(index.effects, start, range.start.association),
+        fastEnd = projectOutside(index.effects, end, range.end.association);
 
-        if (fastStart !== false && fastEnd !== false && (originallyEmpty || !mayCoverRange(chunk.effects, start, end))) {start = fastStart; end = fastEnd; continue;}
+      if (
+        fastStart !== false &&
+        fastEnd !== false &&
+        (originallyEmpty || !mayCoverRange(index.effects, start, end))
+      ) {
+        start = fastStart;
+        end = fastEnd;
+      } else
+        for (const chunk of index.chunks()) {
+          const fastStartValue = projectOutside(chunk.effects, start, range.start.association),
+            fastEndValue = projectOutside(chunk.effects, end, range.end.association);
 
-        for (const map of chunk.maps) {
-          if (!originallyEmpty && start && end && start.key === end.key && map.kind === 'replace' && map.key === start.key && map.to > map.from && map.from <= start.offset && map.to >= end.offset) return {status: 'deleted'};
-          start = mapped(start, map, range.start.association, 'start'); end = mapped(end, map, range.end.association, 'end');
+          if (
+            fastStartValue !== false &&
+            fastEndValue !== false &&
+            (originallyEmpty || !mayCoverRange(chunk.effects, start, end))
+          ) {
+            start = fastStartValue;
+            end = fastEndValue;
+            continue;
+          }
+
+          for (const map of chunk.maps) {
+            if (
+              !originallyEmpty &&
+              start &&
+              end &&
+              start.key === end.key &&
+              map.kind === 'replace' &&
+              map.key === start.key &&
+              map.to > map.from &&
+              map.from <= start.offset &&
+              map.to >= end.offset
+            )
+              return { status: 'deleted' };
+            start = mapped(start, map, range.start.association, 'start');
+            end = mapped(end, map, range.end.association, 'end');
+          }
         }
-      }
 
-      const a = resolvePoint(start, range.start.association), b = resolvePoint(end, range.end.association);
+      const a = resolvePoint(start, range.start.association),
+        b = resolvePoint(end, range.end.association);
 
       if (a.status !== 'resolved') return a;
 
- if (b.status !== 'resolved') return b;
-      tree(); const first = textRanks.get(a.point.id), last = textRanks.get(b.point.id);
+      if (b.status !== 'resolved') return b;
+      tree();
 
-      if (first === undefined || last === undefined) return {status: 'deleted'};
+      const first = textRanks.get(a.point.id),
+        last = textRanks.get(b.point.id);
 
-      if (first > last || first === last && (a.point.offset > b.point.offset || !originallyEmpty && a.point.offset === b.point.offset)) return {status: 'deleted'};
+      if (first === undefined || last === undefined) return { status: 'deleted' };
 
-      return {status: 'resolved', ranges: textNodes.slice(first, last + 1).map(node => ({id: node.id, from: node.id === a.point.id ? a.point.offset : 0, to: node.id === b.point.id ? b.point.offset : schema.text(node)?.length ?? 0}))};
+      if (
+        first > last ||
+        (first === last &&
+          (a.point.offset > b.point.offset ||
+            (!originallyEmpty && a.point.offset === b.point.offset)))
+      )
+        return { status: 'deleted' };
+
+      return {
+        status: 'resolved',
+        ranges: textNodes.slice(first, last + 1).map((node) => ({
+          id: node.id,
+          from: node.id === a.point.id ? a.point.offset : 0,
+          to: node.id === b.point.id ? b.point.offset : (schema.text(node)?.length ?? 0),
+        })),
+      };
     },
     checkpoint() {
-      return {version: 1, documentId, revision: state.revision, since,
-        definitions: [...definitions].map(([id, maps]) => ({id, maps: structuredClone(maps)})),
-        events: events.map(event => ({revision: event.revision, operations: event.operations.map(op => ({...op}))}))};
+      return {
+        version: 1,
+        documentId,
+        revision: state.revision,
+        since,
+        definitions: [...definitions].map(([id, maps]) => ({ id, maps: structuredClone(maps) })),
+        events: events.map((event) => ({
+          revision: event.revision,
+          operations: event.operations.map((op) => ({ ...op })),
+        })),
+      };
     },
   });
 
-  return {api, advance(next: State<N>, maps: readonly AnchorMap[], restore?: {operations: readonly MappingOperation[]; redo: boolean}): readonly MappingOperation[] {
-    if (next.revision !== state.revision + 1) throw new Error('Position index requires consecutive revisions');
+  return {
+    api,
+    advance(
+      next: State<N>,
+      maps: readonly AnchorMap[],
+      restore?: { operations: readonly MappingOperation[]; redo: boolean },
+    ): readonly MappingOperation[] {
+      if (next.revision !== state.revision + 1)
+        throw new Error('Position index requires consecutive revisions');
 
-    const operations: readonly MappingOperation[] = restore ? (restore.redo ? restore.operations : [...restore.operations].reverse().map(op => ({id: op.id, inverse: !op.inverse})))
-      : maps.length ? [{id: next.revision, inverse: false}] : [];
+      const operations: readonly MappingOperation[] = restore
+        ? restore.redo
+          ? restore.operations
+          : [...restore.operations].toReversed().map((op) => ({ id: op.id, inverse: !op.inverse }))
+        : maps.length
+          ? [{ id: next.revision, inverse: false }]
+          : [];
 
-    if (!restore && maps.length) definitions.set(next.revision, maps.map(map => map.kind === 'remove' ? {...map, keys: [...map.keys], boundaries:map.boundaries?.map(b=>({...b,left:b.left&&{...b.left},right:b.right&&{...b.right}})), fallbacks: map.fallbacks?.map(f => ({key: f.key, before: f.before && {...f.before}, after: f.after && {...f.after}}))} : map.kind === 'insert' ? {...map, keys: [...map.keys]} : {...map}));
+      if (!restore && maps.length)
+        definitions.set(
+          next.revision,
+          maps.map((map) =>
+            map.kind === 'remove'
+              ? {
+                  ...map,
+                  keys: [...map.keys],
+                  boundaries: map.boundaries?.map((b) => ({
+                    ...b,
+                    left: b.left && { ...b.left },
+                    right: b.right && { ...b.right },
+                  })),
+                  fallbacks: map.fallbacks?.map((f) => ({
+                    key: f.key,
+                    before: f.before && { ...f.before },
+                    after: f.after && { ...f.after },
+                  })),
+                }
+              : map.kind === 'insert'
+                ? { ...map, keys: [...map.keys] }
+                : { ...map },
+          ),
+        );
 
-    if (operations.length) events.push({revision: next.revision, operations: operations.map(op => ({...op}))});
-    state = next; suffixes.clear(); suffixWeight = 0; historyGroups = undefined;
+      if (operations.length)
+        events.push({ revision: next.revision, operations: operations.map((op) => ({ ...op })) });
+      state = next;
+      suffixes.clear();
+      suffixWeight = 0;
+      historyGroups = undefined;
 
-    return operations;
-  }};
+      return operations;
+    },
+  };
 }

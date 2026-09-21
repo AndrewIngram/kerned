@@ -1,1 +1,1 @@
-export {default} from 'canvaskit-wasm';
+export { default } from 'canvaskit-wasm';

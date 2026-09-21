@@ -8,12 +8,12 @@ Packed caret buffers also shrink to their actual caret and line counts before a 
 
 Chromium, 1100 × 950 viewport, mixed styled documents. Each value is the increase from the same page paused at 32 blocks, after two forced garbage collections. Decimal MB, one memory trial per condition. Heap and backing storage are separate CDP categories, not total browser process memory.
 
-| Blocks | Policy | Added JS heap, MB | Added backing storage, MB |
-|---|---|---:|---:|
-| 2,000 | Compact carets, retain all geometry | 13.8 | 17.6 |
-| 2,000 | Compact carets, viewport geometry | 9.1 | 13.1 |
-| 10,000 | Compact carets, retain all geometry | 67.7 | 90.0 |
-| 10,000 | Compact carets, viewport geometry | 43.6 | 66.5 |
+| Blocks | Policy                              | Added JS heap, MB | Added backing storage, MB |
+| ------ | ----------------------------------- | ----------------: | ------------------------: |
+| 2,000  | Compact carets, retain all geometry |              13.8 |                      17.6 |
+| 2,000  | Compact carets, viewport geometry   |               9.1 |                      13.1 |
+| 10,000 | Compact carets, retain all geometry |              67.7 |                      90.0 |
+| 10,000 | Compact carets, viewport geometry   |              43.6 |                      66.5 |
 
 The earlier 10,000-block measurement was 67.0 MB heap and 108.7 MB backing storage. Compared with that historical run, the new default reduces these categories by about 35% and 39%. The same-build comparison above isolates geometry eviction from caret compaction.
 
@@ -41,14 +41,14 @@ Validation covers:
 
 ## Reproduce
 
-Build with `npm run build` and serve the production preview on port 5176. The default `/extensions.html?stream=10000` uses viewport retention. Add `retention=all` for the compacted full-retention comparison.
+Build with `pnpm run build` and serve the production preview on port 5176. The default `/extensions.html?stream=10000` uses viewport retention. Add `retention=all` for the compacted full-retention comparison.
 
-Run `npm run memory:editor` for memory and rehydration checks. Run `npm run check:editor`, `npm run check:editor-large`, and `npm run check:editor-reflow` for interaction coverage. Run `node scripts/check-editor-retention-pixels.mjs` to compare rendered document pixels across policies.
+Run `pnpm run memory:editor` for memory and rehydration checks. Run `pnpm run check:editor`, `pnpm run check:editor-large`, and `pnpm run check:editor-reflow` for interaction coverage. Run `node scripts/check-editor-retention-pixels.mjs` to compare rendered document pixels across policies.
 
 For the timing report without replacing the earlier baseline artifact:
 
 ```sh
-REFLOW_REPORT=artifacts/editor-retention-reflow.json npm run benchmark:editor-reflow
+REFLOW_REPORT=artifacts/editor-retention-reflow.json pnpm run benchmark:editor-reflow
 ```
 
 Raw results are in `artifacts/editor-retention.json`, `artifacts/editor-retention-reflow.json`, and `artifacts/editor-retention-pixels.json`.

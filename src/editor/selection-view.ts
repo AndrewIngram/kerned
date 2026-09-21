@@ -1,6 +1,6 @@
-import { wordRange } from './text';
-import { RangeSelection, TextSelection, type Selection, type SelectionContext } from './selection';
 import type { NodeIdentity, Schema } from './schema';
+import { RangeSelection, TextSelection, type Selection, type SelectionContext } from './selection';
+import { wordRange } from './text';
 
 /** Resolve a selection against the renderer's ordered blocks. Containers can be
  * projected by an extension without teaching core about lists, tables or headings. */

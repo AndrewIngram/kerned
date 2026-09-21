@@ -3,23 +3,23 @@
 The writing demo and extension study are two routes of one Vite React app. Both
 HTML files load `src/demo/app/main.tsx`. The entry loads engine assets and the
 initial sample, then mounts `App`. React Fast Refresh handles component updates.
-Run `npm run demo` to open the writing route.
+Run `pnpm run demo` to open the writing route.
 
 ## What belongs where
 
-| Owner | Responsibility |
-| --- | --- |
-| `src/editor` | Schema-independent state, transactions, selections, text navigation and selection projection |
-| `src/editor-browser` | Native event routing, input capture, pointer/multiclick policy and keyboard navigation binding |
-| `src/editor-react` | Optional subscriptions and DOM/input/viewport lifecycle hooks |
-| `src/editor-canvas` | CanvasKit surface lifetime, registered painters, selection/highlight/caret drawing and frame scheduling |
-| `src/extensions/starter-kit` | Paragraph/list/quote/table commands, schema projection, incremental layout and React block rendering |
-| `src/demo/app` | Sample switching and loading, toolbar presentation, external comment UI, search UI, outline and diagnostics |
+| Owner                        | Responsibility                                                                                              |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `src/editor`                 | Schema-independent state, transactions, selections, text navigation and selection projection                |
+| `src/editor-browser`         | Native event routing, input capture, pointer/multiclick policy and keyboard navigation binding              |
+| `src/editor-react`           | Optional subscriptions and DOM/input/viewport lifecycle hooks                                               |
+| `src/editor-canvas`          | CanvasKit surface lifetime, registered painters, selection/highlight/caret drawing and frame scheduling     |
+| `src/extensions/starter-kit` | Paragraph/list/quote/table commands, schema projection, incremental layout and React block rendering        |
+| `src/demo/app`               | Sample switching and loading, toolbar presentation, external comment UI, search UI, outline and diagnostics |
 
 The headless core imports neither React nor browser code. Browser, React and
 canvas adapters do not import a particular schema. Starter-kit code cannot import
 app code, sample loaders, demo styles or benchmark fixtures. These rules are
-checked by `npm run check:app-boundaries`, which also runs during the build.
+checked by `pnpm run check:app-boundaries`, which also runs during the build.
 
 ## How to follow an edit
 

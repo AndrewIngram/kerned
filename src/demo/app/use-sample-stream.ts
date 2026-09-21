@@ -1,11 +1,10 @@
-import type { createEditorScene } from '../../editor-scene';
-
 import { useEffect, useRef, useState } from 'react';
-import { type StarterNode } from '../../extensions/demo-model';
+
 import { type EditorSample } from '../../editor-samples';
+import type { createEditorScene } from '../../editor-scene';
 import { type Placement, type Scene } from '../../editor-scene';
 import { createStreamMetrics, streamConfig } from '../../editor-stream';
-
+import { type StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 
 export function useSampleStream(
@@ -16,7 +15,9 @@ export function useSampleStream(
   const sourceLoaded = useRef(sample.initial.length),
     sourceRevision = useRef(0);
 
-  const [metrics] = useState(() => ({ current: createStreamMetrics() }));
+  const [loadedCount, setLoadedCount] = useState(sample.initial.length);
+
+  const metrics = useRef(createStreamMetrics());
   const paused = useRef(streamConfig.paused);
 
   const pending = useRef<{
@@ -57,8 +58,11 @@ export function useSampleStream(
       let cursor = sample.initial.length,
         batch = 32;
 
+      // oxlint-disable-next-line eslint/no-unmodified-loop-condition -- Effect cleanup cancels the stream while its awaited work yields.
       while (cursor < sample.total && !cancelled) {
+        // oxlint-disable-next-line eslint/no-unmodified-loop-condition -- Effect cleanup cancels the stream while its awaited work yields.
         while (paused.current && !cancelled)
+          // oxlint-disable-next-line eslint/no-await-in-loop -- Stream batches and pause checks must run sequentially with rendering backpressure.
           await new Promise((resolve) => setTimeout(resolve, 16));
 
         if (cancelled) return;
@@ -69,6 +73,7 @@ export function useSampleStream(
         const chunk = sample.chunk(cursor, count),
           generationMs = performance.now() - started;
 
+        // oxlint-disable-next-line eslint/no-await-in-loop -- Stream batches and pause checks must run sequentially with rendering backpressure.
         const layoutWork = await new Promise<number>((done) => {
           const result = editor.dispatch({
             baseRevision: editor.state.revision,
@@ -78,6 +83,7 @@ export function useSampleStream(
           });
 
           sourceLoaded.current = cursor + count;
+          setLoadedCount(cursor + count);
           sourceRevision.current = result.state.revision;
           pending.current = {
             target: result.state.revision,
@@ -103,6 +109,7 @@ export function useSampleStream(
             Math.floor(count * Math.max(0.5, Math.min(2, 8 / Math.max(0.1, layoutWork)))),
           ),
         );
+        // oxlint-disable-next-line eslint/no-await-in-loop -- Stream batches and pause checks must run sequentially with rendering backpressure.
         await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
@@ -115,14 +122,30 @@ export function useSampleStream(
       pending.current?.done(0);
       pending.current = null;
     };
-  }, [sample]);
+  }, [sample, editor, seedComments]);
 
-  return { sourceLoaded, sourceRevision, metrics, paused, pending, renderWork };
+  function recordRender(elapsed: number) {
+    renderWork.current = elapsed;
+
+    if (pending.current) pending.current.renderMs += elapsed;
+  }
+
+  return {
+    loadedCount,
+    sourceLoaded,
+    sourceRevision,
+    metrics,
+    paused,
+    pending,
+    renderWork,
+    recordRender,
+  };
 }
 
 export type StreamState = ReturnType<typeof useSampleStream>;
 
 import type { RefObject } from 'react';
+
 import type { PaintReport } from '../../editor-canvas/use-canvas-renderer';
 
 export function recordSamplePaint({

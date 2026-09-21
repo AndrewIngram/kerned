@@ -1,9 +1,10 @@
 import CanvasKitInit from 'canvaskit-wasm';
 import { createRoot } from 'react-dom/client';
+
 import { loadEditorSample } from '../../editor-samples';
+
 import '../../editor.css';
 import { createOwnedEngine } from '../../owned-layout';
-
 import { App } from './app';
 
 const root = document.getElementById('root');

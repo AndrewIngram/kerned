@@ -23,11 +23,11 @@ ProseMirror's resolved positions expose ancestor and shared-parent information o
 
 ## Coordinate alternatives
 
-| Representation | Appropriate use | Limitation |
-| --- | --- | --- |
-| Absolute tree-token offset | Snapshot ordering, interval queries and transaction algorithms | Must map after changes; structural boundaries must be counted, not just text characters |
-| Node-local offset or container child gap | Owned layout, local editing and structural commands | Needs document ordering and explicit mapping after split, join, removal or gap changes |
-| Child-index path | Temporary resolved context | Ancestor insertion and movement invalidate it; unsuitable for persistence |
+| Representation                           | Appropriate use                                                | Limitation                                                                              |
+| ---------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Absolute tree-token offset               | Snapshot ordering, interval queries and transaction algorithms | Must map after changes; structural boundaries must be counted, not just text characters |
+| Node-local offset or container child gap | Owned layout, local editing and structural commands            | Needs document ordering and explicit mapping after split, join, removal or gap changes  |
+| Child-index path                         | Temporary resolved context                                     | Ancestor insertion and movement invalidate it; unsuitable for persistence               |
 
 Keep node-local coordinates on the layout hot path. Add structural gaps and a resolver that can compare positions, expose ancestors and compute common-ancestor ranges. A tree index can supply absolute ranks when required without making every edit rewrite every node's offset. Cache subtree sizes and update affected paths; benchmark the implementation rather than assuming its complexity from the API.
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import {createRoot} from 'react-dom/client';
-import {flushSync} from 'react-dom';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
-export {React, createRoot, flushSync};
+export { React, createRoot, flushSync };

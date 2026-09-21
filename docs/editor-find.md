@@ -6,11 +6,11 @@ Find belongs to the editor API; its UI belongs to the host. The demo uses a floa
 const editor = createEditor(schema, nodes, selection);
 
 editor.find.setQuery('Breath');
-editor.find.setQuery('Breath', {matchCase: true});
+editor.find.setQuery('Breath', { matchCase: true });
 editor.find.next();
 editor.find.previous();
 
-const {matches, active, activeIndex} = editor.find.state;
+const { matches, active, activeIndex } = editor.find.state;
 // active: {id, key, from, to} | null
 // activeIndex is -1 when no match exists.
 
@@ -23,9 +23,7 @@ For interactive search on large documents, use the cancellable asynchronous API:
 
 ```ts
 const controller = new AbortController();
-const snapshot = await editor.find.setQueryAsync(
-  'Pierre', {matchCase: false}, controller.signal,
-);
+const snapshot = await editor.find.setQueryAsync('Pierre', { matchCase: false }, controller.signal);
 if (snapshot) {
   // snapshot.nodes is the immutable document that produced snapshot.state.
   renderResults(snapshot);

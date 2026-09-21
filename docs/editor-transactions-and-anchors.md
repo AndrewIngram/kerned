@@ -8,11 +8,11 @@ The editor editor now routes local edits and streamed arrivals through a pure tr
 
 Three shapes were considered:
 
-| Shape | Benefit | Limitation |
-|---|---|---|
-| Whole-document snapshots | Simple restoration | Undo can erase streamed or concurrent changes; no position mapping |
-| Explicit operations with revision mappings | Deterministic local changes and testable anchors; fits the existing TypeScript model | Requires a separate rebase implementation for collaboration |
-| A CRDT-owned document with relative item identities | Convergence and references can share the same identity model | Commits document ownership and persistence to a CRDT now |
+| Shape                                               | Benefit                                                                              | Limitation                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Whole-document snapshots                            | Simple restoration                                                                   | Undo can erase streamed or concurrent changes; no position mapping |
+| Explicit operations with revision mappings          | Deterministic local changes and testable anchors; fits the existing TypeScript model | Requires a separate rebase implementation for collaboration        |
+| A CRDT-owned document with relative item identities | Convergence and references can share the same identity model                         | Commits document ownership and persistence to a CRDT now           |
 
 This milestone uses explicit operations. It does not choose an OT or CRDT protocol. Stable identities and durable-reference behavior are requirements for either future integration, but the implementations are not interchangeable without work.
 
@@ -28,8 +28,15 @@ editor.dispatch({
   origin: 'local',
   history: 'separate',
   time: performance.now(),
-  steps: [{kind: 'split', id: paragraphId, at: offset,
-    rightId: editor.allocateBlockId(), rightKey: crypto.randomUUID()}],
+  steps: [
+    {
+      kind: 'split',
+      id: paragraphId,
+      at: offset,
+      rightId: editor.allocateBlockId(),
+      rightKey: crypto.randomUUID(),
+    },
+  ],
 });
 ```
 
@@ -114,11 +121,11 @@ deletion, including typing and plain-text paste over a selection.
 
 Local development-server measurements for 7,280 Warbreaker blocks:
 
-| Browser | Delete handler | Through two frames | Undo handler | Undo through two frames |
-|---|---:|---:|---:|---:|
-| Chromium | 29 ms | 55 ms | 6 ms | 48 ms |
-| Firefox | 28 ms | 37 ms | 9 ms | 58 ms |
-| WebKit | 30 ms | 35 ms | 6 ms | 40 ms |
+| Browser  | Delete handler | Through two frames | Undo handler | Undo through two frames |
+| -------- | -------------: | -----------------: | -----------: | ----------------------: |
+| Chromium |          29 ms |              55 ms |         6 ms |                   48 ms |
+| Firefox  |          28 ms |              37 ms |         9 ms |                   58 ms |
+| WebKit   |          30 ms |              35 ms |         6 ms |                   40 ms |
 
 These timings measure application event handling and animation-frame callbacks,
 not browser compositor presentation timestamps. Raw reports:
@@ -127,8 +134,8 @@ not browser compositor presentation timestamps. Raw reports:
 checked with Cmd-A, Backspace and Cmd-Z in an isolated Warbreaker tab.
 
 ```sh
-npm run check:editor-bulk-delete
-BROWSERS=chromium,firefox,webkit npm run benchmark:editor-delete
+pnpm run check:editor-bulk-delete
+BROWSERS=chromium,firefox,webkit pnpm run benchmark:editor-delete
 ```
 
 The deterministic regression bounds tree visits and history patches, compares
@@ -139,7 +146,7 @@ exact restoration, redo, and input/frame latency budgets.
 
 ## Verification
 
-`npm run check:transactions` exercises deterministic replay, atomic failure, stable identities, rich split/join round trips, grouped history, stream exclusions, saved-anchor resolution, insertion affinity, deletion and missing-history behavior. Browser cases cover wide and narrow viewports in Chromium, Firefox and WebKit.
+`pnpm run check:transactions` exercises deterministic replay, atomic failure, stable identities, rich split/join round trips, grouped history, stream exclusions, saved-anchor resolution, insertion affinity, deletion and missing-history behavior. Browser cases cover wide and narrow viewports in Chromium, Firefox and WebKit.
 
 Existing editor, large-document and reflow checks remain separate. No new runtime dependency, worker, WASM call or serialization step was introduced on the layout path. The JSON examples and round trips concern persistence tests, not rendering.
 

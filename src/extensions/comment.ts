@@ -36,7 +36,10 @@ export function createCommentStore<Message>(initial: readonly CommentThread<Mess
   function publish(threads: readonly CommentThread<Message>[]) {
     state = Object.freeze({ threads: Object.freeze([...threads]) });
 
-    for (const listener of [...listeners]) {
+    // Snapshot registration so callbacks cannot alter this publication's recipients.
+    const pending = [...listeners];
+
+    for (const listener of pending) {
       try {
         listener();
       } catch (error) {

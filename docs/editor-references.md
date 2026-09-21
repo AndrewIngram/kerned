@@ -51,7 +51,6 @@ See the [performance report](relative-position-performance.md) for the algorithm
 
 The public-core tests cover external values, checkpoint reload, deletion of both original endpoint blocks with surviving interior content, split/move/join, newly inserted interior blocks, associations, disjoint cells, undo/redo, malformed checkpoints and atomic rejection. The benchmark also asserts that creating references does not change stored metadata.
 
-
 ## Durable structural gaps
 
 `editor.positions.gap(parentId, childIndex, association)`, `before(nodeId)` and `after(nodeId)` capture standalone `RelativeGap` values. Parse external JSON using `parseRelativeGap` and resolve it with `resolveGap`. Values contain the document identity, parent key and neighboring child keys, never runtime IDs or a registered range ID. They can resolve after reload without text-edit metadata if the document keeps its durable keys.

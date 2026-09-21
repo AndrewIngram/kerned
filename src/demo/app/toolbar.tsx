@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
+import type { Dispatch, RefObject, SetStateAction } from 'react';
+
 import { FindIcon } from '../../demo/find-bar';
 import { bookSamples, type EditorSample } from '../../editor-samples';
-
-import type { Dispatch, RefObject, SetStateAction } from 'react';
 import type { StarterActions } from '../../extensions/starter-kit/actions';
 import type { EditorDocument, EditorSession } from '../../extensions/starter-kit/types';
 
@@ -72,7 +72,7 @@ export function Toolbar({
       document.removeEventListener('pointerdown', close);
       document.removeEventListener('keydown', close);
     };
-  }, []);
+  }, [toolbarRef]);
 
   return minimal ? (
     <header ref={toolbarRef} className="minimal-toolbar" aria-label="Formatting" role="toolbar">

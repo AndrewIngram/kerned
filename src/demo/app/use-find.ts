@@ -7,14 +7,14 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { FindOptions, FindSnapshot, FindState } from '../../editor';
-import { type StarterNode } from '../../extensions/demo-model';
-
 import type { RefObject } from 'react';
+
+import type { FindOptions, FindSnapshot, FindState } from '../../editor';
 import type { EditorState } from '../../editor';
 import type { Viewport } from '../../editor-react';
-import type { EditorSession } from '../../extensions/starter-kit/types';
 import type { Scene } from '../../editor-scene';
+import { type StarterNode } from '../../extensions/demo-model';
+import type { EditorSession } from '../../extensions/starter-kit/types';
 
 export function useFind({
   editor,
@@ -34,8 +34,7 @@ export function useFind({
     [findFocus, setFindFocus] = useState(0);
 
   const lastQuery = useRef(''),
-    returnFocus = useRef<HTMLElement | null>(null),
-    revealFind = useRef(false);
+    returnFocus = useRef<HTMLElement | null>(null);
 
   const lastFindOptions = useRef<FindOptions>({ matchCase: false }),
     findAbort = useRef<AbortController | null>(null);
@@ -83,7 +82,8 @@ export function useFind({
         findInFlight.current = null;
 
         if (!result) return;
-        startTransition(() => setFindSnapshot(result));
+
+        return startTransition(() => setFindSnapshot(result));
       });
     },
     [editor],
@@ -149,7 +149,6 @@ export function useFind({
     findFocus,
     lastQuery,
     lastFindOptions,
-    revealFind,
     requestFind,
     openFind,
     closeFind,
@@ -163,7 +162,6 @@ export function useFindReveal({
   findState,
   findRequest,
   findBlockId,
-  revealFind,
   scroller,
   canvasRef,
   viewport,
@@ -173,14 +171,15 @@ export function useFindReveal({
   findState: FindState;
   findRequest: number;
   findBlockId: number | undefined;
-  revealFind: RefObject<boolean>;
   scroller: RefObject<HTMLDivElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
   viewport: Viewport;
 }) {
+  const revealFind = useRef(false);
   const { zoom, viewportHeight, readScroll, scrollDocumentTo, setScroll } = viewport;
   useLayoutEffect(() => {
     revealFind.current = true;
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Each find request or active-match change must rearm viewport reveal.
   }, [findOpen, findState.active, findRequest]);
   useLayoutEffect(() => {
     if (!findOpen || !findState.active || !revealFind.current) return;
@@ -212,11 +211,11 @@ export function useFindReveal({
       }
 
       const rect = mark.getBoundingClientRect(),
-        viewport = canvasRef.current?.getBoundingClientRect();
+        viewportValue = canvasRef.current?.getBoundingClientRect();
 
-      if (!viewport) return;
-      matchTop = rect.top - viewport.top + readScroll();
-      matchBottom = rect.bottom - viewport.top + readScroll();
+      if (!viewportValue) return;
+      matchTop = rect.top - viewportValue.top + readScroll();
+      matchBottom = rect.bottom - viewportValue.top + readScroll();
     }
 
     revealFind.current = false;
@@ -228,5 +227,17 @@ export function useFindReveal({
       scrollDocumentTo(Math.max(0, matchTop - Math.max(clearance, viewportHeight * 0.35)));
       setScroll(readScroll());
     }
-  }, [scene, findOpen, findState.active, findRequest, findBlockId, zoom, viewportHeight]);
+  }, [
+    scene,
+    findOpen,
+    findState.active,
+    findBlockId,
+    zoom,
+    viewportHeight,
+    scroller,
+    canvasRef,
+    readScroll,
+    scrollDocumentTo,
+    setScroll,
+  ]);
 }

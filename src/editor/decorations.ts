@@ -1,6 +1,6 @@
 import type { DocumentRange, DocumentRangeResult } from './document-ranges';
-import type { SelectionRange } from './selection';
 import type { RelativeRange, RelativeRangeResult } from './relative-positions';
+import type { SelectionRange } from './selection';
 
 /** Feature-owned input. Decoration IDs identify view instances, not registered document ranges. */
 export type InlineDecoration<Data> = { id: string; range: RelativeRange; data: Data };

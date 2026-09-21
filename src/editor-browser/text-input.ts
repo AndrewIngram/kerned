@@ -39,7 +39,7 @@ export function createTextInput<N extends NodeIdentity>(
     if (!(selection instanceof TextSelection)) {
       input.value = '';
       input.setSelectionRange(0, 0);
-      capture = {value: '', offset: 0};
+      capture = { value: '', offset: 0 };
 
       return;
     }
@@ -73,7 +73,7 @@ export function createTextInput<N extends NodeIdentity>(
       return composing;
     },
     sync,
-    compositionStart() {
+    compositionStart(this: void) {
       editor.breakHistory();
       composing = true;
     },
@@ -90,7 +90,7 @@ export function createTextInput<N extends NodeIdentity>(
       if (!(selection instanceof TextSelection)) {
         const value = input.value;
         input.value = '';
-        capture = {value: '', offset: 0};
+        capture = { value: '', offset: 0 };
         replace(0, 0, value);
 
         return;

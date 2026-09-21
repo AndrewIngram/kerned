@@ -101,7 +101,7 @@ export function createPointerSelection(options: PointerSelectionOptions) {
   }
 
   return {
-    onPointerDown(event: PointerInput) {
+    onPointerDown(this: void, event: PointerInput) {
       if (event.pointerType === 'mouse') {
         mouse = event.pointerId;
 
@@ -110,10 +110,10 @@ export function createPointerSelection(options: PointerSelectionOptions) {
 
       begin(event, event.pointerId, 1);
     },
-    onMouseDown(event: MouseInput) {
+    onMouseDown(this: void, event: MouseInput) {
       begin(event, mouse, event.detail);
     },
-    onPointerMove(event: PointerInput) {
+    onPointerMove(this: void, event: PointerInput) {
       const current = drag;
 
       if (
@@ -150,7 +150,7 @@ export function createPointerSelection(options: PointerSelectionOptions) {
 
       if (hit) options.onDrag?.(hit);
     },
-    onPointerUp(event: PointerInput) {
+    onPointerUp(this: void, event: PointerInput) {
       if (drag?.pointerId !== event.pointerId) return;
       drag = null;
 
@@ -160,10 +160,10 @@ export function createPointerSelection(options: PointerSelectionOptions) {
       )
         event.currentTarget.releasePointerCapture(event.pointerId);
     },
-    onPointerCancel() {
+    onPointerCancel(this: void) {
       drag = null;
     },
-    onLostPointerCapture() {
+    onLostPointerCapture(this: void) {
       drag = null;
     },
   };

@@ -1,12 +1,13 @@
-import type { BrowserViewOptions } from '../../editor-browser';
 import { type CanvasKit } from 'canvaskit-wasm';
+import { useMemo, type ComponentProps } from 'react';
+
 import type { FindState } from '../../editor';
 import { textSelection, type Selection } from '../../editor';
+import type { BrowserViewOptions } from '../../editor-browser';
+import type { Viewport } from '../../editor-react';
 import { demoSchema } from '../../extensions/demo-schema';
 import { DemoNodeView } from '../../extensions/node-views';
 import { type CommentHighlight } from '../../extensions/text-block-view';
-
-import type { Viewport } from '../../editor-react';
 import type { StarterActions } from './actions';
 import type { EditorDocument, Owned } from './types';
 import type { useDocumentLayout } from './use-document-layout';
@@ -62,6 +63,63 @@ export function BlockLayer({
       });
     }
 
+  const values = useMemo(
+    () =>
+      visible.map((p): ComponentProps<typeof DemoNodeView>['value'] => ({
+        node: p.node,
+        table: {
+          clipboard,
+          findMatches,
+          activeMatch: findOpen ? findState.active : null,
+          width: contentWidth,
+          onMeasure,
+          selection: editorState.selection,
+          context,
+          onSelect: setSelection,
+          onText: (id, from, to, text, caret) =>
+            dispatch(
+              [{ kind: 'replaceText', id, from, to, text }],
+              { group: `typing:${id}` },
+              textSelection(id, caret),
+              true,
+            ),
+          onUndo: restore,
+          onFormat: toggleFormat,
+          onReplace: replaceCells,
+        },
+        image: { width: contentWidth, onMeasure },
+        checklist: { width: contentWidth, onMeasure, onChange: update },
+        text: {
+          comments: commentsByNode.get(p.node.id),
+          placement: p,
+          kit,
+          owned,
+          open: (kind, atomId, index) => onOpen(kind, p.node.id, atomId, index),
+        },
+      })),
+    [
+      visible,
+      clipboard,
+      findMatches,
+      findOpen,
+      findState.active,
+      contentWidth,
+      onMeasure,
+      editorState.selection,
+      context,
+      setSelection,
+      dispatch,
+      restore,
+      toggleFormat,
+      replaceCells,
+      update,
+      commentsByNode,
+      kit,
+      owned,
+      onOpen,
+    ],
+  );
+
   return (
     <div
       className="dom-layer"
@@ -95,43 +153,12 @@ export function BlockLayer({
           </div>
         ) : null;
       })}
-      {visible.map((p) => {
+      {visible.map((p, index) => {
         const view = (
           <DemoNodeView
             key={p.node.id}
             type={demoSchema.resolve(p.node).name}
-            value={{
-              node: p.node,
-              table: {
-                clipboard,
-                findMatches,
-                activeMatch: findOpen ? findState.active : null,
-                width: contentWidth,
-                onMeasure,
-                selection: editorState.selection,
-                context,
-                onSelect: setSelection,
-                onText: (id, from, to, text, caret) =>
-                  dispatch(
-                    [{ kind: 'replaceText', id, from, to, text }],
-                    { group: `typing:${id}` },
-                    textSelection(id, caret),
-                    true,
-                  ),
-                onUndo: restore,
-                onFormat: toggleFormat,
-                onReplace: replaceCells,
-              },
-              image: { width: contentWidth, onMeasure },
-              checklist: { width: contentWidth, onMeasure, onChange: update },
-              text: {
-                comments: commentsByNode.get(p.node.id),
-                placement: p,
-                kit,
-                owned,
-                open: (kind, atomId, index) => onOpen(kind, p.node.id, atomId, index),
-              },
-            }}
+            value={values[index]}
           />
         );
 

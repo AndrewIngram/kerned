@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useMemo, type RefObject } from 'react';
+
 import {
   TextSelection,
   NodeSelection,
@@ -18,8 +19,8 @@ import {
   positionTextInput,
   type PointerSelectionOptions,
 } from '../editor-browser';
-import type { Viewport } from './use-viewport';
 import type { Rect } from '../engines';
+import type { Viewport } from './use-viewport';
 
 type CanvasInputOptions<N extends NodeIdentity> = {
   context: SelectionContext;
@@ -65,17 +66,20 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
 
   const { scroll, zoom, width, viewportHeight, readScroll, scrollDocumentTo, setScroll } = viewport;
 
+  const revealCaret = useRef(false),
+    latest = useRef(options);
+
+  useLayoutEffect(() => {
+    latest.current = options;
+  }, [options]);
+
   const textInput = useMemo(
+    // oxlint-disable-next-line react/refs -- The factory captures the context getter for input events without invoking it during render.
     () => createTextInput(schema, editor, () => latest.current.context),
     [schema, editor],
   );
 
-  const textInteraction = useMemo(createTextInteraction, [editor]);
-
-  const revealCaret = useRef(false),
-    latest = useRef(options);
-
-  latest.current = options;
+  const textInteraction = useMemo(() => createTextInteraction(), []);
 
   const selectAll = useCallback(() => {
     const { nodes, afterSelectAll } = latest.current;
@@ -114,8 +118,10 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
     );
     afterSelectAll();
     inputRef.current?.focus({ preventScroll: true });
-  }, [editor, schema]);
+  }, [editor, schema, inputRef]);
 
+  // bind only captures these event callbacks; it never reads DOM refs during render.
+  // oxlint-disable-next-line react/refs -- Binding captures DOM getters for later input events.
   const interaction = textInteraction.bind({
     selection,
     context: options.context,
@@ -184,16 +190,31 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
       (caret?.[1] ?? 0) * zoom;
 
     positionTextInput(input, bounds, x, y);
-  }, [caret?.join(','), activeTop, scroll, zoom, width, viewportHeight, inset]);
+  }, [
+    caret,
+    activeTop,
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Viewport and selection changes invalidate imperative DOM measurements and input state.
+    scroll,
+    zoom,
+    width,
+    viewportHeight,
+    inset,
+    readScroll,
+    inputRef,
+    canvasRef,
+  ]);
   const active = selection instanceof TextSelection ? options.node(selection.head.id) : undefined;
   useLayoutEffect(() => {
     if (!textInput.composing && inputRef.current) textInput.sync(inputRef.current);
-  }, [active, selection, textInput]);
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Viewport and selection changes invalidate imperative DOM measurements and input state.
+  }, [active, selection, textInput, inputRef]);
   useEffect(() => {
     const input = inputRef.current;
 
     if (input) return textInput.mount(input, selectAll);
-  }, [textInput, selectAll]);
+
+    return undefined;
+  }, [textInput, selectAll, inputRef]);
   useLayoutEffect(() => {
     if (!revealCaret.current) return;
 
@@ -230,7 +251,17 @@ export function useCanvasInput<N extends NodeIdentity>(options: CanvasInputOptio
       scrollDocumentTo(Math.max(0, target));
       setScroll(readScroll());
     }
-  }, [selection, activeTop, caret, viewportHeight, zoom]);
+  }, [
+    selection,
+    activeTop,
+    caret,
+    viewportHeight,
+    zoom,
+    placements,
+    readScroll,
+    scrollDocumentTo,
+    setScroll,
+  ]);
 
   return {
     textInput,

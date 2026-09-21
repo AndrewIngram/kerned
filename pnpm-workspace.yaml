@@ -1,0 +1,7 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+# Internal dependencies must opt in with workspace:* instead of accidentally
+# resolving a matching name from the registry.
+linkWorkspacePackages: false

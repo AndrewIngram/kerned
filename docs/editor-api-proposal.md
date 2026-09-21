@@ -27,21 +27,21 @@ Tiptap provides the desirable command ergonomics: direct commands, chains that s
 
 ## Representation alternatives
 
-| Approach | Benefit | Cost |
-| --- | --- | --- |
-| Keep arbitrary application-shaped nodes and add adapters for marks, persistence and rendering | Least immediate migration; applications keep their storage shapes | Each schema must reconcile editing, clipboard and annotation semantics. Extensions cannot assume one inline representation. |
-| Adopt one owned semantic node/mark model with extension-defined types | Shared editing and interoperability rules; extensions compose over the same content | Requires migration of existing schema, clipboard and projection code; must preserve measured performance. |
+| Approach                                                                                      | Benefit                                                                             | Cost                                                                                                                        |
+| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Keep arbitrary application-shaped nodes and add adapters for marks, persistence and rendering | Least immediate migration; applications keep their storage shapes                   | Each schema must reconcile editing, clipboard and annotation semantics. Extensions cannot assume one inline representation. |
+| Adopt one owned semantic node/mark model with extension-defined types                         | Shared editing and interoperability rules; extensions compose over the same content | Requires migration of existing schema, clipboard and projection code; must preserve measured performance.                   |
 
 Recommend the second approach. The public model specifies content meaning and editing behavior, without requiring one JavaScript object per character or exposing the physical storage layout. Persistent trees, interned mark sets and packed layout buffers remain implementation choices that we can benchmark independently.
 
 ## Content and extension contracts
 
-| Concept | Meaning | Examples |
-| --- | --- | --- |
-| Node | Structured document content, with a registered type and validated attributes | Text, paragraph, heading, list, table cell, image, inline mention |
-| Mark | Persisted formatting or semantics attached to inline content | Bold, link, code, optional portable comment reference |
-| Decoration | A view augmentation derived from document and extension state | Comment highlight, search result, diagnostic underline, remote cursor |
-| Extension state | Feature-owned data with explicit update and persistence policy | Comment threads, search query, history, collaboration status |
+| Concept         | Meaning                                                                      | Examples                                                              |
+| --------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Node            | Structured document content, with a registered type and validated attributes | Text, paragraph, heading, list, table cell, image, inline mention     |
+| Mark            | Persisted formatting or semantics attached to inline content                 | Bold, link, code, optional portable comment reference                 |
+| Decoration      | A view augmentation derived from document and extension state                | Comment highlight, search result, diagnostic underline, remote cursor |
+| Extension state | Feature-owned data with explicit update and persistence policy               | Comment threads, search query, history, collaboration status          |
 
 Core understands text, inline/block placement, containers, atoms and generic editing capabilities. Paragraphs, headings, lists and tables come from extensions. A starter kit assembles a conventional schema and behavior. A text-layout paragraph remains an engine concept and does not require a schema node named paragraph.
 
@@ -77,8 +77,8 @@ editor.commands.toggleBold();
 editor.chain().focus().toggleHeading({ level: 2 }).run();
 editor.can().toggleBold();
 
-editor.transact(tx => {
-  tx.replaceText(range, "Replacement");
+editor.transact((tx) => {
+  tx.replaceText(range, 'Replacement');
   tx.setSelection(tx.mapPosition(previousCaret));
 });
 

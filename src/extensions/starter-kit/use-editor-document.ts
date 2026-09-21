@@ -1,8 +1,9 @@
-import type { StarterNode } from '../demo-model';
 import { useMemo } from 'react';
+
 import { indexTree, selectionContext, selectionView } from '../../editor';
 import { useEditorState } from '../../editor-react';
 import { projectBlocks } from '../blocks';
+import type { StarterNode } from '../demo-model';
 import { demoSchema } from '../demo-schema';
 import { selectedBlockLabel } from '../headings';
 import type { EditorDocument, EditorSession } from './types';

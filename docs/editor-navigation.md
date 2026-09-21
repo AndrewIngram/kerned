@@ -27,5 +27,5 @@ left to the browser. Pointer selection resets the desired column.
 The host remains responsible for scrolling the resulting caret into view.
 Embedded DOM editing controls retain their own native keyboard behaviour.
 
-Run `npm run check:editor-navigation` for core API contracts and browser checks
+Run `pnpm run check:editor-navigation` for core API contracts and browser checks
 at wide/narrow widths, including paging through a virtualized book.

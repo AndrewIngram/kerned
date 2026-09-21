@@ -1,4 +1,3 @@
-import { supportsOwnedText } from '../owned-text-support';
 import {
   indexTree,
   selectionContext,
@@ -8,6 +7,7 @@ import {
   type Schema,
   type Step,
 } from '../editor';
+import { supportsOwnedText } from '../owned-text-support';
 import {
   plainText,
   type StarterNode,
@@ -79,9 +79,6 @@ export function cellRectangleText(table: TableNode): string {
       col += cell.colspan;
     }
   }
-
-  const escape = (value: string) =>
-    /[\t\n"]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
 
   return occupied.map((row) => row.map((value) => escape(value ?? '')).join('\t')).join('\n');
 }
@@ -294,3 +291,6 @@ export function plainCellRectangle(text: string, allocate: () => NodeIdentity): 
     ),
   };
 }
+
+const escape = (value: string) =>
+  /[\t\n"]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;

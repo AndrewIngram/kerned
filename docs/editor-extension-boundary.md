@@ -3,8 +3,8 @@
 The editing core no longer imports the editor demo's document model. Applications register a schema explicitly. A node's editable-text capability, not the name `paragraph`, determines which operations it supports.
 
 ```ts
-import {createSchema, createEditor} from './editor';
-import {demoStarterKit} from './extensions/demo-schema';
+import { createSchema, createEditor } from './editor';
+import { demoStarterKit } from './extensions/demo-schema';
 
 const schema = createSchema(demoStarterKit);
 const editor = createEditor(schema, initialNodes, initialSelection);
@@ -14,14 +14,14 @@ This is the prototype's public source entry point, not a published package or st
 
 ## Ownership
 
-| Layer | Owns | Does not decide |
-|---|---|---|
-| Editing core, `src/editor` | Atomic application, revisions, identities, selection mapping, local history, durable anchors | Paragraph, heading, list, mention or comment semantics |
-| Node extensions | Text access, replacement, split/join behavior, container contents, property-update rules | History ordering or revision advancement |
-| Inline-object API | Atomic inline positions, slicing, replacement and text projection | Whether an object is a mention, formula, emoji or another token |
-| Annotation API | Range mapping/slicing/joining with extension-selected policies | Comment replies, permissions, rendering or storage |
-| React adapter, `src/editor-react` | Registration and cleanup of canvas painting components | Document schema or editing rules |
-| Demo views and layout adapter | React controls, overlays, style projection, measured layout inputs | Transaction atomicity or anchor resolution |
+| Layer                             | Owns                                                                                         | Does not decide                                                 |
+| --------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Editing core, `src/editor`        | Atomic application, revisions, identities, selection mapping, local history, durable anchors | Paragraph, heading, list, mention or comment semantics          |
+| Node extensions                   | Text access, replacement, split/join behavior, container contents, property-update rules     | History ordering or revision advancement                        |
+| Inline-object API                 | Atomic inline positions, slicing, replacement and text projection                            | Whether an object is a mention, formula, emoji or another token |
+| Annotation API                    | Range mapping/slicing/joining with extension-selected policies                               | Comment replies, permissions, rendering or storage              |
+| React adapter, `src/editor-react` | Registration and cleanup of canvas painting components                                       | Document schema or editing rules                                |
+| Demo views and layout adapter     | React controls, overlays, style projection, measured layout inputs                           | Transaction atomicity or anchor resolution                      |
 
 The low-level layout engine's use of the word paragraph means a text-layout unit. It does not require a document node called `paragraph`. Schema nodes must project their content and formatting into layout inputs. The existing demo adapter still explicitly projects its own paragraph nodes; it is not a general renderer for arbitrary schemas.
 
@@ -68,8 +68,8 @@ OT or CRDT integration must validate that peers agree on schemas and operation m
 
 ## Verification
 
-`npm run check:editor-boundaries` rejects imports from the editing core into demo/schema/React/layout code. It also requires the independent extension fixtures to use only the public entry point.
+`pnpm run check:editor-boundaries` rejects imports from the editing core into demo/schema/React/layout code. It also requires the independent extension fixtures to use only the public entry point.
 
-`npm run check:transactions` runs a separate heading/card schema without paragraphs, including a different text field, split/join, undo/redo and durable anchors. It tests diagnostics and formula tokens against the same public annotation and inline APIs used by comments and mentions. Invalid registration and a plugin that violates replacement semantics are rejected.
+`pnpm run check:transactions` runs a separate heading/card schema without paragraphs, including a different text field, split/join, undo/redo and durable anchors. It tests diagnostics and formula tokens against the same public annotation and inline APIs used by comments and mentions. Invalid registration and a plugin that violates replacement semantics are rejected.
 
 The existing editor, large-document and viewport-reflow checks exercise the migrated demo in Chromium, Firefox and WebKit. Extension dispatch occurs at document operations and layout projection, not per glyph. No new runtime dependency or serialization boundary was added.

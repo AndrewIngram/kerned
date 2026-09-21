@@ -1,5 +1,5 @@
-import { schema } from './editor-foundation.js';
 import { indexTree, selectionContext } from '../../src/editor/index.ts';
+import { schema } from './editor-foundation.js';
 
 export async function mountCanvasInputProbe(element, initial) {
   const React = await import('react');
@@ -49,7 +49,9 @@ export async function mountCanvasInputProbe(element, initial) {
       afterSelectAll() {},
     });
 
-    current = { ...input, viewport };
+    React.useLayoutEffect(() => {
+      current = { ...input, viewport };
+    });
 
     return React.createElement(
       'div',

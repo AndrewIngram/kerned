@@ -1,104 +1,166 @@
-import type {NodeIdentity,Schema} from './schema';
-import {validateTree} from './tree';
+import { z } from 'zod';
 
-export type JsonValue = null|boolean|number|string|JsonValue[]|{[key:string]:JsonValue};
+import type { NodeIdentity, Schema } from './schema';
+import { validateTree } from './tree';
 
-export type NodeCodec<N extends NodeIdentity>={
-  encode(node:N):JsonValue;
-  decode(data:unknown,context:{identity:NodeIdentity;children:N[]}):N;
+export type JsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+type EncodedNode = NodeIdentity & {
+  type: string;
+  version: number;
+  data: JsonValue;
+  children: EncodedNode[];
 };
 
-export function jsonRecord(value:unknown):Record<string,unknown>{
-  if(value===null||typeof value!=='object'||Array.isArray(value))throw new Error('Expected an object');
+export type NodeCodec<N extends NodeIdentity> = {
+  encode(node: N): JsonValue;
+  decode(data: JsonValue, context: { identity: NodeIdentity; children: N[] }): N;
+};
 
-  return value as Record<string,unknown>;
+/** Bound recursion before traversing untrusted JSON, including cyclic objects. */
+function jsonSchema(depth = 0): z.ZodType<JsonValue> {
+  if (depth > 256) return z.never({ error: 'JSON exceeds nesting limit' });
+  const child = z.lazy(() => jsonSchema(depth + 1));
+
+  return z.union([
+    z.null(),
+    z.boolean(),
+    z.number(),
+    z.string(),
+    z.array(child),
+    jsonObjectSchema(child),
+  ]);
 }
 
-export function jsonString(value:unknown):string{if(typeof value!=='string')throw new Error('Expected a string');
+/** Validate entries individually so legal JSON keys such as __proto__ survive copying. */
+function jsonObjectSchema(valueSchema: z.ZodType<JsonValue>) {
+  return z.unknown().transform((value) => {
+    z.record(z.string(), z.unknown()).parse(value);
 
-return value;}
+    // SAFETY: the record parser above established a non-null plain object.
+    return Object.fromEntries(
+      Object.entries(value!).map(([name, item]) => [name, valueSchema.parse(item)]),
+    );
+  });
+}
 
-export function jsonNumber(value:unknown):number{if(typeof value!=='number'||!Number.isFinite(value))throw new Error('Expected a finite number');
+const json = jsonSchema();
 
-return value;}
+export const jsonValue = bindParser(json);
 
-export function jsonBoolean(value:unknown):boolean{if(typeof value!=='boolean')throw new Error('Expected a boolean');
+export const jsonRecord = bindParser(jsonObjectSchema(json));
 
-return value;}
+export const jsonString = bindParser(z.string());
 
-export function jsonArray(value:unknown):unknown[]{if(!Array.isArray(value))throw new Error('Expected an array');
+export const jsonNumber = bindParser(z.number());
 
-return value;}
+export const jsonBoolean = bindParser(z.boolean());
 
-/** Copy JSON values at persistence boundaries; reject lossy values and cycles. */
-export function jsonValue(value:unknown,depth=0):JsonValue{
-  if(depth>256)throw new Error('JSON exceeds nesting limit');
+export const jsonArray = bindParser(z.array(json));
 
-  if(value===null||typeof value==='string'||typeof value==='boolean')return value;
+function encodedNodeSchema(depth = 0): z.ZodType<EncodedNode> {
+  if (depth > 256) return z.never({ error: 'Document exceeds decode depth' });
 
-  if(typeof value==='number')return jsonNumber(value);
-
-  if(Array.isArray(value))return value.map(item=>jsonValue(item,depth+1));
-  const record=jsonRecord(value);
-
-  if(Object.getPrototypeOf(record)!==Object.prototype&&Object.getPrototypeOf(record)!==null)throw new Error('Expected plain JSON data');
-
-  return Object.fromEntries(Object.entries(record).map(([name,item])=>[name,jsonValue(item,depth+1)]));
+  return z.object({
+    type: z.string(),
+    version: z.number(),
+    id: z.number().int(),
+    key: z.string().min(1),
+    locked: z.boolean().optional(),
+    data: json,
+    children: z.array(z.lazy(() => encodedNodeSchema(depth + 1))),
+  });
 }
 
 /** Versioned document data only. Session history, references and feature stores persist separately. */
-export function createDocumentCodec<N extends NodeIdentity>(schema:Schema<N>){
-  const byName=new Map(schema.extensions.map(extension=>[extension.name,extension]));
+export function createDocumentCodec<N extends NodeIdentity>(schema: Schema<N>) {
+  const byName = new Map(schema.extensions.map((extension) => [extension.name, extension]));
 
-  function decode(value:unknown):N[]{
-    const document=jsonRecord(value);
+  const decode = bindParser(
+    z
+      .object({ version: z.literal(1), nodes: z.array(encodedNodeSchema()) })
+      .transform((document) => {
+        let count = 0;
 
-    if(document.version!==1)throw new Error('Unsupported document format');
-    let count=0;
+        function node(data: EncodedNode, depth: number): N {
+          if (depth > 256 || ++count > 1_000_000) throw new Error('Document exceeds decode limits');
 
-    function node(value:unknown,depth:number):N{
-      if(depth>256||++count>1_000_000)throw new Error('Document exceeds decode limits');
-      const data=jsonRecord(value),type=jsonString(data.type),extension=byName.get(type);
+          const type = data.type,
+            extension = byName.get(type);
 
-      if(!extension?.codec)throw new Error(`Missing node codec: ${type}`);
+          if (!extension?.codec) throw new Error(`Missing node codec: ${type}`);
 
-      if(data.version!==extension.version)throw new Error(`Unsupported ${type} version`);
-      const id=jsonNumber(data.id),key=jsonString(data.key);
+          if (data.version !== extension.version) throw new Error(`Unsupported ${type} version`);
+          const { id, key } = data;
 
-      if(!Number.isSafeInteger(id)||!key)throw new Error('Invalid node identity');
-      const identity:NodeIdentity={id,key,...(data.locked===undefined?{}:{locked:jsonBoolean(data.locked)})};
-      const children=jsonArray(data.children).map(child=>node(child,depth+1));
+          if (!Number.isSafeInteger(id) || !key) throw new Error('Invalid node identity');
+          const identity: NodeIdentity = { id, key };
 
-      if(extension.kind!=='container'&&children.length)throw new Error('Non-container has children');
-      const result=extension.codec.decode(data.data,{identity,children});
+          if (data.locked !== undefined) identity.locked = data.locked;
+          const children = data.children.map((child) => node(child, depth + 1));
 
-      if(schema.resolve(result)!==extension||result.id!==id||result.key!==key||result.locked!==identity.locked)throw new Error('Codec changed node identity or type');
-      const actual=schema.children(result);
+          if (extension.kind !== 'container' && children.length)
+            throw new Error('Non-container has children');
+          const result = extension.codec.decode(data.data, { identity, children });
 
-      if(actual.length!==children.length||actual.some((child,i)=>child!==children[i]))throw new Error('Codec changed child content');
+          if (
+            schema.resolve(result) !== extension ||
+            result.id !== id ||
+            result.key !== key ||
+            result.locked !== identity.locked
+          )
+            throw new Error('Codec changed node identity or type');
+          const actual = schema.children(result);
 
-      return result;
+          if (actual.length !== children.length || actual.some((child, i) => child !== children[i]))
+            throw new Error('Codec changed child content');
+
+          return result;
+        }
+
+        const nodes = document.nodes.map((value) => node(value, 0));
+        validateTree(schema, nodes);
+
+        return nodes;
+      }),
+  );
+
+  function encode(nodes: readonly N[]): JsonValue {
+    validateTree(schema, nodes);
+
+    function node(value: N, depth: number): EncodedNode {
+      if (depth > 256) throw new Error('Document exceeds encode depth');
+      const extension = schema.resolve(value);
+
+      if (!extension.codec) throw new Error(`Missing node codec: ${extension.name}`);
+
+      const encoded: EncodedNode = {
+        type: extension.name,
+        version: extension.version,
+        id: value.id,
+        key: value.key,
+        data: jsonValue(extension.codec.encode(value)),
+        children: schema.children(value).map((child) => node(child, depth + 1)),
+      };
+
+      if (value.locked !== undefined) encoded.locked = value.locked;
+
+      return encoded;
     }
 
-    const nodes=jsonArray(document.nodes).map(value=>node(value,0));validateTree(schema,nodes);
-
-return nodes;
+    return { version: 1, nodes: nodes.map((value) => node(value, 0)) };
   }
 
-  function encode(nodes:readonly N[]):JsonValue{
-    validateTree(schema,nodes);
+  return { encode, decode };
+}
 
-    function node(value:N,depth:number):JsonValue{
-      if(depth>256)throw new Error('Document exceeds encode depth');
-      const extension=schema.resolve(value);
-
-if(!extension.codec)throw new Error(`Missing node codec: ${extension.name}`);
-
-      return {type:extension.name,version:extension.version,id:value.id,key:value.key,...(value.locked===undefined?{}:{locked:value.locked}),data:jsonValue(extension.codec.encode(value)),children:schema.children(value).map(child=>node(child,depth+1))};
-    }
-
-    return {version:1,nodes:nodes.map(value=>node(value,0))};
-  }
-
-  return {encode,decode};
+/** Zod parsers are callable without a receiver; bind that contract explicitly. */
+export function bindParser<Output, Input>(schema: z.ZodType<Output, Input>) {
+  return schema.parse.bind(schema);
 }

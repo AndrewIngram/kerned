@@ -1,25 +1,25 @@
 import { type CanvasKit } from 'canvaskit-wasm';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+
 import { FindBar } from '../../demo/find-bar';
 import { createEditor, textSelection, type Selection } from '../../editor';
+import { useCanvasRenderer } from '../../editor-canvas/use-canvas-renderer';
 import { CanvasLayerProvider, Editor, useCanvasInput, useEditorViewport } from '../../editor-react';
+import { bookSamples, type EditorSample } from '../../editor-samples';
 import type { Rect } from '../../engines';
 import { captureComment } from '../../extensions/comment';
 import { demoSchema } from '../../extensions/demo-schema';
 import { OutlineMenu } from '../../extensions/outline-view';
+import { createStarterKitActions } from '../../extensions/starter-kit/actions';
 import { BlockLayer } from '../../extensions/starter-kit/block-layer';
 import { createStarterKitInput, focusStarterKitInput } from '../../extensions/starter-kit/input';
 import { useDocumentLayout } from '../../extensions/starter-kit/use-document-layout';
+import { useEditorDocument } from '../../extensions/starter-kit/use-editor-document';
 import { tableCells } from '../../extensions/table';
-import { bookSamples, type EditorSample } from '../../editor-samples';
 import { createOwnedEngine } from '../../owned-layout';
 import { AnnotationPanel, type ActivePanel } from './annotation-panel';
-import { useComments } from './use-comments';
-
-import { useCanvasRenderer } from '../../editor-canvas/use-canvas-renderer';
-import { createStarterKitActions } from '../../extensions/starter-kit/actions';
-import { useEditorDocument } from '../../extensions/starter-kit/use-editor-document';
 import { Toolbar } from './toolbar';
+import { useComments } from './use-comments';
 import { useDiagnostics } from './use-diagnostics';
 import { useFind, useFindReveal } from './use-find';
 import { useOutline } from './use-outline';
@@ -41,6 +41,7 @@ export function EditorWorkspace({
   loading: boolean;
 }) {
   const minimal = location.pathname === '/editor.html';
+  // oxlint-disable-next-line react/purity -- Render timing is telemetry only and never influences the rendered output.
   const renderStarted = performance.now();
 
   const [editor] = useState(() =>
@@ -50,9 +51,12 @@ export function EditorWorkspace({
   const doc = useEditorDocument(editor);
   const { editorState, nodes, tree, nodeIndexes, selection, selectedRange } = doc;
 
-  function setSelection(next: Selection) {
-    editor.select(next);
-  }
+  const setSelection = useCallback(
+    (next: Selection) => {
+      editor.select(next);
+    },
+    [editor],
+  );
 
   const { comments, commentState, decorations, commentsByNode, nodeComments, seedComments } =
     useComments(editor, editorState, sample, doc.context);
@@ -62,9 +66,9 @@ export function EditorWorkspace({
   const [hasFocus, setHasFocus] = useState(false);
   const [inputNotice, setInputNotice] = useState('');
 
-  const scroller = useRef<HTMLDivElement>(null),
-    canvasRef = useRef<HTMLCanvasElement>(null),
-    inputRef = useRef<HTMLTextAreaElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const viewport = useEditorViewport(scroller, minimal);
 
@@ -91,7 +95,6 @@ export function EditorWorkspace({
     findFocus,
     lastQuery,
     lastFindOptions,
-    revealFind,
     requestFind,
     openFind,
     closeFind,
@@ -99,7 +102,7 @@ export function EditorWorkspace({
   } = useFind({ editor, editorState, scroller, inputRef, onOpen: () => setPanel(null) });
 
   const stream = useSampleStream(editor, sample, seedComments);
-  const { sourceLoaded, metrics, paused, pending, renderWork } = stream;
+  const { loadedCount, metrics, paused, recordRender } = stream;
   const editStarted = useRef<number | null>(null);
   let findEntry = findOpen && findState.active ? tree.byId.get(findState.active.id) : undefined;
 
@@ -107,7 +110,9 @@ export function EditorWorkspace({
     findEntry = findEntry.parent === null ? undefined : tree.byId.get(findEntry.parent);
   const findBlockId = findEntry?.node.id;
   const current = useRef({ nodes, selection, width });
-  current.current = { nodes, selection, width };
+  useLayoutEffect(() => {
+    current.current = { nodes, selection, width };
+  }, [nodes, selection, width]);
 
   const layout = useDocumentLayout({
     owned,
@@ -120,7 +125,7 @@ export function EditorWorkspace({
     findOpen,
     eager: new URLSearchParams(location.search).get('reflow') === 'eager',
     retainAll: new URLSearchParams(location.search).get('retention') === 'all',
-    onLayout: (result, width) => recordSampleLayout(metrics, result, width, nodes.length),
+    onLayout: (result, widthValue) => recordSampleLayout(metrics, result, widthValue, nodes.length),
   });
 
   const {
@@ -137,7 +142,7 @@ export function EditorWorkspace({
 
   const { outline, outlineAvailable, outlineActive, navigateOutline } = useOutline({
     sample,
-    sourceLoaded,
+    loadedCount,
     editorState,
     scene,
     tree,
@@ -152,13 +157,13 @@ export function EditorWorkspace({
   const findGeometry = useMemo(
     () =>
       visible.flatMap((p) => {
-        const layout = p.layout;
+        const layoutValue = p.layout;
 
-        if (!layout) return [];
+        if (!layoutValue) return [];
 
         return (findMatches.get(p.node.id) ?? []).map((match) => ({
           match,
-          rects: layout
+          rects: layoutValue
             .geometry(match.from, match.to, false)
             .rects.map((r): Rect => [r[0], r[1] + p.y, r[2], r[3] + p.y]),
         }));
@@ -172,7 +177,6 @@ export function EditorWorkspace({
     findState,
     findRequest,
     findBlockId,
-    revealFind,
     scroller,
     canvasRef,
     viewport,
@@ -210,9 +214,7 @@ export function EditorWorkspace({
   });
 
   useLayoutEffect(() => {
-    renderWork.current = performance.now() - renderStarted;
-
-    if (pending.current) pending.current.renderMs += renderWork.current;
+    recordRender(performance.now() - renderStarted);
   });
 
   const { textInput, selectAll, pointerSelection, navigate } = useCanvasInput({
@@ -290,7 +292,7 @@ export function EditorWorkspace({
     window.addEventListener('keydown', key);
 
     return () => window.removeEventListener('keydown', key);
-  }, [findOpen, selectAll]);
+  }, [findOpen, selectAll, closeFind, openFind]);
 
   function addComment() {
     const thread = captureComment(editor, crypto.randomUUID(), [{ body: '', reply: '' }]);
@@ -305,6 +307,8 @@ export function EditorWorkspace({
     });
   }
 
+  // The factory stores callbacks for later events; it does not invoke them during render.
+  // oxlint-disable-next-line react/refs
   const actions = createStarterKitActions({
     editor,
     document: doc,
@@ -313,12 +317,14 @@ export function EditorWorkspace({
       if (inputRef.current) textInput.sync(inputRef.current);
     },
     onEdit: () => {
+      // oxlint-disable-next-line react/purity -- This timestamp is captured by an edit event, not during render.
       editStarted.current = performance.now();
     },
     notice: setInputNotice,
     closePanel: () => setPanel(null),
   });
 
+  // oxlint-disable-next-line react/refs -- Input bindings capture DOM getters without invoking them.
   const inputEvents = createStarterKitInput({
     editor,
     document: doc,
@@ -335,10 +341,25 @@ export function EditorWorkspace({
     navigate,
   });
 
-  function closePanel() {
+  // oxlint-disable-next-line react/preserve-manual-memoization -- The DOM ref object stays stable; callbacks only mutate its current element.
+  const closePanel = useCallback(() => {
     setPanel(null);
     inputRef.current?.focus({ preventScroll: true });
-  }
+    // oxlint-disable-next-line react/preserve-manual-memoization -- useRef preserves this object identity across renders.
+  }, [inputRef]);
+
+  const editorView = useMemo(
+    () => ({ pointer: pointerSelection, input: { ...inputEvents, focus: setHasFocus } }),
+    [pointerSelection, inputEvents],
+  );
+
+  const openAnnotation = useCallback(
+    (kind: 'mention' | 'comment', nodeId: number, atomId: string, index: number) => {
+      if (doc.context.text(nodeId) !== null) setSelection(textSelection(nodeId, index));
+      setPanel({ kind, nodeId, atomId, focus: 'panel' });
+    },
+    [doc.context, setSelection],
+  );
 
   useDiagnostics({
     editor,
@@ -396,10 +417,7 @@ export function EditorWorkspace({
             toolbarHeight={toolbarHeight}
           />
         )}
-        <Editor
-          className="editor-surface"
-          view={{ pointer: pointerSelection, input: { ...inputEvents, focus: setHasFocus } }}
-        >
+        <Editor className="editor-surface" view={editorView}>
           <div
             className="editor-frame"
             onKeyDown={(e) => {
@@ -454,11 +472,7 @@ export function EditorWorkspace({
                     setSelection,
                     setFocusedWidget,
                   }}
-                  onOpen={(kind, nodeId, atomId, index) => {
-                    if (doc.context.text(nodeId) !== null)
-                      setSelection(textSelection(nodeId, index));
-                    setPanel({ kind, nodeId, atomId, focus: 'panel' });
-                  }}
+                  onOpen={openAnnotation}
                 />
               </div>
             </div>

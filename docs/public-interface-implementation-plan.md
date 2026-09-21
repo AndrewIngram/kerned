@@ -12,6 +12,8 @@ collaboration/authority work; this refactor must preserve its implemented behavi
 
 Design inputs:
 
+- [Target repository map and quality-tool migration rules](repository-map.md)
+
 - [Package ownership and dependency rules](package-architecture.md)
 - [Tiptap interface audit](tiptap-api-audit.md)
 - [React, rendering and persistence research](tiptap-adapters-research.md)
@@ -37,17 +39,17 @@ Design inputs:
 
 These are semantic commitments; exact builder names may change during type tests.
 
-| Concern | Contract |
-| --- | --- |
-| Schema creation | `createSchema({ extensions })` produces the reusable assembled schema, including `~standard` validation and inferred content types. |
-| Session creation | `createEditor({ schema, content, ... })` consumes that assembly; callers do not supply a second extension list. |
-| Headless composition | Schema/node/mark rules live in model contracts. The composed headless definition also carries commands and state contributions without a model-to-core import cycle. |
-| Mounting | `mountEditor({ editor, element, theme, ... })` returns a view with readiness, configuration and destruction. |
-| React | `useEditor`, `EditorContent`, and selector subscriptions adapt the same session/view. Externally supplied sessions stay externally owned. |
-| Edits | `commands`, `chain`, `can`, queries and an imperative transaction interface share the same implementation. |
-| Views | Standard browser contributions are composed by the supplied browser kit; custom overrides use typed renderer registrations. Consumers do not reconcile parallel registries. |
-| Content | Structured document content is distinct from format strings, view objects, undo state and collaboration checkpoints. |
-| Positions | Snapshot positions and durable reference values have distinct types and resolution contracts. No external-range registration. |
+| Concern              | Contract                                                                                                                                                                    |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema creation      | `createSchema({ extensions })` produces the reusable assembled schema, including `~standard` validation and inferred content types.                                         |
+| Session creation     | `createEditor({ schema, content, ... })` consumes that assembly; callers do not supply a second extension list.                                                             |
+| Headless composition | Schema/node/mark rules live in model contracts. The composed headless definition also carries commands and state contributions without a model-to-core import cycle.        |
+| Mounting             | `mountEditor({ editor, element, theme, ... })` returns a view with readiness, configuration and destruction.                                                                |
+| React                | `useEditor`, `EditorContent`, and selector subscriptions adapt the same session/view. Externally supplied sessions stay externally owned.                                   |
+| Edits                | `commands`, `chain`, `can`, queries and an imperative transaction interface share the same implementation.                                                                  |
+| Views                | Standard browser contributions are composed by the supplied browser kit; custom overrides use typed renderer registrations. Consumers do not reconcile parallel registries. |
+| Content              | Structured document content is distinct from format strings, view objects, undo state and collaboration checkpoints.                                                        |
+| Positions            | Snapshot positions and durable reference values have distinct types and resolution contracts. No external-range registration.                                               |
 
 Do not expose engine storage modes or CanvasKit in ordinary setup. Advanced
 canvas painting can expose a deliberately scoped painter contract through the
@@ -55,20 +57,21 @@ view module; that must not leak into headless session types.
 
 ## Target ownership and migration map
 
+Use the pnpm workspace declared at the root, with `packages/*` and `apps/*`.
 Start with enforced module entry points inside this repository. Add workspace
 package manifests and build exports once the imports obey the intended graph;
 do not publish packages as part of this work. Use coordinated versions initially.
 
-| Target module | Current sources to assess and migrate | Ownership |
-| --- | --- | --- |
-| `model` | `src/editor/schema.ts`, `tree.ts`, `marks.ts`, `inline*.ts`, `schema-codec.ts`, document position/range value types | Schema mechanics, identity, structural data, validated content and codecs |
-| `transform` | Step application/inversion portions of `transactions.ts`, `positions.ts`, `replace-ranges.ts`, mapping helpers | Pure edits and change maps |
-| `state` | Session publication portions of `transactions.ts`, selections, extension state, history, reference resolution | Atomic publication, selection and revision-dependent behavior |
-| `core` | Command composition and public session construction currently spread across core and starter actions | Convenient headless composition and named commands |
-| `view` | `editor-browser`, `editor-canvas`, `editor-scene.ts`, `owned-*`, rendering and viewport logic in hooks | Browser input, geometry, private layout and graphics lifetime |
-| Concrete extensions / kits | `src/extensions`, including `demo-schema.ts`, `demo-model.ts` and `starter-kit` | Content types and their policies, bundled defaults |
-| `react` | `src/editor-react` and remaining framework-specific hosts | Mounting, subscriptions and React renderers |
-| Demo | `src/demo/app`, sample loading and diagnostics | Toolbar appearance, sample navigation, notices and diagnostics |
+| Target module              | Current sources to assess and migrate                                                                               | Ownership                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `model`                    | `src/editor/schema.ts`, `tree.ts`, `marks.ts`, `inline*.ts`, `schema-codec.ts`, document position/range value types | Schema mechanics, identity, structural data, validated content and codecs |
+| `transform`                | Step application/inversion portions of `transactions.ts`, `positions.ts`, `replace-ranges.ts`, mapping helpers      | Pure edits and change maps                                                |
+| `state`                    | Session publication portions of `transactions.ts`, selections, extension state, history, reference resolution       | Atomic publication, selection and revision-dependent behavior             |
+| `core`                     | Command composition and public session construction currently spread across core and starter actions                | Convenient headless composition and named commands                        |
+| `view`                     | `editor-browser`, `editor-canvas`, `editor-scene.ts`, `owned-*`, rendering and viewport logic in hooks              | Browser input, geometry, private layout and graphics lifetime             |
+| Concrete extensions / kits | `src/extensions`, including `demo-schema.ts`, `demo-model.ts` and `starter-kit`                                     | Content types and their policies, bundled defaults                        |
+| `react`                    | `src/editor-react` and remaining framework-specific hosts                                                           | Mounting, subscriptions and React renderers                               |
+| Demo                       | `src/demo/app`, sample loading and diagnostics                                                                      | Toolbar appearance, sample navigation, notices and diagnostics            |
 
 Extract responsibilities before moving files. A file can contain several
 responsibilities today; its current name does not decide its final owner.
@@ -315,6 +318,12 @@ the same public interface. No publishing/deployment is required.
 
 ## Sequencing and verification gates
 
+Preserve the current Oxlint/oxfmt setup, vendored anti-slop plugin, strict
+typechecking, React compiler configuration, Vitest unit/browser split and isolated
+Playwright E2E server. These are migration constraints, not cleanup to redo.
+Every source move updates discovery/configuration in the same slice, with
+before/after test-collection comparison. The repository map specifies the checks.
+
 Order: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8. Introduce small vertical slices within
 each milestone; preserve a working demo throughout. Consumer migration starts
 as soon as each contract works, with packaging/documentation finalized in 8.
@@ -333,16 +342,16 @@ record regressions and their cause rather than increasing thresholds silently.
 
 ## Risks and decisions to resolve in implementation
 
-| Risk | Required treatment before completing the affected milestone |
-| --- | --- |
-| Type inference becomes unusably complex | Measure compiler behavior with nested custom schemas; keep runtime constraints honest instead of encoding every relationship in conditional types. |
-| Standard Schema accepts async validators | Establish synchronous extension validation contract and explicit rejection; never block local edits on arbitrary promises. |
-| New content representation breaks saved references | Preserve stable keys and operation semantics; version and test migrations before switching the demo. |
-| Headless assembly accidentally imports view code | Verify emitted imports and server execution, not just type-only intent. |
-| Extension ordering changes behavior | Deterministic ordering, duplicate/conflict errors, shortcut and normalization fixtures. |
-| Undo and reference persistence become coupled | Prune undo independently and prove externally stored ranges survive checkpoint/reload. |
-| Resource sharing causes cross-editor corruption | Explicit mutable ownership, overlapping-ID fixtures and real lifecycle retention checks. |
-| Theming invalidates too much work | Separate metric and paint invalidation; instrument shaping and cache reuse. |
+| Risk                                               | Required treatment before completing the affected milestone                                                                                        |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Type inference becomes unusably complex            | Measure compiler behavior with nested custom schemas; keep runtime constraints honest instead of encoding every relationship in conditional types. |
+| Standard Schema accepts async validators           | Establish synchronous extension validation contract and explicit rejection; never block local edits on arbitrary promises.                         |
+| New content representation breaks saved references | Preserve stable keys and operation semantics; version and test migrations before switching the demo.                                               |
+| Headless assembly accidentally imports view code   | Verify emitted imports and server execution, not just type-only intent.                                                                            |
+| Extension ordering changes behavior                | Deterministic ordering, duplicate/conflict errors, shortcut and normalization fixtures.                                                            |
+| Undo and reference persistence become coupled      | Prune undo independently and prove externally stored ranges survive checkpoint/reload.                                                             |
+| Resource sharing causes cross-editor corruption    | Explicit mutable ownership, overlapping-ID fixtures and real lifecycle retention checks.                                                           |
+| Theming invalidates too much work                  | Separate metric and paint invalidation; instrument shaping and cache reuse.                                                                        |
 
 Implementation defaults: preserve current UX, use one active view per session
 initially, retain the current renderer, and expose documented advanced contracts

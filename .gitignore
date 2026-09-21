@@ -8,4 +8,5 @@ public/fonts/*.ttf
 public/fonts/*.otf
 test-results/
 playwright-report/
+.vitest/
 artifacts/*.png

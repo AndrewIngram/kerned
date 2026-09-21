@@ -35,11 +35,11 @@ Established direction:
 
 Open product decisions can be deferred to the specified gate:
 
-| Question | Planning assumption, not an agreed product restriction | Decision deadline |
-| --- | --- | --- |
-| Must edits merge after days offline? | Test connected/reconnect workflows first, plus a long-disconnection fixture. Do not promise indefinite offline merging. | Collaboration choice in milestone 3 |
-| Is the server allowed to read canonical content? | Use a trusted authority in the permission prototype. End-to-end encryption is not included in that prototype. | Before choosing deployment/security architecture in milestone 3 |
-| What do permissions on a mark protect? | Test both an immutable visible annotation and protected underlying text as distinct capabilities. | Milestones 3 and 4 |
+| Question                                         | Planning assumption, not an agreed product restriction                                                                  | Decision deadline                                               |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Must edits merge after days offline?             | Test connected/reconnect workflows first, plus a long-disconnection fixture. Do not promise indefinite offline merging. | Collaboration choice in milestone 3                             |
+| Is the server allowed to read canonical content? | Use a trusted authority in the permission prototype. End-to-end encryption is not included in that prototype.           | Before choosing deployment/security architecture in milestone 3 |
+| What do permissions on a mark protect?           | Test both an immutable visible annotation and protected underlying text as distinct capabilities.                       | Milestones 3 and 4                                              |
 
 These questions do not block model fixtures or position contracts. They do block unsupported promises about offline behavior, privacy or durable storage. Record decisions when made instead of treating assumptions as user approval.
 

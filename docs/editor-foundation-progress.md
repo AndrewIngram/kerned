@@ -26,27 +26,27 @@ Subsequent performance work: [indexed relative-position lookup](relative-positio
 
 ## Validation
 
-`npm test` passed 162 tests across Chromium, Firefox and WebKit, with three skips: the same still-unimplemented concurrent split/insert convergence scenario in each browser. Final focused verification passed 45 tests, including two additional cases per browser for command-chain mark resets and framework-free nested text capture. No expected failures are counted as implemented behavior. Coverage includes real React mount/unmount, permission revocation, undo, failed multi-step transactions, external comment decoration resolution, nested/disjoint selections and existing demo editing/formatting.
+`pnpm test` passed 162 tests across Chromium, Firefox and WebKit, with three skips: the same still-unimplemented concurrent split/insert convergence scenario in each browser. Final focused verification passed 45 tests, including two additional cases per browser for command-chain mark resets and framework-free nested text capture. No expected failures are counted as implemented behavior. Coverage includes real React mount/unmount, permission revocation, undo, failed multi-step transactions, external comment decoration resolution, nested/disjoint selections and existing demo editing/formatting.
 
 The mixed-block streaming checks pass all nine cases across the three browsers (2,000/10,000 blocks, desktop/narrow viewports), including 501 resolved external threads at 10,000 blocks. An old image-spacing expectation was updated to account for the existing four-pixel baseline grid; the no-extra-shaping assertion remains intact.
 
-`npm run build` passes type checking, production bundling and the core import boundary checks. Tests use an independent schema through public exports, so they do not rely on demo field names or test-only permission implementations.
+`pnpm run build` passes type checking, production bundling and the core import boundary checks. Tests use an independent schema through public exports, so they do not rely on demo field names or test-only permission implementations.
 
 ## Large-document regression measurements
 
 Three serial development-mode Chromium trials on Apple M4 Pro; Warbreaker contains 7,280 blocks and 1,117,497 plain-text characters. [Original baseline](../artifacts/editor-foundation/baseline.json), [current measurements](../artifacts/editor-runtime-extensions-fixed/baseline.json).
 
-| Measurement | Original median | Current median |
-| --- | ---: | ---: |
-| First usable editor | 204 ms | 199 ms |
-| Progressive load after resume | 1,087 ms | 1,003 ms |
-| Full-book rich paste handler | 52.2 ms | 53.1 ms |
-| Paste to second animation frame | 102.2 ms | 102.3 ms |
-| Typing to second animation frame | 31.8 ms | 31.9 ms |
-| Paging to second animation frame | 32.0 ms | 32.1 ms |
-| Loaded JS heap after GC | 31.36 MB | 31.93 MB |
+| Measurement                      | Original median | Current median |
+| -------------------------------- | --------------: | -------------: |
+| First usable editor              |          204 ms |         199 ms |
+| Progressive load after resume    |        1,087 ms |       1,003 ms |
+| Full-book rich paste handler     |         52.2 ms |        53.1 ms |
+| Paste to second animation frame  |        102.2 ms |       102.3 ms |
+| Typing to second animation frame |         31.8 ms |        31.9 ms |
+| Paging to second animation frame |         32.0 ms |        32.1 ms |
+| Loaded JS heap after GC          |        31.36 MB |       31.93 MB |
 
-An initial regression rebuilt the full tree for each toolbar mark query. Reusing the existing tree index removed it. `npm run check:editor-performance -- artifacts/editor-runtime-extensions-fixed/baseline.json` enforces the initial review budgets: 20% beyond the original maximum for loading/paste, 15% for heap, or an extra frame for typing/paging. Existing paste correctness, undo/redo and stale-paint checks pass. Frame timings include scheduling; heap excludes GPU/native memory. These default-demo measurements do not establish large-document permission-validation or decoration-resolution costs. The [lookup optimization report](relative-position-performance.md) records the subsequent fix, including different capture revisions and undo/redo.
+An initial regression rebuilt the full tree for each toolbar mark query. Reusing the existing tree index removed it. `pnpm run check:editor-performance artifacts/editor-runtime-extensions-fixed/baseline.json` enforces the initial review budgets: 20% beyond the original maximum for loading/paste, 15% for heap, or an extra frame for typing/paging. Existing paste correctness, undo/redo and stale-paint checks pass. Frame timings include scheduling; heap excludes GPU/native memory. These default-demo measurements do not establish large-document permission-validation or decoration-resolution costs. The [lookup optimization report](relative-position-performance.md) records the subsequent fix, including different capture revisions and undo/redo.
 
 ## Remaining implementation
 

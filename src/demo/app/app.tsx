@@ -1,8 +1,8 @@
 import { type CanvasKit } from 'canvaskit-wasm';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { loadEditorSample, sampleUrl, type EditorSample } from '../../editor-samples';
 
+import { loadEditorSample, sampleUrl, type EditorSample } from '../../editor-samples';
 import type { Owned } from '../../extensions/starter-kit/types';
 import { EditorWorkspace } from './editor-workspace';
 
@@ -22,7 +22,7 @@ export function App({
 
   const request = useRef(0);
 
-  async function switchSample(url: URL, push: boolean) {
+  const switchSample = useCallback(async (url: URL, push: boolean) => {
     const id = ++request.current;
     setLoading(true);
     setError('');
@@ -38,13 +38,13 @@ export function App({
       if (push) history.pushState(null, '', url);
       window.scrollTo(0, 0);
       setSample(next);
-    } catch (error) {
+    } catch (errorValue) {
       if (id === request.current)
-        setError(error instanceof Error ? error.message : 'Could not load sample');
+        setError(errorValue instanceof Error ? errorValue.message : 'Could not load sample');
     } finally {
       if (id === request.current) setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     const back = () => {
@@ -53,11 +53,20 @@ export function App({
 
     window.addEventListener('popstate', back);
 
+    // This is a request counter, not a DOM ref; invalidate in-flight loads at cleanup.
     return () => {
+      // oxlint-disable-next-line react-hooks/exhaustive-deps -- Invalidate the live request counter on unmount.
       request.current++;
       window.removeEventListener('popstate', back);
     };
-  }, []);
+  }, [switchSample]);
+
+  const changeSample = useCallback(
+    (id: string) => {
+      void switchSample(new URL(sampleUrl(id)), true);
+    },
+    [switchSample],
+  );
 
   return (
     <>
@@ -67,9 +76,7 @@ export function App({
           owned={owned}
           sample={sample}
           loading={loading}
-          onSampleChange={(id) => {
-            void switchSample(new URL(sampleUrl(id)), true);
-          }}
+          onSampleChange={changeSample}
         />
       )}
       {error && <p role="alert">{error}</p>}

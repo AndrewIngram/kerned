@@ -10,11 +10,11 @@ A width change synchronously lays out the viewport, its overscan and pinned sele
 
 For the 10,000-block fixture, the first phase composed 8 paragraphs instead of 8,999. The paired runs use the same build and fixture, changing the browser viewport from 1,100 to 700 pixels while scrolled to the middle. The editor's content width changes from 742 to 610 CSS pixels. Each browser has three trials per mode, with mode order alternated.
 
-| Browser | Synchronous first paint, ms | Viewport-first paint, ms | Background completion, ms | Worst synchronous frame interval, ms | Worst viewport-first frame interval, ms |
-|---|---:|---:|---:|---:|---:|
-| chromium | 161.5 | 18.4 | 1202.0 | 133.3 | 16.8 |
-| firefox | 174.0 | 13.0 | 1297.0 | 166.7 | 17.5 |
-| webkit | 127.0 | 18.0 | 1200.0 | 128.0 | 21.0 |
+| Browser  | Synchronous first paint, ms | Viewport-first paint, ms | Background completion, ms | Worst synchronous frame interval, ms | Worst viewport-first frame interval, ms |
+| -------- | --------------------------: | -----------------------: | ------------------------: | -----------------------------------: | --------------------------------------: |
+| chromium |                       161.5 |                     18.4 |                    1202.0 |                                133.3 |                                    16.8 |
+| firefox  |                       174.0 |                     13.0 |                    1297.0 |                                166.7 |                                    17.5 |
+| webkit   |                       127.0 |                     18.0 |                    1200.0 |                                128.0 |                                    21.0 |
 
 First paint and completion columns are medians across three trials. Frame columns are the worst sampled interval across those trials. Paint timing starts when scene reflow begins and ends at CanvasKit flush; it excludes the browser's delay before ResizeObserver dispatch and is not a compositor presentation timestamp. Frame intervals are sampled independently around the resize.
 
@@ -51,13 +51,13 @@ React schedules one background pass per animation frame. Width changes supersede
 
 ## Reproduce
 
-~~~sh
-npm run build
-npm run preview
-npm run check:editor-reflow
-npm run benchmark:editor-reflow
+```sh
+pnpm run build
+pnpm run preview
+pnpm run check:editor-reflow
+pnpm run benchmark:editor-reflow
 node scripts/report-editor-reflow.mjs
-~~~
+```
 
 Open [the 10,000-block demo](http://127.0.0.1:5176/extensions.html?stream=10000). Add reflow=eager to the query to run the synchronous comparison path. The default small demo also uses viewport-first reflow.
 

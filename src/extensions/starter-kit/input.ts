@@ -1,5 +1,3 @@
-import { pasteCellRectangle, plainCellRectangle } from '../table-clipboard';
-import { tableCells } from '../table';
 import { boundaries, TextSelection, textSelection, type Step } from '../../editor';
 import { createTextInput, type BrowserViewOptions } from '../../editor-browser';
 import { listCommands, replaceStructuredText } from '../../extensions/blocks';
@@ -9,10 +7,10 @@ import { demoSchema } from '../../extensions/demo-schema';
 import { pasteParagraphs } from '../../extensions/paste';
 import { tablePlainText } from '../../extensions/table';
 import { supportsOwnedText } from '../../owned-text-support';
-
-import type { EditorDocument, EditorSession } from './types';
-
+import { tableCells } from '../table';
+import { pasteCellRectangle, plainCellRectangle } from '../table-clipboard';
 import type { StarterActions } from './actions';
+import type { EditorDocument, EditorSession } from './types';
 
 type InputOptions = {
   editor: EditorSession;
@@ -126,18 +124,6 @@ export function createStarterKitInput({
   }
 
   function copyText() {
-    function nodeText(node: StarterNode): string {
-      return node.kind === 'paragraph' || node.kind === 'heading'
-        ? plainText(node)
-        : node.kind === 'image'
-          ? node.alt
-          : node.kind === 'table'
-            ? tablePlainText(node)
-            : node.kind === 'checklist'
-              ? node.notes || '[Checklist]'
-              : demoSchema.children(node).map(nodeText).join('\n');
-    }
-
     return document.ranges
       .map((range) => {
         const node = tree.byId.get(range.id)?.node;
@@ -340,7 +326,7 @@ export function createStarterKitInput({
     keydown: key,
     compositionstart: textInput.compositionStart,
     compositionend: () => textInput.compositionEnd(input()),
-    input: (_event, input) => textInput.read(input, replace),
+    input: (_event, inputValue) => textInput.read(inputValue, replace),
     copy: (e) => {
       e.preventDefault();
 
@@ -453,4 +439,16 @@ export function focusStarterKitInput(
       : root?.querySelector<HTMLTextAreaElement>(`textarea[data-text-block="${id}"]`);
 
   (cell ?? input)?.focus({ preventScroll: true });
+}
+
+function nodeText(node: StarterNode): string {
+  return node.kind === 'paragraph' || node.kind === 'heading'
+    ? plainText(node)
+    : node.kind === 'image'
+      ? node.alt
+      : node.kind === 'table'
+        ? tablePlainText(node)
+        : node.kind === 'checklist'
+          ? node.notes || '[Checklist]'
+          : demoSchema.children(node).map(nodeText).join('\n');
 }

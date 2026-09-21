@@ -7,16 +7,19 @@ The core supports semantic mark ranges without imposing a node storage shape. Te
 `createMarkSchema` registers named, versioned attribute parsers. Attributes are JSON values. For example:
 
 ```ts
-const marks = createMarkSchema([{
-  name: 'link', version: 1,
-  parse(value) {
-    const attrs = jsonRecord(value);
-    const href = jsonString(attrs.href);
-    if (!href.startsWith('https://')) throw new Error('Expected an HTTPS link');
-    return {href};
+const marks = createMarkSchema([
+  {
+    name: 'link',
+    version: 1,
+    parse(value) {
+      const attrs = jsonRecord(value);
+      const href = jsonString(attrs.href);
+      if (!href.startsWith('https://')) throw new Error('Expected an HTTPS link');
+      return { href };
+    },
   },
-}]);
-const link = marks.create('link', {href: 'https://example.com'});
+]);
+const link = marks.create('link', { href: 'https://example.com' });
 ```
 
 `MarkRange` holds `{from, to, mark}` within one text node. Different types can overlap. At a given location, one type has one attribute value. `setMark` replaces that type only within the supplied interval; `removeMark` can remove one type or every type. `normalizeMarks` merges adjacent equal values and rejects conflicting overlaps. Attribute comparison ignores object-key order. `sliceMarks` projects a fragment to local coordinates.

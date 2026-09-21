@@ -30,8 +30,8 @@ The layout engine accepts Latin text and supported emoji. The text-support check
 rejects unsupported scripts before an edit reaches shaping. General script
 fallback and bidirectional layout remain outside the current implementation.
 
-Use `npm run check:editor`, `npm run check:editor-reflow`, and
-`npm run check:editor-unicode` for inline geometry, reflow, and supported text
+Use `pnpm run check:editor`, `pnpm run check:editor-reflow`, and
+`pnpm run check:editor-unicode` for inline geometry, reflow, and supported text
 checks. See [viewport reflow](editor-viewport-reflow.md) and
 [retained geometry measurements](editor-retained-geometry.md) for the current
 scheduler and memory behavior.

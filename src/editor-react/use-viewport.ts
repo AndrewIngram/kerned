@@ -1,7 +1,8 @@
-import { useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+
 import { observeEditorViewport } from '../editor-browser';
 
-export function useEditorViewport(scroller: RefObject<HTMLDivElement | null>, page: boolean) {
+export function useEditorViewport(scrollerRef: RefObject<HTMLDivElement | null>, page: boolean) {
   const toolbarRef = useRef<HTMLElement>(null);
 
   const [viewportHeight, setViewportHeight] = useState(520),
@@ -11,32 +12,35 @@ export function useEditorViewport(scroller: RefObject<HTMLDivElement | null>, pa
     [width, setWidth] = useState(620),
     [scroll, setScroll] = useState(0);
 
-  function readScroll() {
-    return page ? window.scrollY : (scroller.current?.scrollTop ?? 0);
-  }
+  const readScroll = useCallback(() => {
+    return page ? window.scrollY : (scrollerRef.current?.scrollTop ?? 0);
+  }, [page, scrollerRef]);
 
-  function scrollDocumentTo(top: number) {
-    if (page) window.scrollTo({ top, behavior: 'instant' });
-    else if (scroller.current) scroller.current.scrollTop = top;
-  }
+  const scrollDocumentTo = useCallback(
+    (top: number) => {
+      if (page) window.scrollTo({ top, behavior: 'instant' });
+      else scrollerRef.current?.scrollTo({ top, behavior: 'instant' });
+    },
+    [page, scrollerRef],
+  );
 
   useLayoutEffect(() => {
-    const el = scroller.current;
+    const el = scrollerRef.current;
 
-    if (!el) return;
+    if (!el) return undefined;
 
     return observeEditorViewport({
       element: el,
       scrollport: page ? window : el,
       toolbar: toolbarRef.current,
-      onChange: ({ width, height, inset, scrollTop }) => {
-        setWidth(width);
+      onChange: ({ width: widthValue, height, inset, scrollTop }) => {
+        setWidth(widthValue);
         setViewportHeight(height);
         setToolbarHeight(inset);
         setScroll(scrollTop);
       },
     });
-  }, [page, scroller]);
+  }, [page, scrollerRef]);
 
   return {
     toolbarRef,

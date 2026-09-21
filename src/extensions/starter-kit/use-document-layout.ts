@@ -1,8 +1,8 @@
-import { RangeSelection } from '../../editor';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createEditorScene, type Placement, type Scene } from '../../editor-scene';
 
+import { RangeSelection } from '../../editor';
 import type { Viewport } from '../../editor-react';
+import { createEditorScene, type Placement, type Scene } from '../../editor-scene';
 import type { EditorDocument, Owned } from './types';
 
 type LayoutResult = ReturnType<ReturnType<typeof createEditorScene>['build']>;
@@ -45,11 +45,15 @@ export function useDocumentLayout({
   );
 
   const measurementsRef = useRef(measurements);
-  measurementsRef.current = measurements;
+  useLayoutEffect(() => {
+    measurementsRef.current = measurements;
+  }, [measurements]);
   const inset = 28;
   const contentWidth = Math.max(150, width / zoom - 2 * inset);
   const widthRef = useRef(contentWidth);
-  widthRef.current = contentWidth;
+  useLayoutEffect(() => {
+    widthRef.current = contentWidth;
+  }, [contentWidth]);
 
   const onMeasure = useMemo(
     () => (id: number, measuredWidth: number, height: number) => {
@@ -68,6 +72,7 @@ export function useDocumentLayout({
   );
 
   const scene = useMemo<Scene>(() => {
+    // The retained scene advances once per background tick, independently of React commits.
     const advance = lastReflowTick.current !== reflowTick;
     lastReflowTick.current = reflowTick;
 
@@ -101,6 +106,7 @@ export function useDocumentLayout({
     onLayout(result, contentWidth);
 
     return result.scene;
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- Scroll state invalidates the scene built from the live DOM scroll position.
   }, [
     nodes,
     contentWidth,
@@ -110,8 +116,12 @@ export function useDocumentLayout({
     zoom,
     viewportHeight,
     reflowTick,
-    selection?.anchor.id,
-    selection?.head.id,
+    selection,
+    eager,
+    retainAll,
+    onLayout,
+    readScroll,
+    projection.decorations,
     focusId,
     panelId,
     focusedWidget,
@@ -120,7 +130,9 @@ export function useDocumentLayout({
   ]);
 
   const sceneRef = useRef(scene);
-  sceneRef.current = scene;
+  useLayoutEffect(() => {
+    sceneRef.current = scene;
+  }, [scene]);
   const activePlacement = scene.placements.find((p) => p.node.id === focusId);
 
   const rangeHead = doc.selection instanceof RangeSelection ? doc.selection.head : null;
@@ -153,7 +165,7 @@ export function useDocumentLayout({
       scrollDocumentTo(desired);
       setScroll(readScroll());
     }
-  }, [scene, zoom]);
+  }, [scene, zoom, readScroll, scrollDocumentTo, setScroll]);
 
   const top = scene.top,
     bottom = top + viewportHeight / zoom;
@@ -176,16 +188,16 @@ export function useDocumentLayout({
     for (let i = lo; i < p.length && p[i].y < bottom + 160; i++) result.push(p[i]);
 
     for (const id of [focusedWidget, panelId, findBlockId]) {
-      const pinned = p.find((p) => p.node.id === id);
+      const pinned = p.find((pValue) => pValue.node.id === id);
 
       if (pinned && !result.includes(pinned)) result.push(pinned);
     }
 
-    return result.sort((a, b) => a.y - b.y);
+    return result.toSorted((a, b) => a.y - b.y);
   }, [scene, top, bottom, focusedWidget, panelId, findBlockId]);
 
   useEffect(() => {
-    if (!scene.pending) return;
+    if (!scene.pending) return undefined;
     const frame = requestAnimationFrame(() => setReflowTick((t) => t + 1));
 
     return () => cancelAnimationFrame(frame);

@@ -1,4 +1,4 @@
-export {boundaries} from './editor/text';
+export { boundaries } from './editor/text';
 
 export type Span = {
   start: number;
@@ -9,4 +9,4 @@ export type Span = {
 
 export type Position = { index: number; upstream: boolean };
 
-export type Direction = "left" | "right" | "up" | "down" | "home" | "end";
+export type Direction = 'left' | 'right' | 'up' | 'down' | 'home' | 'end';

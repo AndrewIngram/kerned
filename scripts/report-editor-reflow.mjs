@@ -1,32 +1,40 @@
-import {readFile,writeFile} from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
-const benchmark=JSON.parse(await readFile('artifacts/editor-reflow-benchmark.json','utf8'));
+const benchmark = JSON.parse(await readFile('artifacts/editor-reflow-benchmark.json', 'utf8'));
 
-const checks=JSON.parse(await readFile('artifacts/editor-reflow-checks.json','utf8'));
+const checks = JSON.parse(await readFile('artifacts/editor-reflow-checks.json', 'utf8'));
 
-const median=values=>[...values].sort((a,b)=>a-b)[Math.floor(values.length/2)];
+const median = (values) => [...values].toSorted((a, b) => a - b)[Math.floor(values.length / 2)];
 
-const f=n=>n.toFixed(1);
+const f = (n) => n.toFixed(1);
 
-const rows=[];
+const rows = [];
 
-for(const browser of ['chromium','firefox','webkit']){
- const eager=benchmark.trials.filter(t=>t.browser===browser&&t.mode==='eager');
- const viewport=benchmark.trials.filter(t=>t.browser===browser&&t.mode==='viewport');
+for (const browser of ['chromium', 'firefox', 'webkit']) {
+  const eager = benchmark.trials.filter((t) => t.browser === browser && t.mode === 'eager');
+  const viewport = benchmark.trials.filter((t) => t.browser === browser && t.mode === 'viewport');
 
- if(eager.length!==3||viewport.length!==3)throw new Error('Expected three trials per mode/browser');
- rows.push(`| ${browser} | ${f(median(eager.map(t=>t.firstPaintMs)))} | ${f(median(viewport.map(t=>t.firstPaintMs)))} | ${f(median(viewport.map(t=>t.completeMs)))} | ${f(Math.max(...eager.map(t=>t.frameMaxMs)))} | ${f(Math.max(...viewport.map(t=>t.frameMaxMs)))} |`);
+  if (eager.length !== 3 || viewport.length !== 3)
+    throw new Error('Expected three trials per mode/browser');
+  rows.push(
+    `| ${browser} | ${f(median(eager.map((t) => t.firstPaintMs)))} | ${f(median(viewport.map((t) => t.firstPaintMs)))} | ${f(median(viewport.map((t) => t.completeMs)))} | ${f(Math.max(...eager.map((t) => t.frameMaxMs)))} | ${f(Math.max(...viewport.map((t) => t.frameMaxMs)))} |`,
+  );
 }
 
-const progressive=benchmark.trials.filter(t=>t.mode==='viewport');
+const progressive = benchmark.trials.filter((t) => t.mode === 'viewport');
 
-const counts=progressive.map(t=>t.initialLayouts);
+const counts = progressive.map((t) => t.initialLayouts);
 
-const initialCount=Math.min(...counts)===Math.max(...counts)?String(counts[0]):`${Math.min(...counts)}–${Math.max(...counts)}`;
+const initialCount =
+  Math.min(...counts) === Math.max(...counts)
+    ? String(counts[0])
+    : `${Math.min(...counts)}–${Math.max(...counts)}`;
 
-const batchWork=progressive.flatMap(t=>t.batches.filter(b=>b.background).map(b=>b.workMs)).sort((a,b)=>a-b);
+const batchWork = progressive
+  .flatMap((t) => t.batches.filter((b) => b.background).map((b) => b.workMs))
+  .toSorted((a, b) => a - b);
 
-const text=`# Viewport-first reflow
+const text = `# Viewport-first reflow
 
 Recorded ${benchmark.recordedAt} on ${benchmark.cpu}. The editor editor now reflows visible paragraphs before processing offscreen paragraphs in frame-sized batches. No new dependencies, worker transport or WASM interface were added.
 
@@ -42,7 +50,7 @@ ${rows.join('\n')}
 
 First paint and completion columns are medians across three trials. Frame columns are the worst sampled interval across those trials. Paint timing starts when scene reflow begins and ends at CanvasKit flush; it excludes the browser's delay before ResizeObserver dispatch and is not a compositor presentation timestamp. Frame intervals are sampled independently around the resize.
 
-Offscreen completion deliberately takes longer because work yields between frames. Background composition targets 4 ms and stops after at most 128 paragraphs per batch. Across these runs, the full scene-build work for background batches had median ${f(median(batchWork))} ms, p95 ${f(batchWork[Math.floor(batchWork.length*.95)])} ms and maximum ${f(batchWork.at(-1))} ms. Each batch measurement covers one scene-build call, including placement rebuilding. It excludes subsequent React reconciliation, measurement/anchor follow-up renders and canvas painting. The 4 ms target is not a hard time limit: a single paragraph, allocation or garbage collection can overrun it.
+Offscreen completion deliberately takes longer because work yields between frames. Background composition targets 4 ms and stops after at most 128 paragraphs per batch. Across these runs, the full scene-build work for background batches had median ${f(median(batchWork))} ms, p95 ${f(batchWork[Math.floor(batchWork.length * 0.95)])} ms and maximum ${f(batchWork.at(-1))} ms. Each batch measurement covers one scene-build call, including placement rebuilding. It excludes subsequent React reconciliation, measurement/anchor follow-up renders and canvas painting. The 4 ms target is not a hard time limit: a single paragraph, allocation or garbage collection can overrun it.
 
 Raw data: [paired timings](../artifacts/editor-reflow-benchmark.json), [correctness results](../artifacts/editor-reflow-checks.json).
 
@@ -76,10 +84,10 @@ React schedules one background pass per animation frame. Width changes supersede
 ## Reproduce
 
 ~~~sh
-npm run build
-npm run preview
-npm run check:editor-reflow
-npm run benchmark:editor-reflow
+pnpm run build
+pnpm run preview
+pnpm run check:editor-reflow
+pnpm run benchmark:editor-reflow
 node scripts/report-editor-reflow.mjs
 ~~~
 
@@ -92,4 +100,4 @@ The document's total height and scrollbar thumb can change while offscreen parag
 The scene still scans/copies placement arrays during reflow, and retains shaping and layout for all arrived paragraphs. This change does not solve the retained-memory cost measured in the [large-document study](editor-large-documents.md). The next useful step is bounded offscreen layout retention and compact caret storage, while preserving enough height information for stable scrolling.
 `;
 
-await writeFile('docs/editor-viewport-reflow.md',text);
+await writeFile('docs/editor-viewport-reflow.md', text);

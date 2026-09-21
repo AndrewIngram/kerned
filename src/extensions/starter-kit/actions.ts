@@ -1,5 +1,4 @@
 import { RangeSelection, NodeSelection, AllSelection } from '../../editor';
-import { pasteFragment } from '../clipboard';
 import {
   textSelection,
   toggleMarkCommand,
@@ -14,7 +13,7 @@ import { formattingSchema, type TextFormat } from '../../extensions/formatting';
 import { setTextBlockType } from '../../extensions/headings';
 import { appendTableColumn, appendTableRow, createTable, tableCells } from '../../extensions/table';
 import { textCommands } from '../../extensions/text-commands';
-
+import { pasteFragment } from '../clipboard';
 import type { EditorDocument, EditorSession } from './types';
 
 type ActionOptions = {
@@ -170,6 +169,8 @@ export function createStarterKitActions({
       if (entry.node.kind === 'table') return entry;
       entry = entry.parent === null ? undefined : tree.byId.get(entry.parent);
     }
+
+    return undefined;
   }
 
   function changeTable(column: boolean) {
@@ -205,23 +206,23 @@ export function createStarterKitActions({
     );
   }
 
-  function replaceCells(text: string) {
+  function replaceCells(textValue: string) {
     try {
       const current = editor.state;
 
       const command =
-        text &&
+        textValue &&
         (current.selection instanceof NodeSelection ||
           current.selection instanceof AllSelection ||
           (current.selection instanceof RangeSelection &&
             (!current.selection.ranges(document.context).some((range) => range.kind === 'text') ||
-              text.includes('\n'))))
+              textValue.includes('\n'))))
           ? pasteFragment(
               demoSchema,
               current,
               {
                 inline: false,
-                nodes: text.split(/\r?\n/).map((value) => ({
+                nodes: textValue.split(/\r?\n/).map((value) => ({
                   kind: 'paragraph',
                   ...allocate(),
                   text: value,
@@ -232,8 +233,8 @@ export function createStarterKitActions({
               allocate,
             )
           : current.selection instanceof RangeSelection
-            ? replaceStructuredText(demoSchema, current, text)
-            : editor.selectionEdit(text);
+            ? replaceStructuredText(demoSchema, current, textValue)
+            : editor.selectionEdit(textValue);
 
       dispatch(command.steps, 'separate', command.selection);
     } catch (error) {

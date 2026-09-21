@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { resolveRangeDecorations, type SelectionContext, type SelectionRange } from '../../editor';
+import type { EditorState } from '../../editor';
 import { useEditorState } from '../../editor-react';
+import { type EditorSample } from '../../editor-samples';
 import { commentDecorations, createCommentStore } from '../../extensions/comment';
 import { type StarterNode } from '../../extensions/demo-model';
-import { type CommentHighlight } from '../../extensions/text-block-view';
-import { type EditorSample } from '../../editor-samples';
-
-import type { EditorState } from '../../editor';
 import type { EditorSession } from '../../extensions/starter-kit/types';
+import { type CommentHighlight } from '../../extensions/text-block-view';
 
 export function useComments(
   editor: EditorSession,
@@ -17,22 +17,25 @@ export function useComments(
 ) {
   const [comments] = useState(() => createCommentStore<{ body: string; reply: string }>());
 
-  function seedComments(nodes: readonly StarterNode[]) {
-    comments.putAll(
-      (sample.comments?.(nodes) ?? []).map((seed) => ({
-        id: seed.id,
-        messages: [{ body: seed.body, reply: '' }],
-        range: editor.positions.range(
-          editor.positions.at(seed.nodeId, seed.from, 1),
-          editor.positions.at(seed.nodeId, seed.to, -1),
-        ),
-      })),
-    );
-  }
+  const seedComments = useCallback(
+    (nodes: readonly StarterNode[]) => {
+      comments.putAll(
+        (sample.comments?.(nodes) ?? []).map((seed) => ({
+          id: seed.id,
+          messages: [{ body: seed.body, reply: '' }],
+          range: editor.positions.range(
+            editor.positions.at(seed.nodeId, seed.from, 1),
+            editor.positions.at(seed.nodeId, seed.to, -1),
+          ),
+        })),
+      );
+    },
+    [comments, editor, sample],
+  );
 
   useEffect(() => {
     seedComments(sample.initial);
-  }, [sample]);
+  }, [sample, seedComments]);
   const commentState = useEditorState(comments, (state) => state);
 
   const decorations = useMemo(() => {
@@ -60,7 +63,7 @@ export function useComments(
         ranges: decoration.ranges.flatMap(projectedRanges),
       })),
     };
-  }, [commentState, editorState.nodes, context]);
+  }, [commentState, editor.positions, context]);
 
   const commentsByNode = useMemo(() => {
     const result = new Map<number, CommentHighlight[]>();
@@ -81,7 +84,7 @@ export function useComments(
       }
 
     return { text: result, nodes };
-  }, [decorations, editorState.nodes]);
+  }, [decorations]);
 
   return {
     comments,

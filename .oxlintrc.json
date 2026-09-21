@@ -39,6 +39,59 @@
     "anti-slop/no-unsafe-dictionary-type": "error",
     "anti-slop/no-widen-then-assert": "error",
     "anti-slop/require-readable-spacing": "error",
-    "anti-slop/require-safety-comment-for-type-assertion": "error"
-  }
+    "anti-slop/require-safety-comment-for-type-assertion": "error",
+    "react/unsupported-syntax": "error",
+    // Vite uses the automatic JSX runtime.
+    "react/react-in-jsx-scope": "off",
+    // Initializer callbacks run before the new binding exists.
+    "eslint/no-shadow": [
+      "error",
+      {
+        "ignoreOnInitialization": true
+      }
+    ],
+    // Native elements have no memoized component boundary to preserve.
+    "react-perf/jsx-no-new-object-as-prop": [
+      "error",
+      {
+        "nativeAllowList": "all"
+      }
+    ],
+    // Native event handlers have no memoized component boundary to preserve.
+    "react-perf/jsx-no-new-function-as-prop": [
+      "error",
+      {
+        "nativeAllowList": "all"
+      }
+    ],
+    // Editor transformations copy immutable snapshots; mutating mapped nodes corrupts history.
+    "oxc/no-map-spread": "off"
+  },
+  "plugins": ["typescript", "unicorn", "oxc", "vitest", "promise", "react", "react-perf"],
+  "categories": {
+    "correctness": "error",
+    "perf": "error",
+    "suspicious": "error"
+  },
+  "options": {
+    "typeAware": true
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**", "tests/e2e/**"],
+      "rules": {
+        // Browser actions and benchmark samples depend on the preceding operation.
+        "eslint/no-await-in-loop": "off",
+        // Browser-evaluated closures must be self-contained; fixtures remain local to their tests.
+        "unicorn/consistent-function-scoping": "off"
+      }
+    },
+    {
+      "files": ["tests/**", "src/**/__tests__/**"],
+      "rules": {
+        // Browser-evaluated closures must be self-contained; fixtures remain local to their tests.
+        "unicorn/consistent-function-scoping": "off"
+      }
+    }
+  ]
 }

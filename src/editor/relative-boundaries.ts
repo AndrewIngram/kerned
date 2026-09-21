@@ -1,5 +1,5 @@
-import { projectOutside, mayCoverRange } from './mapping-index';
 import type { AnchorMap } from './anchors';
+import { projectOutside, mayCoverRange } from './mapping-index';
 import type { NodeIdentity, Schema } from './schema';
 import type { TreeIndex } from './tree';
 

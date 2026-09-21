@@ -19,9 +19,9 @@ become their labels, images their alternative text and checklists their notes.
 Comments are not exported. Portable extension serialization remains separate
 work. Table-cell controls use the same rich clipboard adapter.
 
-Run `npm run check:editor-rich-paste` for local and HTML round-trips, nested
+Run `pnpm run check:editor-rich-paste` for local and HTML round-trips, nested
 blocks, partial inline formatting, undo/redo and the complete Warbreaker book
-in Chromium, Firefox and WebKit. `npm run check:editor-book-paste` covers the
+in Chromium, Firefox and WebKit. `pnpm run check:editor-book-paste` covers the
 plain-text fallback.
 
 ## Rectangular cell clipboard
@@ -45,8 +45,9 @@ bisects a merged cell is rejected. Rectangular paste currently requires unmerged
 destination tables. It never silently falls back to destructive plain text after a rejected rich paste.
 Ordinary plain-text paste inside a native cell textarea keeps native text-editing behavior.
 
-Run `npm test -- tests/table-clipboard.spec.js` for headless command and actual table-view tests in
-Chromium, Firefox and WebKit, including external HTML, TSV, expansion, permissions, cut and undo.
+Run `pnpm run test:vitest tests/table-clipboard` for Node command tests and browser HTML/TSV
+tests in Chromium, Firefox and WebKit. Run `pnpm run test:e2e table-clipboard` for actual
+table-view copy, paste, cut and undo journeys.
 
 ## Book-size paste
 
@@ -84,9 +85,9 @@ and time through two animation frames, excluding synthetic clipboard setup.
 They are not browser compositor presentation timestamps or device guarantees.
 
 ```sh
-npm run check:editor-id-allocation
-npm run check:editor-paste-reflow
-BROWSERS=chromium,firefox,webkit npm run benchmark:editor-paste
+pnpm run check:editor-id-allocation
+pnpm run check:editor-paste-reflow
+BROWSERS=chromium,firefox,webkit pnpm run benchmark:editor-paste
 ```
 
 The benchmark copies the complete book, pastes it at its end, compares the
@@ -100,11 +101,11 @@ captures a Chromium CPU profile separately from clean timing runs.
 The final local runs measured these paste latencies. Offscreen completion
 includes the initial response and scheduled frame waits.
 
-| Browser | Paste handler | First frames | Complete offscreen layout |
-|---|---:|---:|---:|
-| Chromium | 52 ms | 105 ms | 1.66 s |
-| Firefox | 79 ms | 167 ms | 3.31 s |
-| WebKit | 44 ms | 87 ms | 1.63 s |
+| Browser  | Paste handler | First frames | Complete offscreen layout |
+| -------- | ------------: | -----------: | ------------------------: |
+| Chromium |         52 ms |       105 ms |                    1.66 s |
+| Firefox  |         79 ms |       167 ms |                    3.31 s |
+| WebKit   |         44 ms |        87 ms |                    1.63 s |
 
 ## Native Select All
 
@@ -115,7 +116,7 @@ textarea without delivering the expected keydown. A native `select` listener
 promotes that selection to the editor document. It ignores selection writes
 already mirrored from the model, preserving deliberate paragraph selections.
 
-`npm run check:editor-select-all` covers both keyboard and native selection
+`pnpm run check:editor-select-all` covers both keyboard and native selection
 paths. The Safari fix was also verified in the actual desktop browser by
 clicking document text, pressing Cmd-A, and inspecting the canvas highlights.
 
