@@ -5,25 +5,60 @@ import type { LaidOut } from '../engines';
 import type { RegisterCanvasPainter } from './canvas-renderer';
 import type { TextLabels } from './text-labels';
 
+type Label = {
+  input: Parameters<TextLabels>[0];
+  layout: LaidOut;
+};
+
 /** Keep graphics objects inside the renderer while extensions paint in document coordinates. */
 export function createLayerDrawing(
   register: RegisterCanvasPainter,
   inset: () => number,
-  labels: TextLabels,
-): LayerDrawing {
+  initialLabels: TextLabels,
+): LayerDrawing & { replaceLabels: (next: TextLabels) => void } {
+  let labels = initialLabels;
   const colors = new Map<string, Color>();
-  const prepared = new WeakMap<LaidOut, PreparedText>();
-  const layouts = new WeakMap<PreparedText, LaidOut>();
+  let prepared = new WeakMap<LaidOut, PreparedText>();
+  const layouts = new WeakMap<PreparedText, Label>();
+  const retained = new Set<WeakRef<Label>>();
+
+  function liveLabels() {
+    const live: Label[] = [];
+
+    for (const reference of retained) {
+      const label = reference.deref();
+
+      if (label) live.push(label);
+      else retained.delete(reference);
+    }
+
+    return live;
+  }
 
   return {
+    replaceLabels(next) {
+      labels = next;
+      prepared = new WeakMap();
+
+      // Refresh retained extension handles before painting, without retaining dead widgets.
+      for (const label of liveLabels()) label.layout = labels(label.input);
+    },
     prepareText(input) {
       const layout = labels(input);
       let label = prepared.get(layout);
 
       if (!label) {
-        label = Object.freeze({ width: input.width, height: layout.height });
+        const value = { input: { ...input }, layout };
+        label = Object.freeze({
+          width: input.width,
+          get height() {
+            return value.layout.height;
+          },
+        });
         prepared.set(layout, label);
-        layouts.set(label, layout);
+        layouts.set(label, value);
+        liveLabels();
+        retained.add(new WeakRef(value));
       }
 
       return label;
@@ -37,10 +72,10 @@ export function createLayerDrawing(
           const drawing: Drawing = {
             text(label, left, top) {
               if (!active) throw new Error('Drawing is only available during its paint callback');
-              const layout = layouts.get(label);
+              const value = layouts.get(label);
 
-              if (!layout) throw new Error('Text must be prepared by this view');
-              layout.draw(canvas, left, top);
+              if (!value) throw new Error('Text must be prepared by this view');
+              value.layout.draw(canvas, left, top);
             },
             rect(bounds, color, radius = 0) {
               if (!active) throw new Error('Drawing is only available during its paint callback');

@@ -1,6 +1,6 @@
 export type DrawingRect = Readonly<{ left: number; top: number; width: number; height: number }>;
 
-/** Prepared by this view; geometry is public, glyph storage stays private. */
+/** Prepared by this view; height refreshes on font replacement, glyph storage stays private. */
 export type PreparedText = Readonly<{ width: number; height: number }>;
 
 export type PrepareText = (input: { text: string; width: number; size: number }) => PreparedText;

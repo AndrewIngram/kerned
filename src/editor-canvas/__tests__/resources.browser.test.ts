@@ -221,3 +221,98 @@ test('browser fonts match each view catalog and releasing one leaves the other r
   bold.destroy();
   expect(registered.every((face) => !document.fonts.has(face))).toBe(true);
 });
+
+test('font replacement reuses graphics, swaps atomically and releases the old collection', async ({
+  onTestFinished,
+}) => {
+  const owner = createViewResources();
+  onTestFinished(() => owner.destroy());
+  await owner.ready;
+  const previous = owner.read();
+  const input = { text: 'MMMMMMMM', width: 1000, size: 24, spans: [] };
+  const before = previous.layout.layoutText(input).lines[0].width;
+
+  const faces = defaultFonts.faces.map((face, index) =>
+    index === 0 ? { ...face, asset: defaultFonts.faces[1].asset } : { ...face },
+  );
+
+  let installs = 0;
+
+  const replacement = owner.replaceFonts({ ...defaultFonts, faces }, (next) => {
+    installs++;
+    expect(owner.read()).toBe(next);
+    expect(next.kit).toBe(previous.kit);
+    expect(next.layout.layoutText(input).lines[0].width).not.toBe(before);
+    expect(previous.layout.memory().wasmLinearBytes).toBeGreaterThan(0);
+    expect(previous.fonts.resolve().cssFamily).not.toBe(next.fonts.resolve().cssFamily);
+  });
+
+  faces[0].asset = 'fonts/not-loaded.ttf';
+  expect(owner.read()).toBe(previous);
+  await replacement;
+  expect(installs).toBe(1);
+  expect(previous.layout.memory().wasmLinearBytes).toBe(0);
+  expect(() => previous.fonts.resolve()).toThrow(/destroyed/);
+  expect(owner.status).toBe('ready');
+});
+
+test('failed replacement preserves current fonts and permits retry', async ({ onTestFinished }) => {
+  const owner = createViewResources({
+    resolveAsset: (asset) =>
+      asset === 'fonts/broken.ttf' ? 'data:application/octet-stream,invalid-font' : `/${asset}`,
+  });
+
+  onTestFinished(() => owner.destroy());
+  await owner.ready;
+  const previous = owner.read();
+
+  const fonts = {
+    ...defaultFonts,
+    faces: defaultFonts.faces.map((face, index) =>
+      index === 1 ? { ...face, asset: 'fonts/broken.ttf' as const } : face,
+    ),
+  };
+
+  await expect(
+    owner.replaceFonts(fonts, () => {
+      throw new Error('Failed fonts must not install');
+    }),
+  ).rejects.toThrow('Font registration failed');
+  expect(owner.read()).toBe(previous);
+  expect(previous.layout.memory().wasmLinearBytes).toBeGreaterThan(0);
+  await owner.replaceFonts(defaultFonts, () => {});
+  expect(owner.read()).not.toBe(previous);
+});
+
+test('superseded font requests and destruction cannot install late resources', async ({
+  onTestFinished,
+}) => {
+  const owner = createViewResources();
+  onTestFinished(() => owner.destroy());
+  await owner.ready;
+  const previous = owner.read();
+  let installs = 0;
+
+  const first = owner.replaceFonts(defaultFonts, () => {
+    installs++;
+  });
+
+  const second = owner.replaceFonts(defaultFonts, () => {
+    installs++;
+  });
+
+  await expect(first).rejects.toMatchObject({ name: 'AbortError' });
+  await second;
+  expect(installs).toBe(1);
+  expect(previous.layout.memory().wasmLinearBytes).toBe(0);
+
+  const pending = owner.replaceFonts(defaultFonts, () => {
+    installs++;
+  });
+
+  owner.destroy();
+  await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  expect(installs).toBe(1);
+  expect(owner.status).toBe('destroyed');
+});

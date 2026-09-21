@@ -6,7 +6,12 @@ import {
   type ComponentPropsWithoutRef,
 } from 'react';
 
-import { mountEditor, type MountEditorOptions, type MountedEditor } from '../editor-canvas';
+import {
+  defaultFonts,
+  mountEditor,
+  type MountEditorOptions,
+  type MountedEditor,
+} from '../editor-canvas';
 import type { NodeIdentity } from '../model';
 
 type EditorProps<N extends NodeIdentity> = MountEditorOptions<N> &
@@ -21,7 +26,7 @@ const defaultTheme = Object.freeze({});
 export function Editor<N extends NodeIdentity>({
   editor,
   resolveAsset,
-  fonts,
+  fonts = defaultFonts,
   scroll,
   toolbar,
   diagnostics,
@@ -37,13 +42,13 @@ export function Editor<N extends NodeIdentity>({
 }: EditorProps<N>) {
   const host = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ onReady, onError, onNotice });
-  const configuration = useRef({ zoom, paddingTop, maxWidth, background, theme });
+  const configuration = useRef({ zoom, paddingTop, maxWidth, background, theme, fonts });
   const view = useRef<MountedEditor | undefined>(undefined);
   const [error, setError] = useState<Error | null>(null);
 
   useLayoutEffect(() => {
     callbacks.current = { onReady, onError, onNotice };
-    configuration.current = { zoom, paddingTop, maxWidth, background, theme };
+    configuration.current = { zoom, paddingTop, maxWidth, background, theme, fonts };
   });
   useLayoutEffect(() => {
     const mounted = view.current;
@@ -51,6 +56,31 @@ export function Editor<N extends NodeIdentity>({
     if (mounted?.isDestroyed) view.current = undefined;
     else mounted?.update({ zoom, paddingTop, maxWidth, background, theme });
   }, [zoom, paddingTop, maxWidth, background, theme]);
+  useLayoutEffect(() => {
+    const mounted = view.current;
+
+    if (!mounted || mounted.isDestroyed) return undefined;
+    let active = true;
+
+    async function replaceFonts(target: MountedEditor) {
+      try {
+        await target.setFonts(fonts);
+
+        if (active) setError(null);
+      } catch (reason) {
+        if (!active) return;
+        const failure = reason instanceof Error ? reason : new Error(String(reason));
+        setError(failure);
+        callbacks.current.onError?.(failure);
+      }
+    }
+
+    void replaceFonts(mounted);
+
+    return () => {
+      active = false;
+    };
+  }, [fonts]);
   useLayoutEffect(() => {
     const element = host.current;
 
@@ -77,7 +107,6 @@ export function Editor<N extends NodeIdentity>({
         mounted = mountEditor(target, {
           editor,
           resolveAsset,
-          fonts,
           scroll,
           toolbar,
           diagnostics,
@@ -105,7 +134,7 @@ export function Editor<N extends NodeIdentity>({
       if (view.current === mounted) view.current = undefined;
       mounted?.destroy();
     };
-  }, [editor, resolveAsset, fonts, scroll, toolbar, diagnostics]);
+  }, [editor, resolveAsset, scroll, toolbar, diagnostics]);
 
   return (
     <>

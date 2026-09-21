@@ -340,6 +340,11 @@ export function createDocumentLayout<N extends NodeIdentity>({
 
       build(false);
     },
+    replaceEngine(next: Parameters<typeof createEditorScene>[0]) {
+      assertAlive();
+      sceneCache.replaceEngine(next);
+      build(false);
+    },
     measure(this: void, id: number, width: number, height: number) {
       assertAlive();
 

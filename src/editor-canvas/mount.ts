@@ -118,6 +118,7 @@ export function mountEditor<N extends NodeIdentity>(
   let diagnostics: ReturnType<typeof connectViewDiagnostics> | undefined;
   const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
   let layers: ReturnType<typeof createViewLayers<N>> | undefined;
+  let drawing: ReturnType<typeof createLayerDrawing> | undefined;
   let textStyle: ReturnType<typeof createTextStyles> | undefined;
   const layerGeometry = createLayerGeometry();
 
@@ -506,29 +507,16 @@ export function mountEditor<N extends NodeIdentity>(
 
       if (status === 'destroyed') throw new DOMException('Editor view was destroyed', 'AbortError');
       const native = resources.read();
-      textStyle = createTextStyles(
-        (id) => {
-          const node = presentation.query(editor.state).tree.byId.get(id)?.node;
-
-          if (!node || editor.schema.resolve(node).kind !== 'text') return null;
-          const value = presentation.present(node);
-
-          return value.kind === 'text' ? value : null;
-        },
-        native.fonts,
-        native.layout.textMetrics,
-        colors,
+      textStyle = resolveTextStyles(native);
+      drawing = createLayerDrawing(
+        painter.register,
+        () => layout?.getSnapshot().inset ?? 0,
+        createTextLabels(native.layout),
       );
-      layers = createViewLayers(
-        overlay,
-        editor,
-        createLayerDrawing(
-          painter.register,
-          () => layout?.getSnapshot().inset ?? 0,
-          createTextLabels(native.layout),
-        ),
-        { onError: fail, onTextPointer: capture.onTextPointer },
-      );
+      layers = createViewLayers(overlay, editor, drawing, {
+        onError: fail,
+        onTextPointer: capture.onTextPointer,
+      });
       const installedLayers = layers;
       cleanup.push(() => installedLayers.destroy());
 
@@ -682,6 +670,22 @@ export function mountEditor<N extends NodeIdentity>(
   const ready = initialize();
   void ready.catch(() => {});
 
+  function resolveTextStyles(native: ReturnType<typeof resources.read>) {
+    return createTextStyles(
+      (id) => {
+        const node = presentation.query(editor.state).tree.byId.get(id)?.node;
+
+        if (!node || editor.schema.resolve(node).kind !== 'text') return null;
+        const value = presentation.present(node);
+
+        return value.kind === 'text' ? value : null;
+      },
+      native.fonts,
+      native.layout.textMetrics,
+      colors,
+    );
+  }
+
   return {
     ready,
     get status() {
@@ -695,6 +699,21 @@ export function mountEditor<N extends NodeIdentity>(
     },
     focus,
     update,
+    /** Keep the current view usable while fonts load; a newer request supersedes this one. */
+    setFonts(fonts: FontConfiguration) {
+      return resources.replaceFonts(fonts, (native) => {
+        if (status !== 'ready' || !layout || !drawing) throw new Error(`Editor view is ${status}`);
+
+        try {
+          textStyle = resolveTextStyles(native);
+          drawing.replaceLabels(createTextLabels(native.layout));
+          layout.replaceEngine(native.layout);
+        } catch (error) {
+          fail(error instanceof Error ? error : new Error(String(error)));
+          throw error;
+        }
+      });
+    },
     scrollTo(top: number) {
       if (status === 'destroyed' || status === 'failed')
         throw new Error(`Editor view is ${status}`);

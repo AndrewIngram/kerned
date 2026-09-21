@@ -78,6 +78,8 @@ export function createEditorScene<N extends NodeIdentity>(
   owned: Pick<Owned, 'createLayout'>,
   present: PresentBlock<N>,
 ) {
+  let engine = owned;
+  let fontsChanged = false;
   let textLayout: ReturnType<Owned['createLayout']> | undefined;
 
   const cache = new Map<number, Cached<N>>(),
@@ -106,7 +108,7 @@ export function createEditorScene<N extends NodeIdentity>(
     const presentation = present(node);
 
     if (presentation.kind !== 'text') throw new Error('Expected text presentation');
-    const owner = (textLayout ??= owned.createLayout());
+    const owner = (textLayout ??= engine.createLayout());
     const input = { ...presentation, id: node.id, width };
 
     if (presentation.atoms.length) {
@@ -172,7 +174,7 @@ export function createEditorScene<N extends NodeIdentity>(
         paddingChanged = padding !== previous.paddingTop;
 
       const styleChanged = presentationVersion !== (view.presentationVersion ?? 0);
-      let reflow = previous.width !== width && previous.placements.length > 0;
+      let reflow = (fontsChanged || previous.width !== width) && previous.placements.length > 0;
 
       if (reflow || styleChanged) {
         dirty.clear();
@@ -195,6 +197,7 @@ export function createEditorScene<N extends NodeIdentity>(
         });
 
       if (
+        !fontsChanged &&
         !styleChanged &&
         nodes === previousNodes &&
         width === previous.width &&
@@ -447,6 +450,7 @@ export function createEditorScene<N extends NodeIdentity>(
         paddingTop: padding,
       };
       presentationVersion = view.presentationVersion ?? 0;
+      fontsChanged = false;
       previousNodes = nodes;
       previousMeasurements = measurements;
       previousDecorations = decorations;
@@ -480,12 +484,23 @@ export function createEditorScene<N extends NodeIdentity>(
 
       return offsetLayout(next.layout, inset);
     },
+    replaceEngine(next: Pick<Owned, 'createLayout'>) {
+      textLayout?.destroy();
+      textLayout = undefined;
+      engine = next;
+      fontsChanged = true;
+
+      // Retain heights and the reading anchor, but never reuse old font identities.
+      for (const [id, value] of cache)
+        cache.set(id, { ...value, width: null, layout: null, boxes: [] });
+    },
     clear() {
       textLayout?.destroy();
       textLayout = undefined;
       cache.clear();
       dirty.clear();
       presentationVersion = 0;
+      fontsChanged = false;
       previousNodes = [];
       previous = {
         placements: [],

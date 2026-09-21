@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status   | Required outcome                                                               |
-| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Complete | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Pending  | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Pending  | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status         | Required outcome                                                               |
+| ----------------------------------- | -------------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete       | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete       | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Complete       | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Complete       | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Complete       | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Review pending | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending        | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending        | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending        | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -2344,3 +2344,44 @@ files unchanged.
 
 Milestone 5 remains open. In-place font-source replacement, full Warbreaker
 live-theme validation and the independent milestone architecture review remain.
+
+### Milestone 5 implementation ready for architecture review
+
+The mounted view now exposes `await view.setFonts(configuration)`. React font-prop
+changes use the same operation without remounting. The resource owner captures
+configuration, loads replacement native/browser faces alongside the current
+collection, and synchronously installs the replacement before releasing the old
+resources. Graphics, input, native node views, session and selection stay alive.
+A failed font load retains working resources; a newer valid request supersedes
+the previous one, and destruction cancels pending work. Initial-load and
+replacement cancellation share the same cleanup policy.
+
+Scene replacement discards old glyph identities and cached geometry while keeping
+paragraph heights and the reading anchor. The viewport and selection are composed
+first; distant paragraphs use the existing background queue. Prepared extension
+labels are refreshed before painting, including labels retained by an extension
+across frames. Weak references let this refresh find live handles without owning
+widget lifetime. Native text reads new per-view aliases through its existing style
+contract. No third-party handles are exposed in the public interface.
+
+Coverage includes concurrent/superseded requests, failure and retry, configuration
+capture, graphics reuse, release of the old font collection, replacement requested
+before initial readiness, a distant 500-paragraph anchor, retained extension
+labels, active table inputs and React prop replacement/default restoration.
+The full 7,280-block Warbreaker document also passes live metrics, paint-only
+colors and font-source changes in all three browsers. Its distant caret, selection,
+focus and reading anchor survive; editing and undo still work, and no stale
+visible paint is recorded.
+
+`pnpm run check` passes with 632 Vitest tests, one unchanged collaboration TODO and
+42 end-to-end cases. The production build and all nine production reflow cases
+pass. Three serial production trials pass unchanged budgets: worst first usable
+230 ms, streaming 1,196.2 ms, paste handler 57.8 ms, paste to paint 117.3 ms, typing
+32.1 ms, paging 32.3 ms and loaded heap 27,028,408 bytes. Evidence is recorded in
+`artifacts/public-interface-m5/font-replacement/`; its commit field identifies
+`41b4633` and measures the uncommitted implementation. The second lint fix/format
+pass leaves files unchanged.
+
+All M5 implementation and validation requirements are now covered. The required
+implementation commit and independent architecture judge follow this checkpoint;
+M5 is not complete until agreed findings are resolved and committed.

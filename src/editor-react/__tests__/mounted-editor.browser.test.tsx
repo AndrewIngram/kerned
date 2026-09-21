@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import {
+  defaultFonts,
   defineNodePresentation,
   defineStyleRule,
   presentations,
@@ -53,6 +54,13 @@ const size = { width: 400, height: 260 };
 const initialTheme = { rules: [defineStyleRule(note, { lineHeight: 40 })] };
 
 const nextTheme = { rules: [defineStyleRule(note, { lineHeight: 48 })] };
+
+const replacementFonts = {
+  ...defaultFonts,
+  faces: defaultFonts.faces.map((face, index) =>
+    index === 0 ? { ...face, asset: defaultFonts.faces[1].asset } : face,
+  ),
+};
 
 const invalidAsset = () => 'data:application/wasm,invalid';
 
@@ -287,4 +295,36 @@ test('React applies and removes a theme without remounting or leaking it into DO
   expect(document.activeElement).toBe(input);
   expect(f.editor.state.selection).toBe(selection);
   expect(f.element.querySelector('[theme]')).toBeNull();
+});
+
+test('React font props replace live resources without remounting and restore defaults', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  flushSync(() => f.root.render(<Editor editor={f.editor} style={size} onReady={f.ready} />));
+  const mounted = await f.readiness;
+  const id = f.editor.state.nodes[0].id;
+  const caret = mounted.coordsAt({ id, offset: 5 });
+  const canvas = f.element.querySelector('canvas');
+
+  flushSync(() =>
+    f.root.render(
+      <Editor
+        editor={f.editor}
+        fonts={replacementFonts}
+        style={size}
+        onReady={unexpectedRemount}
+      />,
+    ),
+  );
+  await expect.poll(() => mounted.coordsAt({ id, offset: 5 })?.left).not.toBe(caret?.left);
+  expect(f.element.querySelector('canvas')).toBe(canvas);
+  expect(mounted.status).toBe('ready');
+  flushSync(() =>
+    f.root.render(<Editor editor={f.editor} style={size} onReady={unexpectedRemount} />),
+  );
+  await expect.poll(() => mounted.coordsAt({ id, offset: 5 })?.left).toBe(caret?.left);
+  expect(f.element.querySelector('canvas')).toBe(canvas);
+  expect(f.element.querySelector('[role=alert]')).toBeNull();
 });

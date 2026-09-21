@@ -887,3 +887,72 @@ test('changing only a text color repaints pixels without shaping, composition, g
   expect(diagnostics.read()?.stats.compositions).toBe(before?.stats.compositions);
   expect(diagnostics.read()?.generation).toBe(before?.generation);
 });
+
+test('font replacement preserves the mounted view, distant reading anchor and selection', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  f.editor.transact((draft) => {
+    draft.step({
+      kind: 'replaceChildren',
+      parent: null,
+      index: 3,
+      count: 0,
+      nodes: Array.from({ length: 500 }, (_, index) =>
+        schema
+          .node(note)
+          .create(
+            { id: index + 4, key: `font-${index}` },
+            { body: `Paragraph ${index} with words that wrap across multiple lines. `.repeat(4) },
+          ),
+      ),
+    });
+
+    return true;
+  });
+  const diagnostics = createViewDiagnostics();
+  const view = mountEditor(f.element, { editor: f.editor, diagnostics });
+  await view.ready;
+  f.editor.select(textSelection(400, 20));
+  await view.reveal({ id: 400, offset: 20 }, { align: 'start' });
+  view.focus();
+  const input = capture(f.element);
+  const canvas = f.element.querySelector('canvas');
+  const selected = f.editor.state.selection;
+  const before = view.blockBounds(400, 'client');
+  const caret = view.coordsAt({ id: 400, offset: 20 });
+  const generation = diagnostics.read()?.generation ?? 0;
+  await view.setFonts({
+    ...defaultFonts,
+    faces: defaultFonts.faces.map((face, index) =>
+      index === 0 ? { ...face, asset: defaultFonts.faces[1].asset } : face,
+    ),
+  });
+  expect(view.status).toBe('ready');
+  expect(f.element.querySelector('canvas')).toBe(canvas);
+  expect(capture(f.element)).toBe(input);
+  expect(document.activeElement).toBe(input);
+  expect(f.editor.state.selection).toBe(selected);
+  expect(view.coordsAt({ id: 400, offset: 20 })?.left).not.toBe(caret?.left);
+  expect(diagnostics.read()?.generation).toBe(generation + 1);
+  expect(diagnostics.read()?.pending).toBeGreaterThan(0);
+  await expect.poll(() => diagnostics.read()?.pending).toBe(0);
+  expect(view.blockBounds(400, 'client')?.top).toBeCloseTo(before?.top ?? 0, 0);
+  expect(view.getSnapshot()?.viewport.top).toBeGreaterThan(1000);
+  await view.setFonts(defaultFonts);
+  expect(view.coordsAt({ id: 400, offset: 20 })?.left).toBeCloseTo(caret?.left ?? 0, 1);
+  expect(f.editor.state.selection).toBe(selected);
+});
+
+test('font replacement requested during initial readiness preserves the attachment', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const view = mountEditor(f.element, { editor: f.editor });
+  await view.setFonts(defaultFonts);
+  expect(view.status).toBe('ready');
+  expect(f.element.querySelectorAll('canvas')).toHaveLength(1);
+  expect(view.coordsAt({ id: 1, offset: 3 })).not.toBeNull();
+});

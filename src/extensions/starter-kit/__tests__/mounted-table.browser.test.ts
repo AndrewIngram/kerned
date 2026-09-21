@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../../core';
 import {
+  defaultFonts,
   mountEditor,
   defineNodePresentation,
   presentations,
@@ -402,5 +403,35 @@ test('a native color-only update retains preview text and active input geometry'
   expect(preview.querySelector('p')).toBe(text);
   expect(input.getBoundingClientRect().toJSON()).toEqual(before.toJSON());
   expect(f.editor.state.selection).toBe(selection);
+  expect(document.activeElement).toBe(input);
+});
+
+test('replacing font sources retains the active table input and updates preview faces', async ({
+  onTestFinished,
+}) => {
+  const f = await fixture(onTestFinished);
+  const preview = f.button('Edit cell 1, 2');
+  const oldFamily = getComputedStyle(preview).fontFamily;
+  const input = await f.focus();
+  const selection = f.editor.state.selection;
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  const before = f.view.coordsAt({ id: 3, offset: 5 });
+  await f.view.setFonts({
+    ...defaultFonts,
+    faces: defaultFonts.faces.map((face, index) =>
+      index === 0 ? { ...face, asset: defaultFonts.faces[1].asset } : face,
+    ),
+  });
+  expect(f.cellInput()).toBe(input);
+  expect(document.activeElement).toBe(input);
+  expect(input.selectionStart).toBe(start);
+  expect(input.selectionEnd).toBe(end);
+  expect(f.editor.state.selection).toBe(selection);
+  expect(getComputedStyle(preview).fontFamily).not.toBe(oldFamily);
+  expect(getComputedStyle(input).fontFamily).toBe(getComputedStyle(preview).fontFamily);
+  expect(f.view.coordsAt({ id: 3, offset: 5 })?.left).not.toBe(before?.left);
+  await f.view.setFonts(defaultFonts);
+  expect(f.view.coordsAt({ id: 3, offset: 5 })?.left).toBeCloseTo(before?.left ?? 0, 1);
   expect(document.activeElement).toBe(input);
 });

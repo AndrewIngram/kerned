@@ -1,8 +1,8 @@
 # View font configuration
 
-Status: milestone 5 is in progress. Configurable faces, live node-style rules and
-shared native typography and paint-only text colors are implemented. Live font
-replacement remains in milestone 5.
+Status: configurable faces, live node-style rules, shared native typography,
+paint-only text colors and in-place font replacement are implemented. Milestone 5
+is awaiting its final validation and architecture review.
 
 A view accepts a font configuration without exposing graphics or shaping handles:
 
@@ -70,9 +70,31 @@ line or caret positions. Glyph drawing preserves text order across faces,
 including overlapping ink, rather than ordering paint by native registration ID.
 The draw runs borrow subarrays of the existing numeric buffers.
 
-Font sources remain attachment configuration. Changing the React `fonts`
-prop currently replaces the native attachment while retaining the supplied
-session. In-place font replacement is still required before milestone 5 is complete.
+Font sources can change without replacing the attachment:
+
+```ts
+await view.setFonts({ ...defaultFonts, faces: productFaces });
+```
+
+`setFonts` captures and validates the configuration before loading. Its promise
+resolves after the replacement fonts are ready and the visible layout has been
+refreshed. Distant paragraphs continue through viewport-first background reflow;
+the promise does not wait for every offscreen paragraph. The current view remains
+usable during loading. Font-loading failure rejects the promise and retains the
+working collection, so the caller can retry. A newer valid request cancels the
+previous request with an `AbortError`; destroying the view cancels pending work.
+Changing an asset's contents requires a versioned URL from the asset resolver.
+
+The swap preserves the graphics surface, native node views, input, session,
+selection and reading anchor. It retains estimated paragraph heights while
+invalidating glyph data from the old collection, then releases the old resources.
+Prepared extension labels refresh before painting; their public `height` reflects
+the current fonts. Native text uses the replacement's private browser aliases.
+
+Changing React's `fonts` prop performs the same live replacement. Removing it
+restores `defaultFonts`. `onReady` still describes the initial mount; replacement
+errors reach `onError` and the existing error display without destroying the
+working view. Use `view.setFonts` when an integration needs to await the swap.
 
 ## Live node-style rules
 
@@ -139,8 +161,7 @@ measurement contract. Spacing-only changes reuse shaping in both plain text and
 text with inline atoms.
 
 These rules reach canvas text, native table previews and editing inputs, list
-markers, document spacing and flowing-container indentation. In-place font-source
-replacement is still outstanding.
+markers, document spacing and flowing-container indentation.
 
 Colors accept standalone CSS literals, including hex, named colors, RGB and HSL.
 The view resolves them once per cached value to 8-bit sRGB, supplying the same

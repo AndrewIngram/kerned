@@ -4,6 +4,7 @@ import { beforeAll, expect, test } from 'vitest';
 import type { Drawing } from '../../editor-browser/drawing';
 import { createOwnedEngine } from '../../owned-layout';
 import { createCanvasRenderer, type CanvasFrame } from '../canvas-renderer';
+import { createFontCatalog, defaultFonts } from '../font-catalog';
 import { createLayerDrawing } from '../layer-drawing';
 import { createTextLabels } from '../text-labels';
 
@@ -241,4 +242,46 @@ test('destruction inside a painter retires resources after the active draw unwin
   expect(paints).toHaveLength(1);
   expect(paints[0].isDeleted()).toBe(true);
   expect(reports).toBe(0);
+});
+
+test('retained prepared labels refresh before a replaced font collection is destroyed', async ({
+  onTestFinished,
+}) => {
+  const first = await createOwnedEngine(kit, 'shaping');
+
+  const next = await createOwnedEngine(kit, 'shaping', {
+    fonts: createFontCatalog({
+      ...defaultFonts,
+      faces: defaultFonts.faces.map((face, index) =>
+        index === 0 ? { ...face, asset: defaultFonts.faces[1].asset } : face,
+      ),
+    }),
+  });
+
+  const renderer = createCanvasRenderer<never>();
+  onTestFinished(() => {
+    renderer.destroy();
+    first.destroy();
+    next.destroy();
+  });
+  const drawing = createLayerDrawing(renderer.register, () => 0, createTextLabels(first));
+  const label = drawing.prepareText({ text: 'MMMM MMMM MMMM', width: 125, size: 18 });
+  const canvas = document.createElement('canvas');
+  drawing.register('retained', 'content', (paint) => paint.text(label, 0, 0));
+  renderer.attach(kit, canvas);
+  renderer.update(frame(() => {}));
+  await nextFrame();
+  const context = canvas.getContext('2d');
+
+  if (!context) throw new Error('Expected canvas');
+  const before = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  drawing.replaceLabels(createTextLabels(next));
+  const calls = next.stats.glyphCalls;
+  first.destroy();
+  renderer.update(frame(() => {}));
+  await nextFrame();
+  const after = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  expect(after).not.toEqual(before);
+  expect(next.stats.glyphCalls).toBe(calls);
+  expect(label.height).toBeGreaterThan(0);
 });
