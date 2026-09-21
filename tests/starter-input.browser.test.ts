@@ -1,7 +1,7 @@
 import { expect, test, onTestFinished } from 'vitest';
 
 import { createEditor } from '../src/core';
-import { createTextInput } from '../src/editor-browser';
+import { createTextInput, createKeyboardShortcuts } from '../src/editor-browser';
 import { starterExtensions } from '../src/extensions/starter-kit';
 import { starterInput } from '../src/extensions/starter-kit/browser';
 import { createStarterKitInput } from '../src/extensions/starter-kit/input';
@@ -119,7 +119,7 @@ test('retained keyboard and text callbacks invoke current session commands', () 
   expect(notices.filter(Boolean)).toEqual([]);
 });
 
-test('native input groups typing and deletion, isolates composition, and owns keyboard undo', () => {
+test('native input groups typing and deletion, isolates composition, and shares keyboard undo', () => {
   const { editor, input, textInput, handlers } = inputSession();
   editor.select(textSelection(1, 5));
 
@@ -130,9 +130,13 @@ test('native input groups typing and deletion, isolates composition, and owns ke
     handlers.input?.(new Event('input'), input);
   }
 
+  const shortcuts = createKeyboardShortcuts(editor);
+
   function key(value: string, ctrlKey = false) {
     const event = new KeyboardEvent('keydown', { key: value, ctrlKey, cancelable: true });
-    handlers.keydown?.(event);
+
+    // The mount dispatches extension shortcuts before the text input fallback.
+    if (!textInput.composing && !shortcuts(event)) handlers.keydown?.(event);
 
     return event;
   }

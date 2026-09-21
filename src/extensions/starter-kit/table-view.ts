@@ -15,7 +15,7 @@ import {
   type SelectionContext,
   type NodeAccess,
 } from '../../state';
-import { formattingSpans, type TextFormat } from '../formatting';
+import { formattingSpans } from '../formatting';
 import { tableCells } from '../table';
 import { createTableContent, type TableText, type TableCellContent } from './table-content';
 
@@ -28,9 +28,8 @@ export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
   access: (id: number) => NodeAccess | undefined;
   onSelect: (selection: Selection) => void;
   onText: (id: number, from: number, to: number, text: string, caret: number) => boolean;
-  onUndo: (redo: boolean) => void;
+  onKeyDown: (event: KeyboardEvent) => boolean;
   onReplace: (text: string) => void;
-  onFormat: (format: TextFormat) => void;
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   textDecorations?: ReadTextDecorations;
   textStyle: ReadTextStyle;
@@ -436,25 +435,7 @@ export function createTableView<N extends NodeIdentity>(
   listen('keydown', (event) => {
     if (!frame || event.isComposing || composing) return;
 
-    if ((event.metaKey || event.ctrlKey) && ['b', 'i', 'u'].includes(event.key.toLowerCase())) {
-      event.preventDefault();
-      frame.onFormat(
-        event.key.toLowerCase() === 'b'
-          ? 'bold'
-          : event.key.toLowerCase() === 'i'
-            ? 'italic'
-            : 'underline',
-      );
-
-      return;
-    }
-
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
-      event.preventDefault();
-      frame.onUndo(event.shiftKey);
-
-      return;
-    }
+    if (frame.onKeyDown(event) || event.defaultPrevented) return;
 
     if (selectedCells().size && (event.key === 'Backspace' || event.key === 'Delete')) {
       event.preventDefault();

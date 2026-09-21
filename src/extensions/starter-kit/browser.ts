@@ -1,5 +1,5 @@
 import { defineExtension, type ContributionContext } from '../../core';
-import { inputPolicies, htmlParsers } from '../../editor-browser';
+import { inputPolicies, htmlParsers, keyboardShortcuts } from '../../editor-browser';
 import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
 import { starterHtmlParsers } from '../html-parsers';
 import { image } from '../starter-definitions';
@@ -12,6 +12,7 @@ export { mentionView, onMentionActivate, type MentionActivation } from './mentio
 
 import { createStarterKitInput } from './input';
 import { starterPresentation } from './presentation';
+import { starterKeyboardShortcuts } from './shortcuts';
 import { tableView } from './table-node-view';
 import { underlineView } from './underline-view';
 
@@ -69,6 +70,8 @@ export const starterInput = defineExtension({
   requires: ['starterEditing', 'starterFormatting', 'starterStructure', 'starterTables'],
   options: {},
   setup(_options, context: ContributionContext) {
+    for (const shortcut of starterKeyboardShortcuts) context.provide(keyboardShortcuts, shortcut);
+
     for (const rule of starterHtmlParsers) context.provide(htmlParsers, rule);
 
     context.provide(inputPolicies, {

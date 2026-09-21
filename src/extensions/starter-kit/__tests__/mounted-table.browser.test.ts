@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../../core';
+import { keyboardShortcuts, type KeyboardShortcut } from '../../../editor-browser';
 import {
   defaultFonts,
   mountEditor,
@@ -15,6 +16,7 @@ import { formattingSpans } from '../../formatting';
 import { paragraph } from '../../starter-definitions';
 import { tableCells } from '../../table';
 import { starterBrowserExtensions } from '../browser';
+import { formattingCommands } from '../formatting';
 
 const note = defineNode({
   name: 'note',
@@ -50,11 +52,26 @@ const notePresentation = defineExtension({
   },
 });
 
-async function fixture(cleanup: (fn: () => void) => void) {
+async function fixture(
+  cleanup: (fn: () => void) => void,
+  shortcuts: readonly KeyboardShortcut[] = [],
+) {
+  const customKeys = defineExtension({
+    name: 'customKeys',
+    options: {},
+    setup(_options, context: ContributionContext) {
+      for (const shortcut of shortcuts) context.provide(keyboardShortcuts, shortcut);
+
+      return {};
+    },
+  });
+
   let writable = true;
 
   const editor = createEditor({
-    schema: createSchema({ extensions: [...starterBrowserExtensions(), note, notePresentation] }),
+    schema: createSchema({
+      extensions: [...starterBrowserExtensions(), note, notePresentation, customKeys],
+    }),
     content: [
       {
         kind: 'table',
@@ -434,4 +451,36 @@ test('replacing font sources retains the active table input and updates preview 
   await f.view.setFonts(defaultFonts);
   expect(f.view.coordsAt({ id: 3, offset: 5 })?.left).toBeCloseTo(before?.left ?? 0, 1);
   expect(document.activeElement).toBe(input);
+});
+
+test('native cell editing shares shortcut priority and IME bypass with canvas capture', async ({
+  onTestFinished,
+}) => {
+  let calls = 0;
+
+  const f = await fixture(onTestFinished, [
+    {
+      key: 'Control-b',
+      run({ editor }) {
+        calls++;
+
+        return editor.transact((draft) => draft.command(formattingCommands.toggleFormat, 'italic'));
+      },
+    },
+  ]);
+
+  f.editor.select(textSelection(3, 0, 6));
+  const input = await f.focus();
+  input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+  f.key('b');
+  expect(calls).toBe(0);
+  input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true }));
+  f.key('b');
+  expect(calls).toBe(1);
+  expect(f.table().rows[0][0].paragraphs[0]).toMatchObject({
+    styles: [{ from: 0, to: 6, mark: { type: 'italic' } }],
+  });
+  f.key('z');
+  expect(f.table().rows[0][0].paragraphs[0]).toMatchObject({ styles: [] });
+  expect(f.notices.filter(Boolean)).toEqual([]);
 });

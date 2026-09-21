@@ -231,3 +231,5 @@ export {
   type HtmlParseRule,
   type ParsedHtmlText,
 } from './html-parser';
+
+export { keyboardShortcuts, createKeyboardShortcuts, type KeyboardShortcut } from './shortcuts';

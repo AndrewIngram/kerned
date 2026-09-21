@@ -2,10 +2,12 @@ import { expect, test } from 'vitest';
 import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../../core';
+import { keyboardShortcuts } from '../../../editor-browser';
 import { mountEditor, defineNodePresentation, presentations } from '../../../editor-canvas';
 import { createSchema, defineNode } from '../../../model';
 import { textSelection } from '../../../state';
 import { starterBrowserExtensions } from '../browser';
+import { formattingCommands } from '../formatting';
 
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
@@ -109,4 +111,68 @@ test('starter input edits foreign text fields through the shared native mount, i
   expect(editor.state.nodes).toHaveLength(3);
   expect(editor.state.nodes[2]).toMatchObject({ kind: 'paragraph', text: '' });
   expect(view.status).toBe('ready');
+});
+
+test('canvas shortcuts override built-ins once and skip explicitly interactive node controls', async ({
+  onTestFinished,
+}) => {
+  let calls = 0;
+
+  const customKeys = defineExtension({
+    name: 'customKeys',
+    options: {},
+    setup(_options, context: ContributionContext) {
+      context.provide(keyboardShortcuts, {
+        key: 'Control-b',
+        run({ editor }) {
+          calls++;
+
+          return editor.transact((draft) =>
+            draft.command(formattingCommands.toggleFormat, 'italic'),
+          );
+        },
+      });
+
+      return {};
+    },
+  });
+
+  const editor = createEditor({
+    schema: createSchema({ extensions: [...starterBrowserExtensions(), customKeys] }),
+    content: [{ kind: 'paragraph', id: 1, text: 'Text' }],
+    selection: textSelection(1, 0, 4),
+  });
+
+  const host = document.createElement('div');
+  host.style.cssText = 'width:480px;height:300px;';
+  document.body.append(host);
+  const view = mountEditor(host, { editor });
+  onTestFinished(() => {
+    view.destroy();
+    editor.destroy();
+    host.remove();
+  });
+  await view.ready;
+  editor.commands.focus();
+  const input = host.querySelector('textarea');
+
+  if (!input) throw new Error('Missing input');
+
+  const key = () =>
+    new KeyboardEvent('keydown', { key: 'b', ctrlKey: true, bubbles: true, cancelable: true });
+
+  input.dispatchEvent(key());
+  expect(calls).toBe(1);
+  expect(editor.state.nodes[0]).toMatchObject({
+    marks: [{ from: 0, to: 4, mark: { type: 'italic' } }],
+  });
+  const root = host.querySelector('[data-editor-view]');
+
+  if (!root) throw new Error('Missing editor root');
+  const button = document.createElement('button');
+  root.append(button);
+  const event = key();
+  button.dispatchEvent(event);
+  expect(calls).toBe(1);
+  expect(event.defaultPrevented).toBe(false);
 });

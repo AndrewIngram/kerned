@@ -10,12 +10,10 @@ import { readClipboard, writeClipboard, type ClipboardFragment } from '../../ext
 import { textContent, type NodeIdentity, type Schema } from '../../model';
 import { supportsOwnedText } from '../../owned-text-support';
 import { TextSelection } from '../../state';
-import type { TextFormat } from '../formatting';
 import { table as tableDefinition, tableCell, image } from '../starter-definitions';
 import { tableCells } from '../table';
 import { plainCellRectangle, cellRectangleText } from '../table-clipboard';
 import { editingCommands } from './commands';
-import { formattingCommands } from './formatting';
 import { structureCommands, structureQueries } from './structure';
 
 type InputOptions<N extends NodeIdentity> = {
@@ -74,22 +72,6 @@ export function createStarterKitInput<N extends NodeIdentity>({
       return false;
     }
   }
-
-  function restore(redo = false) {
-    return run(() => {
-      const changed = editor.transact((context) => context.restoreHistory(redo ? 'redo' : 'undo'));
-
-      if (changed) closePanel?.();
-
-      return changed;
-    }, true);
-  }
-
-  const toggleFormat = (format: TextFormat) =>
-    run(
-      () => editor.transact((context) => context.command(formattingCommands.toggleFormat, format)),
-      true,
-    );
 
   const replaceCells = (text: string) =>
     run(
@@ -182,26 +164,6 @@ export function createStarterKitInput<N extends NodeIdentity>({
     ) {
       event.preventDefault();
       replaceCells('');
-
-      return;
-    }
-
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
-      event.preventDefault();
-      restore(event.shiftKey);
-
-      return;
-    }
-
-    if ((event.metaKey || event.ctrlKey) && ['b', 'i', 'u'].includes(event.key.toLowerCase())) {
-      event.preventDefault();
-      toggleFormat(
-        event.key.toLowerCase() === 'b'
-          ? 'bold'
-          : event.key.toLowerCase() === 'i'
-            ? 'italic'
-            : 'underline',
-      );
 
       return;
     }

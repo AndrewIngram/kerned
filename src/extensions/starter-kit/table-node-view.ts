@@ -1,4 +1,5 @@
 import { defineExtension, type ContributionContext } from '../../core';
+import { createKeyboardShortcuts } from '../../editor-browser';
 import {
   nodeViews,
   type NodeViewContext,
@@ -7,7 +8,6 @@ import {
 import type { NodeIdentity } from '../../model';
 import { table } from '../starter-definitions';
 import { editingCommands } from './commands';
-import { formattingCommands } from './formatting';
 import { createTableView } from './table-view';
 
 /** Grid interaction belongs to the table extension; the mount supplies shared clipboard policy. */
@@ -18,6 +18,7 @@ export const tableView = defineExtension({
   setup(_options, context: ContributionContext) {
     context.provide(nodeViews, {
       create<N extends NodeIdentity>({ editor, clipboard, notice }: NodeViewContext<N>) {
+        const shortcuts = createKeyboardShortcuts(editor);
         const binding = editor.schema.node(table);
 
         function run(action: () => boolean) {
@@ -55,16 +56,7 @@ export const tableView = defineExtension({
                         { history: { group: `typing:${id}` } },
                       ),
                     ),
-                  onUndo: (redo) =>
-                    run(() =>
-                      editor.transact((draft) => draft.restoreHistory(redo ? 'redo' : 'undo')),
-                    ),
-                  onFormat: (format) =>
-                    run(() =>
-                      editor.transact((draft) =>
-                        draft.command(formattingCommands.toggleFormat, format),
-                      ),
-                    ),
+                  onKeyDown: (event) => run(() => shortcuts(event)),
                   onReplace: (text) =>
                     run(() =>
                       editor.transact((draft) =>

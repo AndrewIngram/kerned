@@ -1,11 +1,13 @@
 import { expect, test } from 'vitest';
 
 import { createEditor } from '../../../core';
+import { createKeyboardShortcuts } from '../../../editor-browser';
 import { createDocumentPresentation } from '../../../editor-canvas/presentation';
 import { createSchema } from '../../../model';
 import { textSelection } from '../../../state';
 import { createSampleDocument, type TableNode } from '../../demo-model';
 import { tableCells } from '../../table';
+import { starterInput } from '../browser';
 import { createStarterDocumentQuery } from '../browser-document';
 import { starterExtensions } from '../index';
 import { starterPresentation } from '../presentation';
@@ -15,11 +17,12 @@ function fixture(writable = true) {
   let editable = writable;
 
   const editor = createEditor({
-    schema: createSchema({ extensions: [...starterExtensions, starterPresentation] }),
+    schema: createSchema({ extensions: [...starterExtensions, starterPresentation, starterInput] }),
     document: createSampleDocument().slice(0, 4),
     permissions: { access: () => (editable ? 'editable' : 'read-only') },
   });
 
+  const shortcuts = createKeyboardShortcuts(editor);
   const project = createStarterDocumentQuery(editor.schema);
   const presentation = createDocumentPresentation(editor);
   const host = document.createElement('div');
@@ -65,13 +68,7 @@ function fixture(writable = true) {
           .replaceText({ id, from, to, text, caret })
           .run();
       },
-      onUndo: (redo) => {
-        if (redo) editor.commands.redo();
-        else editor.commands.undo();
-      },
-      onFormat: (format) => {
-        editor.commands.toggleFormat(format);
-      },
+      onKeyDown: shortcuts,
       onReplace: (text) => {
         editor.commands.replaceSelection(text);
       },

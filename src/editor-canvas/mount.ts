@@ -1,7 +1,12 @@
 import { connectEditorView } from '../core';
 
 import './mount.css';
-import { mountEditorView, createEditorViewport, type BrowserViewOptions } from '../editor-browser';
+import {
+  mountEditorView,
+  createEditorViewport,
+  createKeyboardShortcuts,
+  type BrowserViewOptions,
+} from '../editor-browser';
 import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import { createCanvasInput } from '../editor-browser/canvas-input';
 import { createContentSlot } from '../editor-browser/content-slot';
@@ -62,6 +67,7 @@ export function mountEditor<N extends NodeIdentity>(
   const presentation = createDocumentPresentation(editor, configuration.theme, colors);
   // Resolve the initial projection before allocating native resources or changing the host.
   presentation.query(editor.state);
+  const shortcuts = createKeyboardShortcuts(editor);
   const policies: ReturnType<InputContribution['create']>[] = [];
 
   function clipboard(event: ClipboardEvent) {
@@ -686,6 +692,14 @@ export function mountEditor<N extends NodeIdentity>(
         element: () => input,
         keydown(event) {
           if (event.isComposing || capture.textInput.composing) return;
+
+          try {
+            if (shortcuts(event)) return;
+          } catch (error) {
+            reportNotice(error instanceof Error ? error.message : String(error));
+
+            return;
+          }
 
           for (const policy of policies) {
             policy.keydown?.(event);

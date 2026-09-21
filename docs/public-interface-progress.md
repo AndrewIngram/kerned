@@ -3014,3 +3014,37 @@ Milestone 7 remains open for deterministic shortcut/input/paste-rule composition
 the unresolved historical performance gate, and its final architecture judge.
 Milestone 8 is still pending. See [HTML parsing](html-parsing.md) for the public
 interfaces and explicit interchange losses.
+
+### Milestone 7 checkpoint: shared keyboard shortcut composition
+
+The browser adapter now exposes `keyboardShortcuts` and
+`createKeyboardShortcuts`. Extensions register typed handlers with a key and
+optional priority. Higher priorities run first, equal priorities preserve
+installation order, and a false result falls through. Matching uses explicit
+modifiers and a platform-aware `Mod` alias. Composition, AltGraph and previously
+handled events bypass callbacks. Exceptions consume the key before reporting so
+an extension failure cannot trigger a second handler or native edit.
+
+Canvas capture and native table cells use the same dispatcher. Bold, italic,
+underline, undo and redo moved out of their duplicated handlers into starter
+contributions at priority -100. Ordinary custom contributions can override them
+without installation-order tricks. The registry does not install root/global
+listeners or take keyboard ownership from unrelated interactive controls.
+Commands retain their existing permission, history and transaction ownership.
+
+Validation:
+
+- Focused tests pass in Chromium, Firefox and WebKit: precedence, fallback,
+  platform modifiers, composition/AltGraph, exception handling, session lifetime,
+  mounted canvas overrides and native cell overrides/history.
+- `pnpm run check` passes: 882 Vitest tests, one unchanged collaboration TODO,
+  and 42 end-to-end cases. The direct starter input integration fixture now
+  exercises the shared dispatcher before the schema-specific input fallback.
+- `pnpm run build` passes with the existing chunk-size warning.
+- No performance threshold or baseline changed. The historical performance gate
+  described in the previous checkpoint remains open; this slice makes no new
+  claim about those measurements.
+
+See [Keyboard shortcuts](keyboard-shortcuts.md) for authoring and native-view
+integration. Input/paste transformation rules, the performance gate and the
+milestone 7 architecture judge remain outstanding. Milestone 8 is still pending.
