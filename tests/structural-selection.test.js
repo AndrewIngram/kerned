@@ -1,8 +1,14 @@
 import { test, expect } from 'vitest';
 
+import * as blocksModule from '../src/extensions/blocks.ts';
+import * as clipboardModule from '../src/extensions/clipboard.ts';
+import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
+import * as stateModule from '../src/state/index.ts';
+import * as editorFoundationModule from './fixtures/editor-foundation.js';
+
 test('structural ranges preserve direction, hierarchy, codecs and transaction history', async () => {
   const result = await (async () => {
-    const { schema } = await import('./fixtures/editor-foundation.js');
+    const { schema } = editorFoundationModule;
 
     const {
       createEditor,
@@ -10,7 +16,7 @@ test('structural ranges preserve direction, hierarchy, codecs and transaction hi
       selectionContext,
       createSelectionRegistry,
       extendSelection,
-    } = await import('../src/state/index.ts');
+    } = stateModule;
 
     const atom = (id) => ({ id, key: `n-${id}`, kind: 'atom' }),
       text = (id, value) => ({ id, key: `n-${id}`, kind: 'text', value });
@@ -123,11 +129,10 @@ test('structural ranges preserve direction, hierarchy, codecs and transaction hi
 
 test('node edges follow split and join, and node-only ranges support replacement and gaps', async () => {
   const result = await (async () => {
-    const { createEditor, RangeSelection, selectionContext } =
-      await import('../src/state/index.ts');
+    const { createEditor, RangeSelection, selectionContext } = stateModule;
 
-    const { demoSchema } = await import('../src/extensions/demo-schema.ts');
-    const { pasteFragment } = await import('../src/extensions/clipboard.ts');
+    const { demoSchema } = demoSchemaModule;
+    const { pasteFragment } = clipboardModule;
 
     const p = (id, text) => ({
       kind: 'paragraph',
@@ -219,11 +224,10 @@ test('node edges follow split and join, and node-only ranges support replacement
 
 test('structural edits clean empty containers and keep surviving endpoints when an ancestor is deleted', async () => {
   const result = await (async () => {
-    const { createEditor, RangeSelection, selectionContext } =
-      await import('../src/state/index.ts');
+    const { createEditor, RangeSelection, selectionContext } = stateModule;
 
-    const { demoSchema } = await import('../src/extensions/demo-schema.ts');
-    const { replaceStructuredText } = await import('../src/extensions/blocks.ts');
+    const { demoSchema } = demoSchemaModule;
+    const { replaceStructuredText } = blocksModule;
 
     const p = (id, text) => ({
       kind: 'paragraph',
@@ -281,8 +285,8 @@ test('structural edits clean empty containers and keep surviving endpoints when 
 
 test('large node-only deletion batches siblings and undoes atomically', async () => {
   const result = await (async () => {
-    const { schema } = await import('./fixtures/editor-foundation.js');
-    const { createEditor, RangeSelection } = await import('../src/state/index.ts');
+    const { schema } = editorFoundationModule;
+    const { createEditor, RangeSelection } = stateModule;
 
     const nodes = Array.from({ length: 1024 }, (_, id) => ({
       id,

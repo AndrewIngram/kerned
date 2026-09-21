@@ -1,10 +1,16 @@
 import { test, expect } from 'vitest';
 import { z } from 'zod';
 
+import * as editorBrowserModule from '../src/editor-browser/index.ts';
+import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
+import * as modelModule from '../src/model/index.ts';
+import * as stateModule from '../src/state/index.ts';
+import * as editorFoundationModule from './fixtures/editor-foundation.js';
+
 test('extension state publishes atomically and commands report mixed state without running effects', async () => {
   const result = await (async () => {
-    const { fixture } = await import('./fixtures/editor-foundation.js');
-    const { createStateField, commandActivity } = await import('../src/state/index.ts');
+    const { fixture } = editorFoundationModule;
+    const { createStateField, commandActivity } = stateModule;
 
     const field = createStateField({
       create: () => ({ edits: 0, restores: 0 }),
@@ -93,13 +99,9 @@ test('extension state publishes atomically and commands report mixed state witho
 
 test('serialized structural references follow wrapping and movement and recover on undo or reload', async () => {
   const result = await (async () => {
-    const { fixture, dispatch, schema } = await import('./fixtures/editor-foundation.js');
+    const { fixture, dispatch, schema } = editorFoundationModule;
 
-    const { createEditor, parseRelativeGap } = Object.assign(
-      {},
-      await import('../src/state/index.ts'),
-      await import('../src/model/index.ts'),
-    );
+    const { createEditor, parseRelativeGap } = Object.assign({}, stateModule, modelModule);
 
     const editor = fixture({ documentId: 'gaps' }),
       ref = parseRelativeGap(JSON.parse(JSON.stringify(editor.positions.before(4))));
@@ -153,7 +155,7 @@ test('serialized structural references follow wrapping and movement and recover 
 
 test('mark extensions control caret boundary inheritance independently of rendering', async () => {
   const result = await (async () => {
-    const { createSchema, defineNode, defineMark, marksAt } = await import('../src/model/index.ts');
+    const { createSchema, defineNode, defineMark, marksAt } = modelModule;
 
     const schema = createSchema({
       extensions: [
@@ -200,8 +202,8 @@ test('mark extensions control caret boundary inheritance independently of render
 
 test('gap association distinguishes insertions, empty containers and deleted parents', async () => {
   const result = await (async () => {
-    const { fixture, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { parseRelativeGap } = await import('../src/model/index.ts');
+    const { fixture, dispatch } = editorFoundationModule;
+    const { parseRelativeGap } = modelModule;
     const editor = fixture();
 
     const left = editor.positions.gap(2, 1, -1),
@@ -256,7 +258,7 @@ test('foreign inline extensions own attributes, layout and versioned serializati
       jsonRecord,
       replaceInlineObjects,
       sliceInlineObjects,
-    } = await import('../src/model/index.ts');
+    } = modelModule;
 
     const { inline: values } = createSchema({
       extensions: [
@@ -312,10 +314,9 @@ test('foreign inline extensions own attributes, layout and versioned serializati
 
 test('mark command queries cover partial text and caret chains reset on movement', async () => {
   const result = await (async () => {
-    const { createEditor, textSelection, toggleMarkCommand } =
-      await import('../src/state/index.ts');
+    const { createEditor, textSelection, toggleMarkCommand } = stateModule;
 
-    const { demoSchema } = await import('../src/extensions/demo-schema.ts');
+    const { demoSchema } = demoSchemaModule;
     let editable = true;
     const bold = { type: 'bold', attrs: null };
 
@@ -377,12 +378,7 @@ test('selection projection and multiclick ranges work with a foreign schema', as
       selectionView,
       TextSelection,
       textSelectionAtClick,
-    } = Object.assign(
-      {},
-      await import('../src/model/index.ts'),
-      await import('../src/state/index.ts'),
-      await import('../src/editor-browser/index.ts'),
-    );
+    } = Object.assign({}, modelModule, stateModule, editorBrowserModule);
 
     const schema = createSchema({
       extensions: [

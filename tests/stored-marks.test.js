@@ -1,9 +1,13 @@
 import { test, expect } from 'vitest';
 
+import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
+import * as formattingModule from '../src/extensions/formatting.ts';
+import * as stateModule from '../src/state/index.ts';
+
 test('stored marks are explicit, reset on movement, restore with history and preserve graphemes', async () => {
   const result = await (async () => {
-    const { createEditor, textSelection, inputMarks } = await import('../src/state/index.ts');
-    const { demoSchema } = await import('../src/extensions/demo-schema.ts');
+    const { createEditor, textSelection, inputMarks } = stateModule;
+    const { demoSchema } = demoSchemaModule;
     const bold = { type: 'bold', attrs: null };
 
     const editor = createEditor(
@@ -97,11 +101,10 @@ test('stored marks are explicit, reset on movement, restore with history and pre
 
 test('replacement inherits selected text and loading preserves a pending override', async () => {
   const result = await (async () => {
-    const { createEditor, textSelection, TextSelection, inputMarks } =
-      await import('../src/state/index.ts');
+    const { createEditor, textSelection, TextSelection, inputMarks } = stateModule;
 
-    const { demoSchema } = await import('../src/extensions/demo-schema.ts');
-    const { formattingMarks } = await import('../src/extensions/formatting.ts');
+    const { demoSchema } = demoSchemaModule;
+    const { formattingMarks } = formattingModule;
 
     const node = (id, text, spans = []) => ({
       kind: 'paragraph',

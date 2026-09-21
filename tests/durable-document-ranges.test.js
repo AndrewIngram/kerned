@@ -1,18 +1,19 @@
 import { test, expect } from 'vitest';
 
+import * as commentModule from '../src/extensions/comment.ts';
+import * as modelModule from '../src/model/index.ts';
+import * as stateModule from '../src/state/index.ts';
+import * as editorFoundationModule from './fixtures/editor-foundation.js';
+
 test('durable mixed ranges survive nested edits, deletion, undo and checkpoint reload without registration', async () => {
   const result = await (async () => {
-    const { schema, dispatch } = await import('./fixtures/editor-foundation.js');
+    const { schema, dispatch } = editorFoundationModule;
 
     const { createEditor, RangeSelection, NodeSelection, parseDocumentRange, textSelection } =
-      Object.assign(
-        {},
-        await import('../src/state/index.ts'),
-        await import('../src/model/index.ts'),
-      );
+      Object.assign({}, stateModule, modelModule);
 
-    const { captureComment, commentDecorations } = await import('../src/extensions/comment.ts');
-    const { resolveRangeDecorations } = await import('../src/state/index.ts');
+    const { captureComment, commentDecorations } = commentModule;
+    const { resolveRangeDecorations } = stateModule;
 
     const atom = (id) => ({ id, key: `n-${id}`, kind: 'atom' }),
       text = (id, value) => ({ id, key: `n-${id}`, kind: 'text', value });
@@ -133,8 +134,8 @@ test('durable mixed ranges survive nested edits, deletion, undo and checkpoint r
 
 test('node boundaries follow split, join, moves and unwrap with inward deletion semantics', async () => {
   const result = await (async () => {
-    const { schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { createEditor, NodeSelection, RangeSelection } = await import('../src/state/index.ts');
+    const { schema, dispatch } = editorFoundationModule;
+    const { createEditor, NodeSelection, RangeSelection } = stateModule;
 
     const t = (id, value) => ({ id, key: `n-${id}`, kind: 'text', value }),
       a = (id) => ({ id, key: `n-${id}`, kind: 'atom' });
@@ -178,12 +179,12 @@ test('node boundaries follow split, join, moves and unwrap with inward deletion 
 
 test('external ranges resolve identically across replicas after accepted edits and container unwrap', async () => {
   const result = await (async () => {
-    const { schema, dispatch } = await import('./fixtures/editor-foundation.js');
+    const { schema, dispatch } = editorFoundationModule;
 
     const { createEditor, NodeSelection, RangeSelection, parseDocumentRange } = Object.assign(
       {},
-      await import('../src/state/index.ts'),
-      await import('../src/model/index.ts'),
+      stateModule,
+      modelModule,
     );
 
     const t = (id, value) => ({ id, key: `n-${id}`, kind: 'text', value }),
@@ -262,8 +263,8 @@ test('external ranges resolve identically across replicas after accepted edits a
 
 test('text endpoints retain an interior atom after both endpoint paragraphs are removed', async () => {
   const result = await (async () => {
-    const { schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { createEditor, TextSelection } = await import('../src/state/index.ts');
+    const { schema, dispatch } = editorFoundationModule;
+    const { createEditor, TextSelection } = stateModule;
 
     const nodes = [
       { id: 1, key: 'a', kind: 'text', value: 'First' },

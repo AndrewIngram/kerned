@@ -1,15 +1,15 @@
 import { test, expect } from 'vitest';
 
+import * as tableClipboardModule from './fixtures/table-clipboard.js';
+
 test('cell rectangles preserve formatting, grow tables, retain unaffected identities and undo atomically', async () => {
   const result = await (async () => {
-    const { createEditor, textSelection, indexTree, selectionContext } =
-      await import('./fixtures/table-clipboard.js');
+    const { createEditor, textSelection, indexTree, selectionContext } = tableClipboardModule;
 
-    const { demoSchema } = await import('./fixtures/table-clipboard.js');
-    const { createTable, tableCells } = await import('./fixtures/table-clipboard.js');
+    const { demoSchema } = tableClipboardModule;
+    const { createTable, tableCells } = tableClipboardModule;
 
-    const { copyCellRectangle, pasteCellRectangle, cellRectangleText } =
-      await import('./fixtures/table-clipboard.js');
+    const { copyCellRectangle, pasteCellRectangle, cellRectangleText } = tableClipboardModule;
 
     let next = 1;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
@@ -117,7 +117,7 @@ test('rectangle paste uses source size and rejects protected targets and merged 
       demoSchema,
       pasteCellRectangle,
       copyCellRectangle,
-    } = await import('./fixtures/table-clipboard.js');
+    } = tableClipboardModule;
 
     let next = 1;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
@@ -228,7 +228,7 @@ test('large rectangles expand in both dimensions and retain header formatting', 
       pasteCellRectangle,
       selectionContext,
       indexTree,
-    } = await import('./fixtures/table-clipboard.js');
+    } = tableClipboardModule;
 
     let next = 1;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });

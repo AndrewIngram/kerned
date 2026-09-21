@@ -1,13 +1,19 @@
 import { test, expect } from 'vitest';
 
+import * as editorFoundationModule from '../../../tests/fixtures/editor-foundation.js';
+import * as editorBrowserModule from '../../editor-browser/index.ts';
+import * as stateModule from '../index.ts';
+import * as rangeSelectionModule from '../range-selection.ts';
+import * as selectionModule from '../selection.ts';
+
 test('selection projection preserves node, container, cell and empty selections', async () => {
   const result = await (async () => {
-    const { fixture, schema } = await import('../../../tests/fixtures/editor-foundation.js');
+    const { fixture, schema } = editorFoundationModule;
 
     const { selectionView, selectionContext, NodeSelection, AllSelection } = Object.assign(
       {},
-      await import('../index.ts'),
-      await import('../selection.ts'),
+      stateModule,
+      selectionModule,
     );
 
     const editor = fixture(),
@@ -59,12 +65,7 @@ test('selection projection preserves node, container, cell and empty selections'
 test('atomic navigation respects document order and preserves shift ranges', async () => {
   const result = await (async () => {
     const { moveNodeSelection, NodeSelection, RangeSelection, TextSelection, textSelection } =
-      Object.assign(
-        {},
-        await import('../../editor-browser/index.ts'),
-        await import('../selection.ts'),
-        await import('../range-selection.ts'),
-      );
+      Object.assign({}, editorBrowserModule, selectionModule, rangeSelectionModule);
 
     const nodes = [
       { id: 1, text: 'Before', selectable: true },

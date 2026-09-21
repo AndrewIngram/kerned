@@ -1,10 +1,13 @@
 import { test, expect } from 'vitest';
 import { z } from 'zod';
 
+import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
+import * as modelModule from '../src/model/index.ts';
+import * as stateModule from '../src/state/index.ts';
+
 test('custom attribute marks replace only their type and round-trip with versions', async () => {
   const result = await (async () => {
-    const { createSchema, defineMark, setMark, removeMark, hasMark, sliceMarks } =
-      await import('../src/model/index.ts');
+    const { createSchema, defineMark, setMark, removeMark, hasMark, sliceMarks } = modelModule;
 
     const { marks: schema } = createSchema({
       extensions: [
@@ -88,11 +91,7 @@ test('mark commands use a foreign node shape and preserve permissions and atomic
       TextSelection,
       changeSelectionMarks,
       selectionHasMark,
-    } = Object.assign(
-      {},
-      await import('../src/model/index.ts'),
-      await import('../src/state/index.ts'),
-    );
+    } = Object.assign({}, modelModule, stateModule);
 
     const schema = createSchema({
         extensions: [
@@ -165,12 +164,12 @@ test('mark commands use a foreign node shape and preserve permissions and atomic
 
 test('document codecs reload durable comment endpoints with their independent checkpoint', async () => {
   const result = await (async () => {
-    const { demoSchema, demoDocumentCodec } = await import('../src/extensions/demo-schema.ts');
+    const { demoSchema, demoDocumentCodec } = demoSchemaModule;
 
     const { createEditor, textSelection, parseRelativeRange } = Object.assign(
       {},
-      await import('../src/state/index.ts'),
-      await import('../src/model/index.ts'),
+      stateModule,
+      modelModule,
     );
 
     const editor = createEditor(
@@ -232,8 +231,7 @@ test('document codecs reload durable comment endpoints with their independent ch
 
 test('third-party node codecs own their payload while core enforces identities', async () => {
   const result = await (async () => {
-    const { createSchema, defineNode, createDocumentCodec, jsonRecord, jsonString } =
-      await import('../src/model/index.ts');
+    const { createSchema, defineNode, createDocumentCodec, jsonRecord, jsonString } = modelModule;
 
     let corrupt = false;
 
