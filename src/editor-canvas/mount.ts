@@ -1,6 +1,8 @@
-import './mount.css';
 import { connectEditorView } from '../core';
+
+import './mount.css';
 import { mountEditorView, createEditorViewport, type BrowserViewOptions } from '../editor-browser';
+import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import { createCanvasInput } from '../editor-browser/canvas-input';
 import {
   inputPolicies,
@@ -366,13 +368,15 @@ export function mountEditor<N extends NodeIdentity>(
       }
 
       nativeIndex++;
-      block.host.style.left = `${inset}px`;
+      const indent = doc.projection.decorations.get(id)?.inset ?? 0;
+      const nodeWidth = allocatedBlockWidth(contentWidth, indent);
+      block.host.style.left = `${inset + indent}px`;
       block.host.style.top = `${placement.y}px`;
-      block.host.style.width = `${contentWidth}px`;
+      block.host.style.width = `${nodeWidth}px`;
       block.host.dataset.selected = String(!!doc.selectedRange(placement.node));
       block.view.update({
         node: placement.node,
-        width: contentWidth,
+        width: nodeWidth,
         onMeasure: layout.measure,
         selection: editor.state.selection,
         context: doc.context,

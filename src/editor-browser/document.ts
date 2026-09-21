@@ -7,6 +7,9 @@ type ProjectionPolicy<N, Block extends N, Context> = {
   child(this: void, parent: N, index: number, context: Context): Context;
 };
 
+/** A node's half-open interval in the rendered block sequence, not an editing position. */
+export type ProjectedSpan<N> = Readonly<{ node: N; from: number; to: number }>;
+
 /** One view projection owns its snapshot caches; discarded drafts can be collected. */
 export function createDocumentQuery<N extends NodeIdentity, Block extends N, Context>(
   schema: Schema<N>,
@@ -17,6 +20,7 @@ export function createDocumentQuery<N extends NodeIdentity, Block extends N, Con
   function content(roots: readonly N[]) {
     const nodes: Block[] = [];
     const decorations = new Map<number, Context>();
+    const containers = new Map<number, ProjectedSpan<N>>();
 
     function visit(node: N, inherited: Context) {
       decorations.set(node.id, inherited);
@@ -24,9 +28,12 @@ export function createDocumentQuery<N extends NodeIdentity, Block extends N, Con
       if (policy.isBlock(node)) {
         nodes.push(node);
       } else {
+        const span = { node, from: nodes.length, to: nodes.length };
+        containers.set(node.id, span);
         schema
           .children(node)
           .forEach((child, index) => visit(child, policy.child(node, index, inherited)));
+        span.to = nodes.length;
       }
     }
 
@@ -50,7 +57,18 @@ export function createDocumentQuery<N extends NodeIdentity, Block extends N, Con
       return undefined;
     }
 
-    return { projection, tree, context, nodeIndexes, blockFor };
+    /** Flowing containers span their descendants; native descendants resolve to their owner. */
+    function spanFor(id: number): ProjectedSpan<N> | undefined {
+      const container = containers.get(id);
+
+      if (container) return container;
+      const owner = blockFor(id);
+      const index = owner && nodeIndexes.get(owner.id);
+
+      return owner && index !== undefined ? { node: owner, from: index, to: index + 1 } : undefined;
+    }
+
+    return { projection, tree, context, nodeIndexes, blockFor, spanFor };
   }
 
   function projectState(editorState: EditorState<N>) {
@@ -120,6 +138,7 @@ export function createDocumentQuery<N extends NodeIdentity, Block extends N, Con
       active,
       selectedBlocks,
       blockFor: current.blockFor,
+      spanFor: current.spanFor,
     };
   }
 

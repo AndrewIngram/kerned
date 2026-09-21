@@ -1,5 +1,6 @@
 import type { NodeIdentity } from '../model';
 import { equalScopedSelection, type ScopedSelection, type NodeAccess } from '../state';
+import { allocatedBlockWidth } from './block-geometry';
 import type { Decoration } from './decorations';
 import type { DrawingRect } from './drawing';
 import { createRangeViews } from './range-view-owner';
@@ -162,9 +163,9 @@ export function createWidgetViews<N extends NodeIdentity>(
             at.kind === 'text'
               ? block.text?.caret(at.offset, at.upstream)
               : {
-                  left: 0,
+                  left: block.inset,
                   top: at.edge === 'start' ? 0 : block.height,
-                  width: block.width,
+                  width: allocatedBlockWidth(block.width, block.inset),
                   height: 0,
                 };
 

@@ -1,3 +1,4 @@
+import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import type { ViewSession } from '../editor-browser/input-contributions';
 import type { NodeView } from '../editor-browser/node-views';
 import type { NodeIdentity, RelativePosition, TextPoint } from '../model';
@@ -95,34 +96,34 @@ export function createViewGeometry<N extends NodeIdentity>({
     coordinates: 'document' | 'client' = 'document',
   ): BlockBounds | null {
     if (destroyed || !frame || frame.document.editorState.nodes !== editor.state.nodes) return null;
-    const owner = frame.document.blockFor(id);
+    const span = frame.document.spanFor(id);
 
-    if (!owner) return null;
-    const index = frame.document.nodeIndexes.get(owner.id);
-    const placement = index === undefined ? undefined : frame.layout.scene.placements[index];
+    if (!span || span.from === span.to) return null;
+    const { scene, inset, contentWidth } = frame.layout;
+    const first = scene.placements[span.from];
+    const last = scene.placements[span.to - 1];
 
-    if (!placement) return null;
+    if (!first || !last) return null;
+    const top = first.y;
+    const height = last.y + last.height - top;
+    const indent = frame.document.projection.decorations.get(span.node.id)?.inset ?? 0;
+    const left = inset + indent;
+    const width = allocatedBlockWidth(contentWidth, indent);
 
     if (coordinates === 'client') {
       const canvas = bounds();
       const { zoom, readScroll } = frame.viewport;
 
       return {
-        id: owner.id,
-        left: canvas.left + frame.layout.inset * zoom,
-        top: canvas.top + placement.y * zoom - readScroll(),
-        width: frame.layout.contentWidth * zoom,
-        height: placement.height * zoom,
+        id: span.node.id,
+        left: canvas.left + left * zoom,
+        top: canvas.top + top * zoom - readScroll(),
+        width: width * zoom,
+        height: height * zoom,
       };
     }
 
-    return {
-      id: owner.id,
-      left: frame.layout.inset,
-      top: placement.y,
-      width: frame.layout.contentWidth,
-      height: placement.height,
-    };
+    return { id: span.node.id, left, top, width, height };
   }
 
   function coordsAt(point: TextPoint): DOMRect | null {

@@ -1,3 +1,4 @@
+import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import type { createDocumentQuery } from '../editor-browser/document';
 import type { Rect } from '../engines';
 import type { NodeIdentity } from '../model';
@@ -351,7 +352,11 @@ export function createDocumentLayout<N extends NodeIdentity>({
       if (
         !frame ||
         !detach ||
-        width !== snapshot.contentWidth ||
+        width !==
+          allocatedBlockWidth(
+            snapshot.contentWidth,
+            document?.projection.decorations.get(id)?.inset ?? 0,
+          ) ||
         !Number.isFinite(height) ||
         height <= 0 ||
         !document?.nodeIndexes.has(id)

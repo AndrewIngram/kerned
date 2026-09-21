@@ -1,3 +1,4 @@
+import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import type { LaidOut, LayoutInput, Rect } from '../engines';
 import type { NodeIdentity } from '../model';
 import type { InlineAtom } from '../owned-inline';
@@ -180,7 +181,7 @@ export function createEditorScene<N extends NodeIdentity>(
         dirty.clear();
 
         for (const [id, value] of cache)
-          if (value.width !== Math.max(80, width - (decorations.get(id)?.inset ?? 0)))
+          if (value.width !== allocatedBlockWidth(width, decorations.get(id)?.inset ?? 0))
             dirty.set(id, value.node);
       }
 
@@ -253,7 +254,7 @@ export function createEditorScene<N extends NodeIdentity>(
 
       function update(node: N) {
         const startedValue = performance.now(),
-          value = compose(node, Math.max(80, width - (decorations.get(node.id)?.inset ?? 0)));
+          value = compose(node, allocatedBlockWidth(width, decorations.get(node.id)?.inset ?? 0));
 
         compositionMs += performance.now() - startedValue;
         cache.set(node.id, value);
@@ -268,7 +269,7 @@ export function createEditorScene<N extends NodeIdentity>(
       for (let index = 0; index < nodes.length; index++) {
         const node = nodes[index],
           inset = decorations.get(node.id)?.inset ?? 0,
-          layoutWidth = Math.max(80, width - inset);
+          layoutWidth = allocatedBlockWidth(width, inset);
 
         if (index > 0) y += gap(nodes[index - 1], node);
 
@@ -283,7 +284,7 @@ export function createEditorScene<N extends NodeIdentity>(
           if (cache.delete(node.id)) textLayout?.release(node.id);
           dirty.delete(node.id);
           const measured = measurements.get(node.id);
-          const height = measured?.width === width ? measured.height : presentation.height;
+          const height = measured?.width === layoutWidth ? measured.height : presentation.height;
 
           if (styleChanged && oldPlacement && oldPlacement.height !== height) reflow = true;
           placements.push({ node, y, height, layout: null, layoutWidth: width, boxes: [] });
@@ -472,7 +473,7 @@ export function createEditorScene<N extends NodeIdentity>(
 
       const value = cache.get(id),
         inset = currentDecorations.get(id)?.inset ?? 0,
-        width = Math.max(80, previous.width - inset);
+        width = allocatedBlockWidth(previous.width, inset);
 
       if (value?.layout && value.width === width && value.node === placement.node)
         return offsetLayout(value.layout, inset);

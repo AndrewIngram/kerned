@@ -1,5 +1,7 @@
-import './decorations.css';
 import type { NodeIdentity } from '../model';
+
+import './decorations.css';
+import { allocatedBlockBounds } from './block-geometry';
 import {
   createDecorationSource,
   type Decoration,
@@ -124,7 +126,7 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
                   outlines.set(key, outline);
                 }
 
-                place(outline, block);
+                place(outline, allocatedBlockBounds(block));
                 outline.style.boxShadow = `0 0 0 ${value.outline.width}px ${value.outline.color}`;
                 outline.style.borderRadius = `${value.outline.radius}px`;
 

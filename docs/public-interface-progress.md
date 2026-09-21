@@ -2741,3 +2741,44 @@ they are not a benchmark of thousands of custom React renderers.
 M6 remains open for explicit canvas-owned editable content slots, followed by
 final validation, commit and the independent architecture judge. Milestones 7
 and 8 remain pending.
+
+### Milestone 6 checkpoint: flowing-container geometry
+
+The document projection now records each flowing container's half-open span in
+the rendered block sequence. `spanFor(id)` resolves that interval or the native
+owner of a rendered descendant. It preserves empty intervals, reuses the existing
+projection on selection-only updates and leaves earlier snapshots intact after
+edits. The span indices remain private view coordinates, not document positions.
+
+`view.blockBounds` now reports nonempty flowing-container bounds from the first
+and last placements, including internal paragraph spacing. It does not traverse
+or compose the subtree for a geometry query. Client bounds use the existing zoom
+and scroll conversion. Empty flows still have no rendered bounds until the
+content-slot layout can give their chrome geometry.
+
+The work also exposed an inherited-width bug: native blocks were positioned and
+measured at the full document column width even when a flowing ancestor indented
+them. Native hosts, measurement acceptance and scene estimates now agree with
+text layout's allocated width. A shared internal allocation rule also keeps
+node outlines, node-edge widgets and public block bounds aligned. Existing native
+descendant ownership remains unchanged; a table-cell paragraph still resolves
+to its table's block bounds.
+
+Tests cover nested and empty projection spans, snapshot reuse, deletion, measured
+native blocks inside nested flows, node-edge widget and outline alignment, zoom,
+text edits, scrolling and stale-layout queries. The full check passes with 768
+Vitest tests, one unchanged collaboration TODO and 42 end-to-end cases. The build
+passes with the existing bundle-size warning.
+
+Three serial production trials in `artifacts/public-interface-m6/container-geometry/`
+pass all original budgets: worst first usable 236 ms, streaming 1,221.4 ms, paste
+handler 60 ms, paste paint 119.9 ms, typing 32.1 ms, paging 32.3 ms and loaded heap
+27,888,104 bytes. The report records parent `cbf8021` and measures this checkpoint's
+uncommitted tree.
+
+`docs/content-slots.md` records the remaining implementation contract and required
+verification. This checkpoint supplies container geometry and correct descendant
+allocation; it does not yet expose a content-slot attachment or React component.
+M6 remains open for chrome measurement, shared slot lifetime, paint ordering,
+React integration and their interaction/virtualization regressions. The milestone
+judge follows completion of that work. Milestones 7 and 8 remain pending.

@@ -237,8 +237,10 @@ for owned sessions, context and toolbar selectors.
   unsubscribes. Subscription after disposal throws.
 - `blockBounds(id, coordinates = 'document')` returns a block's document-space rectangle and rendered owner
   ID. Native descendants, such as cell paragraphs, return their table's bounds;
-  use `coordsAt` for their individual text. Flowing containers have no standalone
-  bounds. Pass `'client'` for viewport-relative CSS-pixel bounds suitable for
+  use `coordsAt` for their individual text. Nonempty flowing containers span their
+  projected descendants, including inter-block spacing, with their own inherited
+  indentation. Empty flows have no rendered bounds yet. Native blocks and text
+  blocks report their allocated width inside that indentation. Pass `'client'` for viewport-relative CSS-pixel bounds suitable for
   application popovers. Uncomposed offscreen blocks can have estimated bounds until reflow.
   Missing nodes, stale document layout and disposed views return `null`.
 - `update({ zoom, paddingTop, maxWidth, background })` merges view settings without replacing its

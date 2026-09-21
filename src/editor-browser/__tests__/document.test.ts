@@ -120,6 +120,34 @@ test('projection traverses schema-defined children and stops at rendered contain
   expect(document.blockFor(999)).toBeUndefined();
 });
 
+test('projection spans retain nested containers, native owners and empty structural intervals', ({
+  onTestFinished,
+}) => {
+  const { editor, query, visits } = fixture();
+  onTestFinished(() => editor.destroy());
+  const original = query(editor.state);
+  expect(original.spanFor(10)).toMatchObject({ node: { id: 10 }, from: 0, to: 2 });
+  expect(original.spanFor(11)).toMatchObject({ node: { id: 11 }, from: 1, to: 2 });
+  expect(original.spanFor(21)).toMatchObject({ node: { id: 20 }, from: 2, to: 3 });
+  expect(original.spanFor(999)).toBeUndefined();
+  const visited = visits();
+  editor.select(textSelection(2, 3));
+  expect(query(editor.state).spanFor).toBe(original.spanFor);
+  expect(query(editor.state).spanFor(11)).toBe(original.spanFor(11));
+  expect(visits()).toBe(visited);
+  editor.transact((draft) => {
+    draft.step({ kind: 'replaceChildren', parent: 11, index: 0, count: 1, nodes: [] });
+
+    return true;
+  });
+  const emptied = query(editor.state);
+  expect(emptied.spanFor(11)).toMatchObject({ from: 1, to: 1 });
+  expect(emptied.spanFor(10)).toMatchObject({ from: 0, to: 1 });
+  expect(emptied.spanFor(21)).toMatchObject({ from: 1, to: 2 });
+  expect(emptied.spanFor(2)).toBeUndefined();
+  expect(original.spanFor(11)).toMatchObject({ from: 1, to: 2 });
+});
+
 test('forward and backward selections span nested text and rendered containers while excluding a zero-offset final block', ({
   onTestFinished,
 }) => {
