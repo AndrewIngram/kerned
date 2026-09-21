@@ -1,3 +1,4 @@
+import { createEditorSerializer } from '../../core';
 import { createTextInput, type BrowserViewOptions, type ViewSession } from '../../editor-browser';
 import { createDocumentQuery } from '../../editor-browser/document';
 import { readClipboard, writeClipboard, type ClipboardFragment } from '../../extensions/clipboard';
@@ -38,6 +39,7 @@ export function createStarterKitInput<N extends NodeIdentity>({
   navigate,
 }: InputOptions<N>) {
   const tableType = editor.schema.node(tableDefinition);
+  const serializer = createEditorSerializer(editor, { unsupported: 'text' });
 
   const project = createDocumentQuery<N, N, null>(editor.schema, {
     initial: null,
@@ -274,7 +276,7 @@ export function createStarterKitInput<N extends NodeIdentity>({
       if (!e.clipboardData) return;
 
       try {
-        writeClipboard(e.clipboardData, editor.schema, editor.state, copyText());
+        writeClipboard(e.clipboardData, editor.schema, editor.state, copyText(), serializer);
       } catch (error) {
         notice?.(error instanceof Error ? error.message : String(error));
 
@@ -288,7 +290,7 @@ export function createStarterKitInput<N extends NodeIdentity>({
       if (!e.clipboardData) return;
 
       try {
-        writeClipboard(e.clipboardData, editor.schema, editor.state, copyText());
+        writeClipboard(e.clipboardData, editor.schema, editor.state, copyText(), serializer);
       } catch (error) {
         notice?.(error instanceof Error ? error.message : String(error));
 

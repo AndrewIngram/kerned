@@ -1,8 +1,14 @@
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor } from '../../core';
-import { createSchema, defineNode } from '../../model';
+import {
+  createEditor,
+  createEditorSerializer,
+  defineExtension,
+  serializers,
+  type ContributionContext,
+} from '../../core';
+import { createSchema, defineNode, defineNodeSerializer } from '../../model';
 import { textSelection } from '../../state';
 import { readClipboard, writeClipboard } from '../clipboard';
 import { starterExtensions } from '../starter-kit';
@@ -97,4 +103,53 @@ test('rectangular copy retains custom cell text nodes and their attributes', ({
   const data = new DataTransfer();
   writeClipboard(data, schema, editor.state, 'ignored');
   expect(readClipboard(data, schema)?.nodes).toEqual([copied]);
+});
+
+test('clipboard HTML uses the installed custom serializer without a node view', ({
+  onTestFinished,
+}) => {
+  const customOutput = defineExtension({
+    name: 'customOutput',
+    options: {},
+    setup(_options, context: ContributionContext) {
+      context.provide(
+        serializers,
+        defineNodeSerializer(note, ({ attributes, content }) => ({
+          ...content,
+          html: [
+            {
+              tag: 'aside',
+              attributes: { 'data-category': attributes.category },
+              children: content.html,
+            },
+          ],
+        })),
+      );
+
+      return {};
+    },
+  });
+
+  const editor = createEditor({
+    schema: createSchema({ extensions: [...starterExtensions, note, customOutput] }),
+    content: [
+      {
+        kind: 'note',
+        id: 1,
+        body: 'Custom',
+        category: 'important',
+        styles: [{ from: 0, to: 6, mark: { type: 'bold', attrs: null } }],
+      },
+    ],
+    selection: textSelection(1, 0, 6),
+  });
+
+  onTestFinished(() => editor.destroy());
+  const output = createEditorSerializer(editor);
+  const data = new DataTransfer();
+  writeClipboard(data, editor.schema, editor.state, 'Custom', output);
+  expect(data.getData('text/html')).toBe(
+    '<aside data-category="important"><strong>Custom</strong></aside>',
+  );
+  expect(readClipboard(data, editor.schema)?.nodes[0]).toBe(editor.state.nodes[0]);
 });

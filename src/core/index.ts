@@ -21,6 +21,8 @@ export {
 
 export { selectedValue, type SelectedValue } from './queries';
 
+export { serializers, createEditorSerializer } from './serialization';
+
 export {
   createPendingEdit,
   type PendingEdit,

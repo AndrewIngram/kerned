@@ -2910,3 +2910,39 @@ collaboration TODO and 42 end-to-end cases. The production build passes with the
 existing chunk-size warning. The new helper is opt-in and does not change demo
 input or rendering paths. A second lint-fix/format pass leaves tracked and
 untracked files unchanged.
+
+### Milestone 7 checkpoint: static serializers and clipboard export
+
+The model now provides schema-bound node, mark and inline serializers. They
+produce structured HTML and plain text without a DOM, view, graphics engine or
+React dependency. Definition bindings infer attributes and preserve configured
+family identity. Container serializers receive serialized children plus typed
+attribute reads, so a table can group rows without knowing the document union.
+HTML strings are escaped text, not raw markup; malformed names, void children
+and excessive output nesting reject.
+
+The core's optional `serializers` contribution assembles these adapters with the
+same extensions as the schema. `createEditorSerializer` collects them for a
+headless session; `createDocumentSerializer` also works directly with a schema
+and serializer list. Strict export rejects missing and duplicate serializers.
+Lossy text fallback is an explicit policy.
+
+Starter serializers cover headings, paragraphs, lists, quotes, tables/cells,
+images, formatting marks and mentions. The clipboard adapter now uses installed
+serializers rather than a hardcoded node/mark switch. Local fragment tokens still
+preserve immutable canonical nodes without serialization. Custom schema tests
+verify typed HTML output and local-copy identity without an interactive node
+view. JSON round trips preserve rich static output. Extensible HTML import and
+complete inline HTML round trips remain open, as do shortcut/input-rule
+composition and the final M7 judge.
+
+`pnpm run check` passes with 813 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes with the existing chunk
+warning. Three production trials in `artifacts/public-interface-m7/serialization/`
+pass all original budgets: first usable 239 ms, streaming 1,216.6 ms, paste
+handler 59.1 ms, paste paint 120.2 ms, typing 32.2 ms, paging 32.4 ms and loaded
+heap 27,942,292 bytes. Reports record parent `73ff949` and measure this checkpoint's
+uncommitted implementation. Full-book copy costs 18.9–19.1 ms versus roughly
+12.4–12.9 ms in the preceding hardcoded path; the new generic traversal and
+structured output add work to this cold export operation. No threshold was
+changed, and this cost remains visible for the milestone review.

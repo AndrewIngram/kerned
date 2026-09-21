@@ -1,6 +1,6 @@
 import {
   indexTree,
-  textContent,
+  createDocumentSerializer,
   createDocumentCodec,
   type NodeIdentity,
   type Schema,
@@ -19,8 +19,8 @@ import { replaceStructuredText } from './blocks';
 import type { StarterNode } from './demo-model';
 import { demoDocumentCodec } from './demo-schema';
 import { importHtml } from './html';
-import { paragraph, heading, list, image, table, tableCell } from './starter-definitions';
-import { tableRows } from './table';
+import { paragraph, table } from './starter-definitions';
+import { starterSerializers } from './static-serializers';
 import { copyCellRectangle, cellRectangleText, pasteCellRectangle } from './table-clipboard';
 
 export type ClipboardFragment<N = StarterNode> = { nodes: readonly N[]; inline: boolean };
@@ -67,106 +67,12 @@ function remember<N extends NodeIdentity>(schema: Schema<N>, fragment: Clipboard
   return token;
 }
 
-const escape = (text: string) =>
-  text
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
-
-function html<N extends NodeIdentity>(schema: Schema<N>, node: N): string {
-  const type = schema.resolve(node);
-
-  const children = () =>
-    schema
-      .children(node)
-      .map((child) => html(schema, child))
-      .join('');
-
-  if (type.kind === 'text') {
-    const text = type.editing.text(node);
-    const ranges = type.editing.marks?.read(node) ?? [];
-    const inline = type.editing.inline?.read(node) ?? [];
-
-    const edges = [
-      ...new Set([
-        0,
-        text.length,
-        ...ranges.flatMap((range) => [range.from, range.to]),
-        ...inline.flatMap((value) => [value.index, value.index + 1]),
-      ]),
-    ].toSorted((a, b) => a - b);
-
-    let body = '';
-
-    for (let i = 0; i < edges.length - 1; i++) {
-      const from = edges[i],
-        to = edges[i + 1];
-
-      const marks = ranges.filter((range) => range.from <= from && range.to >= to);
-      let part = escape(textContent(schema, node, from, to)).replaceAll('\n', '<br>');
-
-      if (marks.some((s) => s.mark.type === 'bold')) part = `<strong>${part}</strong>`;
-
-      if (marks.some((s) => s.mark.type === 'italic')) part = `<em>${part}</em>`;
-
-      if (marks.some((s) => s.mark.type === 'underline')) part = `<u>${part}</u>`;
-      body += part;
-    }
-
-    const level = type.name === heading.name ? schema.node(heading).read(node)?.level : undefined;
-    const tag = level ? `h${level}` : 'p';
-
-    return `<${tag}>${body}</${tag}>`;
-  }
-
-  switch (type.name) {
-    case 'quote':
-      return `<blockquote>${children()}</blockquote>`;
-    case 'list': {
-      const attrs = schema.node(list).read(node);
-
-      if (!attrs) throw new Error('Expected list');
-      const tag = attrs.ordered ? 'ol' : 'ul';
-
-      return `<${tag} start="${attrs.start}">${children()}</${tag}>`;
-    }
-
-    case 'listItem':
-      return `<li>${children()}</li>`;
-    case 'table': {
-      const attrs = schema.node(table).read(node);
-
-      if (!attrs) throw new Error('Expected table');
-
-      const rows = tableRows(schema, node)
-        .map((row) => `<tr>${row.map((cell) => html(schema, cell)).join('')}</tr>`)
-        .join('');
-
-      return `<table><caption>${escape(attrs.caption)}</caption>${rows}</table>`;
-    }
-
-    case 'tableCell': {
-      const attrs = schema.node(tableCell).read(node);
-
-      if (!attrs) throw new Error('Expected table cell');
-      const tag = attrs.header ? 'th' : 'td';
-
-      return `<${tag} colspan="${attrs.colspan}" rowspan="${attrs.rowspan}">${children()}</${tag}>`;
-    }
-
-    case 'image':
-      return `<p>${escape(schema.node(image).read(node)?.alt ?? '')}</p>`;
-    default:
-      return children();
-  }
-}
-
 export function writeClipboard<N extends NodeIdentity>(
   data: DataTransfer,
   schema: Schema<N>,
   state: EditorState<N>,
   text: string,
+  serializer = createDocumentSerializer(schema, starterSerializers, { unsupported: 'text' }),
 ) {
   const ranges = state.selection.ranges(selectionContext(schema, state.nodes)),
     byId = new Map(ranges.map((r) => [r.id, r]));
@@ -212,7 +118,7 @@ export function writeClipboard<N extends NodeIdentity>(
   const token = remember(schema, { nodes, inline });
 
   data.setData('text/plain', rectangle ? cellRectangleText(schema, rectangle) : text);
-  data.setData('text/html', nodes.map((node) => html(schema, node)).join(''));
+  data.setData('text/html', serializer.serialize(nodes).html);
   data.setData(mime, token);
 }
 

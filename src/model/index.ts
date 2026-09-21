@@ -96,3 +96,15 @@ export { type NodeBinding } from './node-binding';
 export { type ValueBinding } from './value-binding';
 
 export { textContent } from './text-content';
+
+export { renderHtml, type HtmlOutput } from './html-output';
+
+export {
+  createDocumentSerializer,
+  defineNodeSerializer,
+  defineMarkSerializer,
+  defineInlineSerializer,
+  type StaticContent,
+  type StaticChild,
+  type SerializerContribution,
+} from './static-serialization';
