@@ -52,3 +52,53 @@ test('the site root opens the writing demo and preserves query parameters', asyn
   await expect(page).toHaveURL(/\/editor\.html\?sample=minimal#draft$/);
   await expect(page.getByRole('toolbar', { name: 'Formatting' })).toBeVisible();
 });
+
+test('sample replacement releases only the old layout owner and keeps assets resident', async ({
+  page,
+}) => {
+  const errors = [];
+  const requests = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/editor.html');
+  await page.waitForFunction(() => window.editorDiagnostics);
+  const origin = await page.evaluate(() => performance.timeOrigin);
+  page.on('request', (request) => requests.push(request.url()));
+  const picker = page.getByLabel('Sample', { exact: true });
+
+  for (let iteration = 0; iteration < 2; iteration++) {
+    await picker.selectOption('warbreaker');
+    await expect(picker).toBeEnabled();
+    await expect
+      .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))
+      .toBeGreaterThan(4);
+    await picker.selectOption('minimal');
+    await expect(picker).toBeEnabled();
+    await expect
+      .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))
+      .toBe(4);
+    await expect
+      .poll(() => page.evaluate(() => window.editorDiagnostics.metrics().retention))
+      .toEqual({ owners: 1, documents: 4, paragraphVariants: 4 });
+  }
+
+  await page.goBack();
+  await expect
+    .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))
+    .toBeGreaterThan(4);
+  await page.goForward();
+  await expect
+    .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))
+    .toBe(4);
+  await expect
+    .poll(() => page.evaluate(() => window.editorDiagnostics.metrics().retention.owners))
+    .toBe(1);
+  await page.evaluate(() => window.editorDiagnostics.select(1, 0));
+  await page.keyboard.type('Still editable. ');
+  await expect
+    .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes[0].text))
+    .toMatch(/^Still editable\./);
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin);
+  expect(requests.filter((url) => url.endsWith('/samples/warbreaker.html'))).toHaveLength(1);
+  expect(requests.filter((url) => /\.(wasm|ttf)(?:\?|$)/.test(url))).toEqual([]);
+  expect(errors).toEqual([]);
+});

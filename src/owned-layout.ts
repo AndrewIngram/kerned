@@ -1,7 +1,7 @@
-import type { CanvasKit, Font } from 'canvaskit-wasm';
+import type { CanvasKit, Font, Typeface } from 'canvaskit-wasm';
 import { z } from 'zod';
 
-import { fontFiles, type Engine, type LaidOut } from './engines';
+import { fontFiles, type LayoutInput, type LaidOut } from './engines';
 import { boundaries, type Span } from './layout-types';
 import { createBlockSession } from './owned-blocks';
 import { placeParagraphs } from './owned-document';
@@ -36,12 +36,22 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
   const exportedMemory = exports.memory;
 
   if (!(exportedMemory instanceof WebAssembly.Memory)) throw new Error('Invalid shaping memory');
-  const memory = exportedMemory;
+
+  let runtime: { exports: WebAssembly.Exports; memory: WebAssembly.Memory } | undefined = {
+    exports,
+    memory: exportedMemory,
+  };
+
+  function currentRuntime() {
+    if (!runtime) throw new Error('Layout resources are destroyed');
+
+    return runtime;
+  }
 
   function call(name: string, ...args: number[]): number {
     const fn = z
       .function({ input: z.tuple([]).rest(z.number()), output: z.number() })
-      .parse(exports[name]);
+      .parse(currentRuntime().exports[name]);
 
     const value: unknown = fn(...args);
 
@@ -50,20 +60,31 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
 
   function allocate(bytes: Uint8Array) {
     const ptr = call('allocate', bytes.length);
-    new Uint8Array(memory.buffer, ptr, bytes.length).set(bytes);
+    new Uint8Array(currentRuntime().memory.buffer, ptr, bytes.length).set(bytes);
 
     return ptr;
   }
 
-  const faces = data.map((bytes, index) => {
-    if (call('register_font', allocate(new Uint8Array(bytes)), bytes.byteLength) !== index)
-      throw new Error('Font registration failed');
-    const face = kit.Typeface.MakeFreeTypeFaceFromData(bytes);
+  const faces: Typeface[] = [];
+  const paint = new kit.Paint();
 
-    if (!face) throw new Error('Skia font registration failed');
+  try {
+    paint.setColor(kit.Color(37, 42, 35));
+    paint.setAntiAlias(true);
 
-    return face;
-  });
+    for (const [index, bytes] of data.entries()) {
+      if (call('register_font', allocate(new Uint8Array(bytes)), bytes.byteLength) !== index)
+        throw new Error('Font registration failed');
+      const face = kit.Typeface.MakeFreeTypeFaceFromData(bytes);
+
+      if (!face) throw new Error('Skia font registration failed');
+      faces.push(face);
+    }
+  } catch (error) {
+    for (const face of faces) face.delete();
+    paint.delete();
+    throw error;
+  }
 
   const fonts = new Map<string, Font>();
 
@@ -79,10 +100,6 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
 
     return value;
   }
-
-  const paint = new kit.Paint();
-  paint.setColor(kit.Color(37, 42, 35));
-  paint.setAntiAlias(true);
 
   const stats = {
     glyphCalls: 0,
@@ -100,7 +117,13 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
   // Build the replacement separately so traversal and failed layouts cannot evict it.
   type RetainedParagraph = Omit<PreparedParagraph, 'composed'> & { composed?: ComposedParagraph };
 
-  const documents = new Map<number, Map<string, RetainedParagraph>>();
+  const cacheScopes = new Set<Map<number, Map<string, RetainedParagraph>>>();
+  let destroyed = false;
+
+  function assertActive() {
+    if (destroyed) throw new Error('Layout resources are destroyed');
+  }
+
   const blockSessions = new Set<{ retained(): PreparedParagraph[]; release(): void }>();
 
   function resolveGlyphBuffer(text: string, id: number, size: number): ShapingRun {
@@ -108,6 +131,7 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
     const ptr = call('shape', id, allocate(bytes), bytes.length);
 
     if (!ptr) throw new Error('Shaping failed');
+    const memory = currentRuntime().memory;
     const words = new Uint32Array(memory.buffer, ptr, call('result_words'));
 
     if (words.length !== 3 + words[0] * 5 + words[1]) throw new Error('Invalid shaping buffer');
@@ -350,6 +374,8 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
       geometry: document.geometry,
       move: document.move,
       draw(canvas, x, y) {
+        assertActive();
+
         for (const placement of document.placements)
           for (const run of placement.paragraph.runs) {
             canvas.drawGlyphs(
@@ -363,6 +389,8 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
           }
       },
       drawViewport(canvas, x, y, top, bottom) {
+        assertActive();
+
         let paragraphsValue = 0,
           runs = 0;
 
@@ -388,190 +416,237 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
     };
   }
 
-  const engine: Engine = {
-    name:
-      storage === 'objects'
-        ? 'Owned / HarfRust'
-        : storage === 'packed'
-          ? 'Owned / packed placement'
-          : storage === 'carets'
-            ? 'Owned / packed carets'
-            : 'Owned / packed shaping',
-    clear() {
-      documents.clear();
+  function createLayout() {
+    assertActive();
+    const documents = new Map<number, Map<string, RetainedParagraph>>();
+    cacheScopes.add(documents);
+    let released = false;
 
-      const pending = [...blockSessions];
+    function assertOwner() {
+      assertActive();
 
-      for (const session of pending) session.release();
-    },
-    layout(input): LaidOut {
-      const started = performance.now();
-      const size = input.size;
+      if (released) throw new Error('Layout owner is destroyed');
+    }
 
-      if (
-        !(
-          input.width > 0 &&
-          input.size > 0 &&
-          Number.isFinite(input.width) &&
-          Number.isFinite(input.size)
+    return {
+      layout(input: LayoutInput): LaidOut {
+        assertOwner();
+        const started = performance.now();
+        const size = input.size;
+
+        if (
+          !(
+            input.width > 0 &&
+            input.size > 0 &&
+            Number.isFinite(input.width) &&
+            Number.isFinite(input.size)
+          )
         )
-      )
-        throw new Error('Width and size must be positive finite numbers');
+          throw new Error('Width and size must be positive finite numbers');
 
-      if (!supportsOwnedText(input.text))
-        throw new Error(
-          'Owned prototype currently supports Latin left-to-right paragraphs and emoji.',
-        );
-      const allStops = new Set(input.spans.length ? boundaries(input.text) : []);
+        if (!supportsOwnedText(input.text))
+          throw new Error(
+            'Owned prototype currently supports Latin left-to-right paragraphs and emoji.',
+          );
+        const allStops = new Set(input.spans.length ? boundaries(input.text) : []);
 
-      for (const span of input.spans)
-        if (!allStops.has(span.start) || !allStops.has(span.end))
-          throw new Error('Formatting must end at grapheme boundaries');
-      const paragraphs: ComposedParagraph[] = [];
-      const previous = documents.get(input.id);
-      const retained = new Map<string, RetainedParagraph>();
-      let offset = 0;
+        for (const span of input.spans)
+          if (!allStops.has(span.start) || !allStops.has(span.end))
+            throw new Error('Formatting must end at grapheme boundaries');
+        const paragraphs: ComposedParagraph[] = [];
+        const previous = documents.get(input.id);
+        const retained = new Map<string, RetainedParagraph>();
+        let offset = 0;
 
-      for (const text of input.text.split('\n')) {
-        const spans = input.spans
-          .filter((s) => s.end > offset && s.start < offset + text.length)
-          .map((s) => ({
-            ...s,
-            start: Math.max(0, s.start - offset),
-            end: Math.min(text.length, s.end - offset),
-          }));
+        for (const text of input.text.split('\n')) {
+          const spans = input.spans
+            .filter((s) => s.end > offset && s.start < offset + text.length)
+            .map((s) => ({
+              ...s,
+              start: Math.max(0, s.start - offset),
+              end: Math.min(text.length, s.end - offset),
+            }));
 
-        const key = JSON.stringify([text, spans, input.size, input.lineHeight, input.baselineGrid]);
-        const cached = retained.get(key) ?? previous?.get(key);
+          const key = JSON.stringify([
+            text,
+            spans,
+            input.size,
+            input.lineHeight,
+            input.baselineGrid,
+          ]);
 
-        const { paragraphGlyphs, composed, packed } = prepare(
-          text,
-          spans,
-          input.width,
+          const cached = retained.get(key) ?? previous?.get(key);
+
+          const { paragraphGlyphs, composed, packed } = prepare(
+            text,
+            spans,
+            input.width,
+            input.size,
+            cached,
+            input.lineHeight,
+            input.baselineGrid,
+          );
+
+          retained.set(key, { paragraphGlyphs, composed, packed });
+          paragraphs.push(composed);
+          stats.paragraphs++;
+          offset += text.length + 1;
+        }
+
+        const result = snapshot(paragraphs, size, started);
+        documents.set(input.id, retained);
+
+        return result;
+      },
+      layoutInline(input: {
+        id: number;
+        text: string;
+        spans: Span[];
+        atoms: readonly InlineAtom[];
+        width: number;
+        size: number;
+        lineHeight?: number;
+        baselineGrid?: number;
+      }) {
+        assertOwner();
+        const started = performance.now();
+
+        if (
+          !(
+            input.width > 0 &&
+            input.size > 0 &&
+            Number.isFinite(input.width) &&
+            Number.isFinite(input.size)
+          )
+        )
+          throw new Error('Invalid inline layout dimensions');
+
+        const key = JSON.stringify([
+          input.text,
+          input.spans,
+          input.atoms,
           input.size,
-          cached,
           input.lineHeight,
           input.baselineGrid,
-        );
+        ]);
 
-        retained.set(key, { paragraphGlyphs, composed, packed });
-        paragraphs.push(composed);
-        stats.paragraphs++;
-        offset += text.length + 1;
-      }
+        const previous = documents.get(input.id)?.get(key);
 
-      const result = snapshot(paragraphs, size, started);
-      documents.set(input.id, retained);
+        const paragraphGlyphs =
+          previous?.paragraphGlyphs ??
+          layoutInlineParagraph(input.text, input.spans, input.atoms, (text, fontValue) =>
+            resolveGlyphs(text, fontValue, input.size),
+          );
 
-      return result;
-    },
-  };
+        if (!('clusters' in paragraphGlyphs)) throw new Error('Inline cache kind mismatch');
+        const packed = previous?.packed ?? packGlyphs(paragraphGlyphs);
+        const fontMetrics = font(0, input.size).getMetrics();
+        const defaultHeight = input.lineHeight ?? input.size * 1.6;
+
+        const normalBaseline =
+          (defaultHeight - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent;
+
+        // This spike uses a common line height accommodating the tallest inline.
+        const rawBaseline = Math.max(normalBaseline, ...input.atoms.map((a) => a.ascent));
+
+        const baseline = input.baselineGrid
+          ? Math.ceil(rawBaseline / input.baselineGrid) * input.baselineGrid
+          : rawBaseline;
+
+        const rawHeight =
+          baseline + Math.max(defaultHeight - normalBaseline, ...input.atoms.map((a) => a.descent));
+
+        const lineHeight = input.baselineGrid
+          ? Math.ceil(rawHeight / input.baselineGrid) * input.baselineGrid
+          : rawHeight;
+
+        const composed =
+          previous?.composed?.width === input.width
+            ? previous.composed
+            : composeParagraph(
+                paragraphGlyphs,
+                input.text.length,
+                input.width,
+                lineHeight,
+                baseline,
+                packed,
+                'packed',
+              );
+
+        if (composed !== previous?.composed) {
+          includeInkBounds(composed, input.size);
+          stats.compositions++;
+          stats.renderBuffers += composed.runs.length;
+        }
+
+        const result = snapshot([composed], input.size, started);
+
+        const inlineBoxes = input.atoms.map((atom) => {
+          const caret = composed.geometry(atom.index, atom.index, false).caret;
+          const line = composed.lines.find((l) => l.top === caret[1]);
+
+          if (!line) throw new Error('Missing inline line');
+
+          return {
+            ...atom,
+            x: caret[0],
+            y: line.baseline - atom.ascent,
+            height: atom.ascent + atom.descent,
+          };
+        });
+
+        documents.set(input.id, new Map([[key, { paragraphGlyphs, packed, composed }]]));
+
+        return { ...result, inlineBoxes };
+      },
+      // Release when the owning document/block is removed, not when a rendered
+      // LaidOut snapshot is disposed. Existing snapshots remain usable.
+      release(id: number) {
+        assertOwner();
+        documents.delete(id);
+      },
+      // Published snapshots remain valid; only the engine's composition cache drops.
+      releaseLayout(id: number) {
+        assertOwner();
+        const retained = documents.get(id);
+
+        if (retained)
+          for (const [key, paragraph] of retained) {
+            retained.set(key, {
+              paragraphGlyphs: paragraph.paragraphGlyphs,
+              packed: paragraph.packed,
+            });
+          }
+      },
+      clear() {
+        assertOwner();
+        documents.clear();
+      },
+      destroy() {
+        if (released) return;
+        released = true;
+        documents.clear();
+        cacheScopes.delete(documents);
+      },
+    };
+  }
 
   return {
-    engine,
+    createLayout,
+    layoutText(input: Omit<LayoutInput, 'id'>) {
+      const owner = createLayout();
+
+      try {
+        return owner.layout({ ...input, id: 0 });
+      } finally {
+        owner.destroy();
+      }
+    },
     stats,
     wasmBytes: wasm.byteLength,
-    layoutInline(input: {
-      id: number;
-      text: string;
-      spans: Span[];
-      atoms: readonly InlineAtom[];
-      width: number;
-      size: number;
-      lineHeight?: number;
-      baselineGrid?: number;
-    }) {
-      const started = performance.now();
-
-      if (
-        !(
-          input.width > 0 &&
-          input.size > 0 &&
-          Number.isFinite(input.width) &&
-          Number.isFinite(input.size)
-        )
-      )
-        throw new Error('Invalid inline layout dimensions');
-
-      const key = JSON.stringify([
-        input.text,
-        input.spans,
-        input.atoms,
-        input.size,
-        input.lineHeight,
-        input.baselineGrid,
-      ]);
-
-      const previous = documents.get(input.id)?.get(key);
-
-      const paragraphGlyphs =
-        previous?.paragraphGlyphs ??
-        layoutInlineParagraph(input.text, input.spans, input.atoms, (text, fontValue) =>
-          resolveGlyphs(text, fontValue, input.size),
-        );
-
-      if (!('clusters' in paragraphGlyphs)) throw new Error('Inline cache kind mismatch');
-      const packed = previous?.packed ?? packGlyphs(paragraphGlyphs);
-      const fontMetrics = font(0, input.size).getMetrics();
-      const defaultHeight = input.lineHeight ?? input.size * 1.6;
-
-      const normalBaseline =
-        (defaultHeight - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent;
-
-      // This spike uses a common line height accommodating the tallest inline.
-      const rawBaseline = Math.max(normalBaseline, ...input.atoms.map((a) => a.ascent));
-
-      const baseline = input.baselineGrid
-        ? Math.ceil(rawBaseline / input.baselineGrid) * input.baselineGrid
-        : rawBaseline;
-
-      const rawHeight =
-        baseline + Math.max(defaultHeight - normalBaseline, ...input.atoms.map((a) => a.descent));
-
-      const lineHeight = input.baselineGrid
-        ? Math.ceil(rawHeight / input.baselineGrid) * input.baselineGrid
-        : rawHeight;
-
-      const composed =
-        previous?.composed?.width === input.width
-          ? previous.composed
-          : composeParagraph(
-              paragraphGlyphs,
-              input.text.length,
-              input.width,
-              lineHeight,
-              baseline,
-              packed,
-              'packed',
-            );
-
-      if (composed !== previous?.composed) {
-        includeInkBounds(composed, input.size);
-        stats.compositions++;
-        stats.renderBuffers += composed.runs.length;
-      }
-
-      const result = snapshot([composed], input.size, started);
-
-      const inlineBoxes = input.atoms.map((atom) => {
-        const caret = composed.geometry(atom.index, atom.index, false).caret;
-        const line = composed.lines.find((l) => l.top === caret[1]);
-
-        if (!line) throw new Error('Missing inline line');
-
-        return {
-          ...atom,
-          x: caret[0],
-          y: line.baseline - atom.ascent,
-          height: atom.ascent + atom.descent,
-        };
-      });
-
-      documents.set(input.id, new Map([[key, { paragraphGlyphs, packed, composed }]]));
-
-      return { ...result, inlineBoxes };
-    },
     createBlockDocument(settings: { width: number; size: number }) {
+      assertActive();
+
       const session = createBlockSession<PreparedParagraph>(settings, {
         prepare,
         snapshot: (paragraphs, size, started) =>
@@ -601,25 +676,27 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
         release: session.release,
       };
     },
-    // Release when the owning document/block is removed, not when a rendered
-    // LaidOut snapshot is disposed. Existing snapshots remain usable.
-    release(id: number) {
-      documents.delete(id);
-    },
-    // Published snapshots remain valid; only the engine's composition cache drops.
-    releaseLayout(id: number) {
-      const retained = documents.get(id);
+    destroy() {
+      if (destroyed) return;
+      destroyed = true;
 
-      if (retained)
-        for (const [key, paragraph] of retained) {
-          retained.set(key, {
-            paragraphGlyphs: paragraph.paragraphGlyphs,
-            packed: paragraph.packed,
-          });
-        }
+      for (const scope of cacheScopes) scope.clear();
+      cacheScopes.clear();
+
+      for (const session of blockSessions) session.release();
+
+      for (const value of fonts.values()) value.delete();
+      fonts.clear();
+
+      for (const face of faces) face.delete();
+      paint.delete();
+      inkBounds.clear();
+      paragraphMetrics.clear();
+      runtime = undefined;
     },
     memory() {
-      const paragraphs = [...documents.values()]
+      const paragraphs = [...cacheScopes]
+        .flatMap((scope) => [...scope.values()])
         .flatMap((document) => [...document.values()])
         .concat([...blockSessions].flatMap((s) => s.retained()));
 
@@ -653,16 +730,20 @@ export async function createOwnedEngine(kit: CanvasKit, storage: OwnedStorage = 
 
       return {
         ...totals,
-        wasmLinearBytes: memory.buffer.byteLength,
+        wasmLinearBytes: runtime?.memory.buffer.byteLength ?? 0,
         paragraphs: paragraphs.length,
         composedParagraphs: paragraphs.filter((p) => p.composed).length,
       };
     },
     retention() {
       return {
-        documents: documents.size + blockSessions.size,
+        owners: cacheScopes.size,
+        documents:
+          [...cacheScopes].reduce((sum, scope) => sum + scope.size, 0) + blockSessions.size,
         paragraphVariants:
-          [...documents.values()].reduce((sum, paragraphs) => sum + paragraphs.size, 0) +
+          [...cacheScopes]
+            .flatMap((scope) => [...scope.values()])
+            .reduce((sum, paragraphs) => sum + paragraphs.size, 0) +
           [...blockSessions].reduce((sum, session) => sum + session.retained().length, 0),
       };
     },

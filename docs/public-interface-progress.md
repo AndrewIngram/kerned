@@ -1114,3 +1114,35 @@ production trials in
 budget: first usable 177ms, streaming 1097.7ms, paste handler 57.9ms, paste paint
 120.7ms, typing 32.4ms, paging 32.5ms and loaded heap 28,964,020 bytes. The report
 identifies `30e2f39` and measures this checkpoint's uncommitted tree.
+
+### Milestone 4 isolated layout owners and resource cleanup
+
+Paragraph cache ownership now follows each scene, independently of the shared
+font/WASM resources. Layout owners have local node-ID maps and explicit cache
+release/destruction; clearing one cannot evict another with the same IDs. Scene
+clear drops the whole owner, including navigation-only layouts. Mention labels
+use temporary, uncached snapshots rather than the global reserved ID `900000`.
+All direct callers migrated; the root engine's global layout/clear interface was
+removed.
+
+Resource destruction is idempotent and releases fonts, faces, paint, block
+sessions, caches and its WASM reference. Partial native font initialization cleans
+up acquired resources. Published geometry remains readable, while stale drawing
+or shaping rejects after resource destruction. The demo now replaces workspaces
+by generation without `flushSync`; cache isolation makes React cleanup order
+irrelevant to the successor's retained layout.
+
+Validation passed `pnpm run check` and production build: **271 Vitest passes, one
+unchanged convergence todo and 42 Playwright scenarios**. Real browser fixtures
+exercise identical IDs across owners/scenes, cache eviction and width changes,
+retained snapshots, terminal destruction and label retention. The new E2E case
+switches samples repeatedly, uses back/forward, verifies only one live layout
+owner, checks typing still works and confirms WASM/fonts are not fetched again.
+
+Three serial production trials in
+`artifacts/public-interface-m4/layout-owners/baseline.json` pass every unchanged
+budget: first usable 176ms, streaming 1060.1ms, paste handler 56.1ms, paste paint
+115.7ms, typing 32.6ms, paging 32.9ms and loaded heap 29,530,844 bytes. The report
+identifies `5443b2d` and measures this checkpoint's uncommitted tree. Milestone 4
+still requires complete mounting, asset lifecycle, input and layout controllers
+before its independent architecture judge.

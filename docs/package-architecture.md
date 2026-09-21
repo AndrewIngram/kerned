@@ -105,20 +105,23 @@ retention must remain independent of the undo stack's lifetime: comments must
 not lose their anchors because undo entries were pruned. Collaboration adapters
 will consume operations and mappings without owning browser state.
 
-## Current mismatches
+## Current migration state
 
-- `src/editor/index.ts` mixes model, transaction, session and geometric helpers.
-- `src/editor/transactions.ts` combines operation application, publication,
-  history and session commands. Extract cohesive ownership before moving files.
-- `src/demo/app/main.tsx` initializes CanvasKit and `createOwnedEngine`.
-- `src/demo/app/app.tsx` coordinates renderer reuse by forcing an unmount.
+Milestones 0–3 have separated model, transform, state and core, compiled typed
+Standard Schema assemblies and moved editing to composed session commands. See
+[verified progress](public-interface-progress.md) for review and validation evidence.
+
+The remaining view/package differences are:
+
+- `src/demo/app/main.tsx` still initializes CanvasKit and `createOwnedEngine`.
 - `src/editor-react/editor.tsx` mounts listeners while the demo assembles the
-  editing surface. Some viewport/rendering behavior currently lives in React
-  hooks and must become framework-independent before React can be a thin adapter.
-- `src/extensions/starter-kit/actions.ts` needs a rendered document snapshot and
-  presentation callbacks. Commands should read session state when invoked.
-- Starter-kit currently uses `demoSchema`; it must become configurable extension
-  composition rather than a facade over that fixed schema.
+  complete editing surface. Painting is now framework-independent; input and
+  layout synchronization still need extraction from React hooks.
+- Scenes have independent cache owners. Sample changes no longer require a
+  synchronous unmount to coordinate shared cache cleanup.
+- Starter commands compose with foreign node definitions, but browser codecs,
+  projection and rendering still need their complete extension-driven migration.
+- Built workspace exports and external consumer fixtures remain milestone 8.
 
 ## Standard Schema document contract
 

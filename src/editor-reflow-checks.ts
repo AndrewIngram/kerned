@@ -15,6 +15,7 @@ export async function checkReflow(
   measurements: ReadonlyMap<number, Measurement>,
 ) {
   const owned = await createOwnedEngine(kit, 'shaping');
+  const owner = owned.createLayout();
 
   let y = 32 + scene.paddingTop,
     paragraphs = 0,
@@ -64,8 +65,8 @@ export async function checkReflow(
         };
 
         const expected = node.inline.length
-          ? owned.layoutInline({ ...input, atoms: node.inline.map(inlineSchema.layout) })
-          : owned.engine.layout(input);
+          ? owner.layoutInline({ ...input, atoms: node.inline.map(inlineSchema.layout) })
+          : owner.layout(input);
 
         const geometry = (layout: typeof expected) => [
           layout.height,
@@ -116,6 +117,6 @@ export async function checkReflow(
 
     return { blocks: nodes.length, paragraphs, hydrated, checks: 'passed' };
   } finally {
-    owned.engine.clear();
+    owned.destroy();
   }
 }

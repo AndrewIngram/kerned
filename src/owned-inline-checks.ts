@@ -11,6 +11,7 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
   }
 
   const id = -900;
+  const owner = owned.createLayout();
 
   try {
     for (const text of [
@@ -28,7 +29,7 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
       );
 
       for (const width of [1, 74, 75, 140, 400]) {
-        const layout = owned.layoutInline({ id, text, atoms, spans: [], width, size: 20 });
+        const layout = owner.layoutInline({ id, text, atoms, spans: [], width, size: 20 });
 
         for (const box of layout.inlineBoxes) {
           check(Number.isFinite(box.x + box.y) && box.height === 42, 'Invalid inline rectangle');
@@ -57,8 +58,8 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
         ]);
 
         const glyphRuns = owned.stats.glyphCalls;
-        owned.releaseLayout(id);
-        const hydrated = owned.layoutInline({ id, text, atoms, spans: [], width, size: 20 });
+        owner.releaseLayout(id);
+        const hydrated = owner.layoutInline({ id, text, atoms, spans: [], width, size: 20 });
         check(owned.stats.glyphCalls === glyphRuns, 'Inline hydration reshaped text');
         check(
           saved ===
@@ -78,7 +79,7 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
             ]),
           'Eviction changed a published inline snapshot',
         );
-        owned.layoutInline({
+        owner.layoutInline({
           id,
           text,
           atoms,
@@ -86,7 +87,7 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
           width: width + 17,
           size: 28,
         });
-        owned.release(id);
+        owner.release(id);
         check(
           saved ===
             JSON.stringify([
@@ -105,7 +106,7 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
       let rejected = false;
 
       try {
-        owned.layoutInline({ id, text: '\ufffc', atoms, spans: [], width: 100, size: 20 });
+        owner.layoutInline({ id, text: '\ufffc', atoms, spans: [], width: 100, size: 20 });
       } catch {
         rejected = true;
       }
@@ -115,6 +116,6 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
 
     return { assertions };
   } finally {
-    owned.release(id);
+    owner.destroy();
   }
 }

@@ -13,7 +13,7 @@ import type { StarterNode } from './demo-model';
 type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
 
 type InlineBox = Pick<
-  ReturnType<Owned['layoutInline']>['inlineBoxes'][number],
+  ReturnType<ReturnType<Owned['createLayout']>['layoutInline']>['inlineBoxes'][number],
   'id' | 'index' | 'label' | 'x' | 'y' | 'width' | 'height'
 >;
 
@@ -115,8 +115,7 @@ function Mention({
 }) {
   const label = useMemo(
     () =>
-      owned.engine.layout({
-        id: 900000,
+      owned.layoutText({
         text: box.label,
         spans: [],
         width: box.width - 12,

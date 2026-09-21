@@ -59,6 +59,8 @@ type Cached = {
 };
 
 export function createEditorScene(owned: Owned, size = 20) {
+  let textLayout: ReturnType<Owned['createLayout']> | undefined;
+
   const cache = new Map<number, Cached>(),
     dirty = new Map<number, TextBlockNode>();
 
@@ -79,6 +81,8 @@ export function createEditorScene(owned: Owned, size = 20) {
     previousMeasurements: ReadonlyMap<number, Measurement> = new Map();
 
   function compose(node: TextBlockNode, width: number): Cached {
+    const owner = (textLayout ??= owned.createLayout());
+
     const style = typography(node, size),
       spans =
         node.kind === 'heading' && node.text.length
@@ -99,12 +103,12 @@ export function createEditorScene(owned: Owned, size = 20) {
     };
 
     if (node.inline.length) {
-      const layout = owned.layoutInline({ ...input, atoms: node.inline.map(inlineSchema.layout) });
+      const layout = owner.layoutInline({ ...input, atoms: node.inline.map(inlineSchema.layout) });
 
       return { node, width, height: layout.height, layout, boxes: layout.inlineBoxes };
     }
 
-    const layout = owned.engine.layout(input);
+    const layout = owner.layout(input);
 
     return { node, width, height: layout.height, layout, boxes: [] };
   }
@@ -194,7 +198,7 @@ export function createEditorScene(owned: Owned, size = 20) {
           if (!live.has(id)) {
             cache.delete(id);
             dirty.delete(id);
-            owned.release(id);
+            textLayout?.release(id);
           }
       }
 
@@ -321,7 +325,7 @@ export function createEditorScene(owned: Owned, size = 20) {
           if (changed && value.layout) {
             value = { ...value, layout: null, boxes: [] };
             cache.set(node.id, value);
-            owned.releaseLayout(node.id);
+            textLayout?.releaseLayout(node.id);
           }
         } else dirty.delete(node.id);
 
@@ -431,7 +435,7 @@ export function createEditorScene(owned: Owned, size = 20) {
 
           if (value?.layout) {
             cache.set(p.node.id, { ...value, layout: null, boxes: [] });
-            owned.releaseLayout(p.node.id);
+            textLayout?.releaseLayout(p.node.id);
           }
 
           if (p.layout) placements[index] = { ...p, layout: null, boxes: [] };
@@ -481,7 +485,8 @@ export function createEditorScene(owned: Owned, size = 20) {
       return offsetLayout(next.layout, inset);
     },
     clear() {
-      for (const id of cache.keys()) owned.release(id);
+      textLayout?.destroy();
+      textLayout = undefined;
       cache.clear();
       dirty.clear();
       previousNodes = [];

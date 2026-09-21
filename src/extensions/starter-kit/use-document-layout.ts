@@ -206,7 +206,6 @@ export function useDocumentLayout({
   useEffect(
     () => () => {
       sceneCache.clear();
-      owned.engine.clear();
     },
     [owned, sceneCache],
   );

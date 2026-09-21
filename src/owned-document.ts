@@ -35,8 +35,8 @@ export function placeParagraphs(paragraphs: ComposedParagraph[]) {
     return placement;
   });
 
-  // The existing Engine comparison API requires flat line metadata. Glyph buffers
-  // and caret indexes remain local and shared; they are never flattened here.
+  // Line metadata uses document coordinates for navigation and hit testing.
+  // Glyph buffers and caret indexes remain local and shared.
   const lines = placements.flatMap((p) =>
     p.paragraph.lines.map((line) => ({
       ...line,

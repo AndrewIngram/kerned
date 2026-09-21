@@ -15,7 +15,7 @@ export type Line = {
 
 export type Geometry = { caret: Rect; rects: Rect[] };
 
-type Input = {
+export type LayoutInput = {
   lineHeight?: number;
   baselineGrid?: number;
   id: number;
@@ -44,12 +44,6 @@ export interface LaidOut {
   geometry(anchor: number, focus: number, upstream: boolean): Geometry;
   move(index: number, upstream: boolean, direction: Direction): Position;
   dispose(): void;
-}
-
-export interface Engine {
-  name: string;
-  layout(input: Input): LaidOut;
-  clear(): void;
 }
 
 export const fontFiles = [

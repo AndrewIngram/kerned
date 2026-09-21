@@ -82,8 +82,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
 
           const text = 'Bold 👩‍💻 and 🇬🇧 café 🜀';
 
-          const layout = owned.engine.layout({
-            id: 1,
+          const layout = owned.layoutText({
             text,
             spans: [{ start: 0, end: text.length, bold: true, italic: false }],
             width: 400,
@@ -98,7 +97,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
             caret: layout.geometry(text.length, text.length, false).caret,
           });
           layout.dispose();
-          owned.engine.clear();
+          owned.destroy();
           surface.delete();
         }
 

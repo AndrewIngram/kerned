@@ -1,6 +1,5 @@
 import { type CanvasKit } from 'canvaskit-wasm';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
 
 import { loadEditorSample, sampleUrl, type EditorSample } from '../../editor-samples';
 import type { Owned } from '../../extensions/starter-kit/types';
@@ -15,7 +14,7 @@ export function App({
   owned: Owned;
   initial: EditorSample;
 }) {
-  const [sample, setSample] = useState<EditorSample | null>(initial);
+  const [current, setCurrent] = useState({ sample: initial, generation: 0 });
 
   const [loading, setLoading] = useState(false),
     [error, setError] = useState('');
@@ -31,13 +30,10 @@ export function App({
       const next = await loadEditorSample(url);
 
       if (id !== request.current) return;
-      // Dispose old scene snapshots and streaming work before the new scene uses
-      // the shared engine. Keep WASM, fonts, and imported sample data resident.
-      flushSync(() => setSample(null));
 
       if (push) history.pushState(null, '', url);
       window.scrollTo(0, 0);
-      setSample(next);
+      setCurrent({ sample: next, generation: id });
     } catch (errorValue) {
       if (id === request.current)
         setError(errorValue instanceof Error ? errorValue.message : 'Could not load sample');
@@ -70,15 +66,14 @@ export function App({
 
   return (
     <>
-      {sample && (
-        <EditorWorkspace
-          kit={kit}
-          owned={owned}
-          sample={sample}
-          loading={loading}
-          onSampleChange={changeSample}
-        />
-      )}
+      <EditorWorkspace
+        key={current.generation}
+        kit={kit}
+        owned={owned}
+        sample={current.sample}
+        loading={loading}
+        onSampleChange={changeSample}
+      />
       {error && <p role="alert">{error}</p>}
     </>
   );
