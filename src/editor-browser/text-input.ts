@@ -17,6 +17,12 @@ export function createTextInput<N extends NodeIdentity>(
     frame = 0;
 
   let cached: { nodes: readonly N[]; context: SelectionContext } | undefined;
+  let destroyed = false;
+  let detach: (() => void) | undefined;
+
+  function assertActive() {
+    if (destroyed) throw new Error('Text input is destroyed');
+  }
 
   function context() {
     if (readContext) return readContext();
@@ -28,6 +34,7 @@ export function createTextInput<N extends NodeIdentity>(
   }
 
   function sync(input: HTMLTextAreaElement) {
+    assertActive();
     const { selection } = editor.state;
 
     if (!(selection instanceof TextSelection)) {
@@ -68,10 +75,12 @@ export function createTextInput<N extends NodeIdentity>(
     },
     sync,
     compositionStart(this: void) {
+      assertActive();
       editor.breakHistory();
       composing = true;
     },
     compositionEnd(input: HTMLTextAreaElement | null) {
+      assertActive();
       composing = false;
       editor.breakHistory();
       cancelAnimationFrame(frame);
@@ -79,6 +88,7 @@ export function createTextInput<N extends NodeIdentity>(
       if (input) frame = requestAnimationFrame(() => sync(input));
     },
     read(input: HTMLTextAreaElement, replace: (from: number, to: number, text: string) => void) {
+      assertActive();
       const selection = editor.state.selection;
 
       if (!(selection instanceof TextSelection)) {
@@ -122,6 +132,10 @@ export function createTextInput<N extends NodeIdentity>(
     },
     /** Observe Safari's native Select All, which can bypass keydown. */
     mount(input: HTMLTextAreaElement, onSelectAll: () => void) {
+      assertActive();
+
+      if (detach) throw new Error('Text input is already mounted');
+
       const select = () => {
         const selection = editor.state.selection;
 
@@ -145,11 +159,28 @@ export function createTextInput<N extends NodeIdentity>(
 
       input.addEventListener('select', select);
 
-      return () => {
+      const cleanup = () => {
+        if (detach !== cleanup) return;
+        detach = undefined;
         input.removeEventListener('select', select);
         cancelAnimationFrame(frame);
         composing = false;
+        capture = { value: '', offset: 0 };
+        cached = undefined;
       };
+
+      detach = cleanup;
+
+      return cleanup;
+    },
+    destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      detach?.();
+      cancelAnimationFrame(frame);
+      composing = false;
+      capture = { value: '', offset: 0 };
+      cached = undefined;
     },
   };
 }

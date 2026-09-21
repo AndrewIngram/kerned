@@ -8,15 +8,15 @@ remaining complete-view and package migration; this page describes current code.
 
 ## What belongs where
 
-| Owner                                     | Responsibility                                                                                              |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication             |
-| `src/core`                                | Composed headless session, named commands/queries, extension lifetime and view attachment                   |
-| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                             |
-| `src/editor-react`                        | Optional subscriptions and attachment adapters; input/viewport synchronization still awaits full extraction |
-| `src/editor-canvas`                       | Framework-independent surfaces, painters, selection/highlight/caret drawing and frame scheduling            |
-| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering      |
-| `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                         |
+| Owner                                     | Responsibility                                                                                             |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication            |
+| `src/core`                                | Composed headless session, named commands/queries, extension lifetime and view attachment                  |
+| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                            |
+| `src/editor-react`                        | Optional subscriptions and input/painting attachment adapters; viewport state still awaits full extraction |
+| `src/editor-canvas`                       | Framework-independent surfaces, painters, selection/highlight/caret drawing and frame scheduling           |
+| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering     |
+| `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                        |
 
 The headless modules import neither React nor browser code. Browser and canvas
 modules are independent of React, and generic adapters do not import a particular
@@ -37,9 +37,9 @@ complete mounted-view interface must take over that assembly. Comment threads
 remain external to document state.
 
 Custom rendering can use `createTextInteraction().bind(...)` with its own text
-and line geometry. `useCanvasInput` currently owns React synchronization of the
-hidden textarea and caret reveal; those responsibilities are the next controller
-extraction. Neither depends on paragraph or heading names.
+and line geometry. `createCanvasInput` owns pointer/navigation binding, hidden-textarea synchronization
+and caret reveal. `useCanvasInput` only attaches it and supplies committed layout
+frames. Neither depends on paragraph or heading names.
 
 ## Lifetime and performance constraints
 
@@ -65,6 +65,6 @@ extraction. Neither depends on paragraph or heading names.
 - `useDiagnostics` is the only app module importing correctness fixtures. Canvas
   diagnostics expose a readonly painter count rather than a mutable registry.
 
-Complete asset readiness/cancellation, input/layout controllers and public vanilla
+Complete asset readiness/cancellation, layout scheduling and public vanilla
 mounting remain milestone 4 work. The demo still initializes and passes internal
 engine resources; that is not the intended final consumer interface.

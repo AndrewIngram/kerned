@@ -1146,3 +1146,31 @@ budget: first usable 176ms, streaming 1060.1ms, paste handler 56.1ms, paste pain
 identifies `5443b2d` and measures this checkpoint's uncommitted tree. Milestone 4
 still requires complete mounting, asset lifecycle, input and layout controllers
 before its independent architecture judge.
+
+### Milestone 4 native input controller
+
+`editor-browser/canvas-input.ts` now owns pointer/navigation binding, hidden
+textarea positioning/synchronization, native Select All and caret reveal. The
+React hook only attaches the controller and supplies committed layout frames.
+Reveal requests have their own scheduling and wait for geometry matching the
+current session selection; they no longer require an artificial React render.
+
+Input attachments cancel pending composition/reveal work and release capture and
+frame references. Stale detach callbacks cannot remove a successor. Terminal
+controller/text-input destruction is idempotent, removes listeners and rejects
+stale mutation callbacks. It does not destroy the borrowed editor session.
+
+Validation passed `pnpm run check` and production build: **283 Vitest passes, one
+unchanged convergence todo and 42 Playwright scenarios**. Twelve focused browser
+cases exercise the imperative controller without React. The existing navigation,
+page-scroll and pointer audits also passed across Chromium, Firefox and WebKit,
+including 1100px/390px layouts, shift/modifier navigation, PageUp/PageDown, distant
+boundaries, full-area clicks, interactive controls, resizing and undo.
+
+Three serial production trials in
+`artifacts/public-interface-m4/input-controller/baseline.json` pass every unchanged
+budget: first usable 174ms, streaming 1074.6ms, paste handler 55.7ms, paste paint
+119.3ms, typing 32.2ms, paging 32.8ms and loaded heap 29,069,368 bytes. The report
+identifies `8d30c3b` and measures this checkpoint's uncommitted tree. Complete
+mounting, layout scheduling and asset readiness/cancellation remain before the
+milestone 4 architecture review.

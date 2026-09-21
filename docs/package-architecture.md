@@ -115,8 +115,8 @@ The remaining view/package differences are:
 
 - `src/demo/app/main.tsx` still initializes CanvasKit and `createOwnedEngine`.
 - `src/editor-react/editor.tsx` mounts listeners while the demo assembles the
-  complete editing surface. Painting is now framework-independent; input and
-  layout synchronization still need extraction from React hooks.
+  complete editing surface. Painting and native input are now framework-independent; layout
+  scheduling still needs extraction from React hooks.
 - Scenes have independent cache owners. Sample changes no longer require a
   synchronous unmount to coordinate shared cache cleanup.
 - Starter commands compose with foreign node definitions, but browser codecs,
