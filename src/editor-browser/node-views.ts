@@ -3,6 +3,7 @@ import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '../
 import type { Selection, SelectionContext } from '../state';
 import type { ViewSession } from './input-contributions';
 import { createTextDecorations, type ReadTextDecorations } from './text-decorations';
+import type { ReadTextStyle } from './text-style';
 
 export type NodeViewEnvironment = {
   clipboard: (event: ClipboardEvent) => void;
@@ -22,6 +23,7 @@ export type NodeViewFrame<N> = {
   context: SelectionContext;
   width: number;
   textDecorations?: ReadTextDecorations;
+  textStyle?: ReadTextStyle;
   onMeasure: (id: number, width: number, height: number) => void;
 };
 

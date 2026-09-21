@@ -1,5 +1,6 @@
 import './container-decorations.css';
 import { defineExtension, type ContributionContext } from '../../core';
+import { applyTextStyle } from '../../editor-browser/text-style';
 import { viewLayers, type ViewLayerFrame } from '../../editor-browser/view-layers';
 import type { NodeIdentity, Schema } from '../../model';
 import { quote, list, listItem } from '../starter-definitions';
@@ -16,7 +17,7 @@ function createContainerDecorations<N extends NodeIdentity>(
   const quotes = new Map<number, HTMLSpanElement>();
 
   return {
-    update({ blocks }: ViewLayerFrame<N>) {
+    update({ blocks, textStyle }: ViewLayerFrame<N>) {
       const active = new Set<number>();
       const rules = new Map<number, { top: number; bottom: number; left: number }>();
 
@@ -58,6 +59,10 @@ function createContainerDecorations<N extends NodeIdentity>(
           markers.set(block.node.id, marker);
           element.append(marker);
         }
+
+        const style = textStyle?.(block.node.id);
+
+        if (style) applyTextStyle(marker, style);
 
         marker.style.left = `${block.left}px`;
         marker.style.top = `${block.top}px`;

@@ -41,8 +41,10 @@ export const tableView = defineExtension({
 
             return {
               update(frame: NodeViewFrame<N>) {
+                if (!frame.textStyle) throw new Error('Table views require resolved text styles');
                 view.update({
                   ...frame,
+                  textStyle: frame.textStyle,
                   onSelect: (selection) => editor.select(selection),
                   onText: (id, from, to, text, caret) =>
                     run(() =>

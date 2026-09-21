@@ -1,12 +1,11 @@
 import { type NodeIdentity, type Schema, type MarkRange } from '../../model';
-import { table, tableCell, heading } from '../starter-definitions';
+import { table, tableCell } from '../starter-definitions';
 import { tableRows } from '../table';
 
 export type TableText = {
   id: number;
   text: string;
   marks: readonly MarkRange[];
-  level?: 1 | 2 | 3 | 4;
 };
 
 export type TableCellContent = {
@@ -23,7 +22,6 @@ export type TableCellContent = {
 export function createTableContent<N extends NodeIdentity>(schema: Schema<N>) {
   const tables = schema.node(table);
   const cells = schema.node(tableCell);
-  const headings = schema.node(heading);
   const textCache = new WeakMap<N, TableText>();
   const cellCache = new WeakMap<N, TableCellContent>();
   const tableCache = new WeakMap<N, { id: number; caption: string; rows: TableCellContent[][] }>();
@@ -37,7 +35,6 @@ export function createTableContent<N extends NodeIdentity>(schema: Schema<N>) {
         id: node.id,
         text: editing.text(node),
         marks: editing.marks?.read(node) ?? [],
-        level: headings.matches(node) ? headings.read(node)?.level : undefined,
       };
       textCache.set(node, value);
     }

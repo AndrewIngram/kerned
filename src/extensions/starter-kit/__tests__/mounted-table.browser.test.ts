@@ -1,10 +1,16 @@
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor } from '../../../core';
-import { mountEditor } from '../../../editor-canvas';
+import { createEditor, defineExtension, type ContributionContext } from '../../../core';
+import {
+  mountEditor,
+  defineNodePresentation,
+  presentations,
+  defineStyleRule,
+} from '../../../editor-canvas';
 import { createSchema, defineNode } from '../../../model';
 import { textSelection } from '../../../state';
+import { formattingSpans } from '../../formatting';
 import { paragraph } from '../../starter-definitions';
 import { tableCells } from '../../table';
 import { starterBrowserExtensions } from '../browser';
@@ -20,11 +26,34 @@ const note = defineNode({
   }),
 });
 
+const notePresentation = defineExtension({
+  name: 'notePresentation',
+  options: {},
+  setup(_options, context: ContributionContext) {
+    context.provide(
+      presentations,
+      defineNodePresentation(note, () => (attrs, node) => ({
+        kind: 'text',
+        text: attrs.body,
+        size: 18,
+        lineHeight: 28,
+        before: 0,
+        after: 16,
+        baselineGrid: 4,
+        spans: formattingSpans(node.marks),
+        atoms: [],
+      })),
+    );
+
+    return {};
+  },
+});
+
 async function fixture(cleanup: (fn: () => void) => void) {
   let writable = true;
 
   const editor = createEditor({
-    schema: createSchema({ extensions: [...starterBrowserExtensions(), note] }),
+    schema: createSchema({ extensions: [...starterBrowserExtensions(), note, notePresentation] }),
     content: [
       {
         kind: 'table',
@@ -308,4 +337,45 @@ test('revealing native text scrolls a narrow table locally', async ({ onTestFini
   expect(caret?.right).toBeLessThanOrEqual(bounds.right + 1);
   expect(document.activeElement).toBe(focus);
   expect(f.editor.state.selection.eq(selection)).toBe(true);
+});
+
+test('custom cell text and its native input share live resolved styles without losing selection or focus', async ({
+  onTestFinished,
+}) => {
+  const f = await fixture(onTestFinished);
+  const preview = f.button('Edit cell 1, 1');
+  expect(getComputedStyle(preview).fontSize).toBe('18px');
+  const original = f.editor.state;
+  f.view.update({
+    theme: {
+      baselineGrid: 0,
+      rules: [
+        defineStyleRule(note, { size: 26, lineHeight: 42, font: { weight: 700, style: 'italic' } }),
+      ],
+    },
+  });
+  const style = getComputedStyle(preview);
+  expect(style.fontSize).toBe('26px');
+  expect(style.lineHeight).toBe('42px');
+  expect(style.fontWeight).toBe('700');
+  expect(style.fontStyle).toBe('italic');
+  const family = style.fontFamily;
+  const input = await f.focus();
+  expect(getComputedStyle(input).fontFamily).toBe(family);
+  expect(getComputedStyle(input).lineHeight).toBe('42px');
+  const height = input.getBoundingClientRect().height;
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  f.view.update({ theme: { rules: [defineStyleRule(note, { size: 30, lineHeight: 60 })] } });
+  expect(f.cellInput()).toBe(input);
+  expect(document.activeElement).toBe(input);
+  expect(input.selectionStart).toBe(start);
+  expect(input.selectionEnd).toBe(end);
+  expect(getComputedStyle(input).lineHeight).toBe('60px');
+  expect(input.getBoundingClientRect().height).toBeGreaterThan(height);
+  expect(f.editor.state).toBe(original);
+  f.view.update({ theme: {} });
+  expect(getComputedStyle(input).fontSize).toBe('18px');
+  expect(getComputedStyle(input).lineHeight).toBe('28px');
+  expect(document.activeElement).toBe(input);
 });

@@ -1,7 +1,7 @@
 # View font configuration
 
-Status: milestone 5 is in progress. Configurable canvas faces and live node-style
-rules are implemented. Shared DOM typography, text colors and live font replacement
+Status: milestone 5 is in progress. Configurable faces, live node-style rules and
+shared native typography are implemented. Text colors and live font replacement
 remain in milestone 5.
 
 A view accepts a font configuration without exposing graphics or shaping handles:
@@ -70,10 +70,10 @@ line or caret positions. Glyph drawing preserves text order across faces,
 including overlapping ink, rather than ordering paint by native registration ID.
 The draw runs borrow subarrays of the existing numeric buffers.
 
-This slice treats `fonts` as attachment configuration. Changing the React `fonts`
+Font sources remain attachment configuration. Changing the React `fonts`
 prop currently replaces the native attachment while retaining the supplied
-session. In-place font replacement and coordinated canvas/table/list styling are
-still required before milestone 5 is complete.
+session. In-place font replacement and paint-only text colors are still required before
+milestone 5 is complete.
 
 ## Live node-style rules
 
@@ -138,10 +138,48 @@ measured heights; their renderers report actual changes through the existing
 measurement contract. Spacing-only changes reuse shaping in both plain text and
 text with inline atoms.
 
-Current scope: these rules reach canvas text, document spacing and flowing-container
-indentation. Native table text/editing and list marker styling still need the
-shared resolved-style contract; they do not yet consume all these settings.
-Text color rules and in-place font-source replacement are also outstanding.
+These rules reach canvas text, native table previews and editing inputs, list
+markers, document spacing and flowing-container indentation. Text color rules
+and in-place font-source replacement are still outstanding.
+
+## Native text rendering
+
+Node-view frames and layer frames expose `textStyle(id, marks?)`. It returns an
+immutable resolved `TextStyle`, or `null` for an absent/non-text node. The optional
+bold/italic flags resolve the same authored emphasis as the canvas font matcher.
+Custom text nodes provide their defaults through `defineNodePresentation`; the
+style reader does not assume starter-kit node names or text attribute fields.
+
+`applyTextStyle(element, style)` applies the resolved face, size, leading and
+baseline-grid adjustment. The snapshot includes semantic font metadata and a
+`cssFamily` containing private browser aliases. These aliases belong to the
+mounted view, must not be persisted as document formatting, and are released with
+that view. The helper uses CSS `translate` for the baseline adjustment; put editor
+positioning on the enclosing host when writing a native renderer.
+
+Each view registers its own browser `FontFace` objects from the exact buffers used
+by its shaper and canvas painter. Each face’s asset is resolved once for both
+renderers; a second resolution cannot choose a different source for native text.
+Readiness waits for browser font loading and registration. Destroying a view
+removes only its registrations, even when another view uses the same semantic
+family name with different bytes. Failed ordinary fonts reject readiness without
+publishing a partial font collection. Cancellation cannot register fonts late.
+
+The bundled bitmap color-emoji font is accepted by the tested Chromium but rejected
+by Firefox and WebKit. For the designated emoji face only, a browser-format
+rejection uses platform emoji families in native text. Canvas continues using the
+configured emoji face. Native emoji appearance can therefore differ across browser
+engines. Ordinary font failures do not silently fall back. This behavior was
+verified with real browser font loading, rather than inferred from user-agent names.
+
+Tables read styles for their actual child nodes. Their preview text and textareas
+share the same base font, size, leading and grid adjustment. Previews resolve
+authored marks within that family. The existing plain textarea does not visually
+render mixed inline marks while editing. Header cells add the table extension's bold emphasis. Adjacent
+paragraphs use the resolved spacing instead of separate table typography constants.
+Theme updates preserve active textarea identity, focus and selection and resize it
+when metrics change. List markers inherit their associated text node's appearance;
+tests measure their actual browser baselines against canvas line baselines.
 
 ## Ownership decision
 

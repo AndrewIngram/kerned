@@ -2,10 +2,12 @@ import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 
 import { createOwnedEngine } from '../owned-layout';
 import { readEditorAsset, type ResolveEditorAsset } from './assets';
+import { createDOMFonts } from './dom-fonts';
 import { createFontCatalog, type FontConfiguration } from './font-catalog';
 
 type NativeResources = {
   kit: CanvasKit;
+  fonts: Awaited<ReturnType<typeof createDOMFonts>>;
   layout: Awaited<ReturnType<typeof createOwnedEngine>>;
 };
 
@@ -17,7 +19,11 @@ type ResourceState =
 
 /** Private view lifetime. Ordinary consumers mount a view, rather than borrowing these handles. */
 export function createViewResources(
-  options: { resolveAsset?: ResolveEditorAsset; fonts?: FontConfiguration } = {},
+  options: {
+    resolveAsset?: ResolveEditorAsset;
+    fonts?: FontConfiguration;
+    document?: Document;
+  } = {},
 ) {
   const abort = new AbortController();
   const assets = { ...options, signal: abort.signal };
@@ -42,14 +48,27 @@ export function createViewResources(
     }
 
     abort.signal.throwIfAborted();
-    const layout = await createOwnedEngine(kit, 'shaping', { ...assets, fonts });
+    const data = await Promise.all(fonts.faces.map((face) => readEditorAsset(face.asset, assets)));
+    const layout = await createOwnedEngine(kit, 'shaping', { ...assets, fonts, fontData: data });
 
-    if (abort.signal.aborted) {
+    try {
+      const browserFonts = await createDOMFonts(
+        options.document ?? document,
+        fonts,
+        data,
+        abort.signal,
+      );
+
+      if (abort.signal.aborted) {
+        browserFonts.destroy();
+        abort.signal.throwIfAborted();
+      }
+
+      state = { status: 'ready', resources: { kit, layout, fonts: browserFonts } };
+    } catch (error) {
       layout.destroy();
-      abort.signal.throwIfAborted();
+      throw error;
     }
-
-    state = { status: 'ready', resources: { kit, layout } };
   }
 
   let onAbort: (() => void) | undefined;
@@ -95,7 +114,10 @@ export function createViewResources(
       state = { status: 'destroyed' };
       abort.abort(new DOMException('Editor view was destroyed', 'AbortError'));
 
-      if (previous.status === 'ready') previous.resources.layout.destroy();
+      if (previous.status === 'ready') {
+        previous.resources.fonts.destroy();
+        previous.resources.layout.destroy();
+      }
     },
   };
 }

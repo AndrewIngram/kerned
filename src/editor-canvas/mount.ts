@@ -22,6 +22,7 @@ import { createLayerGeometry } from './layer-geometry';
 import { createDocumentPresentation } from './presentation';
 import { createViewResources } from './resources';
 import { createTextLabels } from './text-labels';
+import { createTextStyles } from './text-styles';
 import { connectViewDiagnostics } from './view-diagnostics';
 import { createViewGeometry } from './view-geometry';
 import { readViewConfiguration, type ViewConfiguration } from './view-options';
@@ -115,6 +116,7 @@ export function mountEditor<N extends NodeIdentity>(
   let diagnostics: ReturnType<typeof connectViewDiagnostics> | undefined;
   const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
   let layers: ReturnType<typeof createViewLayers<N>> | undefined;
+  let textStyle: ReturnType<typeof createTextStyles> | undefined;
   const layerGeometry = createLayerGeometry();
 
   const renderers = createNodeViews(editor, { clipboard, notice: reportNotice, onError: fail });
@@ -361,12 +363,14 @@ export function mountEditor<N extends NodeIdentity>(
         onMeasure: layout.measure,
         selection: editor.state.selection,
         context: doc.context,
+        textStyle,
       });
     }
 
     layout.present(snapshot);
     layers?.update({
       tree: doc.tree,
+      textStyle,
       insets: doc.projection.decorations,
       blocks: visible.map(layerGeometry),
       inset,
@@ -471,7 +475,11 @@ export function mountEditor<N extends NodeIdentity>(
 
     element.append(root);
     cleanup.push(() => root.remove());
-    resources = createViewResources({ resolveAsset: options.resolveAsset, fonts: options.fonts });
+    resources = createViewResources({
+      resolveAsset: options.resolveAsset,
+      fonts: options.fonts,
+      document,
+    });
     cleanup.push(() => resources.destroy());
     cleanup.push(
       () => viewport.destroy(),
@@ -489,6 +497,18 @@ export function mountEditor<N extends NodeIdentity>(
 
       if (status === 'destroyed') throw new DOMException('Editor view was destroyed', 'AbortError');
       const native = resources.read();
+      textStyle = createTextStyles(
+        (id) => {
+          const node = presentation.query(editor.state).tree.byId.get(id)?.node;
+
+          if (!node || editor.schema.resolve(node).kind !== 'text') return null;
+          const value = presentation.present(node);
+
+          return value.kind === 'text' ? value : null;
+        },
+        native.fonts,
+        native.layout.textMetrics,
+      );
       layers = createViewLayers(
         overlay,
         editor,

@@ -31,13 +31,17 @@ type PreparedParagraph = {
 export async function createOwnedEngine(
   kit: CanvasKit,
   storage: OwnedStorage = 'objects',
-  assets: EditorAssetOptions & { fonts?: ReturnType<typeof createFontCatalog> } = {},
+  assets: EditorAssetOptions & {
+    fonts?: ReturnType<typeof createFontCatalog>;
+    fontData?: readonly ArrayBuffer[];
+  } = {},
 ) {
   const catalog = assets.fonts ?? createFontCatalog();
 
   const [wasm, data] = await Promise.all([
     readEditorAsset('engines/owned.wasm', assets),
-    Promise.all(catalog.faces.map((face) => readEditorAsset(face.asset, assets))),
+    assets.fontData ??
+      Promise.all(catalog.faces.map((face) => readEditorAsset(face.asset, assets))),
   ]);
 
   assets.signal?.throwIfAborted();
@@ -182,7 +186,34 @@ export async function createOwnedEngine(
   }
 
   const inkBounds = new Map<string, ReturnType<Font['getMetrics']>['bounds']>();
-  const paragraphMetrics = new Map<string, { lineHeight: number; baseline: number }>();
+
+  const paragraphMetrics = new Map<
+    string,
+    { lineHeight: number; baseline: number; baselineOffset: number }
+  >();
+
+  function textMetrics(size: number, requestedHeight: number, grid: number, faces: TextFaces) {
+    const metricKey = `${faces.normal}:${size}:${requestedHeight}:${grid}`;
+    let metrics = paragraphMetrics.get(metricKey);
+
+    if (!metrics) {
+      const lineHeight = requestedHeight;
+      const fontMetrics = font(faces.normal, size).getMetrics();
+      metrics = {
+        lineHeight,
+        baseline:
+          (lineHeight - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent,
+        baselineOffset: 0,
+      };
+      const naturalBaseline = metrics.baseline;
+
+      if (grid) metrics.baseline = Math.round(metrics.baseline / grid) * grid;
+      metrics.baselineOffset = metrics.baseline - naturalBaseline;
+      paragraphMetrics.set(metricKey, metrics);
+    }
+
+    return metrics;
+  }
 
   function prepare(
     text: string,
@@ -194,23 +225,7 @@ export async function createOwnedEngine(
     grid = 0,
     faces: TextFaces = nativeFonts.defaults,
   ): PreparedParagraph {
-    const metricKey = `${faces.normal}:${size}:${requestedHeight}:${grid}`;
-    let metrics = paragraphMetrics.get(metricKey);
-
-    if (!metrics) {
-      const lineHeight = requestedHeight;
-      const fontMetrics = font(faces.normal, size).getMetrics();
-      metrics = {
-        lineHeight,
-        baseline:
-          (lineHeight - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent,
-      };
-
-      if (grid) metrics.baseline = Math.round(metrics.baseline / grid) * grid;
-      paragraphMetrics.set(metricKey, metrics);
-    }
-
-    const { lineHeight, baseline } = metrics;
+    const { lineHeight, baseline } = textMetrics(size, requestedHeight, grid, faces);
     let paragraphGlyphs = cached?.paragraphGlyphs;
 
     if (paragraphGlyphs) stats.cacheHits++;
@@ -626,6 +641,20 @@ export async function createOwnedEngine(
   }
 
   return {
+    textMetrics(
+      this: void,
+      input: Pick<LayoutInput, 'size' | 'lineHeight' | 'baselineGrid' | 'font'>,
+    ) {
+      assertActive();
+      const faces = input.font ? nativeFonts.resolve(input.font) : nativeFonts.defaults;
+
+      return textMetrics(
+        input.size,
+        input.lineHeight ?? input.size * 1.6,
+        input.baselineGrid ?? 0,
+        faces,
+      );
+    },
     createLayout,
     layoutText(input: Omit<LayoutInput, 'id'>) {
       const owner = createLayout();

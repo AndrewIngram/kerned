@@ -2,11 +2,15 @@ import './table-view.css';
 import type { BrowserViewOptions } from '../../editor-browser';
 import { nativeTextCaret, revealNativeText } from '../../editor-browser/native-text-geometry';
 import type { ReadTextDecorations, TextDecoration } from '../../editor-browser/text-decorations';
+import {
+  applyTextStyle,
+  type ReadTextStyle,
+  type TextStyle,
+} from '../../editor-browser/text-style';
 import type { NodeIdentity, Schema, TextPoint } from '../../model';
 import { TextSelection, textSelection, type Selection, type SelectionContext } from '../../state';
 import { formattingSpans, type TextFormat } from '../formatting';
 import { tableCells } from '../table';
-import { typography } from '../typography';
 import { createTableContent, type TableText, type TableCellContent } from './table-content';
 
 export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
@@ -22,24 +26,20 @@ export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
   onFormat: (format: TextFormat) => void;
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   textDecorations?: ReadTextDecorations;
+  textStyle: ReadTextStyle;
 };
 
 const emptyMatches: readonly TextDecoration[] = [];
 
-function textStyle(element: HTMLElement, paragraph: TableText) {
-  const style = paragraph.level
-    ? typography({ kind: 'heading', level: paragraph.level }, 18)
-    : undefined;
-
-  element.style.fontSize = style ? `${style.size}px` : '';
-  element.style.lineHeight = style ? `${style.lineHeight}px` : '';
-  element.style.fontWeight = style ? '700' : '';
-}
-
-function paintText(element: HTMLElement, paragraph: TableText, matches: readonly TextDecoration[]) {
+function paintText(
+  element: HTMLElement,
+  paragraph: TableText,
+  matches: readonly TextDecoration[],
+  readStyle: ReadTextStyle,
+  header: boolean,
+) {
   const document = element.ownerDocument;
   const text = document.createElement('p');
-  textStyle(text, paragraph);
   const spans = formattingSpans(paragraph.marks);
 
   const cuts = [
@@ -57,9 +57,16 @@ function paintText(element: HTMLElement, paragraph: TableText, matches: readonly
     const decorations = matches.filter((value) => value.from <= start && value.to > start);
     span.textContent = paragraph.text.slice(start, cuts[index + 1]);
 
-    if (active.some((mark) => mark.bold)) span.style.fontWeight = '700';
+    const style = readStyle(paragraph.id, {
+      bold: header || active.some((mark) => mark.bold),
+      italic: active.some((mark) => mark.italic),
+    });
 
-    if (active.some((mark) => mark.italic)) span.style.fontStyle = 'italic';
+    if (style) {
+      span.style.fontFamily = style.cssFamily;
+      span.style.fontWeight = String(style.font.weight);
+      span.style.fontStyle = style.font.style;
+    }
 
     if (active.some((mark) => mark.underline)) span.style.textDecoration = 'underline';
 
@@ -99,6 +106,7 @@ type ParagraphView = {
   element: HTMLButtonElement | HTMLTextAreaElement;
   paragraph?: TableText;
   matches?: readonly TextDecoration[];
+  style?: TextStyle;
 };
 
 /** Owns the table's DOM, native editing, selection and measurement independently of React.
@@ -196,6 +204,7 @@ export function createTableView<N extends NodeIdentity>(
   function render(syncSelection: boolean) {
     if (!frame || destroyed) return;
     const selected = selectedCells();
+    let resizeInput = syncSelection;
 
     if (selected.size) editing = null;
     const rowIds = new Set<number>();
@@ -243,6 +252,8 @@ export function createTableView<N extends NodeIdentity>(
         view.element.rowSpan = cell.rowspan;
         view.selector.setAttribute('aria-label', `Select cell ${rowIndex + 1}, ${cellIndex + 1}`);
 
+        let previousAfter = 0;
+
         for (const [paragraphIndex, paragraph] of cell.paragraphs.entries()) {
           paragraphIds.add(paragraph.id);
           let content = paragraphs.get(paragraph.id);
@@ -268,8 +279,18 @@ export function createTableView<N extends NodeIdentity>(
               view.element.children[paragraphIndex + 1] ?? null,
             );
           const matches = frame.textDecorations?.(paragraph.id) ?? emptyMatches;
+          const style = frame.textStyle(paragraph.id, { bold: cell.header });
+
+          if (!style) throw new Error(`Missing text style for table paragraph ${paragraph.id}`);
+
+          if (content.style !== style) applyTextStyle(content.element, style);
+          content.element.style.marginTop = paragraphIndex
+            ? `${Math.max(previousAfter, style.before)}px`
+            : '0px';
+          previousAfter = style.after;
 
           if (content.element instanceof HTMLTextAreaElement) {
+            resizeInput ||= content.style !== style;
             content.element.setAttribute(
               'aria-label',
               `Cell ${rowIndex + 1}, ${cellIndex + 1} text`,
@@ -277,19 +298,23 @@ export function createTableView<N extends NodeIdentity>(
 
             if (!composing && content.element.value !== paragraph.text)
               content.element.value = paragraph.text;
-            textStyle(content.element, paragraph);
           } else {
             content.element.setAttribute(
               'aria-label',
               `Edit cell ${rowIndex + 1}, ${cellIndex + 1}${paragraphIndex ? `, paragraph ${paragraphIndex + 1}` : ''}`,
             );
 
-            if (content.paragraph !== paragraph || content.matches !== matches)
-              paintText(content.element, paragraph, matches);
+            if (
+              content.paragraph !== paragraph ||
+              content.matches !== matches ||
+              content.style !== style
+            )
+              paintText(content.element, paragraph, matches, frame.textStyle, cell.header);
           }
 
           content.paragraph = paragraph;
           content.matches = matches;
+          content.style = style;
         }
       }
     }
@@ -324,9 +349,12 @@ export function createTableView<N extends NodeIdentity>(
           Math.max(selection.anchor.offset, selection.head.offset),
           selection.anchor.offset > selection.head.offset ? 'backward' : 'forward',
         );
-        textarea.style.height = '0px';
-        textarea.style.height = `${textarea.scrollHeight}px`;
       } else if (selected.size) element.focus({ preventScroll: true });
+    }
+
+    if (textarea && resizeInput) {
+      textarea.style.height = '0px';
+      textarea.style.height = `${textarea.scrollHeight}px`;
     }
 
     report();

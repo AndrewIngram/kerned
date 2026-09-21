@@ -179,3 +179,5 @@ export {
   type ReadTextDecorations,
   type TextDecorationSource,
 } from './text-decorations';
+
+export { applyTextStyle, type TextStyle, type ReadTextStyle } from './text-style';

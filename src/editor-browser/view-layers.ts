@@ -10,6 +10,7 @@ import type {
   InlineBounds,
 } from './drawing';
 import type { ViewSession } from './input-contributions';
+import type { ReadTextStyle } from './text-style';
 
 export type LayerBlock<N> = {
   readonly node: N;
@@ -28,7 +29,10 @@ export type LayerBlock<N> = {
 };
 
 /** Bounds use unscaled document coordinates in the layer's positioned host. */
-export type ViewLayerFrame<N> = { readonly blocks: readonly LayerBlock<N>[] };
+export type ViewLayerFrame<N> = {
+  readonly blocks: readonly LayerBlock<N>[];
+  readonly textStyle?: ReadTextStyle;
+};
 
 type ViewLayer<N> = {
   update(frame: ViewLayerFrame<N>): void;
@@ -246,6 +250,7 @@ export function createViewLayers<N extends NodeIdentity>(
   return {
     update(frame: {
       tree: TreeIndex<N>;
+      textStyle?: ReadTextStyle;
       insets: ReadonlyMap<number, { inset: number }>;
       blocks: readonly {
         node: N;
@@ -300,7 +305,7 @@ export function createViewLayers<N extends NodeIdentity>(
         };
       });
 
-      current = { blocks };
+      current = { blocks, textStyle: frame.textStyle };
 
       for (const { name, view } of layers) {
         dirty.delete(name);

@@ -23,8 +23,8 @@ test('resolves every asset, initializes native resources and disposes all layout
     expect(owner.status).toBe('ready');
     expect(requested).toEqual([
       'engines/canvaskit.wasm',
-      'engines/owned.wasm',
       ...defaultFonts.faces.map((face) => face.asset),
+      'engines/owned.wasm',
     ]);
     const { kit, layout } = owner.read();
     const paragraph = layout.layoutText({ text: 'Ready to edit', width: 200, size: 20, spans: [] });
@@ -74,11 +74,7 @@ test('destruction during font resolution cancels native initialization', async (
   });
 
   await expect(owner.ready).rejects.toMatchObject({ name: 'AbortError' });
-  expect(requested).toEqual([
-    'engines/canvaskit.wasm',
-    'engines/owned.wasm',
-    defaultFonts.faces[0].asset,
-  ]);
+  expect(requested).toEqual(['engines/canvaskit.wasm', defaultFonts.faces[0].asset]);
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   expect(owner.status).toBe('destroyed');
   expect(() => owner.read()).toThrow(/destroyed/);
@@ -168,4 +164,60 @@ test('font configuration is captured before asynchronous asset loading', async (
     .layout.layoutText({ text: 'Stable font snapshot', spans: [], size: 20, width: 200 });
 
   expect(text.lines.length).toBeGreaterThan(0);
+});
+
+test('browser fonts match each view catalog and releasing one leaves the other registered', async ({
+  onTestFinished,
+}) => {
+  const regular = createViewResources();
+
+  const bold = createViewResources({
+    fonts: {
+      ...defaultFonts,
+      faces: defaultFonts.faces.map((face, index) =>
+        index === 0 ? { ...face, asset: defaultFonts.faces[1].asset } : face,
+      ),
+    },
+  });
+
+  const a = document.createElement('span');
+  const b = document.createElement('span');
+  onTestFinished(() => {
+    regular.destroy();
+    bold.destroy();
+    a.remove();
+    b.remove();
+  });
+  await Promise.all([regular.ready, bold.ready]);
+  const ordinary = regular.read().fonts.resolve();
+  const display = bold.read().fonts.resolve();
+  expect(ordinary.cssFamily).not.toBe(display.cssFamily);
+
+  for (const [element, fonts] of [
+    [a, ordinary],
+    [b, display],
+  ] as const) {
+    element.textContent = 'MMMMMMMM';
+    element.style.cssText = `position:absolute;font:400 24px ${fonts.cssFamily};font-synthesis:none;white-space:pre;`;
+    document.body.append(element);
+  }
+
+  const widthA = a.getBoundingClientRect().width;
+  const widthB = b.getBoundingClientRect().width;
+  expect(widthA).not.toBe(widthB);
+  const input = { text: 'MMMMMMMM', width: 1000, size: 24, spans: [] };
+  expect(widthA).toBeCloseTo(regular.read().layout.layoutText(input).lines[0].width, 0);
+  expect(widthB).toBeCloseTo(bold.read().layout.layoutText(input).lines[0].width, 0);
+
+  const registered = [...document.fonts].filter((face) =>
+    display.cssFamily.startsWith(`"${face.family}"`),
+  );
+
+  expect(registered).toHaveLength(1);
+  expect(registered.every((face) => face.status === 'loaded')).toBe(true);
+  regular.destroy();
+  expect(registered.every((face) => document.fonts.has(face))).toBe(true);
+  expect(b.getBoundingClientRect().width).toBe(widthB);
+  bold.destroy();
+  expect(registered.every((face) => !document.fonts.has(face))).toBe(true);
 });

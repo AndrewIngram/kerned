@@ -1,22 +1,25 @@
 import { expect, test } from 'vitest';
 
 import { createEditor } from '../../../core';
+import { createDocumentPresentation } from '../../../editor-canvas/presentation';
 import { createSchema } from '../../../model';
 import { textSelection } from '../../../state';
 import { createSampleDocument, type TableNode } from '../../demo-model';
 import { tableCells } from '../../table';
 import { createStarterDocumentQuery } from '../browser-document';
 import { starterExtensions } from '../index';
+import { starterPresentation } from '../presentation';
 import { createTableView, type TableFrame } from '../table-view';
 
 function fixture(writable = true) {
   const editor = createEditor({
-    schema: createSchema({ extensions: starterExtensions }),
+    schema: createSchema({ extensions: [...starterExtensions, starterPresentation] }),
     document: createSampleDocument().slice(0, 4),
     permissions: { access: () => (writable ? 'editable' : 'read-only') },
   });
 
   const project = createStarterDocumentQuery(editor.schema);
+  const presentation = createDocumentPresentation(editor);
   const host = document.createElement('div');
   host.style.width = '400px';
   document.body.append(host);
@@ -33,6 +36,21 @@ function fixture(writable = true) {
     return {
       node,
       width: 400,
+      textStyle(id) {
+        const text = project(editor.state).tree.byId.get(id)?.node;
+
+        if (!text) return null;
+        const style = presentation.present(text);
+
+        return style.kind === 'text'
+          ? {
+              ...style,
+              cssFamily: 'sans-serif',
+              baselineOffset: 0,
+              font: { family: 'sans-serif', weight: style.font?.weight ?? 400, style: 'normal' },
+            }
+          : null;
+      },
       onMeasure: (id, width, height) => reports.push({ id, width, height }),
       selection: editor.state.selection,
       context: project(editor.state).context,

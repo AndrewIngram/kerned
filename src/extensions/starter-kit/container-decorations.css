@@ -12,7 +12,7 @@
 .list-marker {
   position: absolute;
   right: 8px;
-  top: 1px;
-  font: 18px/1.6 system-ui;
+  top: 0;
+  font: inherit;
   color: #555;
 }

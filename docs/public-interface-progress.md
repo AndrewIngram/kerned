@@ -2273,3 +2273,46 @@ Milestone 5 is still open. Next is the shared resolved-style contract for native
 table text/editing and list markers, followed by paint-only color updates and
 in-place font-source replacement. Full Warbreaker theme-change validation and the
 milestone's independent architecture review remain required before completion.
+
+### Milestone 5 checkpoint: shared native typography
+
+Node-view and layer frames now carry a read-only text-style reader, backed by the
+same per-view presentations as canvas layout. Its immutable snapshots expose
+semantic font metadata, native CSS aliases and resolved metrics without native
+handles. Native renderers can use `applyTextStyle`; table previews, active cell
+textareas and list markers now consume this contract. Tables no longer have a
+separate heading-size helper or fixed body size/leading, and markers no longer
+hardcode a system font. Custom cell text supplies its own presentation contribution.
+
+The resource owner loads each face's bytes once for both rendering paths. It owns
+matching browser FontFace registrations under private aliases, so two views can
+use the same semantic family with different source bytes. Readiness includes these
+registrations; destruction releases only the owning view's faces. Ordinary font
+failure and cancellation leave no partially registered collection. Cross-browser
+checks found that Firefox and WebKit reject the bundled bitmap color-emoji font.
+Only that designated emoji face uses platform fallback on browser rejection;
+ordinary text font errors remain explicit and canvas emoji stays unchanged.
+
+Native text uses the layout engine's baseline-grid adjustment. Real DOM baseline
+measurements match canvas lines with the default grid and with snapping disabled.
+Tests also compare browser text widths with the corresponding canvas faces, verify
+independent font ownership and cleanup, and change a custom cell's live size,
+weight, style and leading while retaining its textarea, selection and focus.
+Textarea measurement now runs for content/selection/dimension or style changes,
+not every otherwise unchanged view update. Authored table previews resolve marks
+through the shared font matcher; plain native textareas retain their existing
+limitation of not displaying mixed inline marks while editing.
+
+`pnpm run check` passes with 596 Vitest tests, one unchanged collaboration TODO and
+42 end-to-end cases. The production build passes, as do all nine production reflow
+cases across Chromium, Firefox and WebKit, including 2,000/10,000-block documents
+and concurrent 10,000-block streaming. Three serial production trials pass every
+unchanged budget: worst first usable 229 ms, streaming 1,181.5 ms, paste handler
+56.3 ms, paste to paint 115 ms, typing 32.3 ms, paging 32.4 ms and loaded heap
+26,999,576 bytes. Evidence in `artifacts/public-interface-m5/native-typography/`
+identifies `5f4ef16` and measures this checkpoint's uncommitted implementation.
+A second lint fix/format pass leaves files unchanged.
+
+Milestone 5 remains open. Paint-only text colors, in-place font-source replacement,
+full Warbreaker live-theme validation and the independent milestone architecture
+review are still required. This checkpoint does not complete the milestone.
