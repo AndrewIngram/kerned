@@ -1,13 +1,12 @@
 import { type CanvasKit } from 'canvaskit-wasm';
 import { useMemo, type ComponentProps } from 'react';
 
-import type { FindState } from '../../editor';
-import { textSelection, type Selection } from '../../editor';
 import type { BrowserViewOptions } from '../../editor-browser';
 import type { Viewport } from '../../editor-react';
 import { demoSchema } from '../../extensions/demo-schema';
 import { DemoNodeView } from '../../extensions/node-views';
 import { type CommentHighlight } from '../../extensions/text-block-view';
+import { type FindState, textSelection, type Selection } from '../../state';
 import type { StarterActions } from './actions';
 import type { EditorDocument, Owned } from './types';
 import type { useDocumentLayout } from './use-document-layout';

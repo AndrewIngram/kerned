@@ -6,15 +6,14 @@ import {
   useMemo,
   useRef,
   useState,
+  type RefObject,
 } from 'react';
-import type { RefObject } from 'react';
 
-import type { FindOptions, FindSnapshot, FindState } from '../../editor';
-import type { EditorState } from '../../editor';
 import type { Viewport } from '../../editor-react';
 import type { Scene } from '../../editor-scene';
 import { type StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
+import type { FindOptions, FindSnapshot, FindState, EditorState } from '../../state';
 
 export function useFind({
   editor,

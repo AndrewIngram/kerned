@@ -2,7 +2,7 @@ import { test, expect } from 'vitest';
 
 test('stored marks are explicit, reset on movement, restore with history and preserve graphemes', async () => {
   const result = await (async () => {
-    const { createEditor, textSelection, inputMarks } = await import('../src/editor/index.ts');
+    const { createEditor, textSelection, inputMarks } = await import('../src/state/index.ts');
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     const bold = { type: 'bold', attrs: null };
 
@@ -98,7 +98,7 @@ test('stored marks are explicit, reset on movement, restore with history and pre
 test('replacement inherits selected text and loading preserves a pending override', async () => {
   const result = await (async () => {
     const { createEditor, textSelection, TextSelection, inputMarks } =
-      await import('../src/editor/index.ts');
+      await import('../src/state/index.ts');
 
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     const { formattingMarks } = await import('../src/extensions/formatting.ts');

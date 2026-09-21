@@ -1,4 +1,5 @@
-import { createSchema, createEditor, textSelection } from '../../src/editor/index.ts';
+import { createSchema } from '../../src/model/index.ts';
+import { createEditor, textSelection } from '../../src/state/index.ts';
 
 // Deliberately independent of the demo schema, text fields and renderer.
 const text = (id, value, role = 'body') => ({ id, key: `n-${id}`, kind: 'text', role, value });

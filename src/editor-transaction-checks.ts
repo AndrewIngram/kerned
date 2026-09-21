@@ -1,6 +1,3 @@
-import { textSelection, selectionContext } from './editor';
-import { createEditor, applyTransaction, mapPosition, type Transaction } from './editor';
-import { createAnchor, parseAnchor, resolveAnchor } from './editor';
 import {
   createSampleDocument,
   type TextBlockNode,
@@ -9,7 +6,17 @@ import {
 import { demoSchema } from './extensions/demo-schema';
 import { formattingMarks } from './extensions/formatting';
 import { createMention } from './extensions/mention';
-import { boundaries } from './model';
+import { parseAnchor, boundaries } from './model';
+import {
+  textSelection,
+  selectionContext,
+  createEditor,
+  applyTransaction,
+  type Transaction,
+  createAnchor,
+  resolveAnchor,
+} from './state';
+import { mapPosition } from './transform';
 
 export function checkTransactions() {
   let assertions = 0;

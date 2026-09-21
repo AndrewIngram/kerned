@@ -1,4 +1,4 @@
-import type { NodeIdentity, Schema } from '../editor';
+import type { NodeIdentity, Schema } from '../model';
 
 export type OutlineHeading = { level: number; title: string };
 

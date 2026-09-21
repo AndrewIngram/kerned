@@ -3,7 +3,7 @@ import { test, expect } from 'vitest';
 test('extension state publishes atomically and commands report mixed state without running effects', async () => {
   const result = await (async () => {
     const { fixture } = await import('./fixtures/editor-foundation.js');
-    const { createStateField, commandActivity } = await import('../src/editor/index.ts');
+    const { createStateField, commandActivity } = await import('../src/state/index.ts');
 
     const field = createStateField({
       create: () => ({ edits: 0, restores: 0 }),
@@ -93,7 +93,12 @@ test('extension state publishes atomically and commands report mixed state witho
 test('serialized structural references follow wrapping and movement and recover on undo or reload', async () => {
   const result = await (async () => {
     const { fixture, dispatch, schema } = await import('./fixtures/editor-foundation.js');
-    const { createEditor, parseRelativeGap } = await import('../src/editor/index.ts');
+
+    const { createEditor, parseRelativeGap } = Object.assign(
+      {},
+      await import('../src/state/index.ts'),
+      await import('../src/model/index.ts'),
+    );
 
     const editor = fixture({ documentId: 'gaps' }),
       ref = parseRelativeGap(JSON.parse(JSON.stringify(editor.positions.before(4))));
@@ -147,7 +152,7 @@ test('serialized structural references follow wrapping and movement and recover 
 
 test('mark extensions control caret boundary inheritance independently of rendering', async () => {
   const result = await (async () => {
-    const { createMarkSchema, createSchema, marksAt } = await import('../src/editor/index.ts');
+    const { createMarkSchema, createSchema, marksAt } = await import('../src/model/index.ts');
 
     const marks = createMarkSchema([
       {
@@ -202,7 +207,7 @@ test('mark extensions control caret boundary inheritance independently of render
 test('gap association distinguishes insertions, empty containers and deleted parents', async () => {
   const result = await (async () => {
     const { fixture, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { parseRelativeGap } = await import('../src/editor/index.ts');
+    const { parseRelativeGap } = await import('../src/model/index.ts');
     const editor = fixture();
 
     const left = editor.positions.gap(2, 1, -1),
@@ -257,7 +262,7 @@ test('foreign inline extensions own attributes, layout and versioned serializati
       jsonString,
       replaceInlineObjects,
       sliceInlineObjects,
-    } = await import('../src/editor/index.ts');
+    } = await import('../src/model/index.ts');
 
     const values = createInlineSchema([
       {
@@ -310,7 +315,7 @@ test('foreign inline extensions own attributes, layout and versioned serializati
 test('mark command queries cover partial text and caret chains reset on movement', async () => {
   const result = await (async () => {
     const { createEditor, textSelection, toggleMarkCommand } =
-      await import('../src/editor/index.ts');
+      await import('../src/state/index.ts');
 
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     let editable = true;
@@ -373,7 +378,12 @@ test('selection projection and multiclick ranges work with a foreign schema', as
       selectionView,
       TextSelection,
       textSelectionAtClick,
-    } = await import('../src/editor/index.ts');
+    } = Object.assign(
+      {},
+      await import('../src/model/index.ts'),
+      await import('../src/state/index.ts'),
+      await import('../src/editor-browser/index.ts'),
+    );
 
     const schema = createSchema([
       {

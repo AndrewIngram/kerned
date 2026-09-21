@@ -1,5 +1,5 @@
 import type { Geometry, Line, Rect } from './engines';
-import type { Direction, Position } from './model';
+import type { Direction, Position } from './layout-types';
 
 // A single paragraph-owned buffer. Capacity includes the worst case of one
 // soft line per cluster; finish compacts it before publishing the snapshot.

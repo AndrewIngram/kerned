@@ -1,6 +1,5 @@
 import { sampleChunk } from './editor-stream';
-import { plainText } from './extensions/demo-model';
-import { createSampleDocument, type StarterNode } from './extensions/demo-model';
+import { plainText, createSampleDocument, type StarterNode } from './extensions/demo-model';
 import { demoSchema } from './extensions/demo-schema';
 import { formattingMarks } from './extensions/formatting';
 import { importHtml } from './extensions/html';

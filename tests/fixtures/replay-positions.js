@@ -1,4 +1,4 @@
-import { indexTree, boundaries } from '../../src/editor/index.ts';
+import { indexTree, boundaries } from '../../src/model/index.ts';
 
 // Deliberately slow reference interpreter. It knows nothing about summaries or chunks.
 export function replayRange(schema, editor, range) {

@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status   | Required outcome                                                               |
-| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Pending  | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Pending  | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Pending  | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Pending  | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Pending  | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status    | Required outcome                                                               |
+| ----------------------------------- | --------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete  | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | In review | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Pending   | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Pending   | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Pending   | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Pending   | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending   | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending   | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending   | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -208,3 +208,67 @@ The viewport cache retained 48 composed paragraphs after scrolling and resizing,
 for both document sizes. The full cache retained 1,800 and 9,000 respectively.
 The complete heap/storage and geometry comparisons are preserved in
 `artifacts/public-interface-m0/retention.json`.
+
+## Milestone 1: model, transform and state
+
+Milestone 0 review fixes were committed as `5d7c017` before this extraction.
+The three real implementation modules are now `src/model`, `src/transform` and
+`src/state`, each with an explicit entry point. Workspace manifests and built
+exports remain milestone 8 work; no package forwards to implementation outside
+its ownership.
+
+- Model owns schema/tree mechanics, marks, inline values, codecs, coordinate
+  values and independently serializable durable references.
+- Transform owns document steps, application, identity-checked change inversion,
+  numeric/key mappings and snapshot mapping. `applySteps` requires no session,
+  selection, revision or history policy. Its result includes a validated tree
+  index reused by state during selection acceptance.
+- State owns transaction acceptance, selection publication, permissions, history,
+  extension state and retained reference resolution. Stream-only append policy
+  stays here. Appends now return invertible transform changes; stream transactions
+  still exclude those changes from local history.
+- Geometry-specific selection and keyboard helpers moved to the browser module.
+  The previous low-level `src/model.ts` is named `src/layout-types.ts` to distinguish
+  layout coordinates from the document model.
+
+The former `src/editor` implementation and barrel are removed. Callers, browser
+fixtures and diagnostic scripts import the owning public entry points. The shared
+syntax-based checker covers imports, type imports, type queries, re-exports and
+literal dynamic imports. Model can depend only on itself and Zod; transform can
+also depend on model; state can also depend on transform. Cross-module private
+imports and imports of the removed barrel fail the check.
+
+Property updates preserve their batch path when no step observer is present.
+When authorization is active, consecutive updates publish within the transform
+one at a time so each permission check sees the previous update. Throwing aborts
+before the editor publishes anything. This closes the old batch path's stale
+permission view without imposing that cost on ordinary formatting.
+
+`tests/headless-consumer.test.ts` exercises foreign-schema transformation,
+inversion, append, step authorization, snapshot ownership and durable ranges in
+the Node project without browser globals. The existing retained tests keep their
+semantics. The schema codec's Date case now has a stable name instead of embedding
+the capture time. `artifacts/public-interface-m1/test-relocations.json` explicitly
+records both relocated test files and that one title change. Reproduce discovery
+verification after collecting the two reporter outputs:
+
+```sh
+pnpm exec vitest run --reporter=json --outputFile=/tmp/gprose-tests.json
+pnpm exec playwright test --list --reporter=json > /tmp/gprose-e2e.json
+node scripts/check-test-discovery.mjs /tmp/gprose-tests.json /tmp/gprose-e2e.json artifacts/public-interface-m1/test-relocations.json
+```
+
+Three serial production foundation trials are preserved in
+`artifacts/public-interface-m1`. These were captured from the implementation
+worktree whose parent is `5d7c017`, before its milestone commit. All historical
+budgets pass. Compared with the production M0 worst values: first usable paint
+174ms versus 181ms, streaming 1,118.9ms versus 1,100.2ms, paste handler 59.6ms
+versus 56.1ms, paste paint 103.1ms versus 99ms, typing 32.7ms versus 32.3ms,
+paging 32.4ms versus 32.3ms, loaded heap 28,846,224 versus 28,457,096 bytes.
+These small changes do not justify a new budget or a speedup claim.
+
+The milestone gate passed: lint, format, typecheck, ownership checks, **108 Vitest
+passes with the existing convergence todo**, and **39 Playwright passes**. The
+production build passed. Discovery comparison preserved all 105 baseline Vitest
+identities/statuses, including the todo and repeated browser identities, and all
+39 E2E identities. The four new headless consumer cases account for the increase.

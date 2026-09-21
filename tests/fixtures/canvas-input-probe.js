@@ -1,4 +1,5 @@
-import { indexTree, selectionContext } from '../../src/editor/index.ts';
+import { indexTree } from '../../src/model/index.ts';
+import { selectionContext } from '../../src/state/index.ts';
 import { schema } from './editor-foundation.js';
 
 export async function mountCanvasInputProbe(element, initial) {

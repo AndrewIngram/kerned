@@ -10,7 +10,7 @@ test('structural ranges preserve direction, hierarchy, codecs and transaction hi
       selectionContext,
       createSelectionRegistry,
       extendSelection,
-    } = await import('../src/editor/index.ts');
+    } = await import('../src/state/index.ts');
 
     const atom = (id) => ({ id, key: `n-${id}`, kind: 'atom' }),
       text = (id, value) => ({ id, key: `n-${id}`, kind: 'text', value });
@@ -124,7 +124,7 @@ test('structural ranges preserve direction, hierarchy, codecs and transaction hi
 test('node edges follow split and join, and node-only ranges support replacement and gaps', async () => {
   const result = await (async () => {
     const { createEditor, RangeSelection, selectionContext } =
-      await import('../src/editor/index.ts');
+      await import('../src/state/index.ts');
 
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     const { pasteFragment } = await import('../src/extensions/clipboard.ts');
@@ -220,7 +220,7 @@ test('node edges follow split and join, and node-only ranges support replacement
 test('structural edits clean empty containers and keep surviving endpoints when an ancestor is deleted', async () => {
   const result = await (async () => {
     const { createEditor, RangeSelection, selectionContext } =
-      await import('../src/editor/index.ts');
+      await import('../src/state/index.ts');
 
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     const { replaceStructuredText } = await import('../src/extensions/blocks.ts');
@@ -282,7 +282,7 @@ test('structural edits clean empty containers and keep surviving endpoints when 
 test('large node-only deletion batches siblings and undoes atomically', async () => {
   const result = await (async () => {
     const { schema } = await import('./fixtures/editor-foundation.js');
-    const { createEditor, RangeSelection } = await import('../src/editor/index.ts');
+    const { createEditor, RangeSelection } = await import('../src/state/index.ts');
 
     const nodes = Array.from({ length: 1024 }, (_, id) => ({
       id,

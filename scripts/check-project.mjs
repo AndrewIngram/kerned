@@ -41,6 +41,9 @@ for (const entry of ['editor.html', 'extensions.html']) {
   for (const [, source] of scripts) visit(source.replace(/^\//, ''));
 }
 
+// Public headless entry points are supported even when the demo does not import every export.
+for (const entry of ['model', 'transform', 'state']) visit(`src/${entry}/index.ts`);
+
 // Extensions are supported entry points even when the demo does not import them.
 for (const file of sourceFiles.filter((file) => file.startsWith('src/extensions/'))) visit(file);
 

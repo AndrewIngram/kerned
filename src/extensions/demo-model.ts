@@ -1,10 +1,10 @@
+import { boundaries, type Span } from '../layout-types';
 import {
   replaceInlineObjects,
   type InlineValue,
   type MarkRange,
   type NodeIdentity,
-} from '../editor';
-import { boundaries, type Span } from '../model';
+} from '../model';
 import { createMention, inlineSchema } from './mention';
 
 export type StarterSpan = Span & { underline?: boolean };

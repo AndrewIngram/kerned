@@ -1,18 +1,6 @@
 import { type CanvasKit } from 'canvaskit-wasm';
-import { useEffect } from 'react';
-import type { RefObject } from 'react';
+import { useEffect, type RefObject } from 'react';
 
-import type { FindState } from '../../editor';
-import {
-  createAnchor,
-  parseAnchor,
-  resolveAnchor,
-  resolveRangeDecorations,
-  TextSelection,
-  RangeSelection,
-  textSelection,
-  type Selection,
-} from '../../editor';
 import { benchmarkContainerEdits, checkContainers } from '../../editor-container-checks';
 import { checkExtensions } from '../../editor-extension-checks';
 import { type CanvasPaintLayer, type CanvasPainter as Painter } from '../../editor-react';
@@ -25,7 +13,18 @@ import type { StarterLeaf } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { importHtml } from '../../extensions/html';
 import type { EditorSession, Owned } from '../../extensions/starter-kit/types';
+import { parseAnchor } from '../../model';
 import { checkInline } from '../../owned-inline-checks';
+import {
+  type FindState,
+  createAnchor,
+  resolveAnchor,
+  resolveRangeDecorations,
+  TextSelection,
+  RangeSelection,
+  textSelection,
+  type Selection,
+} from '../../state';
 import type { StreamState } from './use-sample-stream';
 
 type DiagnosticsOptions = {

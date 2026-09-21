@@ -1,11 +1,5 @@
-import {
-  TextSelection,
-  selectionContext,
-  type NodeIdentity,
-  type Schema,
-  type EditorState,
-  type SelectionContext,
-} from '../editor';
+import { type NodeIdentity, type Schema } from '../model';
+import { TextSelection, selectionContext, type EditorState, type SelectionContext } from '../state';
 
 type InputSession<N extends NodeIdentity> = {
   readonly state: EditorState<N>;

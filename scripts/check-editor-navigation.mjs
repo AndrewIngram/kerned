@@ -16,8 +16,11 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
 
       if (width === 1100) {
         const core = await page.evaluate(async () => {
-          const { hitTestTextLines, createTextNavigation, TextSelection } =
-            await import('/src/editor/index.ts');
+          const { hitTestTextLines, createTextNavigation, TextSelection } = Object.assign(
+            {},
+            await import('/src/editor-browser/index.ts'),
+            await import('/src/state/index.ts'),
+          );
 
           const hits = [];
 

@@ -1,13 +1,13 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 
+import type { BrowserViewOptions } from '../editor-browser';
 import {
   TextSelection,
   textSelection,
   type Selection,
   type SelectionContext,
   type FindMatch,
-} from '../editor';
-import type { BrowserViewOptions } from '../editor-browser';
+} from '../state';
 import type { TableNode, TableCell } from './demo-model';
 import { formattingSpans, type TextFormat } from './formatting';
 import { tableCells } from './table';

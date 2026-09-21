@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { TableNode } from './demo-model';
+import type { TableNode, StarterNode, TextBlockNode, TableCell } from './demo-model';
 
 /** Plain-text clipboard representation for a read-only table block. */
 export function tablePlainText(table: TableNode): string {
@@ -11,9 +11,8 @@ export function tablePlainText(table: TableNode): string {
   return (table.caption ? [table.caption, ...rows] : rows).join('\n');
 }
 
-import type { NodeExtension, NodeIdentity } from '../editor';
+import type { NodeExtension, NodeIdentity } from '../model';
 import { createCellSelectionExtension } from './cell-selection';
-import type { StarterNode, TextBlockNode, TableCell } from './demo-model';
 
 const cellCoordinates = z.object({
   row: z.number().int().nonnegative(),

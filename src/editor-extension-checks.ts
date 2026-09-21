@@ -1,10 +1,6 @@
-import { textSelection } from './editor';
 // This fixture uses only public API imports, with no demo nodes or built-in paragraph.
 import {
   createSchema,
-  createEditor,
-  createAnchor,
-  resolveAnchor,
   replaceAnnotations,
   sliceAnnotations,
   joinAnnotations,
@@ -15,7 +11,8 @@ import {
   type NodeExtension,
   type RangeAnnotation,
   type InlineObject,
-} from './editor';
+} from './model';
+import { textSelection, createEditor, createAnchor, resolveAnchor } from './state';
 
 type Heading = { id: number; key: string; type: 'heading'; value: string; level: number };
 

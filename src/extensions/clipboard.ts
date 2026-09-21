@@ -1,16 +1,14 @@
+import { indexTree, type NodeIdentity, type Schema } from '../model';
+import { supportsOwnedText } from '../owned-text-support';
 import {
   RangeSelection,
   NodeSelection,
   applyTransaction,
-  indexTree,
   selectionContext,
   textSelection,
   type EditorState,
-  type NodeIdentity,
-  type Schema,
-  type Step,
-} from '../editor';
-import { supportsOwnedText } from '../owned-text-support';
+} from '../state';
+import { type Step } from '../transform';
 import { replaceStructuredText } from './blocks';
 import { plainText, type StarterNode } from './demo-model';
 import { importHtml } from './html';

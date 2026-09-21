@@ -143,7 +143,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     assert.equal(await page.locator('.document-outline').count(), 0);
 
     const result = await page.evaluate(async () => {
-      const { createSchema } = await import('/src/editor/index.ts');
+      const { createSchema } = await import('/src/model/index.ts');
       const { createOutlineExtension } = await import('/src/extensions/outline.ts');
 
       const schema = createSchema([

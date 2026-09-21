@@ -1,5 +1,5 @@
 import type { LaidOut } from './engines';
-import { boundaries, type Span } from './model';
+import { boundaries, type Span } from './layout-types';
 import { supportsOwnedText } from './owned-text-support';
 
 export type OwnedBlock = { readonly text: string; readonly spans: readonly Readonly<Span>[] };

@@ -1,4 +1,4 @@
-import { normalizeMarks, createMarkSchema, type JsonValue, type MarkRange } from '../editor';
+import { normalizeMarks, createMarkSchema, type JsonValue, type MarkRange } from '../model';
 import type { StarterSpan } from './demo-model';
 
 export type TextFormat = 'bold' | 'italic' | 'underline';

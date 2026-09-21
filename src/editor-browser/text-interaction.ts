@@ -1,7 +1,4 @@
 import {
-  createTextNavigation,
-  moveNodeSelection,
-  textBoundaryNearNode,
   NodeSelection,
   RangeSelection,
   rangeSelection,
@@ -9,17 +6,19 @@ import {
   selectionAnchor,
   extendSelection,
   endpointOffset,
-  type NavigationNode,
   type SelectionContext,
-  hitTestTextLines,
-  textSelectionAtClick,
   TextSelection,
   type Selection,
-  type TextHitRegion,
+} from '../state';
+import { hitTestTextLines, type TextHitRegion } from './hit-testing';
+import {
+  createTextNavigation,
   type NavigationBlock,
   type NavigationLayout,
-} from '../editor';
+} from './keyboard-navigation';
+import { moveNodeSelection, textBoundaryNearNode, type NavigationNode } from './node-navigation';
 import type { PointerSelectionOptions } from './pointer-selection';
+import { textSelectionAtClick } from './selection-view';
 
 type TextInteractionOptions = {
   selection: Selection;

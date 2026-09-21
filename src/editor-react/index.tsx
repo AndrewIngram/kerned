@@ -1,7 +1,8 @@
 import type { Canvas, CanvasKit, Paint } from 'canvaskit-wasm';
 import { createContext, useContext, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
 
-import type { NodeIdentity, EditorState, CommandDefinition, CommandState } from '../editor';
+import type { NodeIdentity } from '../model';
+import type { EditorState, CommandDefinition, CommandState } from '../state';
 
 export type CanvasPainter = (canvas: Canvas, kit: CanvasKit, paint: Paint) => void;
 

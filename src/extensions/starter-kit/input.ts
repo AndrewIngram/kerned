@@ -1,4 +1,3 @@
-import { boundaries, TextSelection, textSelection, type Step } from '../../editor';
 import { createTextInput, type BrowserViewOptions } from '../../editor-browser';
 import { listCommands, replaceStructuredText } from '../../extensions/blocks';
 import { pasteFragment, readClipboard, writeClipboard } from '../../extensions/clipboard';
@@ -6,7 +5,10 @@ import { plainText, type StarterNode } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { pasteParagraphs } from '../../extensions/paste';
 import { tablePlainText } from '../../extensions/table';
+import { boundaries } from '../../model';
 import { supportsOwnedText } from '../../owned-text-support';
+import { TextSelection, textSelection } from '../../state';
+import { type Step } from '../../transform';
 import { tableCells } from '../table';
 import { pasteCellRectangle, plainCellRectangle } from '../table-clipboard';
 import type { StarterActions } from './actions';

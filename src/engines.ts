@@ -1,6 +1,6 @@
 import type { Canvas } from 'canvaskit-wasm';
 
-import type { Direction, Position, Span } from './model';
+import type { Direction, Position, Span } from './layout-types';
 
 export type Rect = [number, number, number, number];
 

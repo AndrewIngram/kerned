@@ -104,3 +104,16 @@ export function mountEditorView(element: HTMLElement, initial: BrowserViewOption
 }
 
 export { createTextInteraction, positionTextInput } from './text-interaction';
+
+export { hitTestTextLines, type TextHit, type TextHitRegion } from './hit-testing';
+
+export {
+  createTextNavigation,
+  type NavigationBlock,
+  type NavigationLayout,
+  type NavigationKey,
+} from './keyboard-navigation';
+
+export { selectionView, textSelectionAtClick } from './selection-view';
+
+export { textBoundaryNearNode, moveNodeSelection, type NavigationNode } from './node-navigation';

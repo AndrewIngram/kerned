@@ -1,5 +1,5 @@
 import type { Geometry, Rect } from './engines';
-import type { Direction, Position } from './model';
+import type { Direction, Position } from './layout-types';
 import type { ComposedParagraph } from './owned-paragraph';
 
 type Placement = { offset: number; y: number; paragraph: ComposedParagraph };

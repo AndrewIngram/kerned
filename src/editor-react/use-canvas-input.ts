@@ -1,25 +1,24 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useMemo, type RefObject } from 'react';
 
 import {
-  TextSelection,
-  NodeSelection,
-  RangeSelection,
-  AllSelection,
-  type Selection,
-  type NodeIdentity,
-  type Schema,
-  type createEditor,
   type NavigationLayout,
   type TextHitRegion,
-  type SelectionContext,
-} from '../editor';
-import {
   createTextInput,
   createTextInteraction,
   positionTextInput,
   type PointerSelectionOptions,
 } from '../editor-browser';
 import type { Rect } from '../engines';
+import { type NodeIdentity, type Schema } from '../model';
+import {
+  TextSelection,
+  NodeSelection,
+  RangeSelection,
+  AllSelection,
+  type Selection,
+  type createEditor,
+  type SelectionContext,
+} from '../state';
 import type { Viewport } from './use-viewport';
 
 type CanvasInputOptions<N extends NodeIdentity> = {

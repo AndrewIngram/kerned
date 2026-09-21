@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 
-import { indexTree, selectionContext, selectionView } from '../../editor';
+import { selectionView } from '../../editor-browser';
 import { useEditorState } from '../../editor-react';
+import { indexTree } from '../../model';
+import { selectionContext } from '../../state';
 import { projectBlocks } from '../blocks';
 import type { StarterNode } from '../demo-model';
 import { demoSchema } from '../demo-schema';

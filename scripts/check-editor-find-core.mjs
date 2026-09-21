@@ -14,7 +14,11 @@ for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(','
     await page.goto('http://127.0.0.1:5173/editor.html');
 
     const result = await page.evaluate(async () => {
-      const { createSchema, createEditor, textSelection } = await import('/src/editor/index.ts');
+      const { createSchema, createEditor, textSelection } = Object.assign(
+        {},
+        await import('/src/model/index.ts'),
+        await import('/src/state/index.ts'),
+      );
 
       let reads = 0,
         checks = 0;

@@ -1,6 +1,6 @@
 import { useId, useLayoutEffect, useRef, useState } from 'react';
 
-import type { FindOptions, FindState } from '../editor';
+import type { FindOptions, FindState } from '../state';
 
 export function FindIcon() {
   return (

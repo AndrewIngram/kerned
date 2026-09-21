@@ -1,43 +1,71 @@
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
 
-const files = (await readdir('src/editor')).filter((name) => name.endsWith('.ts'));
+import { dependencies } from './import-dependencies.mjs';
 
-for (const name of files) {
-  const source = await readFile(`src/editor/${name}`, 'utf8');
+const layers = new Set(['model', 'transform', 'state']);
 
-  for (const [, specifier] of source.matchAll(/(?:from\s*|import\s*\()['"]([^'"]+)['"]/g)) {
-    // Zod supplies synchronous, framework-free persistence validation.
-    assert.ok(
-      specifier === 'zod' || (specifier.startsWith('./') && !specifier.slice(2).includes('/')),
-      `Core ${name} imports outside its boundary: ${specifier}`,
-    );
+const allowed = { model: [], transform: ['model'], state: ['model', 'transform'] };
+
+const sources = ['src', 'tests', 'scripts'].flatMap((root) =>
+  readdirSync(root, { recursive: true })
+    .filter((file) => /\.(?:ts|tsx|js|mjs)$/.test(file))
+    .map((file) => `${root}/${file}`),
+);
+
+let checked = 0;
+
+for (const file of sources) {
+  const layer = file.startsWith('src/') ? file.split('/')[1] : null;
+  const headless = layers.has(layer) && !file.includes('/__tests__/');
+
+  for (const specifier of dependencies(file, readFileSync(file, 'utf8'))) {
+    const target = specifier.startsWith('.')
+      ? path.normalize(path.join(path.dirname(file), specifier))
+      : specifier.startsWith('/src/')
+        ? specifier.slice(1)
+        : specifier;
+
+    const targetLayer = target.startsWith('src/') ? target.split('/')[1] : null;
+
+    assert.ok(!/^src\/editor(?:\/|$)/.test(target), `${file}: removed editor barrel: ${specifier}`);
+
+    if (headless) {
+      assert.ok(
+        target === 'zod' ||
+          (targetLayer === layer && !target.includes('/__tests__/')) ||
+          allowed[layer].includes(targetLayer),
+        `${file}: ${layer} must not depend on ${specifier}`,
+      );
+    }
+
+    if (layers.has(targetLayer) && targetLayer !== layer) {
+      assert.ok(
+        target === `src/${targetLayer}` || target === `src/${targetLayer}/index.ts`,
+        `${file}: use the ${targetLayer} public entry point, not ${specifier}`,
+      );
+    }
   }
+
+  if (headless) checked++;
 }
 
-const independent = await readFile('src/editor-extension-checks.ts', 'utf8');
-
-for (const [, specifier] of independent.matchAll(/from\s*['"]([^'"]+)['"]/g))
-  assert.equal(
-    specifier,
-    './editor',
-    'Independent extension tests must use only the public entry point',
-  );
-
-for (const file of [
+for (const fixture of [
+  'src/editor-extension-checks.ts',
   'src/editor-container-checks.ts',
   'src/editor-selection-checks.ts',
   'src/extensions/cell-selection.ts',
 ]) {
-  const source = await readFile(file, 'utf8');
-
-  for (const [, specifier] of source.matchAll(/from\s*['"]([^'"]+)['"]/g))
+  for (const specifier of dependencies(fixture, readFileSync(fixture, 'utf8'))) {
     assert.ok(
-      specifier === './editor' ||
-        specifier === '../editor' ||
+      /^(?:\.\/|\.\.\/)(?:model|transform|state|editor-browser)$/.test(specifier) ||
         specifier.startsWith('./extensions/'),
-      `${file} bypasses the public API: ${specifier}`,
+      `${fixture}: independent fixture bypasses public entry points: ${specifier}`,
     );
+  }
 }
 
-console.log(`Checked ${files.length} core modules and public-only extension fixtures`);
+console.log(
+  `Checked ${checked} headless modules and public imports across ${sources.length} files`,
+);

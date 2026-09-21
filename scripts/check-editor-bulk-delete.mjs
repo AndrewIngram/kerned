@@ -22,7 +22,7 @@ try {
 
   const results = await page.evaluate(async () => {
     const { createEditor, TextSelection, createAnchor, resolveAnchor } =
-      await import('/src/editor/index.ts');
+      await import('/src/state/index.ts');
 
     const { demoSchema } = await import('/src/extensions/demo-schema.ts');
     const { replaceStructuredText } = await import('/src/extensions/blocks.ts');

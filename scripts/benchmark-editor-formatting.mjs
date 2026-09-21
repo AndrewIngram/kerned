@@ -19,7 +19,11 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
       );
 
       if (process.env.BASELINE_DIR) {
-        for (const path of ['editor/transactions.ts', 'editor-scene.ts']) {
+        for (const path of [
+          'state/transactions.ts',
+          'transform/apply-steps.ts',
+          'editor-scene.ts',
+        ]) {
           const source = await readFile(`${process.env.BASELINE_DIR}/${path}`, 'utf8');
 
           const { outputText } = ts.transpileModule(source, {

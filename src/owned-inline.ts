@@ -1,4 +1,4 @@
-import { boundaries, type Span } from './model';
+import { boundaries, type Span } from './layout-types';
 import type { Glyph, Cluster, ParagraphGlyphs } from './owned-paragraph';
 import { supportsOwnedText } from './owned-text-support';
 

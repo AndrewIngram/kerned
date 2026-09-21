@@ -5,7 +5,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const { React, createRoot, flushSync } = await import('./fixtures/selection-probe.js');
 
     const { createEditor, NodeSelection, textSelection, selectionContext } =
-      await import('../src/editor/index.ts');
+      await import('../src/state/index.ts');
 
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     const { createTable, tableCells } = await import('../src/extensions/table.ts');
@@ -109,7 +109,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     flushSync(() => actions().restore());
     flushSync(() => actions().insertTable());
     const order = editor.state.nodes.map((n) => n.kind);
-    const { TextSelection } = await import('../src/editor/index.ts');
+    const { TextSelection } = await import('../src/state/index.ts');
 
     const insertedTable = editor.state.nodes[2],
       after = editor.state.nodes[3];

@@ -1,11 +1,3 @@
-import { RangeSelection, NodeSelection, AllSelection } from '../../editor';
-import {
-  textSelection,
-  toggleMarkCommand,
-  type Selection,
-  type Step,
-  type Transaction,
-} from '../../editor';
 import { blockCommands, listCommands, replaceStructuredText } from '../../extensions/blocks';
 import { type StarterNode } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
@@ -13,6 +5,16 @@ import { formattingSchema, type TextFormat } from '../../extensions/formatting';
 import { setTextBlockType } from '../../extensions/headings';
 import { appendTableColumn, appendTableRow, createTable, tableCells } from '../../extensions/table';
 import { textCommands } from '../../extensions/text-commands';
+import {
+  RangeSelection,
+  NodeSelection,
+  AllSelection,
+  textSelection,
+  toggleMarkCommand,
+  type Selection,
+  type Transaction,
+} from '../../state';
+import { type Step } from '../../transform';
 import { pasteFragment } from '../clipboard';
 import type { EditorDocument, EditorSession } from './types';
 

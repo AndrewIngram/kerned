@@ -3,7 +3,7 @@ import { test, expect } from 'vitest';
 test('custom attribute marks replace only their type and round-trip with versions', async () => {
   const result = await (async () => {
     const { createMarkSchema, setMark, removeMark, hasMark, sliceMarks, jsonRecord, jsonString } =
-      await import('../src/editor/index.ts');
+      await import('../src/model/index.ts');
 
     const schema = createMarkSchema([
       {
@@ -89,7 +89,11 @@ test('mark commands use a foreign node shape and preserve permissions and atomic
       TextSelection,
       changeSelectionMarks,
       selectionHasMark,
-    } = await import('../src/editor/index.ts');
+    } = Object.assign(
+      {},
+      await import('../src/model/index.ts'),
+      await import('../src/state/index.ts'),
+    );
 
     const extension = {
       name: 'line',
@@ -167,8 +171,11 @@ test('document codecs reload durable comment endpoints with their independent ch
   const result = await (async () => {
     const { demoSchema, demoDocumentCodec } = await import('../src/extensions/demo-schema.ts');
 
-    const { createEditor, textSelection, parseRelativeRange } =
-      await import('../src/editor/index.ts');
+    const { createEditor, textSelection, parseRelativeRange } = Object.assign(
+      {},
+      await import('../src/state/index.ts'),
+      await import('../src/model/index.ts'),
+    );
 
     const editor = createEditor(
       demoSchema,
@@ -230,7 +237,7 @@ test('document codecs reload durable comment endpoints with their independent ch
 test('third-party node codecs own their payload while core enforces identities', async () => {
   const result = await (async () => {
     const { createSchema, createDocumentCodec, jsonRecord, jsonString } =
-      await import('../src/editor/index.ts');
+      await import('../src/model/index.ts');
 
     let corrupt = false;
 

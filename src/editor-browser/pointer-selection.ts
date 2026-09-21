@@ -2,12 +2,12 @@ import {
   type Selection,
   NodeSelection,
   TextSelection,
-  type TextHit,
   extendSelection,
   selectionAnchor,
   type SelectionAnchor,
   type SelectionContext,
-} from '../editor';
+} from '../state';
+import { type TextHit } from './hit-testing';
 
 type MouseInput = Pick<
   MouseEvent,

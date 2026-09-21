@@ -3,7 +3,7 @@ import { test, expect } from 'vitest';
 test('nested text selection and non-contiguous table cells', async () => {
   const result = await (async () => {
     const { fixture, schema } = await import('./fixtures/editor-foundation.js');
-    const { TextSelection, selectionContext } = await import('../src/editor/index.ts');
+    const { TextSelection, selectionContext } = await import('../src/state/index.ts');
     const { createCellSelectionExtension } = await import('../src/extensions/cell-selection.ts');
 
     const editor = fixture(),
@@ -36,7 +36,7 @@ test('nested text selection and non-contiguous table cells', async () => {
 test('serialized comment endpoints expand across interior insertion and follow split/move/join', async () => {
   const result = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { createAnchor, resolveAnchor } = await import('../src/editor/index.ts');
+    const { createAnchor, resolveAnchor } = await import('../src/state/index.ts');
     const editor = fixture();
 
     const start = JSON.parse(
@@ -76,7 +76,7 @@ test('serialized comment endpoints expand across interior insertion and follow s
 test('both insertion associations and grapheme-safe atomic rejection', async () => {
   const result = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { createAnchor, resolveAnchor } = await import('../src/editor/index.ts');
+    const { createAnchor, resolveAnchor } = await import('../src/state/index.ts');
     const editor = fixture();
 
     const anchors = [-1, 1].map((bias) =>
@@ -137,7 +137,7 @@ test('stale agent coordinates reject atomically rather than overwriting another 
 test('snapshot positions resolve tree context, structural gaps and document order', async () => {
   const result = await (async () => {
     const { fixture, schema } = await import('./fixtures/editor-foundation.js');
-    const { createPositionSnapshot } = await import('../src/editor/index.ts');
+    const { createPositionSnapshot } = await import('../src/transform/index.ts');
     const snapshot = createPositionSnapshot(schema, fixture().state);
 
     const heading = snapshot.text(3, 6),
@@ -182,7 +182,7 @@ test('snapshot positions resolve tree context, structural gaps and document orde
 test('snapshot positions reject foreign coordinates and invalid boundaries', async () => {
   const result = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { createPositionSnapshot } = await import('../src/editor/index.ts');
+    const { createPositionSnapshot } = await import('../src/transform/index.ts');
 
     const editor = fixture(),
       original = createPositionSnapshot(schema, editor.state);
@@ -245,8 +245,11 @@ test('old external endpoints resolve after journal compaction and checkpoint rel
   const result = await (async () => {
     const { fixture, schema, dispatch, capture } = await import('./fixtures/editor-foundation.js');
 
-    const { createEditor, textSelection, parseRelativeRange } =
-      await import('../src/editor/index.ts');
+    const { createEditor, textSelection, parseRelativeRange } = Object.assign(
+      {},
+      await import('../src/state/index.ts'),
+      await import('../src/model/index.ts'),
+    );
 
     const editor = fixture(),
       saved = JSON.stringify(capture(editor, 3, 1, 5));
@@ -283,7 +286,7 @@ test('old external endpoints resolve after journal compaction and checkpoint rel
 test('transaction mapping connects nested text and structural gaps to the exact next snapshot', async () => {
   const result = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { createPositionSnapshot } = await import('../src/editor/index.ts');
+    const { createPositionSnapshot } = await import('../src/transform/index.ts');
 
     const editor = fixture(),
       before = createPositionSnapshot(schema, editor.state);
@@ -375,7 +378,7 @@ test('reference edge associations, grouped history, and validation are explicit'
   const result = await (async () => {
     const { fixture, schema, dispatch, capture } = await import('./fixtures/editor-foundation.js');
 
-    const { createEditor, textSelection } = await import('../src/editor/index.ts');
+    const { createEditor, textSelection } = await import('../src/state/index.ts');
     const editor = fixture();
     const inside = capture(editor, 3, 1, 5);
     const inclusive = capture(editor, 3, 1, 5, 3, -1, 1);
@@ -437,7 +440,7 @@ test('reference edge associations, grouped history, and validation are explicit'
 test('wrapped gaps, text-only edits, removal and undo produce usable position mappings', async () => {
   const results = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { createPositionSnapshot } = await import('../src/editor/index.ts');
+    const { createPositionSnapshot } = await import('../src/transform/index.ts');
     const editor = fixture();
 
     let source = createPositionSnapshot(schema, editor.state),
@@ -549,7 +552,7 @@ test('disjoint ranges preserve surviving cells and references created after an e
 test('external endpoints require no registration and survive endpoint-block deletion', async () => {
   const result = await (async () => {
     const { fixture, dispatch, capture } = await import('./fixtures/editor-foundation.js');
-    const { parseRelativeRange } = await import('../src/editor/index.ts');
+    const { parseRelativeRange } = await import('../src/model/index.ts');
 
     const editor = fixture(),
       checkpoint = JSON.stringify(editor.positions.checkpoint());
@@ -689,7 +692,7 @@ test('read-only and protected nodes can move or be deleted, but reject content e
 test('general locks protect descendant deletion and history uses current permissions', async () => {
   const result = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { indexTree } = await import('../src/editor/index.ts');
+    const { indexTree } = await import('../src/model/index.ts');
     let edit = true;
 
     const editor = fixture({
@@ -732,7 +735,7 @@ test('general locks protect descendant deletion and history uses current permiss
 test('permission projections omit protected subtrees in initial and subsequent snapshots', async () => {
   const result = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { projectDocument } = await import('../src/editor/index.ts');
+    const { projectDocument } = await import('../src/state/index.ts');
 
     const editor = fixture(),
       permissions = {
@@ -765,7 +768,11 @@ test('agent proposals follow unrelated edits, reject changed targets and commit 
   const result = await (async () => {
     const { fixture, schema, dispatch, capture } = await import('./fixtures/editor-foundation.js');
 
-    const { prepareTextProposal, indexTree } = await import('../src/editor/index.ts');
+    const { prepareTextProposal, indexTree } = Object.assign(
+      {},
+      await import('../src/state/index.ts'),
+      await import('../src/model/index.ts'),
+    );
 
     const editor = fixture(),
       proposal = {
@@ -807,7 +814,12 @@ test('agent proposals follow unrelated edits, reject changed targets and commit 
 test('headless command chains share draft state, commit once, and capability checks have no effects', async () => {
   const result = await (async () => {
     const { fixture, schema } = await import('./fixtures/editor-foundation.js');
-    const { indexTree, textSelection } = await import('../src/editor/index.ts');
+
+    const { indexTree, textSelection } = Object.assign(
+      {},
+      await import('../src/model/index.ts'),
+      await import('../src/state/index.ts'),
+    );
 
     const editor = fixture(),
       initial = editor.state,
@@ -903,7 +915,7 @@ test('command capability checks respect current permissions without mutating sta
 test('external comment threads produce decorations without changing schema or range storage', async () => {
   const result = await (async () => {
     const { fixture, dispatch, capture } = await import('./fixtures/editor-foundation.js');
-    const { resolveRangeDecorations } = await import('../src/editor/index.ts');
+    const { resolveRangeDecorations } = await import('../src/state/index.ts');
     const { commentDecorations } = await import('../src/extensions/comment.ts');
     const editor = fixture();
 
@@ -967,7 +979,7 @@ test('revoking edit permission after chain preparation prevents execution and ca
 
 test('node locks survive starter-kit heading conversion and end-of-heading splits', async () => {
   const result = await (async () => {
-    const { createEditor, textSelection } = await import('../src/editor/index.ts');
+    const { createEditor, textSelection } = await import('../src/state/index.ts');
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     const { setTextBlockType } = await import('../src/extensions/headings.ts');
 
@@ -1002,7 +1014,7 @@ test('node locks survive starter-kit heading conversion and end-of-heading split
 test('permission inheritance protects nested content and opaque property changes', async () => {
   const result = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { indexTree } = await import('../src/editor/index.ts');
+    const { indexTree } = await import('../src/model/index.ts');
     let readonly = false;
 
     const editor = fixture({
@@ -1037,7 +1049,7 @@ test('position checkpoint rejects missing original operations and invalid undo s
   const result = await (async () => {
     const { fixture, schema, dispatch, capture } = await import('./fixtures/editor-foundation.js');
 
-    const { createEditor, textSelection } = await import('../src/editor/index.ts');
+    const { createEditor, textSelection } = await import('../src/state/index.ts');
 
     const editor = fixture(),
       range = capture(editor, 3, 0, 5);
@@ -1094,7 +1106,7 @@ test('position checkpoint rejects missing original operations and invalid undo s
 test('joins and range replacements cannot copy protected source text into visible nodes', async () => {
   const result = await (async () => {
     const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
-    const { projectDocument } = await import('../src/editor/index.ts');
+    const { projectDocument } = await import('../src/state/index.ts');
     const permissions = { access: (n) => (n.id === 4 ? 'protected' : 'editable') };
 
     const editor = fixture({ permissions }),
@@ -1170,8 +1182,11 @@ test('indexed mapping agrees with exact replay across varied histories and captu
 
     const { replayRange } = await import('./fixtures/replay-positions.js');
 
-    const { indexTree, boundaries, createEditor, textSelection } =
-      await import('../src/editor/index.ts');
+    const { indexTree, boundaries, createEditor, textSelection } = Object.assign(
+      {},
+      await import('../src/model/index.ts'),
+      await import('../src/state/index.ts'),
+    );
 
     let seed = 1234567,
       checked = 0,

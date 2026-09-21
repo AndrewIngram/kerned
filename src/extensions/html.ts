@@ -1,4 +1,4 @@
-import { boundaries } from '../editor';
+import { boundaries } from '../model';
 import type {
   HeadingLevel,
   TextBlockNode,

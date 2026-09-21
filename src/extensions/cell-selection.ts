@@ -1,18 +1,16 @@
+import { jsonRecord, jsonString, type SelectionRange } from '../model';
 import {
-  jsonRecord,
-  jsonString,
   Selection,
   textSelection,
   selectionNear,
   type SelectionContext,
   type SelectionMapping,
   type SelectionBookmark,
-  type SelectionRange,
   type SelectionJSON,
   type SelectionExtension,
   type SelectionEdit,
   type SelectionStep,
-} from '../editor';
+} from '../state';
 
 export type GridCell = { id: number; colspan: number; rowspan: number };
 

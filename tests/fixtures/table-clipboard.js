@@ -1,9 +1,6 @@
-export {
-  createEditor,
-  textSelection,
-  indexTree,
-  selectionContext,
-} from '../../src/editor/index.ts';
+export { createEditor, textSelection, selectionContext } from '../../src/state/index.ts';
+
+export { indexTree } from '../../src/model/index.ts';
 
 export { demoSchema } from '../../src/extensions/demo-schema.ts';
 

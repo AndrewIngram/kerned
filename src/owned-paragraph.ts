@@ -1,5 +1,5 @@
 import type { Geometry, Line, Rect } from './engines';
-import type { Direction, Position } from './model';
+import type { Direction, Position } from './layout-types';
 import { createPackedCarets } from './owned-carets';
 import type { PackedGlyphs } from './owned-packed';
 import type { PackedShaping } from './owned-shaped';

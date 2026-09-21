@@ -1,0 +1,9 @@
+{
+  "files": {
+    "src/editor/__tests__/schema-codec.test.ts": "src/model/__tests__/schema-codec.test.ts",
+    "src/editor/__tests__/selection-adapters.test.js": "src/state/__tests__/selection-adapters.test.js"
+  },
+  "testNames": {
+    "rejects non-JSON value Mon Sep 21 2026 02:47:33 GMT+0100 (British Summer Time)": "rejects non-JSON value Date"
+  }
+}

@@ -5,7 +5,7 @@ import {
   jsonNumber,
   type JsonValue,
   type InlineValueExtension,
-} from '../editor';
+} from '../model';
 import type { InlineAtom } from '../owned-inline';
 
 export type MentionData = Pick<InlineAtom, 'label' | 'width' | 'ascent' | 'descent'>;

@@ -13,7 +13,12 @@ try {
   await page.goto('http://127.0.0.1:5173/editor.html');
 
   const result = await page.evaluate(async () => {
-    const { createEditor, createSchema, textSelection } = await import('/src/editor/index.ts');
+    const { createEditor, createSchema, textSelection } = Object.assign(
+      {},
+      await import('/src/state/index.ts'),
+      await import('/src/model/index.ts'),
+    );
+
     let visits = 0;
 
     const schema = createSchema([

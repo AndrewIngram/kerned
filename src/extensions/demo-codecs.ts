@@ -6,7 +6,7 @@ import {
   jsonArray,
   type NodeCodec,
   type JsonValue,
-} from '../editor';
+} from '../model';
 import type { StarterNode, TextBlockNode, TableCell } from './demo-model';
 import { formattingSchema } from './formatting';
 import { inlineSchema } from './mention';

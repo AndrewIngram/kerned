@@ -2,7 +2,6 @@ import { type CanvasKit } from 'canvaskit-wasm';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { FindBar } from '../../demo/find-bar';
-import { createEditor, textSelection, type Selection } from '../../editor';
 import { useCanvasRenderer } from '../../editor-canvas/use-canvas-renderer';
 import { CanvasLayerProvider, Editor, useCanvasInput, useEditorViewport } from '../../editor-react';
 import { bookSamples, type EditorSample } from '../../editor-samples';
@@ -17,6 +16,7 @@ import { useDocumentLayout } from '../../extensions/starter-kit/use-document-lay
 import { useEditorDocument } from '../../extensions/starter-kit/use-editor-document';
 import { tableCells } from '../../extensions/table';
 import { createOwnedEngine } from '../../owned-layout';
+import { createEditor, textSelection, type Selection } from '../../state';
 import { AnnotationPanel, type ActivePanel } from './annotation-panel';
 import { Toolbar } from './toolbar';
 import { useComments } from './use-comments';

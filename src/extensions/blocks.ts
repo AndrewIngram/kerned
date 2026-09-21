@@ -2,10 +2,17 @@ import {
   indexTree,
   type NodeExtension,
   type Schema,
-  type EditorState,
-  type Step,
   type NodeIdentity,
-} from '../editor';
+  type SelectionRange,
+} from '../model';
+import {
+  type EditorState,
+  RangeSelection,
+  selectionContext,
+  TextSelection,
+  textSelection,
+} from '../state';
+import { type Step } from '../transform';
 import type { StarterNode, StarterLeaf } from './demo-model';
 import { createListExtensions } from './lists';
 
@@ -219,14 +226,6 @@ export function blockCommands(
     },
   };
 }
-
-import {
-  RangeSelection,
-  selectionContext,
-  TextSelection,
-  textSelection,
-  type SelectionRange,
-} from '../editor';
 
 /** Join selected text across quote/list boundaries without flattening the document. */
 export function replaceStructuredText(

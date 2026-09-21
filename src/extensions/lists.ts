@@ -1,14 +1,12 @@
-import { textSelection } from '../editor';
 import {
   indexTree,
   childrenAt,
   type NodeIdentity,
   type NodeExtension,
   type Schema,
-  type EditorState,
-  type Step,
-  type Selection,
-} from '../editor';
+} from '../model';
+import { textSelection, type EditorState, type Selection } from '../state';
+import { type Step } from '../transform';
 
 export type ListSettings = { ordered: boolean; start: number };
 

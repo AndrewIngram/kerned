@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
-import ts from 'typescript';
+import { dependencies } from './import-dependencies.mjs';
 
 const groups = [
   'editor-browser',
@@ -12,43 +12,12 @@ const groups = [
   'demo/app',
 ];
 
-// Traverse syntax, not just top-level import declarations: a barrel or lazy
-// import must not provide a back door through the same ownership boundary.
-function dependencies(file, code) {
-  const source = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true);
-  const result = [];
-
-  function visit(node) {
-    if (
-      (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
-      node.moduleSpecifier &&
-      ts.isStringLiteral(node.moduleSpecifier)
-    )
-      result.push(node.moduleSpecifier.text);
-
-    if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
-      const argument = node.arguments[0];
-      assert.ok(
-        argument && (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)),
-        `${file}: dynamic import must have a statically checkable target`,
-      );
-      result.push(argument.text);
-    }
-
-    ts.forEachChild(node, visit);
-  }
-
-  visit(source);
-
-  return result;
-}
-
 assert.deepEqual(
   dependencies(
     'fixture.ts',
-    "import type {X} from './one'; export {Y} from './two'; async function load(){return import('./three');}",
+    "import type {X} from './one'; export {Y} from './two'; async function load(){return import('./three');} type T = import('./four').Type;",
   ),
-  ['./one', './two', './three'],
+  ['./one', './two', './three', './four'],
 );
 
 assert.throws(() => dependencies('fixture.ts', 'import(variable)'), /statically checkable/);

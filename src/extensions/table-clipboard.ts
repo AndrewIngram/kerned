@@ -1,13 +1,7 @@
-import {
-  indexTree,
-  selectionContext,
-  TextSelection,
-  type EditorState,
-  type NodeIdentity,
-  type Schema,
-  type Step,
-} from '../editor';
+import { indexTree, type NodeIdentity, type Schema } from '../model';
 import { supportsOwnedText } from '../owned-text-support';
+import { selectionContext, TextSelection, type EditorState } from '../state';
+import { type Step } from '../transform';
 import {
   plainText,
   type StarterNode,

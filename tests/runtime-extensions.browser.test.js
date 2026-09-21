@@ -5,7 +5,7 @@ test('React selectors suppress unchanged values and view listeners clean up unde
     const { fixture, dispatch, mountOptimizedProbe } =
       await import('./fixtures/editor-foundation.js');
 
-    const { textSelection } = await import('../src/editor/index.ts');
+    const { textSelection } = await import('../src/state/index.ts');
 
     const editor = fixture(),
       element = document.createElement('div');
@@ -52,7 +52,7 @@ test('React selectors suppress unchanged values and view listeners clean up unde
 test('framework-free text capture handles a foreign schema and nested selection', async () => {
   const result = await (async () => {
     const { fixture, schema } = await import('./fixtures/editor-foundation.js');
-    const { TextSelection, textSelection } = await import('../src/editor/index.ts');
+    const { TextSelection, textSelection } = await import('../src/state/index.ts');
     const { createTextInput } = await import('../src/editor-browser/index.ts');
 
     const editor = fixture(),

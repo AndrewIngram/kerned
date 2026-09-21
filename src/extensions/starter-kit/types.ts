@@ -1,11 +1,7 @@
-import type {
-  createEditor,
-  EditorState,
-  indexTree,
-  SelectionContext,
-  selectionView,
-} from '../../editor';
+import type { selectionView } from '../../editor-browser';
+import type { indexTree } from '../../model';
 import type { createOwnedEngine } from '../../owned-layout';
+import type { createEditor, EditorState, SelectionContext } from '../../state';
 import type { projectBlocks } from '../blocks';
 import type { StarterLeaf, StarterNode } from '../demo-model';
 import type { selectedBlockLabel } from '../headings';

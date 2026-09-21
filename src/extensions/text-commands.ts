@@ -1,16 +1,14 @@
+import { sameMark, type Schema, indexTree } from '../model';
 import {
   markActivity,
   inputMarks,
-  sameMark,
   TextSelection,
   changeSelectionMarks,
   selectionHasMark,
   selectionContext,
   type EditorState,
-  type Schema,
-  type Step,
-} from '../editor';
-import { indexTree } from '../editor';
+} from '../state';
+import { type Step } from '../transform';
 import type { StarterNode } from './demo-model';
 import { formattingSchema, type TextFormat } from './formatting';
 

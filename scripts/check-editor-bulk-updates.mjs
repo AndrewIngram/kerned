@@ -10,7 +10,7 @@ try {
 
   const result = await page.evaluate(async () => {
     const { createSchema, createEditor, textSelection, indexTree, createAnchor, resolveAnchor } =
-      await import('/src/editor/index.ts');
+      Object.assign({}, await import('/src/model/index.ts'), await import('/src/state/index.ts'));
 
     const checks = [];
 

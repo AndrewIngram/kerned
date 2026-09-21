@@ -1,0 +1,122 @@
+import { expect, test } from 'vitest';
+
+import { createSchema, parseRelativeRange, type NodeIdentity } from '../src/model';
+import { createEditor, textSelection } from '../src/state';
+import { applySteps, createPositionSnapshot, restoreChanges } from '../src/transform';
+
+type Line = NodeIdentity & { content: string };
+
+const schema = createSchema<Line>([
+  {
+    name: 'line',
+    version: 1,
+    kind: 'text',
+    accepts: () => true,
+    validateUpdate() {},
+    editing: {
+      text: (node) => node.content,
+      replace: (node, from, to, text) => ({
+        ...node,
+        content: node.content.slice(0, from) + text + node.content.slice(to),
+      }),
+      split: (node, at, identity) => [
+        { ...node, content: node.content.slice(0, at) },
+        { ...node, ...identity, content: node.content.slice(at) },
+      ],
+      join: (left, right) => ({ ...left, content: left.content + right.content }),
+    },
+  },
+]);
+
+const original: Line[] = [{ id: 1, key: 'line-one', content: 'Hello world' }];
+
+test('public headless modules edit and invert a document without a session or browser', () => {
+  expect('document' in globalThis).toBe(false);
+  expect('window' in globalThis).toBe(false);
+
+  const result = applySteps(schema, original, [
+    { kind: 'split', id: 1, at: 5, rightId: 2, rightKey: 'line-two' },
+    { kind: 'replaceText', id: 2, from: 0, to: 1, text: ', ' },
+  ]);
+
+  expect(result.nodes.map((node) => node.content)).toEqual(['Hello', ', world']);
+  expect(original[0].content).toBe('Hello world');
+  expect(result.maps.map((map) => map.kind)).toEqual(['children', 'split', 'replace']);
+  expect(result.anchorMaps.map((map) => map.kind)).toEqual(['split', 'replace']);
+
+  const restored = restoreChanges(result.nodes, result.changes, 'backward');
+  expect(restored.nodes[0]).toBe(original[0]);
+  expect(restoreChanges(restored.nodes, result.changes, 'forward').nodes).toEqual(result.nodes);
+  expect(() => restoreChanges([{ ...result.nodes[0] }], result.changes, 'backward')).toThrow(
+    /rebasing/,
+  );
+});
+
+test('append produces invertible document changes without choosing a session history policy', () => {
+  const result = applySteps(schema, original, [
+    { kind: 'append', nodes: [{ id: 2, key: 'line-two', content: 'Next line' }] },
+  ]);
+
+  expect(result.changedIds).toEqual([2]);
+  expect(restoreChanges(result.nodes, result.changes, 'backward').nodes).toEqual(original);
+});
+
+test('step authorization observes preceding property updates and failure leaves input intact', () => {
+  const observed: boolean[] = [];
+
+  expect(() =>
+    applySteps(
+      schema,
+      original,
+      [
+        { kind: 'updateBlock', node: { ...original[0], locked: true } },
+        { kind: 'updateBlock', node: { ...original[0], locked: false } },
+      ],
+      {
+        beforeStep(nodes) {
+          observed.push(nodes[0].locked === true);
+
+          if (nodes[0].locked) throw new Error('Locked node');
+        },
+      },
+    ),
+  ).toThrow('Locked node');
+  expect(observed).toEqual([false, true]);
+  expect(original[0].locked).toBeUndefined();
+});
+
+test('state publishes transforms and retains durable ranges independently of its journal', () => {
+  const editor = createEditor(schema, original, textSelection(1, 0), [], {
+    documentId: 'headless-consumer',
+  });
+
+  const range = parseRelativeRange({
+    version: 1,
+    start: editor.positions.at(1, 0, 1),
+    end: editor.positions.at(1, 5, -1),
+  });
+
+  const snapshot = createPositionSnapshot(schema, editor.state);
+  const point = snapshot.text(1, 5);
+
+  editor.dispatch({
+    baseRevision: 0,
+    origin: 'local',
+    history: 'separate',
+    time: 1,
+    steps: [{ kind: 'replaceText', id: 1, from: 2, to: 2, text: '!' }],
+  });
+  editor.compactJournal();
+  expect(editor.journal).toHaveLength(0);
+  expect(editor.positions.resolveRange(range)).toEqual({
+    status: 'resolved',
+    ranges: [{ id: 1, from: 0, to: 6 }],
+  });
+  expect(() => createPositionSnapshot(schema, editor.state).resolve(point)).toThrow(/snapshot/);
+  editor.undo();
+  expect(editor.state.nodes).toEqual(original);
+  expect(editor.positions.resolveRange(range)).toEqual({
+    status: 'resolved',
+    ranges: [{ id: 1, from: 0, to: 5 }],
+  });
+});

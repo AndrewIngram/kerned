@@ -1,15 +1,7 @@
-import { textSelection, TextSelection } from './editor';
-import {
-  createSchema,
-  createEditor,
-  createAnchor,
-  resolveAnchor,
-  indexTree,
-  type NodeIdentity,
-  type NodeExtension,
-  type Step,
-} from './editor';
 import { createListExtensions, type ListCommand } from './extensions/lists';
+import { createSchema, indexTree, type NodeIdentity, type NodeExtension } from './model';
+import { textSelection, TextSelection, createEditor, createAnchor, resolveAnchor } from './state';
+import { type Step } from './transform';
 
 type Text = NodeIdentity & { kind: 'text'; value: string };
 

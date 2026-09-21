@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 
 import { type EditorSample } from '../../editor-samples';
-import type { createEditorScene } from '../../editor-scene';
-import { type Placement, type Scene } from '../../editor-scene';
+import type { createEditorScene, Placement, Scene } from '../../editor-scene';
 import { createStreamMetrics, streamConfig } from '../../editor-stream';
 import { type StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
@@ -143,8 +142,6 @@ export function useSampleStream(
 }
 
 export type StreamState = ReturnType<typeof useSampleStream>;
-
-import type { RefObject } from 'react';
 
 import type { PaintReport } from '../../editor-canvas/use-canvas-renderer';
 

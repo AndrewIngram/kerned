@@ -1,4 +1,6 @@
-import { indexTree, selectionContext, type Schema, type EditorState, type Step } from '../editor';
+import { indexTree, type Schema } from '../model';
+import { selectionContext, type EditorState } from '../state';
+import { type Step } from '../transform';
 import type { StarterNode, HeadingLevel } from './demo-model';
 
 /** Change block semantics without replacing text identities or relative positions. */

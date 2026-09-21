@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import type { Dispatch, RefObject, SetStateAction } from 'react';
+import { useEffect, type Dispatch, type RefObject, type SetStateAction } from 'react';
 
 import { FindIcon } from '../../demo/find-bar';
 import { bookSamples, type EditorSample } from '../../editor-samples';

@@ -2,7 +2,7 @@ import type { CanvasKit, Font } from 'canvaskit-wasm';
 import { z } from 'zod';
 
 import { fontFiles, type Engine, type LaidOut } from './engines';
-import { boundaries, type Span } from './model';
+import { boundaries, type Span } from './layout-types';
 import { createBlockSession } from './owned-blocks';
 import { placeParagraphs } from './owned-document';
 import { layoutInlineParagraph, type InlineAtom } from './owned-inline';

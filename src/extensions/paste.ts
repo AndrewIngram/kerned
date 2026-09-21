@@ -1,12 +1,6 @@
-import {
-  indexTree,
-  TextSelection,
-  textSelection,
-  type EditorState,
-  type NodeIdentity,
-  type Schema,
-  type Step,
-} from '../editor';
+import { indexTree, type NodeIdentity, type Schema } from '../model';
+import { TextSelection, textSelection, type EditorState } from '../state';
+import { type Step } from '../transform';
 import { replaceStructuredText } from './blocks';
 import type { StarterNode } from './demo-model';
 

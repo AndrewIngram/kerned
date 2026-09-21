@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { resolveRangeDecorations, type SelectionContext, type SelectionRange } from '../../editor';
-import type { EditorState } from '../../editor';
 import { useEditorState } from '../../editor-react';
 import { type EditorSample } from '../../editor-samples';
 import { commentDecorations, createCommentStore } from '../../extensions/comment';
 import { type StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 import { type CommentHighlight } from '../../extensions/text-block-view';
+import { type SelectionRange } from '../../model';
+import { resolveRangeDecorations, type SelectionContext, type EditorState } from '../../state';
 
 export function useComments(
   editor: EditorSession,

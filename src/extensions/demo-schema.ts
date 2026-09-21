@@ -6,7 +6,7 @@ import {
   validateInlineObjects,
   sliceInlineObjects,
   type NodeExtension,
-} from '../editor';
+} from '../model';
 import { listCommands, quoteExtension } from './blocks';
 import { demoCodecs } from './demo-codecs';
 import { replaceText, type StarterNode, type TextBlockNode } from './demo-model';

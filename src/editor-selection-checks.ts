@@ -1,6 +1,6 @@
+import { createCellSelectionExtension } from './extensions/cell-selection';
+import { jsonNumber, createSchema, type NodeIdentity, type NodeExtension } from './model';
 import {
-  jsonNumber,
-  createSchema,
   createEditor,
   TextSelection,
   NodeSelection,
@@ -9,12 +9,9 @@ import {
   selectionContext,
   selectionMapping,
   createSelectionRegistry,
-  type NodeIdentity,
-  type NodeExtension,
   type Selection,
-  type Step,
-} from './editor';
-import { createCellSelectionExtension } from './extensions/cell-selection';
+} from './state';
+import { type Step } from './transform';
 
 type Node = NodeIdentity &
   (
