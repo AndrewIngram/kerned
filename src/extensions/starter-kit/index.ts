@@ -1,3 +1,4 @@
+import { localHistory } from '../history';
 import { starterDefinitions } from '../starter-definitions';
 import { starterEditing } from './commands';
 import { starterFormatting } from './formatting';
@@ -6,6 +7,7 @@ import { starterTables } from './tables';
 
 export const starterExtensions = [
   ...starterDefinitions,
+  localHistory,
   starterFormatting,
   starterStructure,
   starterTables,

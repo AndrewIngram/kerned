@@ -7,14 +7,11 @@ import {
   validateTree,
 } from '../model';
 import {
-  invertAnchorMap,
   type AnchorMap,
   type RevisionMap,
   type SnapshotTransition,
-  invertPositionMap,
   type PositionMap,
   applySteps,
-  restoreChanges,
   type DocumentChange,
   type Step,
 } from '../transform';
@@ -27,19 +24,15 @@ import {
 import { createEditorEvents, type EditorEvents } from './events';
 import type { StateFieldRegistration, ExtensionUpdate } from './extension-state';
 import { createFind } from './find';
+import { createLocalHistory, type HistoryOptions } from './local-history';
 import { assertEditAllowed, assertContentEditAllowed, type AccessPolicy } from './permissions';
-import {
-  createRelativePositions,
-  parsePositionCheckpoint,
-  type MappingOperation,
-} from './relative-positions';
+import { createRelativePositions, parsePositionCheckpoint } from './relative-positions';
 import {
   TextSelection,
   selectionContext,
   selectionMapping,
   createSelectionRegistry,
   type SelectionExtension,
-  type SelectionBookmark,
 } from './selection';
 import { Selection } from './selection-base';
 import { inputMarks } from './stored-marks';
@@ -71,26 +64,14 @@ type Applied<N extends NodeIdentity> = {
   positionMapping: SnapshotTransition<N>;
 };
 
-type HistoryEntry<N extends NodeIdentity> = {
-  changes: DocumentChange<N>[];
-  maps: AnchorMap[];
-  positionMaps: PositionMap[];
-  operations: MappingOperation[];
-  before: SelectionBookmark;
-  after: SelectionBookmark;
-  afterSelection: Selection;
-  group: string | null;
-  time: number;
-  beforeMarks: readonly Mark[] | null;
-  afterMarks: readonly Mark[] | null;
-};
-
 export type EditorOptions<N extends NodeIdentity = NodeIdentity> = {
   documentId?: string;
   revision?: number;
   positionCheckpoint?: unknown;
   permissions?: AccessPolicy<N>;
   fields?: readonly StateFieldRegistration<N>[];
+  /** Null disables history. The imperative session defaults to local history. */
+  history?: HistoryOptions | null;
 };
 
 export function applyTransaction<N extends NodeIdentity>(
@@ -214,7 +195,7 @@ export function createEditor<N extends NodeIdentity>(
   let state: EditorState<N> = { nodes: initial, selection, revision, storedMarks: null },
     nextId = -1;
 
-  let boundary = true;
+  const history = options.history === null ? null : createLocalHistory<N>(options.history);
   const fields = [...new Set(options.fields ?? [])];
 
   for (const field of fields) field.initialize(state);
@@ -269,39 +250,29 @@ export function createEditor<N extends NodeIdentity>(
     }
   }
 
-  const past: HistoryEntry<N>[] = [],
-    future: HistoryEntry<N>[] = [],
-    journal: RevisionMap[] = [];
+  const journal: RevisionMap[] = [];
 
   function restore(redo: boolean) {
     assertWritable();
 
-    const source = redo ? future : past,
-      target = redo ? past : future,
-      entry = source.at(-1);
+    const replay = history?.prepare(state.nodes, redo ? 'redo' : 'undo');
 
-    if (!entry) return null;
-
-    const { nodes, changedIds } = restoreChanges(
-      state.nodes,
-      entry.changes,
-      redo ? 'forward' : 'backward',
-    );
+    if (!replay) return null;
+    const { nodes, changedIds, maps } = replay;
 
     validateTree(schema, nodes);
 
     const context = selectionContext(schema, nodes),
-      nextSelection = (redo ? entry.after : entry.before).resolve(context);
+      nextSelection = replay.selection.resolve(context);
 
     selections.validate(context, nextSelection);
 
     const next = {
-        nodes,
-        selection: nextSelection,
-        revision: state.revision + 1,
-        storedMarks: redo ? entry.afterMarks : entry.beforeMarks,
-      },
-      maps = redo ? entry.maps : [...entry.maps].toReversed().map(invertAnchorMap);
+      nodes,
+      selection: nextSelection,
+      revision: state.revision + 1,
+      storedMarks: replay.storedMarks,
+    };
 
     if (options.permissions) {
       // Undoing a split joins content again; current source access still applies.
@@ -327,7 +298,7 @@ export function createEditor<N extends NodeIdentity>(
     const positionMapping = {
       before: state,
       after: next,
-      maps: redo ? entry.positionMaps : [...entry.positionMaps].toReversed().map(invertPositionMap),
+      maps: replay.positionMaps,
     };
 
     const update: ExtensionUpdate<N> = {
@@ -338,10 +309,8 @@ export function createEditor<N extends NodeIdentity>(
     };
 
     prepareFields(update);
-    positions.advance(next, maps, { operations: entry.operations, redo });
-    source.pop();
-    target.push(entry);
-    boundary = true;
+    positions.advance(next, maps, { operations: replay.operations, redo });
+    replay.commit();
     journal.push({ from: state.revision, to: state.revision + 1, maps });
 
     state = next;
@@ -362,8 +331,7 @@ export function createEditor<N extends NodeIdentity>(
       if (destroyed) return;
       assertWritable();
       destroyed = true;
-      past.length = 0;
-      future.length = 0;
+      history?.clear();
       journal.length = 0;
       allocationNodes = undefined;
       occupiedIds = new Set();
@@ -419,7 +387,7 @@ export function createEditor<N extends NodeIdentity>(
       journal.splice(0, count);
     },
     get history() {
-      return { undo: past.length, redo: future.length };
+      return history?.counts ?? { undo: 0, redo: 0 };
     },
     allocateBlockId() {
       assertWritable();
@@ -437,7 +405,7 @@ export function createEditor<N extends NodeIdentity>(
     },
     breakHistory(this: void) {
       assertWritable();
-      boundary = true;
+      history?.closeGroup();
     },
     selectionJSON() {
       return state.selection.encode(selectionContext(schema, state.nodes));
@@ -461,7 +429,7 @@ export function createEditor<N extends NodeIdentity>(
       const update: ExtensionUpdate<N> = { kind: 'selection', before: state, after };
       prepareFields(update);
 
-      if (!state.selection.eq(next)) boundary = true;
+      if (!state.selection.eq(next)) history?.closeGroup();
       state = after;
       notify(update);
 
@@ -504,7 +472,7 @@ export function createEditor<N extends NodeIdentity>(
       const update: ExtensionUpdate<N> = { kind: 'storedMarks', before: state, after };
       prepareFields(update);
       state = after;
-      boundary = true;
+      history?.closeGroup();
       notify(update);
 
       return state;
@@ -524,47 +492,16 @@ export function createEditor<N extends NodeIdentity>(
       prepareFields(update);
       const operations = positions.advance(result.state, result.anchorMaps);
 
-      if (tx.origin === 'local' && result.changes.length) {
-        const group = tx.history === 'separate' ? null : tx.history.group,
-          last = past.at(-1);
-
-        if (
-          !boundary &&
-          group !== null &&
-          last?.group === group &&
-          tx.time >= last.time &&
-          (group.startsWith('composition:') || tx.time - last.time < 750) &&
-          last.afterSelection.eq(state.selection)
-        ) {
-          last.changes.push(...result.changes);
-          last.maps.push(...result.anchorMaps);
-          last.positionMaps.push(...result.maps);
-          last.operations.push(...operations);
-          last.after = result.state.selection.getBookmark();
-          last.afterSelection = result.state.selection;
-          last.afterMarks = result.state.storedMarks ?? null;
-          last.time = tx.time;
-        } else {
-          past.push({
-            changes: [...result.changes],
-            maps: [...result.anchorMaps],
-            positionMaps: [...result.maps],
-            operations: [...operations],
-            before: state.selection.getBookmark(),
-            after: result.state.selection.getBookmark(),
-            afterSelection: result.state.selection,
-            beforeMarks: state.storedMarks ?? null,
-            afterMarks: result.state.storedMarks ?? null,
-            group,
-            time: tx.time,
-          });
-
-          if (past.length > 256) past.shift();
-        }
-
-        future.length = 0;
-        boundary = group === null;
-      }
+      if (tx.origin === 'local')
+        history?.record({
+          before: state,
+          after: result.state,
+          transaction: tx,
+          changes: result.changes,
+          maps: result.maps,
+          anchorMaps: result.anchorMaps,
+          operations,
+        });
 
       journal.push({ from: state.revision, to: result.state.revision, maps: result.anchorMaps });
       state = result.state;

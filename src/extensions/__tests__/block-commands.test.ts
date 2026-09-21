@@ -10,6 +10,7 @@ import {
 import { createSchema, defineNode, indexTree, type DocumentNode } from '../../model';
 import { NodeSelection, textSelection } from '../../state';
 import { createBlockCommands } from '../block-commands';
+import { localHistory } from '../history';
 import { createListCommands, type ListAdapter } from '../lists';
 
 const definitions = [
@@ -136,7 +137,7 @@ const editing = defineExtension({
   },
 });
 
-const schema = createSchema({ extensions: [...definitions, editing] });
+const schema = createSchema({ extensions: [...definitions, editing, localHistory] });
 
 function session() {
   return createEditor({

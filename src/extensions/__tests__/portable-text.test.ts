@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { createEditor, defineCommand, defineQuery } from '../../core';
 import { createSchema, defineNode } from '../../model';
 import { NodeSelection, TextSelection, textSelection, toggleMarkCommand } from '../../state';
+import { localHistory } from '../history';
 import { starterDefinitions } from '../starter-definitions';
 import { starterFormatting } from '../starter-kit/formatting';
 import { starterStructure } from '../starter-kit/structure';
@@ -66,7 +67,14 @@ const widget = defineNode({
 });
 
 const schema = createSchema({
-  extensions: [...starterDefinitions, starterFormatting, starterStructure, caption, widget],
+  extensions: [
+    ...starterDefinitions,
+    localHistory,
+    starterFormatting,
+    starterStructure,
+    caption,
+    widget,
+  ],
 });
 
 test('a node-owned formatting contribution operates in open nested documents', () => {
@@ -228,6 +236,7 @@ test('table commands preserve custom cell text and cell selections across edits 
   const tableSchema = createSchema({
     extensions: [
       ...starterDefinitions,
+      localHistory,
       starterFormatting,
       starterStructure,
       starterTables,

@@ -958,3 +958,39 @@ The report identifies `f735ac1` and measures this checkpoint's uncommitted tree.
 Milestone 3 remains in progress. History-provider ownership and the migration of
 undo/redo into extension commands remain before the completion commit and
 architecture judge. The judge must review the complete milestone since `c3cdf8b`.
+
+### Milestone 3 explicit local-history ownership
+
+Composed sessions now retain local undo history only when one installed extension
+contributes `history` configuration. StarterKit installs `localHistory`; custom
+assemblies can configure its retention depth and grouping delay. Multiple owners
+reject before state construction and use the existing failed-initialization
+cleanup path. Sessions sharing a configured definition keep independent stacks.
+A session without history still maps durable positions and publishes edits.
+
+The state module's `local-history.ts` owns undo groups, retention, composition
+coalescing and replay preparation. Replay preparation does not mutate either
+stack. State validates the restored document, selection and permissions and
+prepares fields before accepting the replay. A rejected undo or redo leaves the
+snapshot, stack and position checkpoint intact, and a later retry succeeds.
+The low-level imperative state constructor retains its default local history;
+`history: null` disables it. The composed extension interface accepts local policy
+configuration, not arbitrary callbacks that can interrupt publication. General
+collaborative history remains outside this implementation.
+
+Full checks, declaration emission and production build passed with **243 Vitest
+tests, one unchanged convergence todo, and 39 Playwright scenarios**. A subsequent
+replay-rejection regression also passed with the complete six-test history suite
+and typecheck, bringing the suite total to 244 passing tests. Tests cover no-history
+sessions, durable-position independence, retained depth, configurable grouping,
+composition, independent sessions, conflicting owners and invalid options.
+
+Three serial production trials in
+`artifacts/public-interface-m3/history-ownership/baseline.json` pass all unchanged
+budgets: first usable 174ms, full stream 1079.7ms, paste handler 54.7ms, paste paint
+113.5ms, typing 32.4ms, paging 32.4ms, loaded heap 29,021,644 bytes. The report
+identifies `b3e09ad` and measures this checkpoint's uncommitted implementation.
+
+Milestone 3 remains in progress. Undo/redo still need named command contributions
+with accurate dry runs and atomic command semantics before the completion commit
+and independent architecture judge. That judge's baseline remains `c3cdf8b`.

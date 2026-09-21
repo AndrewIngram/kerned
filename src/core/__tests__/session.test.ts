@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import type { StarterNode } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
+import { localHistory } from '../../extensions/history';
 import { tableCells } from '../../extensions/table';
 import {
   createSchema,
@@ -72,7 +73,7 @@ const editing = defineExtension({
   }),
 });
 
-const schema = createSchema({ extensions: [note, editing] });
+const schema = createSchema({ extensions: [note, editing, localHistory] });
 
 function session() {
   return createEditor({ schema, content: [{ kind: 'note', text: 'A' }] });
@@ -315,7 +316,9 @@ test('the complete recursive starter schema retains typed commands and table sel
     setup: () => ({ commands: { insert }, selections: [tableCells.extension] }),
   });
 
-  const combined = createSchema({ extensions: [...demoSchema.definitions, behavior] });
+  const combined = createSchema({
+    extensions: [...demoSchema.definitions, behavior, localHistory],
+  });
 
   const editor = createEditor({
     schema: combined,

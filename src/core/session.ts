@@ -19,6 +19,7 @@ import {
   type CommandOptions,
   type Selection,
   type SelectionExtension,
+  type HistoryOptions,
 } from '../state';
 import {
   commandRegistry,
@@ -42,6 +43,7 @@ export type SessionContribution<N extends NodeIdentity> = {
   queries?: QueryDefinitions<N>;
   fields?: EditorOptions<N>['fields'];
   selections?: readonly SelectionExtension[];
+  history?: HistoryOptions;
 };
 
 type Contribution<Definition> = Definition extends { setup: (...args: never[]) => infer Value }
@@ -173,6 +175,13 @@ export function createEditor(
       return contribution ? [{ ...contribution, name: definition.name }] : [];
     });
 
+    const historyProviders = contributions.filter((contribution) => contribution.history);
+
+    if (historyProviders.length > 1)
+      throw new Error(
+        `Conflicting history providers: ${historyProviders.map((provider) => provider.name).join(', ')}`,
+      );
+
     const content = [...result.value];
 
     const editor = createStateEditor(
@@ -186,6 +195,7 @@ export function createEditor(
         positionCheckpoint: config.positionCheckpoint,
         permissions: config.permissions,
         fields: contributions.flatMap((contribution) => contribution.fields ?? []),
+        history: historyProviders[0]?.history ?? null,
       },
     );
 

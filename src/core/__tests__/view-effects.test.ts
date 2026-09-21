@@ -1,6 +1,7 @@
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
+import { localHistory } from '../../extensions/history';
 import { createSchema, defineNode } from '../../model';
 import { textSelection } from '../../state';
 import { connectEditorView, createEditor, defineCommand, defineExtension } from '../index';
@@ -41,7 +42,7 @@ const editing = defineExtension({
   }),
 });
 
-const schema = createSchema({ extensions: [note, editing] });
+const schema = createSchema({ extensions: [note, editing, localHistory] });
 
 const session = () => createEditor({ schema, content: [{ kind: 'note', id: 1, text: 'A' }] });
 

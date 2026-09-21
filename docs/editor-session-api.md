@@ -19,6 +19,7 @@ the definition; transactional state belongs to registered fields.
 import { createEditor, defineCommand, defineExtension } from './src/core';
 import { createSchema, indexTree } from './src/model';
 import { paragraph } from './src/extensions/starter-definitions';
+import { localHistory } from './src/extensions/history';
 
 const Append = defineExtension({
   name: 'append',
@@ -39,7 +40,7 @@ const Append = defineExtension({
   }),
 });
 
-const schema = createSchema({ extensions: [paragraph, Append] });
+const schema = createSchema({ extensions: [paragraph, Append, localHistory] });
 const editor = createEditor({
   schema,
   content: [{ kind: 'paragraph', id: 1, text: 'Draft' }],
@@ -148,7 +149,7 @@ editor.transact((context) => {
 });
 ```
 
-Each command reads the draft produced by preceding commands. `run()` publishes one transaction, one revision, one notification and one undo event. Returning false abandons the entire chain. Capability checks run against a draft and do not publish, allocate editor IDs or change history/position metadata. Commands themselves must be pure apart from their draft operations; the engine cannot undo arbitrary external side effects in application callbacks.
+Each command reads the draft produced by preceding commands. `run()` publishes one transaction, one revision, one notification and, when history is installed, one undo event. Returning false abandons the entire chain. Capability checks run against a draft and do not publish, allocate editor IDs or change history/position metadata. Commands themselves must be pure apart from their draft operations; the engine cannot undo arbitrary external side effects in application callbacks.
 
 An intervening editor change invalidates a prepared chain. Current permissions are checked again at execution, including after revocation. Permission failures return false. Invalid schema operations still throw rather than being hidden as ordinary command unavailability. The imperative `dispatch` API remains available and rejects unauthorized transactions before publishing any state.
 
@@ -360,6 +361,28 @@ Text extensions can provide a mark-storage adapter, and node extensions can prov
 `Editor` from `src/editor-react` mounts this runtime around its children. The caller supplies `view.pointer`, optional `view.input`, and a renderer as children. The editor session belongs to the caller and survives React unmount/remount. Both demos use this host and the native runtime. Schema-specific commands and clipboard policy live in the starter-kit extensions. Generic canvas painting, viewport lifecycle, multiclick policy and navigation binding live in reusable adapters. The demo assembles these pieces; this is not a zero-configuration rich-text widget. See [app ownership](editor-app-architecture.md).
 
 `createReactRenderers<Value>([{name, component}])` creates a typed `ExtensionView` taking `{type, value}`. Build registries outside render so components retain their identity. Components may return DOM, `CanvasPrimitive` registrations, or both. Duplicate names and missing registrations reject explicitly. The starter kit registers block renderers, a mention inline renderer, underline drawing, and external comment decorations through this public interface. Layout geometry is passed by the host; React is absent from core and from the browser runtime.
+
+## History ownership
+
+Composed sessions retain undo history only when an installed extension contributes
+`history` options. `starterExtensions` includes `localHistory`. Custom assemblies
+can add `localHistory.configure({ depth: 256, newGroupDelay: 750 })`, where depth
+counts undo groups and the delay is milliseconds between grouped edits. An active
+composition remains one group even when it exceeds that delay. Selection changes
+and explicit history boundaries close a group.
+
+Two extensions claiming history reject with both owner names before state
+creation. The contribution is configuration for the state module's local history
+implementation; it is not a callback for mutating history during publication.
+Collaborative history and concurrent rebasing remain unimplemented. Each session
+creates independent storage even when it shares an extension definition.
+
+Without this capability, edits still publish and durable positions still map,
+but `editor.history` stays empty and `undo()`/`redo()` return false. The lower
+imperative state constructor keeps its default local history for direct users;
+pass `{ history: null }` to disable it. Its `HistoryOptions` accepts the same
+retention and grouping settings. Named undo/redo commands are still the remaining
+milestone 3 migration.
 
 ## Extension resource lifetime
 
