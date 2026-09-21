@@ -143,7 +143,7 @@ export function useSampleStream(
 
 export type StreamState = ReturnType<typeof useSampleStream>;
 
-import type { PaintReport } from '../../editor-canvas/use-canvas-renderer';
+import type { PaintReport } from '../../editor-canvas/canvas-renderer';
 
 export function recordSamplePaint({
   stream,

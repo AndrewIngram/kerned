@@ -1,18 +1,18 @@
-import type { Canvas, CanvasKit, Paint } from 'canvaskit-wasm';
 import { createContext, useContext, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
 
+import type {
+  CanvasPainter,
+  CanvasPaintLayer,
+  RegisterCanvasPainter,
+} from '../editor-canvas/canvas-renderer';
 import type { NodeIdentity } from '../model';
 import type { EditorState, CommandDefinition, CommandState } from '../state';
 
-export type CanvasPainter = (canvas: Canvas, kit: CanvasKit, paint: Paint) => void;
-
-export type CanvasPaintLayer = 'background' | 'content';
-
-export type RegisterCanvasPainter = (
-  id: string,
-  painter: CanvasPainter,
-  layer: CanvasPaintLayer,
-) => () => void;
+export type {
+  CanvasPainter,
+  CanvasPaintLayer,
+  RegisterCanvasPainter,
+} from '../editor-canvas/canvas-renderer';
 
 const PaintContext = createContext<RegisterCanvasPainter | null>(null);
 

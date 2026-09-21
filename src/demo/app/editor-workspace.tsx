@@ -3,7 +3,6 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import { createEditor } from '../../core';
 import { FindBar } from '../../demo/find-bar';
-import { useCanvasRenderer } from '../../editor-canvas/use-canvas-renderer';
 import {
   CanvasLayerProvider,
   Editor,
@@ -11,6 +10,7 @@ import {
   useEditorViewport,
   useEditorState,
 } from '../../editor-react';
+import { useCanvasRenderer } from '../../editor-react/use-canvas-renderer';
 import { bookSamples, type EditorSample } from '../../editor-samples';
 import type { Rect } from '../../engines';
 import { captureComment } from '../../extensions/comment';
@@ -197,7 +197,7 @@ export function EditorWorkspace({
     viewport,
   });
 
-  const { register, painters } = useCanvasRenderer({
+  const { register, diagnostics: canvasDiagnostics } = useCanvasRenderer({
     inset: layout.inset,
     kit,
     canvasRef,
@@ -400,7 +400,7 @@ export function EditorWorkspace({
     zoom,
     widthRef,
     scrollDocumentTo,
-    painters,
+    canvasDiagnostics,
     setSelection,
     inputRef,
   });

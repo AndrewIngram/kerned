@@ -1,9 +1,9 @@
 import { type CanvasKit } from 'canvaskit-wasm';
 import { useEffect, type RefObject } from 'react';
 
+import type { CanvasDiagnostics } from '../../editor-canvas/canvas-renderer';
 import { benchmarkContainerEdits, checkContainers } from '../../editor-container-checks';
 import { checkExtensions } from '../../editor-extension-checks';
-import { type CanvasPaintLayer, type CanvasPainter as Painter } from '../../editor-react';
 import { checkReflow } from '../../editor-reflow-checks';
 import { createEditorScene, type Scene } from '../../editor-scene';
 import { checkSelections } from '../../editor-selection-checks';
@@ -43,7 +43,7 @@ type DiagnosticsOptions = {
   zoom: number;
   widthRef: RefObject<number>;
   scrollDocumentTo: (top: number) => void;
-  painters: RefObject<Map<string, { paint: Painter; layer: CanvasPaintLayer }>>;
+  canvasDiagnostics: CanvasDiagnostics;
   setSelection: (selection: Selection) => void;
   inputRef: RefObject<HTMLTextAreaElement | null>;
 };
@@ -64,7 +64,7 @@ export function useDiagnostics({
   zoom,
   widthRef,
   scrollDocumentTo,
-  painters,
+  canvasDiagnostics,
   setSelection,
   inputRef,
 }: DiagnosticsOptions) {
@@ -184,7 +184,7 @@ export function useDiagnostics({
         zoom,
         width: widthRef.current,
         scroll: readScroll(),
-        paintCount: painters.current.size,
+        paintCount: canvasDiagnostics.painterCount,
       }),
       select: (id: number, index: number) => {
         setSelection(textSelection(id, index));
@@ -211,7 +211,7 @@ export function useDiagnostics({
     metrics,
     readScroll,
     widthRef,
-    painters,
+    canvasDiagnostics,
     findRef,
     scrollDocumentTo,
     setSelection,

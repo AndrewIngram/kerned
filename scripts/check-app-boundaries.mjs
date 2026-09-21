@@ -74,6 +74,15 @@ for (const group of groups) {
         );
       }
 
+      if (group === 'editor-canvas') {
+        assert.ok(
+          !['react', 'react-dom'].some(
+            (module) => target === module || target.startsWith(module + '/'),
+          ) && !target.startsWith('src/editor-react/'),
+          `${file} couples canvas lifecycle to React: ${specifier}`,
+        );
+      }
+
       if (target.endsWith('checks')) {
         assert.equal(
           file,

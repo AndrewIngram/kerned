@@ -1080,3 +1080,37 @@ code is unchanged by these fixes; the final pre-review three-trial performance
 report remains applicable. README and session examples now describe the composed
 session interface. The post-review commit closes milestone 3; milestone 4 owns
 the remaining complete view lifecycle and demo assembly removal.
+
+## Milestone 4: framework-independent paint ownership (in progress)
+
+The native paint owner is now `editor-canvas/canvas-renderer.ts`. It owns surfaces,
+paints, registration identity, the pending animation frame and draw cleanup. The
+React hook moved to `editor-react` and only attaches the controller and sends
+frames. The canvas module no longer imports React, enforced by the app dependency
+check. Painter contracts also belong to canvas; React re-exports them for its
+optional component adapter.
+
+Attachments release native resources, cancel queued frames and drop their last
+frame's document references. The controller can attach again, while terminal
+`destroy()` rejects further use. Stale detach callbacks and replaced painter
+registrations cannot remove their successors. Destruction inside a painter
+retires its resources only after the current draw unwinds, preserving balanced
+canvas state. Diagnostics expose a readonly painter count instead of a mutable
+registration map.
+
+Real CanvasKit browser fixtures cover actual painted pixels, coalesced updates,
+resize/remount, native paint deletion, cancellation, stale cleanup and destruction
+during drawing. All nine focused cases passed in Chromium, Firefox and WebKit.
+This is an implementation checkpoint, not milestone 4 acceptance: layout, input,
+assets, scene/cache ownership, complete public mounting and demo simplification
+still remain before its independent judge.
+
+Checkpoint validation passed `pnpm run check` and production build: **262 Vitest
+passes, one unchanged convergence todo, and all 39 Playwright scenarios**. A
+source edit during an intermediate browser run triggered Vite hot reload and
+invalidated that run; the complete fixed-tree rerun passed. The three serial
+production trials in
+`artifacts/public-interface-m4/paint-controller/baseline.json` pass every unchanged
+budget: first usable 177ms, streaming 1097.7ms, paste handler 57.9ms, paste paint
+120.7ms, typing 32.4ms, paging 32.5ms and loaded heap 28,964,020 bytes. The report
+identifies `30e2f39` and measures this checkpoint's uncommitted tree.
