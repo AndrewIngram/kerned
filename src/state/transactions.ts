@@ -3,6 +3,7 @@ import {
   type NodeIdentity,
   type Schema,
   type JsonValue,
+  type TreeIndex,
   indexTree,
   validateTree,
 } from '../model';
@@ -25,7 +26,12 @@ import { createEditorEvents, type EditorEvents } from './events';
 import type { StateFieldRegistration, ExtensionUpdate } from './extension-state';
 import { createFindSession } from './find';
 import { createLocalHistory, type HistoryOptions } from './local-history';
-import { assertEditAllowed, assertContentEditAllowed, type AccessPolicy } from './permissions';
+import {
+  assertEditAllowed,
+  assertContentEditAllowed,
+  nodeAccess,
+  type AccessPolicy,
+} from './permissions';
 import { createRelativePositions, parsePositionCheckpoint } from './relative-positions';
 import {
   TextSelection,
@@ -57,6 +63,7 @@ export type EditorState<N extends NodeIdentity> = {
 
 type Applied<N extends NodeIdentity> = {
   state: EditorState<N>;
+  tree: TreeIndex<N>;
   changes: DocumentChange<N>[];
   maps: PositionMap[];
   anchorMaps: AnchorMap[];
@@ -165,6 +172,7 @@ export function applyTransaction<N extends NodeIdentity>(
 
   return {
     state: next,
+    tree,
     changes,
     maps,
     anchorMaps,
@@ -183,7 +191,7 @@ export function createEditor<N extends NodeIdentity>(
   options: EditorOptions<N> = {},
 ) {
   const selections = createSelectionRegistry(extensions);
-  validateTree(schema, initial);
+  let currentTree = validateTree(schema, initial);
   selections.validate(selectionContext(schema, initial), selection);
 
   const documentId = options.documentId ?? crypto.randomUUID(),
@@ -297,8 +305,6 @@ export function createEditor<N extends NodeIdentity>(
 
       if (options.permissions) {
         // Undoing a split joins content again; current source access still applies.
-        const currentTree = indexTree(schema, state.nodes);
-
         for (const map of maps)
           if (map.kind === 'join') {
             const left = currentTree.byKey.get(map.key)?.node,
@@ -331,6 +337,7 @@ export function createEditor<N extends NodeIdentity>(
         replay.commit();
         journal.push({ from: state.revision, to: next.revision, maps });
         state = next;
+        currentTree = tree;
         notify(update);
 
         return { state, changedIds, positionMapping };
@@ -350,6 +357,21 @@ export function createEditor<N extends NodeIdentity>(
     },
     get isDestroyed() {
       return destroyed;
+    },
+    getAccess(id: number) {
+      assertActive();
+
+      return nodeAccess(currentTree, id, options.permissions);
+    },
+    /** Publish external permission changes without a document edit or history entry. */
+    refreshPermissions() {
+      assertWritable();
+      const after = { ...state };
+      const update: ExtensionUpdate<N> = { kind: 'permissions', before: state, after };
+      prepareFields(update);
+      state = after;
+      history?.closeGroup();
+      notify(update);
     },
     /** Idempotent. The final snapshot remains readable, but all writes and subscriptions stop. */
     destroy() {
@@ -504,7 +526,14 @@ export function createEditor<N extends NodeIdentity>(
     },
     dispatch(tx: Transaction<N>) {
       assertWritable();
-      const result = applyTransaction(schema, state, tx, selections, options.permissions);
+
+      const { tree, ...result } = applyTransaction(
+        schema,
+        state,
+        tx,
+        selections,
+        options.permissions,
+      );
 
       const update: ExtensionUpdate<N> = {
         kind: 'transaction',
@@ -530,6 +559,7 @@ export function createEditor<N extends NodeIdentity>(
 
       journal.push({ from: state.revision, to: result.state.revision, maps: result.anchorMaps });
       state = result.state;
+      currentTree = tree;
       notify(update);
 
       return result;

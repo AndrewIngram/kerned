@@ -8,7 +8,7 @@ export type ExtensionUpdate<N extends NodeIdentity> = {
 } & (
   | { kind: 'transaction'; transaction: Transaction<N>; mapping: SnapshotTransition<N> }
   | { kind: 'undo' | 'redo'; mapping: SnapshotTransition<N> }
-  | { kind: 'selection' | 'storedMarks' }
+  | { kind: 'selection' | 'storedMarks' | 'permissions' }
 );
 
 export type StateFieldRegistration<N extends NodeIdentity> = {

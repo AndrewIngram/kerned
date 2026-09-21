@@ -150,6 +150,8 @@ top-left or bottom-left, including native blocks. Text anchors currently require
 canvas text geometry; they do not insert controls into native table-cell text.
 The frame includes the owning node, `data`, `at` and a block-local `anchor`
 rectangle. `BlockTextGeometry.caret` exposes the same geometry to custom layers.
+Frames also supply the node's effective `access`. Permission refreshes update it
+even for node-local sources whose decoration descriptors remain unchanged.
 
 Hosts size to their DOM content. Widgets are overlays and do not reserve text
 space or change document height. Use semantic inline objects when content must

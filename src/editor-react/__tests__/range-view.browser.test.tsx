@@ -13,7 +13,7 @@ import {
   type MountedEditor,
 } from '../../editor-canvas';
 import { createSchema, defineNode, defineInline, defineMark, type NodeIdentity } from '../../model';
-import { textSelection } from '../../state';
+import { textSelection, type NodeAccess } from '../../state';
 import {
   defineReactInlineView,
   defineReactMarkView,
@@ -52,7 +52,14 @@ const highlight = defineMark({
 
 const Application = createContext({ theme: 'missing', render: (_kind: string) => {} });
 
-function Badge({ attributes, id, index, width, height }: ReactInlineViewProps<typeof badge>) {
+function Badge({
+  attributes,
+  id,
+  index,
+  width,
+  height,
+  access,
+}: ReactInlineViewProps<typeof badge>) {
   const application = useContext(Application);
   const [count, setCount] = useState(0);
   expectTypeOf(attributes.label).toEqualTypeOf<string>();
@@ -61,6 +68,7 @@ function Badge({ attributes, id, index, width, height }: ReactInlineViewProps<ty
   return (
     <button
       data-badge={id}
+      data-access={access}
       data-index={index}
       style={{ width, height, pointerEvents: 'auto' }}
       onClick={() => setCount((value) => value + 1)}
@@ -70,7 +78,7 @@ function Badge({ attributes, id, index, width, height }: ReactInlineViewProps<ty
   );
 }
 
-function Highlight({ attributes, fragments }: ReactMarkViewProps<typeof highlight>) {
+function Highlight({ attributes, fragments, access }: ReactMarkViewProps<typeof highlight>) {
   const application = useContext(Application);
   expectTypeOf(attributes.color).toEqualTypeOf<string>();
   useLayoutEffect(() => application.render('mark'));
@@ -81,6 +89,7 @@ function Highlight({ attributes, fragments }: ReactMarkViewProps<typeof highligh
         <span
           key={`${fragment.top}:${fragment.left}`}
           data-mark-fragment={index}
+          data-access={access}
           data-theme={application.theme}
           style={{
             position: 'absolute',
@@ -129,6 +138,32 @@ const rendering = defineExtension({
 
 const schema = createSchema({ extensions: [note, badge, highlight, rendering] });
 
+test('inline and mark access updates propagate without document mutation or unrelated renderer updates', async ({
+  onTestFinished,
+}) => {
+  const access = new Map<number, NodeAccess>();
+  const f = fixture(false, (id) => access.get(id) ?? 'editable');
+  onTestFinished(() => f.destroy());
+  f.show();
+  await f.ready;
+  const button = f.element.querySelector<HTMLElement>('[data-badge]');
+  const mark = f.element.querySelector<HTMLElement>('[data-mark-fragment]');
+
+  if (!button || !mark) throw new Error('Missing range views');
+  const before = f.editor.state;
+  const inlineRenders = f.renders.filter((kind) => kind === 'inline').length;
+  access.set(2, 'read-only');
+  f.editor.refreshPermissions();
+  await expect.poll(() => mark.dataset.access).toBe('read-only');
+  expect(f.renders.filter((kind) => kind === 'inline').length).toBe(inlineRenders);
+  expect(button.dataset.access).toBe('editable');
+  access.set(1, 'protected');
+  f.editor.refreshPermissions();
+  await expect.poll(() => button.dataset.access).toBe('protected');
+  expect(f.element.querySelector('[data-badge]')).toBe(button);
+  expect(f.editor.state.nodes).toBe(before.nodes);
+});
+
 const prose = 'Wrapped marked text should remain selectable across every line. '.repeat(8);
 
 function FixtureContent<N extends NodeIdentity>({
@@ -156,13 +191,14 @@ function FixtureContent<N extends NodeIdentity>({
   );
 }
 
-function fixture(long = false) {
+function fixture(long = false, access: (id: number) => NodeAccess = () => 'editable') {
   const element = document.createElement('div');
   document.body.append(element);
   const root = createRoot(element);
 
   const editor = createEditor({
     schema,
+    permissions: { access: (node) => access(node.id) },
     content: [
       {
         id: 1,

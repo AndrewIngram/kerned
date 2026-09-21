@@ -113,7 +113,6 @@ export function mountEditor<N extends NodeIdentity>(
   let failure: Error | undefined;
   let focusPending = false;
   let focused = false;
-  let focusedNode: number | undefined;
   let layout: ReturnType<typeof createDocumentLayout<N>> | undefined;
   let diagnostics: ReturnType<typeof connectViewDiagnostics> | undefined;
   const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
@@ -226,6 +225,17 @@ export function mountEditor<N extends NodeIdentity>(
   }
 
   function updateLayout() {
+    const active = document.activeElement;
+
+    const host =
+      active instanceof Element && overlay.contains(active)
+        ? active.closest('[data-editor-node],[data-editor-focus-node]')
+        : null;
+
+    const focusedNode = host
+      ? Number(host.getAttribute('data-editor-node') ?? host.getAttribute('data-editor-focus-node'))
+      : undefined;
+
     layout?.update({
       viewport: frameViewport(),
       pinned: [...geometry.pinned(), ...(focusedNode === undefined ? [] : [focusedNode])],
@@ -568,20 +578,7 @@ export function mountEditor<N extends NodeIdentity>(
 
       let focusUpdate = false;
 
-      const trackFocus = (event: FocusEvent) => {
-        const target = event.type === 'focusout' ? event.relatedTarget : event.target;
-
-        const host =
-          target instanceof Element && overlay.contains(target)
-            ? target.closest('[data-editor-node],[data-editor-focus-node]')
-            : null;
-
-        focusedNode = host
-          ? Number(
-              host.getAttribute('data-editor-node') ?? host.getAttribute('data-editor-focus-node'),
-            )
-          : undefined;
-
+      const trackFocus = () => {
         // Moving/replacing a native control can dispatch blur during DOM reconciliation.
         // Publish its retention change after that operation has completed.
         if (focusUpdate) return;
@@ -599,11 +596,11 @@ export function mountEditor<N extends NodeIdentity>(
         });
       };
 
-      overlay.addEventListener('focusin', trackFocus);
-      overlay.addEventListener('focusout', trackFocus);
+      overlay.addEventListener('focusin', trackFocus, true);
+      overlay.addEventListener('focusout', trackFocus, true);
       cleanup.push(() => {
-        overlay.removeEventListener('focusin', trackFocus);
-        overlay.removeEventListener('focusout', trackFocus);
+        overlay.removeEventListener('focusin', trackFocus, true);
+        overlay.removeEventListener('focusout', trackFocus, true);
       });
 
       const events: NonNullable<BrowserViewOptions['input']> = {

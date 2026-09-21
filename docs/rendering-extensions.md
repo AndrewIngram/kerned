@@ -43,6 +43,12 @@ line fragment. A fragment supplies `left`, `top`, `width`, `height` and `baselin
 in block-local coordinates. Drawing uses the same coordinates; the view supplies
 document placement, scrolling and zoom. The underlying text remains canvas-owned.
 
+Both mark and inline frames include the owning node's effective `access`, including
+ancestor restrictions. `editor.refreshPermissions()` updates these props after an
+external policy change. Unchanged access skips unrelated renderer updates; access
+changes do not reshape text. Editing commands remain the authority for checking
+whether an operation is permitted.
+
 `InlineViewFrame` includes normalized `attributes`, the text-node identity,
 inline `id`, UTF-16 `index`, and allocated `width`/`height`. Its drawing and overlay
 coordinates start at the inline box's top-left. The text presentation reserves

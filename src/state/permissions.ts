@@ -11,6 +11,35 @@ export type AccessPolicy<N extends NodeIdentity> = {
   rootEditable?: boolean;
 };
 
+function inheritAccess(parent: NodeAccess, own: NodeAccess): NodeAccess {
+  if (parent === 'protected' || own === 'protected') return 'protected';
+
+  return parent === 'read-only' || own === 'read-only' ? 'read-only' : 'editable';
+}
+
+/** Query one current node without scanning unrelated branches or caching a mutable policy. */
+export function nodeAccess<N extends NodeIdentity>(
+  tree: TreeIndex<N>,
+  id: number,
+  policy?: AccessPolicy<N>,
+): NodeAccess | undefined {
+  let entry = tree.byId.get(id);
+
+  if (!entry) return undefined;
+
+  if (!policy) return 'editable';
+  let access: NodeAccess = 'editable';
+
+  while (entry) {
+    access = inheritAccess(access, policy.access(entry.node));
+
+    if (access === 'protected') return access;
+    entry = entry.parent === null ? undefined : tree.byId.get(entry.parent);
+  }
+
+  return access;
+}
+
 export class PermissionDenied extends Error {
   constructor(
     readonly key: string | null,
@@ -25,17 +54,10 @@ function effectiveAccess<N extends NodeIdentity>(tree: TreeIndex<N>, policy: Acc
   const access = new Map<number, NodeAccess>();
 
   for (const { node, parent } of tree.order) {
-    const inherited = parent === null ? 'editable' : access.get(parent),
+    const inherited = parent === null ? 'editable' : (access.get(parent) ?? 'editable'),
       own = policy.access(node);
 
-    access.set(
-      node.id,
-      inherited === 'protected' || own === 'protected'
-        ? 'protected'
-        : inherited === 'read-only' || own === 'read-only'
-          ? 'read-only'
-          : 'editable',
-    );
+    access.set(node.id, inheritAccess(inherited, own));
   }
 
   return access;
@@ -162,11 +184,10 @@ export function projectDocument<N extends NodeIdentity>(
   policy: AccessPolicy<N>,
 ): readonly ProjectedNode<N>[] {
   function project(node: N, inherited: NodeAccess): ProjectedNode<N> {
-    const own = policy.access(node);
+    const access = inheritAccess(inherited, policy.access(node));
 
-    if (inherited === 'protected' || own === 'protected')
+    if (access === 'protected')
       return { kind: 'protected', key: node.key, locked: node.locked === true };
-    const access = inherited === 'read-only' || own === 'read-only' ? 'read-only' : 'editable';
     const children = schema.children(node).map((child) => project(child, access));
 
     return {

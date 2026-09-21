@@ -28,7 +28,7 @@ import {
   type MountedEditor,
 } from '../../editor-canvas';
 import { createSchema, defineNode, type DocumentNode } from '../../model';
-import { NodeSelection, textSelection } from '../../state';
+import { NodeSelection, textSelection, type AccessPolicy } from '../../state';
 import { defineReactNodeView, EditorContent, type ReactNodeViewProps } from '../index';
 
 const note = defineNode({
@@ -77,7 +77,7 @@ const Application = createContext<{
   rendered: (id: number) => void;
 } | null>(null);
 
-function Card({ node, attributes, selected }: ReactNodeViewProps<typeof card>) {
+function Card({ node, attributes, selected, access }: ReactNodeViewProps<typeof card>) {
   const application = useContext(Application);
 
   if (!application) throw new Error('Application context was lost');
@@ -91,17 +91,60 @@ function Card({ node, attributes, selected }: ReactNodeViewProps<typeof card>) {
   useLayoutEffect(() => rendered(node.id));
 
   return (
-    <section data-card={node.id} data-selected={selected} style={{ height: attributes.height }}>
+    <section
+      data-access={access}
+      data-card={node.id}
+      data-selected={selected}
+      style={{ height: attributes.height }}
+    >
       <span>
         {theme}:{attributes.label}
       </span>
       <button onClick={() => setClicks((value) => value + 1)}>Count {clicks}</button>
-      <button onClick={() => renameCard(node.id, 'Saved')}>Rename</button>
+      <button disabled={access !== 'editable'} onClick={() => renameCard(node.id, 'Saved')}>
+        Rename
+      </button>
     </section>
   );
 }
 
 const cardRenderer = defineReactNodeView(card, Card);
+
+test('React node views receive live effective access without remounting or remeasuring unrelated content', async ({
+  onTestFinished,
+}) => {
+  let writable = true;
+  const f = fixture(false, { access: () => (writable ? 'editable' : 'read-only') });
+  onTestFinished(() => f.destroy());
+  f.root.render(
+    <Application.Provider value={f.application}>
+      <EditorContent editor={f.editor} style={size} onReady={f.ready} />
+    </Application.Provider>,
+  );
+  const view = await f.readiness;
+  const element = f.element.querySelector<HTMLElement>('[data-card]');
+  const renameButton = element?.querySelectorAll('button')[1];
+
+  if (!element || !renameButton) throw new Error('Missing card');
+  const before = f.editor.state;
+  const bounds = view.blockBounds(f.editor.state.nodes[1].id);
+  writable = false;
+  f.editor.refreshPermissions();
+  await expect.poll(() => element.dataset.access).toBe('read-only');
+  expect(renameButton.disabled).toBe(true);
+  expect(f.element.querySelector('[data-card]')).toBe(element);
+  expect(view.blockBounds(f.editor.state.nodes[1].id)).toEqual(bounds);
+  expect(f.editor.state.nodes).toBe(before.nodes);
+  const count = f.renders.length;
+  f.editor.refreshPermissions();
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
+  expect(f.renders.length).toBe(count);
+  writable = true;
+  f.editor.refreshPermissions();
+  await expect.poll(() => renameButton.disabled).toBe(false);
+});
 
 const views = defineExtension({
   name: 'views',
@@ -141,13 +184,14 @@ const schema = createSchema({ extensions: [note, card, controls, views] });
 
 const size = { width: 420, height: 280 };
 
-function fixture(long = false) {
+function fixture(long = false, permissions?: AccessPolicy<Node>) {
   const element = document.createElement('div');
   document.body.append(element);
   const root = createRoot(element);
 
   const editor = createEditor({
     schema,
+    permissions,
     content: [
       { kind: 'note', text: 'Canvas text above the widget.' },
       { kind: 'card', label: 'Original' },

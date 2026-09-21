@@ -13,7 +13,7 @@ import {
   type MountedEditor,
 } from '../../editor-canvas';
 import { createSchema, defineNode } from '../../model';
-import { textSelection } from '../../state';
+import { textSelection, type NodeAccess } from '../../state';
 import { defineReactWidgetView, EditorContent, type ReactWidgetViewProps } from '../index';
 
 const note = defineNode({
@@ -30,7 +30,7 @@ const Theme = createContext('missing');
 
 const Render = createContext(() => {});
 
-function Review({ data, node }: ReactWidgetViewProps<{ label: string }>) {
+function Review({ data, node, access }: ReactWidgetViewProps<{ label: string }>) {
   const theme = useContext(Theme);
   const render = useContext(Render);
   const [count, setCount] = useState(0);
@@ -39,7 +39,10 @@ function Review({ data, node }: ReactWidgetViewProps<{ label: string }>) {
 
   return (
     <button
+      onFocus={(event) => event.stopPropagation()}
+      onBlur={(event) => event.stopPropagation()}
       data-widget={node.id}
+      data-access={access}
       style={{ pointerEvents: 'auto' }}
       onClick={() => setCount((value) => value + 1)}
     >
@@ -52,7 +55,30 @@ const review = defineReactWidgetView(Review);
 
 const editorStyle = { width: 380, height: 400 };
 
-function fixture() {
+test('node-local widget sources still receive permission changes without explicit decoration invalidation', async ({
+  onTestFinished,
+}) => {
+  let writable = true;
+  const f = fixture(() => (writable ? 'editable' : 'read-only'));
+  onTestFinished(() => f.destroy());
+  f.show();
+  await f.whenReady;
+  const button = f.element.querySelector<HTMLElement>('[data-widget]');
+
+  if (!button) throw new Error('Missing widget');
+  writable = false;
+  f.editor.refreshPermissions();
+  await expect.poll(() => button.dataset.access).toBe('read-only');
+  expect(f.element.querySelector('[data-widget]')).toBe(button);
+  const count = f.renders;
+  f.editor.refreshPermissions();
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
+  expect(f.renders).toBe(count);
+});
+
+function fixture(access: (id: number) => NodeAccess = () => 'editable') {
   let values: readonly Decoration[] = [
     review({ key: 'review', at: { kind: 'text', offset: 4 }, data: { label: 'Review' } }),
   ];
@@ -100,6 +126,7 @@ function fixture() {
 
   const editor = createEditor({
     schema: createSchema({ extensions: [note, rendering] }),
+    permissions: { access: (node) => access(node.id) },
     content: Array.from({ length: 100 }, (_, index) => ({
       kind: 'note' as const,
       id: index + 1,
@@ -211,6 +238,7 @@ test('focused widgets pin their block, culling drops local state and remounting 
   if (!button) throw new Error('Missing widget');
   await userEvent.click(button);
   button.focus();
+  expect(document.activeElement).toBe(button);
   f.editor.select(textSelection(100, 0));
   await view.reveal({ id: 100, offset: 0 });
   expect(button.isConnected).toBe(true);

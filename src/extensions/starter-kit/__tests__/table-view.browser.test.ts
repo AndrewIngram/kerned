@@ -12,10 +12,12 @@ import { starterPresentation } from '../presentation';
 import { createTableView, type TableFrame } from '../table-view';
 
 function fixture(writable = true) {
+  let editable = writable;
+
   const editor = createEditor({
     schema: createSchema({ extensions: [...starterExtensions, starterPresentation] }),
     document: createSampleDocument().slice(0, 4),
-    permissions: { access: () => (writable ? 'editable' : 'read-only') },
+    permissions: { access: () => (editable ? 'editable' : 'read-only') },
   });
 
   const project = createStarterDocumentQuery(editor.schema);
@@ -55,6 +57,7 @@ function fixture(writable = true) {
       onMeasure: (id, width, height) => reports.push({ id, width, height }),
       selection: editor.state.selection,
       context: project(editor.state).context,
+      access: (id) => editor.getAccess(id),
       onSelect: (selection) => editor.select(selection),
       onText: (id, from, to, text, caret) => {
         return editor
@@ -109,6 +112,10 @@ function fixture(writable = true) {
     button,
     input,
     frame,
+    setWritable(value: boolean) {
+      editable = value;
+      editor.refreshPermissions();
+    },
     update(next: Partial<TableFrame<TableNode>>) {
       overrides = next;
       view.update(frame());
@@ -254,8 +261,17 @@ test('native table input restores canonical text when permissions reject an edit
   f.button('Edit cell 1, 1').click();
   const input = f.input();
   type(input, 'Must not persist');
+  expect(input.readOnly).toBe(true);
   expect(input.value).toBe('Keep the first release focused.');
   expect(f.frame().node.rows[0][0].paragraphs[0].text).toBe(input.value);
+  expect(document.activeElement).toBe(input);
+  f.setWritable(true);
+  expect(f.input()).toBe(input);
+  expect(input.readOnly).toBe(false);
+  type(input, 'Permitted');
+  expect(f.frame().node.rows[0][0].paragraphs[0].text).toBe('Permitted');
+  f.setWritable(false);
+  expect(input.readOnly).toBe(true);
   expect(document.activeElement).toBe(input);
 });
 

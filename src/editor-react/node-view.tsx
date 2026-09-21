@@ -6,6 +6,7 @@ import {
   type NodeViewFrame,
 } from '../editor-browser/node-views';
 import type { NodeIdentity, SchemaDefinition } from '../model';
+import type { NodeAccess } from '../state';
 import { portalHostFor } from './portals';
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
@@ -16,6 +17,7 @@ export type ReactNodeViewProps<Definition extends NodeDefinition> = {
   readonly attributes: NodeViewAttributes<Definition>;
   readonly width: number;
   readonly selected: boolean;
+  readonly access: NodeAccess;
 };
 
 /** Register a measured React block with the same lifecycle as native node views. */
@@ -29,7 +31,10 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
     const portals = portalHostFor(element);
 
     let current:
-      | (NodeViewFrame<NodeIdentity> & { attributes: NodeViewAttributes<Definition> })
+      | (NodeViewFrame<NodeIdentity> & {
+          attributes: NodeViewAttributes<Definition>;
+          access: NodeAccess;
+        })
       | undefined;
 
     let selected = false;
@@ -52,6 +57,7 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
           !current ||
           current.node !== frame.node ||
           current.width !== frame.width ||
+          current.access !== frame.access ||
           selected !== nextSelected;
 
         current = frame;
@@ -65,6 +71,7 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
             attributes={frame.attributes}
             width={frame.width}
             selected={selected}
+            access={frame.access}
           />,
         );
       },

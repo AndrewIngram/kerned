@@ -8,7 +8,13 @@ import {
   type TextStyle,
 } from '../../editor-browser/text-style';
 import type { NodeIdentity, Schema, TextPoint } from '../../model';
-import { TextSelection, textSelection, type Selection, type SelectionContext } from '../../state';
+import {
+  TextSelection,
+  textSelection,
+  type Selection,
+  type SelectionContext,
+  type NodeAccess,
+} from '../../state';
 import { formattingSpans, type TextFormat } from '../formatting';
 import { tableCells } from '../table';
 import { createTableContent, type TableText, type TableCellContent } from './table-content';
@@ -19,6 +25,7 @@ export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
   onMeasure: (id: number, width: number, height: number) => void;
   selection: Selection;
   context: SelectionContext;
+  access: (id: number) => NodeAccess | undefined;
   onSelect: (selection: Selection) => void;
   onText: (id: number, from: number, to: number, text: string, caret: number) => boolean;
   onUndo: (redo: boolean) => void;
@@ -297,6 +304,7 @@ export function createTableView<N extends NodeIdentity>(
           previousAfter = style.after;
 
           if (content.element instanceof HTMLTextAreaElement) {
+            content.element.readOnly = frame.access(paragraph.id) !== 'editable';
             resizeInput ||= metricsChanged;
             content.element.setAttribute(
               'aria-label',

@@ -1,4 +1,5 @@
 import type { NodeIdentity, SchemaDefinition, ValueBinding } from '../model';
+import type { NodeAccess } from '../state';
 import type { Drawing, DrawingLayer, TextFragment } from './drawing';
 import { createRangeViews } from './range-view-owner';
 import type { LayerBlock, ViewLayerContext, ViewLayerContribution } from './view-layers';
@@ -15,6 +16,7 @@ export type ValueViewAttributes<D extends ValueDefinition> = NonNullable<
 
 export type InlineViewFrame<D extends InlineDefinition> = Readonly<{
   node: Readonly<NodeIdentity>;
+  access: NodeAccess;
   attributes: ValueViewAttributes<D>;
   id: string;
   index: number;
@@ -24,6 +26,7 @@ export type InlineViewFrame<D extends InlineDefinition> = Readonly<{
 
 export type MarkViewFrame<D extends MarkDefinition> = Readonly<{
   node: Readonly<NodeIdentity>;
+  access: NodeAccess;
   attributes: ValueViewAttributes<D>;
   from: number;
   to: number;
@@ -69,6 +72,9 @@ export function defineInlineView<D extends InlineDefinition>(
           const type = context.editor.schema.resolve(block.node);
 
           if (type.kind !== 'text' || !block.inline.length) return [];
+          const access = context.editor.getAccess(block.node.id);
+
+          if (!access) throw new Error('Cannot render a node outside the current document');
           let cached = frames.get(block.node);
 
           if (!cached) {
@@ -80,6 +86,7 @@ export function defineInlineView<D extends InlineDefinition>(
               if (bound)
                 cached.set(value.id, {
                   node: block.node,
+                  access,
                   attributes: bound.attrs,
                   id: value.id,
                   index: value.index,
@@ -96,8 +103,12 @@ export function defineInlineView<D extends InlineDefinition>(
 
             if (!frame) return [];
 
-            if (frame.width !== box.width || frame.height !== box.height) {
-              frame = { ...frame, width: box.width, height: box.height };
+            if (
+              frame.width !== box.width ||
+              frame.height !== box.height ||
+              frame.access !== access
+            ) {
+              frame = { ...frame, width: box.width, height: box.height, access };
               cached.set(box.id, frame);
             }
 
@@ -137,6 +148,7 @@ export function defineMarkView<D extends MarkDefinition>(
           width: number;
           height: number;
           color: string;
+          access: NodeAccess;
           frames: readonly MarkViewFrame<D>[];
         }
       >();
@@ -147,6 +159,9 @@ export function defineMarkView<D extends MarkDefinition>(
           const type = context.editor.schema.resolve(block.node);
 
           if (type.kind !== 'text' || !block.text) return [];
+          const access = context.editor.getAccess(block.node.id);
+
+          if (!access) throw new Error('Cannot render a node outside the current document');
           let previous = cache.get(block.node);
 
           if (
@@ -154,7 +169,8 @@ export function defineMarkView<D extends MarkDefinition>(
             previous.text !== block.text ||
             previous.width !== block.width ||
             previous.height !== block.height ||
-            previous.color !== color
+            previous.color !== color ||
+            previous.access !== access
           ) {
             const frames = (type.editing.marks?.read(block.node) ?? []).flatMap((range) => {
               const bound = binding.read(range.mark);
@@ -163,6 +179,7 @@ export function defineMarkView<D extends MarkDefinition>(
                 ? [
                     {
                       node: block.node,
+                      access,
                       attributes: bound.attrs,
                       from: range.from,
                       to: range.to,
@@ -180,6 +197,7 @@ export function defineMarkView<D extends MarkDefinition>(
               width: block.width,
               height: block.height,
               color,
+              access,
               frames,
             };
             cache.set(block.node, previous);

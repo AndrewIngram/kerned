@@ -1,6 +1,6 @@
 import { defineContribution } from '../core';
 import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '../model';
-import type { Selection, SelectionContext } from '../state';
+import type { NodeAccess, Selection, SelectionContext } from '../state';
 import type { ViewSession } from './input-contributions';
 import { createTextDecorations, type ReadTextDecorations } from './text-decorations';
 import type { ReadTextStyle } from './text-style';
@@ -68,7 +68,10 @@ export function defineNodeView<Definition extends NodeDefinition>(
     context: NodeViewContext<N>,
   ) => (element: HTMLDivElement) => {
     update(
-      frame: NodeViewFrame<NodeIdentity> & { attributes: NodeViewAttributes<Definition> },
+      frame: NodeViewFrame<NodeIdentity> & {
+        attributes: NodeViewAttributes<Definition>;
+        access: NodeAccess;
+      },
     ): void;
     focusSelection?(selection: Selection): boolean;
     coordsAt?(point: TextPoint): DOMRect | null;
@@ -93,7 +96,10 @@ export function defineNodeView<Definition extends NodeDefinition>(
 
               if (!attributes)
                 throw new Error(`Node does not match renderer for ${definition.name}`);
-              view.update({ ...frame, attributes });
+              const access = context.editor.getAccess(frame.node.id);
+
+              if (!access) throw new Error('Cannot render a node outside the current document');
+              view.update({ ...frame, attributes, access });
             },
             focusSelection: view.focusSelection
               ? (selection) => view.focusSelection?.(selection) ?? false

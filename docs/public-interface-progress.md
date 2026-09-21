@@ -2643,3 +2643,48 @@ widgets, while controls inside native table-cell text await the content-slot
 work. M6 remains open for explicit editable content slots and complete
 selection/editability contracts. Its independent milestone judge is still due
 after those requirements are implemented and validated.
+
+### Milestone 6 checkpoint: live renderer access
+
+The session now exposes `getAccess(id)` and `refreshPermissions()`. Queries use
+the validated current tree and visit only the requested ancestor path. The
+session reuses transaction and history validation indexes; a renderer does not
+rebuild a document-wide index on each access query. The published dispatch result
+does not expose the session's retained mutable index. Querying, enforcement and
+authority projection share the same inheritance rule.
+
+Refreshing an externally changed policy publishes a new snapshot with a
+`permissions` update. It preserves document identity, selection, revision,
+reference checkpoints and history entries, closes the current history group and
+invalidates prepared command chains. Extension reducers prepare before publication.
+A rejected refresh can be retried. Command execution still checks live policy
+without relying on a UI refresh.
+
+Bound node, inline, mark and widget renderer frames include effective access.
+React adapters preserve host identity and skip unchanged access. Node-local
+widget sources receive updated access even when their descriptors remain cached.
+The table extension updates native textarea read-only state without replacing
+its active input. Tests cover ancestor restrictions, current policy, missing
+nodes, command rejection, history and anchor preservation, reducer failure and
+retry, unchanged-node rendering and live controls.
+
+Validation also found a weakness in focused-widget retention. A custom React
+control that stops focus-event propagation reproduced eviction while still
+focused in all three browsers. The mount now derives retention from the actual
+active element and observes focus events during capture, removing the cached
+focus-event interpretation. The strengthened regression verifies retained focus,
+later eviction on blur and external widget data after remount. An earlier
+intermittent Firefox failure did not recur in 20 stress repetitions; that event
+sequence was not captured, so it is not claimed as a separately diagnosed cause.
+Temporary tracing and stress-test duplication were removed.
+
+`pnpm run check` passes with 749 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes. Three serial production
+trials in `artifacts/public-interface-m6/access/` pass every original budget:
+worst first usable 237 ms, streaming 1,209.8 ms, paste handler 58.1 ms, paste paint
+119.5 ms, typing 31.9 ms, paging 32.1 ms and loaded heap 27,846,884 bytes. The report
+records parent `3ed9dc2` and measures this checkpoint's uncommitted tree.
+
+M6 still needs scoped selection contracts and explicit canvas-owned editable
+content slots before its final validation, commit and independent architecture
+judge. Milestones 7 and 8 remain pending.

@@ -341,6 +341,27 @@ These references resolve against the editor's accepted revision order. They do n
 
 Pass `permissions: {access(node), rootEditable?}` to `createEditor`. `access` returns `editable`, `read-only` or `protected` for the authenticated principal captured by the policy. Descendants inherit restrictions. `rootEditable` controls changes to the root child sequence; it does not by itself make every descendant read-only.
 
+`editor.getAccess(id)` returns the effective content access for a current node,
+including ancestor restrictions, or `undefined` when the node no longer exists.
+It reads the live policy and visits only that node's ancestor path. Without a
+policy, current nodes are editable. Access does not answer whether a structural
+move or deletion is permitted; those operations also depend on parent access
+and locks.
+
+After changing external policy data, call `editor.refreshPermissions()`. It
+publishes a fresh session snapshot with `update.kind === 'permissions'`, allowing
+toolbar selectors and mounted controls to refresh. It preserves document nodes,
+selection, revision, reference metadata and undo/redo entries, and closes the
+current typing group. It emits no content, transaction or selection event.
+Prepared command chains become obsolete. Extension reducers run before publication
+and can reject the refresh atomically; callers may retry after resolving the error.
+Commands always recheck live permissions even if the caller has not refreshed UI.
+
+Schema-bound node, inline and mark frames, and decoration widget frames, expose
+`access` to both vanilla and React renderers. A change updates the affected
+renderer without replacing its host or reshaping text. The table extension also
+updates its active textarea's native `readOnly` property while preserving focus.
+
 Text/property changes require edit access. Join, split and text-range operations also require access to their source text, so deletion of a protected source cannot launder that text into an editable node. Undoing a split performs the same source check. Child-sequence changes require edit access to the parent. Whole-node moves/deletes do not require editing the moved/deleted node, unless deletion encounters a locked descendant without edit access. Removing an ancestor cannot bypass that lock. Undo and redo use current access, not historical access. General node metadata includes `locked?: boolean`.
 
 Use `projectDocument(schema, canonicalNodes, policy)` **at the trusted authority**. A protected subtree becomes `{kind: 'protected', key, locked}`. A visible container has childless node data plus separately projected children. Applications must avoid duplicating hidden content in public ancestor metadata. Changes to opaque application property values are conservatively treated as edits.

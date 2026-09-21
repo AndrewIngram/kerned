@@ -4,7 +4,7 @@ import type { EditorState } from './transactions';
 
 type DocumentUpdate<N extends NodeIdentity> = Exclude<
   ExtensionUpdate<N>,
-  { kind: 'selection' | 'storedMarks' }
+  { kind: 'selection' | 'storedMarks' | 'permissions' }
 >;
 
 /** Semantic notifications precede view invalidation; destruction is terminal. */

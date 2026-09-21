@@ -45,6 +45,7 @@ export const tableView = defineExtension({
                 view.update({
                   ...frame,
                   textStyle: frame.textStyle,
+                  access: (id) => editor.getAccess(id),
                   onSelect: (selection) => editor.select(selection),
                   onText: (id, from, to, text, caret) =>
                     run(() =>

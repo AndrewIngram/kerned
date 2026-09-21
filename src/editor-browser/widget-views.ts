@@ -1,4 +1,5 @@
 import type { NodeIdentity } from '../model';
+import type { NodeAccess } from '../state';
 import type { Decoration } from './decorations';
 import type { DrawingRect } from './drawing';
 import { createRangeViews } from './range-view-owner';
@@ -10,6 +11,7 @@ export type WidgetAnchor =
 
 export type WidgetViewFrame<Data> = Readonly<{
   node: Readonly<NodeIdentity>;
+  access: NodeAccess;
   data: Data;
   at: WidgetAnchor;
   /** The anchor rectangle is block-local; the mount positions the DOM host. */
@@ -30,7 +32,7 @@ export type WidgetDecoration = Readonly<{
   at: WidgetAnchor;
   [widgetRenderer]: {
     owner: { destroy(element: HTMLElement): void };
-    render(element: HTMLElement, node: NodeIdentity, anchor: DrawingRect): void;
+    render(element: HTMLElement, node: NodeIdentity, anchor: DrawingRect, access: NodeAccess): void;
   };
 }>;
 
@@ -60,7 +62,7 @@ export function defineWidgetView<Data>(create: (element: HTMLElement) => WidgetV
       at,
       [widgetRenderer]: {
         owner,
-        render(element, node, anchor) {
+        render(element, node, anchor, access) {
           let view = instances.get(element);
 
           if (!view) {
@@ -68,7 +70,7 @@ export function defineWidgetView<Data>(create: (element: HTMLElement) => WidgetV
             instances.set(element, view);
           }
 
-          view.update({ node, data, at, anchor });
+          view.update({ node, data, at, anchor, access });
         },
       },
     };
@@ -77,6 +79,7 @@ export function defineWidgetView<Data>(create: (element: HTMLElement) => WidgetV
 
 type ProjectedWidget = {
   node: NodeIdentity;
+  access: NodeAccess;
   decoration: WidgetDecoration;
   anchor: DrawingRect;
 };
@@ -107,6 +110,7 @@ export function createWidgetViews<N extends NodeIdentity>(
       text: LayerBlock<N>['text'];
       width: number;
       height: number;
+      access: NodeAccess;
       values: readonly Decoration[];
       frames: readonly ProjectedWidget[];
     }
@@ -116,6 +120,9 @@ export function createWidgetViews<N extends NodeIdentity>(
     context,
     (block) => {
       const values = read(block.node.id);
+      const access = context.editor.getAccess(block.node.id);
+
+      if (!access) throw new Error('Cannot render a node outside the current document');
       let previous = cache.get(block.node);
 
       if (
@@ -123,7 +130,8 @@ export function createWidgetViews<N extends NodeIdentity>(
         previous.values !== values ||
         previous.text !== block.text ||
         previous.width !== block.width ||
-        previous.height !== block.height
+        previous.height !== block.height ||
+        previous.access !== access
       ) {
         const frames: ProjectedWidget[] = [];
 
@@ -141,10 +149,17 @@ export function createWidgetViews<N extends NodeIdentity>(
                   height: 0,
                 };
 
-          if (anchor) frames.push({ node: block.node, decoration, anchor });
+          if (anchor) frames.push({ node: block.node, decoration, anchor, access });
         }
 
-        previous = { text: block.text, width: block.width, height: block.height, values, frames };
+        previous = {
+          text: block.text,
+          width: block.width,
+          height: block.height,
+          values,
+          frames,
+          access,
+        };
         cache.set(block.node, previous);
       }
 
@@ -171,11 +186,11 @@ export function createWidgetViews<N extends NodeIdentity>(
         }
 
         return {
-          update({ node, decoration, anchor }) {
+          update({ node, decoration, anchor, access }) {
             const next = decoration[widgetRenderer];
 
             current = next;
-            current.render(element, node, anchor);
+            current.render(element, node, anchor, access);
           },
           destroy,
         };

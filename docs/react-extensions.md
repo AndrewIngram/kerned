@@ -38,7 +38,7 @@ renderer list on `EditorContent` and no schema name lookup inside the component.
 Binding recognizes configured variants of the same definition family.
 
 The component receives immutable normalized `attributes`, readonly node identity,
-available `width` and a `selected` flag. Attribute types come from the node's
+available `width`, effective `access` and a `selected` flag. Attribute types come from the node's
 Standard Schema, including defaults and transforms. The component can use its
 application providers and typed editor context to invoke commands. It does not
 receive a renderer, shaper, native graphics handle or mutable document reference.
@@ -46,7 +46,7 @@ receive a renderer, shaper, native graphics handle or mutable document reference
 The native view owns placement, viewport culling and selection. A scoped
 `ResizeObserver` reports the component's unscaled height with the current width,
 so late reports can be rejected by layout. React node updates are suppressed when
-the node, width and selected state are unchanged. Application context updates
+the node, width, access and selected state are unchanged. Application context updates
 still reach the component. Interactive controls follow the existing pointer
 policy and do not move the editor selection. Events bubble through the content
 host and the application's React tree.
