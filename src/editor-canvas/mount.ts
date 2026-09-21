@@ -19,8 +19,9 @@ import { createDocumentPresentation } from './presentation';
 import { createViewResources } from './resources';
 import { createTextLabels } from './text-labels';
 import { createViewGeometry } from './view-geometry';
+import { readViewConfiguration, type ViewConfiguration } from './view-options';
 
-export type MountEditorOptions<N extends NodeIdentity> = {
+export type MountEditorOptions<N extends NodeIdentity> = ViewConfiguration & {
   editor: ViewSession<N>;
   resolveAsset?: ResolveEditorAsset;
   scroll?: 'container' | 'page';
@@ -35,6 +36,7 @@ export function mountEditor<N extends NodeIdentity>(
   options: MountEditorOptions<N>,
 ) {
   const { editor } = options;
+  let configuration = readViewConfiguration({ zoom: options.zoom, paddingTop: options.paddingTop });
   const presentation = createDocumentPresentation(editor);
   // Resolve the initial projection before allocating native resources or changing the host.
   presentation.query(editor.state);
@@ -51,6 +53,7 @@ export function mountEditor<N extends NodeIdentity>(
   }
 
   const viewport = createEditorViewport();
+  viewport.setZoom(configuration.zoom);
   const capture = createCanvasInput({ schema: editor.schema, editor });
   const painter = createCanvasRenderer<N>({ onError: fail });
   const document = element.ownerDocument;
@@ -198,11 +201,27 @@ export function mountEditor<N extends NodeIdentity>(
     layout?.update({
       viewport: frameViewport(),
       pinned: [...geometry.pinned(), ...(focusedNode === undefined ? [] : [focusedNode])],
-      paddingTop: 0,
+      paddingTop: configuration.paddingTop,
       eager: false,
       retainAll: false,
       onLayout() {},
     });
+  }
+
+  function update(value: ViewConfiguration) {
+    if (status === 'destroyed' || status === 'failed') throw new Error(`Editor view is ${status}`);
+    const next = readViewConfiguration(value, configuration);
+
+    if (next.zoom === configuration.zoom && next.paddingTop === configuration.paddingTop) return;
+    configuration = next;
+
+    try {
+      viewport.setZoom(next.zoom);
+      updateLayout();
+    } catch (error) {
+      fail(error instanceof Error ? error : new Error(String(error)));
+      throw error;
+    }
   }
 
   function publish() {
@@ -527,6 +546,10 @@ export function mountEditor<N extends NodeIdentity>(
       return status === 'destroyed';
     },
     focus,
+    update,
+    getSnapshot: geometry.getSnapshot,
+    subscribe: geometry.subscribe,
+    blockBounds: geometry.blockBounds,
     /** Client coordinates for resident canvas or native text; null until layout is current. */
     coordsAt: geometry.coordsAt,
     reveal: geometry.reveal,

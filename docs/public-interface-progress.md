@@ -2061,3 +2061,33 @@ Evidence, including failed search measurements and the profile summary, is in
 Milestone 4 remains open for supported view updates and diagnostics and the full
 demo migration to the public mount, including search reveal. This is a checkpoint;
 the required milestone commit-and-judge gate follows those exit conditions.
+
+### Milestone 4 checkpoint: live view settings and observable geometry
+
+The public mount accepts zoom and document top padding at creation and through
+`update`. Configuration is validated atomically; unchanged settings do no work.
+Updates during asset loading apply to the initial layout. The React adapter
+updates these props without replacing the mounted view, input or graphics, and
+restores defaults when props are omitted. Failed views retain their error until
+an attachment change retries initialization.
+
+`getSnapshot` and `subscribe` expose immutable viewport/content geometry with
+revision and version information. Notifications coalesce after native
+reconciliation, allowing observers to update, unsubscribe or destroy the view.
+`blockBounds` resolves document-space bounds, including the rendered owner of
+native descendants; stale layouts return null. Engine and layout handles remain
+private. Reveal supports viewport alignment and CSS-pixel margins while keeping
+its durable target, selection/focus preservation and cancellation semantics.
+Clamped document edges report success when the target is visible.
+
+Validation: `pnpm run check` passes (527 Vitest tests, one unchanged collaboration
+TODO, 42 end-to-end cases), and the production build passes with its existing
+bundle-size warning. New three-browser cases cover loading-time and live React
+updates, immutable/stable snapshots, atomic invalid updates, stale geometry after
+edits, native cell ownership, observer-driven updates/destruction, page-scroll
+snapshots, zoomed reveal alignment and clamped document edges. Focus, selection,
+canvas and native table input identities remain intact through updates.
+
+Milestone 4 remains open for the separate diagnostic contract and complete demo
+migration, including outline, annotation placement, search reveal and streaming
+telemetry. The required milestone judge follows those exit conditions.

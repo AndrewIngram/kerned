@@ -154,3 +154,49 @@ test('React reports asset failure and can retry without replacing the session', 
   expect(f.mounted?.status).toBe('ready');
   await expect.poll(() => f.element.querySelector('[role="alert"]')).toBeNull();
 });
+
+test('React updates zoom and padding without replacing its view, including props changed while loading', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  flushSync(() =>
+    f.root.render(
+      <Editor editor={f.editor} style={size} onReady={f.ready} zoom={1.25} paddingTop={16} />,
+    ),
+  );
+  flushSync(() =>
+    f.root.render(
+      <Editor editor={f.editor} style={size} onReady={f.ready} zoom={1.5} paddingTop={32} />,
+    ),
+  );
+  const mounted = await f.readiness;
+  expect(mounted.getSnapshot()?.zoom).toBe(1.5);
+  const canvas = f.element.querySelector('canvas');
+  const before = mounted.blockBounds(f.editor.state.nodes[0].id);
+
+  if (!before) throw new Error('Expected initial block bounds');
+  mounted.focus();
+  const input = f.element.querySelector('textarea');
+  flushSync(() =>
+    f.root.render(
+      <Editor
+        editor={f.editor}
+        style={size}
+        onReady={unexpectedRemount}
+        zoom={2}
+        paddingTop={64}
+      />,
+    ),
+  );
+  expect(mounted.getSnapshot()?.zoom).toBe(2);
+  expect(mounted.blockBounds(before.id)?.top).toBeCloseTo(before.top + 32);
+  expect(document.activeElement).toBe(input);
+  expect(f.element.querySelector('canvas')).toBe(canvas);
+  flushSync(() =>
+    f.root.render(<Editor editor={f.editor} style={size} onReady={unexpectedRemount} />),
+  );
+  expect(mounted.getSnapshot()?.zoom).toBe(1);
+  expect(mounted.blockBounds(before.id)?.top).toBeCloseTo(before.top - 32);
+  expect(f.element.querySelector('[zoom], [paddingtop]')).toBeNull();
+});

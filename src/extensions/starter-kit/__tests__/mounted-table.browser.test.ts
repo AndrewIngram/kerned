@@ -246,6 +246,14 @@ test('public geometry and reveal locate native cell text without changing select
   expect(start?.height).toBeGreaterThan(0);
   expect(end?.left).toBeGreaterThan(start?.left ?? 0);
   expect(f.view.coordsAt({ id: 3, offset: 100 })).toBeNull();
+  // Native descendants share their rendered owner's document bounds, while
+  // coordsAt resolves the individual cell's text geometry.
+  expect(f.view.blockBounds(3)).toEqual(f.view.blockBounds(1));
+  expect(f.view.blockBounds(3)?.id).toBe(1);
+  f.view.update({ zoom: 1.25, paddingTop: 24 });
+  expect(f.view.getSnapshot()?.zoom).toBe(1.25);
+  expect(f.cellInput()).toBe(input);
+  expect(document.activeElement).toBe(input);
   const original = f.editor.state.selection;
   f.editor.transact((draft) => {
     draft.step({

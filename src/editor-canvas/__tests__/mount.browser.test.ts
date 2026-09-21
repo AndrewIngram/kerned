@@ -212,6 +212,105 @@ test('interactive node views preserve native focus and two editors own independe
   expect(document.activeElement).toBe(capture(second.element));
 });
 
+test('live view configuration preserves the attachment and publishes immutable document geometry', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const view = mountEditor(f.element, { editor: f.editor, paddingTop: 12 });
+  expect(view.getSnapshot()).toBeNull();
+  view.update({ zoom: 1.25, paddingTop: 24 });
+  await view.ready;
+  await frame();
+  const initial = view.getSnapshot();
+  const before = view.blockBounds(1);
+
+  if (!initial || !before) throw new Error('Expected published geometry');
+  expect(initial.zoom).toBe(1.25);
+  expect(initial.documentRevision).toBe(f.editor.state.revision);
+  expect(initial.viewport.width).toBeCloseTo(420 / 1.25);
+  expect(Object.isFrozen(initial)).toBe(true);
+  expect(Object.isFrozen(initial.content)).toBe(true);
+  expect(view.blockBounds(999)).toBeNull();
+  const canvas = f.element.querySelector('canvas');
+  const input = capture(f.element);
+  view.focus();
+  const selection = f.editor.state.selection;
+  view.update({ paddingTop: 64 });
+  expect(view.blockBounds(1)?.top).toBeCloseTo(before.top + 40);
+  view.update({ zoom: 1.5 });
+  expect(view.getSnapshot()?.zoom).toBe(1.5);
+  expect(view.getSnapshot()?.viewport.width).toBeCloseTo(420 / 1.5);
+  expect(f.element.querySelector('canvas')).toBe(canvas);
+  expect(document.activeElement).toBe(input);
+  expect(f.editor.state.selection).toBe(selection);
+  const current = view.getSnapshot();
+  view.update({ zoom: 1.5 });
+  expect(view.getSnapshot()).toBe(current);
+  expect(() => view.update({ zoom: 2, paddingTop: -1 })).toThrow(/paddingTop/);
+  expect(view.status).toBe('ready');
+  expect(view.getSnapshot()).toBe(current);
+  expect(initial.zoom).toBe(1.25);
+  expect(view.coordsAt({ id: 1, offset: 0 })?.height).toBeGreaterThan(0);
+  f.editor.transact((draft) => {
+    draft.step({ kind: 'replaceText', id: 1, from: 0, to: 0, text: 'More text ' });
+
+    return true;
+  });
+  expect(view.blockBounds(1)).toBeNull();
+  await expect.poll(() => view.getSnapshot()?.documentRevision).toBe(f.editor.state.revision);
+  expect(view.blockBounds(1)).not.toBeNull();
+  view.destroy();
+  expect(view.getSnapshot()).toBeNull();
+  expect(view.blockBounds(1)).toBeNull();
+  expect(() => view.update({ zoom: 1 })).toThrow(/destroyed/);
+  expect(() => view.subscribe(() => {})).toThrow(/destroyed/);
+});
+
+test('view observers run after native reconciliation and can update, unsubscribe or destroy safely', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const view = mountEditor(f.element, { editor: f.editor });
+  const observed: number[] = [];
+  let initialObserved = false;
+
+  const unsubscribe = view.subscribe(() => {
+    const snapshot = view.getSnapshot();
+
+    if (!snapshot) return;
+    observed.push(snapshot.zoom);
+    expect(f.element.querySelector('button')?.textContent).toBe('Interactive card');
+    expect(view.coordsAt({ id: 1, offset: 0 })?.height).toBeGreaterThan(0);
+
+    if (initialObserved) return;
+    initialObserved = true;
+    view.update({ zoom: 1.25 });
+  });
+
+  await view.ready;
+  await expect.poll(() => observed).toContain(1.25);
+  unsubscribe();
+  const count = observed.length;
+  view.update({ zoom: 1.5 });
+  await frame();
+  expect(observed).toHaveLength(count);
+  let destroyedNotice = false;
+  view.subscribe(() => {
+    if (view.getSnapshot()) view.destroy();
+    else destroyedNotice = true;
+  });
+  view.update({ paddingTop: 20 });
+  await expect.poll(() => view.status).toBe('destroyed');
+  await frame();
+  expect(destroyedNotice).toBe(true);
+  expect(f.element.childElementCount).toBe(0);
+  const next = mountEditor(f.element, { editor: f.editor });
+  await next.ready;
+  expect(next.status).toBe('ready');
+});
+
 test('destruction during initialization cancels readiness, releases the attachment and cannot paint late', async ({
   onTestFinished,
 }) => {
@@ -310,6 +409,8 @@ test('page scrolling reveals distant selections and preserves the client coordin
   const point = view.coordsAt({ id: 80, offset: 3 });
   expect(point?.top).toBeGreaterThanOrEqual(0);
   expect(point?.bottom).toBeLessThanOrEqual(window.innerHeight);
+  await expect.poll(() => view.getSnapshot()?.viewport.top ?? 0).toBeGreaterThan(500);
+  expect(view.blockBounds(80)?.top).toBeGreaterThan(500);
 });
 
 test('public reveal retains selection, follows intervening edits, and cancels superseded or destroyed requests', async ({
@@ -354,6 +455,26 @@ test('public reveal retains selection, follows intervening edits, and cancels su
   expect(view.coordsAt({ id: 80, offset: 3 })?.top).toBeLessThan(bounds.top);
   expect(f.editor.state.selection.eq(selection)).toBe(true);
   expect(document.activeElement).toBe(focus);
+  view.update({ zoom: 1.5 });
+  const target = { id: 40, offset: 3 };
+  const canvas = f.element.querySelector('canvas');
+
+  if (!canvas) throw new Error('Expected canvas');
+  expect(await view.reveal(target, { align: 'start', margin: 24 })).toBe(true);
+  expect(view.coordsAt(target)?.top).toBeCloseTo(canvas.getBoundingClientRect().top + 24, 0);
+  expect(await view.reveal(target, { align: 'end', margin: 24 })).toBe(true);
+  expect(view.coordsAt(target)?.bottom).toBeCloseTo(canvas.getBoundingClientRect().bottom - 24, 0);
+  expect(await view.reveal(target, { align: 'center' })).toBe(true);
+  const centered = view.coordsAt(target);
+
+  if (!centered) throw new Error('Expected revealed coordinates');
+  expect(centered.top + centered.height / 2).toBeCloseTo(
+    canvas.getBoundingClientRect().top + canvas.getBoundingClientRect().height / 2,
+    0,
+  );
+  expect(await view.reveal({ id: 1, offset: 0 }, { align: 'center' })).toBe(true);
+  expect(() => view.reveal(target, { margin: -1 })).toThrow(/margin/);
+  expect(f.editor.state.selection.eq(selection)).toBe(true);
   const cancelled = view.reveal({ id: 1, offset: 2 });
   view.destroy();
   expect(await cancelled).toBe(false);

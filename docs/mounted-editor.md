@@ -13,6 +13,7 @@ editor.commands.focus();
 
 const caret = view.coordsAt({ id: paragraphId, offset: 3 });
 await view.reveal({ id: paragraphId, offset: 3 }); // Keeps focus and selection unchanged.
+view.update({ zoom: 1.25, paddingTop: 48 });
 view.destroy(); // The editor session remains usable and can be mounted again.
 ```
 
@@ -198,6 +199,11 @@ initialization and background view failures, also displayed in an alert.
 `onNotice` receives nonfatal input messages such as a rejected paste. The native
 mount also announces these messages through a status element.
 
+`zoom` and `paddingTop` props update the existing view, including while assets are
+loading. They preserve its input element, focus and selection. Omitting either
+prop restores its default (`1` and `0` respectively). Changing attachment options
+such as the session, scroll mode or asset resolver creates a new view.
+
 ## Lifetime and coordinates
 
 - `ready` resolves after assets, layout, input and painting have been attached.
@@ -212,6 +218,28 @@ mount also announces these messages through a status element.
   returns `null` before readiness, after destruction, for invalid positions, when
   layout is stale, or when the rendered owner has no text geometry. Reading
   coordinates does not change scroll, native selection or focus.
+- `getSnapshot()` returns an immutable `ViewSnapshot`, or `null` before the first
+  layout and after disposal. It includes the document revision, zoom, viewport
+  top/width/height and content left/width/height. Lengths are unscaled document
+  units. Snapshot identity stays stable until layout, viewport or editor state
+  changes; `version` increases with each replacement. The snapshot describes the
+  last published layout, which can lag a new transaction until layout catches up.
+- `subscribe(listener)` observes those snapshots, including final disposal.
+  Notifications coalesce in a microtask after native reconciliation, so listeners
+  can safely update or destroy the view. Read the current snapshot in the listener;
+  intermediate synchronous snapshots may be skipped. The returned function
+  unsubscribes. Subscription after disposal throws.
+- `blockBounds(id)` returns a block's document-space rectangle and rendered owner
+  ID. Native descendants, such as cell paragraphs, return their table's bounds;
+  use `coordsAt` for their individual text. Flowing containers have no standalone
+  bounds. Uncomposed offscreen blocks can have estimated bounds until reflow.
+  Missing nodes, stale document layout and disposed views return `null`.
+- `update({ zoom, paddingTop })` merges view settings without replacing its
+  session, graphics or input. Zoom must be finite and positive; top padding is a
+  finite, nonnegative length in document units. Omitted values retain their
+  current setting. Updates are validated together before applying, and identical
+  settings do no work. Updates during loading apply to the initial layout;
+  updates after failure or destruction throw.
 - `reveal(point)` retains the target in layout and returns a promise indicating
   whether it was revealed. It captures a relative position so intervening edits
   map the target before scrolling. A later reveal supersedes an earlier request;
@@ -219,6 +247,11 @@ mount also announces these messages through a status element.
   Deletion follows the relative-position contract's surviving boundary fallback
   where one exists. The initial point must be a valid text position. Reveal leaves
   selection and focus alone.
+  Optional `{ align: 'nearest' | 'start' | 'center' | 'end', margin }` controls
+  viewport alignment and clearance in CSS pixels. The default is nearest with no
+  margin. Excessive margins are limited to the available height; document edges
+  can prevent exact alignment. A fully visible target still resolves `true` when
+  scrolling is clamped at an edge.
 - `scroll: 'page'` uses page scrolling and an optional `toolbar` element as the
   sticky inset. The default uses a scroll container inside the supplied host.
   `editor.commands.scrollIntoView()` reveals the current selection.

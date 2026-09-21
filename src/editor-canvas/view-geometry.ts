@@ -3,6 +3,7 @@ import type { NodeView } from '../editor-browser/node-views';
 import type { NodeIdentity, RelativePosition, TextPoint } from '../model';
 import type { DocumentLayoutFrame, DocumentLayoutSnapshot } from './document-layout';
 import type { createDocumentPresentation } from './presentation';
+import { readRevealOptions, type RevealOptions } from './view-options';
 
 type Document<N extends NodeIdentity> = ReturnType<
   ReturnType<typeof createDocumentPresentation<N>>['query']
@@ -13,6 +14,23 @@ type GeometryFrame<N extends NodeIdentity> = {
   layout: DocumentLayoutSnapshot<N>;
   viewport: DocumentLayoutFrame<N>['viewport'];
 };
+
+/** All lengths are unscaled document units. Client coordinates are provided by coordsAt. */
+export type ViewSnapshot = Readonly<{
+  version: number;
+  documentRevision: number;
+  zoom: number;
+  viewport: Readonly<{ top: number; width: number; height: number }>;
+  content: Readonly<{ left: number; width: number; height: number }>;
+}>;
+
+export type BlockBounds = Readonly<{
+  id: number;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}>;
 
 /** Owns asynchronous text reveal and the mapping from resident layout to client coordinates. */
 export function createViewGeometry<N extends NodeIdentity>({
@@ -29,9 +47,67 @@ export function createViewGeometry<N extends NodeIdentity>({
   onError: (error: Error) => void;
 }) {
   let frame: GeometryFrame<N> | undefined;
+  let snapshot: ViewSnapshot | null = null;
+  let version = 0;
+  const listeners = new Set<() => void>();
+  let notificationQueued = false;
   let scheduled: number | undefined;
   let destroyed = false;
-  let pending: { anchor: RelativePosition; resolve: (visible: boolean) => void } | undefined;
+
+  let pending:
+    | {
+        anchor: RelativePosition;
+        options: ReturnType<typeof readRevealOptions>;
+        resolve: (visible: boolean) => void;
+      }
+    | undefined;
+
+  function notify() {
+    if (notificationQueued) return;
+    notificationQueued = true;
+    // Observers may update or destroy the view. Finish native reconciliation
+    // before invoking them, and coalesce intermediate synchronous snapshots.
+    queueMicrotask(() => {
+      notificationQueued = false;
+      const published = snapshot;
+      const observers = [...listeners];
+
+      for (const listener of observers) {
+        if (snapshot !== published) break;
+
+        if (!listeners.has(listener)) continue;
+
+        try {
+          listener();
+        } catch (error) {
+          queueMicrotask(() => {
+            throw error;
+          });
+        }
+      }
+
+      if (destroyed && published === null) listeners.clear();
+    });
+  }
+
+  function blockBounds(id: number): BlockBounds | null {
+    if (destroyed || !frame || frame.document.editorState.nodes !== editor.state.nodes) return null;
+    const owner = frame.document.blockFor(id);
+
+    if (!owner) return null;
+    const index = frame.document.nodeIndexes.get(owner.id);
+    const placement = index === undefined ? undefined : frame.layout.scene.placements[index];
+
+    if (!placement) return null;
+
+    return {
+      id: owner.id,
+      left: frame.layout.inset,
+      top: placement.y,
+      width: frame.layout.contentWidth,
+      height: placement.height,
+    };
+  }
 
   function coordsAt(point: TextPoint): DOMRect | null {
     if (destroyed || !frame || frame.document.editorState.nodes !== editor.state.nodes) return null;
@@ -92,8 +168,9 @@ export function createViewGeometry<N extends NodeIdentity>({
 
       try {
         const point = target();
+        const options = pending?.options;
 
-        if (!point) return finish(false);
+        if (!point || !options) return finish(false);
 
         if (!frame || frame.document.editorState.nodes !== editor.state.nodes) return;
         const owner = frame.document.blockFor(point.id);
@@ -104,17 +181,33 @@ export function createViewGeometry<N extends NodeIdentity>({
         if (!rect) return finish(false);
         const canvas = bounds();
         const { readScroll, scrollDocumentTo, viewportHeight } = frame.viewport;
-        const top = canvas.top;
-        const bottom = top + viewportHeight;
+        const margin = Math.min(options.margin, Math.max(0, (viewportHeight - rect.height) / 2));
+        const top = canvas.top + margin;
+        const bottom = canvas.top + viewportHeight - margin;
 
         const delta =
-          rect.top < top ? rect.top - top : rect.bottom > bottom ? rect.bottom - bottom : 0;
+          options.align === 'start'
+            ? rect.top - top
+            : options.align === 'center'
+              ? (rect.top + rect.bottom - top - bottom) / 2
+              : options.align === 'end'
+                ? rect.bottom - bottom
+                : rect.top < top
+                  ? rect.top - top
+                  : rect.bottom > bottom
+                    ? rect.bottom - bottom
+                    : 0;
 
         if (Math.abs(delta) < 1) return finish(true);
         const before = readScroll();
         scrollDocumentTo(Math.max(0, before + delta));
 
-        if (Math.abs(readScroll() - before) < 0.1) return finish(false);
+        // A document edge can prevent the requested alignment even when the
+        // target is visible. Report visibility rather than retrying forever.
+        if (Math.abs(readScroll() - before) < 0.1)
+          return finish(
+            rect.top >= canvas.top - 1 && rect.bottom <= canvas.top + viewportHeight + 1,
+          );
         invalidate();
         schedule();
       } catch (error) {
@@ -126,15 +219,26 @@ export function createViewGeometry<N extends NodeIdentity>({
   }
 
   return {
+    getSnapshot: () => snapshot,
+    subscribe(this: void, listener: () => void) {
+      if (destroyed) throw new Error('Editor view is destroyed');
+      listeners.add(listener);
+
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    blockBounds,
     coordsAt,
     /** Reveal without changing focus or selection. A later request supersedes an earlier one. */
-    reveal(this: void, point: TextPoint): Promise<boolean> {
+    reveal(this: void, point: TextPoint, options: RevealOptions = {}): Promise<boolean> {
       if (destroyed) return Promise.resolve(false);
+      const resolvedOptions = readRevealOptions(options);
       const anchor = editor.positions.at(point.id, point.offset);
       pending?.resolve(false);
 
       return new Promise<boolean>((resolve) => {
-        pending = { anchor, resolve };
+        pending = { anchor, options: resolvedOptions, resolve };
 
         try {
           invalidate();
@@ -153,8 +257,33 @@ export function createViewGeometry<N extends NodeIdentity>({
     },
     update(value: GeometryFrame<N>) {
       if (destroyed) return;
+      const { zoom, width, viewportHeight, readScroll } = value.viewport;
+      const top = readScroll() / zoom;
+      const previous = frame;
       frame = value;
       schedule();
+
+      if (
+        previous?.layout === value.layout &&
+        previous.document.editorState === value.document.editorState &&
+        snapshot?.zoom === zoom &&
+        snapshot.viewport.top === top &&
+        snapshot.viewport.width === width / zoom &&
+        snapshot.viewport.height === viewportHeight / zoom
+      )
+        return;
+      snapshot = Object.freeze({
+        version: ++version,
+        documentRevision: value.document.editorState.revision,
+        zoom,
+        viewport: Object.freeze({ top, width: width / zoom, height: viewportHeight / zoom }),
+        content: Object.freeze({
+          left: value.layout.inset,
+          width: value.layout.contentWidth,
+          height: value.layout.scene.height,
+        }),
+      });
+      notify();
     },
     destroy() {
       if (destroyed) return;
@@ -163,6 +292,8 @@ export function createViewGeometry<N extends NodeIdentity>({
       if (scheduled !== undefined) cancelAnimationFrame(scheduled);
       finish(false);
       frame = undefined;
+      snapshot = null;
+      notify();
     },
   };
 }

@@ -15,6 +15,8 @@ export function Editor<N extends NodeIdentity>({
   resolveAsset,
   scroll,
   toolbar,
+  zoom = 1,
+  paddingTop = 0,
   onReady,
   onError,
   onNotice,
@@ -22,11 +24,17 @@ export function Editor<N extends NodeIdentity>({
 }: EditorProps<N>) {
   const host = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ onReady, onError, onNotice });
+  const configuration = useRef({ zoom, paddingTop });
+  const view = useRef<MountedEditor | undefined>(undefined);
   const [error, setError] = useState<Error | null>(null);
 
   useLayoutEffect(() => {
     callbacks.current = { onReady, onError, onNotice };
+    configuration.current = { zoom, paddingTop };
   });
+  useLayoutEffect(() => {
+    view.current?.update({ zoom, paddingTop });
+  }, [zoom, paddingTop]);
   useLayoutEffect(() => {
     const element = host.current;
 
@@ -38,6 +46,8 @@ export function Editor<N extends NodeIdentity>({
     function report(failure: Error) {
       if (!active) return;
       reported = true;
+
+      if (view.current === mounted) view.current = undefined;
       setError(failure);
       callbacks.current.onError?.(failure);
     }
@@ -53,9 +63,11 @@ export function Editor<N extends NodeIdentity>({
           resolveAsset,
           scroll,
           toolbar,
+          ...configuration.current,
           onError: report,
           onNotice: (message) => callbacks.current.onNotice?.(message),
         });
+        view.current = mounted;
         await mounted.ready;
 
         if (active && !mounted.isDestroyed) {
@@ -71,6 +83,8 @@ export function Editor<N extends NodeIdentity>({
 
     return () => {
       active = false;
+
+      if (view.current === mounted) view.current = undefined;
       mounted?.destroy();
     };
   }, [editor, resolveAsset, scroll, toolbar]);
