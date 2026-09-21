@@ -71,21 +71,6 @@ export const heading = defineNode({
   }),
 });
 
-export const checklist = defineNode({
-  name: 'checklist',
-  version: 1,
-  options: {},
-  schema: () => ({
-    groups: ['block'],
-    attributes: z.strictObject({
-      checked: z.array(z.boolean()),
-      expanded: z.boolean(),
-      notes: z.string(),
-    }),
-    content: { kind: 'atom' },
-  }),
-});
-
 export const image = defineNode({
   name: 'image',
   version: 1,
@@ -214,7 +199,6 @@ export const formattingDefinitions = [bold, italic, underline] as const;
 export const starterDefinitions = [
   paragraph,
   heading,
-  checklist,
   image,
   table,
   tableCell,

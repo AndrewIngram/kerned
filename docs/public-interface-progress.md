@@ -1372,7 +1372,7 @@ unchanged budget: worst first usable 178 ms, streaming 1,062.9 ms, paste handler
 28,959,676 bytes. The report identifies `9dbbe9f` and measures this checkpoint's
 uncommitted tree; `large-documents.json` records the large-document audit.
 
-Milestone 4 remains open. Tables, checklists, inline/mark/decorations and input
+Milestone 4 remains open. Tables, inline/mark/decorations and input
 policies still need composition through the extension/view contracts, and the
 complete public mount must own their placement and lifecycle. The milestone judge
 follows that exit, not this first consumer of the contribution mechanism.
@@ -1381,3 +1381,33 @@ Consumer-interface follow-up: inline boolean option defaults can infer a literal
 `false` instead of `boolean`. A separately declared defaults object currently
 avoids this, but the final extension-author examples should support ordinary
 boolean reconfiguration without that workaround.
+
+### Milestone 4 checkpoint: remove the checklist extension
+
+Removed the checklist at the user's request. The starter schema, node union,
+React renderer, stylesheet, clipboard branches and expanded-height fallback no
+longer include it. Its demo-only update adapter was also removed. The general
+node update command remains available independently of the deleted feature.
+
+The extension diagnostic sample now uses an existing table for editable native
+controls. Generated stream blocks previously occupied by checklists are ordinary
+paragraphs; the 10,000-block fixture contains 9,499 paragraphs, one table and 500
+images. Diagnostics count mounted embedded blocks without checklist-specific DOM
+attributes. The measured-height controller test uses an image. The retained-node
+codec fixture excludes the retired schema type; old checklist documents are no
+longer supported by this starter assembly. Historical performance reports retain
+the original fixture description and explain the change.
+
+Validation: `pnpm run check` passes (360 Vitest tests, one unchanged collaboration
+TODO, 42 end-to-end cases), and the production build passes. The large-document
+and viewport-first reflow audits each pass all nine cases, including focused
+native input, measured height changes, scroll anchoring and streaming edits.
+Cross-block selection passes in Chromium, Firefox and WebKit; its replacement
+input now uses one input event to match its single-undo assertion. Evidence is in
+`artifacts/public-interface-m4/remove-checklist/`.
+
+Three serial production trials pass all unchanged budgets: worst first usable
+175 ms, streaming 1,062.4 ms, paste handler 56 ms, paste to paint 117.3 ms,
+typing 32.2 ms, paging 32.6 ms and loaded heap 28,947,408 bytes. The report records
+`02183dd` and measures this checkpoint's uncommitted tree. Milestone 4 remains
+open; checklist migration is no longer part of its remaining work.

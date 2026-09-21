@@ -110,13 +110,12 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       await page.getByLabel('Reply').fill('Keep this focused.');
       assert.equal((await read()).stats.glyphCalls, initialGlyphCalls);
       await page.keyboard.press('Escape');
-      const block = page.locator('[data-widget="3"]');
-      await block.getByRole('button').click();
-      await page.waitForFunction(
-        () => window.editorDiagnostics.read().scene.find((p) => p.id === 3).height > 250,
-      );
-      await block.getByLabel('Block notes').fill('Persist through virtualization.');
-      await block.getByLabel('Review the examples').check();
+      const block = page.locator('[data-table="3"]');
+      await block.getByRole('button', { name: 'Edit cell 1, 1', exact: true }).click();
+
+      await block
+        .getByLabel('Cell 1, 1 text', { exact: true })
+        .fill('Persist through virtualization.');
       await settle();
       const state = await read();
       assert.equal(state.stats.glyphCalls, initialGlyphCalls);
@@ -127,10 +126,10 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       assert.equal(
         next.y,
         place.y + Math.ceil(place.height / 4) * 4 + 24,
-        'Checklist spacing includes 4px grid alignment',
+        'Table spacing includes 4px grid alignment',
       );
       // A focused DOM widget stays mounted outside the visible range.
-      await block.getByLabel('Block notes').focus();
+      await block.getByLabel('Cell 1, 1 text', { exact: true }).focus();
       await settle();
       await page.locator('.document-scroll').evaluate((el) => (el.scrollTop = el.scrollHeight));
       await settle();
@@ -143,12 +142,12 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       assert.equal(bottom.stats.glyphCalls, initialGlyphCalls);
       await page.locator('.document-scroll').evaluate((el) => (el.scrollTop = 0));
       await block.waitFor();
+      await block.getByRole('button', { name: 'Edit cell 1, 1', exact: true }).click();
       await settle();
       assert.equal(
-        await block.getByLabel('Block notes').inputValue(),
+        await block.getByLabel('Cell 1, 1 text', { exact: true }).inputValue(),
         'Persist through virtualization.',
       );
-      assert.equal(await block.getByLabel('Review the examples').isChecked(), true);
       await page.evaluate(() => window.editorDiagnostics.select(1, 0));
       await settle();
       await input.evaluate((el) => {

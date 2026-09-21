@@ -1,5 +1,4 @@
 import type { ClipboardFragment } from '../../extensions/clipboard';
-import type { StarterNode } from '../../extensions/demo-model';
 import type { TextFormat } from '../../extensions/formatting';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 import { TextSelection } from '../../state';
@@ -77,7 +76,6 @@ export function createEditorControls({
       run(() => (column ? editor.commands.addTableColumn() : editor.commands.addTableRow())),
     replaceCells: (text: string) => run(() => editor.commands.replaceSelection(text)),
     paste: (fragment: ClipboardFragment) => run(() => editor.commands.paste(fragment)),
-    update: (node: StarterNode) => run(() => editor.commands.updateNode(node), false),
     restore: (redo = false) =>
       run(() => {
         const changed = redo ? editor.commands.redo() : editor.commands.undo();

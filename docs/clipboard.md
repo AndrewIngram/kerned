@@ -11,11 +11,11 @@ source identities are replaced, so repeated pastes cannot duplicate block IDs.
 Inline insertion uses split/join transactions to map surviving positions, and
 each paste creates one history entry.
 
-Local fragments retain the extension model, including mentions,
-images and checklist data. The page retains up to eight immutable fragments;
+Local fragments retain the extension model, including mentions
+and images. The page retains up to eight immutable fragments;
 unknown or expired tokens use HTML instead. Custom extension data is therefore
 not yet portable across reloads or separate tabs. In exported HTML, mentions
-become their labels, images their alternative text and checklists their notes.
+become their labels, and images their alternative text.
 Comments are not exported. Portable extension serialization remains separate
 work. Table-cell controls use the same rich clipboard adapter.
 

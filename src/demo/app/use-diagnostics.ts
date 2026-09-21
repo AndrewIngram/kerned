@@ -129,8 +129,8 @@ export function useDiagnostics({
         scroll: readScroll(),
         zoom,
         width: layoutDiagnostics.contentWidth,
-        mounted: [...document.querySelectorAll('[data-widget], [data-image]')].map((n) =>
-          Number(n.getAttribute('data-widget') ?? n.getAttribute('data-image')),
+        mounted: [...document.querySelectorAll('[data-editor-node]')].map((n) =>
+          Number(n.getAttribute('data-editor-node')),
         ),
         nodes: current.current.nodes.filter((n) => ids.includes(n.id)),
         scene: layoutDiagnostics.scene.placements
@@ -177,8 +177,8 @@ export function useDiagnostics({
           boxes: p.boxes,
         })),
         stats: { ...owned.stats },
-        mounted: [...document.querySelectorAll('[data-widget]')].map((n) =>
-          n.getAttribute('data-widget'),
+        mounted: [...document.querySelectorAll('[data-editor-node]')].map((n) =>
+          n.getAttribute('data-editor-node'),
         ),
         zoom,
         width: layoutDiagnostics.contentWidth,

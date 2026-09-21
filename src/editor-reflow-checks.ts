@@ -102,11 +102,7 @@ export async function checkReflow(
             ? measured.height
             : node.kind === 'image'
               ? 96
-              : node.kind === 'table'
-                ? Math.max(60, node.rows.length * 64)
-                : node.expanded
-                  ? 290
-                  : 190;
+              : Math.max(60, node.rows.length * 64);
 
         if (height !== actual.height) throw new Error(`Widget height differs at ${node.id}`);
         y += Math.ceil(height / 4) * 4;

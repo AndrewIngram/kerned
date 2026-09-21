@@ -52,7 +52,7 @@ node scripts/report-editor-large.mjs
 
 Open [/extensions.html?stream=10000](http://127.0.0.1:5176/extensions.html?stream=10000). The default page remains the small extension study. The stream parameter accepts 32 through 10,000 blocks. The test-only paused=1 option holds loading after the first 32 blocks; window.editorDiagnostics.resume() continues it. slowImages=1 extends the image decode delay for reflow checks.
 
-The fixture is generated locally, one requested chunk at a time. This tests incremental document ingestion, layout, React updates and painting. It does **not** measure network transport, server parsing, real download latency or arbitrary external content. It uses styled Latin paragraphs, atomic mentions, comments, checklists and images. At 10,000 blocks there are 8,999 paragraphs, 501 checklists and 500 image blocks. The images share one SVG resource; these numbers do not describe 500 distinct decoded photographs.
+The fixture is generated locally, one requested chunk at a time. This tests incremental document ingestion, layout, React updates and painting. It does **not** measure network transport, server parsing, real download latency or arbitrary external content. It uses styled Latin paragraphs, atomic mentions, comments, a table and images. At 10,000 blocks there are 9,499 paragraphs, one table and 500 image blocks. The images share one SVG resource; these numbers do not describe 500 distinct decoded photographs.
 
 ## Loading measurements
 
@@ -78,7 +78,7 @@ The large cases verify:
 - Unchanged existing paragraph geometry on append and layout calls limited to incoming paragraphs.
 - Focus and selection preservation during loading.
 - Delayed image decode, resulting block height and following-paragraph position.
-- A focused checklist resized above the viewport without moving the visible anchor.
+- A focused table resized above the viewport without moving the visible anchor.
 - Widget notes surviving loading and virtualization.
 - Bounded mounts and unchanged shaping/layout counts on scrolling.
 - One-paragraph invalidation for a styled edit, undo restoration, and a combining mark typed at a formatting boundary.

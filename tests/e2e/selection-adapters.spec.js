@@ -42,17 +42,13 @@ test('clicking an atomic view selects it while interactive descendants retain na
   expect(await page.evaluate(() => window.editorDiagnostics.read().selection.type)).toBeUndefined();
   await page.evaluate((idValue2) => window.editorDiagnostics.scrollTo(idValue2), id);
   await image.click();
-  await page.evaluate(() =>
-    window.editorDiagnostics.scrollTo(
-      window.editorDiagnostics.read().nodes.find((n) => n.kind === 'checklist').id,
-    ),
-  );
-  const checklist = page.locator('[data-widget]').first();
-  await checklist.scrollIntoViewIfNeeded();
-  const checkbox = checklist.locator('input[type=checkbox]').first();
-  const checked = await checkbox.isChecked();
-  await checkbox.click();
-  expect(await checkbox.isChecked()).toBe(!checked);
-  expect(await page.evaluate(() => window.editorDiagnostics.read().selection.type)).toBe('node');
+  await page.evaluate(() => window.editorDiagnostics.scrollTo(3));
+  const table = page.locator('[data-table="3"]');
+  await table.getByRole('button', { name: 'Edit cell 1, 1', exact: true }).click();
+  const input = table.getByLabel('Cell 1, 1 text', { exact: true });
+  await expect(input).toBeFocused();
+  await input.fill('Native cell input');
+  await expect(input).toHaveValue('Native cell input');
+  expect(await page.evaluate(() => window.editorDiagnostics.read().selection.type)).toBeUndefined();
   expect(id).toBeGreaterThan(0);
 });

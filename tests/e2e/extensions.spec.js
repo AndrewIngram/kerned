@@ -1,30 +1,22 @@
 import { test, expect } from '@playwright/test';
 
-test('extension diagnostics retain mentions and editable React checklists', async ({ page }) => {
+test('extension diagnostics retain mentions and editable table cells', async ({ page }) => {
   await page.goto('/extensions.html');
   await page.waitForFunction(() => window.editorDiagnostics);
   await page.getByLabel('Open @Maya Chen').click();
   await expect(page.getByRole('dialog')).toContainText('Design team');
   await page.keyboard.press('Escape');
   await expect(page.getByLabel('Canvas text input')).toBeFocused();
-  const checklist = page.locator('[data-widget="3"]');
-  await checklist.getByLabel('Review the examples').check();
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => window.editorDiagnostics.read().nodes.find((node) => node.id === 3).checked[1],
-      ),
-    )
-    .toBe(true);
-  await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await expect(checklist.getByLabel('Review the examples')).not.toBeChecked();
-  await checklist.getByRole('button', { name: 'Add block notes' }).click();
-  const notes = checklist.getByLabel('Block notes');
+  const table = page.locator('[data-table="3"]');
+  await table.getByRole('button', { name: 'Edit cell 1, 1', exact: true }).click();
+  const notes = table.getByLabel('Cell 1, 1 text', { exact: true });
   await notes.fill('Keep focus');
   await expect(notes).toBeFocused();
   await page.keyboard.type(' while typing');
   await expect(notes).toHaveValue('Keep focus while typing');
   await expect(notes).toBeFocused();
+  await page.keyboard.press('Control+z');
+  await expect(notes).toHaveValue('Keep the first release focused.');
 });
 
 test('comments remain external through replies, text edits, undo and rich paste', async ({

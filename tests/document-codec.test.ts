@@ -33,7 +33,7 @@ test('document nesting counts document nodes independently of JSON nesting', () 
   expect(() => demoDocumentCodec.decode({ version: 1, nodes: [extra] })).toThrow(z.ZodError);
 });
 
-test('the assembled starter kit reads and writes the captured pre-migration format', () => {
+test('the assembled starter kit reads and writes the pre-migration format for retained nodes', () => {
   const fixture = z
     .object({ content: z.unknown(), encoded: z.unknown() })
     .parse(JSON.parse(starterFixture));

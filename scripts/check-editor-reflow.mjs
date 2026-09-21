@@ -87,15 +87,15 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       // DOM measurement and focused-widget pinning during a fresh width generation.
       await page.evaluate(() => window.editorDiagnostics.scrollTo(3));
       await settle();
-      const block = page.locator('[data-widget="3"]');
-      await block.getByRole('button').click();
-      await block.getByLabel('Block notes').fill('Keep focus during reflow.');
+      const block = page.locator('[data-table="3"]');
+      await block.getByRole('button', { name: 'Edit cell 1, 1', exact: true }).click();
+      await block.getByLabel('Cell 1, 1 text', { exact: true }).fill('Keep focus during reflow.');
       await settle();
       await page.setViewportSize({ width: 760, height: 950 });
       await settle();
       assert.ok((await probe()).reflowPending > 0);
-      await block.getByLabel('Block notes').evaluate((el) => {
-        el.style.height = '210px';
+      await block.getByLabel('Cell 1, 1 text', { exact: true }).evaluate((el) => {
+        el.style.height = '410px';
       });
       await settle();
       await page.evaluate(() => window.editorDiagnostics.scrollTo(4, 8));
@@ -106,7 +106,9 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       const final = await probe([4]);
       assert.ok(Math.abs(screen(final) - screen(anchored)) < 1.5);
       assert.equal(
-        await block.getByLabel('Block notes').evaluate((el) => el === document.activeElement),
+        await block
+          .getByLabel('Cell 1, 1 text', { exact: true })
+          .evaluate((el) => el === document.activeElement),
         true,
       );
       assert.equal(final.stalePaints, 0);

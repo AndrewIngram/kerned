@@ -85,8 +85,6 @@ function html(node: StarterNode): string {
 
     case 'image':
       return `<p>${escape(node.alt)}</p>`;
-    case 'checklist':
-      return `<p>${escape(node.notes || '[Checklist]')}</p>`;
     default: {
       const exhaustive: never = node;
       throw new Error(String(exhaustive));

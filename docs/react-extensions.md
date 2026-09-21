@@ -16,10 +16,10 @@ portals. The mention panel reads its parent's React context. An inline atom
 occupies one U+FFFC code unit, with caret stops before and after it. Plain-text
 copy substitutes its label.
 
-Checklists and images report their measured height through `ResizeObserver`.
+Tables and images report their measured height through `ResizeObserver`.
 Measurements carry their width so the host can discard stale reports. Height
-changes move later blocks without reshaping their text. Checkbox values, notes,
-and comment replies live in document state with undo/redo and survive unmounting.
+changes move later blocks without reshaping their text. Table cell text lives in document state with undo/redo and survives unmounting.
+Comment replies belong to the external comments extension.
 
 Canvas drawing and DOM placement use the same block coordinates. The host mounts
 visible blocks with overscan and pins focused widgets until focus leaves them.

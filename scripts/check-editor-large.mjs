@@ -100,17 +100,19 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       // Resize a retained, focused widget above the viewport and preserve the next block's screen position.
       await page.evaluate(() => window.editorDiagnostics.scrollTo(3));
       await settle();
-      const block = page.locator('[data-widget="3"]');
-      await block.getByRole('button').click();
-      await block.getByLabel('Block notes').fill('Keep this note while loading.');
+      const block = page.locator('[data-table="3"]');
+      await block.getByRole('button', { name: 'Edit cell 1, 1', exact: true }).click();
+      await block
+        .getByLabel('Cell 1, 1 text', { exact: true })
+        .fill('Keep this note while loading.');
       await settle();
-      await block.getByLabel('Block notes').focus();
+      await block.getByLabel('Cell 1, 1 text', { exact: true }).focus();
       await settle();
       await page.evaluate(() => window.editorDiagnostics.scrollTo(4, 8));
       await settle();
       const anchorBefore = await probe([4]);
-      await block.getByLabel('Block notes').evaluate((el) => {
-        el.style.height = '210px';
+      await block.getByLabel('Cell 1, 1 text', { exact: true }).evaluate((el) => {
+        el.style.height = '410px';
       });
       await page.waitForFunction(() => window.editorDiagnostics.probe([3]).scene[0].height > 400);
       await settle();
@@ -124,7 +126,9 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
         'Widget resize moved anchor',
       );
       assert.equal(
-        await block.getByLabel('Block notes').evaluate((el) => document.activeElement === el),
+        await block
+          .getByLabel('Cell 1, 1 text', { exact: true })
+          .evaluate((el) => document.activeElement === el),
         true,
       );
       const atResume = await probe();
@@ -140,7 +144,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       const loaded = await probe([1, 3]);
       assert.equal(loaded.count, total);
       assert.ok(loaded.nodes[0].text.startsWith('Edited '));
-      assert.equal(loaded.nodes[1].notes, 'Keep this note while loading.');
+      assert.equal(loaded.nodes[1].rows[0][0].paragraphs[0].text, 'Keep this note while loading.');
       assert.deepEqual(loaded.selection, atResume.selection);
       await page.getByRole('button', { name: 'Undo', exact: true }).focus();
       await settle();

@@ -22,7 +22,7 @@ node scripts/report-editor-large.mjs
 
 Open [/extensions.html?stream=10000](http://127.0.0.1:5176/extensions.html?stream=10000). The default page remains the small extension study. The stream parameter accepts 32 through 10,000 blocks. The test-only paused=1 option holds loading after the first 32 blocks; window.editorDiagnostics.resume() continues it. slowImages=1 extends the image decode delay for reflow checks.
 
-The fixture is generated locally, one requested chunk at a time. This tests incremental document ingestion, layout, React updates and painting. It does **not** measure network transport, server parsing, real download latency or arbitrary external content. It uses styled Latin paragraphs, atomic mentions, comments, checklists and images. At 10,000 blocks there are 8,999 paragraphs, 501 checklists and 500 image blocks. The images share one SVG resource; these numbers do not describe 500 distinct decoded photographs.
+The fixture is generated locally, one requested chunk at a time. This tests incremental document ingestion, layout, React updates and painting. It does **not** measure network transport, server parsing, real download latency or arbitrary external content. It uses styled Latin paragraphs, atomic mentions, comments, checklists and images. At 10,000 blocks there are 8,999 paragraphs, 501 checklists and 500 image blocks. The images share one SVG resource; these numbers do not describe 500 distinct decoded photographs. The checklist extension has since been removed. Current runs use 9,499 paragraphs, one editable table and 500 images; the recorded measurements below used the original fixture. Current focus and resize checks use the table.
 
 ## Loading measurements
 

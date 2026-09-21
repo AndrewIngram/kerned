@@ -30,16 +30,6 @@ export function sampleChunk(start: number, count: number): StarterNode[] {
     const i = index - 4,
       id = index + 6;
 
-    if (i % 20 === 0)
-      return {
-        kind: 'checklist',
-        id,
-        key: `block-${id}`,
-        checked: [false, false, false],
-        expanded: false,
-        notes: '',
-      };
-
     if (i % 20 === 4)
       return {
         kind: 'image',

@@ -29,18 +29,10 @@
       "inline": []
     },
     {
-      "kind": "checklist",
-      "id": 3,
-      "key": "block-3",
-      "checked": [true, false, false],
-      "expanded": false,
-      "notes": ""
-    },
-    {
       "kind": "paragraph",
       "id": 4,
       "key": "block-4",
-      "text": "The checklist stays part of the document. The next paragraph moves when its content expands.",
+      "text": "Embedded blocks stay part of the document.",
       "marks": [],
       "inline": []
     },
@@ -263,24 +255,12 @@
         "children": []
       },
       {
-        "type": "checklist",
-        "version": 1,
-        "id": 3,
-        "key": "block-3",
-        "data": {
-          "checked": [true, false, false],
-          "expanded": false,
-          "notes": ""
-        },
-        "children": []
-      },
-      {
         "type": "paragraph",
         "version": 2,
         "id": 4,
         "key": "block-4",
         "data": {
-          "text": "The checklist stays part of the document. The next paragraph moves when its content expands.",
+          "text": "Embedded blocks stay part of the document.",
           "marks": [],
           "inline": []
         },

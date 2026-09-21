@@ -1,7 +1,6 @@
 import type { ComponentProps } from 'react';
 
 import { createReactRenderers } from '../editor-react';
-import { Checklist } from './checklist-view';
 import type { StarterLeaf } from './demo-model';
 import { TableBlock } from './table-view';
 import { ParagraphExtensions } from './text-block-view';
@@ -9,7 +8,6 @@ import { ParagraphExtensions } from './text-block-view';
 type NodeViewValue = {
   node: StarterLeaf;
   table: Omit<ComponentProps<typeof TableBlock>, 'node'>;
-  checklist: Omit<ComponentProps<typeof Checklist>, 'node'>;
   text: ComponentProps<typeof ParagraphExtensions>;
 };
 
@@ -21,14 +19,6 @@ export const DemoNodeView = createReactRenderers<NodeViewValue>([
       if (value.node.kind !== 'table') throw new Error('Expected table');
 
       return <TableBlock {...value.table} node={value.node} />;
-    },
-  },
-  {
-    name: 'checklist',
-    component: ({ value }) => {
-      if (value.node.kind !== 'checklist') throw new Error('Expected checklist');
-
-      return <Checklist {...value.checklist} node={value.node} />;
     },
   },
   { name: 'paragraph', component: ({ value }) => <ParagraphExtensions {...value.text} /> },

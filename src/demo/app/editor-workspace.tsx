@@ -11,7 +11,7 @@ import {
   useEditorState,
 } from '../../editor-react';
 import { useCanvasRenderer } from '../../editor-react/use-canvas-renderer';
-import { bookSamples, type EditorSample } from '../../editor-samples';
+import { type EditorSample } from '../../editor-samples';
 import { streamConfig } from '../../editor-stream';
 import type { Rect } from '../../engines';
 import { captureComment } from '../../extensions/comment';
@@ -522,9 +522,7 @@ export function EditorWorkspace({
               {sample.total
                 ? `${nodes.length.toLocaleString()} / ${sample.total.toLocaleString()} blocks`
                 : ''}
-              {!bookSamples.some((book) => book.id === sample.id)
-                ? ` · ${visible.filter((p) => p.node.kind === 'checklist').length} mounted checklists`
-                : ''}
+              {` · ${visible.filter((p) => p.node.kind === 'table' || p.node.kind === 'image').length} mounted blocks`}
             </span>
           </footer>
         )}

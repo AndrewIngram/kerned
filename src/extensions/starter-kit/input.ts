@@ -320,10 +320,8 @@ function nodeText(node: StarterNode, schema: Schema<StarterNode>): string {
       ? node.alt
       : node.kind === 'table'
         ? tablePlainText(node)
-        : node.kind === 'checklist'
-          ? node.notes || '[Checklist]'
-          : schema
-              .children(node)
-              .map((child) => nodeText(child, schema))
-              .join('\n');
+        : schema
+            .children(node)
+            .map((child) => nodeText(child, schema))
+            .join('\n');
 }

@@ -156,7 +156,7 @@ test('publishes caret and culled geometry without React and ignores callback-onl
 
 test('coalesces measurements, rejects stale widths and anchors after the host applies the new height', async () => {
   const f = await fixture([
-    { kind: 'checklist', id: 500, key: 'checklist-500', checked: [], expanded: false, notes: '' },
+    { kind: 'image', id: 500, key: 'image-500', src: '/test.svg', alt: 'Measured block' },
     ...paragraphs(30),
   ]);
 
@@ -180,7 +180,7 @@ test('coalesces measurements, rejects stale widths and anchors after the host ap
     const after = f.controller.getSnapshot();
     expect(f.reports).toHaveLength(reports + 1);
     expect(after.scene.placements[0].height).toBe(600);
-    expect(before.scene.placements[0].height).toBe(190);
+    expect(before.scene.placements[0].height).toBe(96);
     expect(f.host.scrollTop).toBe(scroll);
     f.controller.present(before);
     expect(f.host.scrollTop).toBe(scroll);

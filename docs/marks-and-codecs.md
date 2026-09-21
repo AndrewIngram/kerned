@@ -42,7 +42,7 @@ const restoredNodes = codec.decode(JSON.parse(saved));
 
 The envelope stores format version 1, then each node's type, schema version, ID, durable key, optional lock, payload and children. Decoding rejects unsupported versions/types, invalid identities, duplicate keys or IDs, children on non-containers, and extension violations of child order or identity. Extension child constraints run on the completed tree. Decoding is bounded to one million nodes and 256 nested levels. Encoded payloads are detached JSON copies; unsupported values reject instead of being silently lost by JSON serialization.
 
-`demoDocumentCodec` covers the current starter kit: paragraphs, headings, quotes, lists/items, table cells/tables, mentions inside text, checklists and images. Text payloads use semantic marks. Table row indices must agree with the serialized structure.
+`demoDocumentCodec` covers the current starter kit: paragraphs, headings, quotes, lists/items, table cells/tables, mentions inside text and images. Text payloads use semantic marks. Table row indices must agree with the serialized structure.
 
 This is document serialization, not a complete session backup. Restoring durable external ranges also requires the same document ID, revision and position checkpoint, as described in [reference persistence](editor-references.md). Threads are stored separately. Undo history, authentication, protected-content projection, automatic persistence, collaborative delivery and migrations are not supplied by this codec. A protected client must receive a trusted projection, never the full canonical document envelope.
 

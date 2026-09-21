@@ -270,11 +270,7 @@ export function createEditorScene(owned: Owned, size = 20) {
               ? measured.height
               : node.kind === 'image'
                 ? 96
-                : node.kind === 'table'
-                  ? Math.max(60, node.rows.length * 64)
-                  : node.expanded
-                    ? 290
-                    : 190;
+                : Math.max(60, node.rows.length * 64);
 
           placements.push({ node, y, height, layout: null, layoutWidth: width, boxes: [] });
           y += Math.ceil(height / 4) * 4;

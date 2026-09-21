@@ -90,8 +90,7 @@ export function selectedBlockLabel(
       continue;
     }
 
-    let label =
-      node.kind === 'image' ? 'Image' : node.kind === 'checklist' ? 'Checklist' : 'Paragraph';
+    let label = node.kind === 'image' ? 'Image' : 'Paragraph';
 
     while (entry) {
       if (entry.node.kind === 'table' || entry.node.kind === 'tableCell') {

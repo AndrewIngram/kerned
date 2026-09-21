@@ -10,7 +10,6 @@ import { demoSchema } from '../../extensions/demo-schema';
 import { DemoNodeView } from '../../extensions/node-views';
 import { type CommentHighlight } from '../../extensions/text-block-view';
 import { type FindState, type Selection } from '../../state';
-import type { StarterNode } from '../demo-model';
 import type { EditorDocument } from './document';
 import type { DocumentLayout, DocumentLayoutSnapshot } from './document-layout';
 import type { InputActions } from './input';
@@ -20,9 +19,7 @@ type BlockLayerProps = {
   editor: EditorSession;
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   doc: EditorDocument;
-  actions: Pick<InputActions, 'replaceText' | 'restore' | 'toggleFormat' | 'replaceCells'> & {
-    update(this: void, node: StarterNode): boolean;
-  };
+  actions: Pick<InputActions, 'replaceText' | 'restore' | 'toggleFormat' | 'replaceCells'>;
   layout: DocumentLayoutSnapshot & { onMeasure: DocumentLayout['measure'] };
   viewport: Viewport;
   kit: CanvasKit;
@@ -58,7 +55,7 @@ export function BlockLayer({
   const labels = useMemo(() => createTextLabels(owned), [owned]);
   const nodeViews = useMemo(() => createNodeViews(editor), [editor]);
   const { projection, editorState, context, selectedRange } = doc;
-  const { replaceText, restore, toggleFormat, replaceCells, update } = actions;
+  const { replaceText, restore, toggleFormat, replaceCells } = actions;
   const { visible, contentWidth, onMeasure, scene } = layout;
   const { width, zoom } = viewport;
   const quoteRules = new Map<number, { top: number; bottom: number; left: number }>();
@@ -91,7 +88,6 @@ export function BlockLayer({
           onFormat: toggleFormat,
           onReplace: replaceCells,
         },
-        checklist: { width: contentWidth, onMeasure, onChange: update },
         text: {
           comments: commentsByNode.get(p.node.id),
           placement: p,
@@ -115,7 +111,6 @@ export function BlockLayer({
       restore,
       toggleFormat,
       replaceCells,
-      update,
       commentsByNode,
       kit,
       labels,

@@ -67,7 +67,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     assert.ok(copied.includes('\n'));
     assert.ok(copied.endsWith(original[1].text.slice(0, h)));
     await canvas.screenshot({ path: `artifacts/cross-selection-${name}.png` });
-    await page.keyboard.type('XYZ');
+    await page.keyboard.insertText('XYZ');
     await settle();
     assert.equal(
       (await read()).nodes[0].text,
@@ -127,7 +127,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     assert.equal(state.selection.anchorId, 2);
     assert.equal(state.selection.id, 4);
     assert.equal(
-      await page.locator('[data-widget="3"]').evaluate((el) => el.parentElement.dataset.selected),
+      await page.locator('[data-table="3"]').evaluate((el) => el.parentElement.dataset.selected),
       'true',
     );
     await page.keyboard.press('Delete');

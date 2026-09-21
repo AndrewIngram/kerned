@@ -11,8 +11,6 @@ export type TextBlockNode = Extract<StarterNode, { kind: 'paragraph' | 'heading'
 
 export type HeadingLevel = Extract<StarterNode, { kind: 'heading' }>['level'];
 
-export type ChecklistNode = Extract<StarterNode, { kind: 'checklist' }>;
-
 export type ImageNode = Extract<StarterNode, { kind: 'image' }>;
 
 export type TableCell = Extract<StarterNode, { kind: 'tableCell' }>;
@@ -25,7 +23,7 @@ export type ListNode = Extract<StarterNode, { kind: 'list' }>;
 
 export type ListItemNode = Extract<StarterNode, { kind: 'listItem' }>;
 
-export type StarterLeaf = TextBlockNode | ChecklistNode | ImageNode | TableNode;
+export type StarterLeaf = TextBlockNode | ImageNode | TableNode;
 
 export function createSampleDocument(): StarterNode[] {
   const first = 'Review the draft with \ufffc before sharing it with the team.';
@@ -53,43 +51,53 @@ export function createSampleDocument(): StarterNode[] {
     },
     { kind: 'paragraph', id: 2, key: 'block-2', text: second, marks: [], inline: [] },
     {
-      kind: 'checklist',
+      kind: 'table',
       id: 3,
       key: 'block-3',
-      checked: [true, false, false],
-      expanded: false,
-      notes: '',
+      caption: 'Review notes',
+      rows: [
+        [
+          {
+            kind: 'tableCell',
+            id: 20001,
+            key: 'review-cell',
+            row: 0,
+            header: false,
+            colspan: 1,
+            rowspan: 1,
+            paragraphs: [
+              {
+                kind: 'paragraph',
+                id: 20002,
+                key: 'review-notes',
+                text: 'Keep the first release focused.',
+                marks: [],
+                inline: [],
+              },
+            ],
+          },
+        ],
+      ],
     },
     {
       kind: 'paragraph',
       id: 4,
       key: 'block-4',
-      text: 'The checklist stays part of the document. The next paragraph moves when its content expands.',
+      text: 'Tables stay part of the document. The next paragraph moves when a cell expands.',
       marks: [],
       inline: [],
     },
   ];
 
   for (let i = 0; i < 160; i++)
-    nodes.push(
-      i % 12 === 0
-        ? {
-            kind: 'checklist',
-            id: i + 10,
-            key: `block-${i + 10}`,
-            checked: [false, false, false],
-            expanded: false,
-            notes: '',
-          }
-        : {
-            kind: 'paragraph',
-            id: i + 10,
-            key: `block-${i + 10}`,
-            text: `Section ${i + 1}. Canvas text keeps its own wrapping and caret geometry. Scroll to see only nearby interactive blocks mount.`,
-            marks: [],
-            inline: [],
-          },
-    );
+    nodes.push({
+      kind: 'paragraph',
+      id: i + 10,
+      key: `block-${i + 10}`,
+      text: `Section ${i + 1}. Canvas text keeps its own wrapping and caret geometry. Scroll to see only nearby interactive blocks mount.`,
+      marks: [],
+      inline: [],
+    });
 
   return nodes;
 }

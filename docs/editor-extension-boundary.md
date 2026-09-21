@@ -11,7 +11,7 @@ const schema = createSchema({ extensions: starterDefinitions });
 const editor = createEditor(schema, initialNodes, initialSelection);
 ```
 
-These are public source entry points, not published packages or stable versioned interfaces yet. The demo starter kit registers paragraphs, headings, checklists, images, tables, quotes and lists. It is an application configuration, not a mandatory core schema or a complete rich-text starter kit.
+These are public source entry points, not published packages or stable versioned interfaces yet. The demo starter kit registers paragraphs, headings, images, tables, quotes and lists. It is an application configuration, not a mandatory core schema or a complete rich-text starter kit.
 
 ## Ownership
 

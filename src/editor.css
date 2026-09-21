@@ -117,46 +117,6 @@ canvas {
   position: absolute;
   pointer-events: auto;
 }
-.checklist {
-  background: #f3f4ec;
-  border: 1px solid #d6dccb;
-  border-radius: 8px;
-  padding: 16px 18px;
-  font-size: 14px;
-  line-height: 1.6;
-}
-.checklist-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-.checklist-heading strong {
-  font-weight: 500;
-}
-.checklist small {
-  color: #606a5a;
-  font-size: 12px;
-}
-.checklist > label:not(.notes-label) {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 0;
-}
-.checklist input {
-  accent-color: #4d6441;
-}
-.checklist > button {
-  margin-top: 12px;
-}
-.notes-label {
-  display: block;
-  margin-top: 14px;
-}
-.checklist textarea,
 .nearby-panel textarea {
   display: block;
   width: 100%;
@@ -263,9 +223,6 @@ footer {
 @media (pointer: coarse) {
   button,
   select {
-    min-height: 40px;
-  }
-  .checklist label {
     min-height: 40px;
   }
   textarea {
@@ -475,11 +432,6 @@ body[data-demo='minimal'] .input-notice {
   width: calc(100% - 56px);
   margin: 8px auto 16px;
   color: #92502e;
-}
-body[data-demo='minimal'] .checklist {
-  background: #f8f8fa;
-  border-color: #e7e7ea;
-  color: #333;
 }
 body[data-demo='minimal'] .nearby-panel {
   background: #fff;
