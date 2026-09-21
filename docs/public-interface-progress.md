@@ -2167,3 +2167,27 @@ tests, one unchanged collaboration TODO and 42 end-to-end cases. A second lint
 fix/format pass leaves files unchanged. Production screenshots were inspected
 for the writing demo at desktop/narrow widths and the extension study. The
 independent milestone architecture review is next.
+
+### Milestone 4 architecture review and completion
+
+The independent `improve-codebase-architecture` judge reviewed commit `7e88a89`,
+including the accumulated framework-independent mount, resources, browser
+contributions, geometry/diagnostics separation, React attachment and demo migration.
+It found one actionable issue: after an externally owned session was destroyed,
+changing React view configuration still called `update` on the destroyed view.
+The existing test rerendered unchanged props and did not exercise that effect.
+
+A changed-zoom/padding regression reproduced unhandled errors in all three
+browsers. The React attachment now releases its stale reference instead of
+updating or reviving the destroyed view. The revised 12-case focused suite passes.
+`pnpm run check` also passes: 539 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes with its existing bundle
+warning. This fix only affects updates to destroyed attachments; the production
+performance evidence above remains applicable to the active editing path.
+
+The judge found no other actionable M4 architecture issues. Native lifetime and
+resource ownership sit behind the mount; the demo consumes supported geometry
+and separate diagnostics; extension input, node views and layers share that
+lifetime. Typography/font configuration, final React authoring interfaces,
+codec/input composition and built workspace packages remain milestones 5–8.
+Milestone 4 is complete after the post-review fix commit.

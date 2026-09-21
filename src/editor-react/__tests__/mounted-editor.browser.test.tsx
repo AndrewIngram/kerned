@@ -240,7 +240,9 @@ test('React remounts on session replacement and tolerates updates after borrowed
   expect(document.activeElement).toBe(input);
   second.editor.destroy();
   expect(replacement.isDestroyed).toBe(true);
-  flushSync(() => first.root.render(<Editor editor={second.editor} style={size} />));
+  flushSync(() =>
+    first.root.render(<Editor editor={second.editor} style={size} zoom={1.25} paddingTop={24} />),
+  );
   expect(first.element.querySelector('canvas')).toBeNull();
   expect(() => second.editor.commands.focus()).toThrow(/destroyed/);
   flushSync(() => first.root.render(<Editor key="closed" editor={second.editor} style={size} />));

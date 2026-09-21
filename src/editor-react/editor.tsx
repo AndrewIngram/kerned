@@ -42,7 +42,10 @@ export function Editor<N extends NodeIdentity>({
     configuration.current = { zoom, paddingTop, maxWidth, background };
   });
   useLayoutEffect(() => {
-    view.current?.update({ zoom, paddingTop, maxWidth, background });
+    const mounted = view.current;
+
+    if (mounted?.isDestroyed) view.current = undefined;
+    else mounted?.update({ zoom, paddingTop, maxWidth, background });
   }, [zoom, paddingTop, maxWidth, background]);
   useLayoutEffect(() => {
     const element = host.current;

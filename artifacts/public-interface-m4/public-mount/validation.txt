@@ -95,3 +95,9 @@ typingFrameMs: 32.1 <= 48.6
 pagingFrameMs: 32.4 <= 48.7
 loadedHeapBytes: 29147388.0 <= 36069308.4
 
+
+Post-judge validation
+React changed-props-after-destroy regression: reproduced in all three browsers
+Targeted regression: 12 passed, no unhandled errors
+pnpm run check: PASS (539 Vitest, 1 unchanged TODO, 42 E2E)
+pnpm run build: PASS (existing bundle-size warning)
