@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { createSchema, defineNode } from '../../model';
 import { selectionContext } from '../../state';
+import { decorations, type TextDecoration } from '../decorations';
 import { createNodeViews, defineNodeView, nodeViews } from '../node-views';
-import { nativeTextDecorations, type TextDecoration } from '../text-decorations';
 
 const card = defineNode({
   name: 'card',
@@ -21,8 +21,15 @@ test('native decorations compose, coalesce updates and release every subscriptio
   onTestFinished,
 }) => {
   const listeners = new Set<() => void>();
-  let values: readonly TextDecoration[] = [{ key: 'one', from: 0, to: 1, background: 'gold' }];
-  const extra: readonly TextDecoration[] = [{ key: 'two', from: 1, to: 2, background: 'pink' }];
+
+  let values: readonly TextDecoration[] = [
+    { kind: 'text', key: 'one', from: 0, to: 1, background: 'gold' },
+  ];
+
+  const extra: readonly TextDecoration[] = [
+    { kind: 'text', key: 'two', from: 1, to: 2, background: 'pink' },
+  ];
+
   const seen: (readonly TextDecoration[])[] = [];
   let failUpdate = false;
   let failCleanup = false;
@@ -33,8 +40,9 @@ test('native decorations compose, coalesce updates and release every subscriptio
     name: 'decoratedCard',
     options: {},
     setup(_options, context: ContributionContext) {
-      for (const read of [() => values, () => extra]) {
-        context.provide(nativeTextDecorations, {
+      for (const [index, read] of [() => values, () => extra].entries()) {
+        context.provide(decorations, {
+          name: `source:${index}`,
           create: () => ({
             read,
             subscribe(listener) {
@@ -55,9 +63,9 @@ test('native decorations compose, coalesce updates and release every subscriptio
         defineNodeView(card, () => (element) => ({
           update({ node, textDecorations }) {
             if (failUpdate) throw new Error('Update failed');
-            const decorations = textDecorations?.(node.id) ?? [];
-            seen.push(decorations);
-            element.textContent = decorations.map((value) => value.key).join(',');
+            const ranges = textDecorations?.(node.id) ?? [];
+            seen.push(ranges);
+            element.textContent = ranges.map((value) => value.key).join(',');
           },
           destroy() {
             destroyed++;
@@ -104,17 +112,17 @@ test('native decorations compose, coalesce updates and release every subscriptio
   const first = seen.at(-1);
   view.update(frame);
   expect(seen.at(-1)).toBe(first);
-  expect(element.textContent).toBe('one,two');
+  expect(element.textContent).toBe('["source:0","one"],["source:1","two"]');
   expect(listeners.size).toBe(2);
   const count = seen.length;
-  values = [{ key: 'changed', from: 0, to: 2, background: 'blue' }];
+  values = [{ kind: 'text', key: 'changed', from: 0, to: 2, background: 'blue' }];
 
   for (const listener of listeners) {
     listener();
     listener();
   }
 
-  await expect.poll(() => element.textContent).toBe('changed,two');
+  await expect.poll(() => element.textContent).toBe('["source:0","changed"],["source:1","two"]');
   expect(seen).toHaveLength(count + 1);
   failUpdate = true;
 

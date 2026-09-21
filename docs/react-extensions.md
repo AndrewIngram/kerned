@@ -1,7 +1,8 @@
 # React extensions
 
-Status: milestone 6 is in progress. Measured React block views are implemented;
-mark/widget registration, content slots and public decorations are still pending.
+Status: milestone 6 is in progress. Measured React block views and public
+[decorations](decorations.md) are implemented. React mark/widget registration and
+content slots are still pending.
 
 `EditorContent` attaches the same complete view used by vanilla applications.
 It borrows the session and owns its view and React portal host. React components
@@ -65,9 +66,10 @@ scroll it out of the mounted region and verify those attributes on remount.
 
 The existing table and image contributions remain framework-independent. Their
 measurement, clipboard and native-input behavior uses the same view lifetime.
-Comments, mentions, underlines and canvas search remain browser layer
-contributions. The general React mark/widget and decoration contracts still need
-to replace the remaining specialized integration points.
+Comments and search use the public decoration contribution for both canvas and
+native text. Mentions and underlines remain browser layer contributions. React
+mark/widget registrations still need to replace their specialized integration
+points.
 
 ## Ownership choice
 

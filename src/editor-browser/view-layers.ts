@@ -1,6 +1,8 @@
 import { defineContribution } from '../core';
 import type { NodeIdentity, TreeIndex } from '../model';
 import type { ObserveTextPointer } from './canvas-input';
+import { decorationLayer } from './decoration-layer';
+import { decorationContributions } from './decorations';
 import type {
   BlockTextGeometry,
   DrawingLayer,
@@ -72,7 +74,12 @@ export function createViewLayers<N extends NodeIdentity>(
   options: { onError?: (error: Error) => void; onTextPointer?: ObserveTextPointer } = {},
 ) {
   if (editor.isDestroyed) throw new Error('Editor is destroyed');
-  const contributions = viewLayers.read(editor);
+
+  const contributions = [
+    ...decorationContributions(editor).map(decorationLayer),
+    ...viewLayers.read(editor),
+  ];
+
   const names = new Set<string>();
 
   for (const contribution of contributions) {
@@ -89,6 +96,7 @@ export function createViewLayers<N extends NodeIdentity>(
 
   const dirty = new Set<string>();
   let current: ViewLayerFrame<N> | undefined;
+  let frameState = editor.state;
   let scheduled = 0;
   let destroyed = false;
   let tree: TreeIndex<N> | undefined;
@@ -99,7 +107,7 @@ export function createViewLayers<N extends NodeIdentity>(
   function flush() {
     scheduled = 0;
 
-    if (destroyed || !current) return;
+    if (destroyed || !current || frameState !== editor.state) return;
 
     try {
       for (const layer of layers) {
@@ -306,6 +314,7 @@ export function createViewLayers<N extends NodeIdentity>(
       });
 
       current = { blocks, textStyle: frame.textStyle };
+      frameState = editor.state;
 
       for (const { name, view } of layers) {
         dirty.delete(name);

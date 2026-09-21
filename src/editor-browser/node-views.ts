@@ -131,6 +131,7 @@ export function createNodeViews<N extends NodeIdentity>(
         let destroyed = false;
         let detach: (() => void) | undefined;
         let frame: NodeViewFrame<N> | undefined;
+        let frameState = editor.state;
         let scheduled = 0;
         let decorations: ReturnType<typeof createTextDecorations<N>> | undefined;
 
@@ -139,7 +140,8 @@ export function createNodeViews<N extends NodeIdentity>(
           cancelAnimationFrame(scheduled);
           scheduled = 0;
           frame = next;
-          decorations?.begin();
+          frameState = editor.state;
+          decorations?.begin(next.context);
 
           try {
             view.update({ ...next, textDecorations: decorations?.read });
@@ -153,7 +155,7 @@ export function createNodeViews<N extends NodeIdentity>(
           scheduled = requestAnimationFrame(() => {
             scheduled = 0;
 
-            if (destroyed || !frame) return;
+            if (destroyed || !frame || frameState !== editor.state) return;
 
             try {
               update(frame);

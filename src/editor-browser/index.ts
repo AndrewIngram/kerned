@@ -173,12 +173,7 @@ export type {
   BlockTextGeometry,
 } from './drawing';
 
-export {
-  nativeTextDecorations,
-  type TextDecoration,
-  type ReadTextDecorations,
-  type TextDecorationSource,
-} from './text-decorations';
+export { type TextDecoration, type ReadTextDecorations } from './text-decorations';
 
 export { applyTextStyle, type TextStyle, type ReadTextStyle } from './text-style';
 
@@ -191,3 +186,13 @@ export {
   type NodeViewAttributes,
   type NodeView,
 } from './node-views';
+
+export {
+  decorations,
+  type Decoration,
+  type NodeDecoration,
+  type DecorationActivation,
+  type DecorationSource,
+  type DecorationContribution,
+  type InvalidateDecorations,
+} from './decorations';

@@ -2504,3 +2504,40 @@ stores; local React state ends with its mounted component. M6 remains open for
 editable content slots and complete selection/editability contracts, React marks
 and widgets, general decorations and migration of existing extension renderers.
 The milestone architecture judge follows completion of those requirements.
+
+### Milestone 6 checkpoint: public decoration sources
+
+Added the named `decorations` contribution for transient text backgrounds, node
+outlines and activation. Sources read an explicit editor state, publish immutable
+per-node results and subscribe to external invalidation. Keys belong to a source
+and node, not a document reference registry. Default document dependencies remain
+safe for selection, ancestor and mapped-range projections; opt-in node dependencies
+skip reads for unrelated immutable nodes. External notifications can target node
+IDs. Offscreen invalidation waits for residency, and culling evicts render caches.
+
+The view projects wrapped text into multiple fragments, keeps controls stable as
+ranges move and preserves ordinary caret placement inside comment highlights.
+Native text views compose the same descriptors with qualified keys. Comments and
+search now provide these values rather than maintaining separate native and canvas
+painting implementations. Their persistent semantic state still belongs to the
+feature. Existing lower-level layers remain available for arbitrary drawing.
+
+The canvas layer and lazy native adapter each own their source instance and
+subscription. Setup failures release previously allocated resources; duplicate
+names fail before source creation. Update failures clean up the mount without
+destroying the session. Delayed invalidation cannot combine a new state with an
+old geometry frame. Browser tests cover scoped invalidation, node versus document
+dependencies, wrapped activation, stable control identity, culling/remounting,
+outlines, duplicate keys/names, empty names and subscription failure.
+
+`pnpm run check` passes with 700 Vitest tests, one unchanged collaboration TODO,
+and 42 end-to-end cases. The production build passes. Three serial production
+trials in `artifacts/public-interface-m6/decorations/` pass every unchanged budget:
+worst first usable 226 ms, streaming 1,200.6 ms, paste handler 57.9 ms, paste paint
+117.6 ms, typing 32.1 ms, paging 32.4 ms and loaded heap 27,103,052 bytes. The report
+records parent commit `bf27167` and measures this checkpoint's uncommitted tree.
+
+[Decorations](decorations.md) documents authoring, dependency contracts, key scope,
+activation, caching and ownership. Milestone 6 remains open for editable content
+slots, complete selection/editability contracts, React marks/widgets and migration
+of mentions and other custom rendering. The milestone judge follows those changes.

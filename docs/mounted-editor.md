@@ -53,8 +53,8 @@ their own containers without changing focus or scrolling the document. The mount
 then handles outer scrolling. Tables implement both, including inactive styled
 cell text and active textareas.
 
-Transient text-highlight ranges can accompany native frames. This is an internal
-rendering contract, not the final extension decoration-authoring interface.
+Transient text-highlight ranges accompany native frames through the public
+[decoration contribution](decorations.md), shared with canvas text.
 
 Document overlays contribute through `viewLayers` from `src/editor-browser`.
 Each named contribution creates one layer per mounted view and returns `update`
@@ -157,9 +157,10 @@ reads the current query. The demo and public mount use the same search extension
 
 Native node views receive `frame.textDecorations(textNodeId)`, returning readonly
 ranges with a stable `key`, UTF-16 `from`/`to`, a background color and optional
-`data-*` attributes. Extensions provide `nativeTextDecorations` with a source
-factory, a `read(id)` function and `subscribe(listener)`. Return stable arrays for
-unchanged ranges. Keys should include the extension's name to avoid collisions.
+`data-*` attributes. Extensions provide `decorations` with a named source
+factory, a `read(id, state)` function and `subscribe(listener)`. Return stable arrays for
+unchanged ranges. Keys are scoped to each source and node; the native adapter
+qualifies them when combining sources.
 Contributions compose in registration order; later backgrounds take precedence.
 The table view combines those ranges with document formatting and keeps active
 textareas intact. Textarea contents retain native input rendering while editing.
@@ -168,9 +169,9 @@ The node-view owner initializes sources only when a renderer reads decorations.
 It coalesces external invalidations, prunes composed-range caches to resident text
 and releases subscriptions and scheduled work on destruction. Errors reach the
 mounted view's error handler. Comments and search exercise the same contract;
-native renderers contain no comment/search-specific branches. Arbitrary mark and
-widget rendering, localized change-range invalidation and React registrations
-remain milestone 6 work.
+native renderers contain no comment/search-specific branches. Sources can target
+invalidation to particular node IDs and declare node-local dependencies. Arbitrary
+mark/widget rendering and React registrations remain milestone 6 work.
 
 The layer owns its DOM and styling. The host ignores pointer events by default;
 interactive descendants can opt in. Nonsemantic decoration layers set their own
@@ -181,8 +182,8 @@ one throws. Semantic state belongs outside the culled DOM.
 The starter `containerDecorations` extension uses this contract for list markers
 and quote rules. Numbering, nested containers and continuation paragraphs are
 resolved through installed schema definitions. The demo and public mount share
-this extension and its stylesheet. External invalidation is supported; the planned
-general range-decoration and localized change-range interface remains milestone 6 work.
+this extension and its stylesheet. General range highlights use `decorations`;
+`viewLayers` supports lower-level drawing and DOM placement.
 
 ## React
 

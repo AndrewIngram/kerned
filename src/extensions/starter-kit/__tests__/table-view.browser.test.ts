@@ -270,6 +270,7 @@ test('highlight-only frames update displayed ranges without replacing the active
       20002,
       [
         {
+          kind: 'text' as const,
           key: 'match',
           from: 0,
           to: 4,
@@ -294,6 +295,7 @@ test('highlight-only frames update displayed ranges without replacing the active
           20002,
           [
             {
+              kind: 'text' as const,
               key: 'match',
               from: 0,
               to: 4,

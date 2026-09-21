@@ -1,4 +1,4 @@
-.range-hit {
+.editor-decoration-hit {
   position: absolute;
   pointer-events: auto;
   display: block;
@@ -10,13 +10,7 @@
   touch-action: none;
   user-select: none;
 }
-.range-hit:focus-visible {
+.editor-decoration-hit:focus-visible {
   outline: 2px solid #526b42;
   outline-offset: 1px;
-}
-.comment-node-outline {
-  position: absolute;
-  pointer-events: none;
-  box-shadow: 0 0 0 3px #e9cb7880;
-  border-radius: 8px;
 }

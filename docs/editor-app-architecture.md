@@ -76,8 +76,9 @@ the app's find hook owns opening, focus and controls.
   collection usable while loading; failed replacement preserves it. Metric
   changes reflow visible content first; paint-only color changes reuse layout.
 - Node views own decoding, measurement and cancellation. Culled DOM does not own
-  semantic state. General React node/mark/widget rendering and public decoration
-  authoring remain milestone 6 work.
+  semantic state. React node views and public decoration contributions share the
+  mounted lifetime. React mark/widget rendering and content slots remain milestone
+  6 work.
 - `useSampleStream` owns sample append scheduling and cancels work on unmount. Its
   controller measures new composition work rather than total document size.
 - `useDiagnostics` is the only app module importing correctness fixtures. It uses

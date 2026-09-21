@@ -1,41 +1,31 @@
-import { defineContribution } from '../core';
 import type { NodeIdentity } from '../model';
+import type { SelectionContext } from '../state';
+import {
+  createDecorationSource,
+  decorationContributions,
+  type Decoration,
+  type TextDecoration,
+} from './decorations';
 import type { ViewSession } from './input-contributions';
 
-/** Non-schema styling of a UTF-16 text range. Attributes are limited to data-* metadata. */
-export type TextDecoration = Readonly<{
-  key: string;
-  from: number;
-  to: number;
-  background: string;
-  attributes?: Readonly<Record<`data-${string}`, string>>;
-}>;
+export type { TextDecoration } from './decorations';
 
 export type ReadTextDecorations = (id: number) => readonly TextDecoration[];
 
-export type TextDecorationSource = {
-  read: ReadTextDecorations;
-  subscribe(this: void, listener: () => void): () => void;
-};
-
-export const nativeTextDecorations = defineContribution<{
-  create<N extends NodeIdentity>(editor: ViewSession<N>): TextDecorationSource;
-}>();
-
-/** One native view reads only its resident text; sources never build a document-wide render map. */
+/** Native text borrows the same public source contract as canvas decoration layers. */
 export function createTextDecorations<N extends NodeIdentity>(
   editor: ViewSession<N>,
   invalidate: () => void,
 ) {
-  const providers = nativeTextDecorations.read(editor);
-  const sources: TextDecorationSource[] = [];
+  const providers = decorationContributions(editor);
+  const sources: ReturnType<typeof createDecorationSource<N>>[] = [];
   let prepared = false;
   let destroyed = false;
-  const cleanup: (() => void)[] = [];
+  let context: SelectionContext | undefined;
 
   const cache = new Map<
     number,
-    { inputs: readonly (readonly TextDecoration[])[]; value: readonly TextDecoration[] }
+    { inputs: readonly (readonly Decoration[])[]; value: readonly TextDecoration[] }
   >();
 
   const empty: readonly TextDecoration[] = [];
@@ -46,9 +36,9 @@ export function createTextDecorations<N extends NodeIdentity>(
     destroyed = true;
     const errors: unknown[] = [];
 
-    for (const stop of cleanup.splice(0).toReversed()) {
+    for (const source of sources.splice(0).toReversed()) {
       try {
-        stop();
+        source.destroy();
       } catch (error) {
         errors.push(error);
       }
@@ -56,7 +46,7 @@ export function createTextDecorations<N extends NodeIdentity>(
 
     cache.clear();
     resident.clear();
-    sources.length = 0;
+    context = undefined;
 
     if (errors.length) throw new AggregateError(errors, 'Text decoration cleanup failed');
   }
@@ -66,11 +56,8 @@ export function createTextDecorations<N extends NodeIdentity>(
     prepared = true;
 
     try {
-      for (const provider of providers) {
-        const source = provider.create(editor);
-        sources.push(source);
-        cleanup.push(source.subscribe(() => invalidate()));
-      }
+      for (const provider of providers)
+        sources.push(createDecorationSource(provider, editor, invalidate));
     } catch (error) {
       try {
         release();
@@ -87,25 +74,38 @@ export function createTextDecorations<N extends NodeIdentity>(
   return {
     read(this: void, id: number): readonly TextDecoration[] {
       if (destroyed) throw new Error('Text decoration view is destroyed');
+      const node = context?.node(id);
+
+      if (!node || !providers.length) return empty;
       prepare();
-
-      if (!sources.length) return empty;
-
-      if (sources.length === 1) return sources[0].read(id);
       resident.add(id);
-      const inputs = sources.map((source) => source.read(id));
-      const cached = cache.get(id);
+      const inputs = sources.map((source) => source.read(node, editor.state));
+      const previous = cache.get(id);
 
-      if (cached && inputs.every((value, i) => value === cached.inputs[i])) return cached.value;
-      const value = inputs.flat();
+      if (previous && inputs.every((value, i) => value === previous.inputs[i]))
+        return previous.value;
+
+      const value = inputs.flatMap((values, index) =>
+        values.flatMap((decoration) =>
+          decoration.kind === 'text'
+            ? [{ ...decoration, key: JSON.stringify([providers[index].name, decoration.key]) }]
+            : [],
+        ),
+      );
+
       cache.set(id, { inputs, value });
 
       return value;
     },
-    begin() {
+    begin(next: SelectionContext) {
+      context = next;
       resident.clear();
+
+      for (const source of sources) source.begin();
     },
     end() {
+      for (const source of sources) source.end();
+
       for (const id of cache.keys()) if (!resident.has(id)) cache.delete(id);
     },
     destroy: release,
