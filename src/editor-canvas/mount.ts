@@ -13,6 +13,8 @@ import { RangeSelection } from '../state';
 import type { ResolveEditorAsset } from './assets';
 import { createCanvasRenderer } from './canvas-renderer';
 import { createDocumentLayout } from './document-layout';
+import { createLayerDrawing } from './layer-drawing';
+import { createLayerGeometry } from './layer-geometry';
 import { createDocumentPresentation } from './presentation';
 import { createViewResources } from './resources';
 import { createViewGeometry } from './view-geometry';
@@ -86,6 +88,7 @@ export function mountEditor<N extends NodeIdentity>(
   let layout: ReturnType<typeof createDocumentLayout<N>> | undefined;
   const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
   let layers: ReturnType<typeof createViewLayers<N>> | undefined;
+  const layerGeometry = createLayerGeometry();
 
   const renderers = createNodeViews(editor, { clipboard, notice: reportNotice });
 
@@ -267,7 +270,7 @@ export function mountEditor<N extends NodeIdentity>(
     layers?.update({
       tree: doc.tree,
       insets: doc.projection.decorations,
-      blocks: visible,
+      blocks: visible.map((block) => ({ ...block, text: layerGeometry(block.layout) })),
       inset,
       width: contentWidth,
     });
@@ -331,7 +334,11 @@ export function mountEditor<N extends NodeIdentity>(
   try {
     element.append(root);
     cleanup.push(() => root.remove());
-    layers = createViewLayers(overlay, editor);
+    layers = createViewLayers(
+      overlay,
+      editor,
+      createLayerDrawing(painter.register, () => layout?.getSnapshot().inset ?? 0),
+    );
     const installedLayers = layers;
     cleanup.push(() => installedLayers.destroy());
     resources = createViewResources({ resolveAsset: options.resolveAsset });

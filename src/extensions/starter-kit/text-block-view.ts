@@ -69,18 +69,6 @@ export function createTextBlockView(
             .rects.map((rect) => ({ comment, rect })) ?? [],
       );
 
-      const underlines = p.node.marks
-        .filter((span) => span.mark.type === 'underline')
-        .flatMap(
-          (span) =>
-            p.layout?.geometry(span.from, span.to, false).rects.map((rect) => ({
-              rect,
-              baseline:
-                p.layout?.lines.find((line) => line.top <= rect[1] && line.bottom > rect[1])
-                  ?.baseline ?? rect[3] - 6,
-            })) ?? [],
-        );
-
       const mentions = p.boxes.map((box) => ({
         box,
         label: labels({ text: box.label, width: box.width - 12, size: 18 }),
@@ -163,16 +151,11 @@ export function createTextBlockView(
           ),
         );
 
-      if (underlines.length || mentions.length)
+      if (mentions.length)
         removePaint.push(
           register(
             `text-content-${p.node.id}`,
-            (canvas, kit, paint) => {
-              paint.setColor(kit.Color(41, 50, 39));
-
-              for (const { rect: r, baseline } of underlines)
-                canvas.drawRect(kit.XYWHRect(r[0], p.y + baseline + 2, r[2] - r[0], 1), paint);
-
+            (canvas) => {
               for (const { box, label } of mentions)
                 label.draw(canvas, box.x + 6, p.y + box.y + (box.height - label.height) / 2);
             },

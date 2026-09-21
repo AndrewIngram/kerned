@@ -1,5 +1,6 @@
 import { defineContribution } from '../core';
 import type { NodeIdentity, TreeIndex } from '../model';
+import type { BlockTextGeometry, DrawingLayer, DrawingPainter, RegisterDrawing } from './drawing';
 import type { ViewSession } from './input-contributions';
 
 export type LayerBlock<N> = {
@@ -9,6 +10,7 @@ export type LayerBlock<N> = {
   readonly width: number;
   readonly height: number;
   readonly inset: number;
+  readonly text: BlockTextGeometry | null;
   readonly ancestors: readonly {
     readonly node: N;
     readonly childIndex: number;
@@ -24,12 +26,16 @@ type ViewLayer<N> = {
   destroy(): void;
 };
 
+export type ViewLayerContext<N extends NodeIdentity> = {
+  editor: ViewSession<N>;
+  element: HTMLDivElement;
+  /** One registration per plane, replaced on the next call and released with this layer. */
+  paint: (layer: DrawingLayer, painter: DrawingPainter | null) => void;
+};
+
 export type ViewLayerContribution = {
   readonly name: string;
-  create<N extends NodeIdentity>(context: {
-    editor: ViewSession<N>;
-    element: HTMLDivElement;
-  }): ViewLayer<N>;
+  create<N extends NodeIdentity>(context: ViewLayerContext<N>): ViewLayer<N>;
 };
 
 export const viewLayers = defineContribution<ViewLayerContribution>();
@@ -38,6 +44,7 @@ export const viewLayers = defineContribution<ViewLayerContribution>();
 export function createViewLayers<N extends NodeIdentity>(
   element: HTMLElement,
   editor: ViewSession<N>,
+  registerDrawing: RegisterDrawing,
 ) {
   if (editor.isDestroyed) throw new Error('Editor is destroyed');
   const contributions = viewLayers.read(editor);
@@ -48,7 +55,7 @@ export function createViewLayers<N extends NodeIdentity>(
     names.add(contribution.name);
   }
 
-  const layers: { host: HTMLDivElement; view: ViewLayer<N> }[] = [];
+  const layers: { host: HTMLDivElement; view: ViewLayer<N>; releasePaint: () => void }[] = [];
   let destroyed = false;
   let tree: TreeIndex<N> | undefined;
   let insets: ReadonlyMap<number, { inset: number }> | undefined;
@@ -61,13 +68,14 @@ export function createViewLayers<N extends NodeIdentity>(
     detach?.();
     const errors: unknown[] = [];
 
-    for (const { host, view } of layers.splice(0).toReversed()) {
+    for (const { host, view, releasePaint } of layers.splice(0).toReversed()) {
       try {
         view.destroy();
       } catch (error) {
         errors.push(error);
       }
 
+      releasePaint();
       host.remove();
     }
 
@@ -84,10 +92,34 @@ export function createViewLayers<N extends NodeIdentity>(
       host.dataset.editorLayer = contribution.name;
       host.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
       element.append(host);
+      const painting = new Map<DrawingLayer, () => void>();
+      const paintKey = `layer:${JSON.stringify(contribution.name)}`;
+      let active = true;
+
+      function releasePaint() {
+        active = false;
+
+        for (const release of painting.values()) release();
+        painting.clear();
+      }
 
       try {
-        layers.push({ host, view: contribution.create({ editor, element: host }) });
+        const view = contribution.create({
+          editor,
+          element: host,
+          paint(layer, painter) {
+            if (!active || destroyed) throw new Error('View layer is destroyed');
+            painting.get(layer)?.();
+            painting.delete(layer);
+
+            if (painter)
+              painting.set(layer, registerDrawing(`${paintKey}:${layer}`, layer, painter));
+          },
+        });
+
+        layers.push({ host, view, releasePaint });
       } catch (error) {
+        releasePaint();
         host.remove();
         throw error;
       }
@@ -112,7 +144,7 @@ export function createViewLayers<N extends NodeIdentity>(
     update(frame: {
       tree: TreeIndex<N>;
       insets: ReadonlyMap<number, { inset: number }>;
-      blocks: readonly { node: N; y: number; height: number }[];
+      blocks: readonly { node: N; y: number; height: number; text: BlockTextGeometry | null }[];
       inset: number;
       width: number;
     }) {
@@ -153,6 +185,7 @@ export function createViewLayers<N extends NodeIdentity>(
           width: frame.width,
           height: block.height,
           inset: frame.insets.get(block.node.id)?.inset ?? 0,
+          text: block.text,
           ancestors: path,
         };
       });

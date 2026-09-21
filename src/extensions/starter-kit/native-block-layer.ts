@@ -7,6 +7,8 @@ import {
 import { createViewLayers } from '../../editor-browser/view-layers';
 import type { RegisterCanvasPainter } from '../../editor-canvas/canvas-renderer';
 import type { DocumentLayout, DocumentLayoutSnapshot } from '../../editor-canvas/document-layout';
+import { createLayerDrawing } from '../../editor-canvas/layer-drawing';
+import { createLayerGeometry } from '../../editor-canvas/layer-geometry';
 import { createTextLabels } from '../../editor-canvas/text-labels';
 import type { StarterNode, StarterLeaf } from '../demo-model';
 import type { EditorDocument } from './browser-document';
@@ -60,8 +62,15 @@ export function createBlockLayer(
 
   const labels = createTextLabels(owned);
   const mounted = new Map<number, MountedBlock>();
-  const layers = createViewLayers(element, editor);
   let frame: BlockLayerFrame | undefined;
+
+  const layers = createViewLayers(
+    element,
+    editor,
+    createLayerDrawing(register, () => frame?.layout.inset ?? 0),
+  );
+
+  const layerGeometry = createLayerGeometry();
   let destroyed = false;
   let detach: (() => void) | undefined;
   element.classList.add('dom-layer');
@@ -116,7 +125,7 @@ export function createBlockLayer(
       layers.update({
         tree: doc.tree,
         insets: doc.projection.decorations,
-        blocks: visible,
+        blocks: visible.map((block) => ({ ...block, text: layerGeometry(block.layout) })),
         inset,
         width: contentWidth,
       });

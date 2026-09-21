@@ -8,8 +8,11 @@ import { starterExtensions } from './index';
 import { createStarterKitInput } from './input';
 import { starterPresentation } from './presentation';
 import { tableView } from './table-node-view';
+import { underlineView } from './underline-view';
 
 export { containerDecorations } from './container-decorations';
+
+export { underlineView } from './underline-view';
 
 export const imageView = defineExtension({
   name: 'imageView',
@@ -47,6 +50,7 @@ export function starterBrowserExtensions({ imageDelay = 0 }: { imageDelay?: numb
     tableView,
     starterPresentation,
     containerDecorations,
+    underlineView,
   ] as const;
 }
 

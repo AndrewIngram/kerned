@@ -1841,3 +1841,37 @@ typing 32.3 ms, paging 33 ms and loaded heap 29,354,640 bytes. Evidence is in
 Milestone 4 remains open for inline/mark/decorations, supported view update and
 diagnostic contracts, and migration of the complete demo to the public mount.
 This checkpoint is not the milestone's commit-and-judge gate.
+
+### Milestone 4 checkpoint: shared mark geometry and drawing
+
+View-layer contributions can now register background and content painters through
+a renderer-independent `Drawing` interface. The mount owns document-coordinate
+transforms, graphics state and painter lifetime. Drawing contexts expire after
+their callback, and layer initialization/destruction releases registrations even
+when extension code throws. No CanvasKit handles cross this public interface.
+
+Resident text blocks expose immutable range fragments with line baselines. The
+adapter caches geometry wrappers by layout identity and uses the existing owned
+text geometry. The starter underline extension consumes schema mark capabilities,
+so it also handles custom text fields and mark storage. It retains only resident
+fragments and invalidates them when content or layout changes. The demo and public
+mount use this same contribution; the old block painter's underline code is gone.
+
+Browser tests check wrapped underlines inside a custom text node and indented
+container, configured color/thickness, mark removal and undo. Pixel tests cover
+document coordinates under zoom/scroll, transform restoration and expiration of
+borrowed drawing contexts. Lifecycle tests check painter replacement and cleanup
+after failing factories and destructors. The custom-schema fixture uses an
+explicit extension tuple, preserving the session capability stability check.
+
+`pnpm run check` passes with 487 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build and all six toolbar audit cases
+pass. Three serial production trials pass every unchanged performance budget:
+worst first usable 178 ms, streaming 1,057.1 ms, paste handler 56.8 ms, paste to
+paint 122.1 ms, typing 32.2 ms, paging 33.3 ms and loaded heap 29,335,884 bytes.
+Evidence is in `artifacts/public-interface-m4/mark-drawing/`; reports identify
+`08356d6` and measure this checkpoint's uncommitted tree.
+
+Milestone 4 remains open. Mentions, comments and search decorations still need
+shared view integration, followed by supported view updates/diagnostics and the
+complete demo mount migration. The milestone judge follows those exit conditions.

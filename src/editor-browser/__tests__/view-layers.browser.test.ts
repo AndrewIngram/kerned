@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { createSchema, defineNode, indexTree } from '../../model';
+import type { RegisterDrawing } from '../drawing';
 import { createViewLayers, viewLayers, type ViewLayerContribution } from '../view-layers';
 
 const card = defineNode({
@@ -11,6 +12,21 @@ const card = defineNode({
   options: {},
   schema: () => ({ attributes: z.strictObject({}), content: { kind: 'atom' } }),
 });
+
+function painting() {
+  const active = new Set<symbol>();
+
+  const register: RegisterDrawing = () => {
+    const token = Symbol();
+    active.add(token);
+
+    return () => {
+      active.delete(token);
+    };
+  };
+
+  return { active, register };
+}
 
 function fixture(contributions: readonly ViewLayerContribution[]) {
   const extension = defineExtension({
@@ -45,10 +61,13 @@ test('composed layers receive canonical visible blocks and clean up independentl
   onTestFinished,
 }) => {
   const released: string[] = [];
+  const drawing = painting();
 
   const contributions: ViewLayerContribution[] = ['first', 'second'].map((name) => ({
     name,
-    create({ element, editor }) {
+    create({ element, editor, paint }) {
+      paint('content', () => {});
+      paint('content', () => {});
       const button = document.createElement('button');
       button.style.pointerEvents = 'auto';
       element.append(button);
@@ -70,8 +89,9 @@ test('composed layers receive canonical visible blocks and clean up independentl
 
   const a = fixture(contributions);
   const b = fixture(contributions);
-  const first = createViewLayers(a.host, a.editor);
-  const second = createViewLayers(b.host, b.editor);
+  const first = createViewLayers(a.host, a.editor, drawing.register);
+  const second = createViewLayers(b.host, b.editor, drawing.register);
+  expect(drawing.active.size).toBe(4);
   onTestFinished(() => {
     a.destroy();
     b.destroy();
@@ -79,7 +99,7 @@ test('composed layers receive canonical visible blocks and clean up independentl
   first.update({
     tree: indexTree(a.editor.schema, a.editor.state.nodes),
     insets: new Map(),
-    blocks: [{ node: a.editor.state.nodes[0], y: 32, height: 40 }],
+    blocks: [{ node: a.editor.state.nodes[0], y: 32, height: 40, text: null }],
     inset: 28,
     width: 400,
   });
@@ -89,10 +109,12 @@ test('composed layers receive canonical visible blocks and clean up independentl
   expect(released).toEqual(['second', 'first']);
   expect(a.host.childElementCount).toBe(0);
   expect(b.host.childElementCount).toBe(2);
+  expect(drawing.active.size).toBe(2);
   first.destroy();
   expect(() => second.destroy()).toThrow('View layer cleanup failed');
   expect(released).toEqual(['second', 'first', 'second', 'first']);
   expect(b.host.childElementCount).toBe(0);
+  expect(drawing.active.size).toBe(0);
 });
 
 test('layer installation rejects duplicate names before allocation and unwinds failed factories', ({
@@ -100,11 +122,13 @@ test('layer installation rejects duplicate names before allocation and unwinds f
 }) => {
   let created = 0;
   let released = 0;
+  const drawing = painting();
 
   const good: ViewLayerContribution = {
     name: 'same',
-    create() {
+    create({ paint }) {
       created++;
+      paint('background', () => {});
 
       return {
         update() {},
@@ -121,7 +145,8 @@ test('layer installation rejects duplicate names before allocation and unwinds f
     good,
     {
       name: 'failure',
-      create() {
+      create({ paint }) {
+        paint('content', () => {});
         throw new Error('Factory failed');
       },
     },
@@ -131,11 +156,16 @@ test('layer installation rejects duplicate names before allocation and unwinds f
     duplicate.destroy();
     failed.destroy();
   });
-  expect(() => createViewLayers(duplicate.host, duplicate.editor)).toThrow('Duplicate view layer');
+  expect(() => createViewLayers(duplicate.host, duplicate.editor, drawing.register)).toThrow(
+    'Duplicate view layer',
+  );
   expect(created).toBe(0);
   expect(duplicate.host.childElementCount).toBe(0);
-  expect(() => createViewLayers(failed.host, failed.editor)).toThrow('Factory failed');
+  expect(() => createViewLayers(failed.host, failed.editor, drawing.register)).toThrow(
+    'Factory failed',
+  );
   expect(created).toBe(1);
   expect(released).toBe(1);
   expect(failed.host.childElementCount).toBe(0);
+  expect(drawing.active.size).toBe(0);
 });

@@ -155,5 +155,15 @@ export {
   viewLayers,
   type ViewLayerContribution,
   type ViewLayerFrame,
+  type ViewLayerContext,
   type LayerBlock,
 } from './view-layers';
+
+export type {
+  Drawing,
+  DrawingRect,
+  DrawingLayer,
+  DrawingPainter,
+  TextFragment,
+  BlockTextGeometry,
+} from './drawing';

@@ -1,7 +1,9 @@
 import CanvasKitInit, { type CanvasKit, type Paint } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 
+import type { Drawing } from '../../editor-browser/drawing';
 import { createCanvasRenderer, type CanvasFrame } from '../canvas-renderer';
+import { createLayerDrawing } from '../layer-drawing';
 
 let kit: CanvasKit;
 
@@ -38,6 +40,45 @@ function pixel(canvas: HTMLCanvasElement) {
 
   return [...context.getImageData(2, 2, 1, 1).data];
 }
+
+test('extension drawing uses document coordinates, restores transforms and expires outside paint', async ({
+  onTestFinished,
+}) => {
+  const canvas = document.createElement('canvas');
+  const renderer = createCanvasRenderer<never>();
+  onTestFinished(() => renderer.destroy());
+  const drawing = createLayerDrawing(renderer.register, () => 12);
+  const borrowed: Drawing[] = [];
+  drawing('extension', 'content', (paint) => {
+    borrowed.push(paint);
+    paint.rect({ left: 20, top: 12, width: 10, height: 8 }, '#ff0000', 2);
+  });
+  renderer.register(
+    'following',
+    (target, graphics, paint) => {
+      paint.setColor(graphics.Color(0, 0, 255));
+      target.drawRect(graphics.XYWHRect(0, 20, 4, 4), paint);
+    },
+    'content',
+  );
+  renderer.attach(kit, canvas);
+  renderer.update({ ...frame(() => {}), inset: 12, top: 10, zoom: 1.5 });
+  await nextFrame();
+  const context = canvas.getContext('2d');
+
+  if (!context) throw new Error('Missing canvas');
+  const scale = 1.5 * devicePixelRatio;
+
+  const at = (x: number, y: number) => [
+    ...context.getImageData(Math.floor(x * scale), Math.floor((y - 10) * scale), 1, 1).data,
+  ];
+
+  expect(at(25, 16)).toEqual([255, 0, 0, 255]);
+  expect(at(13, 21)).toEqual([0, 0, 255, 255]);
+  expect(() => borrowed[0].rect({ left: 0, top: 0, width: 1, height: 1 }, 'red')).toThrow(
+    'only available during',
+  );
+});
 
 test('vanilla renderer coalesces updates, paints pixels and isolates replacement registrations', async () => {
   const canvas = document.createElement('canvas');
