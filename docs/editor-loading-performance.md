@@ -27,7 +27,7 @@ With the demo running at `http://127.0.0.1:5173`:
 ```sh
 BROWSERS=chromium,firefox,webkit REPORT=artifacts/editor-loading-after.json node scripts/benchmark-editor-loading.mjs
 BASELINE=1 FIND=off REPORT=artifacts/editor-loading-controller-before.json node scripts/benchmark-editor-loading.mjs
-HYBRID_URL=http://127.0.0.1:5173/editor.html node scripts/check-war-and-peace.mjs
+EDITOR_URL=http://127.0.0.1:5173/editor.html node scripts/check-war-and-peace.mjs
 ```
 
 `SAMPLES=war-and-peace` selects one book; `FIND=on` selects the streaming-search case. `PROFILE=/tmp/editor-loading` optionally saves Chromium CPU profiles, separately from clean timing runs. `BASELINE=1` intercepts the served module only in the test browser; it does not edit source files.

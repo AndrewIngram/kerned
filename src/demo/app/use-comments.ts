@@ -2,22 +2,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { resolveRangeDecorations, type SelectionContext, type SelectionRange } from '../../editor';
 import { useEditorState } from '../../editor-react';
 import { commentDecorations, createCommentStore } from '../../extensions/comment';
-import { type HybridNode } from '../../extensions/demo-model';
+import { type StarterNode } from '../../extensions/demo-model';
 import { type CommentHighlight } from '../../extensions/text-block-view';
-import { type HybridSample } from '../../hybrid-samples';
+import { type EditorSample } from '../../editor-samples';
 
 import type { EditorState } from '../../editor';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 
 export function useComments(
   editor: EditorSession,
-  editorState: EditorState<HybridNode>,
-  sample: HybridSample,
+  editorState: EditorState<StarterNode>,
+  sample: EditorSample,
   context: SelectionContext,
 ) {
   const [comments] = useState(() => createCommentStore<{ body: string; reply: string }>());
 
-  function seedComments(nodes: readonly HybridNode[]) {
+  function seedComments(nodes: readonly StarterNode[]) {
     comments.putAll(
       (sample.comments?.(nodes) ?? []).map((seed) => ({
         id: seed.id,

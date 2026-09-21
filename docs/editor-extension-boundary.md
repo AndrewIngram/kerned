@@ -1,6 +1,6 @@
 # Core engines and schema extensions
 
-The editing core no longer imports the hybrid demo's document model. Applications register a schema explicitly. A node's editable-text capability, not the name `paragraph`, determines which operations it supports.
+The editing core no longer imports the editor demo's document model. Applications register a schema explicitly. A node's editable-text capability, not the name `paragraph`, determines which operations it supports.
 
 ```ts
 import {createSchema, createEditor} from './editor';
@@ -54,7 +54,7 @@ The demo stores comments separately from document nodes and resolves their durab
 
 ## Alternatives considered
 
-Keeping a fixed `HybridNode` union in the core would make each new schema require changes to history and anchors. That coupling has been removed.
+Keeping a fixed `StarterNode` union in the core would make each new schema require changes to history and anchors. That coupling has been removed.
 
 Replacing every document with a new universal tree representation would address nested structures immediately, but would also commit persistence and operation formats before proving the extension contract. This pass instead uses an explicit schema capability interface and migrates the existing consumers. It does not retain a parallel legacy transaction API.
 
@@ -62,7 +62,7 @@ Replacing every document with a new universal tree representation would address 
 
 Generic containers and structural operations now support inserting, replacing, removing, moving, wrapping and unwrapping children. A headless list extension owns content rules, numbering, indentation and Enter/Backspace commands. See [containers and lists](editor-containers-and-lists.md). The core does not branch on list node names.
 
-The [selection contract](editor-selections.md) now supports text, node, all-document and custom selection types, with a headless cell-selection extension representing disjoint cells independently of tree order. A general nested renderer, list toolbar/keyboard wiring in the hybrid demo, configurable marks, a command registry, schema codecs/migrations and a production starter kit remain unfinished.
+The [selection contract](editor-selections.md) now supports text, node, all-document and custom selection types, with a headless cell-selection extension representing disjoint cells independently of tree order. A general nested renderer, list toolbar/keyboard wiring in the editor demo, configurable marks, a command registry, schema codecs/migrations and a production starter kit remain unfinished.
 
 OT or CRDT integration must validate that peers agree on schemas and operation meanings. Schema names and versions alone do not establish convergence. Extensions will need declared structural semantics and deterministic conflict rules; core transactions remain local and revision-checked.
 
@@ -72,4 +72,4 @@ OT or CRDT integration must validate that peers agree on schemas and operation m
 
 `npm run check:transactions` runs a separate heading/card schema without paragraphs, including a different text field, split/join, undo/redo and durable anchors. It tests diagnostics and formula tokens against the same public annotation and inline APIs used by comments and mentions. Invalid registration and a plugin that violates replacement semantics are rejected.
 
-The existing hybrid, large-document and viewport-reflow checks exercise the migrated demo in Chromium, Firefox and WebKit. Extension dispatch occurs at document operations and layout projection, not per glyph. No new runtime dependency or serialization boundary was added.
+The existing editor, large-document and viewport-reflow checks exercise the migrated demo in Chromium, Firefox and WebKit. Extension dispatch occurs at document operations and layout projection, not per glyph. No new runtime dependency or serialization boundary was added.

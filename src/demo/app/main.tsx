@@ -1,7 +1,7 @@
 import CanvasKitInit from 'canvaskit-wasm';
 import { createRoot } from 'react-dom/client';
-import { loadHybridSample } from '../../hybrid-samples';
-import '../../hybrid.css';
+import { loadEditorSample } from '../../editor-samples';
+import '../../editor.css';
 import { createOwnedEngine } from '../../owned-layout';
 
 import { App } from './app';
@@ -15,7 +15,7 @@ if (!root) throw new Error('Missing root');
 
   const [kit, sample] = await Promise.all([
     CanvasKitInit({ locateFile: () => '/engines/canvaskit.wasm' }),
-    loadHybridSample(),
+    loadEditorSample(),
   ]);
 
   const owned = await createOwnedEngine(kit, 'shaping');

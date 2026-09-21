@@ -4,7 +4,7 @@ import {createMention} from './extensions/mention';
 import {demoSchema} from './extensions/demo-schema';
 import {createEditor,applyTransaction,mapPosition,type Transaction} from './editor';
 import {createAnchor,parseAnchor,resolveAnchor} from './editor';
-import {createHybridDocument,type TextBlockNode,type HybridNode} from './extensions/demo-model';
+import {createSampleDocument,type TextBlockNode,type StarterNode} from './extensions/demo-model';
 import {boundaries} from './model';
 
 export function checkTransactions(){
@@ -15,7 +15,7 @@ export function checkTransactions(){
   for(const at of boundaries(paragraph.text)){
     const editor=createEditor(demoSchema,[paragraph],textSelection(1,at,at));
     const beforeAnchor=createAnchor(demoSchema,editor.state,'doc',1,at,-1),afterAnchor=createAnchor(demoSchema,editor.state,'doc',1,at,1);
-    const tx:Transaction<HybridNode>={baseRevision:0,origin:'local',history:'separate',time:0,steps:[{kind:'split',id:1,at,rightId:2,rightKey:'right'}],selection:textSelection(2,0,0)};
+    const tx:Transaction<StarterNode>={baseRevision:0,origin:'local',history:'separate',time:0,steps:[{kind:'split',id:1,at,rightId:2,rightKey:'right'}],selection:textSelection(2,0,0)};
     const result=editor.dispatch(tx);
     // Forward commands are deterministic over independent document copies.
     const replay=applyTransaction(demoSchema,{nodes:structuredClone([paragraph]),selection:textSelection(1,at,at),revision:0},{...structuredClone(tx),selection:editor.readSelection(textSelection(2,0).encode(selectionContext(demoSchema,result.state.nodes)))});
@@ -31,12 +31,12 @@ export function checkTransactions(){
     const resolved=resolveAnchor(demoSchema,afterAnchor,'doc',editor.state,editor.journal);
     check(resolved.status==='resolved'&&resolved.anchor.blockKey==='original'&&resolved.anchor.offset===at,'Anchor follows undo/redo structural maps');
   }
-  const editor=createEditor(demoSchema,createHybridDocument(),textSelection(1,0,0));
+  const editor=createEditor(demoSchema,createSampleDocument(),textSelection(1,0,0));
   const initial=editor.state.nodes[0],anchors=[-1,1] as const;
   const saved=anchors.map(bias=>createAnchor(demoSchema,editor.state,'doc',1,0,bias));
   for(let i=0;i<3;i++)editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:{group:'typing:1'},time:i*100,steps:[{kind:'replaceText',id:1,from:i,to:i,text:'x'}]});
   check(editor.history.undo===1,'Adjacent typing groups');
-  const stream:HybridNode={kind:'image',id:900,key:'streamed',src:'test',alt:'test'};
+  const stream:StarterNode={kind:'image',id:900,key:'streamed',src:'test',alt:'test'};
   editor.dispatch({baseRevision:editor.state.revision,origin:'stream',history:'exclude',steps:[{kind:'append',nodes:[stream]}]});
   const persisted=JSON.parse(JSON.stringify({state:editor.state,journal:editor.journal,anchors:saved}));
   for(let i=0;i<2;i++){
@@ -51,7 +51,7 @@ export function checkTransactions(){
   for(const tx of [
     {baseRevision:0,origin:'local',history:'separate',time:400,steps:[]},
     {baseRevision:before.revision,origin:'local',history:'separate',time:400,steps:[{kind:'replaceText',id:1,from:0,to:0,text:'valid'},{kind:'split',id:1,at:1,rightId:2,rightKey:'collision'}]},
-  ] satisfies Transaction<HybridNode>[]){
+  ] satisfies Transaction<StarterNode>[]){
     let rejected=false;try{editor.dispatch(tx);}catch{rejected=true;}check(rejected&&editor.state===before,'Failed transaction is atomic');
   }
   const target=createAnchor(demoSchema,editor.state,'doc',1,1,1);

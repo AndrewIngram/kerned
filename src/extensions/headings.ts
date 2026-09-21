@@ -1,20 +1,20 @@
 import {indexTree,selectionContext,type Schema,type EditorState,type Step} from '../editor';
-import type {HybridNode,HeadingLevel} from './demo-model';
+import type {StarterNode,HeadingLevel} from './demo-model';
 
 /** Change block semantics without replacing text identities or relative positions. */
-export function setTextBlockType(schema:Schema<HybridNode>,state:EditorState<HybridNode>,ids:readonly number[],level:HeadingLevel|null,tree=indexTree(schema,state.nodes)):Step<HybridNode>[] {
+export function setTextBlockType(schema:Schema<StarterNode>,state:EditorState<StarterNode>,ids:readonly number[],level:HeadingLevel|null,tree=indexTree(schema,state.nodes)):Step<StarterNode>[] {
   return ids.flatMap(id=>{
     const entry=tree.byId.get(id);if(!entry)return [];
     const node=entry.node;if(node.kind!=='paragraph'&&node.kind!=='heading')return [];
     if(level===null&&node.kind==='paragraph'||node.kind==='heading'&&node.level===level)return [];
     const content={id:node.id,key:node.key,locked:node.locked,text:node.text,marks:node.marks,inline:node.inline};
-    const next:HybridNode=level===null?{...content,kind:'paragraph'}:{...content,kind:'heading',level};
+    const next:StarterNode=level===null?{...content,kind:'paragraph'}:{...content,kind:'heading',level};
     return [{kind:'replaceChildren',parent:entry.parent,index:entry.index,count:1,nodes:[next]}];
   });
 }
 
 /** The nearest structural wrapper describes ordinary text; headings keep their level. */
-export function selectedBlockLabel(schema:Schema<HybridNode>,state:EditorState<HybridNode>,tree=indexTree(schema,state.nodes)){
+export function selectedBlockLabel(schema:Schema<StarterNode>,state:EditorState<StarterNode>,tree=indexTree(schema,state.nodes)){
   const context=selectionContext(schema,state.nodes,tree),empty=state.selection.isEmpty(context);
   const labels=new Set<string>();
   const ranges=state.selection.ranges(context);

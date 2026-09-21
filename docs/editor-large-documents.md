@@ -1,12 +1,12 @@
-# Large hybrid documents
+# Large editor documents
 
-This is the initial loading and memory study. [Retained geometry](hybrid-retained-geometry.md) now supersedes its memory measurements. Width changes now use [viewport-first reflow](hybrid-viewport-reflow.md); its paired benchmark supersedes the synchronous resize measurements below. The [book loading study](editor-loading-performance.md) documents the updated batch controller, which targets new paragraph composition rather than total render work.
+This is the initial loading and memory study. [Retained geometry](editor-retained-geometry.md) now supersedes its memory measurements. Width changes now use [viewport-first reflow](editor-viewport-reflow.md); its paired benchmark supersedes the synchronous resize measurements below. The [book loading study](editor-loading-performance.md) documents the updated batch controller, which targets new paragraph composition rather than total render work.
 
-Recorded 2026-09-19T15:17:14.919Z on Apple M4 Pro. Production build, local Vite preview, headless Chromium, Firefox and WebKit. Browser versions and raw measurements are in [the benchmark artifact](../artifacts/hybrid-large-benchmark.json); correctness results are in [the check artifact](../artifacts/hybrid-large-checks.json).
+Recorded 2026-09-19T15:17:14.919Z on Apple M4 Pro. Production build, local Vite preview, headless Chromium, Firefox and WebKit. Browser versions and raw measurements are in [the benchmark artifact](../artifacts/editor-large-benchmark.json); correctness results are in [the check artifact](../artifacts/editor-large-checks.json).
 
 ## Result
 
-Incremental loading works with the hybrid extensions. The first 32 blocks are editable before the remaining blocks are generated. Background arrival preserves text edits, selection, focus, widget state and undo history. Rendering and DOM mounting stay bounded by the viewport.
+Incremental loading works with the editor extensions. The first 32 blocks are editable before the remaining blocks are generated. Background arrival preserves text edits, selection, focus, widget state and undo history. Rendering and DOM mounting stay bounded by the viewport.
 
 The remaining costs are whole-document reflow and retained layout. At the time of this baseline, width changes recomposed all loaded paragraphs synchronously. The viewport-first implementation now batches that work. The editor retains shaping and geometry for every loaded paragraph, even when its React elements are unmounted.
 
@@ -15,12 +15,12 @@ The remaining costs are whole-document reflow and retained layout. At the time o
 ~~~sh
 npm run build
 npm run preview
-node scripts/check-hybrid-large.mjs
-node scripts/benchmark-hybrid-large.mjs
-node scripts/report-hybrid-large.mjs
+node scripts/check-editor-large.mjs
+node scripts/benchmark-editor-large.mjs
+node scripts/report-editor-large.mjs
 ~~~
 
-Open [/hybrid-editor.html?stream=10000](http://127.0.0.1:5176/hybrid-editor.html?stream=10000). The default page remains the small extension study. The stream parameter accepts 32 through 10,000 blocks. The test-only paused=1 option holds loading after the first 32 blocks; window.hybridSpike.resume() continues it. slowImages=1 extends the image decode delay for reflow checks.
+Open [/extensions.html?stream=10000](http://127.0.0.1:5176/extensions.html?stream=10000). The default page remains the small extension study. The stream parameter accepts 32 through 10,000 blocks. The test-only paused=1 option holds loading after the first 32 blocks; window.editorDiagnostics.resume() continues it. slowImages=1 extends the image decode delay for reflow checks.
 
 The fixture is generated locally, one requested chunk at a time. This tests incremental document ingestion, layout, React updates and painting. It does **not** measure network transport, server parsing, real download latency or arbitrary external content. It uses styled Latin paragraphs, atomic mentions, comments, checklists and images. At 10,000 blocks there are 8,999 paragraphs, 501 checklists and 500 image blocks. The images share one SVG resource; these numbers do not describe 500 distinct decoded photographs.
 
@@ -45,7 +45,7 @@ Clean timing runs remain at the top of the document without interaction. Correct
 
 ## Interaction and reflow checks
 
-All 9 large-document cases passed: 2,000 blocks at a 1,100-pixel viewport, and 10,000 blocks at 1,100 and 420 pixels, in each browser. The narrow cases use DPR 1.5. The original nine-case hybrid suite also passes, including DPR 2 and 150% zoom.
+All 9 large-document cases passed: 2,000 blocks at a 1,100-pixel viewport, and 10,000 blocks at 1,100 and 420 pixels, in each browser. The narrow cases use DPR 1.5. The original nine-case editor suite also passes, including DPR 2 and 150% zoom.
 
 The large cases verify:
 

@@ -59,7 +59,7 @@ reveal. Neither requires the demo's paragraph/heading model.
   Layout and paint observers report metrics; the rendering modules do not know
   about sample progress or benchmark thresholds.
 - `useDiagnostics` is the only app module that imports the correctness fixtures.
-  It preserves the existing `window.hybridSpike` interface for browser checks.
+  It preserves the existing `window.editorDiagnostics` interface for browser checks.
 
 ## Design decision
 

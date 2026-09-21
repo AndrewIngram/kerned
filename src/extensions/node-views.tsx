@@ -1,13 +1,13 @@
 import type {ComponentProps} from 'react';
 import {createReactRenderers} from '../editor-react';
 import {TableBlock} from './table-view';
-import {ImageBlock} from '../hybrid-image';
+import {ImageBlock} from '../editor-image';
 import {Checklist} from './checklist-view';
 import {ParagraphExtensions} from './text-block-view';
-import type {HybridLeaf} from './demo-model';
+import type {StarterLeaf} from './demo-model';
 
 type NodeViewValue={
-  node:HybridLeaf;
+  node:StarterLeaf;
   table:Omit<ComponentProps<typeof TableBlock>,'node'>;
   image:Omit<ComponentProps<typeof ImageBlock>,'node'>;
   checklist:Omit<ComponentProps<typeof Checklist>,'node'>;

@@ -109,7 +109,7 @@ Migrate headings, lists, quotes, tables, mentions, images, embeds, clipboard cod
 
 Replace fixed `spans`, `atoms` and `comments` handling in the demo model with the appropriate generic content and extension state. Migrate callers then delete replaced adapters. Small temporary internal adapters are acceptable within a milestone, but do not publish parallel legacy and replacement APIs.
 
-Move the clean demo and hybrid preview onto the same browser runtime. This migration does not require a new visual design. If unavoidable UI ambiguity arises, use the existing UI exploration process.
+Move the clean demo and editor preview onto the same browser runtime. This migration does not require a new visual design. If unavoidable UI ambiguity arises, use the existing UI exploration process.
 
 Exit: navigation, selection, formatting, lists/tables, rich clipboard, streaming outline and large-document checks pass. Compare performance against milestone 1. Investigate material regressions before adding more capabilities.
 

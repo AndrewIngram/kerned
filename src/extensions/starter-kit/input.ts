@@ -4,7 +4,7 @@ import { boundaries, TextSelection, textSelection, type Step } from '../../edito
 import { createTextInput, type BrowserViewOptions } from '../../editor-browser';
 import { listCommands, replaceStructuredText } from '../../extensions/blocks';
 import { pasteFragment, readClipboard, writeClipboard } from '../../extensions/clipboard';
-import { plainText, type HybridNode } from '../../extensions/demo-model';
+import { plainText, type StarterNode } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { pasteParagraphs } from '../../extensions/paste';
 import { tablePlainText } from '../../extensions/table';
@@ -18,7 +18,7 @@ type InputOptions = {
   editor: EditorSession;
   document: EditorDocument;
   actions: StarterActions;
-  textInput: ReturnType<typeof createTextInput<HybridNode>>;
+  textInput: ReturnType<typeof createTextInput<StarterNode>>;
   input: () => HTMLTextAreaElement | null;
   notice: (message: string) => void;
   closePanel: () => void;
@@ -126,7 +126,7 @@ export function createStarterKitInput({
   }
 
   function copyText() {
-    function nodeText(node: HybridNode): string {
+    function nodeText(node: StarterNode): string {
       return node.kind === 'paragraph' || node.kind === 'heading'
         ? plainText(node)
         : node.kind === 'image'
@@ -319,7 +319,7 @@ export function createStarterKitInput({
       if (!(caret instanceof TextSelection))
         throw new Error('Text replacement must return a caret');
 
-      const steps: Step<HybridNode>[] = [
+      const steps: Step<StarterNode>[] = [
         ...command.steps,
         {
           kind: 'split',

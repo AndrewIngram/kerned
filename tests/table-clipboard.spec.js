@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 test('cell rectangles preserve formatting, grow tables, retain unaffected identities and undo atomically',async({page})=>{
- await page.goto('/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+ await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
  const result=await page.evaluate(async()=>{
   const {createEditor,textSelection,indexTree,selectionContext}=await import('/tests/fixtures/table-clipboard.js');
   const {demoSchema}=await import('/tests/fixtures/table-clipboard.js');
@@ -38,7 +38,7 @@ test('cell rectangles preserve formatting, grow tables, retain unaffected identi
 });
 
 test('clipboard HTML is a cropped rectangle and TSV preserves empty and quoted cells',async({page})=>{
- await page.goto('/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+ await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
  const result=await page.evaluate(async()=>{
   const {createEditor}=await import('/tests/fixtures/table-clipboard.js');
   const {demoSchema}=await import('/tests/fixtures/table-clipboard.js');
@@ -63,7 +63,7 @@ test('clipboard HTML is a cropped rectangle and TSV preserves empty and quoted c
 
 test('table view routes copy, paste and cut through rich clipboard commands',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+ await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
  await page.locator('summary[aria-label="Table"]').click();await page.getByRole('button',{name:'Table (3 × 3)',exact:true}).click();
  await page.getByRole('button',{name:'Edit cell 1, 1',exact:true}).click();await page.getByLabel('Cell 1, 1 text',{exact:true}).fill('Alice');
  await page.getByRole('button',{name:'Select cell 1, 1',exact:true}).click();await page.getByRole('button',{name:'Bold',exact:true}).click();
@@ -84,7 +84,7 @@ test('table view routes copy, paste and cut through rich clipboard commands',asy
 });
 
 test('rectangle paste uses source size and rejects protected targets and merged grids without edits',async({page})=>{
- await page.goto('/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+ await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
  const result=await page.evaluate(async()=>{
   const {createEditor,createTable,tableCells,demoSchema,pasteCellRectangle,copyCellRectangle}=await import('/tests/fixtures/table-clipboard.js');
   let next=1;const allocate=()=>({id:next++,key:crypto.randomUUID()});
@@ -111,7 +111,7 @@ test('rectangle paste uses source size and rejects protected targets and merged 
 });
 
 test('large rectangles expand in both dimensions and retain header formatting',async({page})=>{
- await page.goto('/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+ await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
  const result=await page.evaluate(async()=>{
   const {createEditor,createTable,tableCells,demoSchema,pasteCellRectangle,selectionContext,indexTree}=await import('/tests/fixtures/table-clipboard.js');
   let next=1;const allocate=()=>({id:next++,key:crypto.randomUUID()});

@@ -1,6 +1,6 @@
 # Retained geometry
 
-The hybrid editor now keeps caret and glyph-position geometry near the viewport and for pinned interactions. Offscreen paragraphs retain their measured height, width and shaping data. Revisiting them recomposes geometry in TypeScript without another HarfRust call or serialization boundary.
+The editor editor now keeps caret and glyph-position geometry near the viewport and for pinned interactions. Offscreen paragraphs retain their measured height, width and shaping data. Revisiting them recomposes geometry in TypeScript without another HarfRust call or serialization boundary.
 
 Packed caret buffers also shrink to their actual caret and line counts before a snapshot is published. Previously they retained capacity for the worst case of one line per cluster.
 
@@ -41,16 +41,16 @@ Validation covers:
 
 ## Reproduce
 
-Build with `npm run build` and serve the production preview on port 5176. The default `/hybrid-editor.html?stream=10000` uses viewport retention. Add `retention=all` for the compacted full-retention comparison.
+Build with `npm run build` and serve the production preview on port 5176. The default `/extensions.html?stream=10000` uses viewport retention. Add `retention=all` for the compacted full-retention comparison.
 
-Run `npm run memory:hybrid` for memory and rehydration checks. Run `npm run check:hybrid`, `npm run check:hybrid-large`, and `npm run check:hybrid-reflow` for interaction coverage. Run `node scripts/check-hybrid-retention-pixels.mjs` to compare rendered document pixels across policies.
+Run `npm run memory:editor` for memory and rehydration checks. Run `npm run check:editor`, `npm run check:editor-large`, and `npm run check:editor-reflow` for interaction coverage. Run `node scripts/check-editor-retention-pixels.mjs` to compare rendered document pixels across policies.
 
 For the timing report without replacing the earlier baseline artifact:
 
 ```sh
-REFLOW_REPORT=artifacts/hybrid-retention-reflow.json npm run benchmark:hybrid-reflow
+REFLOW_REPORT=artifacts/editor-retention-reflow.json npm run benchmark:editor-reflow
 ```
 
-Raw results are in `artifacts/hybrid-retention.json`, `artifacts/hybrid-retention-reflow.json`, and `artifacts/hybrid-retention-pixels.json`.
+Raw results are in `artifacts/editor-retention.json`, `artifacts/editor-retention-reflow.json`, and `artifacts/editor-retention-pixels.json`.
 
 Total memory still grows with the document because text, shaping, metadata and model state remain resident. This change bounds detailed geometry, not the entire document. Reducing shaping retention or paging content requires its own measured policy so that memory savings do not introduce expensive shaping during scrolling.

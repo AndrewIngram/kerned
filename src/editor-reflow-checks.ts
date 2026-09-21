@@ -3,11 +3,11 @@ import {typography} from './extensions/typography';
 import {inlineSchema} from './extensions/mention';
 import type {CanvasKit} from 'canvaskit-wasm';
 import {createOwnedEngine} from './owned-layout';
-import type {HybridLeaf} from './extensions/demo-model';
-import type {Measurement,Scene} from './hybrid-scene';
+import type {StarterLeaf} from './extensions/demo-model';
+import type {Measurement,Scene} from './editor-scene';
 
 /** Independent eager reference: compose each paragraph from scratch at the target width. */
-export async function checkReflow(kit:CanvasKit,nodes:HybridLeaf[],scene:Scene,measurements:ReadonlyMap<number,Measurement>){
+export async function checkReflow(kit:CanvasKit,nodes:StarterLeaf[],scene:Scene,measurements:ReadonlyMap<number,Measurement>){
   const owned=await createOwnedEngine(kit,'shaping');
   let y=32+scene.paddingTop,paragraphs=0,hydrated=0;
   try{

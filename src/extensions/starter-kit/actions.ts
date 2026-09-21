@@ -8,7 +8,7 @@ import {
   type Transaction,
 } from '../../editor';
 import { blockCommands, listCommands, replaceStructuredText } from '../../extensions/blocks';
-import { type HybridNode } from '../../extensions/demo-model';
+import { type StarterNode } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { formattingSchema, type TextFormat } from '../../extensions/formatting';
 import { setTextBlockType } from '../../extensions/headings';
@@ -39,8 +39,8 @@ export function createStarterKitActions({
   const { editorState, tree, textSelection: text, focusId, selectedBlocks } = document;
 
   function dispatch(
-    steps: Step<HybridNode>[],
-    history: Transaction<HybridNode>['history'] = 'separate',
+    steps: Step<StarterNode>[],
+    history: Transaction<StarterNode>['history'] = 'separate',
     nextSelection?: Selection,
     input = false,
   ) {
@@ -69,7 +69,7 @@ export function createStarterKitActions({
   }
 
   function runCommand(
-    steps: Step<HybridNode>[],
+    steps: Step<StarterNode>[],
     nextSelection: Selection = editor.state.selection,
   ) {
     try {
@@ -127,7 +127,7 @@ export function createStarterKitActions({
     tree,
   );
 
-  function structure(action: () => Step<HybridNode>[]) {
+  function structure(action: () => Step<StarterNode>[]) {
     try {
       runCommand(action());
     } catch (error) {
@@ -197,7 +197,7 @@ export function createStarterKitActions({
     if (!entry) return;
 
     const table = createTable(allocate),
-      after: HybridNode = { kind: 'paragraph', ...allocate(), text: '', marks: [], inline: [] };
+      after: StarterNode = { kind: 'paragraph', ...allocate(), text: '', marks: [], inline: [] };
 
     runCommand(
       [{ kind: 'insertChildren', parent: null, index: entry.index + 1, nodes: [table, after] }],
@@ -254,7 +254,7 @@ export function createStarterKitActions({
     focus();
   }
 
-  function update(node: HybridNode) {
+  function update(node: StarterNode) {
     dispatch([{ kind: 'updateBlock', node }]);
   }
 

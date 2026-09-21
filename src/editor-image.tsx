@@ -1,6 +1,6 @@
 import {useLayoutEffect,useRef,useState} from 'react';
 import type {ImageNode} from './extensions/demo-model';
-import {streamConfig} from './hybrid-stream';
+import {streamConfig} from './editor-stream';
 
 const decoded = new Map<string,{width:number;height:number}>();
 export function ImageBlock({node,width,onMeasure}:{node:ImageNode;width:number;onMeasure:(id:number,width:number,height:number)=>void}) {

@@ -1,6 +1,6 @@
 import {formattingMarks} from './extensions/formatting';
 import {createMention} from './extensions/mention';
-import {createHybridDocument, type HybridNode} from './extensions/demo-model';
+import {createSampleDocument, type StarterNode} from './extensions/demo-model';
 
 const params = new URLSearchParams(location.search);
 const requested = Number(params.get('stream'));
@@ -9,12 +9,12 @@ export const streamConfig = {
   paused: params.get('paused') === '1',
   imageDelay: params.get('slowImages') === '1' ? 1600 : 250,
 };
-const introduction = createHybridDocument().slice(0, 4);
+const introduction = createSampleDocument().slice(0, 4);
 const imageSource = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="360" viewBox="0 0 800 360"><rect width="800" height="360" fill="#e5edda"/><path d="M60 270L220 140L340 230L510 75L730 270Z" fill="#78936b"/><circle cx="650" cy="85" r="32" fill="#edc968"/></svg>');
 
 /** A deterministic local source. Only the requested chunk is generated. No network timing is implied. */
-export function hybridChunk(start: number, count: number): HybridNode[] {
-  return Array.from({length: count}, (_, offset): HybridNode => {
+export function sampleChunk(start: number, count: number): StarterNode[] {
+  return Array.from({length: count}, (_, offset): StarterNode => {
     const index = start + offset;
     if (index < 4) return introduction[index];
     const i = index - 4, id = index + 6;

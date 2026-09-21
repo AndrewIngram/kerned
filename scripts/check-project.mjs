@@ -19,7 +19,7 @@ function visit(file) {
     visit(resolved);
   }
 }
-for (const entry of ['editor.html', 'hybrid-editor.html']) {
+for (const entry of ['editor.html', 'extensions.html']) {
   const html = readFileSync(entry, 'utf8');
   const scripts = [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g)];
   assert.ok(scripts.length, `${entry}: missing editor entry point`);

@@ -1,11 +1,11 @@
 import { RangeSelection } from '../../editor';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createHybridScene, type Placement, type Scene } from '../../hybrid-scene';
+import { createEditorScene, type Placement, type Scene } from '../../editor-scene';
 
 import type { Viewport } from '../../editor-react';
 import type { EditorDocument, Owned } from './types';
 
-type LayoutResult = ReturnType<ReturnType<typeof createHybridScene>['build']>;
+type LayoutResult = ReturnType<ReturnType<typeof createEditorScene>['build']>;
 
 type LayoutOptions = {
   owned: Owned;
@@ -38,7 +38,7 @@ export function useDocumentLayout({
   const { width, zoom, scroll, readScroll, viewportHeight, scrollDocumentTo, setScroll } = viewport;
   const [reflowTick, setReflowTick] = useState(0);
   const lastReflowTick = useRef(0);
-  const [sceneCache] = useState(() => createHybridScene(owned, size));
+  const [sceneCache] = useState(() => createEditorScene(owned, size));
 
   const [measurements, setMeasurements] = useState(
     new Map<number, { width: number; height: number }>(),

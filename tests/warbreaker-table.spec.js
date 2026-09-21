@@ -4,7 +4,7 @@ test('Warbreaker retains its editable table after outline navigation', async ({p
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto('/editor.html?sample=warbreaker');
-  await page.waitForFunction(()=>window.hybridSpike?.probe([]).complete);
+  await page.waitForFunction(()=>window.editorDiagnostics?.probe([]).complete);
   await page.getByRole('button',{name:'Open document outline',exact:true}).focus();
   await page.getByRole('button',{name:'Ars Arcanum',exact:true}).click();
   await page.keyboard.press('Escape');

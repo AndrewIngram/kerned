@@ -1,7 +1,7 @@
 # React extensions
 
 The writing demo at `/editor.html` and extension diagnostics at
-`/hybrid-editor.html` share `src/demo/app/main.tsx`. Both use the same editing core,
+`/extensions.html` share `src/demo/app/main.tsx`. Both use the same editing core,
 owned layout engine, and extension schema. The diagnostics page keeps fixtures
 for extension behavior that the writing demo does not expose.
 
@@ -24,10 +24,10 @@ and comment replies live in document state with undo/redo and survive unmounting
 Canvas drawing and DOM placement use the same block coordinates. The host mounts
 visible blocks with overscan and pins focused widgets until focus leaves them.
 The scene retains shaping while releasing offscreen geometry. See
-[retained geometry](hybrid-retained-geometry.md) and
-[viewport reflow](hybrid-viewport-reflow.md).
+[retained geometry](editor-retained-geometry.md) and
+[viewport reflow](editor-viewport-reflow.md).
 
-Run `npm run build`, `npm run preview`, then `npm run check:hybrid` to check
+Run `npm run build`, `npm run preview`, then `npm run check:editor` to check
 mentions, portals, atomic navigation, copy/paste, widget measurements, focus,
 and inline layout in Chromium, Firefox, and WebKit. `npm run check:transactions`
 also checks independent schemas, containers, selections, and durable anchors.

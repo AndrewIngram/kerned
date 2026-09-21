@@ -43,7 +43,7 @@ for (let trial = 0; trial < trials; trial++) {
     page.on('pageerror', e => errors.push(e.message));
     await page.routeWebSocket(url => url.pathname === '/', () => {});
     await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');
-    await page.waitForFunction(() => window.hybridSpike?.probe([]).complete, null, {timeout: 120000});
+    await page.waitForFunction(() => window.editorDiagnostics?.probe([]).complete, null, {timeout: 120000});
     const cdp = await page.context().newCDPSession(page);
     await cdp.send('HeapProfiler.enable');
     async function heap() {
@@ -51,8 +51,8 @@ for (let trial = 0; trial < trials; trial++) {
       return cdp.send('Runtime.getHeapUsage');
     }
     const loadedHeap = await heap();
-    await page.evaluate(() => window.hybridSpike.select(1, 0));
-    const original = await page.evaluate(() => window.hybridSpike.read().nodes[0].text);
+    await page.evaluate(() => window.editorDiagnostics.select(1, 0));
+    const original = await page.evaluate(() => window.editorDiagnostics.read().nodes[0].text);
     async function measuredKey(key, eventType) {
       await page.evaluate(eventType => {
         window.foundationFrame = null;
@@ -67,7 +67,7 @@ for (let trial = 0; trial < trials; trial++) {
     }
     const typing = [];
     for (let i = 0; i < 12; i++) typing.push(await measuredKey('x', 'beforeinput'));
-    assert.equal(await page.evaluate(() => window.hybridSpike.read().nodes[0].text), 'x'.repeat(12) + original);
+    assert.equal(await page.evaluate(() => window.editorDiagnostics.read().nodes[0].text), 'x'.repeat(12) + original);
     const paging = [];
     for (let i = 0; i < 12; i++) paging.push(await measuredKey(i % 2 ? 'PageUp' : 'PageDown', 'keydown'));
     const afterInteractionHeap = await heap();

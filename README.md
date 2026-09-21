@@ -25,7 +25,7 @@ as `/editor.html` through Vite:
 
 The Vite entry loads engine assets and the initial sample, then mounts the React
 app. The app owns sample navigation; the editor packages own selection, input,
-commands and rendering. Both `/editor.html` and `/hybrid-editor.html` use this app.
+commands and rendering. Both `/editor.html` and `/extensions.html` use this app.
 
 See [editor app ownership](docs/editor-app-architecture.md) for the module map,
 execution flow and lifecycle constraints. The optional React `Editor` component
@@ -42,7 +42,7 @@ schema:
 import {createEditor, textSelection, type Step} from './src/editor';
 import {demoSchema} from './src/extensions/demo-schema';
 import {tableCells} from './src/extensions/table';
-import type {HybridNode} from './src/extensions/demo-model';
+import type {StarterNode} from './src/extensions/demo-model';
 
 const editor = createEditor(
 	demoSchema,
@@ -71,7 +71,7 @@ apply their steps with `editor.dispatch`:
 ```ts
 import {textCommands} from './src/extensions/text-commands';
 
-function dispatch(steps: readonly Step<HybridNode>[]) {
+function dispatch(steps: readonly Step<StarterNode>[]) {
 	return editor.dispatch({
 		baseRevision: editor.state.revision,
 		origin: 'local',
@@ -175,7 +175,7 @@ and annotations when text changes.
 
 [`demoStarterKit`](src/extensions/demo-schema.ts) registers the existing
 paragraphs, headings, checklists, images, tables, quotes, and lists. Its formatting
-and block commands use the `HybridNode` model; a custom schema supplies commands
+and block commands use the `StarterNode` model; a custom schema supplies commands
 for its own nodes. See the [extension contracts](docs/editor-extension-boundary.md)
 for containers and validation.
 

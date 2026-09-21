@@ -10,7 +10,7 @@ for(const name of (process.env.BROWSERS??'chromium').split(',')){
     page.on('pageerror',error=>errors.push(error.message));
     await page.routeWebSocket(url=>url.pathname==='/',()=>{});
     await page.goto(process.env.FIND_URL??'http://127.0.0.1:5173/editor.html?sample=war-and-peace');
-    await page.waitForFunction(()=>window.hybridSpike?.probe([]).complete,null,{timeout:90000});
+    await page.waitForFunction(()=>window.editorDiagnostics?.probe([]).complete,null,{timeout:90000});
     await page.getByRole('button',{name:'Find',exact:true}).click();
     const input=page.getByRole('textbox',{name:'Find in document',exact:true});
     await page.evaluate(()=>{
@@ -28,11 +28,11 @@ for(const name of (process.env.BROWSERS??'chromium').split(',')){
       cdp=await page.context().newCDPSession(page);await cdp.send('Profiler.enable');await cdp.send('Profiler.start');
     }
     for(let trial=0;trial<Number(process.env.TRIALS??2);trial++){
-      await input.fill('');await page.waitForFunction(()=>window.hybridSpike.find().query==='');
+      await input.fill('');await page.waitForFunction(()=>window.editorDiagnostics.find().query==='');
       await input.pressSequentially('Pierre',{delay:30});
-      await page.waitForFunction(()=>window.hybridSpike.find().query==='Pierre');
-      await input.fill('e');await page.waitForFunction(()=>window.hybridSpike.find().query==='e');
-      await input.fill('the');await page.waitForFunction(()=>window.hybridSpike.find().query==='the');
+      await page.waitForFunction(()=>window.editorDiagnostics.find().query==='Pierre');
+      await input.fill('e');await page.waitForFunction(()=>window.editorDiagnostics.find().query==='e');
+      await input.fill('the');await page.waitForFunction(()=>window.editorDiagnostics.find().query==='the');
     }
     const burst=await input.evaluate(async input=>{
       const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;
@@ -42,8 +42,8 @@ for(const name of (process.env.BROWSERS??'chromium').split(',')){
       },i*12))));
       return {maxDispatchDelayMs:Math.max(...delays),value:input.value};
     });
-    assert.equal(burst.value,'Pierre');await page.waitForFunction(()=>window.hybridSpike.find().query==='Pierre');
-    assert.equal(await page.evaluate(()=>window.hybridSpike.find().matches.length),1964);
+    assert.equal(burst.value,'Pierre');await page.waitForFunction(()=>window.editorDiagnostics.find().query==='Pierre');
+    assert.equal(await page.evaluate(()=>window.editorDiagnostics.find().matches.length),1964);
     // Cancel from the same task, before a pending query has a chance to finish.
     await input.evaluate(input=>{
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,'e');
@@ -51,14 +51,14 @@ for(const name of (process.env.BROWSERS??'chromium').split(',')){
       input.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
     });
     await page.waitForTimeout(50);
-    assert.equal(await input.count(),0);assert.equal(await page.evaluate(()=>window.hybridSpike.find().query),'');
+    assert.equal(await input.count(),0);assert.equal(await page.evaluate(()=>window.editorDiagnostics.find().query),'');
     await page.getByRole('button',{name:'Find',exact:true}).click();assert.equal(await input.inputValue(),'e','Reopening retains the latest draft, even if its search was cancelled');
-    await input.fill('Pierre');await page.waitForFunction(()=>window.hybridSpike.find().query==='Pierre');
+    await input.fill('Pierre');await page.waitForFunction(()=>window.editorDiagnostics.find().query==='Pierre');
     await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     if(cdp){const {profile}=await cdp.send('Profiler.stop');await writeFile(process.env.PROFILE,JSON.stringify(profile));}
     const report=await page.evaluate(async()=>{
       const {createFind}=await import('/src/editor/index.ts'),{demoSchema}=await import('/src/extensions/demo-schema.ts');
-      const nodes=window.hybridSpike.read().nodes,find=createFind(demoSchema,()=>nodes);
+      const nodes=window.editorDiagnostics.read().nodes,find=createFind(demoSchema,()=>nodes);
       const queries=['P','Pi','Pierre','e','the'];
       const timings=queries.map(query=>{const start=performance.now(),state=find.setQuery(query);return {query,matches:state.matches.length,ms:performance.now()-start};});
       return {blocks:nodes.length,characters:nodes.reduce((n,node)=>n+(node.text?.length??0),0),events:window.findBenchmark.events,timings};

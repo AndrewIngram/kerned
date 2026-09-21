@@ -1,4 +1,4 @@
-import type { HybridNode } from '../demo-model';
+import type { StarterNode } from '../demo-model';
 import { useMemo } from 'react';
 import { indexTree, selectionContext, selectionView } from '../../editor';
 import { useEditorState } from '../../editor-react';
@@ -22,7 +22,7 @@ export function useEditorDocument(editor: EditorSession): EditorDocument {
   const nodeIndexes = useMemo(() => new Map(nodes.map((node, index) => [node.id, index])), [nodes]);
   const view = selectionView(demoSchema, editorState.selection, context, nodeIndexes);
   const active = view.focusId === null ? undefined : tree.byId.get(view.focusId)?.node;
-  const selectedBlocks: HybridNode[] = [];
+  const selectedBlocks: StarterNode[] = [];
   const seen = new Set<number>();
 
   function include(id: number) {

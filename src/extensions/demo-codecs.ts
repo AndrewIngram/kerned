@@ -1,11 +1,11 @@
 import {inlineSchema} from './mention';
 import {jsonRecord,jsonString,jsonNumber,jsonBoolean,jsonArray,type NodeCodec,type JsonValue} from '../editor';
-import type {HybridNode,TextBlockNode,TableCell} from './demo-model';
+import type {StarterNode,TextBlockNode,TableCell} from './demo-model';
 import {formattingSchema} from './formatting';
 
 function integer(value:unknown,min=0){const result=jsonNumber(value);if(!Number.isSafeInteger(result)||result<min)throw new Error('Expected an integer in range');return result;}
-function textNode(node:HybridNode):TextBlockNode{if(node.kind!=='paragraph'&&node.kind!=='heading')throw new Error('Expected text node');return node;}
-function textData(node:HybridNode):{[key:string]:JsonValue}{
+function textNode(node:StarterNode):TextBlockNode{if(node.kind!=='paragraph'&&node.kind!=='heading')throw new Error('Expected text node');return node;}
+function textData(node:StarterNode):{[key:string]:JsonValue}{
   const text=textNode(node);
   return {text:text.text,marks:formattingSchema.encode(text.marks),inline:inlineSchema.encode(text.inline)};
 }
@@ -15,9 +15,9 @@ function parseText(value:unknown){
   const inline=inlineSchema.decode(text,data.inline);
   return {text,marks:formattingSchema.validate(text,marks),inline};
 }
-function paragraphs(children:HybridNode[]):TextBlockNode[]{return children.map(textNode);}
-function cell(node:HybridNode):TableCell{if(node.kind!=='tableCell')throw new Error('Expected table cell');return node;}
-function textCodec(kind:'paragraph'|'heading'):NodeCodec<HybridNode>{return {
+function paragraphs(children:StarterNode[]):TextBlockNode[]{return children.map(textNode);}
+function cell(node:StarterNode):TableCell{if(node.kind!=='tableCell')throw new Error('Expected table cell');return node;}
+function textCodec(kind:'paragraph'|'heading'):NodeCodec<StarterNode>{return {
   encode(node):JsonValue{const data=textData(node);if(kind==='heading'&&node.kind==='heading')return {...data,level:node.level};return data;},
   decode(data,{identity}){
     const text=parseText(data);
@@ -26,7 +26,7 @@ function textCodec(kind:'paragraph'|'heading'):NodeCodec<HybridNode>{return {
     return {kind,level,...identity,...text};
   },
 };}
-function atom(kind:'checklist'|'image'):NodeCodec<HybridNode>{return {
+function atom(kind:'checklist'|'image'):NodeCodec<StarterNode>{return {
   encode(node):JsonValue{
     if(node.kind==='checklist')return {checked:node.checked,expanded:node.expanded,notes:node.notes};
     if(node.kind==='image')return {src:node.src,alt:node.alt};
@@ -34,11 +34,11 @@ function atom(kind:'checklist'|'image'):NodeCodec<HybridNode>{return {
   },
   decode(value,{identity}){const data=jsonRecord(value);return kind==='checklist'?{kind,...identity,checked:jsonArray(data.checked).map(jsonBoolean),expanded:jsonBoolean(data.expanded),notes:jsonString(data.notes)}:{kind,...identity,src:jsonString(data.src),alt:jsonString(data.alt)};},
 };}
-function container(kind:'quote'|'listItem'|'list'):NodeCodec<HybridNode>{return {
+function container(kind:'quote'|'listItem'|'list'):NodeCodec<StarterNode>{return {
   encode(node):JsonValue{return node.kind==='list'?{ordered:node.ordered,start:node.start}:{};},
   decode(value,{identity,children}){const data=jsonRecord(value);return kind==='list'?{kind,...identity,children,ordered:jsonBoolean(data.ordered),start:integer(data.start,1)}:{kind,...identity,children};},
 };}
-export const demoCodecs:Readonly<Record<string,NodeCodec<HybridNode>>>={
+export const demoCodecs:Readonly<Record<string,NodeCodec<StarterNode>>>={
   paragraph:textCodec('paragraph'),heading:textCodec('heading'),checklist:atom('checklist'),image:atom('image'),quote:container('quote'),listItem:container('listItem'),list:container('list'),
   tableCell:{
     encode(node):JsonValue{const value=cell(node);return {row:value.row,header:value.header,colspan:value.colspan,rowspan:value.rowspan};},

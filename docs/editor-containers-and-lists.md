@@ -36,7 +36,7 @@ This separation is consistent with [ProseMirror's table module](https://github.c
 
 `npm run check:transactions` checks nested structure through an independent schema using only public APIs. Coverage includes numbering, multi-level indent/outdent, Enter/Backspace, generic structural operations, durable references, atomic rejection, streamed-root preservation, undo/redo, disjoint branch edits, and wrapping 2,000/10,000 blocks. Bulk wrapping is a single `replaceChildren` step, avoiding repeated tree scans per item.
 
-Transaction checks passed at wide and narrow viewports in Chromium, Firefox and WebKit. The existing hybrid, large-document and viewport-reflow suites also passed across all three browsers, including 10,000 blocks and concurrent streaming.
+Transaction checks passed at wide and narrow viewports in Chromium, Firefox and WebKit. The existing editor, large-document and viewport-reflow suites also passed across all three browsers, including 10,000 blocks and concurrent streaming.
 
 `npm run benchmark:containers` measures `editor.dispatch` directly: one-character edits in 2,000/10,000 text leaves, flat or under one generic container, three warmups and 20 samples per case. The existing edit-to-paint metric starts after dispatch and cannot measure this cost.
 

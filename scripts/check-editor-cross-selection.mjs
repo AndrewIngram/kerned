@@ -4,8 +4,8 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
  try{
   const page=await browser.newPage({viewport:{width:1100,height:950}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(process.env.HYBRID_URL??'http://127.0.0.1:5173/hybrid-editor.html');await page.waitForFunction(()=>window.hybridSpike);
-  const read=()=>page.evaluate(()=>window.hybridSpike.read());
+  await page.goto(process.env.EDITOR_URL??'http://127.0.0.1:5173/extensions.html');await page.waitForFunction(()=>window.editorDiagnostics);
+  const read=()=>page.evaluate(()=>window.editorDiagnostics.read());
   const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
   const canvas=page.getByLabel('Canvas document');
   const point=async(id,x)=>{const state=await read(),box=await canvas.boundingBox(),p=state.scene.find(p=>p.id===id);return {x:box.x+(28+x)*state.zoom,y:box.y+(p.y+15)*state.zoom-state.scroll};};

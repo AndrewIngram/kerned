@@ -2,9 +2,9 @@ import {formattingMarks} from './extensions/formatting';
 import {createOutlineExtension,type OutlineEntry} from './extensions/outline';
 import {demoSchema} from './extensions/demo-schema';
 import {plainText} from './extensions/demo-model';
-import {createHybridDocument,type HybridNode} from './extensions/demo-model';
+import {createSampleDocument,type StarterNode} from './extensions/demo-model';
 import {importHtml} from './extensions/html';
-import {hybridChunk} from './hybrid-stream';
+import {sampleChunk} from './editor-stream';
 
 type BookSampleId='warbreaker'|'war-and-peace';
 export const bookSamples:readonly {id:BookSampleId;title:string;description:string}[]=[
@@ -12,19 +12,19 @@ export const bookSamples:readonly {id:BookSampleId;title:string;description:stri
   {id:'war-and-peace',title:'War and Peace',description:'Leo Tolstoy · Translated by Louise and Aylmer Maude · Complete novel'},
 ];
 
-export type HybridSample={
+export type EditorSample={
   id:'extensions'|'stream'|'minimal'|BookSampleId;
   title:string;
   description:string;
   total:number;
-  initial:HybridNode[];
-  comments?:(nodes:readonly HybridNode[])=>{id:string;nodeId:number;from:number;to:number;body:string}[];
+  initial:StarterNode[];
+  comments?:(nodes:readonly StarterNode[])=>{id:string;nodeId:number;from:number;to:number;body:string}[];
   outline?:readonly {entry:OutlineEntry;sourceIndex:number}[];
-  chunk:(start:number,count:number)=>HybridNode[];
+  chunk:(start:number,count:number)=>StarterNode[];
 };
 
-const books=new Map<BookSampleId,Promise<HybridNode[]>>();
-export async function loadHybridSample(url=new URL(location.href)):Promise<HybridSample>{
+const books=new Map<BookSampleId,Promise<StarterNode[]>>();
+export async function loadEditorSample(url=new URL(location.href)):Promise<EditorSample>{
   const book=bookSamples.find(book=>book.id===url.searchParams.get('sample'));
   if(book){
     let loaded=books.get(book.id);
@@ -44,7 +44,7 @@ export async function loadHybridSample(url=new URL(location.href)):Promise<Hybri
     return {...book,outline,total:nodes.length,initial:chunk(0,32),chunk};
   }
   const total=Number(url.searchParams.get('stream'));
-  if(Number.isInteger(total)&&total>=32&&total<=10000)return {id:'stream',comments:sampleComments,title:'Mixed blocks',description:'Generated paragraphs, mentions, checklists and images.',total,initial:hybridChunk(0,32),chunk:hybridChunk};
+  if(Number.isInteger(total)&&total>=32&&total<=10000)return {id:'stream',comments:sampleComments,title:'Mixed blocks',description:'Generated paragraphs, mentions, checklists and images.',total,initial:sampleChunk(0,32),chunk:sampleChunk};
   if(location.pathname==='/editor.html'){
     const texts=[
       'Good ideas often begin with a few words. A thought worth keeping, a question to explore, or a plan taking shape.',
@@ -52,12 +52,12 @@ export async function loadHybridSample(url=new URL(location.href)):Promise<Hybri
       'The best tools give your ideas room to breathe.',
       'Try selecting a few words, or a passage across paragraphs. Make it bold or italic, rewrite it, and undo to find your way back.',
     ];
-    const initial:HybridNode[]=texts.map((text,index)=>({kind:'paragraph',id:index+1,key:`draft-${index+1}`,text,marks:[],inline:[]}));
+    const initial:StarterNode[]=texts.map((text,index)=>({kind:'paragraph',id:index+1,key:`draft-${index+1}`,text,marks:[],inline:[]}));
     const second=initial[1];
     if((second.kind==='paragraph'||second.kind==='heading'))second.marks=formattingMarks([{start:25,end:38,bold:true,italic:false},{start:54,end:73,bold:false,italic:true}]);
     return {id:'minimal',title:'Draft',description:'',total:0,initial,chunk:()=>[]};
   }
-  return {id:'extensions',comments:sampleComments,title:'Launch notes',description:'Select a mention or highlighted phrase. Expand the checklist to add notes.',total:0,initial:createHybridDocument(),chunk:()=>[]};
+  return {id:'extensions',comments:sampleComments,title:'Launch notes',description:'Select a mention or highlighted phrase. Expand the checklist to add notes.',total:0,initial:createSampleDocument(),chunk:()=>[]};
 }
 
 export function sampleUrl(id:string){
@@ -68,7 +68,7 @@ export function sampleUrl(id:string){
   return url.href;
 }
 
-function sampleComments(nodes:readonly HybridNode[]){
+function sampleComments(nodes:readonly StarterNode[]){
   return nodes.flatMap(node=>{
     if(node.kind!=='paragraph'&&node.kind!=='heading')return [];
     if(node.id===2)return [{id:'review',nodeId:2,from:10,to:40,body:'Can we limit this to the core editing flow?'}];

@@ -1,10 +1,10 @@
 import {formattingSchema} from './formatting';
 import {demoCodecs} from './demo-codecs';
 import {normalizeMarks,sliceMarks,createDocumentCodec,createSchema,validateInlineObjects,sliceInlineObjects,type NodeExtension} from '../editor';
-import {replaceText,type HybridNode,type TextBlockNode} from './demo-model';
+import {replaceText,type StarterNode,type TextBlockNode} from './demo-model';
 import {editableTableExtension,tableCellExtension} from './table';
 import {listCommands,quoteExtension} from './blocks';
-function textBlock(node:HybridNode):TextBlockNode{
+function textBlock(node:StarterNode):TextBlockNode{
   if((node.kind!=='paragraph'&&node.kind!=='heading'))throw new Error('Text extension requires a paragraph or heading');return node;
 }
 function slice(node:TextBlockNode,from:number,to:number,id=node.id):TextBlockNode{
@@ -17,7 +17,7 @@ function joined(left:TextBlockNode,right:TextBlockNode):TextBlockNode{
   return {...left,text:left.text+right.text,marks:normalizeMarks([...left.marks,...right.marks.map(range=>({...range,from:range.from+offset,to:range.to+offset}))]),inline:[...left.inline,...right.inline.map(a=>({...a,index:a.index+offset}))]};
 }
 
-export const paragraphExtension:NodeExtension<HybridNode>={
+export const paragraphExtension:NodeExtension<StarterNode>={
   name:'paragraph',version:2,kind:'text',accepts:node=>node.kind==='paragraph',
   validateUpdate(before,after){
     const a=textBlock(before),b=textBlock(after);
@@ -32,11 +32,11 @@ export const paragraphExtension:NodeExtension<HybridNode>={
     join:(left,right)=>joined(textBlock(left),textBlock(right)),
   },
 };
-export const headingExtension:NodeExtension<HybridNode>={...paragraphExtension,name:'heading',accepts:node=>node.kind==='heading'};
-export const checklistExtension:NodeExtension<HybridNode>={name:'checklist',version:1,kind:'atom',accepts:node=>node.kind==='checklist',validateUpdate(){}};
-export const imageExtension:NodeExtension<HybridNode>={name:'image',version:1,kind:'atom',accepts:node=>node.kind==='image',validateUpdate(){}};
+export const headingExtension:NodeExtension<StarterNode>={...paragraphExtension,name:'heading',accepts:node=>node.kind==='heading'};
+export const checklistExtension:NodeExtension<StarterNode>={name:'checklist',version:1,kind:'atom',accepts:node=>node.kind==='checklist',validateUpdate(){}};
+export const imageExtension:NodeExtension<StarterNode>={name:'image',version:1,kind:'atom',accepts:node=>node.kind==='image',validateUpdate(){}};
 
-export const demoStarterKit:NodeExtension<HybridNode>[]=[paragraphExtension,headingExtension,checklistExtension,imageExtension,editableTableExtension,tableCellExtension,quoteExtension,...listCommands.extensions].map(extension=>({...extension,codec:demoCodecs[extension.name]}));
+export const demoStarterKit:NodeExtension<StarterNode>[]=[paragraphExtension,headingExtension,checklistExtension,imageExtension,editableTableExtension,tableCellExtension,quoteExtension,...listCommands.extensions].map(extension=>({...extension,codec:demoCodecs[extension.name]}));
 export const demoSchema=createSchema(demoStarterKit);
 
 export const demoDocumentCodec=createDocumentCodec(demoSchema);

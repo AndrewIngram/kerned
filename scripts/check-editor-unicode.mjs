@@ -3,25 +3,25 @@ import assert from 'node:assert/strict';
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();try{
  const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+ await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
  const settle=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
- const original=await page.evaluate(()=>window.hybridSpike.read().nodes[0].text);
+ const original=await page.evaluate(()=>window.editorDiagnostics.read().nodes[0].text);
  for(const value of ['😀','👍🏽','👩‍💻','👨‍👩‍👧‍👦','🇬🇧','1️⃣','❤️','é','e\u0301','🫩']){
-  await page.evaluate(()=>window.hybridSpike.select(1,0));await settle();await page.keyboard.insertText(value);await settle();
+  await page.evaluate(()=>window.editorDiagnostics.select(1,0));await settle();await page.keyboard.insertText(value);await settle();
   assert.deepEqual(errors,[],'Unicode must not crash rendering');
   assert.equal(await page.locator('.text-capture').count(),1);
-  assert.equal(await page.evaluate(()=>window.hybridSpike.read().nodes[0].text),value+original);
+  assert.equal(await page.evaluate(()=>window.editorDiagnostics.read().nodes[0].text),value+original);
   await page.keyboard.press('Backspace');await settle();
-  assert.equal(await page.evaluate(()=>window.hybridSpike.read().nodes[0].text),original,'Backspace must remove one entire grapheme');
+  assert.equal(await page.evaluate(()=>window.editorDiagnostics.read().nodes[0].text),original,'Backspace must remove one entire grapheme');
   await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();
-  assert.equal(await page.evaluate(()=>window.hybridSpike.read().nodes[0].text),value+original);
+  assert.equal(await page.evaluate(()=>window.editorDiagnostics.read().nodes[0].text),value+original);
   await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();
-  assert.equal(await page.evaluate(()=>window.hybridSpike.read().nodes[0].text),original);
+  assert.equal(await page.evaluate(()=>window.editorDiagnostics.read().nodes[0].text),original);
  }
- await page.evaluate(()=>window.hybridSpike.select(1,0));await settle();await page.keyboard.insertText('😀 👍🏽 👩‍💻 🇬🇧 ❤️ café ');await settle();
+ await page.evaluate(()=>window.editorDiagnostics.select(1,0));await settle();await page.keyboard.insertText('😀 👍🏽 👩‍💻 🇬🇧 ❤️ café ');await settle();
  await page.screenshot({path:`artifacts/editor-emoji-${name}.png`});
  // Unsupported scripts must leave the editor usable, without committing bad layout input.
- await page.keyboard.insertText('漢');await settle();assert.deepEqual(errors,[]);assert.ok(!(await page.evaluate(()=>window.hybridSpike.read().nodes[0].text)).includes('漢'));
+ await page.keyboard.insertText('漢');await settle();assert.deepEqual(errors,[]);assert.ok(!(await page.evaluate(()=>window.editorDiagnostics.read().nodes[0].text)).includes('漢'));
  await page.keyboard.insertText('OK');await settle();assert.deepEqual(errors,[]);
  if(name==='chromium'){
   const variants=await page.evaluate(async()=>{

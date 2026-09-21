@@ -7,7 +7,7 @@ export function tablePlainText(table:TableNode):string{
 }
 
 import {createCellSelectionExtension} from './cell-selection';
-import type {HybridNode,TextBlockNode,TableCell} from './demo-model';
+import type {StarterNode,TextBlockNode,TableCell} from './demo-model';
 import type {NodeExtension,NodeIdentity} from '../editor';
 export const tableCells=createCellSelectionExtension({rows(context,id){
  const node=context.node(id);
@@ -20,7 +20,7 @@ export const tableCells=createCellSelectionExtension({rows(context,id){
   return rows;
  },[]);
 }});
-export const editableTableExtension:NodeExtension<HybridNode>={
+export const editableTableExtension:NodeExtension<StarterNode>={
  name:'table',version:1,kind:'container',accepts:node=>node.kind==='table',validateUpdate(){},
  content:{children:node=>node.kind==='table'?node.rows.flat():[],withChildren(node,children){
   if(node.kind!=='table')throw new Error('Expected table');
@@ -28,7 +28,7 @@ export const editableTableExtension:NodeExtension<HybridNode>={
   return {...node,rows};
  },validateChildren(node,children){if(node.kind!=='table'||!children.length||children.some(c=>c.kind!=='tableCell'))throw new Error('Tables require cells');}},
 };
-export const tableCellExtension:NodeExtension<HybridNode>={
+export const tableCellExtension:NodeExtension<StarterNode>={
  name:'tableCell',version:1,kind:'container',accepts:node=>node.kind==='tableCell',validateUpdate(){},
  content:{children:node=>node.kind==='tableCell'?node.paragraphs:[],withChildren(node,children){
   if(node.kind!=='tableCell')throw new Error('Expected cell');

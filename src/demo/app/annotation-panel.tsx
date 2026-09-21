@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Rect } from '../../engines';
-import { type Scene } from '../../hybrid-scene';
+import { type Scene } from '../../editor-scene';
 
 import type { Viewport } from '../../editor-react';
 import type { useComments } from './use-comments';

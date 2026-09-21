@@ -12,7 +12,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
       // Keep concurrent development/builds from reloading a measured page.
       await page.routeWebSocket(url=>url.pathname==='/',()=>{});
       if (process.env.BASELINE_DIR) {
-        for (const path of ['editor/transactions.ts', 'hybrid-scene.ts']) {
+        for (const path of ['editor/transactions.ts', 'editor-scene.ts']) {
           const source = await readFile(`${process.env.BASELINE_DIR}/${path}`, 'utf8');
           const {outputText} = ts.transpileModule(source, {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}});
           const body = outputText.replace(/from (["'])(\.[^"']+)\1/g, (_,quote,specifier)=>`from ${quote}${specifier}.ts${quote}`);
@@ -22,8 +22,8 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(process.env.FORMATTING_URL ?? 'http://127.0.0.1:5173/editor.html?sample=warbreaker');
-      await page.waitForFunction(() => window.hybridSpike?.probe([]).complete, undefined, {timeout: 120000});
-      await page.evaluate(() => window.hybridSpike.select(window.hybridSpike.read().nodes[0].id, 0));
+      await page.waitForFunction(() => window.editorDiagnostics?.probe([]).complete, undefined, {timeout: 120000});
+      await page.evaluate(() => window.editorDiagnostics.select(window.editorDiagnostics.read().nodes[0].id, 0));
       await page.keyboard.press('Meta+a');
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       let cdp;
@@ -33,7 +33,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
         await cdp.send('Profiler.start');
       }
       const result = await page.evaluate(async () => {
-        const api = window.hybridSpike;
+        const api = window.editorDiagnostics;
         const original = api.read();
         const before = api.metrics();
         const start = performance.now();
@@ -72,17 +72,17 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
       console.log(name, trial, JSON.stringify(result));
       assert.equal(result.bold, true, 'Every character must be bold');
       assert.equal(result.selectionPreserved, true);
-      await page.waitForFunction(() => window.hybridSpike.probe([]).reflowPending === 0, undefined, {timeout: 120000});
+      await page.waitForFunction(() => window.editorDiagnostics.probe([]).reflowPending === 0, undefined, {timeout: 120000});
       Object.assign(result, await page.evaluate(() => {
         window.formattingFrames.active=false;
-        return {completeMs:performance.now()-window.formattingStarted,maxFrameGapMs:Math.max(...window.formattingFrames.gaps),stalePaints:window.hybridSpike.metrics().stalePaints};
+        return {completeMs:performance.now()-window.formattingStarted,maxFrameGapMs:Math.max(...window.formattingFrames.gaps),stalePaints:window.editorDiagnostics.metrics().stalePaints};
       }));
       const undo = await page.evaluate(async () => {
         const start = performance.now();
         document.querySelector('button[aria-label="Undo"]').click();
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
         const paintedMs = performance.now() - start;
-        return {paintedMs, restored: JSON.stringify(window.hybridSpike.read().nodes) === JSON.stringify(window.formattingOriginal.nodes)};
+        return {paintedMs, restored: JSON.stringify(window.editorDiagnostics.read().nodes) === JSON.stringify(window.formattingOriginal.nodes)};
       });
       assert.equal(undo.restored, true, 'One undo must restore all original formatting');
       assert.equal(result.stalePaints, 0, 'Visible paragraphs must always have current layout');

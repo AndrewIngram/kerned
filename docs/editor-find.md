@@ -54,7 +54,7 @@ Asynchronous search starts in a new task, then yields between roughly 4 ms work 
 
 During append-only loading, an earlier snapshot remains valid for its unchanged document prefix. The demo retains its count and highlights while the next snapshot catches up. New roots do not reset Find, toggle its pending indicator, or repeatedly scroll to the active result. Actual edits invalidate affected snapshots; a changed query displays a pending count and temporarily disables result navigation.
 
-`src/demo/find-bar.tsx` owns controls and input focus. The hybrid demo consumes `byNode`, paints only mounted canvas paragraphs, and passes cell ranges to the table view. It pins the current result's block before scrolling to its geometry. The scene can reserve top space so the floating bar does not cover the first result; this does not rewrap text. Editing selections remain independent of search highlights.
+`src/demo/find-bar.tsx` owns controls and input focus. The editor demo consumes `byNode`, paints only mounted canvas paragraphs, and passes cell ranges to the table view. It pins the current result's block before scrolling to its geometry. The scene can reserve top space so the floating bar does not cover the first result; this does not rewrap text. Editing selections remain independent of search highlights.
 
 ## Verification
 

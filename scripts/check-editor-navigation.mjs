@@ -4,7 +4,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();try{
  for(const width of [1100,390]){
  const page=await browser.newPage({viewport:{width,height:800}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+ await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
  if(width===1100){
  const core=await page.evaluate(async()=>{
   const {hitTestTextLines,createTextNavigation,TextSelection}=await import('/src/editor/index.ts');
@@ -33,7 +33,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  for(const [platform,kind,value] of core.cases){const expected=kind==='word'?{id:91,offset:platform==='mac'?3:4}:kind==='shiftWord'?{id:91,offset:4}:kind==='docEnd'?{id:93,offset:39}:kind==='column'?{id:93,offset:5}:kind==='top'?{id:91,offset:0}:null;assert.deepEqual(value,expected,`${platform} ${kind}`);}
  }
  const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
- const read=()=>page.evaluate(()=>window.hybridSpike.read());
+ const read=()=>page.evaluate(()=>window.editorDiagnostics.read());
  const point=async(id,x,dy)=>{const state=await read(),p=state.scene.find(p=>p.id===id),r=await page.getByLabel('Canvas document').boundingBox();return {x:r.x+28+x,y:r.y+p.y-state.scroll+dy};};
  const click=async p=>{await page.mouse.click(p.x,p.y);await settle();return (await read()).selection;};
  let state=await read(),first=state.scene[0],last=state.scene.at(-1);
@@ -46,7 +46,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  await click(firstLine);await page.keyboard.down('Shift');await click({x:width-2,y:lastLine.y});await page.keyboard.up('Shift');state=await read();assert.equal(state.selection.anchorId,first.id);assert.equal(state.selection.id,last.id);
  await page.mouse.move(2,firstLine.y);await page.mouse.down();await page.mouse.move(width-2,lastLine.y,{steps:8});await page.mouse.up();await settle();state=await read();assert.equal(state.selection.anchorId,first.id);assert.equal(state.selection.id,last.id);
  const before=state.selection;await page.getByRole('button',{name:'Find',exact:true}).click();await settle();assert.deepEqual((await read()).selection,before,'Interactive buttons must not relocate selection');await page.keyboard.press('Escape');
- await page.evaluate(()=>window.hybridSpike.select(1,5));await settle();
+ await page.evaluate(()=>window.editorDiagnostics.select(1,5));await settle();
  const mac=await page.evaluate(()=>/Mac|iPhone|iPad/.test(navigator.platform)),word=mac?'Alt':'Control';
  await page.keyboard.press(`${word}+Shift+ArrowRight`);await settle();state=await read();assert.equal(state.selection.anchor,5);assert.ok(state.selection.focus>5);
  await page.keyboard.press('Control+End');await settle();state=await read();assert.equal(state.selection.id,last.id);assert.equal(state.selection.focus,state.nodes.at(-1).text.length);
@@ -56,12 +56,12 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  }
  // Long-document paging must hydrate destination layout and reveal the caret.
  const page=await browser.newPage({viewport:{width:1100,height:800}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');await page.waitForFunction(()=>window.hybridSpike?.probe([]).complete);
- await page.evaluate(()=>window.hybridSpike.select(1,0));await page.keyboard.press('Shift+PageDown');
- await page.waitForFunction(()=>window.hybridSpike.read().selection.id!==1);let state=await page.evaluate(()=>window.hybridSpike.read());assert.equal(state.selection.anchorId,1);assert.ok(state.scroll>0);
- await page.keyboard.press('Control+End');await page.waitForFunction(()=>window.hybridSpike.read().selection.id===window.hybridSpike.read().nodes.at(-1).id);assert.ok(await page.evaluate(()=>scrollY>10000));
- await page.keyboard.press('PageUp');await page.waitForFunction(()=>window.hybridSpike.read().selection.id!==window.hybridSpike.read().nodes.at(-1).id);
- await page.keyboard.press('Control+Home');await page.waitForFunction(()=>window.hybridSpike.read().selection.id===1);assert.ok(await page.evaluate(()=>scrollY<40));assert.deepEqual(errors,[]);
+ await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');await page.waitForFunction(()=>window.editorDiagnostics?.probe([]).complete);
+ await page.evaluate(()=>window.editorDiagnostics.select(1,0));await page.keyboard.press('Shift+PageDown');
+ await page.waitForFunction(()=>window.editorDiagnostics.read().selection.id!==1);let state=await page.evaluate(()=>window.editorDiagnostics.read());assert.equal(state.selection.anchorId,1);assert.ok(state.scroll>0);
+ await page.keyboard.press('Control+End');await page.waitForFunction(()=>window.editorDiagnostics.read().selection.id===window.editorDiagnostics.read().nodes.at(-1).id);assert.ok(await page.evaluate(()=>scrollY>10000));
+ await page.keyboard.press('PageUp');await page.waitForFunction(()=>window.editorDiagnostics.read().selection.id!==window.editorDiagnostics.read().nodes.at(-1).id);
+ await page.keyboard.press('Control+Home');await page.waitForFunction(()=>window.editorDiagnostics.read().selection.id===1);assert.ok(await page.evaluate(()=>scrollY<40));assert.deepEqual(errors,[]);
  await page.close();console.log(name,'page movement, shift selection and distant document boundaries passed');
  }finally{await browser.close();}
 }

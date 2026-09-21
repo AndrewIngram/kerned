@@ -4,7 +4,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();try{
   const streaming=await browser.newPage({viewport:{width:1100,height:800}});
   await streaming.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker&paused=1');
-  await streaming.waitForFunction(()=>window.hybridSpike);
+  await streaming.waitForFunction(()=>window.editorDiagnostics);
   await streaming.getByRole('button',{name:'Open document outline',exact:true}).focus();
   const pendingButtons=streaming.locator('.outline-items button');
   const fullCount=await pendingButtons.count();
@@ -16,7 +16,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await pendingButtons.last().evaluate(el=>el.click());
   assert.equal(await streaming.evaluate(()=>scrollY),beforePendingClick);
   await streaming.keyboard.press('Escape');
-  await streaming.evaluate(()=>window.hybridSpike.select(1,0));
+  await streaming.evaluate(()=>window.editorDiagnostics.select(1,0));
   await streaming.keyboard.type('Edited ');
   await streaming.getByRole('button',{name:'Open document outline',exact:true}).focus();
   assert.ok((await pendingButtons.first().innerText()).startsWith('Edited '));
@@ -26,8 +26,8 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await streaming.getByRole('button',{name:'Paragraph',exact:true}).click();
   await streaming.getByRole('button',{name:'Open document outline',exact:true}).focus();
   assert.equal(await pendingButtons.count(),fullCount-1,'Removed heading must not return from source outline');
-  await streaming.evaluate(()=>window.hybridSpike.resume());
-  await streaming.waitForFunction(()=>window.hybridSpike.probe([]).complete);
+  await streaming.evaluate(()=>window.editorDiagnostics.resume());
+  await streaming.waitForFunction(()=>window.editorDiagnostics.probe([]).complete);
   assert.equal(await pendingButtons.count(),fullCount-1);
   assert.equal(await streaming.locator('.outline-items button:disabled').count(),0);
   await pendingButtons.last().click();
@@ -35,15 +35,15 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await streaming.close();console.log(name,'full pending outline, disabled navigation, live edits and progressive availability passed');
   for(const width of [1100,390]){
    const page=await browser.newPage({viewport:{width,height:800}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-   await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');await page.waitForFunction(()=>window.hybridSpike);
-   await page.getByRole('button',{name:'Open document outline',exact:true}).waitFor();await page.waitForFunction(()=>window.hybridSpike.probe([]).complete);
+   await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');await page.waitForFunction(()=>window.editorDiagnostics);
+   await page.getByRole('button',{name:'Open document outline',exact:true}).waitFor();await page.waitForFunction(()=>window.editorDiagnostics.probe([]).complete);
    const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
-   const before=await page.evaluate(()=>window.hybridSpike.read().selection);
+   const before=await page.evaluate(()=>window.editorDiagnostics.read().selection);
    const trigger=page.getByRole('button',{name:'Open document outline',exact:true});
    await trigger.focus();await page.locator('.outline-panel').waitFor();
    await page.locator('.outline-items button').last().click();await settle();
    assert.ok(await page.evaluate(()=>scrollY>10000));
-   assert.deepEqual(await page.evaluate(()=>window.hybridSpike.read().selection),before,'Navigation must preserve selection');
+   assert.deepEqual(await page.evaluate(()=>window.editorDiagnostics.read().selection),before,'Navigation must preserve selection');
    await page.keyboard.press('Escape');
    if(width>600){const marks=await page.locator('.outline-marks').evaluate(el=>{const r=el.getBoundingClientRect(),active=el.querySelector('[data-active="true"]').getBoundingClientRect(),all=el.querySelectorAll('.outline-mark');return {top:r.top,bottom:r.bottom,activeTop:active.top,activeBottom:active.bottom,scroll:el.scrollTop,gap:all[1].getBoundingClientRect().top-all[0].getBoundingClientRect().top,overflow:getComputedStyle(el).overflow};});assert.ok(marks.activeTop>=marks.top&&marks.activeBottom<=marks.bottom);assert.equal(marks.gap,10);assert.equal(marks.overflow,'hidden');assert.ok(marks.scroll>0);}
    await trigger.press('Enter');await page.locator('.outline-panel').waitFor();
@@ -55,7 +55,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
    await trigger.focus();await page.locator('.outline-panel').waitFor();await page.screenshot({path:`artifacts/outline-${name}-${width}.png`});
    await page.close();console.log(name,width,'outline navigation, dismissal, preserved selection and responsive fit passed');
   }
-  const page=await browser.newPage();await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+  const page=await browser.newPage();await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
   assert.equal(await page.locator('.document-outline').count(),0);
   const result=await page.evaluate(async()=>{
    const {createSchema}=await import('/src/editor/index.ts');
@@ -73,7 +73,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await page.locator('.blocks-menu summary').click();await page.getByRole('button',{name:'Heading 2',exact:true}).click();await page.locator('.document-outline').waitFor();
   await page.getByRole('button',{name:'Open document outline',exact:true}).focus();await page.locator('.outline-panel').waitFor();
   assert.equal(await page.locator('.outline-items button').count(),1);
-  await page.keyboard.press('Escape');await page.evaluate(()=>window.hybridSpike.select(1,0));await page.keyboard.type('Renamed ');
+  await page.keyboard.press('Escape');await page.evaluate(()=>window.editorDiagnostics.select(1,0));await page.keyboard.type('Renamed ');
   await page.getByRole('button',{name:'Open document outline',exact:true}).focus();await page.locator('.outline-panel').waitFor();assert.ok((await page.locator('.outline-items button').innerText()).startsWith('Renamed '));
   await page.getByRole('button',{name:'Undo',exact:true}).click();await page.getByRole('button',{name:'Undo',exact:true}).click();assert.equal(await page.locator('.document-outline').count(),0);
   await page.close();console.log(name,'generic extraction, nested/skipped levels, caching, streaming and editing passed');

@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react';
 import { plainText } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { createOutlineExtension, type OutlineEntry } from '../../extensions/outline';
-import { type HybridSample } from '../../hybrid-samples';
-import { type Scene } from '../../hybrid-scene';
+import { type EditorSample } from '../../editor-samples';
+import { type Scene } from '../../editor-scene';
 
 import type { RefObject } from 'react';
 import type { EditorDocument } from '../../extensions/starter-kit/types';
 
 type OutlineOptions = Pick<EditorDocument, 'editorState' | 'tree'> & {
-  sample: HybridSample;
+  sample: EditorSample;
   sourceLoaded: RefObject<number>;
   scene: Scene;
   zoom: number;

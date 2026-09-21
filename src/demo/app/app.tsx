@@ -1,7 +1,7 @@
 import { type CanvasKit } from 'canvaskit-wasm';
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
-import { loadHybridSample, sampleUrl, type HybridSample } from '../../hybrid-samples';
+import { loadEditorSample, sampleUrl, type EditorSample } from '../../editor-samples';
 
 import type { Owned } from '../../extensions/starter-kit/types';
 import { EditorWorkspace } from './editor-workspace';
@@ -13,9 +13,9 @@ export function App({
 }: {
   kit: CanvasKit;
   owned: Owned;
-  initial: HybridSample;
+  initial: EditorSample;
 }) {
-  const [sample, setSample] = useState<HybridSample | null>(initial);
+  const [sample, setSample] = useState<EditorSample | null>(initial);
 
   const [loading, setLoading] = useState(false),
     [error, setError] = useState('');
@@ -28,7 +28,7 @@ export function App({
     setError('');
 
     try {
-      const next = await loadHybridSample(url);
+      const next = await loadEditorSample(url);
 
       if (id !== request.current) return;
       // Dispose old scene snapshots and streaming work before the new scene uses

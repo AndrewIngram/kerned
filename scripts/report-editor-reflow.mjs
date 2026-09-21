@@ -1,6 +1,6 @@
 import {readFile,writeFile} from 'node:fs/promises';
-const benchmark=JSON.parse(await readFile('artifacts/hybrid-reflow-benchmark.json','utf8'));
-const checks=JSON.parse(await readFile('artifacts/hybrid-reflow-checks.json','utf8'));
+const benchmark=JSON.parse(await readFile('artifacts/editor-reflow-benchmark.json','utf8'));
+const checks=JSON.parse(await readFile('artifacts/editor-reflow-checks.json','utf8'));
 const median=values=>[...values].sort((a,b)=>a-b)[Math.floor(values.length/2)];
 const f=n=>n.toFixed(1);
 const rows=[];
@@ -15,7 +15,7 @@ const counts=progressive.map(t=>t.initialLayouts);const initialCount=Math.min(..
 const batchWork=progressive.flatMap(t=>t.batches.filter(b=>b.background).map(b=>b.workMs)).sort((a,b)=>a-b);
 const text=`# Viewport-first reflow
 
-Recorded ${benchmark.recordedAt} on ${benchmark.cpu}. The hybrid editor now reflows visible paragraphs before processing offscreen paragraphs in frame-sized batches. No new dependencies, worker transport or WASM interface were added.
+Recorded ${benchmark.recordedAt} on ${benchmark.cpu}. The editor editor now reflows visible paragraphs before processing offscreen paragraphs in frame-sized batches. No new dependencies, worker transport or WASM interface were added.
 
 ## Result
 
@@ -31,7 +31,7 @@ First paint and completion columns are medians across three trials. Frame column
 
 Offscreen completion deliberately takes longer because work yields between frames. Background composition targets 4 ms and stops after at most 128 paragraphs per batch. Across these runs, the full scene-build work for background batches had median ${f(median(batchWork))} ms, p95 ${f(batchWork[Math.floor(batchWork.length*.95)])} ms and maximum ${f(batchWork.at(-1))} ms. Each batch measurement covers one scene-build call, including placement rebuilding. It excludes subsequent React reconciliation, measurement/anchor follow-up renders and canvas painting. The 4 ms target is not a hard time limit: a single paragraph, allocation or garbage collection can overrun it.
 
-Raw data: [paired timings](../artifacts/hybrid-reflow-benchmark.json), [correctness results](../artifacts/hybrid-reflow-checks.json).
+Raw data: [paired timings](../artifacts/editor-reflow-benchmark.json), [correctness results](../artifacts/editor-reflow-checks.json).
 
 ## Correctness
 
@@ -65,17 +65,17 @@ React schedules one background pass per animation frame. Width changes supersede
 ~~~sh
 npm run build
 npm run preview
-npm run check:hybrid-reflow
-npm run benchmark:hybrid-reflow
-node scripts/report-hybrid-reflow.mjs
+npm run check:editor-reflow
+npm run benchmark:editor-reflow
+node scripts/report-editor-reflow.mjs
 ~~~
 
-Open [the 10,000-block demo](http://127.0.0.1:5176/hybrid-editor.html?stream=10000). Add reflow=eager to the query to run the synchronous comparison path. The default small demo also uses viewport-first reflow.
+Open [the 10,000-block demo](http://127.0.0.1:5176/extensions.html?stream=10000). Add reflow=eager to the query to run the synchronous comparison path. The default small demo also uses viewport-first reflow.
 
 ## Limits and next step
 
 The document's total height and scrollbar thumb can change while offscreen paragraphs converge. Measurements for unmounted DOM blocks remain estimates. A single very large paragraph still composes synchronously. These results use the existing Latin/styled fixture and local chunk source, not a real network stream or complex-script editor.
 
-The scene still scans/copies placement arrays during reflow, and retains shaping and layout for all arrived paragraphs. This change does not solve the retained-memory cost measured in the [large-document study](hybrid-large-documents.md). The next useful step is bounded offscreen layout retention and compact caret storage, while preserving enough height information for stable scrolling.
+The scene still scans/copies placement arrays during reflow, and retains shaping and layout for all arrived paragraphs. This change does not solve the retained-memory cost measured in the [large-document study](editor-large-documents.md). The next useful step is bounded offscreen layout retention and compact caret storage, while preserving enough height information for stable scrolling.
 `;
-await writeFile('docs/hybrid-viewport-reflow.md',text);
+await writeFile('docs/editor-viewport-reflow.md',text);

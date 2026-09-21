@@ -4,7 +4,7 @@ test('canvas input follows session, inset and scrollport changes without remount
   page,
 }) => {
   await page.goto('/editor.html');
-  await page.waitForFunction(() => window.hybridSpike);
+  await page.waitForFunction(() => window.editorDiagnostics);
   const result = await page.evaluate(async () => {
     const { fixture, dispatch } = await import('/tests/fixtures/editor-foundation.js');
     const { mountCanvasInputProbe } = await import('/tests/fixtures/canvas-input-probe.js');
@@ -66,7 +66,7 @@ test('text capture reuses the document index while the caret moves and refreshes
   page,
 }) => {
   await page.goto('/editor.html');
-  await page.waitForFunction(() => window.hybridSpike);
+  await page.waitForFunction(() => window.editorDiagnostics);
   const result = await page.evaluate(async () => {
     const { fixture, schema, dispatch } = await import('/tests/fixtures/editor-foundation.js');
     const { textSelection, selectionContext } = await import('/src/editor/index.ts');

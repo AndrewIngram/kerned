@@ -59,7 +59,7 @@ for (const group of groups) {
           `${file} depends on application code: ${specifier}`,
         );
         assert.ok(
-          !/hybrid-(samples|stream)/.test(target),
+          !/editor-(samples|stream)/.test(target),
           `${file} depends on demo loading: ${specifier}`,
         );
         assert.ok(!target.endsWith('.css'), `${file} imports demo styling: ${specifier}`);
@@ -92,7 +92,7 @@ for (const group of groups) {
     checked++;
   }
 }
-for (const html of ['editor.html', 'hybrid-editor.html']) {
+for (const html of ['editor.html', 'extensions.html']) {
   assert.match(
     readFileSync(html, 'utf8'),
     /src="\/src\/demo\/app\/main\.tsx"/,

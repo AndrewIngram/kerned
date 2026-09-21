@@ -8,13 +8,13 @@ import {
   useState,
 } from 'react';
 import type { FindOptions, FindSnapshot, FindState } from '../../editor';
-import { type HybridNode } from '../../extensions/demo-model';
+import { type StarterNode } from '../../extensions/demo-model';
 
 import type { RefObject } from 'react';
 import type { EditorState } from '../../editor';
 import type { Viewport } from '../../editor-react';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import type { Scene } from '../../hybrid-scene';
+import type { Scene } from '../../editor-scene';
 
 export function useFind({
   editor,
@@ -24,7 +24,7 @@ export function useFind({
   onOpen,
 }: {
   editor: EditorSession;
-  editorState: EditorState<HybridNode>;
+  editorState: EditorState<StarterNode>;
   scroller: RefObject<HTMLDivElement | null>;
   inputRef: RefObject<HTMLTextAreaElement | null>;
   onOpen: () => void;
@@ -40,9 +40,9 @@ export function useFind({
   const lastFindOptions = useRef<FindOptions>({ matchCase: false }),
     findAbort = useRef<AbortController | null>(null);
 
-  const findInFlight = useRef<readonly HybridNode[] | null>(null);
+  const findInFlight = useRef<readonly StarterNode[] | null>(null);
 
-  const [findSnapshot, setFindSnapshot] = useState<FindSnapshot<HybridNode>>(() => ({
+  const [findSnapshot, setFindSnapshot] = useState<FindSnapshot<StarterNode>>(() => ({
     state: editor.find.state,
     nodes: editor.state.nodes,
   }));

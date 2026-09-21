@@ -3,10 +3,10 @@ import type {CanvasKit} from 'canvaskit-wasm';
 import {CanvasPrimitive,createReactRenderers,type CanvasPainter as Painter} from '../editor-react';
 import type {createOwnedEngine} from '../owned-layout';
 import type {LaidOut} from '../engines';
-import type {HybridNode} from './demo-model';
+import type {StarterNode} from './demo-model';
 type Owned=Awaited<ReturnType<typeof createOwnedEngine>>;
 type InlineBox=Pick<ReturnType<Owned['layoutInline']>['inlineBoxes'][number],'id'|'index'|'label'|'x'|'y'|'width'|'height'>;
-type TextPlacement={node:HybridNode;y:number;layout:LaidOut|null;boxes:InlineBox[]};
+type TextPlacement={node:StarterNode;y:number;layout:LaidOut|null;boxes:InlineBox[]};
 export type CommentHighlight={id:string;from:number;to:number};
 const noComments:readonly CommentHighlight[]=[];
 export function ParagraphExtensions({placement:p,comments=noComments,kit,owned,open}:{placement:TextPlacement;comments?:readonly CommentHighlight[];kit:CanvasKit;owned:Owned;open:(kind:'mention'|'comment',atomId:string,index:number)=>void}){

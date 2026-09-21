@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-test.beforeEach(async({page})=>{await page.goto('/editor.html');await page.waitForFunction(()=>window.hybridSpike);});
+test.beforeEach(async({page})=>{await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);});
 
 test('React selectors suppress unchanged values and view listeners clean up under StrictMode',async({page})=>{
  const result=await page.evaluate(async()=>{

@@ -1,7 +1,7 @@
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
-const base=process.env.HYBRID_URL??'http://127.0.0.1:5176/hybrid-editor.html';
+const base=process.env.EDITOR_URL??'http://127.0.0.1:5176/extensions.html';
 const report={recordedAt:new Date().toISOString(),cases:[]};
 const browser=await chromium.launch();
 try{for(const total of [2000,10000])for(const retention of ['all','viewport']){
@@ -9,31 +9,31 @@ try{for(const total of [2000,10000])for(const retention of ['all','viewport']){
  page.on('pageerror',e=>errors.push(e.message));
  const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
  await page.goto(`${base}?stream=${total}&paused=1&retention=${retention}`);
- await page.waitForFunction(()=>window.hybridSpike);await settle();
+ await page.waitForFunction(()=>window.editorDiagnostics);await settle();
  const cdp=await page.context().newCDPSession(page);await cdp.send('HeapProfiler.enable');
  async function heap(){await cdp.send('HeapProfiler.collectGarbage');await cdp.send('HeapProfiler.collectGarbage');return cdp.send('Runtime.getHeapUsage');}
  const baseline=await heap();
- await page.evaluate(()=>window.hybridSpike.resume());await page.waitForFunction(()=>window.hybridSpike.probe([]).complete);await settle();
- const loaded=await heap(),initial=await page.evaluate(()=>window.hybridSpike.metrics());
- const initialShapes=await page.evaluate(()=>window.hybridSpike.probe([]).stats.shapeCalls);
+ await page.evaluate(()=>window.editorDiagnostics.resume());await page.waitForFunction(()=>window.editorDiagnostics.probe([]).complete);await settle();
+ const loaded=await heap(),initial=await page.evaluate(()=>window.editorDiagnostics.metrics());
+ const initialShapes=await page.evaluate(()=>window.editorDiagnostics.probe([]).stats.shapeCalls);
  const scrolls=[];
  for(let cycle=0;cycle<3;cycle++)for(const id of [Math.floor(total/2)+6,total+5,1]){
-  await page.evaluate(id=>window.hybridSpike.scrollTo(id),id);await settle();
-  const m=await page.evaluate(()=>window.hybridSpike.metrics()),p=await page.evaluate(()=>window.hybridSpike.probe([]));
+  await page.evaluate(id=>window.editorDiagnostics.scrollTo(id),id);await settle();
+  const m=await page.evaluate(()=>window.editorDiagnostics.metrics()),p=await page.evaluate(()=>window.editorDiagnostics.probe([]));
   assert.equal(p.stats.shapeCalls,initialShapes);
   assert.equal(m.memory.caretUnusedBytes,0);assert.equal(m.stalePaints,0);
   if(retention==='viewport')assert.ok(m.residentParagraphs<128);
-  const reference=cycle===0?await page.evaluate(()=>window.hybridSpike.verifyReflow()):undefined;
+  const reference=cycle===0?await page.evaluate(()=>window.editorDiagnostics.verifyReflow()):undefined;
   scrolls.push({cycle,id,reference,sceneMs:m.lastSceneMs,resident:m.residentParagraphs,shapeCalls:p.stats.shapeCalls,layoutCalls:m.layoutCalls});
  }
  assert.equal(new Set(scrolls.map(s=>s.shapeCalls)).size,1);
- const reference=await page.evaluate(()=>window.hybridSpike.verifyReflow());
- await page.setViewportSize({width:700,height:950});await settle();await page.waitForFunction(()=>window.hybridSpike.probe([]).reflowPending===0);await settle();
- const resizedReference=await page.evaluate(()=>window.hybridSpike.verifyReflow());
- await page.setViewportSize({width:1100,height:950});await settle();await page.waitForFunction(()=>window.hybridSpike.probe([]).reflowPending===0);await settle();
- const afterCycles=await heap(),final=await page.evaluate(()=>window.hybridSpike.metrics());
+ const reference=await page.evaluate(()=>window.editorDiagnostics.verifyReflow());
+ await page.setViewportSize({width:700,height:950});await settle();await page.waitForFunction(()=>window.editorDiagnostics.probe([]).reflowPending===0);await settle();
+ const resizedReference=await page.evaluate(()=>window.editorDiagnostics.verifyReflow());
+ await page.setViewportSize({width:1100,height:950});await settle();await page.waitForFunction(()=>window.editorDiagnostics.probe([]).reflowPending===0);await settle();
+ const afterCycles=await heap(),final=await page.evaluate(()=>window.editorDiagnostics.metrics());
  assert.equal(final.stalePaints,0);assert.deepEqual(errors,[]);
  if(retention==='viewport')assert.ok(final.memory.composedParagraphs<128);
  report.cases.push({total,retention,baseline,loaded,afterCycles,delta:{usedSize:loaded.usedSize-baseline.usedSize,backingStorageSize:loaded.backingStorageSize-baseline.backingStorageSize},initialMemory:initial.memory,finalMemory:final.memory,scrolls,reference,resizedReference});
- await writeFile('artifacts/hybrid-retention.json',JSON.stringify(report,null,2)+'\n');console.log(total,retention,report.cases.at(-1).delta,final.memory.composedParagraphs);await page.close();
+ await writeFile('artifacts/editor-retention.json',JSON.stringify(report,null,2)+'\n');console.log(total,retention,report.cases.at(-1).delta,final.memory.composedParagraphs);await page.close();
 }}finally{await browser.close();}

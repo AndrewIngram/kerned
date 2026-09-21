@@ -2,7 +2,7 @@
 
 Both editor views offer **Warbreaker** and **War and Peace** in the **Sample**
 selector. Add `?sample=warbreaker` or `?sample=war-and-peace` to `/editor.html`
-or `/hybrid-editor.html` to open a book directly.
+or `/extensions.html` to open a book directly.
 
 ## War and Peace
 
@@ -42,8 +42,8 @@ gets a direct-loading check too. Results go to `artifacts/war-and-peace-checks.j
 
 ## Warbreaker
 
-Choose **Warbreaker** from the hybrid editor's **Sample** selector, or open
-`/hybrid-editor.html?sample=warbreaker`. The standalone book is served at
+Choose **Warbreaker** from the editor editor's **Sample** selector, or open
+`/extensions.html?sample=warbreaker`. The standalone book is served at
 `/samples/warbreaker.html`.
 
 The source is the supplied `WarbreakerFull6.1.prc`, by Brandon Sanderson. The
@@ -95,7 +95,7 @@ scripts and external resources are never attached to the live document.
   map to H4. The Blocks menu changes heading levels without changing block
   identity, text, marks or comment ranges.
 - Tables retain rows, header cells, captions, column/row spans and formatted
-  paragraphs. The hybrid view renders a semantic DOM table and measures its
+  paragraphs. The editor view renders a semantic DOM table and measures its
   height through the existing block measurement path. At narrow widths, the table
   scrolls horizontally to keep its columns readable.
 - Link labels, superscripts and subscripts become ordinary text. Alignment and
@@ -133,9 +133,9 @@ Editing never changes the canonical HTML.
 ```sh
 npm run build
 npm run preview
-npm run check:hybrid-book
-npm run check:hybrid-table
-npm run check:hybrid
+npm run check:editor-book
+npm run check:editor-table
+npm run check:editor
 npm run check:transactions
 ```
 
@@ -143,6 +143,6 @@ The book check compares all imported text blocks and underline text with the
 HTML in Chromium, Firefox and WebKit. It checks inert parsing, nested marks,
 grapheme boundaries, split/join, edits during loading, undo, completion, the last
 paragraph, narrow reflow at 150% zoom and sample switching. Results are written
-to `artifacts/hybrid-book-checks.json`; screenshots are saved alongside it.
+to `artifacts/editor-book-checks.json`; screenshots are saved alongside it.
 The table check verifies HTML spans, the book's 11-row/33-cell grid and measured
 placement at desktop width and 150% zoom on a narrow viewport in all three browsers.

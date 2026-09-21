@@ -4,12 +4,12 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
  try{for(const width of [1100,390]){
   const page=await browser.newPage({viewport:{width,height:850}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+  await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
   const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));await settle();
-  const read=()=>page.evaluate(()=>window.hybridSpike.read());
+  const read=()=>page.evaluate(()=>window.editorDiagnostics.read());
   const original=(await read()).nodes;
   assert.equal(await page.getByRole('button',{name:'Bold',exact:true}).isDisabled(),false);
-  await page.evaluate(()=>window.hybridSpike.select(1,0));
+  await page.evaluate(()=>window.editorDiagnostics.select(1,0));
   await page.keyboard.down('Shift');for(let i=0;i<10;i++)await page.keyboard.press('ArrowRight');await page.keyboard.up('Shift');await settle();
   const before=(await read()).selection;
   await page.getByRole('button',{name:'Bold',exact:true}).click();await settle();
@@ -26,7 +26,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await page.getByRole('button',{name:'Bold',exact:true}).click();await settle();s=await read();assert.ok(s.nodes[0].marks.length>0);assert.ok(s.nodes[1].marks.some(s=>s.from===0&&(s.mark.type==='bold')));
   await page.keyboard.type('A new thought');await settle();assert.equal((await read()).nodes.length,3);
   await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();assert.equal((await read()).nodes.length,4);
-  await page.evaluate(()=>window.hybridSpike.select(1,0));await page.keyboard.insertText('é');await settle();assert.ok((await read()).nodes[0].text.startsWith('é'));await page.keyboard.insertText('漢');await page.getByRole('status').filter({hasText:'Latin'}).waitFor();
+  await page.evaluate(()=>window.editorDiagnostics.select(1,0));await page.keyboard.insertText('é');await settle();assert.ok((await read()).nodes[0].text.startsWith('é'));await page.keyboard.insertText('漢');await page.getByRole('status').filter({hasText:'Latin'}).waitFor();
   assert.ok(!(await read()).nodes[0].text.includes('漢'));
   await page.screenshot({path:`artifacts/editor-demo-${name}-${width}.png`});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

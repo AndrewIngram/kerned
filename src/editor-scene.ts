@@ -3,22 +3,22 @@ import {typography} from './extensions/typography';
 import {inlineSchema} from './extensions/mention';
 import type {LaidOut,Rect} from './engines';
 import type {BlockDecoration} from './extensions/blocks';
-import type {HybridLeaf, TextBlockNode} from './extensions/demo-model';
+import type {StarterLeaf, TextBlockNode} from './extensions/demo-model';
 import type {createOwnedEngine} from './owned-layout';
 
 type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
-export type Placement = {node:HybridLeaf;y:number;height:number;layout:LaidOut|null;layoutWidth:number;boxes:{id:string;index:number;label:string;x:number;y:number;width:number;height:number}[]};
+export type Placement = {node:StarterLeaf;y:number;height:number;layout:LaidOut|null;layoutWidth:number;boxes:{id:string;index:number;label:string;x:number;y:number;width:number;height:number}[]};
 export type Scene = {placements:Placement[];height:number;width:number;top:number;zoom:number;pending:number;generation:number;paddingTop:number};
 export type Measurement = {width:number;height:number};
 type View = {top:number;height:number;zoom:number;pinned:readonly number[];advance:boolean;eager:boolean;retainAll:boolean;paddingTop?:number};
 // Width is unknown until an inserted paragraph has been composed.
 type Cached = {node:TextBlockNode;width:number|null;height:number;layout:LaidOut|null;boxes:Placement['boxes']};
 
-export function createHybridScene(owned:Owned,size=20) {
+export function createEditorScene(owned:Owned,size=20) {
   const cache=new Map<number,Cached>(),dirty=new Map<number,TextBlockNode>();
   let previous:Scene={placements:[],height:50,width:0,top:0,zoom:1,pending:0,generation:0,paddingTop:0};
   let currentDecorations:ReadonlyMap<number,BlockDecoration>=new Map();
-  let previousNodes:HybridLeaf[]=[],previousMeasurements:ReadonlyMap<number,Measurement>=new Map();
+  let previousNodes:StarterLeaf[]=[],previousMeasurements:ReadonlyMap<number,Measurement>=new Map();
   function compose(node:TextBlockNode,width:number):Cached {
     const style=typography(node,size),spans=node.kind==='heading'&&node.text.length?[...formattingSpans(node.marks),{start:0,end:node.text.length,bold:true,italic:false}]:formattingSpans(node.marks);
     const input={id:node.id,text:node.text,spans,width,size:style.size,lineHeight:style.lineHeight,baselineGrid:4};
@@ -35,7 +35,7 @@ export function createHybridScene(owned:Owned,size=20) {
     return lo;
   }
   return {
-    build(nodes:HybridLeaf[],width:number,measurements:ReadonlyMap<number,Measurement>,view:View,decorations:ReadonlyMap<number,BlockDecoration>=new Map()) {
+    build(nodes:StarterLeaf[],width:number,measurements:ReadonlyMap<number,Measurement>,view:View,decorations:ReadonlyMap<number,BlockDecoration>=new Map()) {
       currentDecorations=decorations;
       const started=performance.now(),layoutIds:number[]=[];
       let compositionMs=0;

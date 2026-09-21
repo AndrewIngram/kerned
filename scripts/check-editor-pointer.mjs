@@ -1,14 +1,14 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
-const url=process.env.HYBRID_URL??'http://127.0.0.1:5173/hybrid-editor.html';
+const url=process.env.EDITOR_URL??'http://127.0.0.1:5173/extensions.html';
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
  try{
   const page=await browser.newPage({viewport:{width:1100,height:900}}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
-  await page.goto(url);await page.waitForFunction(()=>window.hybridSpike);
+  await page.goto(url);await page.waitForFunction(()=>window.editorDiagnostics);
   const canvas=page.getByLabel('Canvas document'),input=page.getByLabel('Canvas text input');
-  const read=()=>page.evaluate(()=>window.hybridSpike.read());
+  const read=()=>page.evaluate(()=>window.editorDiagnostics.read());
   const settle=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   await canvas.click({position:{x:40,y:42}});await settle();
   assert.ok(await input.evaluate(el=>el===document.activeElement),`${name}: clicking canvas must retain input focus`);

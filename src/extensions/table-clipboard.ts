@@ -10,7 +10,7 @@ import {
 } from '../editor';
 import {
   plainText,
-  type HybridNode,
+  type StarterNode,
   type TableNode,
   type TableCell,
   type TextBlockNode,
@@ -19,8 +19,8 @@ import { tableCells } from './table';
 
 /** Copy a logical rectangle rather than a tree slice ordered by the active cell. */
 export function copyCellRectangle(
-  schema: Schema<HybridNode>,
-  state: EditorState<HybridNode>,
+  schema: Schema<StarterNode>,
+  state: EditorState<StarterNode>,
 ): TableNode | null {
   const selection = state.selection;
 
@@ -86,7 +86,7 @@ export function cellRectangleText(table: TableNode): string {
   return occupied.map((row) => row.map((value) => escape(value ?? '')).join('\t')).join('\n');
 }
 
-export function cellPasteTarget(schema: Schema<HybridNode>, state: EditorState<HybridNode>) {
+export function cellPasteTarget(schema: Schema<StarterNode>, state: EditorState<StarterNode>) {
   const context = selectionContext(schema, state.nodes),
     selection = state.selection;
 
@@ -118,8 +118,8 @@ export function cellPasteTarget(schema: Schema<HybridNode>, state: EditorState<H
 
 /** Schema-owned rectangular replacement; browser and React adapters only dispatch it. */
 export function pasteCellRectangle(
-  schema: Schema<HybridNode>,
-  state: EditorState<HybridNode>,
+  schema: Schema<StarterNode>,
+  state: EditorState<StarterNode>,
   source: TableNode,
   allocate: () => NodeIdentity,
 ) {
@@ -171,7 +171,7 @@ export function pasteCellRectangle(
     rows = Math.max(target.map.height, target.row + height);
 
   const result: TableCell[][] = table.rows.map((row) => [...row]),
-    steps: Step<HybridNode>[] = [];
+    steps: Step<StarterNode>[] = [];
 
   for (let y = 0; y < rows; y++) {
     const row = result[y] ?? (result[y] = []);

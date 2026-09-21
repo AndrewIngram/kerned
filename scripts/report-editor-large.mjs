@@ -1,6 +1,6 @@
 import {readFile,writeFile} from 'node:fs/promises';
-const benchmark=JSON.parse(await readFile('artifacts/hybrid-large-benchmark.json','utf8'));
-const checks=JSON.parse(await readFile('artifacts/hybrid-large-checks.json','utf8'));
+const benchmark=JSON.parse(await readFile('artifacts/editor-large-benchmark.json','utf8'));
+const checks=JSON.parse(await readFile('artifacts/editor-large-checks.json','utf8'));
 const median=a=>[...a].sort((a,b)=>a-b)[Math.floor(a.length/2)];
 const f=n=>n.toFixed(1),mb=n=>(n/1e6).toFixed(1);
 const rows=[];
@@ -10,15 +10,15 @@ for(const browser of ['chromium','firefox','webkit'])for(const total of [2000,10
 }
 const resizing=checks.cases.filter(c=>c.total===10000).map(c=>`| ${c.browser} | ${c.width} | ${f(c.widthChanges.at(-1).workMs)} |`);
 const memory=benchmark.memory.map(m=>`| ${m.total.toLocaleString('en-US')} | ${mb(m.delta.usedSize)} | ${mb(m.delta.backingStorageSize)} | ${mb(m.buffers.caretUnusedBytes)} |`);
-const doc=`# Large hybrid documents
+const doc=`# Large editor documents
 
-For the current viewport-first resize implementation and paired timing comparisons, see [viewport-first reflow](hybrid-viewport-reflow.md).
+For the current viewport-first resize implementation and paired timing comparisons, see [viewport-first reflow](editor-viewport-reflow.md).
 
-Recorded ${benchmark.recordedAt} on ${benchmark.cpu}. Production build, local Vite preview, headless Chromium, Firefox and WebKit. Browser versions and raw measurements are in [the benchmark artifact](../artifacts/hybrid-large-benchmark.json); correctness results are in [the check artifact](../artifacts/hybrid-large-checks.json).
+Recorded ${benchmark.recordedAt} on ${benchmark.cpu}. Production build, local Vite preview, headless Chromium, Firefox and WebKit. Browser versions and raw measurements are in [the benchmark artifact](../artifacts/editor-large-benchmark.json); correctness results are in [the check artifact](../artifacts/editor-large-checks.json).
 
 ## Result
 
-Incremental loading works with the hybrid extensions. The first 32 blocks are editable before the remaining blocks are generated. Background arrival preserves text edits, selection, focus, widget state and undo history. Rendering and DOM mounting stay bounded by the viewport.
+Incremental loading works with the editor extensions. The first 32 blocks are editable before the remaining blocks are generated. Background arrival preserves text edits, selection, focus, widget state and undo history. Rendering and DOM mounting stay bounded by the viewport.
 
 The remaining costs are whole-document reflow and retained layout. Width changes now prioritize the viewport and batch offscreen composition; see the reflow report for complete timing comparisons. The editor retains shaping and geometry for every loaded paragraph, even when its React elements are unmounted.
 
@@ -27,12 +27,12 @@ The remaining costs are whole-document reflow and retained layout. Width changes
 ~~~sh
 npm run build
 npm run preview
-node scripts/check-hybrid-large.mjs
-node scripts/benchmark-hybrid-large.mjs
-node scripts/report-hybrid-large.mjs
+node scripts/check-editor-large.mjs
+node scripts/benchmark-editor-large.mjs
+node scripts/report-editor-large.mjs
 ~~~
 
-Open [/hybrid-editor.html?stream=10000](http://127.0.0.1:5176/hybrid-editor.html?stream=10000). The default page remains the small extension study. The stream parameter accepts 32 through 10,000 blocks. The test-only paused=1 option holds loading after the first 32 blocks; window.hybridSpike.resume() continues it. slowImages=1 extends the image decode delay for reflow checks.
+Open [/extensions.html?stream=10000](http://127.0.0.1:5176/extensions.html?stream=10000). The default page remains the small extension study. The stream parameter accepts 32 through 10,000 blocks. The test-only paused=1 option holds loading after the first 32 blocks; window.editorDiagnostics.resume() continues it. slowImages=1 extends the image decode delay for reflow checks.
 
 The fixture is generated locally, one requested chunk at a time. This tests incremental document ingestion, layout, React updates and painting. It does **not** measure network transport, server parsing, real download latency or arbitrary external content. It uses styled Latin paragraphs, atomic mentions, comments, checklists and images. At 10,000 blocks there are 8,999 paragraphs, 501 checklists and 500 image blocks. The images share one SVG resource; these numbers do not describe 500 distinct decoded photographs.
 
@@ -52,7 +52,7 @@ Clean timing runs remain at the top of the document without interaction. Correct
 
 ## Interaction and reflow checks
 
-All ${checks.cases.length} large-document cases passed: 2,000 blocks at a 1,100-pixel viewport, and 10,000 blocks at 1,100 and 420 pixels, in each browser. The narrow cases use DPR 1.5. The original nine-case hybrid suite also passes, including DPR 2 and 150% zoom.
+All ${checks.cases.length} large-document cases passed: 2,000 blocks at a 1,100-pixel viewport, and 10,000 blocks at 1,100 and 420 pixels, in each browser. The narrow cases use DPR 1.5. The original nine-case editor suite also passes, including DPR 2 and 150% zoom.
 
 The large cases verify:
 
@@ -105,4 +105,4 @@ Culling reduces drawing and mounted DOM, but does not evict offscreen shaping or
 
 Placement arrays and block arrays still scan or copy in several updates; this is not yet a tree-backed document store. Per-paragraph layout is retained eagerly as each chunk arrives. The extension demo remains separate from the text-only block session and the original streaming experiment. Full IME support, cross-block selection, accessibility for canvas text and DOM-widget export remain open work.
 `;
-await writeFile('docs/hybrid-large-documents.md',doc);
+await writeFile('docs/editor-large-documents.md',doc);

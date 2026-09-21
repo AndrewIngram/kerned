@@ -11,7 +11,7 @@ import { BlockLayer } from '../../extensions/starter-kit/block-layer';
 import { createStarterKitInput, focusStarterKitInput } from '../../extensions/starter-kit/input';
 import { useDocumentLayout } from '../../extensions/starter-kit/use-document-layout';
 import { tableCells } from '../../extensions/table';
-import { bookSamples, type HybridSample } from '../../hybrid-samples';
+import { bookSamples, type EditorSample } from '../../editor-samples';
 import { createOwnedEngine } from '../../owned-layout';
 import { AnnotationPanel, type ActivePanel } from './annotation-panel';
 import { useComments } from './use-comments';
@@ -36,7 +36,7 @@ export function EditorWorkspace({
 }: {
   kit: CanvasKit;
   owned: Owned;
-  sample: HybridSample;
+  sample: EditorSample;
   onSampleChange: (id: string) => void;
   loading: boolean;
 }) {
@@ -257,7 +257,7 @@ export function EditorWorkspace({
       if (
         event.target instanceof Element &&
         event.target !== document.body &&
-        !event.target.closest('.hybrid-shell')
+        !event.target.closest('.editor-shell')
       )
         return;
 
@@ -363,7 +363,7 @@ export function EditorWorkspace({
 
   return (
     <CanvasLayerProvider value={register}>
-      <main className="hybrid-shell">
+      <main className="editor-shell">
         <Toolbar
           {...{
             minimal,

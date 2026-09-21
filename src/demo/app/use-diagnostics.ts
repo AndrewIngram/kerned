@@ -16,12 +16,12 @@ import { checkExtensions } from '../../editor-extension-checks';
 import { type CanvasPaintLayer, type CanvasPainter as Painter } from '../../editor-react';
 import { checkSelections } from '../../editor-selection-checks';
 import { commentDecorations, createCommentStore } from '../../extensions/comment';
-import type { HybridLeaf } from '../../extensions/demo-model';
+import type { StarterLeaf } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { importHtml } from '../../extensions/html';
-import { checkReflow } from '../../hybrid-reflow-checks';
-import { createHybridScene, type Scene } from '../../hybrid-scene';
-import { checkTransactions } from '../../hybrid-transaction-checks';
+import { checkReflow } from '../../editor-reflow-checks';
+import { createEditorScene, type Scene } from '../../editor-scene';
+import { checkTransactions } from '../../editor-transaction-checks';
 import { checkInline } from '../../owned-inline-checks';
 
 import type { RefObject } from 'react';
@@ -33,12 +33,12 @@ type DiagnosticsOptions = {
   comments: ReturnType<typeof createCommentStore<{ body: string; reply: string }>>;
   findRef: RefObject<FindState>;
   kit: CanvasKit;
-  current: RefObject<{ nodes: HybridLeaf[]; selection: Selection; width: number }>;
+  current: RefObject<{ nodes: StarterLeaf[]; selection: Selection; width: number }>;
   sceneRef: RefObject<Scene>;
   measurementsRef: RefObject<Map<number, { width: number; height: number }>>;
   paused: StreamState['paused'];
   metrics: StreamState['metrics'];
-  sceneCache: ReturnType<typeof createHybridScene>;
+  sceneCache: ReturnType<typeof createEditorScene>;
   owned: Owned;
   readScroll: () => number;
   zoom: number;
@@ -72,10 +72,10 @@ export function useDiagnostics({
   useEffect(() => {
     const diagnostics = {
       anchor: (id: number, offset: number, bias: -1 | 1) =>
-        createAnchor(demoSchema, editor.state, 'hybrid-demo', id, offset, bias),
+        createAnchor(demoSchema, editor.state, 'editor-demo', id, offset, bias),
       // oxlint-disable-next-line anti-slop/no-unknown-parameters -- External serialized anchors are parsed at this diagnostics boundary.
       resolveAnchor: (value: unknown) =>
-        resolveAnchor(demoSchema, parseAnchor(value), 'hybrid-demo', editor.state, editor.journal),
+        resolveAnchor(demoSchema, parseAnchor(value), 'editor-demo', editor.state, editor.journal),
       comments: () => ({
         threads: comments.state.threads,
         ...resolveRangeDecorations(commentDecorations(comments.state.threads), editor.positions),
@@ -193,11 +193,11 @@ export function useDiagnostics({
       },
     };
 
-    const host: Window & { hybridSpike?: typeof diagnostics } = window;
-    host.hybridSpike = diagnostics;
+    const host: Window & { editorDiagnostics?: typeof diagnostics } = window;
+    host.editorDiagnostics = diagnostics;
 
     return () => {
-      if (host.hybridSpike === diagnostics) delete host.hybridSpike;
+      if (host.editorDiagnostics === diagnostics) delete host.editorDiagnostics;
     };
   }, [owned, zoom]);
 }

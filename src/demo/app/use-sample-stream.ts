@@ -1,17 +1,17 @@
-import type { createHybridScene } from '../../hybrid-scene';
+import type { createEditorScene } from '../../editor-scene';
 
 import { useEffect, useRef, useState } from 'react';
-import { type HybridNode } from '../../extensions/demo-model';
-import { type HybridSample } from '../../hybrid-samples';
-import { type Placement, type Scene } from '../../hybrid-scene';
-import { createStreamMetrics, streamConfig } from '../../hybrid-stream';
+import { type StarterNode } from '../../extensions/demo-model';
+import { type EditorSample } from '../../editor-samples';
+import { type Placement, type Scene } from '../../editor-scene';
+import { createStreamMetrics, streamConfig } from '../../editor-stream';
 
 import type { EditorSession } from '../../extensions/starter-kit/types';
 
 export function useSampleStream(
   editor: EditorSession,
-  sample: HybridSample,
-  seedComments: (nodes: readonly HybridNode[]) => void,
+  sample: EditorSample,
+  seedComments: (nodes: readonly StarterNode[]) => void,
 ) {
   const sourceLoaded = useRef(sample.initial.length),
     sourceRevision = useRef(0);
@@ -208,7 +208,7 @@ export function recordSamplePaint({
 
 export function recordSampleLayout(
   metrics: StreamState['metrics'],
-  result: ReturnType<ReturnType<typeof createHybridScene>['build']>,
+  result: ReturnType<ReturnType<typeof createEditorScene>['build']>,
   contentWidth: number,
   loaded: number,
 ) {

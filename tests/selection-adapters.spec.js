@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('selection projection preserves node, container, cell and empty selections', async ({ page }) => {
   await page.goto('/editor.html');
-  await page.waitForFunction(() => window.hybridSpike);
+  await page.waitForFunction(() => window.editorDiagnostics);
   const result = await page.evaluate(async () => {
     const { fixture, schema } = await import('/tests/fixtures/editor-foundation.js');
     const { selectionView, selectionContext, NodeSelection, AllSelection } = await import('/src/editor/index.ts');
@@ -33,7 +33,7 @@ test('selection projection preserves node, container, cell and empty selections'
 
 test('starter commands target the selected node and disjoint cells, never the first paragraph', async ({ page }) => {
   await page.goto('/editor.html');
-  await page.waitForFunction(() => window.hybridSpike);
+  await page.waitForFunction(() => window.editorDiagnostics);
   const result = await page.evaluate(async () => {
     const {React, createRoot, flushSync} = await import('/tests/fixtures/selection-probe.js');
     const {createEditor, NodeSelection, textSelection, selectionContext} = await import('/src/editor/index.ts');
@@ -101,7 +101,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
 
 test('atomic navigation respects document order and preserves shift ranges', async ({page}) => {
   await page.goto('/editor.html');
-  await page.waitForFunction(() => window.hybridSpike);
+  await page.waitForFunction(() => window.editorDiagnostics);
   const result = await page.evaluate(async () => {
     const {moveNodeSelection,NodeSelection,RangeSelection,TextSelection,textSelection} = await import('/src/editor/index.ts');
     const nodes=[{id:1,text:'Before',selectable:true},{id:2,text:null,selectable:true},{id:3,text:null,selectable:false},{id:4,text:null,selectable:true},{id:5,text:'After',selectable:true}];
@@ -130,43 +130,43 @@ test('atomic navigation respects document order and preserves shift ranges', asy
 });
 
 test('clicking an atomic view selects it while interactive descendants retain native input', async ({page}) => {
-  await page.goto('/hybrid-editor.html?stream=32');
-  await page.waitForFunction(() => window.hybridSpike);
-  await page.evaluate(()=>window.hybridSpike.scrollTo(window.hybridSpike.read().nodes.find(n=>n.kind==='image').id));
+  await page.goto('/extensions.html?stream=32');
+  await page.waitForFunction(() => window.editorDiagnostics);
+  await page.evaluate(()=>window.editorDiagnostics.scrollTo(window.editorDiagnostics.read().nodes.find(n=>n.kind==='image').id));
   const image=page.locator('[data-editor-node]').filter({has:page.locator('[data-image]')}).first();
   await image.scrollIntoViewIfNeeded();
   const id=Number(await image.getAttribute('data-editor-node'));
   await image.click();
   await expect(image).toHaveAttribute('data-selected','true');
-  expect(await page.evaluate(()=>window.hybridSpike.read().selection.type)).toBe('node');
+  expect(await page.evaluate(()=>window.editorDiagnostics.read().selection.type)).toBe('node');
   await page.keyboard.press('ArrowLeft');
-  expect(await page.evaluate(()=>window.hybridSpike.read().selection.type)).toBeUndefined();
+  expect(await page.evaluate(()=>window.editorDiagnostics.read().selection.type)).toBeUndefined();
   await page.keyboard.press('ArrowRight');
   await expect(image).toHaveAttribute('data-selected','true');
   await page.keyboard.press('ArrowRight');
-  expect(await page.evaluate(()=>window.hybridSpike.read().selection.type)).toBeUndefined();
+  expect(await page.evaluate(()=>window.editorDiagnostics.read().selection.type)).toBeUndefined();
   await image.click();
   await page.keyboard.press('Shift+ArrowRight');
-  const extended=await page.evaluate(()=>window.hybridSpike.read().selection);
+  const extended=await page.evaluate(()=>window.editorDiagnostics.read().selection);
   expect(extended.type).toBe("range");
   expect(extended.anchor.id).toBe(id);
   await expect(image).toHaveAttribute('data-selected','true');
   await image.click();
   await page.keyboard.press('PageDown');
-  expect(await page.evaluate(()=>window.hybridSpike.read().selection.type)).toBeUndefined();
-  await page.evaluate(id=>window.hybridSpike.scrollTo(id),id);
+  expect(await page.evaluate(()=>window.editorDiagnostics.read().selection.type)).toBeUndefined();
+  await page.evaluate(id=>window.editorDiagnostics.scrollTo(id),id);
   await image.click();
   await page.keyboard.press('Control+End');
-  expect(await page.evaluate(()=>window.hybridSpike.read().selection.type)).toBeUndefined();
-  await page.evaluate(id=>window.hybridSpike.scrollTo(id),id);
+  expect(await page.evaluate(()=>window.editorDiagnostics.read().selection.type)).toBeUndefined();
+  await page.evaluate(id=>window.editorDiagnostics.scrollTo(id),id);
   await image.click();
-  await page.evaluate(()=>window.hybridSpike.scrollTo(window.hybridSpike.read().nodes.find(n=>n.kind==='checklist').id));
+  await page.evaluate(()=>window.editorDiagnostics.scrollTo(window.editorDiagnostics.read().nodes.find(n=>n.kind==='checklist').id));
   const checklist=page.locator('[data-widget]').first();
   await checklist.scrollIntoViewIfNeeded();
   const checkbox=checklist.locator('input[type=checkbox]').first();
   const checked=await checkbox.isChecked();
   await checkbox.click();
   expect(await checkbox.isChecked()).toBe(!checked);
-  expect(await page.evaluate(()=>window.hybridSpike.read().selection.type)).toBe('node');
+  expect(await page.evaluate(()=>window.editorDiagnostics.read().selection.type)).toBe('node');
   expect(id).toBeGreaterThan(0);
 });

@@ -49,7 +49,7 @@ This is a headless extension proof. It does not ship table insertion/rendering, 
 
 Core text replacement joins text siblings and removes intervening atoms. Replacement across different containers explicitly requires a schema-aware structural command, because the engine cannot decide which wrappers to lift, merge or retain. Node/all replacement with a nonempty string likewise requires a schema insertion command to create the appropriate text node. Unsupported commands fail before dispatch.
 
-The hybrid demo retains independent text anchor and head positions across paragraphs. Pointer dragging, Shift-click, keyboard extension, copy, replacement and undo use that selection directly. Node, all and cell interactions remain headless API capabilities.
+The editor demo retains independent text anchor and head positions across paragraphs. Pointer dragging, Shift-click, keyboard extension, copy, replacement and undo use that selection directly. Node, all and cell interactions remain headless API capabilities.
 
 ## Verification
 
@@ -57,10 +57,10 @@ The hybrid demo retains independent text anchor and head positions across paragr
 
 `npm run check:transactions` runs 48 selection assertions alongside container, extension and transaction assertions in Chromium, Firefox and WebKit at wide and narrow viewports. Selection coverage includes cross-block forward/backward ranges, sibling replacement, content extraction, split mapping, node moves and deletion, empty/atom-only documents, schema selectability, malformed codecs, stable-key restoration with different local handles, bookmarks, disjoint cell edits, spans, column growth, cache reuse and undo/redo. The existing browser interaction tests exercise typing, split/join and streamed arrivals.
 
-`npm run check:hybrid-large` passes the existing 2,000/10,000-block cases in all three browsers. These checks establish behavior, not a new latency benchmark.
+`npm run check:editor-large` passes the existing 2,000/10,000-block cases in all three browsers. These checks establish behavior, not a new latency benchmark.
 
 ## Pointer input regression
 
-The canvas now prevents the default pointer-down action from taking focus back from the hidden textarea, and captures the pointer while dragging a text selection. Earlier checks set the caret through the test API and missed both click-to-type focus loss and missing drag handling. `npm run check:hybrid-pointer` exercises real clicks, dragging and typing against the dev server, including 150% zoom.
+The canvas now prevents the default pointer-down action from taking focus back from the hidden textarea, and captures the pointer while dragging a text selection. Earlier checks set the caret through the test API and missed both click-to-type focus loss and missing drag handling. `npm run check:editor-pointer` exercises real clicks, dragging and typing against the dev server, including 150% zoom.
 
 Comment highlight overlays share the text pointer handler. Clicking places the caret at the hit-tested offset while opening the comment without taking text focus. Dragging works through the highlight. Keyboard activation of the comment button still moves focus into its panel. The pointer regression suite checks both paths. Mentions retain their atomic button behavior.

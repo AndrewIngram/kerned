@@ -2,7 +2,7 @@
 
 The [extension-boundary follow-up](editor-extension-boundary.md) extracts this core from the demo schema.
 
-The hybrid editor now routes local edits and streamed arrivals through a pure transaction function. The rendering pipeline consumes the resulting document. React owns focus, input capture and viewport state; the editing core owns document changes, selection, revision checks and local undo history.
+The editor editor now routes local edits and streamed arrivals through a pure transaction function. The rendering pipeline consumes the resulting document. React owns focus, input capture and viewport state; the editing core owns document changes, selection, revision checks and local undo history.
 
 ## Design choice
 
@@ -71,7 +71,7 @@ Offsets are UTF-16 offsets within a paragraph. Bias `-1` follows the position be
 - `deleted`, with an explicitly marked mapped boundary. Deleted-target status stays marked, including after undo; restoring attachment to resurrected content is not implemented.
 - `unavailable`, for another document, a future revision, invalid offsets or missing mapping history.
 
-To resolve an old reference after a restart, persist the document ID, stable block keys, document revision and a contiguous mapping journal from the reference revision to the current document. Tests serialize and reload those values before resolution. Saving only an offset and current document is insufficient. The demo has no database or persistence adapter yet, and its fixed `hybrid-demo` document ID is a fixture identifier, not an application identity scheme.
+To resolve an old reference after a restart, persist the document ID, stable block keys, document revision and a contiguous mapping journal from the reference revision to the current document. Tests serialize and reload those values before resolution. Saving only an offset and current document is insufficient. The demo has no database or persistence adapter yet, and its fixed `editor-demo` document ID is a fixture identifier, not an application identity scheme.
 
 Journal compaction must advance stored references or preserve enough mappings to resolve them. Until a compaction policy exists, the journal is retained without truncation. Pair anchors for ranges; range-deletion and affinity policies still need a first-class range-reference API.
 
@@ -141,7 +141,7 @@ exact restoration, redo, and input/frame latency budgets.
 
 `npm run check:transactions` exercises deterministic replay, atomic failure, stable identities, rich split/join round trips, grouped history, stream exclusions, saved-anchor resolution, insertion affinity, deletion and missing-history behavior. Browser cases cover wide and narrow viewports in Chromium, Firefox and WebKit.
 
-Existing hybrid, large-document and reflow checks remain separate. No new runtime dependency, worker, WASM call or serialization step was introduced on the layout path. The JSON examples and round trips concern persistence tests, not rendering.
+Existing editor, large-document and reflow checks remain separate. No new runtime dependency, worker, WASM call or serialization step was introduced on the layout path. The JSON examples and round trips concern persistence tests, not rendering.
 
 ## Structural follow-up
 

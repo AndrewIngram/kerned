@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      input: ['index.html', 'editor.html', 'hybrid-editor.html'],
+      input: ['index.html', 'editor.html', 'extensions.html'],
     },
   },
 });

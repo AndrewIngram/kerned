@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
  try{
-  const page=await browser.newPage();await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.hybridSpike);
+  const page=await browser.newPage();await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
   const result=await page.evaluate(async()=>{
    const {textCommands}=await import('/src/extensions/text-commands.ts');
    const {createEditor,TextSelection}=await import('/src/editor/index.ts');

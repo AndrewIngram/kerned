@@ -1,23 +1,23 @@
 import {createListExtensions} from './lists';
-import type {HybridNode,HybridLeaf} from './demo-model';
+import type {StarterNode,StarterLeaf} from './demo-model';
 import {indexTree,type NodeExtension,type Schema,type EditorState,type Step,type NodeIdentity} from '../editor';
 
-export const listCommands=createListExtensions<HybridNode>({
+export const listCommands=createListExtensions<StarterNode>({
  list:node=>node.kind==='list'?node:null,item:node=>node.kind==='listItem'?node:null,
  isBlock:node=>node.kind!=='list'&&node.kind!=='listItem'&&node.kind!=='tableCell',
  withChildren(node,children){if(!('children'in node))throw new Error('Expected a container');return {...node,children};},
  createList:(identity,settings)=>({kind:'list',...identity,...settings,children:[]}),
  createItem:identity=>({kind:'listItem',...identity,children:[]}),
 });
-export const quoteExtension:NodeExtension<HybridNode>={
+export const quoteExtension:NodeExtension<StarterNode>={
  name:'quote',version:1,kind:'container',accepts:node=>node.kind==='quote',validateUpdate(){},
  content:{children:node=>'children'in node?node.children:[],withChildren(node,children){if(node.kind!=='quote')throw new Error('Expected quote');return {...node,children};},
  validateChildren(_node,children){if(!children.length||children.some(n=>n.kind==='listItem'))throw new Error('Quotes require block children');}},
 };
 export type BlockDecoration={inset:number;quotes:readonly {id:number;inset:number}[];marker:string};
-export function projectBlocks(roots:HybridNode[]){
- const nodes:HybridLeaf[]=[],decorations=new Map<number,BlockDecoration>();
- function visit(node:HybridNode,inset:number,quotes:readonly {id:number;inset:number}[],marker=''){
+export function projectBlocks(roots:StarterNode[]){
+ const nodes:StarterLeaf[]=[],decorations=new Map<number,BlockDecoration>();
+ function visit(node:StarterNode,inset:number,quotes:readonly {id:number;inset:number}[],marker=''){
   if(node.kind==='quote'){node.children.forEach(child=>visit(child,inset+24,[...quotes,{id:node.id,inset}]));return;}
   if(node.kind==='list'){node.children.forEach((child,index)=>visit(child,inset+28,quotes,node.ordered?`${node.start+index}.`:'•'));return;}
   if(node.kind==='listItem'){node.children.forEach((child,index)=>visit(child,inset,quotes,index===0?marker:''));return;}
@@ -26,7 +26,7 @@ export function projectBlocks(roots:HybridNode[]){
  }
  roots.forEach(node=>visit(node,0,[]));return {nodes,decorations};
 }
-export function blockCommands(schema:Schema<HybridNode>,state:EditorState<HybridNode>,ids:number[],allocate:()=>NodeIdentity,tree=indexTree(schema,state.nodes)){
+export function blockCommands(schema:Schema<StarterNode>,state:EditorState<StarterNode>,ids:number[],allocate:()=>NodeIdentity,tree=indexTree(schema,state.nodes)){
  const entries=ids.map(id=>tree.byId.get(id)).filter(entry=>entry!==undefined);
  const first=entries[0];
  function ancestor(kind:'quote'|'list'|'listItem'){
@@ -41,7 +41,7 @@ export function blockCommands(schema:Schema<HybridNode>,state:EditorState<Hybrid
  return {
   item:ancestor('listItem')?.node.id,
   quoted:entries.length>0&&entries.every(entry=>{while(entry){if(entry.node.kind==='quote')return true;const parent=entry.parent===null?undefined:tree.byId.get(entry.parent);if(!parent)return false;entry=parent;}return false;}),
-  quote():Step<HybridNode>[]{
+  quote():Step<StarterNode>[]{
    if(!entries.length)return [];
    const ancestors=(id:number)=>{const result:number[]=[];let entry=tree.byId.get(id);while(entry){result.push(entry.node.id);entry=entry.parent===null?undefined:tree.byId.get(entry.parent);}return result;};
    const paths=entries.map(entry=>ancestors(entry.node.id));
@@ -53,10 +53,10 @@ export function blockCommands(schema:Schema<HybridNode>,state:EditorState<Hybrid
    const children=parent===null?state.nodes:schema.children(tree.byId.get(parent)!.node);
    const indexes=paths.map(path=>children.findIndex(node=>path.includes(node.id)));
    const index=Math.min(...indexes),last=Math.max(...indexes);
-   const flatten=(node:HybridNode):HybridNode[]=>node.kind==='quote'?node.children.flatMap(flatten):[node];
+   const flatten=(node:StarterNode):StarterNode[]=>node.kind==='quote'?node.children.flatMap(flatten):[node];
    return [{kind:'replaceChildren',parent,index,count:last-index+1,nodes:[{kind:'quote',...allocate(),children:children.slice(index,last+1).flatMap(flatten)}]}];
   },
-  list(ordered:boolean):Step<HybridNode>[]{
+  list(ordered:boolean):Step<StarterNode>[]{
    const existing=ancestor('list');
    if(existing?.node.kind==='list'){
     if(existing.node.ordered!==ordered)return [{kind:'updateBlock',node:{...existing.node,ordered}}];
@@ -69,7 +69,7 @@ export function blockCommands(schema:Schema<HybridNode>,state:EditorState<Hybrid
 
 import {RangeSelection,selectionContext,TextSelection,textSelection,type SelectionRange} from '../editor';
 /** Join selected text across quote/list boundaries without flattening the document. */
-export function replaceStructuredText(schema:Schema<HybridNode>,state:EditorState<HybridNode>,text:string){
+export function replaceStructuredText(schema:Schema<StarterNode>,state:EditorState<StarterNode>,text:string){
  if(state.selection instanceof RangeSelection){
   const edit=state.selection.replace(selectionContext(schema,state.nodes),text);
   const tree=indexTree(schema,state.nodes);
@@ -98,6 +98,6 @@ export function replaceStructuredText(schema:Schema<HybridNode>,state:EditorStat
   ?{kind:'text',id:node.id,from:node.id===start.id?start.offset:0,to:node.id===end.id?end.offset:node.text.length}
   :{kind:'node',id:node.id});
  const pruneEmpty=indexTree(schema,state.nodes).order.flatMap(({node})=>node.kind==='quote'||node.kind==='list'||node.kind==='listItem'?[node.id]:[]);
- const steps:Step<HybridNode>[]=[{kind:'replaceRanges',ranges,text,pruneEmpty}];
+ const steps:Step<StarterNode>[]=[{kind:'replaceRanges',ranges,text,pruneEmpty}];
  return {steps,selection:textSelection(first.id,start.offset+text.length)};
 }

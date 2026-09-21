@@ -1,13 +1,13 @@
 import {formattingMarks} from './formatting';
 import {demoSchema} from './demo-schema';
 import {boundaries} from '../editor';
-import type {HeadingLevel,TextBlockNode,HybridSpan,HybridNode,TableCell} from './demo-model';
+import type {HeadingLevel,TextBlockNode,StarterSpan,StarterNode,TableCell} from './demo-model';
 import {tablePlainText} from './table';
 
 const blocks=new Set(['P','DIV','SECTION','ARTICLE','MAIN','HEADER','FOOTER','ASIDE','NAV','BLOCKQUOTE','UL','OL','LI','TABLE','THEAD','TBODY','TFOOT','TR','TD','TH','H1','H2','H3','H4','H5','H6','PRE','HR']);
 const ignored=new Set(['SCRIPT','STYLE','TEMPLATE','NOSCRIPT','IFRAME','OBJECT','EMBED','SVG','MATH','IMG','VIDEO','AUDIO','SOURCE','LINK','META','TITLE','BASE']);
 type Marks={bold:boolean;italic:boolean;underline:boolean};
-export type HtmlImport={nodes:HybridNode[];tables:number;conversions:{headings:number;links:number;superscripts:number;subscripts:number;nestedTables:number}};
+export type HtmlImport={nodes:StarterNode[];tables:number;conversions:{headings:number;links:number;superscripts:number;subscripts:number;nestedTables:number}};
 
 /** Parse in an inert template; only text and supported marks enter the model.
  * No source elements, attributes, event handlers or resources reach the live DOM.
@@ -16,10 +16,10 @@ export type HtmlImport={nodes:HybridNode[];tables:number;conversions:{headings:n
 export function importHtml(html:string):HtmlImport{
   const template=document.createElement('template');
   template.innerHTML=html;
-  const nodes:HybridNode[]=[];
+  const nodes:StarterNode[]=[];
   const conversions={headings:0,links:0,superscripts:0,subscripts:0,nestedTables:0};
   let tables=0,nextId=1;
-  let text='',spans:HybridSpan[]=[],headingLevel:HeadingLevel|undefined;
+  let text='',spans:StarterSpan[]=[],headingLevel:HeadingLevel|undefined;
   function append(value:string,marks:Marks){
     value=value.replace(/[\t\r\n\f ]+/g,' ');
     if(!text||/[ \n]$/.test(text))value=value.replace(/^ /,'');
@@ -58,7 +58,7 @@ export function importHtml(html:string):HtmlImport{
     if(['BLOCKQUOTE','UL','OL','LI'].includes(tag)){
       flush();
       const imported=importHtml(node.innerHTML);
-      function reidentify(child:HybridNode):HybridNode{
+      function reidentify(child:StarterNode):StarterNode{
         const children=demoSchema.children(child),id=nextId++,copy={...child,id,key:`html-${id}`};
         return children.length?demoSchema.withChildren(copy,children.map(reidentify)):copy;
       }

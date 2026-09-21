@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { FindIcon } from '../../demo/find-bar';
-import { bookSamples, type HybridSample } from '../../hybrid-samples';
+import { bookSamples, type EditorSample } from '../../editor-samples';
 
 import type { Dispatch, RefObject, SetStateAction } from 'react';
 import type { StarterActions } from '../../extensions/starter-kit/actions';
@@ -12,7 +12,7 @@ type ToolbarProps = { doc: EditorDocument; actions: StarterActions } & {
   addComment: () => void;
   findOpen: boolean;
   openFind: () => void;
-  sample: HybridSample;
+  sample: EditorSample;
   loading: boolean;
   onSampleChange: (id: string) => void;
   editor: EditorSession;

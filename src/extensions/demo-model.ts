@@ -1,22 +1,22 @@
 import {boundaries,type Span} from '../model';
 import {replaceInlineObjects,type InlineValue,type MarkRange,type NodeIdentity} from '../editor';
 import {createMention,inlineSchema} from './mention';
-export type HybridSpan = Span & {underline?:boolean};
+export type StarterSpan = Span & {underline?:boolean};
 export type HeadingLevel = 1|2|3|4;
 export type TextBlockNode = ({kind:'paragraph'}|{kind:'heading';level:HeadingLevel}) & NodeIdentity & {text:string;marks:MarkRange[];inline:InlineValue[]};
 export type ChecklistNode = NodeIdentity & {kind:'checklist';checked:boolean[];expanded:boolean;notes:string};
 export type ImageNode = NodeIdentity & {kind:'image';src:string;alt:string};
 export type TableCell = NodeIdentity & {kind:'tableCell';row:number;header:boolean;colspan:number;rowspan:number;paragraphs:TextBlockNode[]};
 export type TableNode = NodeIdentity & {kind:'table';caption:string;rows:TableCell[][]};
-export type HybridLeaf = TextBlockNode | ChecklistNode | ImageNode | TableNode;
-export type QuoteNode= NodeIdentity & {kind:'quote';children:HybridNode[]};
-export type ListNode= NodeIdentity & {kind:'list';ordered:boolean;start:number;children:HybridNode[]};
-export type ListItemNode= NodeIdentity & {kind:'listItem';children:HybridNode[]};
-export type HybridNode = HybridLeaf | QuoteNode | ListNode | ListItemNode | TableCell;
-export function createHybridDocument():HybridNode[]{
+export type StarterLeaf = TextBlockNode | ChecklistNode | ImageNode | TableNode;
+export type QuoteNode= NodeIdentity & {kind:'quote';children:StarterNode[]};
+export type ListNode= NodeIdentity & {kind:'list';ordered:boolean;start:number;children:StarterNode[]};
+export type ListItemNode= NodeIdentity & {kind:'listItem';children:StarterNode[]};
+export type StarterNode = StarterLeaf | QuoteNode | ListNode | ListItemNode | TableCell;
+export function createSampleDocument():StarterNode[]{
   const first='Review the draft with \ufffc before sharing it with the team.';
   const second='We should keep the first release focused and gather feedback before expanding the scope.';
-  const nodes:HybridNode[]=[
+  const nodes:StarterNode[]=[
     {kind:'paragraph',id:1,key:'block-1',text:first,marks:[],inline:[createMention({id:'maya',index:first.indexOf('\ufffc'),label:'@Maya Chen',width:132,ascent:23,descent:7})]},
     {kind:'paragraph',id:2,key:'block-2',text:second,marks:[],inline:[]},
     {kind:'checklist',id:3,key:'block-3',checked:[true,false,false],expanded:false,notes:''},
