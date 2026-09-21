@@ -46,6 +46,7 @@ function fixture(writable = true) {
           ? {
               ...style,
               cssFamily: 'sans-serif',
+              color: '#252a23',
               baselineOffset: 0,
               font: { family: 'sans-serif', weight: style.font?.weight ?? 400, style: 'normal' },
             }

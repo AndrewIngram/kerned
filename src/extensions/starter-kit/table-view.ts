@@ -283,6 +283,13 @@ export function createTableView<N extends NodeIdentity>(
 
           if (!style) throw new Error(`Missing text style for table paragraph ${paragraph.id}`);
 
+          const metricsChanged =
+            !content.style ||
+            content.style.size !== style.size ||
+            content.style.lineHeight !== style.lineHeight ||
+            content.style.cssFamily !== style.cssFamily ||
+            content.style.baselineOffset !== style.baselineOffset;
+
           if (content.style !== style) applyTextStyle(content.element, style);
           content.element.style.marginTop = paragraphIndex
             ? `${Math.max(previousAfter, style.before)}px`
@@ -290,7 +297,7 @@ export function createTableView<N extends NodeIdentity>(
           previousAfter = style.after;
 
           if (content.element instanceof HTMLTextAreaElement) {
-            resizeInput ||= content.style !== style;
+            resizeInput ||= metricsChanged;
             content.element.setAttribute(
               'aria-label',
               `Cell ${rowIndex + 1}, ${cellIndex + 1} text`,
@@ -304,11 +311,7 @@ export function createTableView<N extends NodeIdentity>(
               `Edit cell ${rowIndex + 1}, ${cellIndex + 1}${paragraphIndex ? `, paragraph ${paragraphIndex + 1}` : ''}`,
             );
 
-            if (
-              content.paragraph !== paragraph ||
-              content.matches !== matches ||
-              content.style !== style
-            )
+            if (content.paragraph !== paragraph || content.matches !== matches || metricsChanged)
               paintText(content.element, paragraph, matches, frame.textStyle, cell.header);
           }
 

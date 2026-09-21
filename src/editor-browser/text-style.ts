@@ -1,5 +1,6 @@
 /** Resolved per-view appearance. Family names are semantic; CSS families are view-owned aliases. */
 export type TextStyle = Readonly<{
+  color: string;
   size: number;
   lineHeight: number;
   before: number;
@@ -17,6 +18,7 @@ export type ReadTextStyle = (
 
 /** Native text and its editing input use exactly the same resolved settings. */
 export function applyTextStyle(element: HTMLElement, style: TextStyle) {
+  element.style.color = style.color;
   element.style.fontFamily = style.cssFamily;
   element.style.fontWeight = String(style.font.weight);
   element.style.fontStyle = style.font.style;

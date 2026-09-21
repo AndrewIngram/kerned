@@ -839,3 +839,51 @@ test('metric theme changes reflow around a distant scroll anchor without changin
   expect(view.getSnapshot()?.viewport.top).toBeGreaterThan(1000);
   expect(f.editor.state.selection).toBe(selection);
 });
+
+test('changing only a text color repaints pixels without shaping, composition, geometry or selection changes', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const diagnostics = createViewDiagnostics();
+  const paints: DiagnosticEvent[] = [];
+  diagnostics.subscribe((event) => {
+    if (event.type === 'paint') paints.push(event);
+  });
+  const view = mountEditor(f.element, { editor: f.editor, diagnostics });
+  await view.ready;
+  await expect.poll(() => paints.length).toBeGreaterThan(0);
+  const canvas = f.element.querySelector('canvas');
+
+  if (!canvas) throw new Error('Expected editor canvas');
+  const context = canvas.getContext('2d');
+
+  if (!context) throw new Error('Expected canvas pixels');
+  const before = diagnostics.read();
+  const point = view.coordsAt({ id: 1, offset: 5 });
+  const bounds = view.blockBounds(2);
+  const selection = f.editor.state.selection;
+  const count = paints.length;
+  view.update({ theme: { rules: [defineStyleRule(note, { color: 'rgb(255, 0, 0)' })] } });
+  await expect.poll(() => paints.length).toBeGreaterThan(count);
+  const after = diagnostics.read();
+  expect(after?.stats.glyphCalls).toBe(before?.stats.glyphCalls);
+  expect(after?.stats.compositions).toBe(before?.stats.compositions);
+  expect(after?.generation).toBe(before?.generation);
+  expect(view.coordsAt({ id: 1, offset: 5 })).toEqual(point);
+  expect(view.blockBounds(2)).toEqual(bounds);
+  expect(f.editor.state.selection).toBe(selection);
+  const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  let redPixels = 0;
+
+  for (let index = 0; index < data.length; index += 4) {
+    if (data[index] > 180 && data[index + 1] < 80 && data[index + 2] < 80) redPixels++;
+  }
+
+  expect(redPixels).toBeGreaterThan(50);
+  const colored = paints.length;
+  view.update({ theme: {} });
+  await expect.poll(() => paints.length).toBeGreaterThan(colored);
+  expect(diagnostics.read()?.stats.compositions).toBe(before?.stats.compositions);
+  expect(diagnostics.read()?.generation).toBe(before?.generation);
+});

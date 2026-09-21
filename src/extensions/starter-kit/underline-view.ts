@@ -10,9 +10,11 @@ import {
 import type { NodeIdentity } from '../../model';
 import { underline } from '../starter-definitions';
 
+type UnderlineOptions = { color?: string; offset: number; thickness: number };
+
 function createUnderlineView<N extends NodeIdentity>(
   { editor, paint }: ViewLayerContext<N>,
-  options: { color: string; offset: number; thickness: number },
+  options: UnderlineOptions,
 ) {
   let previous = new Map<
     number,
@@ -20,13 +22,13 @@ function createUnderlineView<N extends NodeIdentity>(
   >();
 
   return {
-    update({ blocks }: ViewLayerFrame<N>) {
+    update({ blocks, textStyle }: ViewLayerFrame<N>) {
       const retained = new Map<
         number,
         { node: N; text: BlockTextGeometry; fragments: readonly TextFragment[] }
       >();
 
-      const rects: DrawingRect[] = [];
+      const rects: (DrawingRect & { color: string })[] = [];
 
       for (const block of blocks) {
         const type = editor.schema.resolve(block.node);
@@ -45,6 +47,7 @@ function createUnderlineView<N extends NodeIdentity>(
         }
 
         retained.set(block.node.id, cached);
+        const color = options.color ?? textStyle?.(block.node.id)?.color ?? '#293227';
 
         for (const fragment of cached.fragments)
           rects.push({
@@ -52,6 +55,7 @@ function createUnderlineView<N extends NodeIdentity>(
             top: block.top + fragment.baseline + options.offset,
             width: fragment.width,
             height: options.thickness,
+            color,
           });
       }
 
@@ -60,7 +64,7 @@ function createUnderlineView<N extends NodeIdentity>(
         'content',
         rects.length
           ? (drawing) => {
-              for (const rect of rects) drawing.rect(rect, options.color);
+              for (const rect of rects) drawing.rect(rect, rect.color);
             }
           : null,
       );
@@ -71,10 +75,12 @@ function createUnderlineView<N extends NodeIdentity>(
   };
 }
 
+const defaults: UnderlineOptions = { offset: 2, thickness: 1 };
+
 /** Underline is a mark's view policy; the generic renderer only provides line geometry. */
 export const underlineView = defineExtension({
   name: 'underlineView',
-  options: { color: '#293227', offset: 2, thickness: 1 },
+  options: defaults,
   requires: [underline.name],
   setup(options, context: ContributionContext) {
     context.provide(viewLayers, {

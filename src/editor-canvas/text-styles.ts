@@ -2,12 +2,14 @@ import type { ReadTextStyle, TextStyle } from '../editor-browser/text-style';
 import type { createOwnedEngine } from '../owned-layout';
 import type { createDOMFonts } from './dom-fonts';
 import type { TextPresentation } from './scene';
+import type { createTextColors } from './text-colors';
 
 /** Cache immutable resolved styles by presentation identity, outside native render and paint loops. */
 export function createTextStyles(
   read: (id: number) => TextPresentation | null,
   fonts: Awaited<ReturnType<typeof createDOMFonts>>,
   metrics: Awaited<ReturnType<typeof createOwnedEngine>>['textMetrics'],
+  colors: ReturnType<typeof createTextColors>,
 ): ReadTextStyle {
   const cache = new WeakMap<TextPresentation, Map<number, TextStyle>>();
 
@@ -35,6 +37,7 @@ export function createTextStyles(
     });
 
     const style: TextStyle = Object.freeze({
+      color: colors(presentation.color).css,
       size: presentation.size,
       lineHeight: presentation.lineHeight,
       before: presentation.before,

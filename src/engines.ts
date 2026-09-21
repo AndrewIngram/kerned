@@ -1,4 +1,4 @@
-import type { Canvas } from 'canvaskit-wasm';
+import type { Canvas, Paint } from 'canvaskit-wasm';
 
 import type { FontSelection } from './editor-canvas/font-catalog';
 import type { Direction, Position, Span } from './layout-types';
@@ -33,7 +33,7 @@ export interface LaidOut {
   coreMs: number;
   adapterMs: number;
   missing: number;
-  draw(canvas: Canvas, x: number, y: number): void;
+  draw(canvas: Canvas, x: number, y: number, paint?: Paint): void;
   // Document-space vertical interval, before draw translation or canvas scaling.
   drawViewport?(
     canvas: Canvas,
@@ -41,6 +41,7 @@ export interface LaidOut {
     y: number,
     top: number,
     bottom: number,
+    paint?: Paint,
   ): { paragraphs: number; runs: number };
   hit(x: number, y: number): Position;
   geometry(anchor: number, focus: number, upstream: boolean): Geometry;

@@ -379,3 +379,28 @@ test('custom cell text and its native input share live resolved styles without l
   expect(getComputedStyle(input).lineHeight).toBe('28px');
   expect(document.activeElement).toBe(input);
 });
+
+test('a native color-only update retains preview text and active input geometry', async ({
+  onTestFinished,
+}) => {
+  const f = await fixture(onTestFinished);
+  const preview = f.button('Edit cell 1, 2');
+  const text = preview.querySelector('p');
+  const input = await f.focus();
+  const before = input.getBoundingClientRect();
+  const selection = f.editor.state.selection;
+  f.view.update({
+    theme: {
+      rules: [
+        defineStyleRule(note, { color: 'blue' }),
+        defineStyleRule(paragraph, { color: 'red' }),
+      ],
+    },
+  });
+  expect(getComputedStyle(input).color).toBe('rgb(0, 0, 255)');
+  expect(getComputedStyle(preview).color).toBe('rgb(255, 0, 0)');
+  expect(preview.querySelector('p')).toBe(text);
+  expect(input.getBoundingClientRect().toJSON()).toEqual(before.toJSON());
+  expect(f.editor.state.selection).toBe(selection);
+  expect(document.activeElement).toBe(input);
+});

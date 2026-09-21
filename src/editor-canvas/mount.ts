@@ -21,6 +21,7 @@ import { createLayerDrawing } from './layer-drawing';
 import { createLayerGeometry } from './layer-geometry';
 import { createDocumentPresentation } from './presentation';
 import { createViewResources } from './resources';
+import { createTextColors } from './text-colors';
 import { createTextLabels } from './text-labels';
 import { createTextStyles } from './text-styles';
 import { connectViewDiagnostics } from './view-diagnostics';
@@ -73,6 +74,7 @@ export function mountEditor<N extends NodeIdentity>(
   const capture = createCanvasInput({ schema: editor.schema, editor });
   const painter = createCanvasRenderer<N>({ onError: fail });
   const document = element.ownerDocument;
+  const colors = createTextColors(document);
   const root = document.createElement('div');
   const space = document.createElement('div');
   const canvas = document.createElement('canvas');
@@ -396,7 +398,14 @@ export function mountEditor<N extends NodeIdentity>(
       zoom: port.zoom,
       top: snapshot.top,
       background: backgroundColor(),
-      blocks: visible,
+      blocks: visible.map((placement) => {
+        const style = presentation.present(placement.node);
+
+        return {
+          ...placement,
+          color: style.kind === 'text' ? colors(style.color).canvas : undefined,
+        };
+      }),
       selectedRange: doc.selectedRange,
       caret: snapshot.caret,
       caretTop: snapshot.activePlacement?.y ?? 0,
@@ -508,6 +517,7 @@ export function mountEditor<N extends NodeIdentity>(
         },
         native.fonts,
         native.layout.textMetrics,
+        colors,
       );
       layers = createViewLayers(
         overlay,

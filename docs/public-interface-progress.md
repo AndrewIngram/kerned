@@ -2316,3 +2316,31 @@ A second lint fix/format pass leaves files unchanged.
 Milestone 5 remains open. Paint-only text colors, in-place font-source replacement,
 full Warbreaker live-theme validation and the independent milestone architecture
 review are still required. This checkpoint does not complete the milestone.
+
+### Milestone 5 checkpoint: paint-only text colors
+
+Text presentations and per-node theme rules now accept standalone CSS colors.
+The view resolves a bounded palette to matching sRGB values for native and canvas
+text, outside glyph painting. Text styles supply the same color to table previews,
+active textareas and list markers. Underlines inherit it unless explicitly
+configured with another color. Context-dependent CSS variables and currentColor
+are rejected rather than depending on unrelated DOM state.
+
+Color changes keep shaping and composition caches, caret geometry and reflow
+generation intact. Native previews retain their elements, and active table inputs
+retain dimensions, focus and selection. The canvas renderer owns a separate text
+paint so extension drawing cannot leak paint settings into glyph rendering.
+Tests inspect actual canvas pixels, including inherited underline color, alongside
+cache counters and geometry in Chromium, Firefox and WebKit.
+
+`pnpm run check` passes with 605 Vitest tests, one unchanged collaboration TODO and
+42 end-to-end cases. The production build and all nine production reflow cases
+pass. Three serial production trials pass every unchanged budget: worst first
+usable 230 ms, streaming 1,178.8 ms, paste handler 57.4 ms, paste to paint 115.6 ms,
+typing 32.3 ms, paging 32.3 ms and loaded heap 27,024,384 bytes. Evidence in
+`artifacts/public-interface-m5/text-colors/` identifies `5b9d2c7` and measures this
+checkpoint's uncommitted implementation. A second lint fix/format pass leaves
+files unchanged.
+
+Milestone 5 remains open. In-place font-source replacement, full Warbreaker
+live-theme validation and the independent milestone architecture review remain.

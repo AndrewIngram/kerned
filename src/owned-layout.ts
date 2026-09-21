@@ -388,7 +388,7 @@ export async function createOwnedEngine(
       hit: document.hit,
       geometry: document.geometry,
       move: document.move,
-      draw(canvas, x, y) {
+      draw(canvas, x, y, textPaint = paint) {
         assertActive();
 
         for (const placement of document.placements)
@@ -399,11 +399,11 @@ export async function createOwnedEngine(
               x,
               y + placement.y,
               font(run.font, size),
-              paint,
+              textPaint,
             );
           }
       },
-      drawViewport(canvas, x, y, top, bottom) {
+      drawViewport(canvas, x, y, top, bottom, textPaint = paint) {
         assertActive();
 
         let paragraphsValue = 0,
@@ -419,7 +419,7 @@ export async function createOwnedEngine(
               x,
               y + placement.y,
               font(run.font, size),
-              paint,
+              textPaint,
             );
             runs++;
           }

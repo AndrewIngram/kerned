@@ -18,7 +18,17 @@ test('list markers follow their text metrics, font and live theme rather than in
         ordered: true,
         start: 3,
         children: [
-          { kind: 'listItem', children: [{ kind: 'paragraph', id: 10, text: 'First item' }] },
+          {
+            kind: 'listItem',
+            children: [
+              {
+                kind: 'paragraph',
+                id: 10,
+                text: 'First item',
+                marks: [{ from: 0, to: 10, mark: { type: 'underline', attrs: null } }],
+              },
+            ],
+          },
           {
             kind: 'listItem',
             children: [{ kind: 'heading', id: 20, level: 2, text: 'Second item' }],
@@ -61,12 +71,13 @@ test('list markers follow their text metrics, font and live theme rather than in
     theme: {
       baselineGrid: 0,
       rules: [
-        defineStyleRule(paragraph, { size: 24, lineHeight: 40 }),
+        defineStyleRule(paragraph, { size: 24, lineHeight: 40, color: 'blue' }),
         defineStyleRule(heading, { size: 32, lineHeight: 48, font: { weight: 400 } }),
       ],
     },
   });
   expect(getComputedStyle(first).fontSize).toBe('24px');
+  expect(getComputedStyle(first).color).toBe('rgb(0, 0, 255)');
   expect(getComputedStyle(first).lineHeight).toBe('40px');
   expect(getComputedStyle(second).fontSize).toBe('32px');
   expect(getComputedStyle(second).fontWeight).toBe('400');
@@ -80,4 +91,22 @@ test('list markers follow their text metrics, font and live theme rather than in
     view.blockBounds(10, 'client')!.top + changedLine.baseline,
     0,
   );
+  const canvas = host.querySelector('canvas');
+  const caret = view.coordsAt({ id: 10, offset: 0 });
+
+  if (!canvas || !caret) throw new Error('Missing painted editor');
+  const surface = canvas.getContext('2d');
+
+  if (!surface) throw new Error('Missing editor pixel context');
+  const bounds = canvas.getBoundingClientRect();
+  const scale = canvas.width / bounds.width;
+  const x = Math.floor((caret.left - bounds.left + 10) * scale);
+  const y = Math.floor((caret.top - bounds.top + changedLine.baseline + 2.5) * scale);
+  await expect
+    .poll(() => {
+      const [r, g, b] = surface.getImageData(x, y, 1, 1).data;
+
+      return b > r + 100 && b > g + 100;
+    })
+    .toBe(true);
 });

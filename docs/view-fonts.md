@@ -1,8 +1,8 @@
 # View font configuration
 
 Status: milestone 5 is in progress. Configurable faces, live node-style rules and
-shared native typography are implemented. Text colors and live font replacement
-remain in milestone 5.
+shared native typography and paint-only text colors are implemented. Live font
+replacement remains in milestone 5.
 
 A view accepts a font configuration without exposing graphics or shaping handles:
 
@@ -72,8 +72,7 @@ The draw runs borrow subarrays of the existing numeric buffers.
 
 Font sources remain attachment configuration. Changing the React `fonts`
 prop currently replaces the native attachment while retaining the supplied
-session. In-place font replacement and paint-only text colors are still required before
-milestone 5 is complete.
+session. In-place font replacement is still required before milestone 5 is complete.
 
 ## Live node-style rules
 
@@ -93,6 +92,7 @@ view.update({
         size: 20,
         lineHeight: 32,
         after: 20,
+        color: '#27352b',
       }),
       defineStyleRule(heading, ({ level }) => ({
         size: [40, 32, 26, 22][level - 1],
@@ -109,7 +109,7 @@ Custom node definitions use the same API. There is no central list of recognized
 node names. Rule handles preserve definition identity; a same-named but unrelated
 definition cannot impersonate an installed node.
 
-Text rules accept `size`, `lineHeight`, `font`, `before`, `after` and
+Text rules accept `size`, `lineHeight`, `font`, `color`, `before`, `after` and
 `baselineGrid`. Box rules accept spacing and grid settings. Flowing containers
 accept `indent`, the amount added to the inherited horizontal inset. Dimensions
 are document units, before zoom. Sizes and line heights must be positive; spacing,
@@ -132,15 +132,24 @@ accepts the same `theme` prop; removing it restores defaults without remounting.
 
 A theme change clears resolved style/projection caches while preserving the
 extension's presentation factory and default cache. It starts a viewport-first
-reflow generation and updates input geometry without editing content, selection,
+reflow generation when metrics change and updates input geometry without editing content, selection,
 undo history or native element identity. Unchanged native blocks retain their
 measured heights; their renderers report actual changes through the existing
 measurement contract. Spacing-only changes reuse shaping in both plain text and
 text with inline atoms.
 
 These rules reach canvas text, native table previews and editing inputs, list
-markers, document spacing and flowing-container indentation. Text color rules
-and in-place font-source replacement are still outstanding.
+markers, document spacing and flowing-container indentation. In-place font-source
+replacement is still outstanding.
+
+Colors accept standalone CSS literals, including hex, named colors, RGB and HSL.
+The view resolves them once per cached value to 8-bit sRGB, supplying the same
+color to canvas and native text. Context-dependent values such as `currentColor`
+and `var(...)` are rejected; resolve application CSS variables before passing them
+to a rule. A color-only update repaints without new shaping, composition or a new
+reflow generation. It preserves caret geometry, native preview elements and active
+input dimensions. List markers and underlines inherit text color; an explicit
+`underlineView.configure({ color })` overrides that inheritance.
 
 ## Native text rendering
 
@@ -150,7 +159,7 @@ bold/italic flags resolve the same authored emphasis as the canvas font matcher.
 Custom text nodes provide their defaults through `defineNodePresentation`; the
 style reader does not assume starter-kit node names or text attribute fields.
 
-`applyTextStyle(element, style)` applies the resolved face, size, leading and
+`applyTextStyle(element, style)` applies the resolved face, size, color, leading and
 baseline-grid adjustment. The snapshot includes semantic font metadata and a
 `cssFamily` containing private browser aliases. These aliases belong to the
 mounted view, must not be persisted as document formatting, and are released with

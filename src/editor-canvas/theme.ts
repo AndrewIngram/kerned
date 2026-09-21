@@ -9,6 +9,7 @@ const positive = z.number().finite().positive();
 const nonnegative = z.number().finite().nonnegative();
 
 const nodeStyle = z.strictObject({
+  color: z.string().trim().min(1).optional(),
   size: positive.optional(),
   lineHeight: positive.optional(),
   before: nonnegative.optional(),
@@ -116,6 +117,7 @@ export function createThemeStyles<N extends NodeIdentity>(
     for (const rule of matching ?? []) {
       const next = rule.read(node);
       style = {
+        color: next.color ?? style.color,
         size: next.size ?? style.size,
         lineHeight: next.lineHeight ?? style.lineHeight,
         before: next.before ?? style.before,
@@ -149,7 +151,7 @@ export function createThemeStyles<N extends NodeIdentity>(
 
     if (style.indent !== undefined)
       throw new Error('Indentation rules require a flowing container');
-    const { font, size, lineHeight, before, after, baselineGrid } = style;
+    const { color, font, size, lineHeight, before, after, baselineGrid } = style;
 
     const spacing = {
       before: before ?? defaults.before,
@@ -158,7 +160,12 @@ export function createThemeStyles<N extends NodeIdentity>(
     };
 
     if (defaults.kind === 'box') {
-      if (font !== undefined || size !== undefined || lineHeight !== undefined)
+      if (
+        color !== undefined ||
+        font !== undefined ||
+        size !== undefined ||
+        lineHeight !== undefined
+      )
         throw new Error('Font rules require a text presentation');
 
       return { ...defaults, ...spacing };
@@ -167,6 +174,7 @@ export function createThemeStyles<N extends NodeIdentity>(
     return {
       ...defaults,
       ...spacing,
+      color: color ?? defaults.color,
       size: size ?? defaults.size,
       lineHeight: lineHeight ?? defaults.lineHeight,
       font: font

@@ -1,4 +1,4 @@
-import type { Canvas, CanvasKit, Paint } from 'canvaskit-wasm';
+import type { Canvas, CanvasKit, Color, Paint } from 'canvaskit-wasm';
 
 import type { LaidOut, Rect } from '../engines';
 
@@ -12,7 +12,7 @@ export type RegisterCanvasPainter = (
   layer: CanvasPaintLayer,
 ) => () => void;
 
-type CanvasBlock<N> = { node: N; y: number; height: number; layout: LaidOut | null };
+type CanvasBlock<N> = { node: N; y: number; height: number; layout: LaidOut | null; color?: Color };
 
 export type PaintReport = { at: number; duration: number; submitted: number };
 
@@ -36,6 +36,7 @@ export type CanvasFrame<N> = {
 type Resources = {
   surface: NonNullable<ReturnType<CanvasKit['MakeSWCanvasSurface']>>;
   paint: Paint;
+  textPaint: Paint;
   width: number;
   height: number;
   retired: boolean;
@@ -44,6 +45,7 @@ type Resources = {
 function dispose(resources: Resources) {
   resources.surface.dispose();
   resources.paint.delete();
+  resources.textPaint.delete();
 }
 
 /** One paint owner, independent of framework lifetimes. Attachments may be replaced;
@@ -99,7 +101,7 @@ export function createCanvasRenderer<N>({ onError }: { onError?: (error: Error) 
     resources: Resources,
     height: number,
   ) {
-    const { surface, paint } = resources,
+    const { surface, paint, textPaint } = resources,
       { zoom, top } = current,
       bottom = top + height / zoom;
 
@@ -137,6 +139,7 @@ export function createCanvasRenderer<N>({ onError }: { onError?: (error: Error) 
       for (const block of current.blocks)
         if (block.layout && block.y + block.height > top - 80 && block.y < bottom + 80) {
           submitted++;
+          textPaint.setColor(block.color ?? kit.Color(37, 42, 35));
 
           if (block.layout.drawViewport)
             block.layout.drawViewport(
@@ -145,8 +148,9 @@ export function createCanvasRenderer<N>({ onError }: { onError?: (error: Error) 
               block.y,
               top - block.y - 80,
               bottom - block.y + 80,
+              textPaint,
             );
-          else block.layout.draw(canvas, 0, block.y);
+          else block.layout.draw(canvas, 0, block.y, textPaint);
         }
 
       for (const painter of painters.values())
@@ -208,15 +212,19 @@ export function createCanvasRenderer<N>({ onError }: { onError?: (error: Error) 
 
     try {
       const paint = new kit.Paint();
+      let textPaint: Paint | undefined;
 
       try {
+        textPaint = new kit.Paint();
         paint.setAntiAlias(true);
+        textPaint.setAntiAlias(true);
       } catch (error) {
         paint.delete();
+        textPaint?.delete();
         throw error;
       }
 
-      attachment.resources = { surface, paint, width, height, retired: false };
+      attachment.resources = { surface, paint, textPaint, width, height, retired: false };
     } catch (error) {
       surface.dispose();
       throw error;

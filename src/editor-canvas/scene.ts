@@ -10,6 +10,7 @@ type BlockSpacing = { before: number; after: number; baselineGrid: number };
 export type TextPresentation = BlockSpacing &
   Omit<LayoutInput, 'id' | 'width'> & {
     kind: 'text';
+    color?: string;
     lineHeight: number;
     atoms: readonly InlineAtom[];
   };
@@ -171,10 +172,9 @@ export function createEditorScene<N extends NodeIdentity>(
         paddingChanged = padding !== previous.paddingTop;
 
       const styleChanged = presentationVersion !== (view.presentationVersion ?? 0);
-      const reflow = (previous.width !== width || styleChanged) && previous.placements.length > 0;
-      const generation = previous.generation + Number(reflow);
+      let reflow = previous.width !== width && previous.placements.length > 0;
 
-      if (reflow) {
+      if (reflow || styleChanged) {
         dirty.clear();
 
         for (const [id, value] of cache)
@@ -272,12 +272,17 @@ export function createEditorScene<N extends NodeIdentity>(
         if (index === anchorIndex) anchorY = y;
 
         const presentation = present(node);
+        const oldPlacement = previous.placements[index];
+
+        if (styleChanged && oldPlacement && oldPlacement.y !== y) reflow = true;
 
         if (presentation.kind === 'box') {
           if (cache.delete(node.id)) textLayout?.release(node.id);
           dirty.delete(node.id);
           const measured = measurements.get(node.id);
           const height = measured?.width === width ? measured.height : presentation.height;
+
+          if (styleChanged && oldPlacement && oldPlacement.height !== height) reflow = true;
           placements.push({ node, y, height, layout: null, layoutWidth: width, boxes: [] });
           y += snap(height, presentation.baselineGrid);
           continue;
@@ -285,6 +290,8 @@ export function createEditorScene<N extends NodeIdentity>(
 
         let value = cache.get(node.id);
         const changed = !value || !sameText(value.presentation, presentation);
+
+        if (styleChanged && value && (changed || value.width !== layoutWidth)) reflow = true;
 
         const urgent =
           (index >= first && (index <= anchorIndex || y <= anchorY + offset + view.height + 160)) ||
@@ -436,7 +443,7 @@ export function createEditorScene<N extends NodeIdentity>(
         top,
         zoom: view.zoom,
         pending: dirty.size,
-        generation,
+        generation: previous.generation + Number(reflow),
         paddingTop: padding,
       };
       presentationVersion = view.presentationVersion ?? 0;
@@ -552,9 +559,10 @@ function offsetLayout(layout: LaidOut, inset: number): LaidOut {
 
   return {
     ...layout,
-    draw: (canvas, x, y) => layout.draw(canvas, x + inset, y),
+    draw: (canvas, x, y, paint) => layout.draw(canvas, x + inset, y, paint),
     drawViewport: layout.drawViewport
-      ? (canvas, x, y, top, bottom) => layout.drawViewport!(canvas, x + inset, y, top, bottom)
+      ? (canvas, x, y, top, bottom, paint) =>
+          layout.drawViewport!(canvas, x + inset, y, top, bottom, paint)
       : undefined,
     hit: (x, y) => layout.hit(x - inset, y),
     geometry: (a, h, u) => {
