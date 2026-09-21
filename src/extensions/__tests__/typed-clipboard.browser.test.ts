@@ -8,10 +8,12 @@ import {
   serializers,
   type ContributionContext,
 } from '../../core';
+import { createEditorHtmlParser, defineHtmlTextParser, htmlParsers } from '../../editor-browser';
 import { createSchema, defineNode, defineNodeSerializer } from '../../model';
 import { textSelection } from '../../state';
 import { readClipboard, writeClipboard } from '../clipboard';
 import { starterExtensions } from '../starter-kit';
+import { starterInput } from '../starter-kit/browser';
 import { tableCells } from '../table';
 import { copyCellRectangle, cellRectangleText } from '../table-clipboard';
 
@@ -113,6 +115,16 @@ test('clipboard HTML uses the installed custom serializer without a node view', 
     options: {},
     setup(_options, context: ContributionContext) {
       context.provide(
+        htmlParsers,
+        defineHtmlTextParser(note, {
+          selector: 'aside[data-category]',
+          attributes: (element, body) => ({
+            body,
+            category: element?.getAttribute('data-category') ?? '',
+          }),
+        }),
+      );
+      context.provide(
         serializers,
         defineNodeSerializer(note, ({ attributes, content }) => ({
           ...content,
@@ -131,7 +143,7 @@ test('clipboard HTML uses the installed custom serializer without a node view', 
   });
 
   const editor = createEditor({
-    schema: createSchema({ extensions: [...starterExtensions, note, customOutput] }),
+    schema: createSchema({ extensions: [...starterExtensions, starterInput, note, customOutput] }),
     content: [
       {
         kind: 'note',
@@ -152,4 +164,14 @@ test('clipboard HTML uses the installed custom serializer without a node view', 
     '<aside data-category="important"><strong>Custom</strong></aside>',
   );
   expect(readClipboard(data, editor.schema)?.nodes[0]).toBe(editor.state.nodes[0]);
+  const external = new DataTransfer();
+  external.setData('text/html', data.getData('text/html'));
+  const imported = readClipboard(external, editor.schema, createEditorHtmlParser(editor));
+  expect(imported?.nodes[0]).toMatchObject({
+    kind: 'note',
+    body: 'Custom',
+    category: 'important',
+    styles: [{ from: 0, to: 6, mark: { type: 'bold' } }],
+  });
+  expect(imported?.inline).toBe(false);
 });

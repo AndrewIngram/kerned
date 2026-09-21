@@ -1,0 +1,15 @@
+[
+  {
+    "browser": "chromium",
+    "copyMs": 19.600000143051147,
+    "characters": 1117593,
+    "blocks": 14656,
+    "originalBlocks": 7328,
+    "handlerMs": 60.59999990463257,
+    "paintMs": 122,
+    "layoutsToPaint": 181,
+    "completeMs": 2114.5,
+    "maxFrameGapMs": 104.20000004768372,
+    "stalePaints": 0
+  }
+]

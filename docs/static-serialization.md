@@ -89,9 +89,8 @@ These formats have different purposes:
   references, access policy or collaboration state. Plain text is deliberately
   lossy. Interactive rendering components are not an HTML codec.
 
-JSON round trips preserve rich tables, marks and inline attributes. The existing
-browser HTML importer still handles starter content; extensible HTML import and
-complete inline HTML round trips remain milestone 7 work. Static export does not
-claim that arbitrary exported custom HTML can already be reconstructed by that
-importer. There is no Markdown codec or complete collaboration-state codec in
-this milestone.
+JSON round trips preserve rich tables, marks and inline attributes. Browser HTML
+import now uses extension contributions too; see [HTML parsing](html-parsing.md)
+for rules, round-trip behavior and explicit losses. Static export does not infer
+parsers from renderers. There is no Markdown codec or complete collaboration-state
+codec in this milestone.

@@ -2946,3 +2946,71 @@ uncommitted implementation. Full-book copy costs 18.9–19.1 ms versus roughly
 12.4–12.9 ms in the preceding hardcoded path; the new generic traversal and
 structured output add work to this cold export operation. No threshold was
 changed, and this cost remains visible for the milestone review.
+
+### Milestone 7 checkpoint: extensible HTML import and rich construction
+
+HTML import now uses schema-bound browser contributions. `defineHtmlTextParser`,
+`defineHtmlNodeParser` and `defineHtmlValueParser` infer input attributes from
+installed definitions; lower-level rules receive a parsing context for structures
+such as tables. Priority and installation order determine precedence, with one
+explicit fallback text rule. A parser works directly with a schema or collects
+`htmlParsers` from a composed session. It does not require an interactive view.
+
+The starter clipboard input and sample loader use these contracts. The former
+hardcoded importer is a small diagnostics facade; recursive containers and table
+cells no longer serialize and reparse `innerHTML`. Custom clipboard tests drop
+the local token and reconstruct custom block attributes and marks from HTML.
+Starter round trips cover headings, quotes, nested lists, table structure/spans,
+images and mention metadata. Paragraphs split around block images. Unsupported
+image schemes are dropped. Unknown wrappers preserve text, and executable or
+foreign SVG/MathML subtrees are ignored. Standalone separator breaks do not add
+blank blocks; explicit line breaks inside text blocks remain content.
+
+Public node bindings can construct rich text with validated marks and inline
+objects, independent of configured storage field names. Value bindings create
+attributes through the installed Standard Schema configuration. Construction owns
+its arrays and attributes, enforces allowed types and Unicode offsets, and rejects
+text normalization that would invalidate supplied offsets. The import pipeline
+can therefore construct canonical nodes without raw field mutation or a JSON
+encode/decode detour.
+
+Initial measurements exposed avoidable import overhead. Profiling led to a
+bounded JSON validation/copy traversal instead of repeatedly constructing nested
+validators, removal of redundant copies of already-owned attributes, and endpoint
+segmentation instead of full-paragraph grapheme arrays. The renderer's text-support
+check now has a printable-ASCII path and one control-character scan, preserving
+its existing Unicode policy. Exhaustive offset tests compare range validation and
+snapping with full segmentation for combining sequences, emoji, flags, CRLF and
+Indic text. JSON rejection, depth, cycle, ownership and special-key tests remain
+in force.
+
+Validation:
+
+- `pnpm run check` passes: 858 Vitest tests, one unchanged collaboration TODO,
+  and 42 end-to-end cases. The production build passes with the existing chunk
+  size warning.
+- `pnpm run check:editor-book` passes in Chromium, Firefox and WebKit. It verifies
+  all 7,313 source text blocks within 7,280 top-level blocks, underline fidelity,
+  streaming edits/undo, inert import, scrolling and sample switching. The actual
+  sample source and its checksums are unchanged.
+- Final three-trial production measurements are in
+  `artifacts/public-interface-m7/html-import-verified/`. Maxima: first usable
+  254 ms, streaming 1,323.2 ms, paste handler 65.1 ms, paste paint 129.5 ms,
+  typing 31.9 ms, paging 32 ms, loaded heap 28,085,896 bytes. The historical
+  first-paint and paste budgets **still fail in this final run**.
+- A separate checkout of parent `03096c7`, built with the same dependencies and
+  engine/font assets on the same machine, also fails those budgets. Its results
+  are preserved in `html-import-parent-comparison/`: first usable 279 ms, paste
+  handler 65.2 ms and paste paint 132 ms. Current full-book copy is 20.3–21.7 ms;
+  the parent comparison is 19.4–21.9 ms. The temporary checkout and preview were
+  removed after measurement.
+- Earlier profiling runs are retained in the other `html-import*` directories.
+  Those preceding the separator fix contain 48 extra blank blocks and are not
+  the final source-fidelity evidence, even where a performance gate passed.
+  No budget or baseline was relaxed. Reports identify parent `03096c7`; current
+  measurements cover the uncommitted implementation captured by this checkpoint.
+
+Milestone 7 remains open for deterministic shortcut/input/paste-rule composition,
+the unresolved historical performance gate, and its final architecture judge.
+Milestone 8 is still pending. See [HTML parsing](html-parsing.md) for the public
+interfaces and explicit interchange losses.

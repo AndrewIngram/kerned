@@ -15,10 +15,33 @@ export function boundaries(text: string): number[] {
   return [...graphemes.segment(text)].map((s) => s.index).concat(text.length);
 }
 
-export function validateTextRange(text: string, from: number, to: number) {
-  const stops = new Set(boundaries(text));
+/** Snap one UTF-16 offset without materializing every grapheme in the text. */
+export function snapTextOffset(text: string, offset: number, association: -1 | 1): number {
+  if (!Number.isSafeInteger(offset) || offset < 0 || offset > text.length)
+    throw new Error('Invalid text offset');
 
-  if (from > to || !stops.has(from) || !stops.has(to))
+  if (offset === 0 || offset === text.length) return offset;
+  const segment = graphemes.segment(text).containing(offset);
+
+  if (!segment || segment.index === offset) return offset;
+
+  return association < 0 ? segment.index : segment.index + segment.segment.length;
+}
+
+export function validateTextRange(text: string, from: number, to: number) {
+  const validOffset = (offset: number) =>
+    Number.isSafeInteger(offset) && offset >= 0 && offset <= text.length;
+
+  if (from > to || !validOffset(from) || !validOffset(to))
+    throw new Error('Edit range must follow grapheme boundaries');
+  // Most imported mark ranges cover a whole block. Interior endpoints need only
+  // their containing segment, not an allocated array and Set for the entire text.
+  const interior = [from, to].filter((offset) => offset !== 0 && offset !== text.length);
+
+  if (!interior.length) return;
+  const segments = graphemes.segment(text);
+
+  if (interior.some((offset) => segments.containing(offset)?.index !== offset))
     throw new Error('Edit range must follow grapheme boundaries');
 }
 

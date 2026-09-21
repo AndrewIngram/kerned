@@ -218,3 +218,16 @@ export {
 } from './range-views';
 
 export type { ContentSlot } from './content-slot';
+
+export {
+  createHtmlParser,
+  createEditorHtmlParser,
+  defineHtmlTextParser,
+  defineHtmlNodeParser,
+  defineHtmlValueParser,
+  htmlParsers,
+  type HtmlParserContribution,
+  type HtmlParseContext,
+  type HtmlParseRule,
+  type ParsedHtmlText,
+} from './html-parser';

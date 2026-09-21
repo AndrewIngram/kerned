@@ -47,7 +47,7 @@ test('assembled headless starter output covers rich tables, heading levels, ment
     const serializer = createEditorSerializer(editor);
     const output = serializer.serialize(editor.state.nodes);
     expect(output).toEqual({
-      html: '<h4>Heading</h4><table><caption>A &amp; B</caption><tr><th colspan="2" rowspan="1"><p><strong>Hi</strong> <span data-gprose-mention="Ada">Ada</span></p></th></tr></table><img src="/image.png" alt="A &lt; B">',
+      html: '<h4>Heading</h4><table><caption>A &amp; B</caption><tr><th colspan="2" rowspan="1"><p><strong>Hi</strong> <span data-gprose-mention="Ada" data-gprose-width="40" data-gprose-ascent="20" data-gprose-descent="4">Ada</span></p></th></tr></table><img src="/image.png" alt="A &lt; B">',
       text: 'Heading\n\nHi Ada\n\nA < B',
     });
     const codec = createDocumentCodec(editor.schema);

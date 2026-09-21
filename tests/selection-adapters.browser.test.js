@@ -13,6 +13,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const { createEditor } = await import('../src/core/index.ts');
     const { createSchema } = await import('../src/model/index.ts');
     const { starterExtensions } = await import('../src/extensions/starter-kit/index.ts');
+    const { starterInput } = await import('../src/extensions/starter-kit/browser.ts');
     const { useEditorState } = await import('../src/editor-react/index.tsx');
 
     const { createStarterDocumentQuery } =
@@ -35,7 +36,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const table = structuredClone(createTable(demoSchema, allocate));
 
     const editor = createEditor({
-      schema: createSchema({ extensions: starterExtensions }),
+      schema: createSchema({ extensions: [...starterExtensions, starterInput] }),
       document: [
         paragraph(1, 'First'),
         { id: 2, key: 'image', kind: 'image', src: '', alt: 'Image' },

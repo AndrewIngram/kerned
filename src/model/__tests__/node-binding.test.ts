@@ -190,3 +190,58 @@ test('copying a subtree respects custom storage and renews node and inline ident
   expect(compiled.validateDocument([source, clone]).issues).toBeUndefined();
   expect(compiled.children(source)[0].key).toBe('text');
 });
+
+test('rich text construction validates canonical values and owns their ranges and attributes', () => {
+  const link = defineMark({
+    name: 'link',
+    version: 1,
+    options: {},
+    schema: () => ({ attributes: z.strictObject({ href: z.string() }) }),
+  });
+
+  const token = defineInline(
+    {
+      name: 'token',
+      version: 1,
+      options: {},
+      schema: () => ({ attributes: z.strictObject({ label: z.string() }) }),
+    },
+    (attrs) => attrs.label,
+  );
+
+  const compiled = createSchema({ extensions: [text, link, token] });
+  const ranges = [{ from: 0, to: 4, mark: { type: 'link', attrs: { href: '/one' } } }];
+  const objects = [{ ...compiled.value(token).create({ label: 'Ada' }), id: 'token-1', index: 3 }];
+
+  const node = compiled
+    .node(text)
+    .create(
+      { id: 1, key: 'rich' },
+      { value: 'Hi \ufffc', level: 1 },
+      { marks: ranges, inline: objects },
+    );
+
+  ranges[0].mark.attrs.href = '/changed';
+  ranges[0].from = 2;
+  objects.length = 0;
+  expect(compiled.editing(node).marks?.read(node)).toEqual([
+    { from: 0, to: 4, mark: { type: 'link', attrs: { href: '/one' } } },
+  ]);
+  expect(compiled.editing(node).inline?.read(node)).toMatchObject([
+    { id: 'token-1', index: 3, attrs: { label: 'Ada' } },
+  ]);
+  expect(compiled.validateDocument([node]).issues).toBeUndefined();
+  expect(Object.isFrozen(compiled.editing(node).marks?.read(node)[0].mark.attrs)).toBe(true);
+  expect(() =>
+    compiled.node(text).create({ id: 2, key: 'bad' }, { value: '\ufffc', level: 1 }),
+  ).toThrow(/Missing inline object/);
+  expect(() =>
+    compiled.node(text).create(
+      { id: 2, key: 'bad' },
+      { value: 'abc', level: 1 },
+      {
+        marks: [{ from: 0, to: 4, mark: compiled.value(link).create({ href: '/one' }) }],
+      },
+    ),
+  ).toThrow(/range/i);
+});

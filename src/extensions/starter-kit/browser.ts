@@ -1,6 +1,7 @@
 import { defineExtension, type ContributionContext } from '../../core';
-import { inputPolicies } from '../../editor-browser';
+import { inputPolicies, htmlParsers } from '../../editor-browser';
 import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
+import { starterHtmlParsers } from '../html-parsers';
 import { image } from '../starter-definitions';
 import { containerDecorations } from './container-decorations';
 import { createImageRenderer } from './image-view';
@@ -68,6 +69,8 @@ export const starterInput = defineExtension({
   requires: ['starterEditing', 'starterFormatting', 'starterStructure', 'starterTables'],
   options: {},
   setup(_options, context: ContributionContext) {
+    for (const rule of starterHtmlParsers) context.provide(htmlParsers, rule);
+
     context.provide(inputPolicies, {
       create({ editor, input, textInput, selectAll, navigate, notice }) {
         const adapter = createStarterKitInput({

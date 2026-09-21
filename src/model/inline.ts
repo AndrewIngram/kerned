@@ -37,6 +37,12 @@ export function validateInlineObjects(
   text: string,
   objects: readonly { id: string; index: number }[],
 ) {
+  if (!objects.length) {
+    if (text.includes('\ufffc')) throw new Error('Missing inline object');
+
+    return;
+  }
+
   const stops = new Set(boundaries(text)),
     ids = new Set<string>(),
     indices = new Set<number>();

@@ -1,6 +1,6 @@
 import { parseAttributes, validateAttributes } from './attribute-validation';
 import type { RuntimeDocumentNode, SchemaDefinition } from './definitions';
-import { jsonRecord } from './schema-codec';
+import { jsonRecord, readJsonRecord } from './schema-codec';
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
 
@@ -21,7 +21,7 @@ export function nodeAttributes(
 
   if ('issues' in result) throw new Error(result.issues.map((issue) => issue.message).join('; '));
 
-  const normalized = jsonRecord(result.value);
+  const normalized = readJsonRecord(result.value);
 
   if (Object.keys(normalized).some((key) => reserved.has(key)))
     throw new Error('Attribute validator returned a reserved node field');

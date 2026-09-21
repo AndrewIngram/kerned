@@ -6,7 +6,7 @@
       "blocks": 7280,
       "textBlocks": 7313,
       "underlineVerified": true,
-      "loadMs": 1268,
+      "loadMs": 1472,
       "stalePaints": 0
     },
     {
@@ -14,7 +14,7 @@
       "blocks": 7280,
       "textBlocks": 7313,
       "underlineVerified": true,
-      "loadMs": 1583,
+      "loadMs": 1948,
       "stalePaints": 0
     },
     {
@@ -22,7 +22,7 @@
       "blocks": 7280,
       "textBlocks": 7313,
       "underlineVerified": true,
-      "loadMs": 1254,
+      "loadMs": 1467,
       "stalePaints": 0
     }
   ]

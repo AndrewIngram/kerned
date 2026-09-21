@@ -5,8 +5,10 @@ import { reservedNodeFields } from './compiled-attributes';
 import { inlineOf, withChildren } from './compiled-storage';
 import type { RuntimeDocumentNode } from './definitions';
 import { freezeJson } from './immutable-json';
-import type { NodeDefinition, NodeFactory } from './node-binding';
-import { jsonRecord } from './schema-codec';
+import type { createInlineValues } from './inline-schema';
+import type { createMarkSchema } from './marks';
+import { isChildContent, type NodeDefinition, type NodeFactory } from './node-binding';
+import { jsonRecord, jsonString, readJsonRecord } from './schema-codec';
 
 const nodeIdentity = z.object({
   id: z.number().int(),
@@ -18,7 +20,11 @@ type NodeDraft = { -readonly [Key in keyof RuntimeDocumentNode]: RuntimeDocument
 
 /** Construct one node using the installed configuration. Child placement and
  * document-wide identities are validated when the draft inserts the result. */
-export function compileNodeFactory(definition: NodeDefinition): NodeFactory<RuntimeDocumentNode> {
+export function compileNodeFactory(
+  definition: NodeDefinition,
+  marks: ReturnType<typeof createMarkSchema>,
+  inlineValues: ReturnType<typeof createInlineValues>,
+): NodeFactory<RuntimeDocumentNode> {
   const reserved = reservedNodeFields(definition);
   const content = definition.spec.content;
   const attributeCache = new WeakMap<RuntimeDocumentNode, object>();
@@ -53,13 +59,13 @@ export function compileNodeFactory(definition: NodeDefinition): NodeFactory<Runt
 
       return Object.freeze(next);
     },
-    create(identity, attributes, children) {
+    create(identity, attributes, supplied) {
       const ownedIdentity = nodeIdentity.parse(identity);
       const parsed = parseAttributes(definition.spec, attributes, []);
 
       if ('issues' in parsed)
         throw new Error(parsed.issues.map((issue) => issue.message).join('; '));
-      const attrs = jsonRecord(parsed.value);
+      const attrs = readJsonRecord(parsed.value);
 
       if (Object.keys(attrs).some((key) => reserved.has(key)))
         throw new Error('Attribute validator returned a reserved node field');
@@ -71,16 +77,46 @@ export function compileNodeFactory(definition: NodeDefinition): NodeFactory<Runt
         ...ownedIdentity,
       };
 
-      if (content.kind === 'container')
-        return Object.freeze(withChildren(node, content, [...children]));
+      if (content.kind === 'container') {
+        if (!isChildContent(supplied)) throw new Error('Containers require child nodes');
 
-      if (children.length) throw new Error('Only containers accept children');
+        return Object.freeze(withChildren(node, content, [...supplied]));
+      }
+
+      if (isChildContent(supplied) && supplied.length)
+        throw new Error('Only containers accept children');
 
       if (content.kind === 'text') {
-        if (content.marks) node[content.marks] = Object.freeze([]);
+        const rich = isChildContent(supplied) ? {} : supplied;
+        const text = jsonString(attrs[content.field]);
+        const ranges = rich.marks ?? [];
+        const inline = rich.inline ?? [];
 
-        if (content.inline) node[content.inline] = Object.freeze([]);
-      }
+        if ((ranges.length || inline.length) && jsonRecord(attributes)[content.field] !== text)
+          throw new Error('Text normalization would invalidate supplied content offsets');
+
+        if (
+          (!content.marks && ranges.length) ||
+          (content.allowedMarks &&
+            ranges.some((range) => !content.allowedMarks!.includes(range.mark.type)))
+        )
+          throw new Error('Unsupported mark for this node');
+
+        if (
+          (!content.inline && inline.length) ||
+          (content.allowedInline &&
+            inline.some((value) => !content.allowedInline!.includes(value.type)))
+        )
+          throw new Error('Unsupported inline object for this node');
+
+        const ownedMarks = marks.validate(text, ranges);
+        const ownedInline = inlineValues.validate(text, inline);
+        freezeJson({ marks: ownedMarks, inline: ownedInline });
+
+        if (content.marks) node[content.marks] = ownedMarks;
+
+        if (content.inline) node[content.inline] = ownedInline;
+      } else if (!isChildContent(supplied)) throw new Error('Only text nodes accept text content');
 
       return Object.freeze(node);
     },

@@ -1,5 +1,10 @@
 import { createEditorSerializer } from '../../core';
-import { createTextInput, type BrowserViewOptions, type ViewSession } from '../../editor-browser';
+import {
+  createEditorHtmlParser,
+  createTextInput,
+  type BrowserViewOptions,
+  type ViewSession,
+} from '../../editor-browser';
 import { createDocumentQuery } from '../../editor-browser/document';
 import { readClipboard, writeClipboard, type ClipboardFragment } from '../../extensions/clipboard';
 import { textContent, type NodeIdentity, type Schema } from '../../model';
@@ -40,6 +45,7 @@ export function createStarterKitInput<N extends NodeIdentity>({
 }: InputOptions<N>) {
   const tableType = editor.schema.node(tableDefinition);
   const serializer = createEditorSerializer(editor, { unsupported: 'text' });
+  const parser = createEditorHtmlParser(editor);
 
   const project = createDocumentQuery<N, N, null>(editor.schema, {
     initial: null,
@@ -306,7 +312,7 @@ export function createStarterKitInput<N extends NodeIdentity>({
       if (!e.clipboardData) return;
 
       try {
-        const fragment = readClipboard(e.clipboardData, editor.schema);
+        const fragment = readClipboard(e.clipboardData, editor.schema, parser);
 
         const rectangle =
           fragment?.nodes.length === 1 && tableType.matches(fragment.nodes[0])

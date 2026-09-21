@@ -1,7 +1,8 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
+import { parseAttributes } from './attribute-validation';
 import { definitionFamily, type SchemaDefinition } from './definitions';
-import type { Immutable } from './immutable-json';
+import { freezeJson, type Immutable } from './immutable-json';
 import type { Mark } from './marks';
 
 export type ValueDefinition = Extract<SchemaDefinition, { category: 'mark' | 'inline' }>;
@@ -9,6 +10,7 @@ export type ValueDefinition = Extract<SchemaDefinition, { category: 'mark' | 'in
 /** A canonical mark/inline value retains its attributes without reparsing on the hot path. */
 export type ValueBinding<Definition extends ValueDefinition> = Readonly<{
   name: Definition['name'];
+  create(attributes: StandardSchemaV1.InferInput<Definition['spec']['attributes']>): Mark;
   read(
     this: void,
     value: Mark,
@@ -32,6 +34,16 @@ export function bindValue<Definition extends ValueDefinition>(
 
   return Object.freeze({
     name: definition.name,
+    create(attributes) {
+      const parsed = parseAttributes(installed.spec, attributes, []);
+
+      if ('issues' in parsed)
+        throw new Error(parsed.issues.map((issue) => issue.message).join('; '));
+
+      freezeJson({ attrs: parsed.value });
+
+      return Object.freeze({ type: definition.name, attrs: parsed.value });
+    },
     read(value: Mark) {
       if (value.type !== definition.name) return null;
 

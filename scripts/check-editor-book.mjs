@@ -75,8 +75,18 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     assert.equal(parsed.marked.nodes[0].kind, 'heading');
     assert.equal(parsed.marked.nodes[0].level, 2);
     assert.deepEqual(
-      parsed.inert.nodes.map((n) => n.text),
-      ['Safe text'],
+      parsed.inert.nodes.filter((node) => node.kind === 'paragraph').map((node) => node.text),
+      ['Safe', 'text'],
+    );
+    assert.deepEqual(
+      parsed.inert.nodes.find((node) => node.kind === 'image'),
+      {
+        kind: 'image',
+        id: parsed.inert.nodes[1].id,
+        key: parsed.inert.nodes[1].key,
+        src: '/never-load',
+        alt: '',
+      },
     );
     assert.equal(parsed.injected, false);
     assert.deepEqual(

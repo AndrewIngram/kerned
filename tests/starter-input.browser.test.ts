@@ -3,13 +3,14 @@ import { expect, test, onTestFinished } from 'vitest';
 import { createEditor } from '../src/core';
 import { createTextInput } from '../src/editor-browser';
 import { starterExtensions } from '../src/extensions/starter-kit';
+import { starterInput } from '../src/extensions/starter-kit/browser';
 import { createStarterKitInput } from '../src/extensions/starter-kit/input';
 import { createSchema } from '../src/model';
 import { TextSelection, textSelection } from '../src/state';
 
 function inputSession() {
   let writable = true;
-  const schema = createSchema({ extensions: starterExtensions });
+  const schema = createSchema({ extensions: [...starterExtensions, starterInput] });
 
   const editor = createEditor({
     schema,

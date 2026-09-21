@@ -249,7 +249,7 @@ export function compileSchema(definitions: readonly SchemaDefinition[]) {
     const common = {
       name: definition.name,
       version: definition.version,
-      factory: compileNodeFactory(definition),
+      factory: compileNodeFactory(definition, marks, inlineValues),
       groups: definition.spec.groups,
       selectable: definition.spec.selectable,
       codec: compileNodeCodec(definition, marks, inlineValues),

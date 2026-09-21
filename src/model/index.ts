@@ -30,7 +30,7 @@ export {
 
 export { type InlineValue } from './inline-schema';
 
-export { boundaries, validateTextRange, wordBoundary, wordRange } from './text';
+export { boundaries, snapTextOffset, validateTextRange, wordBoundary, wordRange } from './text';
 
 export {
   indexTree,
@@ -91,7 +91,7 @@ export {
 
 export { createSchema, type AssembledSchema, type SchemaValues } from './assembly';
 
-export { type NodeBinding } from './node-binding';
+export { type NodeBinding, type TextNodeContent, type NodeContent } from './node-binding';
 
 export { type ValueBinding } from './value-binding';
 

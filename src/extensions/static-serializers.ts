@@ -103,7 +103,12 @@ export const starterSerializers = [
     html: [
       {
         tag: 'span',
-        attributes: { 'data-gprose-mention': attributes.label },
+        attributes: {
+          'data-gprose-mention': attributes.label,
+          'data-gprose-width': attributes.width,
+          'data-gprose-ascent': attributes.ascent,
+          'data-gprose-descent': attributes.descent,
+        },
         children: [attributes.label],
       },
     ],

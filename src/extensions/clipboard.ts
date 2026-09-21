@@ -1,3 +1,4 @@
+import { createHtmlParser } from '../editor-browser';
 import {
   indexTree,
   createDocumentSerializer,
@@ -17,8 +18,7 @@ import {
 import { type Step } from '../transform';
 import { replaceStructuredText } from './blocks';
 import type { StarterNode } from './demo-model';
-import { demoDocumentCodec } from './demo-schema';
-import { importHtml } from './html';
+import { starterHtmlParsers } from './html-parsers';
 import { paragraph, table } from './starter-definitions';
 import { starterSerializers } from './static-serializers';
 import { copyCellRectangle, cellRectangleText, pasteCellRectangle } from './table-clipboard';
@@ -125,6 +125,7 @@ export function writeClipboard<N extends NodeIdentity>(
 export function readClipboard<N extends NodeIdentity>(
   data: DataTransfer,
   schema: Schema<N>,
+  parser = createHtmlParser(schema, starterHtmlParsers),
 ): ClipboardFragment<N> | null {
   const local = fragments.get(data.getData(mime));
 
@@ -132,13 +133,13 @@ export function readClipboard<N extends NodeIdentity>(
   const source = data.getData('text/html');
 
   if (!source) return null;
-  const { nodes } = importHtml(source);
+  const nodes = parser.parse(source);
 
   if (!nodes.length) return null;
 
   return {
-    nodes: createDocumentCodec(schema).decode(demoDocumentCodec.encode(nodes)),
-    inline: nodes.length === 1 && nodes[0].kind === 'paragraph',
+    nodes,
+    inline: nodes.length === 1 && schema.node(paragraph).matches(nodes[0]),
   };
 }
 

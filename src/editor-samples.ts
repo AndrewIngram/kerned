@@ -1,8 +1,9 @@
+import { createHtmlParser } from './editor-browser';
 import { sampleChunk } from './editor-stream';
 import { plainText, createSampleDocument, type StarterNode } from './extensions/demo-model';
 import { demoSchema } from './extensions/demo-schema';
 import { formattingMarks } from './extensions/formatting';
-import { importHtml } from './extensions/html';
+import { starterHtmlParsers } from './extensions/html-parsers';
 import { createOutlineExtension, type OutlineEntry } from './extensions/outline';
 
 type BookSampleId = 'warbreaker' | 'war-and-peace';
@@ -35,6 +36,8 @@ export type EditorSample = {
 
 const books = new Map<BookSampleId, Promise<StarterNode[]>>();
 
+const bookParser = createHtmlParser(demoSchema, starterHtmlParsers);
+
 export async function loadEditorSample(url = new URL(location.href)): Promise<EditorSample> {
   const book = bookSamples.find((book) => book.id === url.searchParams.get('sample'));
 
@@ -46,7 +49,7 @@ export async function loadEditorSample(url = new URL(location.href)): Promise<Ed
         const response = await fetch(`/samples/${book.id}.html`);
 
         if (!response.ok) throw new Error(`Could not load ${book.title} (${response.status})`);
-        const { nodes } = importHtml(await response.text());
+        const nodes = bookParser.parse(await response.text());
 
         if (!nodes.length) throw new Error(`${book.title} contains no importable text`);
 

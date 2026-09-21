@@ -89,3 +89,39 @@ test('inline bindings recognize configured families and reject unrelated or miss
     /Missing inline definition/,
   );
 });
+
+test('value construction uses installed input transforms once and validates attributes', () => {
+  let parses = 0;
+
+  const badge = defineInline(
+    {
+      name: 'badge',
+      version: 1,
+      options: { prefix: 'base' },
+      schema: (options) => ({
+        attributes: z.strictObject({ label: z.string() }).transform((attrs) => {
+          parses++;
+
+          return { label: `${options.prefix}:${attrs.label}` };
+        }),
+        outputAttributes: z.strictObject({ label: z.string() }),
+      }),
+    },
+    (attrs) => attrs.label,
+  );
+
+  const schema = createSchema({ extensions: [text, badge.configure({ prefix: 'installed' })] });
+  const binding = schema.value(badge);
+  const value = binding.create({ label: 'Ada' });
+  expect(binding.read(value)?.attrs.label).toBe('installed:Ada');
+  expect(binding.read(value)?.attrs.label).toBe('installed:Ada');
+  expect(parses).toBe(1);
+  expect(Object.isFrozen(value.attrs)).toBe(true);
+
+  function invalid() {
+    // @ts-expect-error Input attributes are inferred from the definition.
+    binding.create({ label: 42 });
+  }
+
+  expect(invalid).toThrow(/string/);
+});

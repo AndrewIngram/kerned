@@ -63,6 +63,15 @@ export function createInlineValues(extensions: readonly InlineValueProgram[]) {
   return Object.freeze({
     create: (type: string, id: string, index: number, attrs: JsonValue) =>
       make(type, id, index, attrs, 'input'),
+    validate(text: string, values: readonly InlineValue[]) {
+      const canonical = values.map((value) =>
+        make(value.type, value.id, value.index, value.attrs, 'canonical'),
+      );
+
+      validateInlineObjects(text, canonical);
+
+      return canonical;
+    },
     plainText: (value: InlineValue) => resolve(value.type).plainText(value.attrs),
     encode(values: readonly InlineValue[]): JsonValue[] {
       return values.map((value) => ({

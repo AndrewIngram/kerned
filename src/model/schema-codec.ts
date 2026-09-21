@@ -23,38 +23,71 @@ export type NodeCodec<N> = {
   decode(data: JsonValue, context: { identity: NodeIdentity; children: N[] }): N;
 };
 
-/** Bound recursion before traversing untrusted JSON, including cyclic objects. */
-function jsonSchema(depth = 0): z.ZodType<JsonValue> {
-  if (depth > 256) return z.never({ error: 'JSON exceeds nesting limit' });
-  const child = z.lazy(() => jsonSchema(depth + 1));
-
-  return z.union([
-    z.null(),
-    z.boolean(),
-    z.number(),
-    z.string(),
-    z.array(child),
-    jsonObjectSchema(child),
-  ]);
+function invalidJson(message: string): never {
+  throw new z.ZodError([{ code: 'custom', path: [], message }]);
 }
 
-/** Validate entries individually so legal JSON keys such as __proto__ survive copying. */
-function jsonObjectSchema(valueSchema: z.ZodType<JsonValue>) {
-  return z.unknown().transform((value) => {
-    z.record(z.string(), z.unknown()).parse(value);
+/** Validate and copy JSON once, without constructing a validator for each nested value. */
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- This function is the recursive boundary for arbitrary external JSON content.
+function copyJson(value: unknown, depth: number): JsonValue {
+  if (depth > 256) return invalidJson('JSON exceeds nesting limit');
 
-    // SAFETY: the record parser above established a non-null plain object.
-    return Object.fromEntries(
-      Object.entries(value!).map(([name, item]) => [name, valueSchema.parse(item)]),
-    );
-  });
+  // oxlint-disable-next-line anti-slop/no-runtime-typeof -- External JSON has scalar, array and object variants without an application discriminator.
+  switch (typeof value) {
+    case 'string':
+    case 'boolean':
+      return value;
+    case 'number':
+      return Number.isFinite(value) ? value : invalidJson('JSON requires finite numbers');
+    case 'object': {
+      if (value === null) return null;
+
+      if (Array.isArray(value)) {
+        const result: JsonValue[] = [];
+
+        for (let index = 0; index < value.length; index++)
+          result.push(copyJson(value[index], depth + 1));
+
+        return result;
+      }
+
+      const prototype = Object.getPrototypeOf(value);
+
+      if (prototype !== null && prototype !== Object.prototype)
+        return invalidJson('JSON requires plain objects');
+      const entries: [string, unknown][] = Object.entries(value);
+
+      // fromEntries preserves __proto__ as an own data property.
+      return Object.fromEntries(entries.map(([key, child]) => [key, copyJson(child, depth + 1)]));
+    }
+
+    default:
+      return invalidJson('Invalid JSON value');
+  }
 }
 
-const json = jsonSchema();
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- Public JSON import validates and owns untrusted values.
+export function jsonValue(value: unknown): JsonValue {
+  return copyJson(value, 0);
+}
 
-export const jsonValue = bindParser(json);
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- A record is an external JSON boundary, not a trusted internal shape.
+export function jsonRecord(value: unknown): { [key: string]: JsonValue } {
+  return readJsonRecord(jsonValue(value));
+}
 
-export const jsonRecord = bindParser(jsonObjectSchema(json));
+function isJsonArray(value: JsonValue): value is readonly JsonValue[] {
+  return Array.isArray(value);
+}
+
+/** Internal projection for already-owned JSON; public jsonRecord still validates and copies. */
+export function readJsonRecord(value: JsonValue): { [key: string]: JsonValue } {
+  // oxlint-disable-next-line anti-slop/no-runtime-typeof -- Narrow the validated JSON scalar/array/object union to a record.
+  if (value === null || typeof value !== 'object' || isJsonArray(value))
+    return invalidJson('Expected a JSON object');
+
+  return value;
+}
 
 export const jsonString = bindParser(z.string());
 
@@ -62,7 +95,17 @@ export const jsonNumber = bindParser(z.number());
 
 export const jsonBoolean = bindParser(z.boolean());
 
-export const jsonArray = bindParser(z.array(json));
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- Public array import accepts external content and validates every item.
+export function jsonArray(value: unknown): JsonValue[] {
+  if (!Array.isArray(value)) return invalidJson('Expected a JSON array');
+  const result: JsonValue[] = [];
+
+  for (let index = 0; index < value.length; index++) result.push(copyJson(value[index], 1));
+
+  return result;
+}
+
+const json = z.unknown().transform(jsonValue);
 
 function encodedNodeSchema(depth = 0): z.ZodType<EncodedNode> {
   if (depth > 256) return z.never({ error: 'Document exceeds decode depth' });
