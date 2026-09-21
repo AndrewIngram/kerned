@@ -1449,3 +1449,51 @@ Milestone 4 remains open. Native table behavior is ready for the mounted view,
 but table actions/clipboard and inline/mark/decorations still need composition
 through extension contributions. The complete mount must own their placement and
 lifecycle and remove kit/owned from the demo tree before the milestone judge.
+
+### Milestone 4 checkpoint: native block layer and text decorations
+
+`extensions/starter-kit/native-block-layer.ts` now owns culled block DOM,
+contributed image views, native table controllers, quote rules, list markers,
+annotation hit targets and native focus tracking. The React block layer only
+attaches and updates this controller. Deleted the parallel React node registry,
+per-table React wrapper, React text-decoration implementation and unused
+per-node `NodeViewContent` adapter. Its Strict Mode coverage now tests the actual
+block-layer adapter rather than an unused intermediary.
+
+`extensions/starter-kit/text-block-view.ts` owns mention labels, comment
+backgrounds, underline painting and their DOM hit targets. Both canvas layers use
+the same registry as React's optional `CanvasPrimitive`. Ordinary paragraphs
+register no empty painters. Hit targets preserve DOM identity across geometry
+updates and read the current activation callback; pointer clicks through comment
+highlights retain ordinary text selection while keyboard activation opens the
+comment. A layer-owned label cache survives paragraph culling without another
+shaping call. Destroying the layer or its session releases DOM listeners, mounted
+node controllers and paint registrations; a destroyed session cannot revive the
+React attachment.
+
+The migration exposed a WebKit focus issue: clicking a native button can focus
+its table ancestor, and restoring that ancestor after a frame overwrote the
+cell controller's intentional textarea focus. Focus restoration now occurs only
+immediately around a DOM reorder. The native regression starts with the table
+ancestor focused and verifies the textarea receives focus.
+
+Validation: `pnpm run check` passes with 378 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. New native browser cases use real
+shaping, actual canvas pixels, model transactions and DOM focus to check geometry,
+annotation activation, culling, cached labels, tables, structural decoration and
+cleanup. React Strict Mode remounts and borrowed-session destruction exercise the
+new attachment. The production build and all nine cases in each large-document
+and viewport-first reflow audit pass.
+
+Three serial production trials in
+`artifacts/public-interface-m4/native-block-layer/` pass every unchanged budget:
+worst first usable 180 ms, streaming 1,074.1 ms, paste handler 56.2 ms, paste to
+paint 119.8 ms, typing 32.3 ms, paging 32.8 ms and loaded heap 28,842,280 bytes.
+The report records `2249964` and measures this checkpoint's uncommitted tree.
+Large-document and reflow evidence is in the same directory.
+
+Milestone 4 remains open. The block layer is now framework-independent, but
+`EditorWorkspace` still composes layout, input, viewport, assets and painting.
+Table actions/clipboard and inline/decorations still need extension contribution
+contracts. The public mount, supported geometry queries and removal of kit/owned
+from the demo remain required before the milestone judge.

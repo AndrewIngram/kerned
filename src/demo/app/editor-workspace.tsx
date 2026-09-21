@@ -483,7 +483,6 @@ export function EditorWorkspace({
                     actions,
                     layout,
                     viewport,
-                    kit,
                     owned,
                     commentsByNode,
                     nodeComments,

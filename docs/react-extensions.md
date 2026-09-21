@@ -10,15 +10,17 @@ React components register paint callbacks in the current canvas layer. This is
 not a custom React reconciler. Document data and inline metrics remain
 independent of React and DOM nodes.
 
-`src/extensions/text-block-view.tsx` paints atomic mentions and comment ranges.
+`src/extensions/starter-kit/text-block-view.ts` paints atomic mentions, underline
+marks and comment ranges without React.
 DOM targets sit over their canvas geometry; detail and comment panels use React
 portals. The mention panel reads its parent's React context. An inline atom
 occupies one U+FFFC code unit, with caret stops before and after it. Plain-text
 copy substitutes its label.
 
-Tables use a native DOM controller for editing, selection, keyboard input and
-measurement; their React component only mounts and updates it. Native table
-callers use the same session commands as the React demo.
+The native block layer owns culled DOM, table controllers, contributed image
+views, text decorations and native focus tracking. React has one block-layer
+attachment; there is no separate React implementation of table or inline behavior.
+Native table callers use the same session commands as the React demo.
 
 Tables and images report their measured height through `ResizeObserver`.
 Measurements carry their width so the host can discard stale reports. Height

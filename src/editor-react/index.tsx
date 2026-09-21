@@ -18,6 +18,15 @@ const PaintContext = createContext<RegisterCanvasPainter | null>(null);
 
 export const CanvasLayerProvider = PaintContext.Provider;
 
+/** Native extensions attach to the same painter registry as React primitives. */
+export function useCanvasLayer() {
+  const register = useContext(PaintContext);
+
+  if (!register) throw new Error('Canvas rendering requires a CanvasLayerProvider');
+
+  return register;
+}
+
 /** Canvas extensions share the host's viewport pass and release registration on unmount. */
 export function CanvasPrimitive({
   id,
@@ -28,9 +37,7 @@ export function CanvasPrimitive({
   paint: CanvasPainter;
   layer?: CanvasPaintLayer;
 }) {
-  const register = useContext(PaintContext);
-
-  if (!register) throw new Error('CanvasPrimitive requires a CanvasLayerProvider');
+  const register = useCanvasLayer();
   useLayoutEffect(() => register(id, paint, layer), [register, id, paint, layer]);
 
   return null;

@@ -28,7 +28,7 @@ benchmark fixtures. Project dependency checks enforce these rules.
 ```text
 native event -> browser/input adapter -> named session command
   -> state transaction and publication -> createStarterDocumentQuery
-  -> document layout controller -> canvas controller and React BlockLayer
+  -> document layout controller -> canvas controller and native block layer
 ```
 
 Toolbar, native input and programmatic calls share named session commands.
@@ -37,9 +37,11 @@ complete mounted-view interface must take over that assembly. The browser starte
 kit adds image rendering through the same extension tuple as schema and commands.
 `createNodeViews` reads those session contributions, binds renderers to schema
 definition families and owns per-node cleanup when the session is destroyed.
-`NodeViewContent` adapts that native lifecycle to React. Other block and inline
-renderers still await migration from the separate React registrations. Comment threads
-remain external to document state.
+The native block layer composes these contributions with the native table and
+text-decoration controllers. React only attaches this layer; the superseded
+per-node React wrappers and parallel registry have been deleted. Tables and
+inline/decorations still need extension contribution contracts before the public
+mount is complete. Comment threads remain external to document state.
 
 Custom rendering can use `createTextInteraction().bind(...)` with its own text
 and line geometry. `createCanvasInput` owns pointer/navigation binding, hidden-textarea synchronization

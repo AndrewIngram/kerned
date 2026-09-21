@@ -4,8 +4,8 @@ import { useEditorState } from '../../editor-react';
 import { type EditorSample } from '../../editor-samples';
 import { commentDecorations, createCommentStore } from '../../extensions/comment';
 import { type StarterNode } from '../../extensions/demo-model';
+import { type CommentHighlight } from '../../extensions/starter-kit/text-block-view';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import { type CommentHighlight } from '../../extensions/text-block-view';
 import { type SelectionRange } from '../../model';
 import { resolveRangeDecorations, type SelectionContext, type EditorState } from '../../state';
 

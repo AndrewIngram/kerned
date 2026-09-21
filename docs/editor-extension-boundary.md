@@ -67,7 +67,7 @@ Executable callbacks are not stored in document content or transactions.
 
 `src/extensions/comment.ts` keeps discussion messages outside document nodes and captures independent `DocumentRange` values through state. It supplies range decorations without teaching the generic model about replies or comment storage. The model's annotation helpers remain available for other extension-owned ranges.
 
-`src/extensions/text-block-view.tsx` draws highlights and mention labels using public `CanvasPrimitive` registration from `src/editor-react`, with geometry and activation callbacks supplied by the host. It no longer imports the application's private rendering context. React providers such as the demo's team context remain application concerns.
+`src/extensions/starter-kit/text-block-view.ts` draws highlights and mention labels through the native canvas painter registry, with geometry and activation callbacks supplied by the host. The native block layer owns its DOM hits and cleanup. `CanvasPrimitive` remains the optional React adapter to the same painter registry. React providers such as the demo's team context remain application concerns.
 
 The demo stores comments separately from document nodes and resolves their durable ranges through the public decoration API. Text and whole-block comments use the same position checkpoint. Backend discussion persistence remains an application responsibility.
 
