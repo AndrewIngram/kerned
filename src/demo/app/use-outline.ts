@@ -1,36 +1,20 @@
 import { useMemo, useState } from 'react';
 
-import { type Scene } from '../../editor-canvas/scene';
+import type { MountedEditor, ViewSnapshot } from '../../editor-canvas';
 import { type EditorSample } from '../../editor-samples';
-import type { StarterLeaf } from '../../extensions/demo-model';
 import { plainText } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
 import { createOutlineExtension, type OutlineEntry } from '../../extensions/outline';
 import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
 
-type OutlineOptions = Pick<EditorDocument, 'editorState' | 'tree'> & {
+type OutlineOptions = Pick<EditorDocument, 'editorState'> & {
   sample: EditorSample;
   loadedCount: number;
-  scene: Scene<StarterLeaf>;
-  zoom: number;
-  scroll: number;
-  toolbarHeight: number;
-  scrollDocumentTo: (top: number) => void;
-  readScroll: () => number;
+  view: MountedEditor | null;
+  geometry: ViewSnapshot | null;
 };
 
-export function useOutline({
-  sample,
-  loadedCount,
-  editorState,
-  scene,
-  tree,
-  zoom,
-  scroll,
-  toolbarHeight,
-  scrollDocumentTo,
-  readScroll,
-}: OutlineOptions) {
+export function useOutline({ sample, loadedCount, editorState, view, geometry }: OutlineOptions) {
   const pendingOutline = useMemo(
     () =>
       sample.outline?.filter((item) => item.sourceIndex >= loadedCount).map((item) => item.entry) ??
@@ -49,19 +33,19 @@ export function useOutline({
     [outlineExtension, editorState.nodes, pendingOutline],
   );
 
-  const outlinePositions = useMemo(() => {
-    const placements = new Map(scene.placements.map((p) => [p.node.id, p]));
+  const outlinePositions = useMemo(
+    () =>
+      !geometry
+        ? []
+        : outline.flatMap((entry) => {
+            const bounds = view?.blockBounds(entry.id);
 
-    return outline.flatMap((entry) => {
-      let node = tree.byId.get(entry.id);
-
-      while (node && !placements.has(node.node.id))
-        node = node.parent === null ? undefined : tree.byId.get(node.parent);
-      const placement = node ? placements.get(node.node.id) : undefined;
-
-      return placement ? [{ entry, y: placement.y, placementId: placement.node.id }] : [];
-    });
-  }, [outline, scene.placements, tree]);
+            return bounds ? [{ entry, y: bounds.top }] : [];
+            // A layout or viewport publication invalidates the view's geometry queries.
+            // oxlint-disable-next-line react/exhaustive-effect-dependencies
+          }),
+    [outline, view, geometry],
+  );
 
   const outlineAvailable = useMemo(
     () => new Set(outlinePositions.map((item) => item.entry.key)),
@@ -71,28 +55,13 @@ export function useOutline({
   let outlineActive: string | null = outlinePositions[0]?.entry.key ?? null;
 
   for (const item of outlinePositions) {
-    if (item.y * zoom > scroll + 40) break;
+    if (item.y > (geometry?.viewport.top ?? 0) + 40 / (geometry?.zoom ?? 1)) break;
     outlineActive = item.entry.key;
   }
 
   function navigateOutline(entry: OutlineEntry) {
-    const target = outlinePositions.find((item) => item.entry.key === entry.key);
-
-    if (!target) return;
-    scrollDocumentTo(Math.max(0, target.y * zoom - 24));
-
-    if (target.placementId !== entry.id)
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => {
-          const element = document.querySelector<HTMLElement>(`[data-text-block="${entry.id}"]`);
-
-          if (element) {
-            scrollDocumentTo(
-              Math.max(0, readScroll() + element.getBoundingClientRect().top - toolbarHeight - 24),
-            );
-          }
-        }),
-      );
+    if (!outlineAvailable.has(entry.key)) return;
+    void view?.reveal({ id: entry.id, offset: 0 }, { align: 'start', margin: 24 });
   }
 
   return { outline, outlineAvailable, outlineActive, navigateOutline };

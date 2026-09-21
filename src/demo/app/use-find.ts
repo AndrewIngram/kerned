@@ -8,21 +8,19 @@ import {
   type RefObject,
 } from 'react';
 
-import type { Scene } from '../../editor-canvas/scene';
-import type { Viewport } from '../../editor-react';
-import type { StarterLeaf } from '../../extensions/demo-model';
+import type { MountedEditor } from '../../editor-canvas';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 import type { FindOptions, FindState } from '../../state';
 
 export function useFind({
   editor,
   scroller,
-  inputRef,
+  view,
   onOpen,
 }: {
   editor: EditorSession;
   scroller: RefObject<HTMLDivElement | null>;
-  inputRef: RefObject<HTMLTextAreaElement | null>;
+  view: MountedEditor | null;
   onOpen: () => void;
 }) {
   const [findOpen, setFindOpen] = useState(false),
@@ -79,7 +77,7 @@ export function useFind({
         : null;
 
     if (restore && restore !== document.body) restore.focus({ preventScroll: true });
-    else inputRef.current?.focus({ preventScroll: true });
+    else view?.focus();
   }
 
   function moveFind(backwards: boolean) {
@@ -105,85 +103,20 @@ export function useFind({
 }
 
 export function useFindReveal({
-  scene,
+  view,
   findOpen,
   findState,
   findRequest,
-  findBlockId,
-  scroller,
-  canvasRef,
-  viewport,
 }: {
-  scene: Scene<StarterLeaf>;
+  view: MountedEditor | null;
   findOpen: boolean;
   findState: FindState;
   findRequest: number;
-  findBlockId: number | undefined;
-  scroller: RefObject<HTMLDivElement | null>;
-  canvasRef: RefObject<HTMLCanvasElement | null>;
-  viewport: Viewport;
 }) {
-  const revealFind = useRef(false);
-  const { zoom, viewportHeight, readScroll, scrollDocumentTo } = viewport;
   useLayoutEffect(() => {
-    revealFind.current = true;
-    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Each find request or active-match change must rearm viewport reveal.
-  }, [findOpen, findState.active, findRequest]);
-  useLayoutEffect(() => {
-    if (!findOpen || !findState.active || !revealFind.current) return;
-
-    const match = findState.active,
-      placement = scene.placements.find((p) => p.node.id === findBlockId);
-
-    if (!placement) return;
-    let matchTop: number, matchBottom: number;
-
-    if (placement.layout) {
-      const rect = placement.layout.geometry(match.from, match.to, false).rects[0];
-
-      if (!rect) return;
-      matchTop = (placement.y + rect[1]) * zoom;
-      matchBottom = (placement.y + rect[3]) * zoom;
-    } else {
-      const mark = scroller.current?.querySelector<HTMLElement>('[data-find-active="true"]');
-
-      if (!mark) return;
-      // Bring horizontally overflowing table cells into their own scrollport.
-      const table = mark.closest('.table-block');
-
-      if (table) {
-        const a = mark.getBoundingClientRect(),
-          b = table.getBoundingClientRect();
-
-        if (a.left < b.left || a.right > b.right) table.scrollLeft += (a.left - b.left) / zoom - 20;
-      }
-
-      const rect = mark.getBoundingClientRect(),
-        viewportValue = canvasRef.current?.getBoundingClientRect();
-
-      if (!viewportValue) return;
-      matchTop = rect.top - viewportValue.top + readScroll();
-      matchBottom = rect.bottom - viewportValue.top + readScroll();
-    }
-
-    revealFind.current = false;
-
-    const scrollTop = readScroll(),
-      clearance = 64;
-
-    if (matchTop < scrollTop + clearance || matchBottom > scrollTop + viewportHeight - 24) {
-      scrollDocumentTo(Math.max(0, matchTop - Math.max(clearance, viewportHeight * 0.35)));
-    }
-  }, [
-    scene,
-    findOpen,
-    findState.active,
-    findBlockId,
-    zoom,
-    viewportHeight,
-    scroller,
-    canvasRef,
-    readScroll,
-    scrollDocumentTo,
-  ]);
+    if (view && findOpen && findState.active)
+      void view.reveal({ id: findState.active.id, offset: findState.active.from }, { margin: 64 });
+    // Each explicit next/previous request should reveal even if there is only one match.
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies
+  }, [view, findOpen, findState.active, findRequest]);
 }

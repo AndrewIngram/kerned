@@ -49,7 +49,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(','
     );
     // Safari's native Edit > Select All can select the capture textarea without
     // delivering the Cmd-A keydown that headless keyboard helpers synthesize.
-    await page.getByLabel('Canvas text input').evaluate((el) => el.select());
+    await page.getByLabel('Editor text input').evaluate((el) => el.select());
     await page.evaluate(
       () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
     );

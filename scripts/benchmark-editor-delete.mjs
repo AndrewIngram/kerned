@@ -40,7 +40,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
       await cdp.send('Profiler.start');
     }
 
-    const deletion = await page.locator('.text-capture').evaluate(async (el) => {
+    const deletion = await page.locator('[data-editor-input]').evaluate(async (el) => {
       const blocks = window.editorDiagnostics.read().nodes.length,
         started = performance.now();
 

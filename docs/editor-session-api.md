@@ -380,7 +380,12 @@ Text extensions can provide a mark-storage adapter, and node extensions can prov
 
 `Editor` from `src/editor-react` mounts this runtime around its children. The caller supplies `view.pointer`, optional `view.input`, and a renderer as children. The editor session belongs to the caller and survives React unmount/remount. Both demos use this host and the native runtime. Schema-specific commands and clipboard policy live in the starter-kit extensions. Generic canvas painting, viewport lifecycle, multiclick policy and navigation binding live in reusable adapters. The demo assembles these pieces; this is not a zero-configuration rich-text widget. See [app ownership](editor-app-architecture.md).
 
-`createReactRenderers<Value>([{name, component}])` creates a typed `ExtensionView` taking `{type, value}`. Build registries outside render so components retain their identity. Components may return DOM, `CanvasPrimitive` registrations, or both. Duplicate names and missing registrations reject explicitly. The starter kit registers block renderers, a mention inline renderer, underline drawing, and external comment decorations through this public interface. Layout geometry is passed by the host; React is absent from core and from the browser runtime.
+`Editor` from `src/editor-react` attaches the full native mount, while
+`useEditorState` and `useViewState` subscribe to session and view snapshots.
+The demo uses this interface. The small `createReactRenderers<Value>` registry
+maps application names to components; it is not the planned node/mark/decoration
+registration API. That integration remains milestone 6 work. Browser extension
+contributions and drawing are described in [the mounted view reference](mounted-editor.md).
 
 ## History ownership
 

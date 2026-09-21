@@ -29,6 +29,6 @@ test('Warbreaker retains its editable table after outline navigation', async ({ 
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(table).toContainText('First edited');
   await expect(table.locator('[data-cell][data-selected="true"]')).toHaveCount(4);
-  await expect(page.getByLabel('Canvas text input')).not.toBeFocused();
+  await expect(page.getByLabel('Editor text input')).not.toBeFocused();
   expect(errors).toEqual([]);
 });

@@ -7,13 +7,11 @@ export function createEditorControls({
   onEdit,
   notice,
   closePanel,
-  syncInput,
 }: {
   editor: EditorSession;
   onEdit: () => void;
   notice: (message: string) => void;
   closePanel: () => void;
-  syncInput: () => void;
 }) {
   function run(action: () => boolean) {
     try {
@@ -26,7 +24,6 @@ export function createEditorControls({
       return applied;
     } catch (error) {
       notice(error instanceof Error ? error.message : 'Command failed');
-      syncInput();
 
       return false;
     }

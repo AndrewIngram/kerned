@@ -47,6 +47,7 @@ export type DocumentLayoutFrame<N extends NodeIdentity = NodeIdentity> = {
 };
 
 export type DocumentLayoutSnapshot<N extends NodeIdentity> = {
+  nodes: readonly N[];
   inset: number;
   scene: Scene<N>;
   visible: Placement<N>[];
@@ -59,6 +60,7 @@ export type DocumentLayoutSnapshot<N extends NodeIdentity> = {
 
 function emptySnapshot<N extends NodeIdentity>(): DocumentLayoutSnapshot<N> {
   return {
+    nodes: [],
     inset: 28,
     scene: {
       placements: [],
@@ -253,6 +255,7 @@ export function createDocumentLayout<N extends NodeIdentity>({
     }
 
     snapshot = {
+      nodes: doc.nodes,
       inset,
       scene,
       visible: visible.toSorted((a, b) => a.y - b.y),

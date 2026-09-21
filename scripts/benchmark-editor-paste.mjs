@@ -27,7 +27,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
         () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
       );
 
-    const input = page.locator('.text-capture');
+    const input = page.locator('[data-editor-input]');
     await page.evaluate(() => window.editorDiagnostics.select(1, 0));
     await page.keyboard.press('ControlOrMeta+a');
     await settle();

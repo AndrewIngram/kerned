@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+import type { Line, Geometry } from '../engines';
+import type { Direction, Position } from '../layout-types';
+
 const optionsSchema = z.strictObject({
   composition: z.enum(['viewport', 'eager']).default('viewport'),
   retention: z.enum(['viewport', 'all']).default('viewport'),
@@ -13,6 +16,7 @@ export type DiagnosticPlacement = Readonly<{
   height: number;
   layoutWidth: number;
   resident: boolean;
+  measured: Readonly<{ width: number; height: number }> | null;
   boxes: readonly Readonly<{
     id: string;
     index: number;
@@ -93,7 +97,24 @@ export type DiagnosticEvent = DiagnosticFrame &
       }>
   );
 
+export type TextProbe = {
+  id: number;
+  range: { from: number; to: number; upstream?: boolean };
+  hit?: { x: number; y: number };
+  move?: { offset: number; upstream?: boolean; direction: Direction };
+};
+
+export type TextProbeResult = {
+  height: number;
+  lines: Line[];
+  geometry: Geometry;
+  hit: Position | null;
+  move: Position | null;
+};
+
 export type ViewDiagnostics = {
+  /** Copied resident text measurements for independent layout/interaction audits. */
+  inspectText(this: void, probe: TextProbe): TextProbeResult | null;
   /** Fresh scalar counters, or null while detached/loading. Can scan retained buffers. */
   read(this: void): DiagnosticSnapshot | null;
   /** Copies placement metadata on demand. Omit IDs to inspect the whole document. */
@@ -102,7 +123,7 @@ export type ViewDiagnostics = {
   subscribe(this: void, listener: (event: DiagnosticEvent) => void): () => void;
 };
 
-type Source = Pick<ViewDiagnostics, 'read' | 'placements'>;
+type Source = Pick<ViewDiagnostics, 'read' | 'placements' | 'inspectText'>;
 
 type Binding = {
   source: Source;
@@ -122,6 +143,7 @@ export function createViewDiagnostics(options: DiagnosticOptions = {}): ViewDiag
 
   const diagnostics: ViewDiagnostics = {
     read: () => owner.binding?.source.read() ?? null,
+    inspectText: (probe) => owner.binding?.source.inspectText(probe) ?? null,
     placements: (ids) => owner.binding?.source.placements(ids) ?? [],
     subscribe(listener) {
       owner.listeners.add(listener);

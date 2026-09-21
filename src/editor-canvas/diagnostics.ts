@@ -6,4 +6,6 @@ export {
   type DiagnosticSnapshot,
   type DiagnosticPlacement,
   type DiagnosticEvent,
+  type TextProbe,
+  type TextProbeResult,
 } from './view-diagnostics';

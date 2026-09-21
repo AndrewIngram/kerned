@@ -2,8 +2,7 @@ import type { ComponentType } from 'react';
 
 export type ReactRenderer<Value> = { name: string; component: ComponentType<{ value: Value }> };
 
-/** Registration is independent of schema storage. Components may return DOM,
- * CanvasPrimitive registrations, or both. Create the registry outside render.
+/** Registration is independent of schema storage. Components return application UI. Create the registry outside render.
  */
 export function createReactRenderers<Value>(extensions: readonly ReactRenderer<Value>[]) {
   const registry = new Map<string, ComponentType<{ value: Value }>>();

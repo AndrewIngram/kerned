@@ -34,7 +34,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
 
       await settle();
       const atom = (await read()).nodes[0].inline[0];
-      const input = page.getByLabel('Canvas text input');
+      const input = page.getByLabel('Editor text input');
       await page.getByLabel('Open @Maya Chen').click();
       await page.getByRole('dialog').waitFor();
       assert.match(await page.getByRole('dialog').innerText(), /Design team/);
@@ -88,7 +88,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
             p = s.scene[0],
             b = p.boxes[0],
             r = document.querySelector('[data-mention]').getBoundingClientRect(),
-            v = document.querySelector('.document-scroll').getBoundingClientRect();
+            v = document.querySelector('[data-editor-view]').getBoundingClientRect();
 
           return [
             r.left - v.left - (28 + b.x) * s.zoom,
@@ -131,7 +131,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       // A focused DOM widget stays mounted outside the visible range.
       await block.getByLabel('Cell 1, 1 text', { exact: true }).focus();
       await settle();
-      await page.locator('.document-scroll').evaluate((el) => (el.scrollTop = el.scrollHeight));
+      await page.locator('[data-editor-view]').evaluate((el) => (el.scrollTop = el.scrollHeight));
       await settle();
       assert.ok((await read()).mounted.includes('3'));
       await page.getByRole('button', { name: 'Undo', exact: true }).focus();
@@ -140,7 +140,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       const bottom = await read();
       assert.ok(bottom.mounted.length < 8);
       assert.equal(bottom.stats.glyphCalls, initialGlyphCalls);
-      await page.locator('.document-scroll').evaluate((el) => (el.scrollTop = 0));
+      await page.locator('[data-editor-view]').evaluate((el) => (el.scrollTop = 0));
       await block.waitFor();
       await block.getByRole('button', { name: 'Edit cell 1, 1', exact: true }).click();
       await settle();

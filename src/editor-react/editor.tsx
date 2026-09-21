@@ -1,4 +1,10 @@
-import { useLayoutEffect, useRef, useState, type ComponentPropsWithoutRef } from 'react';
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ComponentPropsWithoutRef,
+} from 'react';
 
 import { mountEditor, type MountEditorOptions, type MountedEditor } from '../editor-canvas';
 import type { NodeIdentity } from '../model';
@@ -18,6 +24,8 @@ export function Editor<N extends NodeIdentity>({
   diagnostics,
   zoom = 1,
   paddingTop = 0,
+  maxWidth = null,
+  background = '#ffffff',
   onReady,
   onError,
   onNotice,
@@ -25,17 +33,17 @@ export function Editor<N extends NodeIdentity>({
 }: EditorProps<N>) {
   const host = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ onReady, onError, onNotice });
-  const configuration = useRef({ zoom, paddingTop });
+  const configuration = useRef({ zoom, paddingTop, maxWidth, background });
   const view = useRef<MountedEditor | undefined>(undefined);
   const [error, setError] = useState<Error | null>(null);
 
   useLayoutEffect(() => {
     callbacks.current = { onReady, onError, onNotice };
-    configuration.current = { zoom, paddingTop };
+    configuration.current = { zoom, paddingTop, maxWidth, background };
   });
   useLayoutEffect(() => {
-    view.current?.update({ zoom, paddingTop });
-  }, [zoom, paddingTop]);
+    view.current?.update({ zoom, paddingTop, maxWidth, background });
+  }, [zoom, paddingTop, maxWidth, background]);
   useLayoutEffect(() => {
     const element = host.current;
 
@@ -96,5 +104,18 @@ export function Editor<N extends NodeIdentity>({
       <div {...props} ref={host} />
       {error && <div role="alert">{error.message}</div>}
     </>
+  );
+}
+
+const noView = () => null;
+
+const noSubscription = () => () => {};
+
+/** Subscribe to geometry without owning the view or its session. */
+export function useViewState(view: MountedEditor | null) {
+  return useSyncExternalStore(
+    view?.subscribe ?? noSubscription,
+    view?.getSnapshot ?? noView,
+    noView,
   );
 }

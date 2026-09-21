@@ -3,6 +3,8 @@ import { z } from 'zod';
 const configuration = z.strictObject({
   zoom: z.number().finite().positive().optional(),
   paddingTop: z.number().finite().nonnegative().optional(),
+  maxWidth: z.number().finite().positive().nullable().optional(),
+  background: z.string().min(1).optional(),
 });
 
 /** View settings can change without replacing the session, input or resource owner. */
@@ -22,12 +24,19 @@ export function readRevealOptions(input: RevealOptions) {
 
 export function readViewConfiguration(
   input: ViewConfiguration,
-  current = { zoom: 1, paddingTop: 0 },
+  current: { zoom: number; paddingTop: number; maxWidth: number | null; background: string } = {
+    zoom: 1,
+    paddingTop: 0,
+    maxWidth: null,
+    background: '#ffffff',
+  },
 ) {
   const value = configuration.parse(input);
 
   return {
     zoom: value.zoom ?? current.zoom,
     paddingTop: value.paddingTop ?? current.paddingTop,
+    maxWidth: value.maxWidth === undefined ? current.maxWidth : value.maxWidth,
+    background: value.background ?? current.background,
   };
 }

@@ -90,32 +90,10 @@ h1 {
 }
 .document-scroll {
   height: 520px;
-  overflow: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
   overflow-anchor: none;
   position: relative;
-}
-.document-space {
-  position: relative;
-}
-canvas {
-  cursor: text;
-  user-select: none;
-  position: sticky;
-  top: 0;
-  display: block;
-  touch-action: none;
-}
-.dom-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: 0 0;
-  pointer-events: none;
-}
-.block-position {
-  position: absolute;
-  pointer-events: auto;
 }
 .nearby-panel textarea {
   display: block;
@@ -127,19 +105,6 @@ canvas {
   border-radius: 5px;
   padding: 8px;
   margin-top: 6px;
-}
-.text-capture {
-  pointer-events: none;
-  position: fixed;
-  left: 2px;
-  top: 2px;
-  width: 1px;
-  height: 1px;
-  opacity: 0.01;
-  padding: 0;
-  border: 0;
-  resize: none;
-  overflow: hidden;
 }
 .panel-layer {
   position: absolute;
@@ -232,16 +197,6 @@ footer {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.block-position[data-selected='true']::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(194, 216, 235, 0.45);
-  outline: 2px solid #8daec9;
-  pointer-events: none;
-  border-radius: 8px;
 }
 
 /* Minimal writing demo; the instrumentation page retains its study layout. */
@@ -357,16 +312,13 @@ body[data-demo='minimal'] .document-heading p {
 }
 body[data-demo='minimal'] .editor-frame {
   width: 100%;
-  max-width: 696px;
+  max-width: none;
   margin: 0 auto;
 }
 body[data-demo='minimal'] .document-scroll {
   height: auto;
   overflow: visible;
   overscroll-behavior: auto;
-}
-body[data-demo='minimal'] canvas {
-  top: 50px;
 }
 body[data-demo='minimal'] .input-notice {
   flex: none;
@@ -665,4 +617,9 @@ body[data-demo='minimal'] .table-block th {
 .editor-surface {
   cursor: text;
   touch-action: none;
+}
+
+body[data-demo='minimal'] .find-anchor {
+  max-width: 696px;
+  margin-inline: auto;
 }

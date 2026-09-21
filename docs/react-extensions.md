@@ -5,22 +5,22 @@ The writing demo at `/editor.html` and extension diagnostics at
 owned layout engine, and extension schema. The diagnostics page keeps fixtures
 for extension behavior that the writing demo does not expose.
 
-`src/editor-react/index.tsx` provides `CanvasLayerProvider` and `CanvasPrimitive`.
-React components register paint callbacks in the current canvas layer. This is
-not a custom React reconciler. Document data and inline metrics remain
-independent of React and DOM nodes.
+`Editor` attaches the same native mount used by vanilla applications. It borrows
+the session and owns attachment cleanup. `useEditorState` selects session state;
+`useViewState` observes viewport/layout geometry without owning the view. See
+[the mounted view reference](mounted-editor.md) for configuration and readiness.
 
-`src/extensions/starter-kit/text-block-view.ts` paints atomic mentions, underline
-marks and comment ranges without React.
-DOM targets sit over their canvas geometry; detail and comment panels use React
-portals. The mention panel reads its parent's React context. An inline atom
-occupies one U+FFFC code unit, with caret stops before and after it. Plain-text
-copy substitutes its label.
+The demo no longer coordinates graphics, layout, native input or culled DOM.
+Tables, images, mentions, underlines, comments and search are browser extension
+contributions discovered by the mount. React detail/comment panels use supported
+geometry queries and portals; the mention panel retains its parent's context.
+An inline atom occupies one U+FFFC code unit, with caret stops before and after
+it. Plain-text copy substitutes its label.
 
-The native block layer owns culled DOM, table controllers, contributed image
-views, text decorations and native focus tracking. React has one block-layer
-attachment; there is no separate React implementation of table or inline behavior.
-Native table callers use the same session commands as the React demo.
+The earlier graphics-handle-based `CanvasPrimitive` and manual block-layer
+attachment have been removed. A general React node/mark/decoration registration
+contract is still milestone 6 work. Existing `createReactRenderers` is a small
+application component registry, not a registration with the mounted editor.
 
 Tables and images report their measured height through `ResizeObserver`.
 Measurements carry their width so the host can discard stale reports. Height

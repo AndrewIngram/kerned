@@ -45,7 +45,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     let state = await read();
     assert.equal(state.selection.id, 2, `${name}: drag head reaches second paragraph`);
     assert.equal(state.selection.anchorId, 1, `${name}: drag anchor remains in first paragraph`);
-    const input = page.getByLabel('Canvas text input');
+    const input = page.getByLabel('Editor text input');
 
     const a = state.selection.anchor,
       h = state.selection.focus;

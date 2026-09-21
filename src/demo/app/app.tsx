@@ -1,19 +1,9 @@
-import { type CanvasKit } from 'canvaskit-wasm';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { loadEditorSample, sampleUrl, type EditorSample } from '../../editor-samples';
-import type { Owned } from '../../extensions/starter-kit/types';
 import { EditorWorkspace } from './editor-workspace';
 
-export function App({
-  kit,
-  owned,
-  initial,
-}: {
-  kit: CanvasKit;
-  owned: Owned;
-  initial: EditorSample;
-}) {
+export function App({ initial }: { initial: EditorSample }) {
   const [current, setCurrent] = useState({ sample: initial, generation: 0 });
 
   const [loading, setLoading] = useState(false),
@@ -68,8 +58,6 @@ export function App({
     <>
       <EditorWorkspace
         key={current.generation}
-        kit={kit}
-        owned={owned}
         sample={current.sample}
         loading={loading}
         onSampleChange={changeSample}

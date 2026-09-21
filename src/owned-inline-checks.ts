@@ -1,3 +1,4 @@
+import { createViewResources } from './editor-canvas/resources';
 import type { InlineAtom } from './owned-inline';
 import type { createOwnedEngine } from './owned-layout';
 
@@ -117,5 +118,18 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
     return { assertions };
   } finally {
     owner.destroy();
+  }
+}
+
+/** Run the engine audit with its own isolated resources, outside the application view. */
+export async function checkInlineResources() {
+  const resources = createViewResources();
+
+  try {
+    await resources.ready;
+
+    return checkInline(resources.read().layout);
+  } finally {
+    resources.destroy();
   }
 }

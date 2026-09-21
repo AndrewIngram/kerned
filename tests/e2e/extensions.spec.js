@@ -6,7 +6,7 @@ test('extension diagnostics retain mentions and editable table cells', async ({ 
   await page.getByLabel('Open @Maya Chen').click();
   await expect(page.getByRole('dialog')).toContainText('Design team');
   await page.keyboard.press('Escape');
-  await expect(page.getByLabel('Canvas text input')).toBeFocused();
+  await expect(page.getByLabel('Editor text input')).toBeFocused();
   const table = page.locator('[data-table="3"]');
   await table.getByRole('button', { name: 'Edit cell 1, 1', exact: true }).click();
   const notes = table.getByLabel('Cell 1, 1 text', { exact: true });
@@ -60,14 +60,14 @@ test('comments remain external through replies, text edits, undo and rich paste'
     await page.evaluate(() => window.editorDiagnostics.comments().threads[0].messages[0].reply),
   ).toBe('Keep this discussion');
   await page.evaluate(() => {
-    const input = document.querySelector('.text-capture');
+    const input = document.querySelector('[data-editor-input]');
     window.editorDiagnostics.select(1, 0);
     input.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'a', ctrlKey: true, bubbles: true, cancelable: true }),
     );
   });
   await page.evaluate(() => {
-    const input = document.querySelector('.text-capture'),
+    const input = document.querySelector('[data-editor-input]'),
       data = new DataTransfer();
 
     const event = new ClipboardEvent('copy', {
@@ -92,7 +92,7 @@ test('comments remain external through replies, text edits, undo and rich paste'
 
     for (const [type, value] of Object.entries(window.commentClipboard))
       event.clipboardData.setData(type, value);
-    document.querySelector('.text-capture').dispatchEvent(event);
+    document.querySelector('[data-editor-input]').dispatchEvent(event);
   });
   await expect
     .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))

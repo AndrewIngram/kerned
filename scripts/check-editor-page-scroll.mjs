@@ -27,7 +27,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
 
       const geometry = await page.evaluate(() => ({
         page: scrollY,
-        inset: document.querySelector('.document-scroll').scrollTop,
+        inset: document.querySelector('[data-editor-view]').scrollTop,
         toolbar: document.querySelector('.minimal-toolbar').getBoundingClientRect().top,
         toolbarHeight: document.querySelector('.minimal-toolbar').getBoundingClientRect().height,
         canvas: document.querySelector('canvas').getBoundingClientRect().top,

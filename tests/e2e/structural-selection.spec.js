@@ -60,7 +60,7 @@ test('dragging from an image and shift-clicking it creates a usable structural s
         cancelable: true,
         clipboardData: new DataTransfer(),
       }),
-      input = document.querySelector('.text-capture');
+      input = document.querySelector('[data-editor-input]');
 
     input.dispatchEvent(event);
     const data = event.clipboardData;

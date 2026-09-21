@@ -46,13 +46,16 @@ export const imageView = defineExtension({
 });
 
 /** Browser composition shares the headless definitions and adds view capabilities. */
-export function starterBrowserExtensions({ imageDelay = 0 }: { imageDelay?: number } = {}) {
+export function starterBrowserExtensions({
+  imageDelay = 0,
+  bodySize = 18,
+}: { imageDelay?: number; bodySize?: number } = {}) {
   return [
     ...starterExtensions,
     imageView.configure({ delay: imageDelay }),
     starterInput,
     tableView,
-    starterPresentation,
+    starterPresentation.configure({ bodySize }),
     containerDecorations,
     underlineView,
     mentionView,

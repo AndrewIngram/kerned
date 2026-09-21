@@ -28,7 +28,7 @@ try {
       );
       images.push(
         await page
-          .locator('.document-scroll')
+          .locator('[data-editor-view]')
           .screenshot({ path: `artifacts/editor-retention-${id}-${i}.png` }),
       );
     }

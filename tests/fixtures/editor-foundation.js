@@ -99,7 +99,7 @@ export async function mountOptimizedProbe(editor, element) {
 
   const { useEditorState, createReactRenderers } = await import('../../src/editor-react/index.tsx');
 
-  const { EditorEventHost } = await import('../../src/editor-react/editor-event-host.tsx');
+  const { mountEditorView } = await import('../../src/editor-browser/index.ts');
 
   const counts = { revision: 0, selection: 0, pointer: 0, input: 0, renderer: 0 };
   const selectRevision = (state) => state.revision;
@@ -150,9 +150,16 @@ export async function mountOptimizedProbe(editor, element) {
   };
 
   function Probe() {
+    const host = React.useRef(null);
+    React.useLayoutEffect(() => {
+      const mounted = mountEditorView(host.current, props);
+
+      return () => mounted.destroy();
+    }, []);
+
     return React.createElement(
-      EditorEventHost,
-      { view: props },
+      'div',
+      { ref: host },
       React.createElement(Revision),
       React.createElement(Selection),
       React.createElement('textarea'),

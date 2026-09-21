@@ -26,7 +26,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       await page.keyboard.insertText(value);
       await settle();
       assert.deepEqual(errors, [], 'Unicode must not crash rendering');
-      assert.equal(await page.locator('.text-capture').count(), 1);
+      assert.equal(await page.locator('[data-editor-input]').count(), 1);
       assert.equal(
         await page.evaluate(() => window.editorDiagnostics.read().nodes[0].text),
         value + original,

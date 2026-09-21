@@ -34,7 +34,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(','
     await page.evaluate(() => window.editorDiagnostics.select(1, 0));
     await page.keyboard.press('ControlOrMeta+a');
     await settle();
-    await page.locator('.text-capture').evaluate((el) => {
+    await page.locator('[data-editor-input]').evaluate((el) => {
       const event = new ClipboardEvent('copy', {
         bubbles: true,
         cancelable: true,
@@ -49,7 +49,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(','
       window.editorDiagnostics.select(last.id, last.text.length);
     });
     await settle();
-    await page.locator('.text-capture').evaluate((el) => {
+    await page.locator('[data-editor-input]').evaluate((el) => {
       const event = new ClipboardEvent('paste', {
         bubbles: true,
         cancelable: true,

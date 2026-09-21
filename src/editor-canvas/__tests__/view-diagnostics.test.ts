@@ -6,7 +6,7 @@ import {
   type DiagnosticEvent,
 } from '../view-diagnostics';
 
-const source = { read: () => null, placements: () => [] };
+const source = { read: () => null, placements: () => [], inspectText: () => null };
 
 const event: DiagnosticEvent = {
   type: 'paint',

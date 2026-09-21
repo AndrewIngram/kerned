@@ -406,6 +406,20 @@ test('opt-in diagnostics expose copied counters and matching layout/paint report
   expect(placements[0]).toMatchObject({ id: 1, resident: true });
   expect(placements[0]).not.toHaveProperty('layout');
   expect(placements[0]).not.toHaveProperty('node');
+
+  const probe = {
+    id: 1,
+    range: { from: 0, to: 6 },
+    hit: { x: 10, y: 10 },
+    move: { offset: 0, direction: 'end' as const },
+  };
+
+  const inspection = diagnostics.inspectText(probe);
+
+  if (!inspection) throw new Error('Expected resident text inspection');
+  expect(inspection.geometry.rects.length).toBeGreaterThan(0);
+  inspection.lines[0].start = 999;
+  expect(diagnostics.inspectText(probe)?.lines[0].start).toBe(0);
   expect(JSON.parse(JSON.stringify(snapshot))).toEqual(snapshot);
   expect(Object.isFrozen(snapshot.stats)).toBe(true);
   expect(Object.isFrozen(placements[0].boxes)).toBe(true);
@@ -663,4 +677,38 @@ test('a throwing node-view destructor cannot prevent other views and the mount f
   expect(view.isDestroyed).toBe(true);
   editor.destroy();
   expect(released).toHaveLength(2);
+});
+
+test('a centered column keeps outer editor margins clickable and updates paint independently of text layout', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const diagnostics = createViewDiagnostics();
+  const view = mountEditor(f.element, { editor: f.editor, maxWidth: 300, diagnostics });
+  await view.ready;
+  const canvas = f.element.querySelector('canvas');
+  const root = f.element.querySelector('[data-editor-view]');
+
+  if (!canvas || !root) throw new Error('Expected mounted editor');
+  expect(canvas.getBoundingClientRect().width).toBe(300);
+  expect(canvas.getBoundingClientRect().left - f.element.getBoundingClientRect().left).toBe(60);
+  const point = view.coordsAt({ id: 2, offset: 0 });
+
+  if (!point) throw new Error('Expected second block coordinates');
+  await userEvent.click(root, {
+    position: { x: 5, y: point.top - root.getBoundingClientRect().top + 2 },
+  });
+  expect(f.editor.state.selection).toMatchObject({ head: { id: 2, offset: 0 } });
+  await frame();
+  const compositions = diagnostics.read()?.stats.compositions;
+  view.update({ background: '#fffef9' });
+  await frame();
+  expect(diagnostics.read()?.stats.compositions).toBe(compositions);
+  expect([...canvas.getContext('2d')!.getImageData(0, 0, 1, 1).data]).toEqual([255, 254, 249, 255]);
+  const client = view.blockBounds(2, 'client');
+  expect(client?.top).toBeCloseTo(point.top, 0);
+  view.update({ maxWidth: null });
+  await expect.poll(() => view.getSnapshot()?.viewport.width).toBe(420);
+  expect(canvas.getBoundingClientRect().width).toBe(420);
 });

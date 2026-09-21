@@ -20,7 +20,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       );
 
     const paste = async (data) => {
-      await page.locator('.text-capture').evaluate((el, dataValue) => {
+      await page.locator('[data-editor-input]').evaluate((el, dataValue) => {
         const event = new ClipboardEvent('paste', {
           bubbles: true,
           cancelable: true,
@@ -36,7 +36,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     };
 
     const copy = () =>
-      page.locator('.text-capture').evaluate((el) => {
+      page.locator('[data-editor-input]').evaluate((el) => {
         const event = new ClipboardEvent('copy', {
           bubbles: true,
           cancelable: true,

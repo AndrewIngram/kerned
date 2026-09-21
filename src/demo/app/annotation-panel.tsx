@@ -1,10 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { type Scene } from '../../editor-canvas/scene';
-import type { Viewport } from '../../editor-react';
-import type { Rect } from '../../engines';
-import type { StarterLeaf } from '../../extensions/demo-model';
+import type { MountedEditor, ViewSnapshot } from '../../editor-canvas';
+import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
 import type { useComments } from './use-comments';
 
 const TeamContext = createContext('');
@@ -32,23 +30,24 @@ type PanelProps = Pick<
   'comments' | 'commentState' | 'decorations'
 > & {
   panel: ActivePanel | null;
-  scene: Scene<StarterLeaf>;
-  viewport: Viewport;
+  view: MountedEditor | null;
+  geometry: ViewSnapshot | null;
+  doc: EditorDocument;
   minimal: boolean;
   onClose: () => void;
 };
 
 export function AnnotationPanel({
   panel,
-  scene,
+  view,
+  geometry,
+  doc,
   comments,
   commentState,
   decorations,
-  viewport,
   minimal,
   onClose,
 }: PanelProps) {
-  const { zoom, scroll, width, viewportHeight } = viewport;
   const [portal, setPortal] = useState<HTMLDivElement | null>(null);
   const panelThread = commentState.threads.find((thread) => thread.id === panel?.atomId);
 
@@ -56,50 +55,37 @@ export function AnnotationPanel({
     (decoration) => decoration.id === panel?.atomId,
   )?.ranges;
 
-  const placements = useMemo(
-    () => new Map(scene.placements.map((p) => [p.node.id, p])),
-    [scene.placements],
-  );
-
   const panelRange =
-    panelRanges?.find((range) => range.id === panel?.nodeId && placements.has(range.id)) ??
-    panelRanges?.find((range) => placements.has(range.id));
+    panelRanges?.find((range) => range.id === panel?.nodeId && view?.blockBounds(range.id)) ??
+    panelRanges?.find((range) => view?.blockBounds(range.id));
 
-  const panelPlacement = placements.get(
-    panel?.kind === 'comment' ? (panelRange?.id ?? -1) : (panel?.nodeId ?? -1),
-  );
+  let panelRect: { left: number; top: number; bottom: number } | null = null;
 
-  let panelRect: Rect | null = null;
-
-  if (panel && panelPlacement) {
+  if (panel && view && geometry) {
     if (panel.kind === 'mention') {
-      const box = panelPlacement.boxes.find((b) => b.id === panel.atomId);
+      const node = doc.tree.byId.get(panel.nodeId)?.node;
 
-      if (box)
-        panelRect = [
-          box.x,
-          box.y + panelPlacement.y,
-          box.x + box.width,
-          box.y + box.height + panelPlacement.y,
-        ];
-    } else if (
-      (panelPlacement.node.kind === 'paragraph' || panelPlacement.node.kind === 'heading') &&
-      panelPlacement.layout
-    ) {
-      const r =
-        panelRange?.kind === 'text' &&
-        panelPlacement.layout.geometry(panelRange.from, panelRange.to, false).rects[0];
+      const inline =
+        node && (node.kind === 'paragraph' || node.kind === 'heading')
+          ? node.inline.find((value) => value.id === panel.atomId)
+          : undefined;
 
-      if (r) panelRect = [r[0], r[1] + panelPlacement.y, r[2], r[3] + panelPlacement.y];
-    } else if (panel.kind === 'comment') {
-      panelRect = [
-        28,
-        panelPlacement.y,
-        width / zoom - 28,
-        panelPlacement.y + panelPlacement.height,
-      ];
+      if (inline) panelRect = view.coordsAt({ id: panel.nodeId, offset: inline.index });
+    } else if (panelRange?.kind === 'text') {
+      panelRect = view.coordsAt({ id: panelRange.id, offset: panelRange.from });
+    } else if (panelRange) {
+      const bounds = view.blockBounds(panelRange.id, 'client');
+
+      if (bounds) panelRect = { ...bounds, bottom: bounds.top + bounds.height };
     }
   }
+
+  const origin = portal?.getBoundingClientRect();
+  const viewportTop = minimal ? 0 : (origin?.top ?? 0);
+
+  const viewportBottom = minimal
+    ? window.innerHeight
+    : viewportTop + (geometry?.viewport.height ?? 0) * (geometry?.zoom ?? 1);
 
   useEffect(() => {
     if (panel?.focus === 'panel')
@@ -113,18 +99,19 @@ export function AnnotationPanel({
       {portal &&
         panel &&
         panelRect &&
-        panelRect[3] * zoom - scroll >= 0 &&
-        panelRect[1] * zoom - scroll <= viewportHeight &&
+        origin &&
+        panelRect.bottom >= viewportTop &&
+        panelRect.top <= viewportBottom &&
         createPortal(
           <div
             className="nearby-panel"
             role="dialog"
             aria-label={panel.kind === 'mention' ? 'Mention details' : 'Comment'}
             style={{
-              left: Math.max(8, Math.min((panelRect[0] + 28) * zoom, width - 294)),
+              left: Math.max(8, Math.min(panelRect.left - origin.left, origin.width - 294)),
               top:
-                (minimal ? scroll : 0) +
-                Math.max(8, Math.min(panelRect[3] * zoom - scroll + 8, 290)),
+                Math.max(viewportTop + 8, Math.min(panelRect.bottom + 8, viewportTop + 290)) -
+                origin.top,
             }}
           >
             <button className="close-panel" onClick={onClose}>

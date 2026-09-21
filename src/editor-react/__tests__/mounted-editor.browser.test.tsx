@@ -209,3 +209,40 @@ test('React updates zoom and padding without replacing its view, including props
   expect(mounted.blockBounds(before.id)?.top).toBeCloseTo(before.top - 32);
   expect(f.element.querySelector('[zoom], [paddingtop]')).toBeNull();
 });
+
+test('React remounts on session replacement and tolerates updates after borrowed session destruction', async ({
+  onTestFinished,
+}) => {
+  const first = fixture();
+  const second = fixture();
+  onTestFinished(() => {
+    first.destroy();
+    second.destroy();
+  });
+  flushSync(() =>
+    first.root.render(<Editor editor={first.editor} style={size} onReady={first.ready} />),
+  );
+  const original = await first.readiness;
+  original.focus();
+  const oldInput = first.element.querySelector('textarea');
+  oldInput?.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+  flushSync(() =>
+    first.root.render(<Editor editor={second.editor} style={size} onReady={second.ready} />),
+  );
+  const replacement = await second.readiness;
+  expect(original.isDestroyed).toBe(true);
+  expect(first.editor.isDestroyed).toBe(false);
+  replacement.focus();
+  const input = first.element.querySelector('textarea');
+  expect(input).not.toBe(oldInput);
+  expect(document.activeElement).toBe(input);
+  first.editor.commands.focus();
+  expect(document.activeElement).toBe(input);
+  second.editor.destroy();
+  expect(replacement.isDestroyed).toBe(true);
+  flushSync(() => first.root.render(<Editor editor={second.editor} style={size} />));
+  expect(first.element.querySelector('canvas')).toBeNull();
+  expect(() => second.editor.commands.focus()).toThrow(/destroyed/);
+  flushSync(() => first.root.render(<Editor key="closed" editor={second.editor} style={size} />));
+  expect(first.element.querySelector('canvas')).toBeNull();
+});

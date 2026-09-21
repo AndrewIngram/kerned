@@ -90,7 +90,10 @@ export function createViewGeometry<N extends NodeIdentity>({
     });
   }
 
-  function blockBounds(id: number): BlockBounds | null {
+  function blockBounds(
+    id: number,
+    coordinates: 'document' | 'client' = 'document',
+  ): BlockBounds | null {
     if (destroyed || !frame || frame.document.editorState.nodes !== editor.state.nodes) return null;
     const owner = frame.document.blockFor(id);
 
@@ -99,6 +102,19 @@ export function createViewGeometry<N extends NodeIdentity>({
     const placement = index === undefined ? undefined : frame.layout.scene.placements[index];
 
     if (!placement) return null;
+
+    if (coordinates === 'client') {
+      const canvas = bounds();
+      const { zoom, readScroll } = frame.viewport;
+
+      return {
+        id: owner.id,
+        left: canvas.left + frame.layout.inset * zoom,
+        top: canvas.top + placement.y * zoom - readScroll(),
+        width: frame.layout.contentWidth * zoom,
+        height: placement.height * zoom,
+      };
+    }
 
     return {
       id: owner.id,
@@ -219,6 +235,7 @@ export function createViewGeometry<N extends NodeIdentity>({
   }
 
   return {
+    isCurrent: () => !destroyed && frame?.document.editorState.nodes === editor.state.nodes,
     getSnapshot: () => snapshot,
     subscribe(this: void, listener: () => void) {
       if (destroyed) throw new Error('Editor view is destroyed');

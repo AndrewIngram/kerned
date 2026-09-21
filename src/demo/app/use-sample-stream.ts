@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 
-import type { createEditorScene, Placement, Scene } from '../../editor-canvas/scene';
+import type { ViewDiagnostics, DiagnosticEvent } from '../../editor-canvas/diagnostics';
 import { type EditorSample } from '../../editor-samples';
 import { createStreamMetrics, streamConfig } from '../../editor-stream';
-import type { StarterLeaf, StarterNode } from '../../extensions/demo-model';
+import type { StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 
 export function useSampleStream(
   editor: EditorSession,
   sample: EditorSample,
   seedComments: (nodes: readonly StarterNode[]) => void,
+  diagnostics: ViewDiagnostics,
+  ready: boolean,
+  editStarted: RefObject<number | null>,
 ) {
   const sourceLoaded = useRef(sample.initial.length),
     sourceRevision = useRef(0);
@@ -32,6 +35,8 @@ export function useSampleStream(
 
   const renderWork = useRef(0);
   useEffect(() => {
+    if (!ready) return undefined;
+
     let cancelled = false,
       raf = 0,
       last = performance.now();
@@ -121,7 +126,22 @@ export function useSampleStream(
       pending.current?.done(0);
       pending.current = null;
     };
-  }, [sample, editor, seedComments]);
+  }, [sample, editor, seedComments, ready]);
+
+  useLayoutEffect(
+    () =>
+      diagnostics.subscribe((event) => {
+        if (event.type === 'layout') recordSampleLayout(metrics, event);
+        else
+          recordSamplePaint({
+            stream: { metrics, pending, sourceLoaded, sourceRevision },
+            report: event,
+            editStarted,
+            total: sample.total,
+          });
+      }),
+    [diagnostics, editStarted, sample.total],
+  );
 
   function recordRender(elapsed: number) {
     renderWork.current = elapsed;
@@ -143,54 +163,34 @@ export function useSampleStream(
 
 export type StreamState = ReturnType<typeof useSampleStream>;
 
-import type { PaintReport } from '../../editor-canvas/canvas-renderer';
-
 export function recordSamplePaint({
   stream,
   report,
-  scene,
-  visible,
   editStarted,
-  loaded,
-  revision,
   total,
 }: {
-  stream: StreamState;
-  report: PaintReport;
-  scene: Scene<StarterLeaf>;
-  visible: readonly Placement<StarterLeaf>[];
+  stream: Pick<StreamState, 'metrics' | 'pending' | 'sourceLoaded' | 'sourceRevision'>;
+  report: Extract<DiagnosticEvent, { type: 'paint' }>;
   editStarted: RefObject<number | null>;
-  loaded: number;
-  revision: number;
   total: number;
 }) {
   const { metrics, pending, sourceLoaded, sourceRevision } = stream;
 
-  const { at: now, duration: drawMs, submitted } = report,
+  const { at: now, duration: drawMs, submitted, blocks: loaded, revision } = report,
     m = metrics.current;
 
   if (m.paints.length < 10000) m.paints.push(drawMs);
-  m.maxMounted = Math.max(
-    m.maxMounted,
-    visible.filter((p) => p.node.kind !== 'paragraph' && p.node.kind !== 'heading').length,
-  );
+  m.maxMounted = Math.max(m.maxMounted, report.mounted);
   m.maxSubmitted = Math.max(m.maxSubmitted, submitted);
   const reflow = metrics.current.reflows.at(-1);
 
-  if (reflow && reflow.generation === scene.generation) {
+  if (reflow && reflow.generation === report.generation) {
     if (!reflow.firstPaintMs) reflow.firstPaintMs = now - reflow.started;
 
-    if (!scene.pending && !reflow.completeMs) reflow.completeMs = now - reflow.started;
+    if (!report.pending && !reflow.completeMs) reflow.completeMs = now - reflow.started;
   }
 
-  if (
-    visible.some(
-      (p) =>
-        (p.node.kind === 'paragraph' || p.node.kind === 'heading') &&
-        (!p.layout || p.layoutWidth !== scene.width),
-    )
-  )
-    m.stalePaints++;
+  if (report.stale) m.stalePaints++;
 
   if (editStarted.current !== null) {
     m.editPaintMs.push(now - editStarted.current);
@@ -228,35 +228,34 @@ export function recordSamplePaint({
 
 export function recordSampleLayout(
   metrics: StreamState['metrics'],
-  result: ReturnType<ReturnType<typeof createEditorScene>['build']>,
-  contentWidth: number,
-  loaded: number,
+  report: Extract<DiagnosticEvent, { type: 'layout' }>,
 ) {
-  metrics.current.layoutCalls += result.layoutIds.length;
-  metrics.current.compositionMs += result.compositionMs;
-  metrics.current.lastLayoutIds = result.layoutIds;
-  metrics.current.lastSceneMs = result.workMs;
+  metrics.current.layoutCalls += report.layoutIds.length;
+  metrics.current.compositionMs += report.compositionMs;
+  metrics.current.lastLayoutIds = [...report.layoutIds];
+  metrics.current.lastSceneMs = report.duration;
 
-  if (result.reflow) metrics.current.widthChanges.push({ blocks: loaded, workMs: result.workMs });
-
-  if (result.reflow)
+  if (report.reflow) {
+    metrics.current.widthChanges.push({ blocks: report.blocks, workMs: report.duration });
     metrics.current.reflows.push({
-      generation: result.scene.generation,
-      width: contentWidth,
-      blocks: loaded,
-      started: performance.now() - result.workMs,
+      generation: report.generation,
+      width: report.width,
+      blocks: report.blocks,
+      started: report.at - report.duration,
       firstPaintMs: 0,
       completeMs: 0,
-      initialLayouts: result.layoutIds.length,
+      initialLayouts: report.layoutIds.length,
       batches: [],
     });
+  }
+
   const run = metrics.current.reflows.at(-1);
 
-  if (run && result.layoutIds.length)
+  if (run && report.layoutIds.length)
     run.batches.push({
-      workMs: result.workMs,
-      layouts: result.layoutIds.length,
-      background: result.background,
-      pending: result.scene.pending,
+      workMs: report.duration,
+      layouts: report.layoutIds.length,
+      background: report.background,
+      pending: report.pending,
     });
 }

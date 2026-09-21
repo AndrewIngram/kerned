@@ -69,6 +69,14 @@ for (const group of groups) {
         );
       }
 
+      if (group === 'demo/app') {
+        assert.ok(
+          !target.startsWith('src/editor-canvas/') ||
+            ['src/editor-canvas/diagnostics'].includes(target),
+          `${file} bypasses the public view interface: ${specifier}`,
+        );
+      }
+
       if (group === 'editor-browser') {
         assert.ok(
           !['react', 'react-dom', 'canvaskit-wasm'].some(
@@ -83,7 +91,6 @@ for (const group of groups) {
         [
           'src/extensions/starter-kit/image-view.ts',
           'src/extensions/starter-kit/table-view.ts',
-          'src/extensions/starter-kit/native-block-layer.ts',
         ].includes(file)
       ) {
         assert.ok(

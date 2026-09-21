@@ -1,3 +1,4 @@
+import './mount.css';
 import { connectEditorView } from '../core';
 import { mountEditorView, createEditorViewport, type BrowserViewOptions } from '../editor-browser';
 import { createCanvasInput } from '../editor-browser/canvas-input';
@@ -40,7 +41,14 @@ export function mountEditor<N extends NodeIdentity>(
   options: MountEditorOptions<N>,
 ) {
   const { editor } = options;
-  let configuration = readViewConfiguration({ zoom: options.zoom, paddingTop: options.paddingTop });
+
+  let configuration = readViewConfiguration({
+    zoom: options.zoom,
+    paddingTop: options.paddingTop,
+    maxWidth: options.maxWidth,
+    background: options.background,
+  });
+
   const presentation = createDocumentPresentation(editor);
   // Resolve the initial projection before allocating native resources or changing the host.
   presentation.query(editor.state);
@@ -65,6 +73,9 @@ export function mountEditor<N extends NodeIdentity>(
   const space = document.createElement('div');
   const canvas = document.createElement('canvas');
   const overlay = document.createElement('div');
+  const nativeNodes = document.createElement('div');
+  nativeNodes.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
+  overlay.append(nativeNodes);
   const input = document.createElement('textarea');
   const notice = document.createElement('div');
   notice.setAttribute('role', 'status');
@@ -72,9 +83,13 @@ export function mountEditor<N extends NodeIdentity>(
     'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);';
   const page = options.scroll === 'page';
   root.dataset.editorView = '';
-  root.style.cssText = `position:relative;width:100%;height:100%;min-height:240px;${page ? '' : 'overflow:auto;'}`;
-  space.style.position = 'relative';
-  canvas.style.cssText = 'display:block;position:sticky;pointer-events:none;';
+  space.dataset.editorContent = '';
+  input.dataset.editorInput = '';
+  root.style.cssText = `position:relative;overflow-anchor:none;overscroll-behavior:contain;touch-action:none;cursor:text;width:100%;height:100%;min-height:240px;${page ? '' : 'overflow:auto;'}`;
+  space.style.cssText = 'position:relative;margin-inline:auto;';
+  space.style.maxWidth = configuration.maxWidth === null ? '' : `${configuration.maxWidth}px`;
+  root.style.background = configuration.background;
+  canvas.style.cssText = 'display:block;position:sticky;pointer-events:none;user-select:none;';
   canvas.setAttribute('aria-label', 'Canvas document');
   overlay.style.cssText =
     'position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;';
@@ -154,7 +169,7 @@ export function mountEditor<N extends NodeIdentity>(
     if (status === 'destroyed' || status === 'failed') return;
     focusPending = true;
 
-    if (status !== 'ready') return;
+    if (status !== 'ready' || !geometry.isCurrent()) return;
     const doc = presentation.query(editor.state);
     const owner = doc.focusId === null ? undefined : doc.blockFor(doc.focusId);
 
@@ -235,22 +250,41 @@ export function mountEditor<N extends NodeIdentity>(
     if (status === 'destroyed' || status === 'failed') throw new Error(`Editor view is ${status}`);
     const next = readViewConfiguration(value, configuration);
 
-    if (next.zoom === configuration.zoom && next.paddingTop === configuration.paddingTop) return;
+    if (
+      next.zoom === configuration.zoom &&
+      next.paddingTop === configuration.paddingTop &&
+      next.maxWidth === configuration.maxWidth &&
+      next.background === configuration.background
+    )
+      return;
+    const repaint = next.background !== configuration.background;
     configuration = next;
+    space.style.maxWidth = next.maxWidth === null ? '' : `${next.maxWidth}px`;
+    root.style.background = next.background;
 
     try {
       viewport.setZoom(next.zoom);
       updateLayout();
+
+      if (repaint) publish();
     } catch (error) {
       fail(error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
 
+  function backgroundColor(): [number, number, number] {
+    const color = resources.read().kit.parseColorString(configuration.background);
+
+    return [color[0] * 255, color[1] * 255, color[2] * 255];
+  }
+
   function publish() {
     if (!layout || status === 'destroyed' || status === 'failed') return;
     const snapshot = layout.getSnapshot();
     const doc = presentation.query(editor.state);
+
+    if (snapshot.nodes !== doc.nodes) return;
     const port = frameViewport();
     const { scene, visible, contentWidth, inset } = snapshot;
     space.style.height = `${Math.max(scene.height * port.zoom, port.viewportHeight)}px`;
@@ -268,6 +302,8 @@ export function mountEditor<N extends NodeIdentity>(
       block.host.remove();
       blocks.delete(id);
     }
+
+    let nativeIndex = 0;
 
     for (const placement of visible) {
       const renderer = renderers.find(placement.node);
@@ -291,11 +327,23 @@ export function mountEditor<N extends NodeIdentity>(
         const host = document.createElement('div');
         host.style.cssText = 'position:absolute;pointer-events:auto;';
         host.dataset.editorNode = String(id);
-        overlay.append(host);
-        block = { host, view: renderer.mount(host), name: renderer.name };
+        nativeNodes.append(host);
+        const content = document.createElement('div');
+        host.append(content);
+        block = { host, view: renderer.mount(content), name: renderer.name };
         blocks.set(id, block);
       }
 
+      if (nativeNodes.children[nativeIndex] !== block.host) {
+        const activeElement = document.activeElement;
+        const restore = activeElement instanceof HTMLElement && block.host.contains(activeElement);
+        nativeNodes.insertBefore(block.host, nativeNodes.children[nativeIndex] ?? null);
+
+        if (restore && document.activeElement !== activeElement)
+          activeElement.focus({ preventScroll: true });
+      }
+
+      nativeIndex++;
       block.host.style.left = `${inset}px`;
       block.host.style.top = `${placement.y}px`;
       block.host.style.width = `${contentWidth}px`;
@@ -336,7 +384,7 @@ export function mountEditor<N extends NodeIdentity>(
       height: port.viewportHeight,
       zoom: port.zoom,
       top: snapshot.top,
-      background: [255, 255, 255],
+      background: backgroundColor(),
       blocks: visible,
       selectedRange: doc.selectedRange,
       caret: snapshot.caret,
@@ -568,7 +616,7 @@ export function mountEditor<N extends NodeIdentity>(
       capture.attach(canvas, input);
       painter.attach(native.kit, canvas);
       viewport.attach({
-        element: root,
+        element: space,
         scrollport: page ? window : root,
         toolbar: options.toolbar,
       });
@@ -610,6 +658,13 @@ export function mountEditor<N extends NodeIdentity>(
     },
     focus,
     update,
+    scrollTo(top: number) {
+      if (status === 'destroyed' || status === 'failed')
+        throw new Error(`Editor view is ${status}`);
+
+      if (!Number.isFinite(top)) throw new RangeError('Scroll position must be finite');
+      scrollDocumentTo(Math.max(0, top) * configuration.zoom);
+    },
     getSnapshot: geometry.getSnapshot,
     subscribe: geometry.subscribe,
     blockBounds: geometry.blockBounds,

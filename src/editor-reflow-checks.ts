@@ -1,50 +1,55 @@
-import type { CanvasKit } from 'canvaskit-wasm';
-
-import type { Measurement, Scene } from './editor-canvas/scene';
+import type { ViewDiagnostics } from './editor-canvas/diagnostics';
+import { createViewResources } from './editor-canvas/resources';
 import type { StarterLeaf } from './extensions/demo-model';
 import { formattingSpans } from './extensions/formatting';
 import { inlineSchema } from './extensions/mention';
 import { typography } from './extensions/typography';
-import { createOwnedEngine } from './owned-layout';
 
 /** Independent eager reference: compose each paragraph from scratch at the target width. */
 export async function checkReflow(
-  kit: CanvasKit,
   nodes: StarterLeaf[],
-  scene: Scene<StarterLeaf>,
-  measurements: ReadonlyMap<number, Measurement>,
+  diagnostics: ViewDiagnostics,
+  bodySize = 20,
 ) {
-  const owned = await createOwnedEngine(kit, 'shaping');
-  const owner = owned.createLayout();
+  const scene = diagnostics.read();
+
+  if (!scene) throw new Error('No current view diagnostics');
+  const placements = diagnostics.placements();
+  const resources = createViewResources();
 
   let y = 32 + scene.paddingTop,
     paragraphs = 0,
     hydrated = 0;
 
   try {
+    await resources.ready;
+    const owner = resources.read().layout.createLayout();
+
     for (let i = 0; i < nodes.length; i++) {
       const node = nodes[i],
-        actual = scene.placements[i];
+        actual = placements[i];
 
       if (i) {
         const previous = nodes[i - 1];
 
         const after =
           previous.kind === 'paragraph' || previous.kind === 'heading'
-            ? typography(previous, 20).after
+            ? typography(previous, bodySize).after
             : 24;
 
         const before =
-          node.kind === 'paragraph' || node.kind === 'heading' ? typography(node, 20).before : 0;
+          node.kind === 'paragraph' || node.kind === 'heading'
+            ? typography(node, bodySize).before
+            : 0;
 
         y += Math.max(after, before);
       }
 
-      if (!actual || actual.node !== node || actual.y !== y)
+      if (!actual || actual.id !== node.id || actual.y !== y)
         throw new Error(`Placement differs at ${node.id}`);
 
       if (node.kind === 'paragraph' || node.kind === 'heading') {
-        const style = typography(node, 20);
+        const style = typography(node, bodySize);
 
         const spans =
           node.kind === 'heading' && node.text.length
@@ -68,26 +73,32 @@ export async function checkReflow(
           ? owner.layoutInline({ ...input, atoms: node.inline.map(inlineSchema.layout) })
           : owner.layout(input);
 
-        const geometry = (layout: typeof expected) => [
-          layout.height,
-          layout.lines,
-          layout.geometry(0, node.text.length, false),
-          layout.move(0, false, 'end'),
-          layout.hit(10, 10),
-        ];
+        const probe = diagnostics.inspectText({
+          id: node.id,
+          range: { from: 0, to: node.text.length },
+          move: { offset: 0, direction: 'end' },
+          hit: { x: 10, y: 10 },
+        });
 
         if (
           actual.height !== expected.height ||
           actual.layoutWidth !== scene.width ||
-          (actual.layout &&
-            JSON.stringify(geometry(actual.layout)) !== JSON.stringify(geometry(expected)))
+          (probe &&
+            JSON.stringify([probe.height, probe.lines, probe.geometry, probe.move, probe.hit]) !==
+              JSON.stringify([
+                expected.height,
+                expected.lines,
+                expected.geometry(0, node.text.length, false),
+                expected.move(0, false, 'end'),
+                expected.hit(10, 10),
+              ]))
         )
           throw new Error(`Geometry differs at ${node.id}`);
 
-        if (actual.layout) hydrated++;
+        if (probe) hydrated++;
 
         if (
-          actual.layout &&
+          probe &&
           'inlineBoxes' in expected &&
           JSON.stringify(actual.boxes) !== JSON.stringify(expected.inlineBoxes)
         )
@@ -95,7 +106,7 @@ export async function checkReflow(
         y += expected.height;
         paragraphs++;
       } else {
-        const measured = measurements.get(node.id);
+        const measured = actual.measured;
 
         const height =
           measured?.width === scene.width
@@ -113,6 +124,6 @@ export async function checkReflow(
 
     return { blocks: nodes.length, paragraphs, hydrated, checks: 'passed' };
   } finally {
-    owned.destroy();
+    resources.destroy();
   }
 }

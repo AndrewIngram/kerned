@@ -229,17 +229,21 @@ such as the session, scroll mode or asset resolver creates a new view.
   can safely update or destroy the view. Read the current snapshot in the listener;
   intermediate synchronous snapshots may be skipped. The returned function
   unsubscribes. Subscription after disposal throws.
-- `blockBounds(id)` returns a block's document-space rectangle and rendered owner
+- `blockBounds(id, coordinates = 'document')` returns a block's document-space rectangle and rendered owner
   ID. Native descendants, such as cell paragraphs, return their table's bounds;
   use `coordsAt` for their individual text. Flowing containers have no standalone
-  bounds. Uncomposed offscreen blocks can have estimated bounds until reflow.
+  bounds. Pass `'client'` for viewport-relative CSS-pixel bounds suitable for
+  application popovers. Uncomposed offscreen blocks can have estimated bounds until reflow.
   Missing nodes, stale document layout and disposed views return `null`.
-- `update({ zoom, paddingTop })` merges view settings without replacing its
+- `update({ zoom, paddingTop, maxWidth, background })` merges view settings without replacing its
   session, graphics or input. Zoom must be finite and positive; top padding is a
   finite, nonnegative length in document units. Omitted values retain their
   current setting. Updates are validated together before applying, and identical
   settings do no work. Updates during loading apply to the initial layout;
-  updates after failure or destruction throw.
+  updates after failure or destruction throw. `maxWidth` is an optional centered
+  column width in CSS pixels (`null` uses the available width); editor margins
+  remain clickable. `background` is a CSS color, defaulting to white. Changing
+  only the background repaints without composing text.
 - `reveal(point)` retains the target in layout and returns a promise indicating
   whether it was revealed. It captures a relative position so intervening edits
   map the target before scrolling. A later reveal supersedes an earlier request;
@@ -252,11 +256,16 @@ such as the session, scroll mode or asset resolver creates a new view.
   margin. Excessive margins are limited to the available height; document edges
   can prevent exact alignment. A fully visible target still resolves `true` when
   scrolling is clamped at an edge.
+- `scrollTo(top)` scrolls to an absolute unscaled document offset without changing
+  selection or focus. Scroll positions clamp to document edges.
 - `scroll: 'page'` uses page scrolling and an optional `toolbar` element as the
   sticky inset. The default uses a scroll container inside the supplied host.
   `editor.commands.scrollIntoView()` reveals the current selection.
 - `resolveAsset` maps graphics, shaping and font asset paths to application URLs.
-  Native engine handles stay private to the mounted view.
+  Native engine handles stay private to the mounted view. Successful immutable
+  asset bytes are cached by resolved URL (at most 32 entries / 64 MiB); native
+  graphics, fonts and shaping state remain per-view. Failed or cancelled loads
+  are not cached. Use versioned URLs when asset contents change.
 
 ## Optional diagnostics
 
@@ -280,7 +289,10 @@ view.destroy();
 `read()` copies layout counts, generation/pending state, mounted native IDs,
 shaping/composition counters, retained cache counts and buffer sizes. Reading memory
 counts can traverse retained buffers, so it is intended for audits rather than
-per-frame UI. `placements(ids?)` copies block and inline-box metadata on demand;
+per-frame UI. `inspectText({ id, range, hit?, move? })` copies resident line,
+range, hit-test and movement results for independent reference audits. It returns
+null when no resident layout exists; modifying a probe result cannot mutate the
+editor. `placements(ids?)` copies block and inline-box metadata on demand;
 omitting IDs inspects the whole document. Neither returns nodes, layout objects,
 native resources or mutable buffers. Both return detached values, with `null` and
 an empty array respectively while the view is loading or detached.
@@ -321,10 +333,9 @@ Search and comment rendering are shared across canvas and native text. Mention
 rendering is shared between mounts; a general custom-inline presentation contract
 remains future work.
 
-The writing demo still uses its existing starter composition and an internal
-`EditorEventHost`; it has not switched to this mount yet. It now uses the same
-table node-view, container-decoration, underline, mention, comment and search contributions as the mount.
-Supported view updates and diagnostic contracts must be completed before that
-switch. The old event host is not a second public editor interface. Milestone 4
-remains open until the demo uses the shared mount and stops passing graphics
-handles through its tree.
+The writing and extension demos now mount the same public React `Editor`. They
+create sessions, choose schema/browser extensions and supply application UI;
+engine handles and manual layout, input and painting orchestration are gone.
+Outline, find and annotation panels use geometry/reveal queries. Streaming
+backpressure and the audit harness use separate diagnostics. Independent engine
+checks allocate their own temporary resources outside the application view.

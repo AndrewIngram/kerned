@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from 'react';
+import { useEffect, type RefCallback } from 'react';
 
 import { FindIcon } from '../../demo/find-bar';
 import { bookSamples, type EditorSample } from '../../editor-samples';
@@ -8,7 +8,8 @@ import type { EditorControls } from './editor-controls';
 
 type ToolbarProps = { doc: EditorDocument; actions: EditorControls } & {
   minimal: boolean;
-  toolbarRef: RefObject<HTMLElement | null>;
+  toolbar: HTMLElement | null;
+  setToolbar: RefCallback<HTMLElement>;
   addComment: () => void;
   findOpen: boolean;
   openFind: () => void;
@@ -22,7 +23,8 @@ type ToolbarProps = { doc: EditorDocument; actions: EditorControls } & {
 
 export function Toolbar({
   minimal,
-  toolbarRef,
+  toolbar,
+  setToolbar,
   doc,
   actions,
   addComment,
@@ -55,7 +57,7 @@ export function Toolbar({
 
   useEffect(() => {
     const close = (event: PointerEvent | KeyboardEvent) => {
-      for (const menu of toolbarRef.current?.querySelectorAll('details[open]') ?? []) {
+      for (const menu of toolbar?.querySelectorAll('details[open]') ?? []) {
         if (event instanceof KeyboardEvent) {
           if (event.key !== 'Escape') continue;
           menu.removeAttribute('open');
@@ -72,10 +74,10 @@ export function Toolbar({
       document.removeEventListener('pointerdown', close);
       document.removeEventListener('keydown', close);
     };
-  }, [toolbarRef]);
+  }, [toolbar]);
 
   return minimal ? (
-    <header ref={toolbarRef} className="minimal-toolbar" aria-label="Formatting" role="toolbar">
+    <header ref={setToolbar} className="minimal-toolbar" aria-label="Formatting" role="toolbar">
       <div className="toolbar-inner">
         <details
           className="blocks-menu"

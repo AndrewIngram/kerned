@@ -1,0 +1,97 @@
+Public mount demo migration validation
+
+pnpm run check: PASS (539 Vitest tests, 1 unchanged TODO, 42 E2E)
+pnpm run build: PASS (existing bundle-size warning)
+Second oxlint --fix and format pass: unchanged
+Production desktop/narrow writing and extension study screenshots: inspected
+
+
+> gprose-engine-prototype@0.0.0 check:editor-pointer /Users/andrewingram/Code/gprose
+> node scripts/check-editor-pointer.mjs
+
+chromium click, type, drag, replace and undo passed
+firefox click, type, drag, replace and undo passed
+webkit click, type, drag, replace and undo passed
+
+
+> gprose-engine-prototype@0.0.0 check:editor-navigation /Users/andrewingram/Code/gprose
+> node scripts/check-editor-navigation.mjs
+
+chromium 1100 editor-wide clicks, gutters, shift/drag, controls and modifier navigation passed
+chromium 390 editor-wide clicks, gutters, shift/drag, controls and modifier navigation passed
+chromium page movement, shift selection and distant document boundaries passed
+firefox 1100 editor-wide clicks, gutters, shift/drag, controls and modifier navigation passed
+firefox 390 editor-wide clicks, gutters, shift/drag, controls and modifier navigation passed
+firefox page movement, shift selection and distant document boundaries passed
+webkit 1100 editor-wide clicks, gutters, shift/drag, controls and modifier navigation passed
+webkit 390 editor-wide clicks, gutters, shift/drag, controls and modifier navigation passed
+webkit page movement, shift selection and distant document boundaries passed
+
+
+> gprose-engine-prototype@0.0.0 check:editor-page-scroll /Users/andrewingram/Code/gprose
+> node scripts/check-editor-page-scroll.mjs
+
+chromium 1100 page scrolling, sticky toolbar, canvas hit testing and resize passed
+chromium 390 page scrolling, sticky toolbar, canvas hit testing and resize passed
+firefox 1100 page scrolling, sticky toolbar, canvas hit testing and resize passed
+firefox 390 page scrolling, sticky toolbar, canvas hit testing and resize passed
+webkit 1100 page scrolling, sticky toolbar, canvas hit testing and resize passed
+webkit 390 page scrolling, sticky toolbar, canvas hit testing and resize passed
+
+
+> gprose-engine-prototype@0.0.0 check:editor-outline /Users/andrewingram/Code/gprose
+> node scripts/check-editor-outline.mjs
+
+chromium full pending outline, disabled navigation, live edits and progressive availability passed
+chromium 1100 outline navigation, dismissal, preserved selection and responsive fit passed
+chromium 390 outline navigation, dismissal, preserved selection and responsive fit passed
+chromium generic extraction, nested/skipped levels, caching, streaming and editing passed
+firefox full pending outline, disabled navigation, live edits and progressive availability passed
+firefox 1100 outline navigation, dismissal, preserved selection and responsive fit passed
+firefox 390 outline navigation, dismissal, preserved selection and responsive fit passed
+firefox generic extraction, nested/skipped levels, caching, streaming and editing passed
+webkit full pending outline, disabled navigation, live edits and progressive availability passed
+webkit 1100 outline navigation, dismissal, preserved selection and responsive fit passed
+webkit 390 outline navigation, dismissal, preserved selection and responsive fit passed
+webkit generic extraction, nested/skipped levels, caching, streaming and editing passed
+
+
+> gprose-engine-prototype@0.0.0 check:editor-large /Users/andrewingram/Code/gprose
+> node scripts/check-editor-large.mjs
+
+chromium 2000 1100 passed
+chromium 10000 1100 passed
+chromium 10000 420 passed
+firefox 2000 1100 passed
+firefox 10000 1100 passed
+firefox 10000 420 passed
+webkit 2000 1100 passed
+webkit 10000 1100 passed
+webkit 10000 420 passed
+
+
+> gprose-engine-prototype@0.0.0 check:editor-reflow /Users/andrewingram/Code/gprose
+> node scripts/check-editor-reflow.mjs
+
+chromium 2000 passed
+chromium 10000 passed
+chromium concurrent stream passed
+firefox 2000 passed
+firefox 10000 passed
+firefox concurrent stream passed
+webkit 2000 passed
+webkit 10000 passed
+webkit concurrent stream passed
+
+
+> gprose-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/gprose
+> node scripts/check-editor-performance.mjs artifacts/public-interface-m4/public-mount/baseline.json
+
+firstUsableMs: 217.0 <= 248.4
+streamingMs: 1179.4 <= 1331.3
+pasteHandlerMs: 59.1 <= 62.8
+pastePaintMs: 118.0 <= 123.1
+typingFrameMs: 32.1 <= 48.6
+pagingFrameMs: 32.4 <= 48.7
+loadedHeapBytes: 29147388.0 <= 36069308.4
+

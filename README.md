@@ -174,28 +174,23 @@ session, reusable commands, queries and per-session extension state.
 
 ## Render extensions
 
-Node registration adds editing behavior. The host supplies canvas or DOM views
-for those nodes. React components can register canvas paint callbacks with
-`CanvasPrimitive`:
+Node registration adds editing behavior. The composed browser extensions supply
+presentation, native node views and decoration layers, which the mounted editor
+owns. Applications do not pass graphics or shaping-engine handles:
 
 ```tsx
-import { useCallback } from 'react';
-import { CanvasPrimitive, type CanvasPainter } from './src/editor-react';
+import { Editor } from './src/editor-react';
 
-function Highlight() {
-  const paint = useCallback<CanvasPainter>((canvas, kit, brush) => {
-    brush.setColor(kit.Color(255, 236, 153));
-    canvas.drawRect(kit.XYWHRect(0, 0, 120, 28), brush);
-  }, []);
-
-  return <CanvasPrimitive id="example-highlight" layer="background" paint={paint} />;
-}
+<Editor editor={editor} maxWidth={696} scroll="page" />;
 ```
 
-The host wraps these components in `CanvasLayerProvider`. Its `value` is a
-`register(id, painter, layer)` function that returns an unregister callback. The
-host invokes registered painters during its viewport drawing pass.
-`CanvasPrimitive` unregisters on unmount. Layers are `background` and `content`.
+For custom canvas drawing, a `viewLayers` contribution receives resident block
+geometry and a borrowed drawing interface. It can register background/content
+painters and attach interactive DOM controls. See the [mounted view
+reference](docs/mounted-editor.md) for the implemented geometry, drawing,
+lifetime and diagnostics contracts. The earlier `CanvasPrimitive` API exposing
+native graphics handles has been removed; React node/mark/decoration registrations
+are milestone 6 work.
 
 Inline objects use `InlineObject<Data>` and an `InlineExtension<Data, Layout>`
 with `plainText` and `layout` functions. Range annotations use

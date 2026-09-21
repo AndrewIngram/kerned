@@ -15,7 +15,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     await page.evaluate(() => window.editorDiagnostics.select(1, 0));
     await page.keyboard.press('ControlOrMeta+a');
 
-    const text = await page.locator('.text-capture').evaluate((el) => {
+    const text = await page.locator('[data-editor-input]').evaluate((el) => {
       const event = new ClipboardEvent('copy', {
         bubbles: true,
         cancelable: true,
@@ -32,7 +32,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     await page.waitForFunction(() => window.editorDiagnostics);
     await page.evaluate(() => window.editorDiagnostics.select(1, 0));
     await page.keyboard.press('ControlOrMeta+a');
-    await page.locator('.text-capture').evaluate((el, textValue) => {
+    await page.locator('[data-editor-input]').evaluate((el, textValue) => {
       const event = new ClipboardEvent('paste', {
         bubbles: true,
         cancelable: true,
@@ -65,7 +65,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       await page.evaluate(
         () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
       );
-      await page.locator('.text-capture').evaluate((el, textValue2) => {
+      await page.locator('[data-editor-input]').evaluate((el, textValue2) => {
         const event = new ClipboardEvent('paste', {
           bubbles: true,
           cancelable: true,

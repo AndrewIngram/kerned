@@ -13,7 +13,7 @@ for (const width of [1100, 390]) {
     const box = await canvas.boundingBox();
     const first = await page.evaluate(() => window.editorDiagnostics.read().scene[0]);
     await page.mouse.click(box.x + 30, box.y + first.y + 12);
-    await expect(page.getByLabel('Canvas text input')).toBeFocused();
+    await expect(page.getByLabel('Editor text input')).toBeFocused();
     await page.keyboard.type('Hello ');
     await expect
       .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes[0].text))
@@ -76,12 +76,12 @@ test('sample replacement releases only the old layout owner and keeps assets res
     await picker.selectOption('warbreaker');
     await expect(picker).toBeEnabled();
     await expect
-      .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))
+      .poll(() => page.evaluate(() => window.editorDiagnostics?.read().nodes.length))
       .toBeGreaterThan(4);
     await picker.selectOption('minimal');
     await expect(picker).toBeEnabled();
     await expect
-      .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))
+      .poll(() => page.evaluate(() => window.editorDiagnostics?.read().nodes.length))
       .toBe(4);
     await expect
       .poll(() => page.evaluate(() => window.editorDiagnostics.metrics().retention))
@@ -90,11 +90,11 @@ test('sample replacement releases only the old layout owner and keeps assets res
 
   await page.goBack();
   await expect
-    .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))
+    .poll(() => page.evaluate(() => window.editorDiagnostics?.read().nodes.length))
     .toBeGreaterThan(4);
   await page.goForward();
   await expect
-    .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length))
+    .poll(() => page.evaluate(() => window.editorDiagnostics?.read().nodes.length))
     .toBe(4);
   await expect
     .poll(() => page.evaluate(() => window.editorDiagnostics.metrics().retention.owners))

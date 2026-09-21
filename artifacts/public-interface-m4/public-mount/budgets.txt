@@ -1,0 +1,11 @@
+
+> gprose-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/gprose
+> node scripts/check-editor-performance.mjs artifacts/public-interface-m4/public-mount/baseline.json
+
+firstUsableMs: 217.0 <= 248.4
+streamingMs: 1179.4 <= 1331.3
+pasteHandlerMs: 59.1 <= 62.8
+pastePaintMs: 118.0 <= 123.1
+typingFrameMs: 32.1 <= 48.6
+pagingFrameMs: 32.4 <= 48.7
+loadedHeapBytes: 29147388.0 <= 36069308.4

@@ -39,7 +39,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       assert.equal((await probe()).count, 32);
       const initial = await page.evaluate(() => window.editorDiagnostics.metrics());
       assert.equal(initial.firstLoaded, 32);
-      const input = page.getByLabel('Canvas text input');
+      const input = page.getByLabel('Editor text input');
       await page.evaluate(() => window.editorDiagnostics.select(1, 0));
       await settle();
       await page.keyboard.insertText('Edited ');

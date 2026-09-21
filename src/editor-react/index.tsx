@@ -1,51 +1,11 @@
-import { createContext, useContext, useLayoutEffect, useMemo, useSyncExternalStore } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 
-import type {
-  CanvasPainter,
-  CanvasPaintLayer,
-  RegisterCanvasPainter,
-} from '../editor-canvas/canvas-renderer';
 import type { NodeIdentity } from '../model';
 import type { EditorState, CommandDefinition, CommandState } from '../state';
 
-export type {
-  CanvasPainter,
-  CanvasPaintLayer,
-  RegisterCanvasPainter,
-} from '../editor-canvas/canvas-renderer';
-
-const PaintContext = createContext<RegisterCanvasPainter | null>(null);
-
-export const CanvasLayerProvider = PaintContext.Provider;
-
-/** Native extensions attach to the same painter registry as React primitives. */
-export function useCanvasLayer() {
-  const register = useContext(PaintContext);
-
-  if (!register) throw new Error('Canvas rendering requires a CanvasLayerProvider');
-
-  return register;
-}
-
-/** Canvas extensions share the host's viewport pass and release registration on unmount. */
-export function CanvasPrimitive({
-  id,
-  paint,
-  layer = 'content',
-}: {
-  id: string;
-  paint: CanvasPainter;
-  layer?: CanvasPaintLayer;
-}) {
-  const register = useCanvasLayer();
-  useLayoutEffect(() => register(id, paint, layer), [register, id, paint, layer]);
-
-  return null;
-}
-
 export { usePointerSelection } from './pointer-selection';
 
-export { Editor } from './editor';
+export { Editor, useViewState } from './editor';
 
 export { createReactRenderers, type ReactRenderer } from './renderers';
 

@@ -2121,3 +2121,49 @@ The demo still uses its older instrumentation until its mount migration. That
 migration must preserve streaming backpressure and existing audit measurements;
 this checkpoint does not claim demo performance improvements or milestone 4
 completion. No milestone judge has run yet.
+
+### Milestone 4: demo uses the public mounted view
+
+The writing demo and extension study now use the same React attachment to
+`mountEditor` as a library consumer. The app no longer initializes or passes
+CanvasKit/owned-engine handles, reconciles native blocks, paints, captures input,
+or schedules layout. The old React layout/painting hooks, event host and starter
+block layer have been deleted. The import checker prevents app code from reaching
+into private view modules; diagnostics remain a separate supported entry point.
+
+Outline navigation, search reveal, annotation placement and streaming backpressure
+use public geometry and diagnostic contracts. The mounted view owns a configurable
+centered content column while retaining clickable outer margins. Background changes
+repaint without recomposing text. Immutable asset bytes have a bounded URL cache;
+view replacement reuses downloaded bytes while keeping native resources isolated.
+The diagnostic text probe returns copied geometry for independent reflow audits.
+
+During migration, pairing a newly published document with an older layout caused
+native table undo/redo to focus stale cell geometry. Layout snapshots now carry
+the projected content identity; native reconciliation and focus wait for matching
+content. Native extension content has its own element inside the positioned host.
+Sample replacement keeps the page realm and downloaded assets, and the audit
+waits through the new mount's explicit asynchronous readiness.
+
+Regression coverage exercises the public mount rather than the retired React
+orchestrators: the former session-lifetime case moved to mounted-editor tests,
+and block-layer coverage now mounts the real editor for comments, mentions,
+focused table input, culling, strict remounts and session destruction. Existing
+sample-switching end-to-end checks verify no font/WASM requests after replacement.
+The pointer audit now clicks the same visible coordinates rather than requiring
+the paint-only canvas to receive DOM events. No assertion targets, timeouts,
+performance budgets or quality-tool configuration were weakened.
+
+The production build passes. Pointer placement, modifier navigation, page scroll,
+outline and search audits pass in Chromium, Firefox and WebKit, including narrow
+screens. All nine large-document and all nine independent reflow cases pass,
+including 10,000-block streaming, concurrent edits, native focus and scroll anchors.
+Three serial production trials pass every unchanged budget: worst first usable
+217 ms, streaming 1,179.4 ms, paste handler 59.1 ms, paste to paint 118 ms,
+typing 32.1 ms, paging 32.4 ms and loaded heap 29,147,388 bytes. Evidence is in
+`artifacts/public-interface-m4/public-mount/`; reports identify `d3309f5` and
+measure this milestone's uncommitted tree. `pnpm run check` passes with 539 Vitest
+tests, one unchanged collaboration TODO and 42 end-to-end cases. A second lint
+fix/format pass leaves files unchanged. Production screenshots were inspected
+for the writing demo at desktop/narrow widths and the extension study. The
+independent milestone architecture review is next.

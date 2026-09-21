@@ -16,7 +16,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     await page.waitForFunction(() => window.editorDiagnostics);
 
     const canvas = page.getByLabel('Canvas document'),
-      input = page.getByLabel('Canvas text input');
+      input = page.getByLabel('Editor text input');
 
     const read = () => page.evaluate(() => window.editorDiagnostics.read());
 
@@ -25,7 +25,8 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
         () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
       );
 
-    await canvas.click({ position: { x: 40, y: 42 } });
+    const initialBounds = await canvas.boundingBox();
+    await page.mouse.click(initialBounds.x + 40, initialBounds.y + 42);
     await settle();
     assert.ok(
       await input.evaluate((el) => el === document.activeElement),
