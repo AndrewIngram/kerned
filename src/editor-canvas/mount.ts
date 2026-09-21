@@ -91,7 +91,7 @@ export function mountEditor<N extends NodeIdentity>(
   let layers: ReturnType<typeof createViewLayers<N>> | undefined;
   const layerGeometry = createLayerGeometry();
 
-  const renderers = createNodeViews(editor, { clipboard, notice: reportNotice });
+  const renderers = createNodeViews(editor, { clipboard, notice: reportNotice, onError: fail });
 
   const geometry = createViewGeometry({
     editor,
@@ -297,7 +297,6 @@ export function mountEditor<N extends NodeIdentity>(
       background: [255, 255, 255],
       blocks: visible,
       selectedRange: doc.selectedRange,
-      highlights: [],
       caret: snapshot.caret,
       caretTop: snapshot.activePlacement?.y ?? 0,
       focused,

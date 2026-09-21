@@ -1,0 +1,206 @@
+[
+  {
+    "browser": "chromium",
+    "width": 1100,
+    "matches": 543,
+    "searchPaintMs": 57.02187499999991,
+    "layouts": 19,
+    "apiTimings": [
+      {
+        "query": "Breath",
+        "matches": 543,
+        "ms": 6.099999904632568
+      },
+      {
+        "query": "Vivenna",
+        "matches": 886,
+        "ms": 7.200000047683716
+      },
+      {
+        "query": "the",
+        "matches": 15371,
+        "ms": 30.59999990463257
+      },
+      {
+        "query": "e",
+        "matches": 110374,
+        "ms": 13.800000190734863
+      },
+      {
+        "query": "[.*]",
+        "matches": 0,
+        "ms": 3.6999998092651367
+      }
+    ]
+  },
+  {
+    "browser": "chromium",
+    "width": 390,
+    "matches": 543,
+    "searchPaintMs": 57.568209000000024,
+    "layouts": 13,
+    "apiTimings": [
+      {
+        "query": "Breath",
+        "matches": 543,
+        "ms": 6.099999904632568
+      },
+      {
+        "query": "Vivenna",
+        "matches": 886,
+        "ms": 6.800000190734863
+      },
+      {
+        "query": "the",
+        "matches": 15371,
+        "ms": 29.899999856948853
+      },
+      {
+        "query": "e",
+        "matches": 110374,
+        "ms": 13.600000143051147
+      },
+      {
+        "query": "[.*]",
+        "matches": 0,
+        "ms": 2.5
+      }
+    ]
+  },
+  {
+    "browser": "firefox",
+    "width": 1100,
+    "matches": 543,
+    "searchPaintMs": 74.18670799999927,
+    "layouts": 19,
+    "apiTimings": [
+      {
+        "query": "Breath",
+        "matches": 543,
+        "ms": 11
+      },
+      {
+        "query": "Vivenna",
+        "matches": 886,
+        "ms": 9
+      },
+      {
+        "query": "the",
+        "matches": 15371,
+        "ms": 31
+      },
+      {
+        "query": "e",
+        "matches": 110374,
+        "ms": 20
+      },
+      {
+        "query": "[.*]",
+        "matches": 0,
+        "ms": 4
+      }
+    ]
+  },
+  {
+    "browser": "firefox",
+    "width": 390,
+    "matches": 543,
+    "searchPaintMs": 58.73999999999978,
+    "layouts": 13,
+    "apiTimings": [
+      {
+        "query": "Breath",
+        "matches": 543,
+        "ms": 11
+      },
+      {
+        "query": "Vivenna",
+        "matches": 886,
+        "ms": 8
+      },
+      {
+        "query": "the",
+        "matches": 15371,
+        "ms": 30
+      },
+      {
+        "query": "e",
+        "matches": 110374,
+        "ms": 46
+      },
+      {
+        "query": "[.*]",
+        "matches": 0,
+        "ms": 6
+      }
+    ]
+  },
+  {
+    "browser": "webkit",
+    "width": 1100,
+    "matches": 543,
+    "searchPaintMs": 51.4328749999986,
+    "layouts": 19,
+    "apiTimings": [
+      {
+        "query": "Breath",
+        "matches": 543,
+        "ms": 7
+      },
+      {
+        "query": "Vivenna",
+        "matches": 886,
+        "ms": 7
+      },
+      {
+        "query": "the",
+        "matches": 15371,
+        "ms": 23
+      },
+      {
+        "query": "e",
+        "matches": 110374,
+        "ms": 12
+      },
+      {
+        "query": "[.*]",
+        "matches": 0,
+        "ms": 2
+      }
+    ]
+  },
+  {
+    "browser": "webkit",
+    "width": 390,
+    "matches": 543,
+    "searchPaintMs": 53.715000000000146,
+    "layouts": 13,
+    "apiTimings": [
+      {
+        "query": "Breath",
+        "matches": 543,
+        "ms": 6
+      },
+      {
+        "query": "Vivenna",
+        "matches": 886,
+        "ms": 6
+      },
+      {
+        "query": "the",
+        "matches": 15371,
+        "ms": 23
+      },
+      {
+        "query": "e",
+        "matches": 110374,
+        "ms": 11
+      },
+      {
+        "query": "[.*]",
+        "matches": 0,
+        "ms": 3
+      }
+    ]
+  }
+]

@@ -23,7 +23,7 @@ import {
 } from './commands';
 import { createEditorEvents, type EditorEvents } from './events';
 import type { StateFieldRegistration, ExtensionUpdate } from './extension-state';
-import { createFind } from './find';
+import { createFindSession } from './find';
 import { createLocalHistory, type HistoryOptions } from './local-history';
 import { assertEditAllowed, assertContentEditAllowed, type AccessPolicy } from './permissions';
 import { createRelativePositions, parsePositionCheckpoint } from './relative-positions';
@@ -239,6 +239,9 @@ export function createEditor<N extends NodeIdentity>(
   let allocationNodes: readonly N[] | undefined;
   let occupiedIds: ReadonlySet<number> = new Set();
   const events = createEditorEvents<N>();
+  const find = createFindSession(schema, () => state.nodes);
+  events.on('content', find.refresh);
+  events.on('destroy', find.destroy);
 
   function notify(update: ExtensionUpdate<N>) {
     publishing = true;
@@ -393,7 +396,7 @@ export function createEditor<N extends NodeIdentity>(
     },
     documentId,
     positions: positions.api,
-    find: createFind(schema, () => state.nodes),
+    find: find.api,
     get journal(): readonly RevisionMap[] {
       return journal;
     },

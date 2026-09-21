@@ -45,20 +45,24 @@ kit adds image rendering through the same extension tuple as schema and commands
 definition families and owns per-node cleanup when the session is destroyed.
 Tables and images use those same contributions in both the demo block layer and
 the public mount. The table extension owns grid commands and native cell input;
-the mount supplies its clipboard dispatcher and cached selection context. Find
-state becomes transient highlight ranges before crossing into native views.
+the mount supplies its clipboard dispatcher and cached selection context. Native
+views read composed text decorations by node ID. Search and comment extensions
+provide those sources; the demo no longer builds native highlight maps.
 The table's base styles belong to the browser extension; demo-specific theme
 overrides remain in the app stylesheet. Ownership checks allow styles inside
 their module and reject imports from the demo or another module.
 
-Comments, mentions and underlines use shared `viewLayers` contributions with
+Comments, mentions, underlines and canvas search use shared `viewLayers` contributions with
 schema-derived values and renderer-independent drawing. The old text-block
 renderer and empty paragraph DOM hosts are gone. React only attaches the remaining
 native block layer. Comment/mention activation uses session-local subscriptions
 consumed by the app. The comment extension subscribes to its external store and
 invalidates its view independently of React or document transactions. The hook
-uses the same headless projection for panel placement. Search decorations still
-need shared integration before the public mount is complete.
+uses the same headless projection for panel placement. Find sessions own
+cooperative refresh, stale-result suppression and subscriptions. The demo's find
+hook owns opening, focus and controls; it no longer coordinates search jobs.
+Native text-range decorations use the same sources in the demo and public mount.
+The generic node-view owner coalesces invalidations and releases subscriptions.
 
 Custom rendering can use `createTextInteraction().bind(...)` with its own text
 and line geometry. `createCanvasInput` owns pointer/navigation binding, hidden-textarea synchronization
@@ -119,7 +123,7 @@ frames. Neither depends on paragraph or heading names.
 
 Complete DOM-overlay ownership and demo migration remain milestone 4 work.
 The public vanilla mount now covers native tables, container decorations and
-underlines, mentions and external comments, including custom text/inline storage fields.
+underlines, mentions, external comments and canvas search, including custom text/inline storage fields.
 Asset loading now
 has a private owner with readiness, failure and destruction; the entry no longer
 constructs CanvasKit or chooses engine storage. The demo still passes borrowed

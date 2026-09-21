@@ -2,12 +2,12 @@ import { defineContribution } from '../core';
 import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '../model';
 import type { Selection, SelectionContext } from '../state';
 import type { ViewSession } from './input-contributions';
-
-export type TextHighlight = Readonly<{ from: number; to: number; active: boolean }>;
+import { createTextDecorations, type ReadTextDecorations } from './text-decorations';
 
 export type NodeViewEnvironment = {
   clipboard: (event: ClipboardEvent) => void;
   notice: (message: string) => void;
+  onError?: (error: Error) => void;
 };
 
 export type NodeViewContext<N extends NodeIdentity> = NodeViewEnvironment & {
@@ -21,7 +21,7 @@ export type NodeViewFrame<N> = {
   selection: Selection;
   context: SelectionContext;
   width: number;
-  highlights?: ReadonlyMap<number, readonly TextHighlight[]>;
+  textDecorations?: ReadTextDecorations;
   onMeasure: (id: number, width: number, height: number) => void;
 };
 
@@ -128,15 +128,67 @@ export function createNodeViews<N extends NodeIdentity>(
         const view = renderer.mount(element);
         let destroyed = false;
         let detach: (() => void) | undefined;
+        let frame: NodeViewFrame<N> | undefined;
+        let scheduled = 0;
+        let decorations: ReturnType<typeof createTextDecorations<N>> | undefined;
+
+        function update(next: NodeViewFrame<N>) {
+          if (destroyed || editor.isDestroyed) throw new Error('Node view is destroyed');
+          cancelAnimationFrame(scheduled);
+          scheduled = 0;
+          frame = next;
+          decorations?.begin();
+
+          try {
+            view.update({ ...next, textDecorations: decorations?.read });
+          } finally {
+            decorations?.end();
+          }
+        }
+
+        function invalidate() {
+          if (destroyed || !frame || scheduled) return;
+          scheduled = requestAnimationFrame(() => {
+            scheduled = 0;
+
+            if (destroyed || !frame) return;
+
+            try {
+              update(frame);
+            } catch (error) {
+              if (environment.onError)
+                environment.onError(error instanceof Error ? error : new Error(String(error)));
+              else throw error;
+            }
+          });
+        }
 
         function destroy() {
           if (destroyed) return;
           destroyed = true;
+          cancelAnimationFrame(scheduled);
+          frame = undefined;
           detach?.();
-          view.destroy();
+          const errors: unknown[] = [];
+
+          try {
+            decorations?.destroy();
+          } catch (error) {
+            errors.push(error);
+          }
+
+          try {
+            view.destroy();
+          } catch (error) {
+            errors.push(error);
+          }
+
+          if (errors.length) throw new AggregateError(errors, 'Node view cleanup failed');
         }
 
         try {
+          decorations = createTextDecorations(editor, invalidate);
+
           if (editor.isDestroyed)
             throw new Error('Editor was destroyed while mounting a node view');
           detach = editor.on('destroy', destroy);
@@ -149,10 +201,7 @@ export function createNodeViews<N extends NodeIdentity>(
           get isDestroyed() {
             return destroyed;
           },
-          update(frame) {
-            if (destroyed || editor.isDestroyed) throw new Error('Node view is destroyed');
-            view.update(frame);
-          },
+          update,
           focusSelection: view.focusSelection
             ? (selection) =>
                 !destroyed && !editor.isDestroyed && (view.focusSelection?.(selection) ?? false)

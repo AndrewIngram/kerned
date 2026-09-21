@@ -1,29 +1,26 @@
 import {
-  startTransition,
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type RefObject,
 } from 'react';
 
 import type { Scene } from '../../editor-canvas/scene';
 import type { Viewport } from '../../editor-react';
-import type { StarterLeaf, StarterNode } from '../../extensions/demo-model';
+import type { StarterLeaf } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import type { FindOptions, FindSnapshot, FindState, EditorState } from '../../state';
+import type { FindOptions, FindState } from '../../state';
 
 export function useFind({
   editor,
-  editorState,
   scroller,
   inputRef,
   onOpen,
 }: {
   editor: EditorSession;
-  editorState: EditorState<StarterNode>;
   scroller: RefObject<HTMLDivElement | null>;
   inputRef: RefObject<HTMLTextAreaElement | null>;
   onOpen: () => void;
@@ -35,34 +32,11 @@ export function useFind({
   const lastQuery = useRef(''),
     returnFocus = useRef<HTMLElement | null>(null);
 
-  const lastFindOptions = useRef<FindOptions>({ matchCase: false }),
-    findAbort = useRef<AbortController | null>(null);
+  const lastFindOptions = useRef<FindOptions>({ matchCase: false });
+  const readResults = useCallback(() => editor.find.getSnapshot().state, [editor]);
+  const findState = useSyncExternalStore(editor.find.subscribe, readResults);
+  const findStale = editor.find.getSnapshot().stale;
 
-  const findInFlight = useRef<readonly StarterNode[] | null>(null);
-
-  const [findSnapshot, setFindSnapshot] = useState<FindSnapshot<StarterNode>>(() => ({
-    state: editor.find.state,
-    nodes: editor.state.nodes,
-  }));
-
-  // Appended text cannot invalidate existing ranges. Keep the count and
-  // highlights steady while the search catches up with the loading stream.
-  const findStale = useMemo(
-    () =>
-      findSnapshot.nodes.length > editorState.nodes.length ||
-      findSnapshot.nodes.some((node, i) => node !== editorState.nodes[i]),
-    [findSnapshot.nodes, editorState.nodes],
-  );
-
-  const findState = useMemo<FindState>(
-    () =>
-      findStale
-        ? { ...findSnapshot.state, matches: [], byNode: new Map(), activeIndex: -1, active: null }
-        : findSnapshot.state,
-    [findSnapshot, findStale],
-  );
-
-  const findMatches = findState.byNode;
   const findRef = useRef(findState);
   useLayoutEffect(() => {
     findRef.current = findState;
@@ -72,35 +46,15 @@ export function useFind({
     (query: string, options: FindOptions) => {
       lastQuery.current = query;
       lastFindOptions.current = options;
-      findAbort.current?.abort();
-      const controller = new AbortController();
-      findAbort.current = controller;
-      findInFlight.current = editor.state.nodes;
-      void editor.find.setQueryAsync(query, options, controller.signal).then((result) => {
-        if (controller.signal.aborted) return;
-        findInFlight.current = null;
-
-        if (!result) return;
-
-        return startTransition(() => setFindSnapshot(result));
-      });
+      void editor.find.setQueryAsync(query, options);
     },
     [editor],
   );
 
   useEffect(() => {
     if (!findOpen) return;
-    const inFlight = findInFlight.current;
-
-    if (
-      inFlight &&
-      inFlight.length <= editorState.nodes.length &&
-      inFlight.every((node, i) => node === editorState.nodes[i])
-    )
-      return;
     requestFind(lastQuery.current, lastFindOptions.current);
-  }, [editorState.nodes, findOpen, requestFind]);
-  useEffect(() => () => findAbort.current?.abort(), []);
+  }, [findOpen, requestFind]);
 
   function openFind() {
     if (!findOpen)
@@ -113,9 +67,7 @@ export function useFind({
   }
 
   function closeFind() {
-    findAbort.current?.abort();
-    findInFlight.current = null;
-    setFindSnapshot({ state: editor.find.clear(), nodes: editor.state.nodes });
+    editor.find.clear();
     setFindOpen(false);
     const target = returnFocus.current;
     const cell = target?.dataset.textBlock;
@@ -131,17 +83,14 @@ export function useFind({
   }
 
   function moveFind(backwards: boolean) {
-    setFindSnapshot({
-      state: backwards ? editor.find.previous() : editor.find.next(),
-      nodes: editor.state.nodes,
-    });
+    if (backwards) editor.find.previous();
+    else editor.find.next();
     setFindRequest((n) => n + 1);
   }
 
   return {
     findOpen,
     findState,
-    findMatches,
     findStale,
     findRef,
     findRequest,

@@ -16,6 +16,7 @@ export type ViewSession<N extends NodeIdentity> = EditorViewSession &
     | 'on'
     | 'commands'
     | 'positions'
+    | 'find'
   > & { readonly schema: Schema<N> };
 
 export type InputContribution = {

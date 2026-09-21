@@ -1,6 +1,8 @@
 import { defineContribution, defineExtension, type ExtensionContext } from '../core';
 import {
   viewLayers,
+  nativeTextDecorations,
+  type TextDecoration,
   type ViewLayerContext,
   type ViewLayerFrame,
   type DrawingRect,
@@ -188,6 +190,44 @@ export function commentView(source: CommentSource) {
     name: 'commentView',
     options: { color: '#f6eab4' },
     setup(options, context: Pick<ExtensionContext<NodeIdentity>, 'provide' | 'onDestroy'>) {
+      context.provide(nativeTextDecorations, {
+        create(editor) {
+          const project = createCommentProjection(editor, source);
+          let current = project();
+          const cache = new Map<number, readonly TextDecoration[]>();
+          const empty: readonly TextDecoration[] = [];
+
+          return {
+            subscribe: (listener) => source.subscribe(listener),
+            read(id) {
+              const projection = project();
+
+              if (projection !== current) {
+                current = projection;
+                cache.clear();
+              }
+
+              const comments = projection.text.get(id);
+
+              if (!comments) return empty;
+              let value = cache.get(id);
+
+              if (!value) {
+                value = comments.map((comment) => ({
+                  key: `comment:${comment.id}`,
+                  from: comment.from,
+                  to: comment.to,
+                  background: options.color,
+                  attributes: { 'data-comment-range': comment.id },
+                }));
+                cache.set(id, value);
+              }
+
+              return value;
+            },
+          };
+        },
+      });
       const listeners = new Set<Listener>();
       context.onDestroy(() => listeners.clear());
       context.provide(activations, {

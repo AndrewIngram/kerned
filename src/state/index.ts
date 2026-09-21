@@ -51,6 +51,7 @@ export {
   type FindOptions,
   type FindState,
   type FindSnapshot,
+  type FindStatus,
 } from './find';
 
 export {

@@ -19,6 +19,8 @@ export type FindSnapshot<N extends NodeIdentity> = Readonly<{
   state: FindState;
 }>;
 
+export type FindStatus = Readonly<{ state: FindState; pending: boolean; stale: boolean }>;
+
 const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
 type CachedText = {
@@ -35,7 +37,7 @@ const yieldTask = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 /** A view-independent find session. Reading state synchronizes with the document;
  * searching and navigation never dispatch transactions or alter selections. */
-export function createFind<N extends NodeIdentity>(
+export function createFindSession<N extends NodeIdentity>(
   schema: Schema<N>,
   readNodes: () => readonly N[],
 ) {
@@ -48,7 +50,66 @@ export function createFind<N extends NodeIdentity>(
     active: null,
   };
 
-  let previousNodes: readonly N[] | undefined;
+  let previousNodes: readonly N[] = readNodes();
+  let observedNodes = previousNodes;
+
+  let desired: FindOptions & { query: string; signal?: AbortSignal } = {
+    query: '',
+    matchCase: false,
+  };
+
+  let inFlight: { version: number; nodes: readonly N[] } | null = null;
+  let destroyed = false;
+  let status: FindStatus = { state, pending: false, stale: false };
+  const listeners = new Set<() => void>();
+  let checkedNodes = previousNodes;
+  let checkedResult = previousNodes;
+  let stale = false;
+  let hidden: { source: FindState; state: FindState } | undefined;
+
+  function assertActive() {
+    if (destroyed) throw new Error('Find session is destroyed');
+  }
+
+  function notify() {
+    const nodes = readNodes();
+
+    if (nodes !== checkedNodes || previousNodes !== checkedResult) {
+      checkedNodes = nodes;
+      checkedResult = previousNodes;
+      stale =
+        !!state.query &&
+        (previousNodes.length > nodes.length || previousNodes.some((node, i) => node !== nodes[i]));
+    }
+
+    const pending = inFlight !== null;
+
+    if (stale && hidden?.source !== state) {
+      hidden = {
+        source: state,
+        state: { ...state, matches: [], byNode: new Map(), activeIndex: -1, active: null },
+      };
+    }
+
+    const visible = stale && hidden ? hidden.state : state;
+
+    if (!stale) hidden = undefined;
+
+    if (status.state === visible && status.stale === stale && status.pending === pending) return;
+    status = { state: visible, stale, pending };
+    const pendingListeners = [...listeners];
+
+    for (const listener of pendingListeners) {
+      try {
+        listener();
+      } catch (error) {
+        queueMicrotask(() => {
+          throw error;
+        });
+      }
+    }
+  }
+
   const cache = new Map<string, CachedText>();
   let request = 0;
 
@@ -166,8 +227,12 @@ export function createFind<N extends NodeIdentity>(
       sameQuery &&
       matches.length === state.matches.length &&
       matches.every((match, i) => match === state.matches[i])
-    )
+    ) {
+      notify();
+
       return state;
+    }
+
     const old = sameQuery ? state.active : null;
 
     let index = old
@@ -198,6 +263,7 @@ export function createFind<N extends NodeIdentity>(
       activeIndex,
       active: matches[activeIndex] ?? null,
     };
+    notify();
 
     return state;
   }
@@ -216,9 +282,14 @@ export function createFind<N extends NodeIdentity>(
   }
 
   function setQuery(query: string, options: Partial<FindOptions> = {}) {
+    assertActive();
     request++;
+    inFlight = null;
+    desired = { query, matchCase: options.matchCase ?? state.matchCase };
+    const result = sync(query, desired.matchCase);
+    notify();
 
-    return sync(query, options.matchCase ?? state.matchCase);
+    return result;
   }
 
   /** Cancellable, cooperative search. Only complete results for the current
@@ -228,13 +299,19 @@ export function createFind<N extends NodeIdentity>(
     options: Partial<FindOptions> = {},
     signal?: AbortSignal,
   ): Promise<FindSnapshot<N> | null> {
+    assertActive();
+
     const version = ++request,
       matchCase = options.matchCase ?? state.matchCase;
 
+    desired = { query, matchCase, signal };
+
     let nodes = readNodes();
+    inFlight = { version, nodes };
+    notify();
 
     const cancelled = () => {
-      if (signal?.aborted || version !== request) return true;
+      if (destroyed || signal?.aborted || version !== request) return true;
       const latest = readNodes();
 
       if (latest !== nodes) {
@@ -243,41 +320,64 @@ export function createFind<N extends NodeIdentity>(
         // Loading can append while this job yields. Continue at the next root
         // instead of discarding completed work and rescanning the same prefix.
         nodes = latest;
+        inFlight = { version, nodes };
       }
 
       return false;
     };
 
-    const work = search(() => nodes, query, matchCase);
-    // Even a cold query starts after the urgent input update has committed.
-    await yieldTask();
-
-    if (
-      !cancelled() &&
-      nodes === previousNodes &&
-      query === state.query &&
-      matchCase === state.matchCase
-    )
-      return { nodes, state };
-
-    while (!cancelled()) {
-      const deadline = performance.now() + 4;
-
-      do {
-        const result = work.next();
-
-        if (result.done) return { nodes, state: publish(nodes, query, matchCase, result.value) };
-      } while (performance.now() < deadline);
-
-      // oxlint-disable-next-line eslint/no-await-in-loop -- Yield between search batches to keep input responsive and observe cancellation.
+    try {
+      const work = search(() => nodes, query, matchCase);
+      // Even a cold query starts after the urgent input update has committed.
       await yieldTask();
-    }
 
-    return null;
+      if (
+        !cancelled() &&
+        nodes === previousNodes &&
+        query === state.query &&
+        matchCase === state.matchCase
+      )
+        return { nodes, state };
+
+      while (!cancelled()) {
+        const deadline = performance.now() + 4;
+
+        do {
+          const result = work.next();
+
+          if (result.done) {
+            inFlight = null;
+
+            return { nodes, state: publish(nodes, query, matchCase, result.value) };
+          }
+        } while (performance.now() < deadline);
+
+        // oxlint-disable-next-line eslint/no-await-in-loop -- Yield between search batches to keep input responsive and observe cancellation.
+        await yieldTask();
+      }
+
+      return null;
+    } finally {
+      if (!destroyed && version === request) {
+        inFlight = null;
+
+        desired = signal?.aborted
+          ? { query: state.query, matchCase: state.matchCase }
+          : { query, matchCase };
+        notify();
+
+        // An aborted draft query leaves the last completed query active. If an
+        // edit invalidated it, finish refreshing that query without the draft's signal.
+        if (version === request && signal?.aborted && status.stale) void refreshQuery();
+      }
+    }
   }
 
   function move(direction: 1 | -1) {
+    assertActive();
     request++;
+    inFlight = null;
+    desired = { query: state.query, matchCase: state.matchCase };
     sync();
     const count = state.matches.length;
 
@@ -286,12 +386,26 @@ export function createFind<N extends NodeIdentity>(
       state = { ...state, activeIndex, active: state.matches[activeIndex] };
     }
 
+    notify();
+
     return state;
   }
 
-  return {
+  const api = {
     get state() {
+      if (destroyed) return state;
+
       return sync();
+    },
+    /** A stable, nonblocking snapshot. Subscribe for query, navigation and document changes. */
+    getSnapshot: () => status,
+    subscribe(this: void, listener: () => void) {
+      assertActive();
+      listeners.add(listener);
+
+      return () => {
+        listeners.delete(listener);
+      };
     },
     setQuery,
     setQueryAsync,
@@ -304,6 +418,71 @@ export function createFind<N extends NodeIdentity>(
       return empty;
     },
   };
+
+  async function refreshQuery() {
+    try {
+      await setQueryAsync(desired.query, desired, desired.signal);
+    } catch (error) {
+      queueMicrotask(() => {
+        throw error;
+      });
+    }
+  }
+
+  return {
+    api,
+    refresh(this: void) {
+      if (destroyed) return;
+      const nodes = readNodes();
+
+      if (nodes === observedNodes) return;
+      observedNodes = nodes;
+
+      if (desired.signal?.aborted) {
+        request++;
+        inFlight = null;
+        desired = { query: state.query, matchCase: state.matchCase };
+      }
+
+      if (!desired.query && !state.query && !inFlight) {
+        previousNodes = nodes;
+        notify();
+
+        return;
+      }
+
+      if (
+        inFlight &&
+        inFlight.nodes.length <= nodes.length &&
+        inFlight.nodes.every((node, i) => node === nodes[i])
+      )
+        return;
+      void refreshQuery();
+    },
+    destroy(this: void) {
+      if (destroyed) return;
+      destroyed = true;
+      request++;
+      inFlight = null;
+      listeners.clear();
+      cache.clear();
+      previousNodes = [];
+      observedNodes = previousNodes;
+      checkedNodes = previousNodes;
+      checkedResult = previousNodes;
+      hidden = undefined;
+      status = { ...status, pending: false };
+    },
+  };
+}
+
+/** Standalone matcher. Document owners synchronize by reading state or issuing queries.
+ * Editor sessions also own automatic cooperative refresh and destruction. */
+export function createFind<N extends NodeIdentity>(
+  schema: Schema<N>,
+  readNodes: () => readonly N[],
+) {
+  return createFindSession(schema, readNodes).api;
 }
 
 export type EditorFind = ReturnType<typeof createFind>;

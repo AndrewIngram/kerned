@@ -27,7 +27,6 @@ export type CanvasFrame<N> = {
   background: readonly [number, number, number];
   blocks: readonly CanvasBlock<N>[];
   selectedRange: (node: N) => { from: number; to: number } | null;
-  highlights: readonly { rects: readonly Rect[]; active: boolean }[];
   caret: Rect | undefined;
   caretTop: number;
   focused: boolean;
@@ -133,13 +132,6 @@ export function createCanvasRenderer<N>({ onError }: { onError?: (error: Error) 
 
         for (const r of block.layout.geometry(range.from, range.to, false).rects)
           canvas.drawRect(kit.XYWHRect(r[0], r[1] + block.y, r[2] - r[0], r[3] - r[1]), paint);
-      }
-
-      for (const { rects, active } of current.highlights) {
-        paint.setColor(active ? kit.Color(245, 185, 65) : kit.Color(255, 236, 151));
-
-        for (const r of rects)
-          canvas.drawRect(kit.XYWHRect(r[0], r[1], r[2] - r[0], r[3] - r[1]), paint);
       }
 
       for (const block of current.blocks)

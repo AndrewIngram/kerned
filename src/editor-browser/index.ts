@@ -172,3 +172,10 @@ export type {
   TextFragment,
   BlockTextGeometry,
 } from './drawing';
+
+export {
+  nativeTextDecorations,
+  type TextDecoration,
+  type ReadTextDecorations,
+  type TextDecorationSource,
+} from './text-decorations';

@@ -53,7 +53,14 @@ editor.chain().appendText(1, '!').appendText(1, '?').run();
 `defineCommand` contextually types a reusable command against the document in
 which it executes. It does not capture a fixed node union. The installed name and
 argument tuple determine `commands`, `chain`, `can` and `getCommandState` types.
-`defineQuery` does the same for read callbacks. Queries and activity checks
+`defineQuery` does the same for read callbacks. It defines a pure document query:
+results for unchanged immutable state snapshots and primitive arguments are
+reused. Treat returned objects as immutable snapshots. Each snapshot keeps a
+bounded argument cache; object/function arguments bypass caching because callers
+can mutate them. Selection, stored marks and document changes create new state
+snapshots and invalidate those results. Ordinary contributed query functions
+remain uncached and can be used for external state with its own subscriptions.
+Queries and activity checks
 receive `{ schema, state }`; commands additionally receive draft operations.
 Query return values retain their inferred types.
 

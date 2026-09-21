@@ -145,7 +145,31 @@ commented native blocks. It keeps typing/caret behavior on non-atomic highlights
 and ignores buttons and inputs inside native blocks. Messages stay outside schema
 content and text history. Unmounting releases source subscriptions; remounting
 reads the current source. Native text descendants, such as individual table-cell
-text ranges, still need the general native decoration contract.
+text ranges, receive highlights through the native text-decoration contract.
+Native editing controls retain their own click/focus behavior.
+
+Install `searchView` from `src/extensions/search-view` to paint search matches in
+canvas and native text. It subscribes to `editor.find`, including cooperative refresh after
+edits and streamed appends. `searchView.configure({ color, activeColor })` changes
+the highlight colors. Search state survives view destruction; a remounted view
+reads the current query. The demo and public mount use the same search extension.
+
+Native node views receive `frame.textDecorations(textNodeId)`, returning readonly
+ranges with a stable `key`, UTF-16 `from`/`to`, a background color and optional
+`data-*` attributes. Extensions provide `nativeTextDecorations` with a source
+factory, a `read(id)` function and `subscribe(listener)`. Return stable arrays for
+unchanged ranges. Keys should include the extension's name to avoid collisions.
+Contributions compose in registration order; later backgrounds take precedence.
+The table view combines those ranges with document formatting and keeps active
+textareas intact. Textarea contents retain native input rendering while editing.
+
+The node-view owner initializes sources only when a renderer reads decorations.
+It coalesces external invalidations, prunes composed-range caches to resident text
+and releases subscriptions and scheduled work on destruction. Errors reach the
+mounted view's error handler. Comments and search exercise the same contract;
+native renderers contain no comment/search-specific branches. Arbitrary mark and
+widget rendering, localized change-range invalidation and React registrations
+remain milestone 6 work.
 
 The layer owns its DOM and styling. The host ignores pointer events by default;
 interactive descendants can opt in. Nonsemantic decoration layers set their own
@@ -212,14 +236,14 @@ native table-cell editing and rich rectangular clipboard operations. Table
 cells can contain custom text-node definitions. Ordinary copy/cut and text
 paste within a native cell textarea still use its native behavior; this does
 not provide rich clipboard parity for every cell text selection yet.
-Search decorations still require adapters before
-the complete starter content can use this mount. Comment and mention rendering
-are shared; a general custom-inline presentation contract remains future work.
+Search and comment rendering are shared across canvas and native text. Mention
+rendering is shared between mounts; a general custom-inline presentation contract
+remains future work.
 
 The writing demo still uses its existing starter composition and an internal
 `EditorEventHost`; it has not switched to this mount yet. It now uses the same
-table node-view, container-decoration, underline, mention and comment contributions as the mount.
-Remaining decorations and diagnostic contracts must be completed before that
+table node-view, container-decoration, underline, mention, comment and search contributions as the mount.
+Supported view updates and diagnostic contracts must be completed before that
 switch. The old event host is not a second public editor interface. Milestone 4
 remains open until the demo uses the shared mount and stops passing graphics
 handles through its tree.

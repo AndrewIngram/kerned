@@ -3,7 +3,7 @@
 Find belongs to the editor API; its UI belongs to the host. The demo uses a floating bar opened by the toolbar search button or Cmd/Ctrl+F. Enter moves forward, Shift+Enter moves backward, and Escape closes it. Next and previous wrap around. The bar retains the last query when reopened.
 
 ```ts
-const editor = createEditor(schema, nodes, selection);
+const editor = createEditor({ schema, document: nodes, selection });
 
 editor.find.setQuery('Breath');
 editor.find.setQuery('Breath', { matchCase: true });
@@ -17,7 +17,24 @@ const { matches, active, activeIndex } = editor.find.state;
 editor.find.clear();
 ```
 
-`createFind(schema, readNodes)` is also exported for hosts with their own document-state owner. `FindState`, `FindMatch`, `FindOptions`, `FindSnapshot`, and `EditorFind` are public types. Omitting `matchCase` preserves the current option. `state.byNode` groups the same match objects by text-node ID for rendering.
+`createFind(schema, readNodes)` is also exported for hosts with their own document-state owner. `FindState`, `FindMatch`, `FindOptions`, `FindSnapshot`, `FindStatus`, and `EditorFind` are public types. Omitting `matchCase` preserves the current option. `state.byNode` groups the same match objects by text-node ID for rendering.
+
+Editor sessions own cooperative refresh after edits, undo, redo and stream appends.
+Views subscribe to a stable snapshot without invoking the synchronous matcher:
+
+```ts
+const unsubscribe = editor.find.subscribe(() => {
+  const { state, stale, pending } = editor.find.getSnapshot();
+  // state contains only usable ranges. stale means an edit invalidated the old results.
+  // pending means a cooperative search is still running.
+});
+```
+
+Snapshot reads never scan the document. Stale snapshots expose no matches until
+the replacement search completes. Appends preserve valid results for the old
+prefix while searching newly loaded roots. The editor cancels obsolete work and
+releases subscriptions on destruction. Standalone `createFind` owners still
+synchronize document changes by issuing a query or reading `state`.
 
 For interactive search on large documents, use the cancellable asynchronous API:
 
@@ -40,7 +57,7 @@ The promise returns `null` if another query or synchronous command supersedes it
 - Ranges use original UTF-16 offsets and start and end at grapheme boundaries. Searching for part of a combining sequence or joined emoji does not produce an invalid editing range.
 - Searching, navigation, and clearing do not change the document, selection, revision, or history. Closing the demo bar restores focus without changing the editing selection.
 - Reading state or navigating synchronizes results with the latest immutable document nodes, including edits, undo, redo, and stream appends. A changed query starts at the first match. A document change preserves the current range when possible, otherwise chooses the nearest match in that node, then a surviving result at the previous index.
-- There is no independent subscription system. Synchronous hosts read `find.state` after editor changes and Find commands. Asynchronous hosts keep the returned snapshot and request a refresh when the document changes; reading the synchronous getter during render would bypass cooperative scheduling.
+- `subscribe` reports query, navigation and refresh status changes. Use `getSnapshot` during rendering; reading `state` deliberately performs synchronous matching when the document has changed. Search notifications do not publish document transactions.
 
 ## Ownership and performance
 
@@ -48,11 +65,27 @@ A pure matcher with UI-owned navigation was considered. It would leave every hos
 
 The core walks schema text without layout or DOM access. It skips work when document identity is unchanged and caches per-node text and matches. Unicode grapheme boundaries are cached as one bit per UTF-16 boundary, avoiding repeated segmentation for every keystroke. Plain ASCII needs no boundary table. Formatting updates reuse results; removed nodes leave the cache. An empty query performs no tree scan. Navigation over an unchanged document is constant time.
 
-Asynchronous search starts in a new task, then yields between roughly 4 ms work slices, including within large paragraphs. This gives input and painting opportunities while scanning. The slice target is cooperative, not a hard deadline. The demo keeps the input draft in urgent local React state, cancels obsolete searches, and commits completed snapshots with `startTransition`. A transition alone cannot interrupt a synchronous matcher: [React calls its action immediately](https://react.dev/reference/react/startTransition).
+Asynchronous search starts in a new task, then yields between roughly 4 ms work slices, including within large paragraphs. This gives input and painting opportunities while scanning. The slice target is cooperative, not a hard deadline. The demo keeps the input draft in local React state and reads completed results with `useSyncExternalStore`. The find session owns cancellation and refresh; React does not perform matching.
 
 During append-only loading, an earlier snapshot remains valid for its unchanged document prefix. The demo retains its count and highlights while the next snapshot catches up. New roots do not reset Find, toggle its pending indicator, or repeatedly scroll to the active result. Actual edits invalidate affected snapshots; a changed query displays a pending count and temporarily disables result navigation.
 
-`src/demo/find-bar.tsx` owns controls and input focus. The editor demo consumes `byNode`, paints only mounted canvas paragraphs, and passes cell ranges to the table view. It pins the current result's block before scrolling to its geometry. The scene can reserve top space so the floating bar does not cover the first result; this does not rewrap text. Editing selections remain independent of search highlights.
+`src/demo/find-bar.tsx` owns controls and input focus. The optional `searchView`
+extension paints resident canvas text through shared geometry and drawing APIs,
+and supplies native text decorations for table cells.
+Configure `color` and `activeColor` for its two highlight colors. It subscribes
+to the find session independently of React; removing the view removes its painter
+and subscription, while remounting reads current results. The canvas renderer has
+no search-specific fields or colors.
+
+Native views request decorations by text-node ID, so searching a large document
+does not allocate a render object for every match. The demo no longer builds or
+passes a table-highlight map. Canvas and native rendering read the same safe
+snapshot and configurable colors.
+
+The demo still pins the current result before scrolling. Reveal migration remains
+part of the public-mount integration work. The scene can reserve top space so the
+floating bar does not cover the first result; this does not rewrap text. Editing
+selections remain independent of search highlights.
 
 ## Verification
 

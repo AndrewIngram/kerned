@@ -27,7 +27,6 @@ function frame(onPaint: () => void): CanvasFrame<never> {
     background: [255, 255, 255],
     blocks: [],
     selectedRange: () => null,
-    highlights: [],
     caret: undefined,
     caretTop: 0,
     focused: false,

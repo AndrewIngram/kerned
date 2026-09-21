@@ -1,0 +1,620 @@
+[
+  {
+    "browser": "chromium",
+    "burst": {
+      "maxDispatchDelayMs": 48.5,
+      "value": "Pierre"
+    },
+    "blocks": 11718,
+    "characters": 3175342,
+    "events": [
+      {
+        "value": "P",
+        "started": 3583,
+        "handlerMs": 0.6000001430511475,
+        "inputPaintMs": 5.6000001430511475,
+        "paintedValue": "P"
+      },
+      {
+        "value": "Pi",
+        "started": 3616.7000000476837,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 0.40000009536743164,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pie",
+        "started": 3651.800000190735,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 4.5,
+        "paintedValue": "Pie"
+      },
+      {
+        "value": "Pier",
+        "started": 3732.4000000953674,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 0.40000009536743164,
+        "paintedValue": "Pier"
+      },
+      {
+        "value": "Pierr",
+        "started": 3765.7000000476837,
+        "handlerMs": 0.40000009536743164,
+        "inputPaintMs": 7.299999952316284,
+        "paintedValue": "Pierr"
+      },
+      {
+        "value": "Pierre",
+        "started": 3801.100000143051,
+        "handlerMs": 0.20000004768371582,
+        "inputPaintMs": 5.299999952316284,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 3836.7000000476837,
+        "handlerMs": 0.20000004768371582,
+        "inputPaintMs": 4.299999952316284,
+        "paintedValue": "e"
+      },
+      {
+        "value": "the",
+        "started": 4048.300000190735,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 8.599999904632568,
+        "paintedValue": "the"
+      },
+      {
+        "value": "",
+        "started": 4098.100000143051,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 7.200000047683716,
+        "paintedValue": ""
+      },
+      {
+        "value": "P",
+        "started": 4142.200000047684,
+        "handlerMs": 0.20000004768371582,
+        "inputPaintMs": 13.100000143051147,
+        "paintedValue": "P"
+      },
+      {
+        "value": "Pi",
+        "started": 4199.100000143051,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 7.200000047683716,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pie",
+        "started": 4272.300000190735,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 0.5,
+        "paintedValue": "Pie"
+      },
+      {
+        "value": "Pier",
+        "started": 4340.200000047684,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 16.100000143051147,
+        "paintedValue": "Pier"
+      },
+      {
+        "value": "Pierr",
+        "started": 4383.400000095367,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 4.900000095367432,
+        "paintedValue": "Pierr"
+      },
+      {
+        "value": "Pierre",
+        "started": 4416.5,
+        "handlerMs": 0.3000001907348633,
+        "inputPaintMs": 6.200000047683716,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 4451.800000190735,
+        "handlerMs": 0.19999980926513672,
+        "inputPaintMs": 4.299999952316284,
+        "paintedValue": "e"
+      },
+      {
+        "value": "the",
+        "started": 4534.800000190735,
+        "handlerMs": 0.19999980926513672,
+        "inputPaintMs": 8.5,
+        "paintedValue": "the"
+      },
+      {
+        "value": "e",
+        "started": 4671.800000190735,
+        "handlerMs": 0.2999999523162842,
+        "inputPaintMs": 4.599999904632568,
+        "paintedValue": "e"
+      },
+      {
+        "value": "th",
+        "started": 4688.600000143051,
+        "handlerMs": 0.39999985694885254,
+        "inputPaintMs": 6.200000047683716,
+        "paintedValue": "th"
+      },
+      {
+        "value": "the",
+        "started": 4703,
+        "handlerMs": 0.3000001907348633,
+        "inputPaintMs": 4,
+        "paintedValue": "the"
+      },
+      {
+        "value": "Pi",
+        "started": 4714.800000190735,
+        "handlerMs": 0.39999985694885254,
+        "inputPaintMs": 53,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pier",
+        "started": 4768.300000190735,
+        "handlerMs": 0.09999990463256836,
+        "inputPaintMs": 0.5,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "Pierre",
+        "started": 4768.400000095367,
+        "handlerMs": 0.09999990463256836,
+        "inputPaintMs": 0.5,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 4833.300000190735,
+        "handlerMs": 0.09999990463256836,
+        "inputPaintMs": 54.19999980926514,
+        "paintedValue": "e"
+      }
+    ],
+    "timings": [
+      {
+        "query": "P",
+        "matches": 44716,
+        "ms": 101.30000019073486
+      },
+      {
+        "query": "Pi",
+        "matches": 4186,
+        "ms": 4.700000047683716
+      },
+      {
+        "query": "Pierre",
+        "matches": 1964,
+        "ms": 3.8999998569488525
+      },
+      {
+        "query": "e",
+        "matches": 311360,
+        "ms": 23.40000009536743
+      },
+      {
+        "query": "the",
+        "matches": 47140,
+        "ms": 7.299999952316284
+      }
+    ]
+  },
+  {
+    "browser": "firefox",
+    "burst": {
+      "maxDispatchDelayMs": 88,
+      "value": "Pierre"
+    },
+    "blocks": 11718,
+    "characters": 3175342,
+    "events": [
+      {
+        "value": "P",
+        "started": 7923,
+        "handlerMs": 1,
+        "inputPaintMs": 1,
+        "paintedValue": "P"
+      },
+      {
+        "value": "Pi",
+        "started": 7958,
+        "handlerMs": 1,
+        "inputPaintMs": 1,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pie",
+        "started": 7992,
+        "handlerMs": 0,
+        "inputPaintMs": 1,
+        "paintedValue": "Pie"
+      },
+      {
+        "value": "Pier",
+        "started": 8137,
+        "handlerMs": 0,
+        "inputPaintMs": 50,
+        "paintedValue": "Pier"
+      },
+      {
+        "value": "Pierr",
+        "started": 8192,
+        "handlerMs": 0,
+        "inputPaintMs": 0,
+        "paintedValue": "Pierr"
+      },
+      {
+        "value": "Pierre",
+        "started": 8234,
+        "handlerMs": 1,
+        "inputPaintMs": 1,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 8289,
+        "handlerMs": 1,
+        "inputPaintMs": 9,
+        "paintedValue": "e"
+      },
+      {
+        "value": "the",
+        "started": 8748,
+        "handlerMs": 0,
+        "inputPaintMs": 19,
+        "paintedValue": "the"
+      },
+      {
+        "value": "",
+        "started": 8968,
+        "handlerMs": 1,
+        "inputPaintMs": 60,
+        "paintedValue": ""
+      },
+      {
+        "value": "P",
+        "started": 9249,
+        "handlerMs": 0,
+        "inputPaintMs": 1,
+        "paintedValue": "P"
+      },
+      {
+        "value": "Pi",
+        "started": 9329,
+        "handlerMs": 1,
+        "inputPaintMs": 1,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pie",
+        "started": 9432,
+        "handlerMs": 0,
+        "inputPaintMs": 8,
+        "paintedValue": "Pie"
+      },
+      {
+        "value": "Pier",
+        "started": 9535,
+        "handlerMs": 2,
+        "inputPaintMs": 41,
+        "paintedValue": "Pier"
+      },
+      {
+        "value": "Pierr",
+        "started": 9580,
+        "handlerMs": 1,
+        "inputPaintMs": 37,
+        "paintedValue": "Pierr"
+      },
+      {
+        "value": "Pierre",
+        "started": 9621,
+        "handlerMs": 1,
+        "inputPaintMs": 41,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 9670,
+        "handlerMs": 0,
+        "inputPaintMs": 21,
+        "paintedValue": "e"
+      },
+      {
+        "value": "the",
+        "started": 9857,
+        "handlerMs": 1,
+        "inputPaintMs": 13,
+        "paintedValue": "the"
+      },
+      {
+        "value": "e",
+        "started": 10224,
+        "handlerMs": 0,
+        "inputPaintMs": 16,
+        "paintedValue": "e"
+      },
+      {
+        "value": "th",
+        "started": 10241,
+        "handlerMs": 0,
+        "inputPaintMs": 13,
+        "paintedValue": "the"
+      },
+      {
+        "value": "the",
+        "started": 10250,
+        "handlerMs": 0,
+        "inputPaintMs": 4,
+        "paintedValue": "the"
+      },
+      {
+        "value": "Pi",
+        "started": 10261,
+        "handlerMs": 0,
+        "inputPaintMs": 94,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pier",
+        "started": 10359,
+        "handlerMs": 1,
+        "inputPaintMs": 110,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "Pierre",
+        "started": 10360,
+        "handlerMs": 0,
+        "inputPaintMs": 109,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 10476,
+        "handlerMs": 1,
+        "inputPaintMs": 113,
+        "paintedValue": "e"
+      }
+    ],
+    "timings": [
+      {
+        "query": "P",
+        "matches": 44716,
+        "ms": 113
+      },
+      {
+        "query": "Pi",
+        "matches": 4186,
+        "ms": 9
+      },
+      {
+        "query": "Pierre",
+        "matches": 1964,
+        "ms": 11
+      },
+      {
+        "query": "e",
+        "matches": 311360,
+        "ms": 46
+      },
+      {
+        "query": "the",
+        "matches": 47140,
+        "ms": 13
+      }
+    ]
+  },
+  {
+    "browser": "webkit",
+    "burst": {
+      "maxDispatchDelayMs": 34,
+      "value": "Pierre"
+    },
+    "blocks": 11718,
+    "characters": 3175342,
+    "events": [
+      {
+        "value": "P",
+        "started": 3609,
+        "handlerMs": 1,
+        "inputPaintMs": 17,
+        "paintedValue": "P"
+      },
+      {
+        "value": "Pi",
+        "started": 3650,
+        "handlerMs": 0,
+        "inputPaintMs": 1,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pie",
+        "started": 3717,
+        "handlerMs": 0,
+        "inputPaintMs": 44,
+        "paintedValue": "Pie"
+      },
+      {
+        "value": "Pier",
+        "started": 3765,
+        "handlerMs": 0,
+        "inputPaintMs": 0,
+        "paintedValue": "Pier"
+      },
+      {
+        "value": "Pierr",
+        "started": 3799,
+        "handlerMs": 0,
+        "inputPaintMs": 17,
+        "paintedValue": "Pierr"
+      },
+      {
+        "value": "Pierre",
+        "started": 3832,
+        "handlerMs": 0,
+        "inputPaintMs": 1,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 3869,
+        "handlerMs": 1,
+        "inputPaintMs": 21,
+        "paintedValue": "e"
+      },
+      {
+        "value": "the",
+        "started": 3994,
+        "handlerMs": 0,
+        "inputPaintMs": 33,
+        "paintedValue": "the"
+      },
+      {
+        "value": "",
+        "started": 4032,
+        "handlerMs": 0,
+        "inputPaintMs": 23,
+        "paintedValue": ""
+      },
+      {
+        "value": "P",
+        "started": 4060,
+        "handlerMs": 1,
+        "inputPaintMs": 32,
+        "paintedValue": "P"
+      },
+      {
+        "value": "Pi",
+        "started": 4094,
+        "handlerMs": 1,
+        "inputPaintMs": 42,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pie",
+        "started": 4140,
+        "handlerMs": 0,
+        "inputPaintMs": 1,
+        "paintedValue": "Pie"
+      },
+      {
+        "value": "Pier",
+        "started": 4198,
+        "handlerMs": 0,
+        "inputPaintMs": 0,
+        "paintedValue": "Pier"
+      },
+      {
+        "value": "Pierr",
+        "started": 4246,
+        "handlerMs": 0,
+        "inputPaintMs": 16,
+        "paintedValue": "Pierr"
+      },
+      {
+        "value": "Pierre",
+        "started": 4279,
+        "handlerMs": 0,
+        "inputPaintMs": 16,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 4315,
+        "handlerMs": 0,
+        "inputPaintMs": 8,
+        "paintedValue": "e"
+      },
+      {
+        "value": "the",
+        "started": 4394,
+        "handlerMs": 0,
+        "inputPaintMs": 8,
+        "paintedValue": "the"
+      },
+      {
+        "value": "e",
+        "started": 4430,
+        "handlerMs": 0,
+        "inputPaintMs": 5,
+        "paintedValue": "e"
+      },
+      {
+        "value": "th",
+        "started": 4443,
+        "handlerMs": 0,
+        "inputPaintMs": 23,
+        "paintedValue": "the"
+      },
+      {
+        "value": "the",
+        "started": 4464,
+        "handlerMs": 0,
+        "inputPaintMs": 2,
+        "paintedValue": "the"
+      },
+      {
+        "value": "Pi",
+        "started": 4471,
+        "handlerMs": 0,
+        "inputPaintMs": 5,
+        "paintedValue": "Pi"
+      },
+      {
+        "value": "Pier",
+        "started": 4512,
+        "handlerMs": 0,
+        "inputPaintMs": 5,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "Pierre",
+        "started": 4512,
+        "handlerMs": 0,
+        "inputPaintMs": 5,
+        "paintedValue": "Pierre"
+      },
+      {
+        "value": "e",
+        "started": 4567,
+        "handlerMs": 1,
+        "inputPaintMs": 35,
+        "paintedValue": "e"
+      }
+    ],
+    "timings": [
+      {
+        "query": "P",
+        "matches": 44716,
+        "ms": 90
+      },
+      {
+        "query": "Pi",
+        "matches": 4186,
+        "ms": 5
+      },
+      {
+        "query": "Pierre",
+        "matches": 1964,
+        "ms": 9
+      },
+      {
+        "query": "e",
+        "matches": 311360,
+        "ms": 25
+      },
+      {
+        "query": "the",
+        "matches": 47140,
+        "ms": 9
+      }
+    ]
+  }
+]

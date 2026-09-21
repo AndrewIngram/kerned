@@ -1992,3 +1992,72 @@ Milestone 4 remains open for search and native text-range decorations, supported
 view updates and diagnostics, and complete demo migration. Native table-cell
 comment text ranges need the shared native decoration contract. This checkpoint
 does not satisfy the milestone's commit-and-judge gate.
+
+### Milestone 4 checkpoint: search ownership and native text decorations
+
+Find sessions now own cooperative refresh after edits, undo, redo and streaming
+appends. `subscribe` and `getSnapshot` expose stable, nonblocking result snapshots.
+Invalidated snapshots contain no usable ranges until refresh completes; unchanged
+stream prefixes retain their highlights and counts. New queries, clear and
+destruction cancel obsolete work. Aborting a draft query after an edit refreshes
+the last completed query. The demo hook now owns search UI and focus rather than
+the search job lifecycle.
+
+The optional `searchView` extension paints canvas matches through the shared
+geometry/drawing contract. Canvas frame data and the renderer no longer contain
+search-specific fields, loops or colors. Native text views use composed
+`nativeTextDecorations` sources. Each source reads ranges by text-node ID, and
+the view owner coalesces invalidations, preserves stable arrays, prunes resident
+caches and releases subscriptions. Sources initialize only if a renderer reads
+text decorations, so image views do not subscribe. Subscription and renderer
+cleanup are both attempted even if one fails.
+
+Search and external comments both supply native decorations. Table text combines
+those ranges with document formatting without feature-specific branches. The
+demo's document-wide table-highlight map is gone, and public mounts render cell
+search and comment highlights. Active textareas retain native input rendering
+and interaction. General custom mark/widget rendering and localized change-range
+notifications remain milestone 6 work.
+
+The initial search benchmark failed its unchanged responsiveness checks. React
+subscribed to pending-state changes even when results were unchanged; selecting
+only result snapshots reduced input handlers from 13–38 ms to 0.6–2 ms. Scheduled
+keystrokes still exceeded 50 ms in some browsers. Removing the document-wide
+native highlight map fixed unnecessary allocation, but did not alone clear the
+gate. These failed reports remain alongside the final evidence.
+
+A Chromium CPU profile attributed 484.2 ms of sampled execution to `indexTree`,
+primarily repeated toolbar queries and React development-mode property inspection.
+`defineQuery` now caches pure document-query results by immutable state snapshot
+and primitive arguments, with a bounded argument cache. Mutable object/function
+arguments and ordinary contributed query functions remain uncached. New state
+snapshots invalidate query results; weak snapshot ownership avoids retaining
+discarded editor states. Tests cover selection/edit invalidation, two sessions,
+stable results and mutable/external arguments. The contract is documented in
+`docs/editor-session-api.md`.
+
+Final validation: `pnpm run check` passes with 518 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. The production build passes. The
+existing core search audit passed 40 assertions per browser, and the final
+desktop/narrow search audit passes all six cases. Public-mount tests verify
+actual canvas colors, native search/comment composition, navigation, clear and
+remount. Native source tests cover coalescing, stable composition, update errors,
+cleanup failures and pending-frame cancellation.
+
+The three-browser responsiveness benchmark passes with maximum input handlers
+of 0.6/1/1 ms and scheduled-keystroke delays of 24.8/8/2 ms in
+Chromium/Firefox/WebKit. Input-to-paint maxima are 29/35/24 ms. Streaming with
+search enabled passes for Warbreaker and War and Peace in all three browsers:
+zero vanished highlights, decreasing counts, busy-status flashes or stale paints.
+These are local development measurements, not device-independent guarantees.
+
+Three serial production foundation trials pass every unchanged budget: worst
+first usable 178 ms, streaming 1,073.8 ms, paste handler 56.9 ms, paste to paint
+109.8 ms, typing 32.2 ms, paging 32.6 ms and loaded heap 29,412,288 bytes.
+Evidence, including failed search measurements and the profile summary, is in
+`artifacts/public-interface-m4/search-contribution/`. Foundation reports identify
+`67e649f` and measure this checkpoint's uncommitted tree.
+
+Milestone 4 remains open for supported view updates and diagnostics and the full
+demo migration to the public mount, including search reveal. This is a checkpoint;
+the required milestone commit-and-judge gate follows those exit conditions.

@@ -1,7 +1,7 @@
 import './table-view.css';
 import type { BrowserViewOptions } from '../../editor-browser';
 import { nativeTextCaret, revealNativeText } from '../../editor-browser/native-text-geometry';
-import type { TextHighlight } from '../../editor-browser/node-views';
+import type { ReadTextDecorations, TextDecoration } from '../../editor-browser/text-decorations';
 import type { NodeIdentity, Schema, TextPoint } from '../../model';
 import { TextSelection, textSelection, type Selection, type SelectionContext } from '../../state';
 import { formattingSpans, type TextFormat } from '../formatting';
@@ -21,10 +21,10 @@ export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
   onReplace: (text: string) => void;
   onFormat: (format: TextFormat) => void;
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
-  highlights?: ReadonlyMap<number, readonly TextHighlight[]>;
+  textDecorations?: ReadTextDecorations;
 };
 
-const emptyMatches: readonly TextHighlight[] = [];
+const emptyMatches: readonly TextDecoration[] = [];
 
 function textStyle(element: HTMLElement, paragraph: TableText) {
   const style = paragraph.level
@@ -36,7 +36,7 @@ function textStyle(element: HTMLElement, paragraph: TableText) {
   element.style.fontWeight = style ? '700' : '';
 }
 
-function paintText(element: HTMLElement, paragraph: TableText, matches: readonly TextHighlight[]) {
+function paintText(element: HTMLElement, paragraph: TableText, matches: readonly TextDecoration[]) {
   const document = element.ownerDocument;
   const text = document.createElement('p');
   textStyle(text, paragraph);
@@ -54,7 +54,7 @@ function paintText(element: HTMLElement, paragraph: TableText, matches: readonly
   for (const [index, start] of cuts.slice(0, -1).entries()) {
     const span = document.createElement('span');
     const active = spans.filter((mark) => mark.start <= start && mark.end > start);
-    const match = matches.find((value) => value.from <= start && value.to > start);
+    const decorations = matches.filter((value) => value.from <= start && value.to > start);
     span.textContent = paragraph.text.slice(start, cuts[index + 1]);
 
     if (active.some((mark) => mark.bold)) span.style.fontWeight = '700';
@@ -63,12 +63,20 @@ function paintText(element: HTMLElement, paragraph: TableText, matches: readonly
 
     if (active.some((mark) => mark.underline)) span.style.textDecoration = 'underline';
 
-    if (match) {
-      span.dataset.findMatch = 'true';
-      span.dataset.findActive = String(match.active);
+    let content = span;
+
+    for (const decoration of decorations.toReversed()) {
+      const wrapper = document.createElement('span');
+      wrapper.dataset.decorationKey = decoration.key;
+      wrapper.style.backgroundColor = decoration.background;
+
+      for (const [name, value] of Object.entries(decoration.attributes ?? {}))
+        wrapper.setAttribute(name, value);
+      wrapper.append(content);
+      content = wrapper;
     }
 
-    text.append(span);
+    text.append(content);
   }
 
   if (paragraph.text.endsWith('\n')) text.append(document.createTextNode('\u200b'));
@@ -90,7 +98,7 @@ type CellView = {
 type ParagraphView = {
   element: HTMLButtonElement | HTMLTextAreaElement;
   paragraph?: TableText;
-  matches?: readonly TextHighlight[];
+  matches?: readonly TextDecoration[];
 };
 
 /** Owns the table's DOM, native editing, selection and measurement independently of React.
@@ -259,7 +267,7 @@ export function createTableView<N extends NodeIdentity>(
               content.element,
               view.element.children[paragraphIndex + 1] ?? null,
             );
-          const matches = frame.highlights?.get(paragraph.id) ?? emptyMatches;
+          const matches = frame.textDecorations?.(paragraph.id) ?? emptyMatches;
 
           if (content.element instanceof HTMLTextAreaElement) {
             content.element.setAttribute(

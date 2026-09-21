@@ -1,0 +1,170 @@
+[
+  {
+    "browser": "chromium",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 236,
+    "blocks": 7280,
+    "loadMs": 1409,
+    "batches": 64,
+    "batchSize": {
+      "min": 32,
+      "median": 126,
+      "max": 128
+    },
+    "workMs": {
+      "median": 6,
+      "p95": 7.700000286102295
+    },
+    "elapsedMs": {
+      "median": 18.5,
+      "p95": 24.40000009536743
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "chromium",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 270,
+    "blocks": 11718,
+    "loadMs": 3332.4000000953674,
+    "batches": 113,
+    "batchSize": {
+      "min": 32,
+      "median": 105,
+      "max": 128
+    },
+    "workMs": {
+      "median": 7.700000047683716,
+      "p95": 12.299999952316284
+    },
+    "elapsedMs": {
+      "median": 23.5,
+      "p95": 35.60000014305115
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 359,
+    "blocks": 7280,
+    "loadMs": 2384,
+    "batches": 82,
+    "batchSize": {
+      "min": 32,
+      "median": 90,
+      "max": 128
+    },
+    "workMs": {
+      "median": 9,
+      "p95": 16
+    },
+    "elapsedMs": {
+      "median": 26,
+      "p95": 40
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "firefox",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 317,
+    "blocks": 11718,
+    "loadMs": 6607,
+    "batches": 156,
+    "batchSize": {
+      "min": 16,
+      "median": 78,
+      "max": 128
+    },
+    "workMs": {
+      "median": 13,
+      "p95": 24
+    },
+    "elapsedMs": {
+      "median": 36,
+      "p95": 69
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "warbreaker",
+    "find": "on",
+    "firstUsableMs": 369,
+    "blocks": 7280,
+    "loadMs": 1313,
+    "batches": 60,
+    "batchSize": {
+      "min": 32,
+      "median": 128,
+      "max": 128
+    },
+    "workMs": {
+      "median": 5,
+      "p95": 7
+    },
+    "elapsedMs": {
+      "median": 19,
+      "p95": 32
+    },
+    "layouts": 7311,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 15371,
+    "stalePaints": 0
+  },
+  {
+    "browser": "webkit",
+    "sample": "war-and-peace",
+    "find": "on",
+    "firstUsableMs": 379,
+    "blocks": 11718,
+    "loadMs": 3238,
+    "batches": 112,
+    "batchSize": {
+      "min": 25,
+      "median": 106,
+      "max": 128
+    },
+    "workMs": {
+      "median": 6,
+      "p95": 9
+    },
+    "elapsedMs": {
+      "median": 26,
+      "p95": 41
+    },
+    "layouts": 11750,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 47140,
+    "stalePaints": 0
+  }
+]

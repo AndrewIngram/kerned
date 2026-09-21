@@ -1,0 +1,35 @@
+{
+  "context": "Development Chromium search benchmark before query snapshot caching. Profile samples identify work, not a production latency guarantee.",
+  "topSampledFunctionsMs": {
+    "indexTree": 484.2,
+    "(idle)": 226.8,
+    "visit": 192.3,
+    "run": 156.5,
+    "(program)": 145.6,
+    "(garbage collector)": 100.2,
+    "exports.jsxDEV": 96.2,
+    "addObjectDiffToProperties": 77.0,
+    "addValueToProperties": 32.7,
+    "wasm-function[10497]": 25.6,
+    "build": 18.6,
+    "search": 17.4,
+    "RegExp: Pierre": 15.0,
+    "jsxDEVImpl": 15.0,
+    "wasm-function[3496]": 15.0,
+    "RegExp: e": 14.7,
+    "now": 13.5,
+    "selectedStructure": 12.1,
+    "textCommands": 10.5,
+    "setQueryAsync": 9.1
+  },
+  "indexTreeCallersMs": {
+    "textCommands <-  <-  <- formatPressed <- Toolbar <- react_stack_bottom_frame <- renderWithHooks <- updateFunctionComponent": 107.4,
+    "selectedStructure <- quoteActivity <-  <-  <- get blocks <- addObjectDiffToProperties <- addObjectDiffToProperties <- logComponentRender": 71.8,
+    "selectedStructure <- tableSelection <-  <-  <- selectedTable <- Toolbar <- react_stack_bottom_frame <- renderWithHooks": 68.9,
+    "textCommands <-  <-  <- get formatting <- addObjectDiffToProperties <- addObjectDiffToProperties <- logComponentRender <- commitPassiveMountOnFiber": 63.2,
+    "selectedStructure <-  <-  <- get blocks <- addObjectDiffToProperties <- addObjectDiffToProperties <- logComponentRender <- commitPassiveMountOnFiber": 58.6,
+    "textCommands <-  <-  <- get formatting <- Toolbar <- react_stack_bottom_frame <- renderWithHooks <- updateFunctionComponent": 43.6,
+    "selectedStructure <-  <-  <- get blocks <- Toolbar <- react_stack_bottom_frame <- renderWithHooks <- updateFunctionComponent": 42.5,
+    "selectedStructure <- quoteActivity <-  <-  <- get blocks <- Toolbar <- react_stack_bottom_frame <- renderWithHooks": 28.3
+  }
+}

@@ -586,13 +586,6 @@ body[data-demo='minimal'] .table-block th {
   outline: 2px solid #8c91a0;
   outline-offset: 1px;
 }
-[data-find-match='true'] {
-  background: #ffec97;
-}
-[data-find-active='true'] {
-  background: #f5b941;
-  box-shadow: inset 0 -1px #a86b0a;
-}
 .blocks-menu {
   width: 136px;
   flex: 0 0 136px;

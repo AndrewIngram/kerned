@@ -14,10 +14,11 @@ import {
 import { CanvasLayerProvider } from '../../../editor-react';
 import { createSchema } from '../../../model';
 import { createOwnedEngine } from '../../../owned-layout';
-import { createFind, textSelection } from '../../../state';
+import { textSelection } from '../../../state';
 import { createCommentStore } from '../../comment';
 import { commentView, onCommentActivate } from '../../comment-view';
 import { createSampleDocument, type StarterNode } from '../../demo-model';
+import { searchView } from '../../search-view';
 import { BlockLayer } from '../block-layer';
 import { starterBrowserExtensions, onMentionActivate } from '../browser';
 import { createStarterDocumentQuery } from '../browser-document';
@@ -40,7 +41,11 @@ async function fixture() {
 
   const editor = createEditor({
     schema: createSchema({
-      extensions: [commentView(comments), ...starterBrowserExtensions({ imageDelay: 80 })],
+      extensions: [
+        commentView(comments),
+        searchView,
+        ...starterBrowserExtensions({ imageDelay: 80 }),
+      ],
     }),
     document: createSampleDocument().slice(0, 4),
   });
@@ -81,8 +86,6 @@ async function fixture() {
     selectAll: () => editor.commands.selectAll(),
     navigate: () => false,
   });
-
-  const find = createFind(editor.schema, () => editor.state.nodes);
 
   const opened: {
     kind: string;
@@ -128,12 +131,6 @@ async function fixture() {
         onMeasure: layout.measure,
       },
       viewport: { width: 500, zoom: 1 },
-      highlights: new Map(
-        [...find.state.byNode].map(([id, matches]) => [
-          id,
-          matches.map((match) => ({ ...match, active: false })),
-        ]),
-      ),
       notice() {},
       setFocusedWidget: (id) => focused.push(id),
     };
@@ -151,7 +148,6 @@ async function fixture() {
       background: [255, 255, 255],
       blocks: [],
       selectedRange: () => null,
-      highlights: [],
       caret: undefined,
       caretTop: 0,
       focused: false,

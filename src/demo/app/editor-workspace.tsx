@@ -14,11 +14,11 @@ import { useCanvasRenderer } from '../../editor-react/use-canvas-renderer';
 import { useDocumentLayout } from '../../editor-react/use-document-layout';
 import { type EditorSample } from '../../editor-samples';
 import { streamConfig } from '../../editor-stream';
-import type { Rect } from '../../engines';
 import { captureComment, createCommentStore } from '../../extensions/comment';
 import { commentView, onCommentActivate } from '../../extensions/comment-view';
 import { demoSchema } from '../../extensions/demo-schema';
 import { OutlineMenu } from '../../extensions/outline-view';
+import { searchView } from '../../extensions/search-view';
 import { BlockLayer } from '../../extensions/starter-kit/block-layer';
 import { starterBrowserExtensions, onMentionActivate } from '../../extensions/starter-kit/browser';
 import { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
@@ -62,6 +62,7 @@ export function EditorWorkspace({
       schema: createSchema({
         extensions: [
           commentView(comments),
+          searchView,
           ...starterBrowserExtensions({ imageDelay: streamConfig.imageDelay }),
         ],
       }),
@@ -123,7 +124,6 @@ export function EditorWorkspace({
   const {
     findOpen,
     findState,
-    findMatches,
     findStale,
     findRef,
     findRequest,
@@ -134,7 +134,7 @@ export function EditorWorkspace({
     openFind,
     closeFind,
     moveFind,
-  } = useFind({ editor, editorState, scroller, inputRef, onOpen: () => setPanel(null) });
+  } = useFind({ editor, scroller, inputRef, onOpen: () => setPanel(null) });
 
   const stream = useSampleStream(editor, sample, seedComments);
   const { loadedCount, metrics, paused, recordRender } = stream;
@@ -178,23 +178,6 @@ export function EditorWorkspace({
     readScroll,
   });
 
-  const findGeometry = useMemo(
-    () =>
-      visible.flatMap((p) => {
-        const layoutValue = p.layout;
-
-        if (!layoutValue) return [];
-
-        return (findMatches.get(p.node.id) ?? []).map((match) => ({
-          match,
-          rects: layoutValue
-            .geometry(match.from, match.to, false)
-            .rects.map((r): Rect => [r[0], r[1] + p.y, r[2], r[3] + p.y]),
-        }));
-      }),
-    [visible, findMatches],
-  );
-
   useFindReveal({
     scene,
     findOpen,
@@ -217,10 +200,6 @@ export function EditorWorkspace({
     background: minimal ? [255, 255, 255] : [255, 254, 249],
     blocks: visible,
     selectedRange,
-    highlights: findGeometry.map(({ match, rects }) => ({
-      rects,
-      active: match === findState.active,
-    })),
     caret,
     caretTop: activePlacement?.y ?? 0,
     focused: hasFocus,
@@ -376,21 +355,6 @@ export function EditorWorkspace({
     [editor, pointerSelection, inputEvents, revealSelection, projectDocument, scroller, inputRef],
   );
 
-  const tableHighlights = useMemo(
-    () =>
-      new Map(
-        [...findMatches].map(([id, matches]) => [
-          id,
-          matches.map((match) => ({
-            from: match.from,
-            to: match.to,
-            active: findOpen && match === findState.active,
-          })),
-        ]),
-      ),
-    [findMatches, findOpen, findState.active],
-  );
-
   const openAnnotation = useCallback(
     (kind: 'mention' | 'comment', nodeId: number, atomId: string, index: number) => {
       if (doc.context.text(nodeId) !== null) setSelection(textSelection(nodeId, index));
@@ -515,7 +479,6 @@ export function EditorWorkspace({
                     viewport,
                     owned,
                     clipboard: inputEvents,
-                    highlights: tableHighlights,
                     notice: setInputNotice,
                     setFocusedWidget,
                   }}

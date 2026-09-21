@@ -1,9 +1,5 @@
 import type { BrowserViewOptions, ObserveTextPointer } from '../../editor-browser';
-import {
-  createNodeViews,
-  type NodeView,
-  type TextHighlight,
-} from '../../editor-browser/node-views';
+import { createNodeViews, type NodeView } from '../../editor-browser/node-views';
 import { createViewLayers } from '../../editor-browser/view-layers';
 import type { RegisterCanvasPainter } from '../../editor-canvas/canvas-renderer';
 import type { DocumentLayout, DocumentLayoutSnapshot } from '../../editor-canvas/document-layout';
@@ -19,7 +15,6 @@ export type BlockLayerFrame = {
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   layout: DocumentLayoutSnapshot<StarterLeaf> & { onMeasure: DocumentLayout['measure'] };
   viewport: { width: number; zoom: number };
-  highlights: ReadonlyMap<number, readonly TextHighlight[]>;
   notice: (message: string) => void;
   setFocusedWidget: (id: number | null) => void;
 };
@@ -154,7 +149,6 @@ export function createBlockLayer(
           node: p.node,
           width: contentWidth,
           onMeasure,
-          highlights: next.highlights,
           selection: doc.editorState.selection,
           context: doc.context,
         });

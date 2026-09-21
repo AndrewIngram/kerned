@@ -245,15 +245,46 @@ test('highlight-only frames update displayed ranges without replacing the active
 }) => {
   const f = fixture();
   onTestFinished(() => f.destroy());
-  const highlights = new Map([[20002, [{ from: 0, to: 4, active: false }]]]);
-  f.update({ highlights });
+
+  const highlights = new Map([
+    [
+      20002,
+      [
+        {
+          key: 'match',
+          from: 0,
+          to: 4,
+          background: '#ffec97',
+          attributes: { 'data-find-match': 'true', 'data-find-active': 'false' },
+        },
+      ],
+    ],
+  ]);
+
+  f.update({ textDecorations: (id) => highlights.get(id) ?? [] });
   expect(f.host.querySelector('[data-find-match]')?.textContent).toBe('Keep');
   f.button('Edit cell 1, 1').click();
   const input = f.input();
   input.setSelectionRange(1, 4, 'backward');
   input.dispatchEvent(new Event('select', { bubbles: true }));
   const selection = f.editor.state.selection;
-  f.update({ highlights: new Map([[20002, [{ from: 0, to: 4, active: true }]]]) });
+  f.update({
+    textDecorations: (id) =>
+      new Map([
+        [
+          20002,
+          [
+            {
+              key: 'match',
+              from: 0,
+              to: 4,
+              background: '#f5b941',
+              attributes: { 'data-find-match': 'true', 'data-find-active': 'true' },
+            },
+          ],
+        ],
+      ]).get(id) ?? [],
+  });
   expect(f.input()).toBe(input);
   expect(document.activeElement).toBe(input);
   expect(input.selectionDirection).toBe('backward');

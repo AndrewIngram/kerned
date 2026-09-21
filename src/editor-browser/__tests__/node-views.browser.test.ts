@@ -5,6 +5,7 @@ import { createEditor, defineExtension, type ContributionContext } from '../../c
 import { createSchema, defineNode } from '../../model';
 import { selectionContext } from '../../state';
 import { createNodeViews, defineNodeView, nodeViews } from '../node-views';
+import { nativeTextDecorations, type TextDecoration } from '../text-decorations';
 
 const card = defineNode({
   name: 'card',
@@ -14,6 +15,121 @@ const card = defineNode({
     attributes: z.strictObject({ label: z.string().default(options.defaultLabel) }),
     content: { kind: 'atom' },
   }),
+});
+
+test('native decorations compose, coalesce updates and release every subscription on failure', async ({
+  onTestFinished,
+}) => {
+  const listeners = new Set<() => void>();
+  let values: readonly TextDecoration[] = [{ key: 'one', from: 0, to: 1, background: 'gold' }];
+  const extra: readonly TextDecoration[] = [{ key: 'two', from: 1, to: 2, background: 'pink' }];
+  const seen: (readonly TextDecoration[])[] = [];
+  let failUpdate = false;
+  let failCleanup = false;
+  let destroyed = 0;
+  const errors: Error[] = [];
+
+  const extension = defineExtension({
+    name: 'decoratedCard',
+    options: {},
+    setup(_options, context: ContributionContext) {
+      for (const read of [() => values, () => extra]) {
+        context.provide(nativeTextDecorations, {
+          create: () => ({
+            read,
+            subscribe(listener) {
+              listeners.add(listener);
+
+              return () => {
+                listeners.delete(listener);
+
+                if (failCleanup) throw new Error('Source cleanup failed');
+              };
+            },
+          }),
+        });
+      }
+
+      context.provide(
+        nodeViews,
+        defineNodeView(card, () => (element) => ({
+          update({ node, textDecorations }) {
+            if (failUpdate) throw new Error('Update failed');
+            const decorations = textDecorations?.(node.id) ?? [];
+            seen.push(decorations);
+            element.textContent = decorations.map((value) => value.key).join(',');
+          },
+          destroy() {
+            destroyed++;
+            element.replaceChildren();
+          },
+        })),
+      );
+
+      return {};
+    },
+  });
+
+  const editor = createEditor({
+    schema: createSchema({ extensions: [card, extension] }),
+    content: [{ kind: 'card' }],
+  });
+
+  const node = editor.state.nodes[0];
+
+  const renderer = createNodeViews(editor, {
+    clipboard() {},
+    notice() {},
+    onError: (error) => errors.push(error),
+  }).find(node);
+
+  if (!renderer) throw new Error('Missing renderer');
+  const element = host();
+  const view = renderer.mount(element);
+  onTestFinished(() => {
+    view.destroy();
+    editor.destroy();
+    element.remove();
+  });
+
+  const frame = {
+    node,
+    selection: editor.state.selection,
+    context: selectionContext(editor.schema, editor.state.nodes),
+    width: 240,
+    onMeasure() {},
+  };
+
+  view.update(frame);
+  const first = seen.at(-1);
+  view.update(frame);
+  expect(seen.at(-1)).toBe(first);
+  expect(element.textContent).toBe('one,two');
+  expect(listeners.size).toBe(2);
+  const count = seen.length;
+  values = [{ key: 'changed', from: 0, to: 2, background: 'blue' }];
+
+  for (const listener of listeners) {
+    listener();
+    listener();
+  }
+
+  await expect.poll(() => element.textContent).toBe('changed,two');
+  expect(seen).toHaveLength(count + 1);
+  failUpdate = true;
+
+  for (const listener of listeners) listener();
+  await expect.poll(() => errors.length).toBe(1);
+  expect(errors[0].message).toBe('Update failed');
+  failCleanup = true;
+
+  for (const listener of listeners) listener();
+  expect(() => view.destroy()).toThrow('Node view cleanup failed');
+  expect(listeners.size).toBe(0);
+  expect(destroyed).toBe(1);
+  expect(element.children).toHaveLength(0);
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  expect(errors).toHaveLength(1);
 });
 
 function host() {
