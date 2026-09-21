@@ -104,3 +104,5 @@ export { selectionView } from './selection-view';
 export type { EditorEvents } from './events';
 
 export { type HistoryOptions } from './local-history';
+
+export { type ScopedSelection, equalScopedSelection, selectionInText } from './scoped-selection';

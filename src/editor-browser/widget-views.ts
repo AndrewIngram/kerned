@@ -1,5 +1,5 @@
 import type { NodeIdentity } from '../model';
-import type { NodeAccess } from '../state';
+import { equalScopedSelection, type ScopedSelection, type NodeAccess } from '../state';
 import type { Decoration } from './decorations';
 import type { DrawingRect } from './drawing';
 import { createRangeViews } from './range-view-owner';
@@ -12,6 +12,7 @@ export type WidgetAnchor =
 export type WidgetViewFrame<Data> = Readonly<{
   node: Readonly<NodeIdentity>;
   access: NodeAccess;
+  selection: ScopedSelection;
   data: Data;
   at: WidgetAnchor;
   /** The anchor rectangle is block-local; the mount positions the DOM host. */
@@ -32,7 +33,13 @@ export type WidgetDecoration = Readonly<{
   at: WidgetAnchor;
   [widgetRenderer]: {
     owner: { destroy(element: HTMLElement): void };
-    render(element: HTMLElement, node: NodeIdentity, anchor: DrawingRect, access: NodeAccess): void;
+    render(
+      element: HTMLElement,
+      node: NodeIdentity,
+      anchor: DrawingRect,
+      access: NodeAccess,
+      selection: ScopedSelection,
+    ): void;
   };
 }>;
 
@@ -62,7 +69,7 @@ export function defineWidgetView<Data>(create: (element: HTMLElement) => WidgetV
       at,
       [widgetRenderer]: {
         owner,
-        render(element, node, anchor, access) {
+        render(element, node, anchor, access, selection) {
           let view = instances.get(element);
 
           if (!view) {
@@ -70,7 +77,7 @@ export function defineWidgetView<Data>(create: (element: HTMLElement) => WidgetV
             instances.set(element, view);
           }
 
-          view.update({ node, data, at, anchor, access });
+          view.update({ node, data, at, anchor, access, selection });
         },
       },
     };
@@ -80,6 +87,7 @@ export function defineWidgetView<Data>(create: (element: HTMLElement) => WidgetV
 type ProjectedWidget = {
   node: NodeIdentity;
   access: NodeAccess;
+  selection: ScopedSelection;
   decoration: WidgetDecoration;
   anchor: DrawingRect;
 };
@@ -111,6 +119,7 @@ export function createWidgetViews<N extends NodeIdentity>(
       width: number;
       height: number;
       access: NodeAccess;
+      selection: ScopedSelection;
       values: readonly Decoration[];
       frames: readonly ProjectedWidget[];
     }
@@ -120,9 +129,18 @@ export function createWidgetViews<N extends NodeIdentity>(
     context,
     (block) => {
       const values = read(block.node.id);
-      const access = context.editor.getAccess(block.node.id);
 
-      if (!access) throw new Error('Cannot render a node outside the current document');
+      if (!values.some((value) => value.kind === 'widget')) {
+        cache.delete(block.node);
+
+        return [];
+      }
+
+      const access = context.editor.getAccess(block.node.id);
+      const selection = context.editor.getSelection(block.node.id);
+
+      if (!access || !selection)
+        throw new Error('Cannot render a node outside the current document');
       let previous = cache.get(block.node);
 
       if (
@@ -131,7 +149,8 @@ export function createWidgetViews<N extends NodeIdentity>(
         previous.text !== block.text ||
         previous.width !== block.width ||
         previous.height !== block.height ||
-        previous.access !== access
+        previous.access !== access ||
+        !equalScopedSelection(previous.selection, selection)
       ) {
         const frames: ProjectedWidget[] = [];
 
@@ -149,7 +168,7 @@ export function createWidgetViews<N extends NodeIdentity>(
                   height: 0,
                 };
 
-          if (anchor) frames.push({ node: block.node, decoration, anchor, access });
+          if (anchor) frames.push({ node: block.node, decoration, anchor, access, selection });
         }
 
         previous = {
@@ -159,6 +178,7 @@ export function createWidgetViews<N extends NodeIdentity>(
           values,
           frames,
           access,
+          selection,
         };
         cache.set(block.node, previous);
       }
@@ -186,11 +206,11 @@ export function createWidgetViews<N extends NodeIdentity>(
         }
 
         return {
-          update({ node, decoration, anchor, access }) {
+          update({ node, decoration, anchor, access, selection }) {
             const next = decoration[widgetRenderer];
 
             current = next;
-            current.render(element, node, anchor, access);
+            current.render(element, node, anchor, access, selection);
           },
           destroy,
         };

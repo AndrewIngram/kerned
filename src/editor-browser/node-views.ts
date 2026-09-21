@@ -1,6 +1,6 @@
 import { defineContribution } from '../core';
 import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '../model';
-import type { NodeAccess, Selection, SelectionContext } from '../state';
+import type { NodeAccess, ScopedSelection, Selection, SelectionContext } from '../state';
 import type { ViewSession } from './input-contributions';
 import { createTextDecorations, type ReadTextDecorations } from './text-decorations';
 import type { ReadTextStyle } from './text-style';
@@ -59,6 +59,17 @@ export type NodeViewAttributes<Definition extends NodeDefinition> = NonNullable<
   ReturnType<NodeBinding<NodeIdentity, Definition>['read']>
 >;
 
+/** Schema-bound renderer data. The imperative editor remains available in the factory. */
+export type NodeRenderFrame<Definition extends NodeDefinition> = Omit<
+  NodeViewFrame<NodeIdentity>,
+  'node' | 'selection' | 'context'
+> & {
+  node: Readonly<NodeIdentity>;
+  attributes: NodeViewAttributes<Definition>;
+  access: NodeAccess;
+  selection: ScopedSelection;
+};
+
 /** A renderer binds to an installed definition family, including configured variants.
  * The factory owns per-view caches; each mounted node owns its DOM and cleanup.
  */
@@ -67,12 +78,7 @@ export function defineNodeView<Definition extends NodeDefinition>(
   createRenderer: <N extends NodeIdentity>(
     context: NodeViewContext<N>,
   ) => (element: HTMLDivElement) => {
-    update(
-      frame: NodeViewFrame<NodeIdentity> & {
-        attributes: NodeViewAttributes<Definition>;
-        access: NodeAccess;
-      },
-    ): void;
+    update(frame: NodeRenderFrame<Definition>): void;
     focusSelection?(selection: Selection): boolean;
     coordsAt?(point: TextPoint): DOMRect | null;
     reveal?(point: TextPoint): void;
@@ -98,8 +104,20 @@ export function defineNodeView<Definition extends NodeDefinition>(
                 throw new Error(`Node does not match renderer for ${definition.name}`);
               const access = context.editor.getAccess(frame.node.id);
 
-              if (!access) throw new Error('Cannot render a node outside the current document');
-              view.update({ ...frame, attributes, access });
+              const selectionState = context.editor.getSelection(frame.node.id);
+
+              if (!access || !selectionState)
+                throw new Error('Cannot render a node outside the current document');
+              view.update({
+                node: frame.node,
+                width: frame.width,
+                textDecorations: frame.textDecorations,
+                textStyle: frame.textStyle,
+                onMeasure: frame.onMeasure,
+                attributes,
+                access,
+                selection: selectionState,
+              });
             },
             focusSelection: view.focusSelection
               ? (selection) => view.focusSelection?.(selection) ?? false

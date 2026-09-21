@@ -183,6 +183,7 @@ export {
   type NodeViewContribution,
   type NodeViewContext,
   type NodeViewFrame,
+  type NodeRenderFrame,
   type NodeViewAttributes,
   type NodeView,
 } from './node-views';

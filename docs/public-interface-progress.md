@@ -2688,3 +2688,56 @@ records parent `3ed9dc2` and measures this checkpoint's uncommitted tree.
 M6 still needs scoped selection contracts and explicit canvas-owned editable
 content slots before its final validation, commit and independent architecture
 judge. Milestones 7 and 8 remain pending.
+
+### Milestone 6 checkpoint: scoped renderer selection
+
+The imperative and composed editors now expose `getSelection(nodeId)`. It returns
+`none`, `caret`, `range` or whole-`node` selection within that node's subtree, or
+`undefined` for a missing node. Nested text and structural carets, selected
+ancestors, cross-node ranges and discontiguous cell selections use the same
+query. Empty selected cell text remains a range rather than becoming a caret.
+The session builds one lazy selection index against its retained tree, shares it
+across renderers and drops it on selection/document publication and destruction.
+Permission refresh keeps the index. Queries do not retain historical trees.
+
+Schema-bound vanilla `NodeRenderFrame` and React node props share scoped
+`selection`, effective access and readonly node identities. The old React
+`selected` boolean is removed. Advanced native views retain their global selection
+contract; bound renderers can access the imperative editor through their factory.
+Inline and mark selections are clipped to their own intervals, with caret affinity
+choosing a side at shared boundaries. Widgets receive their owning node's scope
+even when their node-local decoration descriptors have not changed.
+`equalScopedSelection` avoids unrelated renders, and selection-only updates reuse
+mark line fragments. Removing all widget descriptors also releases their cached
+projection data while the owning block remains resident.
+
+Tests exercise nested selection scopes, missing/deleted nodes, undo, structural
+carets, cross-block zero-width endpoints, clipping and rectangular selections
+containing empty cells. A counted selection verifies shared query work across
+hundreds of reads and permission refresh. Browser cases cover vanilla geometry
+reuse, inline/mark/widget selection changes, preserved DOM identity and unchanged
+render counts outside the scoped selection. Consumer types verify readonly node
+identities after deriving React props from the vanilla frame.
+
+The Firefox focused-widget test reproduced another failure under the full test
+workload. Tracing showed an inactive test document (`document.hasFocus() === false`)
+where programmatic `button.blur()` changed the active element without emitting
+`blur` or `focusout`. The test now transfers focus through a real user click on an
+external control, keeping its assertion that the offscreen widget is culled.
+Fifteen repetitions per browser passed under the full check. Temporary probes and
+repetitions were removed; the production focus policy was unchanged in this slice.
+The older widget test now expects the necessary update when the caret leaves its
+owning node, then verifies no further update for movement within another node.
+
+`pnpm run check` passes with 761 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes, with its existing chunk-size
+warning. Three serial production trials in `artifacts/public-interface-m6/selection/`
+pass all original budgets: worst first usable 241 ms, streaming 1,218.4 ms, paste
+handler 57.9 ms, paste paint 120 ms, typing 32 ms, paging 32 ms and loaded heap
+27,886,152 bytes. The report records parent `777de04` and measures this checkpoint's
+uncommitted tree. These measurements cover the existing large-document demo;
+they are not a benchmark of thousands of custom React renderers.
+
+M6 remains open for explicit canvas-owned editable content slots, followed by
+final validation, commit and the independent architecture judge. Milestones 7
+and 8 remain pending.

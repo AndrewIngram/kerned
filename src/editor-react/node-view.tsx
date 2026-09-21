@@ -1,24 +1,16 @@
 import { memo, type ComponentType } from 'react';
 
-import {
-  defineNodeView,
-  type NodeViewAttributes,
-  type NodeViewFrame,
-} from '../editor-browser/node-views';
-import type { NodeIdentity, SchemaDefinition } from '../model';
-import type { NodeAccess } from '../state';
+import { defineNodeView, type NodeRenderFrame } from '../editor-browser/node-views';
+import type { SchemaDefinition } from '../model';
+import { equalScopedSelection } from '../state';
 import { portalHostFor } from './portals';
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
 
 /** Canonical attributes are inferred from the registered definition, including defaults. */
-export type ReactNodeViewProps<Definition extends NodeDefinition> = {
-  readonly node: Readonly<NodeIdentity>;
-  readonly attributes: NodeViewAttributes<Definition>;
-  readonly width: number;
-  readonly selected: boolean;
-  readonly access: NodeAccess;
-};
+export type ReactNodeViewProps<Definition extends NodeDefinition> = Readonly<
+  Pick<NodeRenderFrame<Definition>, 'node' | 'attributes' | 'width' | 'selection' | 'access'>
+>;
 
 /** Register a measured React block with the same lifecycle as native node views. */
 export function defineReactNodeView<Definition extends NodeDefinition>(
@@ -30,14 +22,8 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
   return defineNodeView(definition, () => (element) => {
     const portals = portalHostFor(element);
 
-    let current:
-      | (NodeViewFrame<NodeIdentity> & {
-          attributes: NodeViewAttributes<Definition>;
-          access: NodeAccess;
-        })
-      | undefined;
+    let current: NodeRenderFrame<Definition> | undefined;
 
-    let selected = false;
     let destroyed = false;
 
     const observer = new ResizeObserver(() => {
@@ -49,19 +35,14 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
 
     return {
       update(frame) {
-        const nextSelected = frame.selection
-          .ranges(frame.context)
-          .some((range) => range.id === frame.node.id);
-
         const changed =
           !current ||
           current.node !== frame.node ||
           current.width !== frame.width ||
           current.access !== frame.access ||
-          selected !== nextSelected;
+          !equalScopedSelection(current.selection, frame.selection);
 
         current = frame;
-        selected = nextSelected;
 
         if (!changed) return;
         portals.render(
@@ -70,7 +51,7 @@ export function defineReactNodeView<Definition extends NodeDefinition>(
             node={frame.node}
             attributes={frame.attributes}
             width={frame.width}
-            selected={selected}
+            selection={frame.selection}
             access={frame.access}
           />,
         );

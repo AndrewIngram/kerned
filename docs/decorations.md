@@ -187,3 +187,7 @@ rejects React widgets explicitly. The shared owner handles geometry and lifetime
 for both adapters. Culling drops mounted local state and releases subscriptions;
 remounting reads current semantic data from the source. Factories that throw
 before returning a view must release their own partially allocated resources.
+
+Widget frames also receive the owning node's [scoped selection](rendering-extensions.md#scoped-selection).
+Selection and access updates reach widgets even when their decoration source uses
+node-local dependencies and returns unchanged descriptors.

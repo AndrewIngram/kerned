@@ -170,6 +170,7 @@ export type Editor<D extends readonly SchemaDefinition[], N extends NodeIdentity
   readonly journal: StateSession<N>['journal'];
   readonly find: StateSession<N>['find'];
   readonly getAccess: StateSession<N>['getAccess'];
+  readonly getSelection: StateSession<N>['getSelection'];
   readonly refreshPermissions: StateSession<N>['refreshPermissions'];
   breakHistory(this: void): void;
   allocateBlockId(): number;
@@ -268,6 +269,7 @@ export function createEditor(
       },
       find: editor.find,
       getAccess: (id) => editor.getAccess(id),
+      getSelection: (id) => editor.getSelection(id),
       refreshPermissions: () => editor.refreshPermissions(),
       breakHistory: () => editor.breakHistory(),
       allocateBlockId: () => editor.allocateBlockId(),

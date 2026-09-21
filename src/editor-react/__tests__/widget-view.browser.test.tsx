@@ -13,7 +13,7 @@ import {
   type MountedEditor,
 } from '../../editor-canvas';
 import { createSchema, defineNode } from '../../model';
-import { textSelection, type NodeAccess } from '../../state';
+import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '../../state';
 import { defineReactWidgetView, EditorContent, type ReactWidgetViewProps } from '../index';
 
 const note = defineNode({
@@ -30,7 +30,7 @@ const Theme = createContext('missing');
 
 const Render = createContext(() => {});
 
-function Review({ data, node, access }: ReactWidgetViewProps<{ label: string }>) {
+function Review({ data, node, access, selection }: ReactWidgetViewProps<{ label: string }>) {
   const theme = useContext(Theme);
   const render = useContext(Render);
   const [count, setCount] = useState(0);
@@ -42,6 +42,7 @@ function Review({ data, node, access }: ReactWidgetViewProps<{ label: string }>)
       onFocus={(event) => event.stopPropagation()}
       onBlur={(event) => event.stopPropagation()}
       data-widget={node.id}
+      data-selection={selection.kind}
       data-access={access}
       style={{ pointerEvents: 'auto' }}
       onClick={() => setCount((value) => value + 1)}
@@ -243,7 +244,14 @@ test('focused widgets pin their block, culling drops local state and remounting 
   await view.reveal({ id: 100, offset: 0 });
   expect(button.isConnected).toBe(true);
   expect(document.activeElement).toBe(button);
-  button.blur();
+  // Exercise a user focus transfer. Firefox emits no focus events for .blur()
+  // in an inactive test document when other browser workers have focus.
+  const elsewhere = document.createElement('button');
+  elsewhere.textContent = 'Outside editor';
+  elsewhere.style.cssText = 'position:fixed;right:0;top:0;';
+  document.body.append(elsewhere);
+  onTestFinished(() => elsewhere.remove());
+  await userEvent.click(elsewhere);
   await expect.poll(() => button.isConnected).toBe(false);
   f.change([
     review({ key: 'review', at: { kind: 'text', offset: 8 }, data: { label: 'Persistent' } }),
@@ -280,3 +288,29 @@ function invalidData() {
 }
 
 void invalidData;
+
+test('node-local widgets receive owning-node selection even when their decoration data is unchanged', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  f.show();
+  await f.whenReady;
+  const button = f.element.querySelector<HTMLElement>('[data-widget]');
+
+  if (!button) throw new Error('Missing widget');
+  expect(button.dataset.selection).toBe('caret');
+  f.editor.select(new TextSelection({ id: 1, offset: 12 }, { id: 1, offset: 20 }));
+  await expect.poll(() => button.dataset.selection).toBe('range');
+  f.editor.select(new NodeSelection(1));
+  await expect.poll(() => button.dataset.selection).toBe('node');
+  f.editor.select(textSelection(2, 0));
+  await expect.poll(() => button.dataset.selection).toBe('none');
+  const count = f.renders;
+  f.editor.select(textSelection(2, 4));
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
+  expect(f.renders).toBe(count);
+  expect(f.element.querySelector('[data-widget]')).toBe(button);
+});

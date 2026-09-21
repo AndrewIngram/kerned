@@ -36,12 +36,13 @@ test('widget keys preserve controls through data changes, wrapped caret placemen
     host.append(button);
 
     return {
-      update({ data, node, at, anchor }) {
+      update({ data, node, at, anchor, selection: scope }) {
         expectTypeOf(data.label).toEqualTypeOf<string>();
         expect(node.id).toBe(1);
         expect(anchor.height).toBeGreaterThan(0);
         expect(at.kind).toBe('text');
         updates++;
+        button.dataset.selection = scope.kind;
         button.textContent = data.label;
       },
       destroy() {
@@ -73,7 +74,12 @@ test('widget keys preserve controls through data changes, wrapped caret placemen
   f.editor.select(textSelection(2, 3));
   await frame();
   await frame();
-  expect(updates).toBe(before);
+  expect(updates).toBe(before + 1);
+  expect(button.dataset.selection).toBe('none');
+  f.editor.select(textSelection(2, 5));
+  await frame();
+  await frame();
+  expect(updates).toBe(before + 1);
   show(80, 'Moved');
   await expect.poll(() => button.textContent).toBe('Moved');
   expect(created).toBe(1);

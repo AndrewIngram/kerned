@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { defineNodePresentation, presentations, mountEditor } from '../../editor-canvas';
 import { createSchema, defineMark, defineNode, indexTree } from '../../model';
+import { textSelection } from '../../state';
 import { defineMarkView, viewLayers, type RangeViewMount } from '../index';
 import { createViewLayers } from '../view-layers';
 
@@ -86,6 +87,9 @@ test('mark projection caches evict culled geometry even while the document retai
   }
 
   show(0);
+  show(0);
+  expect(projections).toBe(1);
+  editor.select(textSelection(1, 3));
   show(0);
   expect(projections).toBe(1);
   show(1);

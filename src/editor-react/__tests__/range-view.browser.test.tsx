@@ -13,7 +13,7 @@ import {
   type MountedEditor,
 } from '../../editor-canvas';
 import { createSchema, defineNode, defineInline, defineMark, type NodeIdentity } from '../../model';
-import { textSelection, type NodeAccess } from '../../state';
+import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '../../state';
 import {
   defineReactInlineView,
   defineReactMarkView,
@@ -59,6 +59,7 @@ function Badge({
   width,
   height,
   access,
+  selection,
 }: ReactInlineViewProps<typeof badge>) {
   const application = useContext(Application);
   const [count, setCount] = useState(0);
@@ -68,6 +69,7 @@ function Badge({
   return (
     <button
       data-badge={id}
+      data-selection={selection.kind}
       data-access={access}
       data-index={index}
       style={{ width, height, pointerEvents: 'auto' }}
@@ -78,7 +80,12 @@ function Badge({
   );
 }
 
-function Highlight({ attributes, fragments, access }: ReactMarkViewProps<typeof highlight>) {
+function Highlight({
+  attributes,
+  fragments,
+  access,
+  selection,
+}: ReactMarkViewProps<typeof highlight>) {
   const application = useContext(Application);
   expectTypeOf(attributes.color).toEqualTypeOf<string>();
   useLayoutEffect(() => application.render('mark'));
@@ -89,6 +96,7 @@ function Highlight({ attributes, fragments, access }: ReactMarkViewProps<typeof 
         <span
           key={`${fragment.top}:${fragment.left}`}
           data-mark-fragment={index}
+          data-selection={selection.kind}
           data-access={access}
           data-theme={application.theme}
           style={{
@@ -355,4 +363,38 @@ test('a vanilla mount rejects React range views and releases its DOM without des
   expect(view.status).toBe('failed');
   expect(f.element.children.length).toBe(0);
   expect(f.editor.isDestroyed).toBe(false);
+});
+
+test('inline and wrapped mark renderers receive scoped selection without remounting or unrelated renders', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  f.show();
+  await f.ready;
+  const button = f.element.querySelector<HTMLElement>('[data-badge]');
+  const mark = f.element.querySelector<HTMLElement>('[data-mark-fragment]');
+
+  if (!button || !mark) throw new Error('Missing range views');
+  f.editor.select(textSelection(2, 4));
+  await expect.poll(() => mark.dataset.selection).toBe('caret');
+  expect(button.dataset.selection).toBe('none');
+  const inlineCount = f.renders.filter((kind) => kind === 'inline').length;
+  f.editor.select(new TextSelection({ id: 2, offset: 4 }, { id: 2, offset: 12 }));
+  await expect.poll(() => mark.dataset.selection).toBe('range');
+  expect(f.renders.filter((kind) => kind === 'inline').length).toBe(inlineCount);
+  f.editor.select(textSelection(2, 300));
+  await expect.poll(() => mark.dataset.selection).toBe('none');
+  const count = f.renders.length;
+  f.editor.select(textSelection(2, 320));
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
+  expect(f.renders.length).toBe(count);
+  f.editor.select(new TextSelection({ id: 1, offset: 0 }, { id: 1, offset: 1 }));
+  await expect.poll(() => button.dataset.selection).toBe('range');
+  f.editor.select(new NodeSelection(1));
+  await expect.poll(() => button.dataset.selection).toBe('node');
+  expect(f.element.querySelector('[data-badge]')).toBe(button);
+  expect(f.element.querySelector('[data-mark-fragment]')).toBe(mark);
 });

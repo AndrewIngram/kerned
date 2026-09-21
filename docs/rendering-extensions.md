@@ -125,6 +125,38 @@ rerunning validation or transforms. Input still enters through schema validation
 These contracts currently render canvas text's inline objects and mark ranges.
 Native text views retain their native rendering policy. View-only controls use
 [decoration widgets](decorations.md#widgets), including React registrations.
-Editable content slots and complete selection/editability props remain milestone
-6 work. These renderers do not claim to replace native text input
+Editable content slots remain milestone 6 work. These renderers do not claim to replace native text input
 or implement a second editable DOM tree.
+
+## Scoped selection
+
+`editor.getSelection(nodeId)` returns the selection inside that node's subtree,
+with `undefined` for a missing node. Renderers receive the same `ScopedSelection`
+from `src/state` without traversing the document:
+
+- `none`: no selection inside this scope.
+- `caret`: a `point` and `upstream` affinity. The point is a text offset or a
+  structural position beside a child. A structural caret belongs to the parent,
+  not the child beside it.
+- `range`: selected `ranges` inside the subtree. These can be discontiguous, as
+  with table cells. An empty text range can be selected content; it is not a caret.
+- `node`: the entire node is selected, directly or through a selected ancestor.
+
+Bound vanilla `NodeRenderFrame` and React node props both expose scoped
+`selection`. The imperative editor in the factory still provides the global
+`editor.state.selection`; the lower-level native `NodeViewFrame` retains its
+global selection and context. Inline and mark frames also expose `selection`,
+clipped to their own UTF-16 interval. At a
+shared interval boundary, an upstream caret belongs to the preceding interval;
+otherwise it belongs to the following interval. Whole-node selection stays `node`.
+Widget frames report the owning node's scope; the widget is not document content
+and does not create another selectable region.
+
+`selectionInText(scope, id, from, to)` clips a text node's scope for custom range
+renderers. `equalScopedSelection(a, b)` compares its local meaning, independently
+of a text selection's global direction. Default adapters use this comparison to
+skip unrelated renders. Selection changes do not recompute mark line fragments.
+The session builds one lazy index per selection/document and releases it on the
+next edit, selection change or destruction. Permission refresh retains that index.
+These offsets describe the current snapshot; use `editor.positions` for durable
+references across edits.

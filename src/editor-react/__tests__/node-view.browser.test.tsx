@@ -27,7 +27,7 @@ import {
   presentations,
   type MountedEditor,
 } from '../../editor-canvas';
-import { createSchema, defineNode, type DocumentNode } from '../../model';
+import { createSchema, defineNode, type DocumentNode, type NodeIdentity } from '../../model';
 import { NodeSelection, textSelection, type AccessPolicy } from '../../state';
 import { defineReactNodeView, EditorContent, type ReactNodeViewProps } from '../index';
 
@@ -77,7 +77,7 @@ const Application = createContext<{
   rendered: (id: number) => void;
 } | null>(null);
 
-function Card({ node, attributes, selected, access }: ReactNodeViewProps<typeof card>) {
+function Card({ node, attributes, selection, access }: ReactNodeViewProps<typeof card>) {
   const application = useContext(Application);
 
   if (!application) throw new Error('Application context was lost');
@@ -85,6 +85,7 @@ function Card({ node, attributes, selected, access }: ReactNodeViewProps<typeof 
   if (application.theme === 'Throw') throw new Error('Custom render failed');
   const { theme, rename: renameCard, mounted, rendered } = application;
   const [clicks, setClicks] = useState(0);
+  expectTypeOf(node).toEqualTypeOf<Readonly<NodeIdentity>>();
   expectTypeOf(attributes.label).toEqualTypeOf<string>();
   expectTypeOf(attributes.height).toEqualTypeOf<number>();
   useEffect(() => mounted(node.id), [mounted, node.id]);
@@ -94,7 +95,7 @@ function Card({ node, attributes, selected, access }: ReactNodeViewProps<typeof 
     <section
       data-access={access}
       data-card={node.id}
-      data-selected={selected}
+      data-selected={selection.kind === 'node'}
       style={{ height: attributes.height }}
     >
       <span>

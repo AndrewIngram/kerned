@@ -33,6 +33,7 @@ import {
   type AccessPolicy,
 } from './permissions';
 import { createRelativePositions, parsePositionCheckpoint } from './relative-positions';
+import { indexSelection } from './scoped-selection';
 import {
   TextSelection,
   selectionContext,
@@ -192,6 +193,9 @@ export function createEditor<N extends NodeIdentity>(
 ) {
   const selections = createSelectionRegistry(extensions);
   let currentTree = validateTree(schema, initial);
+
+  let selectionIndex: ReturnType<typeof indexSelection<N>> | undefined;
+
   selections.validate(selectionContext(schema, initial), selection);
 
   const documentId = options.documentId ?? crypto.randomUUID(),
@@ -338,6 +342,7 @@ export function createEditor<N extends NodeIdentity>(
         journal.push({ from: state.revision, to: next.revision, maps });
         state = next;
         currentTree = tree;
+        selectionIndex = undefined;
         notify(update);
 
         return { state, changedIds, positionMapping };
@@ -357,6 +362,17 @@ export function createEditor<N extends NodeIdentity>(
     },
     get isDestroyed() {
       return destroyed;
+    },
+    getSelection(id: number) {
+      assertActive();
+
+      selectionIndex ??= indexSelection(
+        state.selection,
+        selectionContext(schema, state.nodes, currentTree),
+        currentTree,
+      );
+
+      return selectionIndex(id);
     },
     getAccess(id: number) {
       assertActive();
@@ -378,6 +394,7 @@ export function createEditor<N extends NodeIdentity>(
       if (destroyed) return;
       assertWritable();
       destroyed = true;
+      selectionIndex = undefined;
       history?.clear();
       journal.length = 0;
       allocationNodes = undefined;
@@ -477,6 +494,7 @@ export function createEditor<N extends NodeIdentity>(
       prepareFields(update);
 
       if (!state.selection.eq(next)) history?.closeGroup();
+      selectionIndex = undefined;
       state = after;
       notify(update);
 
@@ -560,6 +578,7 @@ export function createEditor<N extends NodeIdentity>(
       journal.push({ from: state.revision, to: result.state.revision, maps: result.anchorMaps });
       state = result.state;
       currentTree = tree;
+      selectionIndex = undefined;
       notify(update);
 
       return result;

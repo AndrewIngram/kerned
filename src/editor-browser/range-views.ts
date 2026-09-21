@@ -1,5 +1,10 @@
 import type { NodeIdentity, SchemaDefinition, ValueBinding } from '../model';
-import type { NodeAccess } from '../state';
+import {
+  equalScopedSelection,
+  selectionInText,
+  type ScopedSelection,
+  type NodeAccess,
+} from '../state';
 import type { Drawing, DrawingLayer, TextFragment } from './drawing';
 import { createRangeViews } from './range-view-owner';
 import type { LayerBlock, ViewLayerContext, ViewLayerContribution } from './view-layers';
@@ -17,6 +22,7 @@ export type ValueViewAttributes<D extends ValueDefinition> = NonNullable<
 export type InlineViewFrame<D extends InlineDefinition> = Readonly<{
   node: Readonly<NodeIdentity>;
   access: NodeAccess;
+  selection: ScopedSelection;
   attributes: ValueViewAttributes<D>;
   id: string;
   index: number;
@@ -27,6 +33,7 @@ export type InlineViewFrame<D extends InlineDefinition> = Readonly<{
 export type MarkViewFrame<D extends MarkDefinition> = Readonly<{
   node: Readonly<NodeIdentity>;
   access: NodeAccess;
+  selection: ScopedSelection;
   attributes: ValueViewAttributes<D>;
   from: number;
   to: number;
@@ -74,7 +81,10 @@ export function defineInlineView<D extends InlineDefinition>(
           if (type.kind !== 'text' || !block.inline.length) return [];
           const access = context.editor.getAccess(block.node.id);
 
-          if (!access) throw new Error('Cannot render a node outside the current document');
+          const selection = context.editor.getSelection(block.node.id);
+
+          if (!access || !selection)
+            throw new Error('Cannot render a node outside the current document');
           let cached = frames.get(block.node);
 
           if (!cached) {
@@ -87,6 +97,12 @@ export function defineInlineView<D extends InlineDefinition>(
                 cached.set(value.id, {
                   node: block.node,
                   access,
+                  selection: selectionInText(
+                    selection,
+                    block.node.id,
+                    value.index,
+                    value.index + 1,
+                  ),
                   attributes: bound.attrs,
                   id: value.id,
                   index: value.index,
@@ -103,12 +119,15 @@ export function defineInlineView<D extends InlineDefinition>(
 
             if (!frame) return [];
 
+            const scoped = selectionInText(selection, block.node.id, frame.index, frame.index + 1);
+
             if (
+              !equalScopedSelection(frame.selection, scoped) ||
               frame.width !== box.width ||
               frame.height !== box.height ||
               frame.access !== access
             ) {
-              frame = { ...frame, width: box.width, height: box.height, access };
+              frame = { ...frame, width: box.width, height: box.height, access, selection: scoped };
               cached.set(box.id, frame);
             }
 
@@ -161,7 +180,10 @@ export function defineMarkView<D extends MarkDefinition>(
           if (type.kind !== 'text' || !block.text) return [];
           const access = context.editor.getAccess(block.node.id);
 
-          if (!access) throw new Error('Cannot render a node outside the current document');
+          const selection = context.editor.getSelection(block.node.id);
+
+          if (!access || !selection)
+            throw new Error('Cannot render a node outside the current document');
           let previous = cache.get(block.node);
 
           if (
@@ -180,6 +202,7 @@ export function defineMarkView<D extends MarkDefinition>(
                     {
                       node: block.node,
                       access,
+                      selection: selectionInText(selection, block.node.id, range.from, range.to),
                       attributes: bound.attrs,
                       from: range.from,
                       to: range.to,
@@ -202,6 +225,14 @@ export function defineMarkView<D extends MarkDefinition>(
             };
             cache.set(block.node, previous);
           }
+
+          previous.frames = previous.frames.map((frame) => {
+            const scoped = selectionInText(selection, block.node.id, frame.from, frame.to);
+
+            return equalScopedSelection(frame.selection, scoped)
+              ? frame
+              : { ...frame, selection: scoped };
+          });
 
           return previous.frames.map((frame) => ({
             key: JSON.stringify([block.node.id, frame.from, frame.to]),
