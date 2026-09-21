@@ -61,15 +61,38 @@ Query return values retain their inferred types.
 normalized attributes without replaying import transforms. Both construction
 paths validate once at the session boundary.
 
-Starter formatting, heading, list, quote and table contributions compose with
-foreign text and atom definitions. The complete starter editing factory still
-declares node-valued command arguments against the closed starter node
-union. The underlying paste and structural algorithms now operate on the executing
-schema; typed command contribution assembly and browser codecs still need their
-complete migration. Renderer projection is owned by the view consumer, not a
-session query. Rich browser paste uses the named session command. Native text,
-splitting and deletion now publish through `transact`, but their policy helpers
-still need migration into extension contributions.
+The complete starter kit composes with foreign text and atom definitions,
+including node-valued update and paste arguments. Browser codecs and renderer
+projection remain tied to starter definitions and still need their complete
+migration. Native typing, Enter, deletion, plain/rich paste and table text edits
+invoke named session commands; the browser adapter does not construct document
+steps for these actions.
+
+Ordinary reusable commands use `defineCommand`. If arguments contain canonical
+nodes, use `defineDocumentCommand` to bind those arguments to the consuming
+schema, without naming its node union:
+
+```ts
+export interface UpdateArguments extends DocumentCommandArguments {
+  readonly args: [node: this['node']];
+}
+
+const update = defineDocumentCommand<UpdateArguments>({
+  execute(context, node) {
+    context.step({ kind: 'updateBlock', node });
+    return true;
+  },
+});
+```
+
+`this['node']` is the assembled document node type. It can appear in arrays or
+nested argument records, such as a clipboard fragment. Export argument interfaces
+used by exported extension definitions so TypeScript can name them in declarations.
+Named calls, chains, dry runs and activity queries all use the same bound tuple.
+The binding is type-only; it adds no runtime parser or serialization. Callback
+bodies still have to work for every consuming schema, using its operations and
+node bindings. Closed-schema callbacks retain their construction-time rejection
+when combined with incompatible foreign nodes.
 
 `schema.node(definition)` binds construction and attribute reads to the installed
 configuration of that definition:
@@ -155,6 +178,24 @@ one chain and when replaying the published transaction. Explicit step marks
 win over inherited marks. Plain text nodes without mark support accept unmarked
 input; unsupported explicit marks reject the entire edit. The resulting caret
 retains the insertion marks for subsequent typing.
+
+Starter native-edit commands are available without a browser:
+
+- `insertText(text, range?)` replaces the current text selection. An optional
+  `{ from, to }` describes a native input diff within the current text node.
+- `replaceText({ id, from, to, text, caret? })` targets a text node explicitly.
+  Moving to a different target clears unrelated stored marks; an optional caret
+  captures the native control's resulting selection.
+- `pasteText(text)` inserts newline-separated paragraphs at the current selection,
+  including within a table cell.
+- `splitBlock()`, `deleteBackward()` and `deleteForward()` apply schema-owned text
+  editing and starter list/quote policies. Deletion respects grapheme boundaries
+  and does not merge separate table cells. Empty quotes unwrap; Enter in a list
+  creates an item or outdents an empty one.
+
+These commands observe the current draft, enforce permissions, participate in
+atomic chains and use the same history options as formatting commands. Browser
+input handlers retain normalization, event routing and composition grouping.
 
 ## Observation and React
 

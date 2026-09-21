@@ -20,6 +20,11 @@ export {
 
 export { selectedValue, type SelectedValue } from './queries';
 
-export { defineCommand, defineQuery } from './definitions';
+export {
+  defineCommand,
+  defineQuery,
+  defineDocumentCommand,
+  type DocumentCommandArguments,
+} from './definitions';
 
 export type { EditorEvents } from '../state';

@@ -2,8 +2,7 @@ import type { ClipboardFragment } from '../../extensions/clipboard';
 import type { StarterNode } from '../../extensions/demo-model';
 import type { TextFormat } from '../../extensions/formatting';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import { TextSelection, type Selection, type Transaction } from '../../state';
-import type { Step } from '../../transform';
+import { TextSelection } from '../../state';
 
 /** Demo feedback and focus wrap the editor's public commands; no document policy lives here. */
 export function createEditorControls({
@@ -21,13 +20,13 @@ export function createEditorControls({
   focus: () => void;
   syncInput: () => void;
 }) {
-  function run(action: () => boolean) {
+  function run(action: () => boolean, focusAfter = true) {
     try {
       onEdit();
       const applied = action();
       notice('');
 
-      if (applied) focus();
+      if (applied && focusAfter) focus();
 
       return applied;
     } catch (error) {
@@ -38,58 +37,37 @@ export function createEditorControls({
     }
   }
 
-  function dispatch(
-    steps: Step<StarterNode>[],
-    history: Transaction<StarterNode>['history'] = 'separate',
-    selection?: Selection,
-    input = false,
-  ) {
-    if (history === 'exclude') throw new Error('Local commands must declare a history group');
-
-    try {
-      onEdit();
-
-      const applied = editor.transact(
-        (context) => {
-          if (input) {
-            if (!(selection instanceof TextSelection))
-              throw new Error('Text input requires a resulting caret');
-            context.apply({ steps, selection, input: true });
-          } else context.apply({ steps, selection });
-
-          return true;
-        },
-        { history, time: Date.now() },
-      );
-
-      if (!applied) {
-        syncInput();
-
-        return false;
-      }
-
-      notice('');
-
-      return true;
-    } catch (error) {
-      notice(error instanceof Error ? error.message : 'Edit failed');
-      syncInput();
-
-      return false;
-    }
-  }
-
   return {
-    dispatch,
-    allocate: () => ({ id: editor.allocateBlockId(), key: crypto.randomUUID() }),
-    structure: (change: () => Step<StarterNode>[]) =>
-      run(() =>
-        editor.transact((context) => {
-          context.steps(change());
-
-          return true;
-        }),
+    replaceText: (id: number, from: number, to: number, text: string, caret: number) =>
+      run(
+        () =>
+          editor
+            .chain({ history: { group: `typing:${id}` } })
+            .replaceText({ id, from, to, text, caret })
+            .run(),
+        false,
       ),
+    allocate: () => ({ id: editor.allocateBlockId(), key: crypto.randomUUID() }),
+    insertText: (
+      text: string,
+      range: { from: number; to: number },
+      history: 'separate' | { group: string },
+    ) => run(() => editor.chain({ history }).insertText(text, range).run(), false),
+    pasteText: (text: string) => run(() => editor.commands.pasteText(text), false),
+    splitBlock: () => run(() => editor.commands.splitBlock(), false),
+    deleteText: (backward: boolean) =>
+      run(() => {
+        const selection = editor.state.selection;
+
+        const chain = editor.chain({
+          history:
+            selection instanceof TextSelection
+              ? { group: `delete:${selection.head.id}` }
+              : 'separate',
+        });
+
+        return (backward ? chain.deleteBackward() : chain.deleteForward()).run();
+      }, false),
     indentList: (outdent = false) => run(() => editor.commands.indentList(outdent)),
     toggleList: (ordered: boolean) => run(() => editor.commands.toggleList(ordered)),
     toggleQuote: () => run(() => editor.commands.toggleQuote()),

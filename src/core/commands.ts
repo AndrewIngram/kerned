@@ -1,33 +1,28 @@
 import type { NodeIdentity } from '../model';
 import type { CommandDefinition, CommandState, createEditor, CommandOptions } from '../state';
+import type { CommandArguments } from './definitions';
 
 export type CommandDefinitions<N extends NodeIdentity> = Readonly<
   Record<string, CommandDefinition<N, never[]>>
 >;
 
-type Arguments<Definition> = [Definition] extends [never]
-  ? never[]
-  : Definition extends {
-        execute: (context: never, ...args: infer Args) => boolean;
-      }
-    ? Args
-    : never;
-
-export type DirectCommands<Definitions> = {
-  readonly [Name in keyof Definitions]: (...args: Arguments<Definitions[Name]>) => boolean;
+export type DirectCommands<Definitions, N extends NodeIdentity> = {
+  readonly [Name in keyof Definitions]: (
+    ...args: CommandArguments<Definitions[Name], N>
+  ) => boolean;
 };
 
-export type CommandStateQuery<Definitions> = keyof Definitions extends never
+export type CommandStateQuery<Definitions, N extends NodeIdentity> = keyof Definitions extends never
   ? (name: never, ...args: never[]) => CommandState
   : <Name extends keyof Definitions>(
       name: Name,
-      ...args: Arguments<Definitions[Name]>
+      ...args: CommandArguments<Definitions[Name], N>
     ) => CommandState;
 
-export type NamedChain<Definitions> = {
+export type NamedChain<Definitions, N extends NodeIdentity> = {
   readonly [Name in keyof Definitions]: (
-    ...args: Arguments<Definitions[Name]>
-  ) => NamedChain<Definitions>;
+    ...args: CommandArguments<Definitions[Name], N>
+  ) => NamedChain<Definitions, N>;
 } & { run(): boolean };
 
 type StateEditor<N extends NodeIdentity> = ReturnType<typeof createEditor<N>>;

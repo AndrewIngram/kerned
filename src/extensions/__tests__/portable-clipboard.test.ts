@@ -1,13 +1,17 @@
-import { expect, test } from 'vitest';
+import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
 import { createEditor } from '../../core';
-import { createSchema, defineNode, indexTree, type DocumentInput } from '../../model';
-import { TextSelection, textSelection } from '../../state';
-import { replaceStructuredText } from '../blocks';
-import { pasteFragment } from '../clipboard';
-import { starterDefinitions } from '../starter-definitions';
-import { starterTables } from '../starter-kit/tables';
+import {
+  createSchema,
+  defineNode,
+  indexTree,
+  type DocumentInput,
+  type DocumentNode,
+} from '../../model';
+import { TextSelection, textSelection, NodeSelection } from '../../state';
+import type { ClipboardFragment } from '../clipboard';
+import { starterExtensions } from '../starter-kit';
 import { tableCells } from '../table';
 
 const caption = defineNode({
@@ -33,7 +37,7 @@ const widget = defineNode({
 });
 
 const schema = createSchema({
-  extensions: [...starterDefinitions, starterTables, caption, widget],
+  extensions: [...starterExtensions, caption, widget],
 });
 
 const richCaption = {
@@ -61,20 +65,10 @@ test('inline paste uses custom text storage, renews inline identities and undoes
   const source = editor.state.nodes[0];
   editor.select(textSelection(2, 6));
   const original = editor.state;
-  expect(
-    editor.transact((context) => {
-      const change = pasteFragment(
-        context.schema,
-        context.state,
-        { nodes: [source], inline: true },
-        context.allocate,
-      );
-
-      context.apply(change);
-
-      return true;
-    }),
-  ).toBe(true);
+  const fragment = { nodes: [source], inline: true };
+  expect(editor.can().paste(fragment)).toBe(true);
+  expect(editor.state).toBe(original);
+  expect(editor.chain().paste(fragment).run()).toBe(true);
   const destination = editor.state.nodes[1];
 
   if (destination.kind !== 'caption') throw new Error('Expected caption');
@@ -146,20 +140,10 @@ test('rectangular paste retains custom cell content while growing the destinatio
   const source = editor.state.nodes[0];
   editor.select(new tableCells.CellSelection(20, 21));
   const original = editor.state;
-  expect(
-    editor.transact((context) => {
-      const change = pasteFragment(
-        context.schema,
-        context.state,
-        { nodes: [source], inline: false },
-        context.allocate,
-      );
-
-      context.apply(change);
-
-      return true;
-    }),
-  ).toBe(true);
+  const fragment = { nodes: [source], inline: false };
+  expect(editor.can().paste(fragment)).toBe(true);
+  expect(editor.state).toBe(original);
+  expect(editor.chain().paste(fragment).run()).toBe(true);
   const destination = editor.state.nodes[1];
 
   if (destination.kind !== 'table') throw new Error('Expected table');
@@ -191,18 +175,62 @@ test('cross-container replacement works with custom text and intervening atoms',
 
   editor.select(new TextSelection({ id: 1, offset: 1 }, { id: 3, offset: 3 }));
   const original = editor.state;
-  expect(
-    editor.transact((context) => {
-      const change = replaceStructuredText(context.schema, context.state, 'X');
-      context.apply(change);
-
-      return true;
-    }),
-  ).toBe(true);
+  expect(editor.commands.replaceSelection('X')).toBe(true);
   expect(editor.state.nodes).toHaveLength(1);
   expect(schema.children(editor.state.nodes[0])).toMatchObject([
     { kind: 'caption', id: 1, value: 'AXZ' },
   ]);
   expect(editor.undo()).toBe(true);
   expect(editor.state.nodes).toEqual(original.nodes);
+});
+
+test('the complete starter kit binds node-valued commands to the consumer document', () => {
+  const editor = createEditor({
+    schema,
+    content: [{ kind: 'widget', id: 1, label: 'Original' }],
+  });
+
+  type Node = DocumentNode<typeof schema.definitions>;
+
+  expectTypeOf(editor.commands.updateNode).parameters.toEqualTypeOf<[node: Node]>();
+  expectTypeOf(editor.commands.paste).parameters.toEqualTypeOf<
+    [fragment: ClipboardFragment<Node>]
+  >();
+  const node = editor.state.nodes[0];
+
+  if (node.kind !== 'widget') throw new Error('Expected widget');
+  const changed = { ...node, label: 'Changed' };
+  const initial = editor.state;
+  expect(editor.getCommandState('updateNode', changed).available).toBe(true);
+  expect(editor.can().chain().updateNode(changed).run()).toBe(true);
+  expect(editor.state).toBe(initial);
+  expect(editor.chain().updateNode(changed).run()).toBe(true);
+  expect(editor.state.nodes[0]).toMatchObject({ label: 'Changed' });
+  expect(editor.undo()).toBe(true);
+  expect(editor.state.nodes).toEqual(initial.nodes);
+
+  editor.select(new NodeSelection(node.id));
+  expect(editor.commands.replaceSelection('First\nSecond')).toBe(true);
+  expect(editor.state.nodes).toMatchObject([
+    { kind: 'paragraph', text: 'First' },
+    { kind: 'paragraph', text: 'Second' },
+  ]);
+
+  function invalidArguments() {
+    const unknownNode = { id: 4, key: 'unknown', kind: 'unknown' } as const;
+    // @ts-expect-error Node-valued arguments reject definitions absent from this schema.
+    editor.commands.updateNode(unknownNode);
+    // @ts-expect-error Fragment descendants use the assembled document union.
+    editor.commands.paste({ nodes: [unknownNode], inline: false });
+    // @ts-expect-error Chained calls preserve the same argument restrictions.
+    editor.chain().updateNode(unknownNode);
+    // @ts-expect-error Availability queries do not widen command arguments.
+    editor.can().paste({ nodes: [unknownNode], inline: false });
+    // @ts-expect-error Activity queries also use the same bound tuple.
+    editor.getCommandState('updateNode', unknownNode);
+    // @ts-expect-error Known nodes still require their attributes.
+    editor.commands.updateNode({ kind: 'widget', id: 4, key: 'missing-label' });
+  }
+
+  void invalidArguments;
 });

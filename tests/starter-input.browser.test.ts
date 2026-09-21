@@ -6,9 +6,9 @@ import { createTextInput } from '../src/editor-browser';
 import { starterExtensions } from '../src/extensions/starter-kit';
 import { createStarterKitInput } from '../src/extensions/starter-kit/input';
 import { createSchema } from '../src/model';
-import { TextSelection } from '../src/state';
+import { TextSelection, textSelection } from '../src/state';
 
-test('retained clipboard handlers read the current selection and share the session paste command', () => {
+function inputSession() {
   const schema = createSchema({ extensions: starterExtensions });
 
   const editor = createEditor({
@@ -45,6 +45,11 @@ test('retained clipboard handlers read the current selection and share the sessi
     navigate: () => false,
   });
 
+  return { editor, input, textInput, notices, handlers };
+}
+
+test('retained clipboard handlers read the current selection and share the session paste command', () => {
+  const { editor, notices, handlers } = inputSession();
   editor.select(new TextSelection({ id: 2, offset: 0 }, { id: 2, offset: 6 }));
   const copy = new ClipboardEvent('copy', { clipboardData: new DataTransfer(), cancelable: true });
   handlers.copy?.(copy);
@@ -81,4 +86,28 @@ test('retained clipboard handlers read the current selection and share the sessi
 
   handlers.copy?.(copyAgain);
   expect(copyAgain.clipboardData?.getData('text/plain')).toBe('First');
+});
+
+test('retained keyboard and text callbacks invoke current session commands', () => {
+  const { editor, input, textInput, notices, handlers } = inputSession();
+  editor.select(textSelection(2, 3));
+  const before = editor.state;
+  const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+  handlers.keydown?.(enter);
+  expect(enter.defaultPrevented).toBe(true);
+  expect(editor.state.nodes).toMatchObject([{ text: 'First' }, { text: 'Sec' }, { text: 'ond' }]);
+  const backspace = new KeyboardEvent('keydown', { key: 'Backspace', cancelable: true });
+  handlers.keydown?.(backspace);
+  expect(backspace.defaultPrevented).toBe(true);
+  expect(editor.state.nodes).toMatchObject([{ text: 'First' }, { text: 'Second' }]);
+  editor.undo();
+  editor.undo();
+  expect(editor.state.nodes).toEqual(before.nodes);
+  editor.select(textSelection(1, 5));
+  textInput.sync(input);
+  input.value += '!';
+  input.setSelectionRange(input.value.length, input.value.length);
+  handlers.input?.(new Event('input'), input);
+  expect(editor.state.nodes[0]).toMatchObject({ text: 'First!' });
+  expect(notices.filter(Boolean)).toEqual([]);
 });

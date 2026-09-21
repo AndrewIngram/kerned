@@ -76,6 +76,42 @@ type DefinitionConfig<
   setup?: (options: Immutable<Options>, ...args: Args) => Contribution;
 };
 
+/** A named recursive contract keeps consumer declaration output bounded. */
+export interface ContentDefinition<
+  Category extends 'node' | 'mark' | 'inline',
+  Name extends string,
+  Options extends DefinitionOptions,
+  Spec,
+  Contribution extends object,
+  Args extends unknown[],
+> {
+  readonly category: Category;
+  readonly name: Name;
+  readonly [definitionFamily]: symbol;
+  readonly version: number;
+  readonly options: Immutable<Options>;
+  readonly requires: readonly string[];
+  readonly spec: Spec;
+  readonly setup: (...args: Args) => Contribution | undefined;
+  configure(
+    next: Partial<Options>,
+  ): ContentDefinition<Category, Name, Options, Spec, Contribution, Args>;
+}
+
+export interface BehaviorDefinition<
+  Name extends string,
+  Options extends DefinitionOptions,
+  Contribution extends object,
+  Args extends unknown[],
+> {
+  readonly category: 'behavior';
+  readonly name: Name;
+  readonly options: Immutable<Options>;
+  readonly requires: readonly string[];
+  readonly setup: (...args: Args) => Contribution;
+  configure(next: Partial<Options>): BehaviorDefinition<Name, Options, Contribution, Args>;
+}
+
 function definition<
   const Category extends 'node' | 'mark' | 'inline',
   const Name extends string,
@@ -87,7 +123,7 @@ function definition<
   category: Category,
   config: DefinitionConfig<Name, Options, Spec, Contribution, Args>,
   family: symbol = Symbol(config.name),
-) {
+): ContentDefinition<Category, Name, Options, Spec, Contribution, Args> {
   if (!config.name || !Number.isSafeInteger(config.version) || config.version < 1)
     throw new Error('Extensions require a name and positive schema version');
 
@@ -247,7 +283,7 @@ export function defineExtension<
   options: Options;
   requires?: readonly string[];
   setup: (options: Immutable<Options>, ...args: Args) => Contribution;
-}) {
+}): BehaviorDefinition<Name, Options, Contribution, Args> {
   if (!config.name) throw new Error('Extensions require a name');
   const { name, setup } = config;
   const options = structuredClone(config.options);

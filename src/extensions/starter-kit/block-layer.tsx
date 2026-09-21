@@ -6,7 +6,7 @@ import type { Viewport } from '../../editor-react';
 import { demoSchema } from '../../extensions/demo-schema';
 import { DemoNodeView } from '../../extensions/node-views';
 import { type CommentHighlight } from '../../extensions/text-block-view';
-import { type FindState, textSelection, type Selection } from '../../state';
+import { type FindState, type Selection } from '../../state';
 import type { StarterNode } from '../demo-model';
 import type { EditorDocument } from './document';
 import type { InputActions } from './input';
@@ -16,7 +16,7 @@ import type { useDocumentLayout } from './use-document-layout';
 type BlockLayerProps = {
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   doc: EditorDocument;
-  actions: Pick<InputActions, 'dispatch' | 'restore' | 'toggleFormat' | 'replaceCells'> & {
+  actions: Pick<InputActions, 'replaceText' | 'restore' | 'toggleFormat' | 'replaceCells'> & {
     update(this: void, node: StarterNode): boolean;
   };
   layout: ReturnType<typeof useDocumentLayout>;
@@ -51,7 +51,7 @@ export function BlockLayer({
   onOpen,
 }: BlockLayerProps) {
   const { projection, editorState, context, selectedRange } = doc;
-  const { dispatch, restore, toggleFormat, replaceCells, update } = actions;
+  const { replaceText, restore, toggleFormat, replaceCells, update } = actions;
   const { visible, contentWidth, onMeasure, scene } = layout;
   const { width, zoom } = viewport;
   const quoteRules = new Map<number, { top: number; bottom: number; left: number }>();
@@ -79,13 +79,7 @@ export function BlockLayer({
           selection: editorState.selection,
           context,
           onSelect: setSelection,
-          onText: (id, from, to, text, caret) =>
-            dispatch(
-              [{ kind: 'replaceText', id, from, to, text }],
-              { group: `typing:${id}` },
-              textSelection(id, caret),
-              true,
-            ),
+          onText: replaceText,
           onUndo: restore,
           onFormat: toggleFormat,
           onReplace: replaceCells,
@@ -111,7 +105,7 @@ export function BlockLayer({
       editorState.selection,
       context,
       setSelection,
-      dispatch,
+      replaceText,
       restore,
       toggleFormat,
       replaceCells,

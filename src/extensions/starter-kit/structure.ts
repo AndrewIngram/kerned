@@ -8,7 +8,7 @@ import { quote, list, listItem } from '../starter-definitions';
 import { selectedStructure } from './selection';
 
 /** Bind constructors to the executing schema so wrappers can retain foreign children. */
-function policies<N extends NodeIdentity>(schema: Schema<N>) {
+export function createStructuralPolicies<N extends NodeIdentity>(schema: Schema<N>) {
   const quoteType = schema.node(quote);
   const listType = schema.node(list);
   const itemType = schema.node(listItem);
@@ -79,7 +79,7 @@ export const starterStructure = defineExtension({
         execute(context) {
           const selected = selectedStructure(context);
 
-          const steps = policies(context.schema)
+          const steps = createStructuralPolicies(context.schema)
             .blocks(context.schema, context.state, selected.ids, context.allocate, selected.tree)
             .quote();
 
@@ -94,7 +94,7 @@ export const starterStructure = defineExtension({
         execute(context, ordered: boolean) {
           const selected = selectedStructure(context);
 
-          const steps = policies(context.schema)
+          const steps = createStructuralPolicies(context.schema)
             .blocks(context.schema, context.state, selected.ids, context.allocate, selected.tree)
             .list(ordered);
 
@@ -107,7 +107,7 @@ export const starterStructure = defineExtension({
       indentList: defineCommand({
         execute(context, outdent = false) {
           const selected = selectedStructure(context);
-          const policy = policies(context.schema);
+          const policy = createStructuralPolicies(context.schema);
           const first = selected.ids[0];
 
           const item =

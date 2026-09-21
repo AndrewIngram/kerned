@@ -67,7 +67,8 @@
     "check:app-boundaries": "node scripts/check-app-boundaries.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "check": "run-p --print-label lint format:check typecheck check:project test"
+    "check": "run-p --print-label lint format:check typecheck check:declarations check:project test",
+    "check:declarations": "node scripts/check-declarations.mjs"
   },
   "dependencies": {
     "@standard-schema/spec": "1.1.0",

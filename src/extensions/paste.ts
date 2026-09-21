@@ -1,5 +1,5 @@
 import { indexTree, type NodeIdentity, type Schema } from '../model';
-import { TextSelection, textSelection, type EditorState } from '../state';
+import { TextSelection, textSelection, selectionContext, type EditorState } from '../state';
 import { type Step } from '../transform';
 import { replaceStructuredText } from './blocks';
 import { paragraph } from './starter-definitions';
@@ -12,7 +12,12 @@ export function pasteParagraphs<N extends NodeIdentity>(
   allocate: () => NodeIdentity,
 ) {
   const lines = text.split('\n');
-  const replacement = replaceStructuredText(schema, state, lines[0]);
+
+  const replacement =
+    state.selection instanceof TextSelection &&
+    state.selection.anchor.id === state.selection.head.id
+      ? state.selection.replace(selectionContext(schema, state.nodes), lines[0])
+      : replaceStructuredText(schema, state, lines[0]);
 
   if (lines.length === 1) return replacement;
   const caret = replacement.selection;

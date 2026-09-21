@@ -820,3 +820,56 @@ Final production trials with session events also pass every unchanged budget
 29.6ms, paging 32.6ms, loaded heap 28,966,720 bytes. These reports identify
 `93a25b5` and measure this checkpoint before commit. A second lint-fix/format
 pass changed no files.
+
+### Milestone 3 complete starter composition and native commands
+
+The complete `starterExtensions` assembly now composes with foreign text and atom
+nodes. `defineDocumentCommand` binds canonical-node arguments to the consuming
+schema through a type-only argument interface. Direct commands, chains, dry runs
+and activity queries all preserve the same assembled node type. Compile-time
+fixtures reject unknown node kinds and missing attributes. Ordinary commands
+retain inferred arguments through `defineCommand`; no runtime serialization or
+extra content parsing was added.
+
+Starter paste and node-update commands no longer capture `StarterNode` or a fixed
+schema. Foreign text with alternative text/mark/inline fields survives named rich
+paste, rectangular table paste and table growth. Custom atom updates, paragraph
+replacement and cross-container replacement work through the complete kit, with
+atomic undo and unchanged dry-run state.
+
+Native typing, Enter, backward/forward deletion, plain-text paste and explicit
+native table edits now invoke named session commands. The browser handler no
+longer constructs split, join, replacement or list steps. The demo's imperative
+step-dispatch and structural callback wrappers were removed. Input handlers keep
+event routing, text normalization and composition/history grouping; clipboard
+codecs and renderer projection still use starter-specific content.
+
+Headless regression tests cover custom text storage, grapheme deletion, stored
+marks through list splitting, joining a later paragraph within a list item,
+empty-quote exit, cross-block replacement/splitting in one undo entry, cell
+boundaries and permissions. Explicit native targets preserve their reported
+caret without inheriting stored marks from a different text node. Plain-text
+paste now handles paragraphs within the selected table cell. Retained-handler
+browser tests verify Enter, Backspace and ordinary typing without rebinding or a
+React render.
+
+Declaration emission uncovered pre-existing anonymous recursive definition types
+and internal symbols that TypeScript could not name. `ContentDefinition` and
+`BehaviorDefinition` now give those recursive contracts names without erasing
+concrete schema or command types. The command argument binding also has a named
+exported contract. `check:declarations` emits declarations into a temporary folder
+and removes it afterward; `pnpm run check` now includes this gate. This adds a
+check rather than relaxing linting, typechecking or any test suite.
+
+Milestone 3 still requires deferred view effects, history-provider ownership,
+extension resource cleanup and the public snapshot contract review before its
+completion commit and architecture judge. The judge baseline remains `c3cdf8b`.
+
+The final full check, declaration emission and production build passed with
+**217 Vitest tests, one unchanged convergence todo, and all 39 Playwright
+scenarios**. The second lint-fix/format pass changed no files. Three production
+trials in `artifacts/public-interface-m3/native-commands/baseline.json` passed
+all unchanged budgets: first usable 175ms, full stream 1081.5ms, paste handler
+55.5ms, paste paint 114.1ms, typing 32.7ms, paging 32.9ms, loaded heap 28,977,404
+bytes. The report identifies `0e2be8a` and measures this uncommitted native-command
+implementation before its declaration-only contract refinements.

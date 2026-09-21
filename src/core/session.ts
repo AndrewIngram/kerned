@@ -107,12 +107,12 @@ export type Editor<D extends readonly SchemaDefinition[], N extends NodeIdentity
   readonly schema: SessionSchema<D, N>;
   readonly documentId: string;
   readonly history: { undo: number; redo: number };
-  readonly commands: DirectCommands<Installed<D, 'commands'>>;
+  readonly commands: DirectCommands<Installed<D, 'commands'>, N>;
   readonly queries: NamedQueries<Installed<D, 'queries'>>;
-  readonly getCommandState: CommandStateQuery<Installed<D, 'commands'>>;
-  chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'>>;
-  can(): DirectCommands<Installed<D, 'commands'>> & {
-    chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'>>;
+  readonly getCommandState: CommandStateQuery<Installed<D, 'commands'>, N>;
+  chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'>, N>;
+  can(): DirectCommands<Installed<D, 'commands'>, N> & {
+    chain(options?: CommandOptions): NamedChain<Installed<D, 'commands'>, N>;
   };
   dispatch(transaction: Transaction<N>): ReturnType<StateSession<N>['dispatch']>;
   readonly positions: StateSession<N>['positions'];

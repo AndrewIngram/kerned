@@ -1,13 +1,10 @@
 import { createTextInput, type BrowserViewOptions } from '../../editor-browser';
-import { listCommands, replaceStructuredText } from '../../extensions/blocks';
 import { readClipboard, writeClipboard, type ClipboardFragment } from '../../extensions/clipboard';
 import { plainText, type StarterNode } from '../../extensions/demo-model';
-import { pasteParagraphs } from '../../extensions/paste';
 import { tablePlainText } from '../../extensions/table';
-import { boundaries, type NodeIdentity, type Schema } from '../../model';
+import { type NodeIdentity, type Schema } from '../../model';
 import { supportsOwnedText } from '../../owned-text-support';
-import { TextSelection, textSelection, type Selection } from '../../state';
-import { type Step } from '../../transform';
+import { TextSelection } from '../../state';
 import type { TextFormat } from '../formatting';
 import { tableCells } from '../table';
 import { plainCellRectangle } from '../table-clipboard';
@@ -15,15 +12,18 @@ import { createStarterDocumentQuery } from './document';
 import type { EditorSession } from './types';
 
 export type InputActions = {
-  dispatch: (
-    steps: Step<StarterNode>[],
-    history?: 'separate' | { group: string },
-    selection?: Selection,
-    input?: boolean,
+  insertText: (
+    text: string,
+    range: { from: number; to: number },
+    history: 'separate' | { group: string },
   ) => boolean;
+  pasteText: (text: string) => boolean;
+  replaceText: (id: number, from: number, to: number, text: string, caret: number) => boolean;
   allocate: () => NodeIdentity;
+  splitBlock: () => boolean;
+  deleteText: (backward: boolean) => boolean;
+  indentList: (outdent?: boolean) => boolean;
   blocks: { item: number | undefined };
-  structure: (change: () => Step<StarterNode>[]) => boolean;
   restore: (redo?: boolean) => boolean;
   toggleFormat: (format: TextFormat) => boolean;
   replaceCells: (text: string) => boolean;
@@ -56,7 +56,7 @@ export function createStarterKitInput({
   navigate,
 }: InputOptions) {
   const project = createStarterDocumentQuery(editor.schema);
-  const { dispatch, allocate, structure, restore, toggleFormat, replaceCells, paste } = actions;
+  const { allocate, restore, toggleFormat, replaceCells, paste } = actions;
 
   function syncInput() {
     const element = input();
@@ -65,22 +65,13 @@ export function createStarterKitInput({
   }
 
   function replace(from: number, to: number, value: string, separate = false, paragraphs = false) {
-    const {
-      editorState,
-      textSelection: selection,
-      start,
-      end,
-      active,
-      crossNode,
-    } = project(editor.state);
+    const selection = editor.state.selection;
 
-    if (!selection || !start || !end) {
+    if (!(selection instanceof TextSelection)) {
       replaceCells(value);
 
       return;
     }
-
-    if (active?.kind !== 'paragraph' && active?.kind !== 'heading') return;
 
     function reject(message: string) {
       notice(message);
@@ -97,42 +88,22 @@ export function createStarterKitInput({
     }
 
     if (paragraphs && clean.includes('\n')) {
-      const command = pasteParagraphs(editor.schema, editorState, clean, allocate);
-      dispatch(command.steps, 'separate', command.selection);
-      closePanel();
+      if (actions.pasteText(clean)) closePanel();
 
       return;
     }
-
-    if (crossNode) {
-      const command = replaceStructuredText(editor.schema, editorState, clean);
-
-      const history = separate
-        ? 'separate'
-        : {
-            group: `${textInput.composing ? 'composition' : clean ? 'typing' : 'delete'}:${start.id}`,
-          };
-
-      dispatch(command.steps, history, command.selection, true);
-      closePanel();
-
-      return;
-    }
-
-    const nextSelection = textSelection(active.id, from + clean.length);
 
     const history = separate
       ? 'separate'
       : {
-          group: `${textInput.composing ? 'composition' : clean ? 'typing' : 'delete'}:${active.id}`,
+          group: `${textInput.composing ? 'composition' : clean ? 'typing' : 'delete'}:${selection.head.id}`,
         };
 
-    dispatch(
-      [{ kind: 'replaceText', id: active.id, from, to, text: clean }],
-      history,
-      nextSelection,
-      true,
-    );
+    if (
+      actions.insertText(clean, { from, to }, history) &&
+      selection.anchor.id !== selection.head.id
+    )
+      closePanel();
   }
 
   function copyText() {
@@ -201,152 +172,24 @@ export function createStarterKitInput({
 
     if (navigate(event)) return;
 
-    const {
-      editorState,
-      tree,
-      nodes,
-      textSelection: selection,
-      crossNode,
-      collapsed,
-      active,
-    } = project(editor.state);
-
-    if (!selection) return;
-    const blocks = actions.blocks;
-
     if (event.key === 'Backspace' || event.key === 'Delete') {
       event.preventDefault();
-
-      if (crossNode) {
-        replace(0, 0, '', true);
-
-        return;
-      }
-
-      let from = Math.min(selection.anchor.offset, selection.head.offset),
-        to = Math.max(selection.anchor.offset, selection.head.offset);
-
-      if (from === to && (active?.kind === 'paragraph' || active?.kind === 'heading')) {
-        const b = boundaries(active.text),
-          i = b.indexOf(from);
-
-        if (event.key === 'Backspace') from = b[Math.max(0, i - 1)];
-        else to = b[Math.min(b.length - 1, i + 1)];
-      }
-
-      if (from === to && (active?.kind === 'paragraph' || active?.kind === 'heading')) {
-        const index = nodes.findIndex((n) => n.id === active.id),
-          back = event.key === 'Backspace';
-
-        if (back && blocks.item !== undefined) {
-          try {
-            const command = listCommands.backspace(editor.schema, editorState, active.id, allocate);
-            dispatch(command.steps, 'separate', command.selection);
-          } catch (error) {
-            notice(String(error));
-          }
-
-          return;
-        }
-
-        const neighbour = nodes[index + (back ? -1 : 1)];
-
-        if (
-          (neighbour?.kind === 'paragraph' || neighbour?.kind === 'heading') &&
-          (back ? from === 0 : to === active.text.length)
-        ) {
-          const left = back ? neighbour : active,
-            right = back ? active : neighbour,
-            at = left.text.length;
-
-          dispatch(
-            [{ kind: 'join', left: left.id, right: right.id }],
-            'separate',
-            textSelection(left.id, at),
-          );
-
-          return;
-        }
-      }
-
-      if (from !== to) replace(from, to, '');
-    }
-
-    if (event.key === 'Tab' && blocks.item !== undefined) {
-      event.preventDefault();
-      structure(
-        () =>
-          (event.shiftKey ? listCommands.outdent : listCommands.indent)(
-            editor.schema,
-            editorState,
-            blocks.item!,
-            allocate,
-          ).steps,
-      );
+      actions.deleteText(event.key === 'Backspace');
 
       return;
     }
 
-    if (event.key === 'Enter' && (active?.kind === 'paragraph' || active?.kind === 'heading')) {
-      if (collapsed && blocks.item !== undefined) {
-        event.preventDefault();
-
-        try {
-          const command = listCommands.enter(
-            editor.schema,
-            editorState,
-            active.id,
-            selection.head.offset,
-            allocate,
-          );
-
-          dispatch(command.steps, 'separate', command.selection);
-        } catch (error) {
-          notice(String(error));
-        }
-
-        return;
-      }
-
-      const parent = tree.byId.get(active.id)?.parent;
-
-      if (
-        collapsed &&
-        !active.text &&
-        parent != null &&
-        tree.byId.get(parent)?.node.kind === 'quote'
-      ) {
-        event.preventDefault();
-        structure(() => [{ kind: 'unwrap', id: parent }]);
-
-        return;
-      }
-
+    if (event.key === 'Tab' && actions.blocks.item !== undefined) {
       event.preventDefault();
-      const rightId = editor.allocateBlockId();
+      actions.indentList(event.shiftKey);
 
-      const command = collapsed
-        ? { steps: [], selection }
-        : replaceStructuredText(editor.schema, editorState, '');
+      return;
+    }
 
-      const caret = command.selection;
+    if (event.key === 'Enter') {
+      event.preventDefault();
 
-      if (!(caret instanceof TextSelection))
-        throw new Error('Text replacement must return a caret');
-
-      const steps: Step<StarterNode>[] = [
-        ...command.steps,
-        {
-          kind: 'split',
-          id: caret.head.id,
-          at: caret.head.offset,
-          rightId,
-          rightKey: crypto.randomUUID(),
-        },
-      ];
-
-      dispatch(steps, 'separate', textSelection(rightId, 0), true);
-      closePanel();
+      if (actions.splitBlock()) closePanel();
     }
   }
 
