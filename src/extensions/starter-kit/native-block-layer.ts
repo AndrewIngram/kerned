@@ -12,6 +12,7 @@ import { createLayerGeometry } from '../../editor-canvas/layer-geometry';
 import { createTextLabels } from '../../editor-canvas/text-labels';
 import type { StarterNode, StarterLeaf } from '../demo-model';
 import type { EditorDocument } from './browser-document';
+import { onMentionActivate } from './mention-view';
 import { createTextBlockView, type CommentHighlight } from './text-block-view';
 import type { EditorSession, Owned } from './types';
 
@@ -67,7 +68,11 @@ export function createBlockLayer(
   const layers = createViewLayers(
     element,
     editor,
-    createLayerDrawing(register, () => frame?.layout.inset ?? 0),
+    createLayerDrawing(register, () => frame?.layout.inset ?? 0, labels),
+  );
+
+  const stopMentions = onMentionActivate(editor, ({ nodeId: blockId, id, index }) =>
+    frame?.onOpen('mention', blockId, id, index),
   );
 
   const layerGeometry = createLayerGeometry();
@@ -125,7 +130,7 @@ export function createBlockLayer(
       layers.update({
         tree: doc.tree,
         insets: doc.projection.decorations,
-        blocks: visible.map((block) => ({ ...block, text: layerGeometry(block.layout) })),
+        blocks: visible.map(layerGeometry),
         inset,
         width: contentWidth,
       });
@@ -152,7 +157,7 @@ export function createBlockLayer(
             block = {
               kind: 'text',
               element: host,
-              view: createTextBlockView(host, register, labels),
+              view: createTextBlockView(host, register),
             };
           mounted.set(p.node.id, block);
         }
@@ -204,6 +209,7 @@ export function createBlockLayer(
       element.removeEventListener('pointerdown', pointer, true);
 
       for (const [id, block] of mounted) remove(id, block);
+      stopMentions();
       layers.destroy();
       element.replaceChildren();
       element.classList.remove('dom-layer');

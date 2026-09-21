@@ -1,6 +1,13 @@
 import { defineContribution } from '../core';
 import type { NodeIdentity, TreeIndex } from '../model';
-import type { BlockTextGeometry, DrawingLayer, DrawingPainter, RegisterDrawing } from './drawing';
+import type {
+  BlockTextGeometry,
+  DrawingLayer,
+  DrawingPainter,
+  LayerDrawing,
+  PrepareText,
+  InlineBounds,
+} from './drawing';
 import type { ViewSession } from './input-contributions';
 
 export type LayerBlock<N> = {
@@ -11,6 +18,7 @@ export type LayerBlock<N> = {
   readonly height: number;
   readonly inset: number;
   readonly text: BlockTextGeometry | null;
+  readonly inline: readonly InlineBounds[];
   readonly ancestors: readonly {
     readonly node: N;
     readonly childIndex: number;
@@ -29,6 +37,7 @@ type ViewLayer<N> = {
 export type ViewLayerContext<N extends NodeIdentity> = {
   editor: ViewSession<N>;
   element: HTMLDivElement;
+  prepareText: PrepareText;
   /** One registration per plane, replaced on the next call and released with this layer. */
   paint: (layer: DrawingLayer, painter: DrawingPainter | null) => void;
 };
@@ -44,7 +53,7 @@ export const viewLayers = defineContribution<ViewLayerContribution>();
 export function createViewLayers<N extends NodeIdentity>(
   element: HTMLElement,
   editor: ViewSession<N>,
-  registerDrawing: RegisterDrawing,
+  drawing: LayerDrawing,
 ) {
   if (editor.isDestroyed) throw new Error('Editor is destroyed');
   const contributions = viewLayers.read(editor);
@@ -107,13 +116,18 @@ export function createViewLayers<N extends NodeIdentity>(
         const view = contribution.create({
           editor,
           element: host,
+          prepareText(input) {
+            if (!active || destroyed) throw new Error('View layer is destroyed');
+
+            return drawing.prepareText(input);
+          },
           paint(layer, painter) {
             if (!active || destroyed) throw new Error('View layer is destroyed');
             painting.get(layer)?.();
             painting.delete(layer);
 
             if (painter)
-              painting.set(layer, registerDrawing(`${paintKey}:${layer}`, layer, painter));
+              painting.set(layer, drawing.register(`${paintKey}:${layer}`, layer, painter));
           },
         });
 
@@ -144,7 +158,13 @@ export function createViewLayers<N extends NodeIdentity>(
     update(frame: {
       tree: TreeIndex<N>;
       insets: ReadonlyMap<number, { inset: number }>;
-      blocks: readonly { node: N; y: number; height: number; text: BlockTextGeometry | null }[];
+      blocks: readonly {
+        node: N;
+        y: number;
+        height: number;
+        text: BlockTextGeometry | null;
+        inline: readonly InlineBounds[];
+      }[];
       inset: number;
       width: number;
     }) {
@@ -186,6 +206,7 @@ export function createViewLayers<N extends NodeIdentity>(
           height: block.height,
           inset: frame.insets.get(block.node.id)?.inset ?? 0,
           text: block.text,
+          inline: block.inline,
           ancestors: path,
         };
       });

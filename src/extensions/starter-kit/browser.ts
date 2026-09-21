@@ -5,6 +5,10 @@ import { image } from '../starter-definitions';
 import { containerDecorations } from './container-decorations';
 import { createImageRenderer } from './image-view';
 import { starterExtensions } from './index';
+import { mentionView } from './mention-view';
+
+export { mentionView, onMentionActivate, type MentionActivation } from './mention-view';
+
 import { createStarterKitInput } from './input';
 import { starterPresentation } from './presentation';
 import { tableView } from './table-node-view';
@@ -51,6 +55,7 @@ export function starterBrowserExtensions({ imageDelay = 0 }: { imageDelay?: numb
     starterPresentation,
     containerDecorations,
     underlineView,
+    mentionView,
   ] as const;
 }
 

@@ -2,8 +2,10 @@ import CanvasKitInit, { type CanvasKit, type Paint } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 
 import type { Drawing } from '../../editor-browser/drawing';
+import { createOwnedEngine } from '../../owned-layout';
 import { createCanvasRenderer, type CanvasFrame } from '../canvas-renderer';
 import { createLayerDrawing } from '../layer-drawing';
+import { createTextLabels } from '../text-labels';
 
 let kit: CanvasKit;
 
@@ -41,15 +43,58 @@ function pixel(canvas: HTMLCanvasElement) {
   return [...context.getImageData(2, 2, 1, 1).data];
 }
 
+test('prepared text is view-owned and drawing never shapes labels', async ({ onTestFinished }) => {
+  const engine = await createOwnedEngine(kit, 'shaping');
+  const renderer = createCanvasRenderer<never>();
+  onTestFinished(() => {
+    renderer.destroy();
+    engine.destroy();
+  });
+  const labels = createTextLabels(engine);
+  const drawing = createLayerDrawing(renderer.register, () => 0, labels);
+  const other = createLayerDrawing(renderer.register, () => 0, labels);
+  const input = { text: 'Ada', width: 60, size: 18 };
+  const label = drawing.prepareText(input);
+  const foreign = other.prepareText(input);
+  expect(drawing.prepareText(input)).toBe(label);
+  expect(label.height).toBeGreaterThan(0);
+  expect(Object.isFrozen(label)).toBe(true);
+  const calls = engine.stats.glyphCalls;
+  let painted = 0;
+  const borrowed: Drawing[] = [];
+  drawing.register('label', 'content', (paint) => {
+    borrowed.push(paint);
+    expect(() => paint.text(foreign, 0, 0)).toThrow('prepared by this view');
+    paint.text(label, 0, 0);
+    painted++;
+  });
+  renderer.attach(kit, document.createElement('canvas'));
+  renderer.update(frame(() => {}));
+  await nextFrame();
+  renderer.update(frame(() => {}));
+  await nextFrame();
+  expect(painted).toBe(2);
+  expect(engine.stats.glyphCalls).toBe(calls);
+  expect(() => borrowed[0].text(label, 0, 0)).toThrow('only available during');
+});
+
 test('extension drawing uses document coordinates, restores transforms and expires outside paint', async ({
   onTestFinished,
 }) => {
   const canvas = document.createElement('canvas');
   const renderer = createCanvasRenderer<never>();
   onTestFinished(() => renderer.destroy());
-  const drawing = createLayerDrawing(renderer.register, () => 12);
+
+  const drawing = createLayerDrawing(
+    renderer.register,
+    () => 12,
+    () => {
+      throw new Error('No text in this fixture');
+    },
+  );
+
   const borrowed: Drawing[] = [];
-  drawing('extension', 'content', (paint) => {
+  drawing.register('extension', 'content', (paint) => {
     borrowed.push(paint);
     paint.rect({ left: 20, top: 12, width: 10, height: 8 }, '#ff0000', 2);
   });

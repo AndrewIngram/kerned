@@ -51,12 +51,13 @@ The table's base styles belong to the browser extension; demo-specific theme
 overrides remain in the app stylesheet. Ownership checks allow styles inside
 their module and reject imports from the demo or another module.
 
-The block layer still composes mention and comment controllers. Underlines now
-use a shared `viewLayers` contribution with schema-derived mark ranges and a
+The block layer still composes comment controllers. Mentions and underlines now
+use shared `viewLayers` contributions with schema-derived mark/inline values and a
 renderer-independent drawing callback. React only attaches
 this layer; the superseded per-node React wrappers and parallel registry have
-been deleted. Inline/decorations still need extension contribution contracts
-before the public mount is complete. Comment threads remain external to document state.
+been deleted. Comments and search decorations still need shared integration
+before the public mount is complete. Mention activation uses a session-local
+subscription consumed by the app adapter. Comment threads remain external to document state.
 
 Custom rendering can use `createTextInteraction().bind(...)` with its own text
 and line geometry. `createCanvasInput` owns pointer/navigation binding, hidden-textarea synchronization
@@ -117,7 +118,7 @@ frames. Neither depends on paragraph or heading names.
 
 Complete DOM-overlay ownership and demo migration remain milestone 4 work.
 The public vanilla mount now covers native tables, container decorations and
-underlines, including marks on custom text fields.
+underlines and mentions, including custom text/inline storage fields.
 Asset loading now
 has a private owner with readiness, failure and destruction; the entry no longer
 constructs CanvasKit or chooses engine storage. The demo still passes borrowed

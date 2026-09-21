@@ -1,33 +1,20 @@
 import type { RegisterCanvasPainter } from '../../editor-canvas/canvas-renderer';
-import type { TextLabels } from '../../editor-canvas/text-labels';
 import type { LaidOut, Rect } from '../../engines';
-import type { createOwnedEngine } from '../../owned-layout';
 import type { TextBlockNode } from '../demo-model';
-
-type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
-
-type InlineBox = Pick<
-  ReturnType<ReturnType<Owned['createLayout']>['layoutInline']>['inlineBoxes'][number],
-  'id' | 'index' | 'label' | 'x' | 'y' | 'width' | 'height'
->;
 
 export type CommentHighlight = { id: string; from: number; to: number };
 
 export type TextBlockFrame = {
-  placement: { node: TextBlockNode; y: number; layout: LaidOut | null; boxes: InlineBox[] };
+  placement: { node: TextBlockNode; y: number; layout: LaidOut | null };
   comments: readonly CommentHighlight[];
   inset: number;
-  open: (kind: 'mention' | 'comment', atomId: string, index: number) => void;
+  open: (kind: 'comment', atomId: string, index: number) => void;
 };
 
-type Hit = { kind: 'mention' | 'comment'; id: string; index: number; label: string; rect: Rect };
+type Hit = { kind: 'comment'; id: string; index: number; label: string; rect: Rect };
 
 /** Native DOM hits and canvas paint share the same immutable layout snapshot. */
-export function createTextBlockView(
-  element: HTMLDivElement,
-  register: RegisterCanvasPainter,
-  labels: TextLabels,
-) {
+export function createTextBlockView(element: HTMLDivElement, register: RegisterCanvasPainter) {
   const buttons = new Map<string, HTMLButtonElement>();
   let hits = new Map<string, Hit>();
   let frame: TextBlockFrame | undefined;
@@ -38,8 +25,7 @@ export function createTextBlockView(
     if (!(event.target instanceof HTMLButtonElement)) return;
     const hit = hits.get(event.target.dataset.hit ?? '');
 
-    if (hit && (hit.kind === 'mention' || event.detail === 0))
-      frame?.open(hit.kind, hit.id, hit.index);
+    if (hit && event.detail === 0) frame?.open(hit.kind, hit.id, hit.index);
   }
 
   element.addEventListener('click', click);
@@ -56,7 +42,6 @@ export function createTextBlockView(
         previous.placement.node === p.node &&
         previous.placement.layout === p.layout &&
         previous.placement.y === p.y &&
-        previous.placement.boxes === p.boxes &&
         previous.comments === comments &&
         previous.inset === inset
       )
@@ -69,21 +54,7 @@ export function createTextBlockView(
             .rects.map((rect) => ({ comment, rect })) ?? [],
       );
 
-      const mentions = p.boxes.map((box) => ({
-        box,
-        label: labels({ text: box.label, width: box.width - 12, size: 18 }),
-      }));
-
       hits = new Map<string, Hit>();
-
-      for (const { box } of mentions)
-        hits.set(`mention:${box.id}`, {
-          kind: 'mention',
-          id: box.id,
-          index: box.index,
-          label: `Open ${box.label}`,
-          rect: [box.x, box.y, box.x + box.width, box.y + box.height],
-        });
 
       for (const [index, { comment, rect }] of decorations.entries())
         hits.set(`comment:${comment.id}:${index}`, {
@@ -105,14 +76,11 @@ export function createTextBlockView(
           element.append(button);
         }
 
-        button.className = hit.kind === 'mention' ? 'mention-hit' : 'range-hit';
+        button.className = 'range-hit';
         button.setAttribute('aria-label', hit.label);
 
-        if (hit.kind === 'mention') button.dataset.mention = hit.id;
-        else {
-          button.dataset.editorTextHit = '';
-          button.dataset.decoration = String(p.node.id);
-        }
+        button.dataset.editorTextHit = '';
+        button.dataset.decoration = String(p.node.id);
 
         const r = hit.rect;
         button.style.left = `${inset + r[0]}px`;
@@ -130,7 +98,7 @@ export function createTextBlockView(
       for (const remove of removePaint) remove();
       removePaint = [];
 
-      if (decorations.length || mentions.length)
+      if (decorations.length)
         removePaint.push(
           register(
             `text-background-${p.node.id}`,
@@ -139,27 +107,8 @@ export function createTextBlockView(
 
               for (const { rect: r } of decorations)
                 canvas.drawRect(kit.XYWHRect(r[0], p.y + r[1], r[2] - r[0], r[3] - r[1]), paint);
-              paint.setColor(kit.Color(229, 237, 218));
-
-              for (const { box } of mentions)
-                canvas.drawRRect(
-                  kit.RRectXY(kit.XYWHRect(box.x, p.y + box.y, box.width, box.height), 4, 4),
-                  paint,
-                );
             },
             'background',
-          ),
-        );
-
-      if (mentions.length)
-        removePaint.push(
-          register(
-            `text-content-${p.node.id}`,
-            (canvas) => {
-              for (const { box, label } of mentions)
-                label.draw(canvas, box.x + 6, p.y + box.y + (box.height - label.height) / 2);
-            },
-            'content',
           ),
         );
     },

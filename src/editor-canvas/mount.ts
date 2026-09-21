@@ -17,6 +17,7 @@ import { createLayerDrawing } from './layer-drawing';
 import { createLayerGeometry } from './layer-geometry';
 import { createDocumentPresentation } from './presentation';
 import { createViewResources } from './resources';
+import { createTextLabels } from './text-labels';
 import { createViewGeometry } from './view-geometry';
 
 export type MountEditorOptions<N extends NodeIdentity> = {
@@ -270,7 +271,7 @@ export function mountEditor<N extends NodeIdentity>(
     layers?.update({
       tree: doc.tree,
       insets: doc.projection.decorations,
-      blocks: visible.map((block) => ({ ...block, text: layerGeometry(block.layout) })),
+      blocks: visible.map(layerGeometry),
       inset,
       width: contentWidth,
     });
@@ -334,13 +335,6 @@ export function mountEditor<N extends NodeIdentity>(
   try {
     element.append(root);
     cleanup.push(() => root.remove());
-    layers = createViewLayers(
-      overlay,
-      editor,
-      createLayerDrawing(painter.register, () => layout?.getSnapshot().inset ?? 0),
-    );
-    const installedLayers = layers;
-    cleanup.push(() => installedLayers.destroy());
     resources = createViewResources({ resolveAsset: options.resolveAsset });
     cleanup.push(() => resources.destroy());
     cleanup.push(
@@ -359,6 +353,18 @@ export function mountEditor<N extends NodeIdentity>(
 
       if (status === 'destroyed') throw new DOMException('Editor view was destroyed', 'AbortError');
       const native = resources.read();
+      layers = createViewLayers(
+        overlay,
+        editor,
+        createLayerDrawing(
+          painter.register,
+          () => layout?.getSnapshot().inset ?? 0,
+          createTextLabels(native.layout),
+        ),
+      );
+      const installedLayers = layers;
+      cleanup.push(() => installedLayers.destroy());
+
       layout = createDocumentLayout({
         owned: native.layout,
         onError: fail,

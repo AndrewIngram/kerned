@@ -58,7 +58,8 @@ rendering contract, not the final extension decoration-authoring interface.
 Document overlays contribute through `viewLayers` from `src/editor-browser`.
 Each named contribution creates one layer per mounted view and returns `update`
 and `destroy` methods. Its factory receives the imperative session, a positioned
-DOM host and a `paint` registration function. Update frames contain resident blocks, including overscan and pinned
+DOM host, text preparation and a `paint` registration function. Factories run
+after view assets are ready. Update frames contain resident blocks, including overscan and pinned
 interaction targets, with unscaled document bounds and flowing ancestors. Each
 ancestor includes its canonical node, child index and inherited inset. The mount
 uses its existing document index and caches these paths; extensions do not receive
@@ -68,6 +69,8 @@ For canvas text, `block.text.fragments(from, to)` returns rectangles and baselin
 for a UTF-16 range. Coordinates are block-local and include the inherited text
 inset; add `block.left` and `block.top` to obtain document coordinates. Native
 boxes have no canvas text geometry and return `null` for `block.text`.
+`block.inline` contains inline identities, UTF-16 offsets and block-local bounds.
+Extensions read semantic attributes from the canonical node through the schema.
 
 `paint('background' | 'content', callback)` registers one painter per layer plane.
 A subsequent call replaces it; passing `null` removes it. The callback receives a
@@ -76,11 +79,36 @@ coordinates. The mount owns scrolling, zoom and graphics state. Drawing outside
 the callback throws. Registrations are released with the view layer, including
 when its factory or destructor throws.
 
+`prepareText({ text, width, size })` prepares a label during an update or factory
+call. It returns an immutable, view-owned token with width and height.
+`drawing.text(label, left, top)` paints it without shaping in the paint callback.
+The view keeps a bounded label cache across viewport culling. Tokens cannot be
+drawn by another view, and text preparation rejects calls after layer destruction.
+The current label contract uses the existing default font; configurable font
+resolution remains milestone 5 work.
+
 The starter `underlineView` uses this geometry and drawing contract. It reads mark
 ranges through the installed schema, so custom text and mark fields work without
 paragraph-specific code. Color, baseline offset and thickness are configurable
 extension options. Only resident geometry is retained, and edits or reflow
 invalidate cached fragments.
+
+The starter `mentionView` reads inline values through schema capabilities and
+renders cached labels, backgrounds and accessible interaction buttons. Its
+stylesheet belongs to the extension. Both the demo and public mount use it.
+Applications observe activation without supplying callbacks as serialized options:
+
+```ts
+import { onMentionActivate } from '../src/extensions/starter-kit/browser';
+
+const unsubscribe = onMentionActivate(editor, ({ nodeId, id, index }) => {
+  // Open application UI for this mention. The extension does not choose a panel.
+});
+```
+
+Listeners belong to one session and are cleared when it is destroyed. Unmounting
+a view removes its buttons and painters while session listeners remain available
+for a later mount. Mention IDs are scoped to their text node.
 
 The layer owns its DOM and styling. The host ignores pointer events by default;
 interactive descendants can opt in. Nonsemantic decoration layers set their own
@@ -147,13 +175,14 @@ native table-cell editing and rich rectangular clipboard operations. Table
 cells can contain custom text-node definitions. Ordinary copy/cut and text
 paste within a native cell textarea still use its native behavior; this does
 not provide rich clipboard parity for every cell text selection yet.
-Inline/decorations still require adapters before
-the complete starter content can use this mount.
+Comments and search decorations still require adapters before
+the complete starter content can use this mount. Mention geometry and rendering
+are shared; a general custom-inline presentation contract remains future work.
 
 The writing demo still uses its existing starter composition and an internal
 `EditorEventHost`; it has not switched to this mount yet. It now uses the same
-table node-view, container-decoration and underline contributions as the mount.
-Inline/decorations and diagnostic contracts must be completed before that
+table node-view, container-decoration, underline and mention contributions as the mount.
+Remaining decorations and diagnostic contracts must be completed before that
 switch. The old event host is not a second public editor interface. Milestone 4
 remains open until the demo uses the shared mount and stops passing graphics
 handles through its tree.

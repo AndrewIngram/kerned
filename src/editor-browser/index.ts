@@ -162,6 +162,9 @@ export {
 export type {
   Drawing,
   DrawingRect,
+  PreparedText,
+  PrepareText,
+  InlineBounds,
   DrawingLayer,
   DrawingPainter,
   TextFragment,

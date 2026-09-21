@@ -25,7 +25,13 @@ function painting() {
     };
   };
 
-  return { active, register };
+  return {
+    active,
+    register,
+    prepareText: () => {
+      throw new Error('No text in this fixture');
+    },
+  };
 }
 
 function fixture(contributions: readonly ViewLayerContribution[]) {
@@ -89,8 +95,8 @@ test('composed layers receive canonical visible blocks and clean up independentl
 
   const a = fixture(contributions);
   const b = fixture(contributions);
-  const first = createViewLayers(a.host, a.editor, drawing.register);
-  const second = createViewLayers(b.host, b.editor, drawing.register);
+  const first = createViewLayers(a.host, a.editor, drawing);
+  const second = createViewLayers(b.host, b.editor, drawing);
   expect(drawing.active.size).toBe(4);
   onTestFinished(() => {
     a.destroy();
@@ -99,7 +105,7 @@ test('composed layers receive canonical visible blocks and clean up independentl
   first.update({
     tree: indexTree(a.editor.schema, a.editor.state.nodes),
     insets: new Map(),
-    blocks: [{ node: a.editor.state.nodes[0], y: 32, height: 40, text: null }],
+    blocks: [{ node: a.editor.state.nodes[0], y: 32, height: 40, text: null, inline: [] }],
     inset: 28,
     width: 400,
   });
@@ -156,14 +162,12 @@ test('layer installation rejects duplicate names before allocation and unwinds f
     duplicate.destroy();
     failed.destroy();
   });
-  expect(() => createViewLayers(duplicate.host, duplicate.editor, drawing.register)).toThrow(
+  expect(() => createViewLayers(duplicate.host, duplicate.editor, drawing)).toThrow(
     'Duplicate view layer',
   );
   expect(created).toBe(0);
   expect(duplicate.host.childElementCount).toBe(0);
-  expect(() => createViewLayers(failed.host, failed.editor, drawing.register)).toThrow(
-    'Factory failed',
-  );
+  expect(() => createViewLayers(failed.host, failed.editor, drawing)).toThrow('Factory failed');
   expect(created).toBe(1);
   expect(released).toBe(1);
   expect(failed.host.childElementCount).toBe(0);

@@ -1875,3 +1875,79 @@ Evidence is in `artifacts/public-interface-m4/mark-drawing/`; reports identify
 Milestone 4 remains open. Mentions, comments and search decorations still need
 shared view integration, followed by supported view updates/diagnostics and the
 complete demo mount migration. The milestone judge follows those exit conditions.
+
+### Milestone 4 checkpoint: contributed mentions and prepared text
+
+The browser starter tuple now supplies `mentionView`. It reads canonical inline
+values through schema capabilities, paints labels/backgrounds and owns accessible
+interaction buttons. The demo and public mount use the same contribution. The
+old text-block view now handles only comment highlights; its mention rendering,
+label shaping and hit targets have been removed. Mention styles moved from the
+app stylesheet to the extension.
+
+Layer frames expose inline identities, offsets and bounds without exporting the
+engine's layout objects. One adapter translates and caches both inline bounds and
+text geometry for both mounts. Empty inline lists share an immutable view value.
+The mention layer skips allocation and painter updates when no inline values or
+previous mention hits are resident.
+
+`prepareText` returns a view-owned token containing public dimensions. Private
+maps retain the corresponding layout; `Drawing.text` rejects tokens from another
+view. Preparation reuses the existing bounded label cache, and paint callbacks do
+not shape text. Layer factories in the public mount now run after fonts/assets
+are ready, so they can prepare labels immediately. Destruction releases layers
+before their graphics resources, and retained preparation functions reject calls
+after layer destruction.
+
+`onMentionActivate(editor, listener)` is the application integration point.
+Subscriptions are session-local, support unsubscribe and are cleared on session
+destruction. Delivery snapshots listeners before invoking callbacks. Activation
+includes the containing node ID, inline ID and current offset. The demo adapter
+uses it to open its existing panel; the extension has no knowledge of that UI.
+Identical inline IDs in different blocks have separate interaction targets.
+
+Browser tests cover custom inline storage fields inside quotes, background and
+text pixels, two simultaneous sessions, duplicate inline IDs across blocks,
+unsubscribe, detached buttons and destruction. Existing culling tests confirm
+that restored labels make no new shaping calls. Drawing tests additionally prove
+prepared-token ownership, cache identity and no shaping during repaint.
+
+The first three-trial production report exceeded the paste-to-paint budget by
+0.5 ms, with every other budget passing. It is retained under
+`artifacts/public-interface-m4/mention-contribution-before-empty-fast-path/`.
+This prompted removal of empty-inline allocation and update work. A later passing
+measurement would establish the budget result, not prove that this small change
+alone caused the timing difference.
+
+The empty-inline fast path alone did not clear the gate: the repeat's worst paste
+paint was 124.1 ms. That report remains in
+`artifacts/public-interface-m4/mention-contribution-empty-fast-path/`.
+An isolated production build of committed `72679e3`, using the same assets and
+source-map setting, was compared in three alternating paste trials. Control
+results were 118.7–120.9 ms; current results were 120.4–121.4 ms. These pass in
+isolation but suggest a small added cost and little margin. The paired reports
+are in `artifacts/public-interface-m4/mention-contribution-comparison/paste.json`.
+
+A CPU profile of the copy/selection/paste workflow attributed its largest sampled
+JavaScript costs to tree indexing and scene construction. The layer adapter also
+still copied private layout fields and created an intermediate geometry object
+for each resident block. It now constructs only the frame's declared fields in
+one object. This removes redundant work and keeps private layout objects out of
+the layer manager. Performance must still be judged against the full original
+three-trial gate, not the narrower paired comparison.
+
+Final validation: `pnpm run check` passes with 493 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. The production build passes. The
+existing toolbar audit passed all six browser/viewport cases before the allocation
+changes; the full end-to-end suite passed again afterward. Three final serial
+production trials pass every unchanged budget: worst first usable 177 ms,
+streaming 1,112.1 ms, paste handler 56.1 ms, paste to paint 122.6 ms, typing
+32.3 ms, paging 32.5 ms and loaded heap 29,372,620 bytes. The final reports are
+in `artifacts/public-interface-m4/mention-contribution/`. They identify `72679e3`
+and measure this checkpoint's uncommitted tree. Paste timing remains close to
+its limit; these results do not establish generous performance headroom.
+
+Milestone 4 remains open for comments/search decoration integration, supported
+view updates and diagnostics, and complete demo migration. General custom-inline
+presentation and font configuration remain their respective planned milestones.
+This is a checkpoint, not the milestone's commit-and-judge gate.

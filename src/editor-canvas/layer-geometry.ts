@@ -1,11 +1,16 @@
-import type { BlockTextGeometry } from '../editor-browser/drawing';
+import type { BlockTextGeometry, InlineBounds } from '../editor-browser/drawing';
 import type { LaidOut } from '../engines';
+import type { NodeIdentity } from '../model';
+import type { Placement } from './scene';
 
 /** Share pure line fragments without exposing shaping, drawing or resource disposal. */
 export function createLayerGeometry() {
   const cache = new WeakMap<LaidOut, BlockTextGeometry>();
+  const emptyInline: readonly InlineBounds[] = [];
 
-  return (layout: LaidOut | null): BlockTextGeometry | null => {
+  const inlines = new WeakMap<Placement<NodeIdentity>['boxes'], readonly InlineBounds[]>();
+
+  function text(layout: LaidOut | null): BlockTextGeometry | null {
     if (!layout) return null;
     let value = cache.get(layout);
 
@@ -37,5 +42,32 @@ export function createLayerGeometry() {
     }
 
     return value;
-  };
+  }
+
+  function inlineBounds(boxes: Placement<NodeIdentity>['boxes']) {
+    if (!boxes.length) return emptyInline;
+    let inline = inlines.get(boxes);
+
+    if (!inline) {
+      inline = boxes.map((box) => ({
+        id: box.id,
+        index: box.index,
+        left: box.x,
+        top: box.y,
+        width: box.width,
+        height: box.height,
+      }));
+      inlines.set(boxes, inline);
+    }
+
+    return inline;
+  }
+
+  return <N extends NodeIdentity>(placement: Placement<N>) => ({
+    node: placement.node,
+    y: placement.y,
+    height: placement.height,
+    text: text(placement.layout),
+    inline: inlineBounds(placement.boxes),
+  });
 }
