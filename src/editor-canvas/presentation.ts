@@ -85,6 +85,7 @@ export function defineNodePresentation<D extends NodeDefinition>(
 export function createDocumentPresentation<N extends NodeIdentity>(
   editor: Parameters<typeof presentations.read>[0] & { readonly schema: Schema<N> },
   theme?: ViewTheme,
+  validateColor?: (color: string) => void,
 ) {
   const renderers = new Map<string, PresentationRenderer<N>>();
 
@@ -97,7 +98,7 @@ export function createDocumentPresentation<N extends NodeIdentity>(
   }
 
   const defaults = new WeakMap<N, NodePresentation>();
-  let style = createThemeStyles(editor.schema, theme);
+  let style = createThemeStyles(editor.schema, theme, validateColor);
   let cache = new WeakMap<N, NodePresentation>();
   let version = 0;
 
@@ -144,7 +145,7 @@ export function createDocumentPresentation<N extends NodeIdentity>(
       return version;
     },
     update(configuration: ViewTheme | undefined) {
-      const next = createThemeStyles(editor.schema, configuration);
+      const next = createThemeStyles(editor.schema, configuration, validateColor);
       style = next;
       cache = new WeakMap();
       query = createQuery();

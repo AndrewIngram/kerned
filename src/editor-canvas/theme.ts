@@ -31,7 +31,7 @@ const ruleIdentity: unique symbol = Symbol('style rule');
 
 export type StyleRule = Readonly<{ name: string; [ruleIdentity]: true }>;
 
-type BoundRule<N> = { name: string; read(node: N): NodeStyle };
+type BoundRule<N> = { name: string; fixedColor?: string; read(node: N): NodeStyle };
 
 const rules = new WeakMap<object, <N extends NodeIdentity>(schema: Schema<N>) => BoundRule<N>>();
 
@@ -41,11 +41,13 @@ export function defineStyleRule<D extends Definition>(
   style: NodeStyle | ((attributes: Attributes<D>) => NodeStyle),
 ): StyleRule {
   let read: (attributes: Attributes<D>) => NodeStyle;
+  let fixedColor: string | undefined;
 
   // oxlint-disable-next-line anti-slop/no-runtime-typeof -- This public input accepts a style object or a typed callback; both paths validate the resulting style at this boundary.
   if (typeof style === 'function') read = (attributes) => nodeStyle.parse(style(attributes));
   else {
     const fixed = nodeStyle.parse(style);
+    fixedColor = fixed.color;
     read = () => fixed;
   }
 
@@ -59,6 +61,7 @@ export function defineStyleRule<D extends Definition>(
 
     return {
       name: definition.name,
+      fixedColor,
       read(node) {
         const attributes = binding.read(node);
 
@@ -93,6 +96,7 @@ export type ViewTheme = Readonly<{
 export function createThemeStyles<N extends NodeIdentity>(
   schema: Schema<N>,
   input: ViewTheme = {},
+  validateColor?: (color: string) => void,
 ) {
   const theme = themeSchema.parse(input);
   const bound = new Map<string, BoundRule<N>[]>();
@@ -102,6 +106,10 @@ export function createThemeStyles<N extends NodeIdentity>(
 
     if (!factory) throw new Error('Unknown style rule');
     const value = factory(schema);
+
+    // Fixed configuration must be valid before the caller installs this theme.
+    // Browser parsing stays in the same adapter used to normalize paint colors.
+    if (value.fixedColor !== undefined) validateColor?.(value.fixedColor);
     bound.set(value.name, [...(bound.get(value.name) ?? []), value]);
   }
 

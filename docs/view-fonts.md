@@ -2,7 +2,7 @@
 
 Status: configurable faces, live node-style rules, shared native typography,
 paint-only text colors and in-place font replacement are implemented. Milestone 5
-is awaiting its final validation and architecture review.
+has passed its implementation gates and independent architecture review.
 
 A view accepts a font configuration without exposing graphics or shaping handles:
 
@@ -167,7 +167,8 @@ Colors accept standalone CSS literals, including hex, named colors, RGB and HSL.
 The view resolves them once per cached value to 8-bit sRGB, supplying the same
 color to canvas and native text. Context-dependent values such as `currentColor`
 and `var(...)` are rejected; resolve application CSS variables before passing them
-to a rule. A color-only update repaints without new shaping, composition or a new
+to a rule. Fixed color rules are validated before theme installation; rejecting one
+leaves the working theme and mounted view intact. A color-only update repaints without new shaping, composition or a new
 reflow generation. It preserves caret geometry, native preview elements and active
 input dimensions. List markers and underlines inherit text color; an explicit
 `underlineView.configure({ color })` overrides that inheritance.

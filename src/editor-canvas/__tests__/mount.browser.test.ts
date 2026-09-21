@@ -956,3 +956,79 @@ test('font replacement requested during initial readiness preserves the attachme
   expect(f.element.querySelectorAll('canvas')).toHaveLength(1);
   expect(view.coordsAt({ id: 1, offset: 3 })).not.toBeNull();
 });
+
+test('invalid fixed theme colors reject without losing the working view or subsequent editing', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const diagnostics = createViewDiagnostics();
+
+  const view = mountEditor(f.element, {
+    editor: f.editor,
+    diagnostics,
+    theme: { rules: [defineStyleRule(note, { lineHeight: 40, color: 'blue' })] },
+  });
+
+  await view.ready;
+  f.editor.select(textSelection(1, 4));
+  view.focus();
+  await frame();
+  const selection = f.editor.state.selection;
+  const input = capture(f.element);
+  const canvas = f.element.querySelector('canvas');
+  const before = view.coordsAt({ id: 1, offset: 4 });
+  const snapshot = diagnostics.read();
+
+  for (const color of ['not-a-color', 'var(--text)', 'currentColor']) {
+    expect(() =>
+      view.update({
+        zoom: 2,
+        paddingTop: 96,
+        theme: { rules: [defineStyleRule(note, { lineHeight: 60, color })] },
+      }),
+    ).toThrow(/text color|CSS color/);
+    expect(view.status).toBe('ready');
+    expect(view.error).toBeUndefined();
+    expect(capture(f.element)).toBe(input);
+    expect(f.element.querySelector('canvas')).toBe(canvas);
+    expect(document.activeElement).toBe(input);
+    expect(view.coordsAt({ id: 1, offset: 4 })).toEqual(before);
+    expect(view.getSnapshot()?.zoom).toBe(1);
+    expect(f.editor.state.selection).toBe(selection);
+    expect(diagnostics.read()?.generation).toBe(snapshot?.generation);
+    expect(diagnostics.read()?.stats.glyphCalls).toBe(snapshot?.stats.glyphCalls);
+  }
+
+  input.setRangeText('!', input.selectionStart, input.selectionEnd, 'end');
+  input.dispatchEvent(
+    new InputEvent('input', { bubbles: true, inputType: 'insertText', data: '!' }),
+  );
+  await frame();
+  expect(f.editor.state.nodes[0]).toMatchObject({ body: 'Firs!t line of a custom schema.' });
+  expect(view.coordsAt({ id: 1, offset: 5 })?.height).toBe(40);
+});
+
+test('an invalid initial fixed color rejects before DOM or resource ownership is acquired', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  let assets = 0;
+  expect(() =>
+    mountEditor(f.element, {
+      editor: f.editor,
+      theme: { rules: [defineStyleRule(note, { color: 'var(--text)' })] },
+      resolveAsset(asset) {
+        assets++;
+
+        return `/${asset}`;
+      },
+    }),
+  ).toThrow(/standalone CSS color/);
+  expect(assets).toBe(0);
+  expect(f.element.childElementCount).toBe(0);
+  const view = mountEditor(f.element, { editor: f.editor });
+  await view.ready;
+  expect(view.status).toBe('ready');
+});

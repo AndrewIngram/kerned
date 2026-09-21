@@ -54,7 +54,9 @@ export function mountEditor<N extends NodeIdentity>(
     theme: options.theme,
   });
 
-  const presentation = createDocumentPresentation(editor, configuration.theme);
+  const document = element.ownerDocument;
+  const colors = createTextColors(document);
+  const presentation = createDocumentPresentation(editor, configuration.theme, colors);
   // Resolve the initial projection before allocating native resources or changing the host.
   presentation.query(editor.state);
   const policies: ReturnType<InputContribution['create']>[] = [];
@@ -73,8 +75,6 @@ export function mountEditor<N extends NodeIdentity>(
   viewport.setZoom(configuration.zoom);
   const capture = createCanvasInput({ schema: editor.schema, editor });
   const painter = createCanvasRenderer<N>({ onError: fail });
-  const document = element.ownerDocument;
-  const colors = createTextColors(document);
   const root = document.createElement('div');
   const space = document.createElement('div');
   const canvas = document.createElement('canvas');

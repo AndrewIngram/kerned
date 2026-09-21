@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status         | Required outcome                                                               |
-| ----------------------------------- | -------------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete       | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete       | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Complete       | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Complete       | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Complete       | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Review pending | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending        | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending        | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending        | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status   | Required outcome                                                               |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Complete | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Complete | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Complete | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -2385,3 +2385,32 @@ pass leaves files unchanged.
 All M5 implementation and validation requirements are now covered. The required
 implementation commit and independent architecture judge follow this checkpoint;
 M5 is not complete until agreed findings are resolved and committed.
+
+### Milestone 5 architecture review and completion
+
+The independent `improve-codebase-architecture` judge assessed the complete M5
+change from `c25f91e` through implementation commit `8e5cd7b`, including public
+theme/font interfaces, native text styles, resource ownership, invalidation and
+React adaptation. The judge independently ran 153 focused browser tests across
+21 Chromium, Firefox and WebKit files.
+
+One P2 finding was accepted: invalid fixed CSS colors passed structural theme
+validation and failed during painting, dismantling a working attachment. A mounted
+regression reproduced the failure in all three browsers. Fixed colors now use the
+existing browser color adapter during theme compilation, before presentation or
+view configuration is installed. The same parser still supplies normalized colors
+to native and canvas text. Rejection preserves the previous theme, geometry,
+canvas/input identities, selection, focus and subsequent editing. Initial invalid
+colors reject before acquiring DOM, asset or session-view ownership.
+
+The judge reviewed the fix and confirmed the finding resolved, with no further
+actionable concerns. `pnpm run check` passes with 638 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. The production build passes, and a
+second lint fix/format pass leaves files unchanged. The production evidence in
+`artifacts/public-interface-m5/font-replacement/` covers the final implementation
+before this validation-only fix; no shaping, reflow or paint algorithm changed
+in the fix. See [the review record](milestone-5-architecture-review.md).
+
+M5 is complete with the post-review fix commit. M6 is next: rendering/decorations
+and React integration. M7 codecs/input policies and M8 built workspace consumers
+remain pending; completing M5 does not complete the overall goal.
