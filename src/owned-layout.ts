@@ -452,13 +452,13 @@ export async function createOwnedEngine(
 
         if (
           !(
-            input.width > 0 &&
+            input.width >= 0 &&
             input.size > 0 &&
             Number.isFinite(input.width) &&
             Number.isFinite(input.size)
           )
         )
-          throw new Error('Width and size must be positive finite numbers');
+          throw new Error('Width must be nonnegative and size positive, both finite');
 
         if (!supportsOwnedText(input.text))
           throw new Error(
@@ -525,7 +525,7 @@ export async function createOwnedEngine(
 
         if (
           !(
-            input.width > 0 &&
+            input.width >= 0 &&
             input.size > 0 &&
             Number.isFinite(input.width) &&
             Number.isFinite(input.size)

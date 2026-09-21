@@ -29,7 +29,7 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
           : [],
       );
 
-      for (const width of [1, 74, 75, 140, 400]) {
+      for (const width of [0, 1, 74, 75, 140, 400]) {
         const layout = owner.layoutInline({ id, text, atoms, spans: [], width, size: 20 });
 
         for (const box of layout.inlineBoxes) {

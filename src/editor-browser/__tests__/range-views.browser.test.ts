@@ -21,13 +21,22 @@ const note = defineNode({
 test('mark projection caches evict culled geometry even while the document retains its nodes', ({
   onTestFinished,
 }) => {
+  const subscriptions = new Set<() => void>();
+
   const extension = defineExtension({
     name: 'ranges',
     options: {},
     setup(_options, context: ContributionContext) {
       context.provide(
         viewLayers,
-        defineMarkView(review, () => () => ({ update() {}, destroy() {} })),
+        defineMarkView(review, ({ invalidate, onDestroy }) => {
+          subscriptions.add(invalidate);
+          onDestroy(() => {
+            subscriptions.delete(invalidate);
+          });
+
+          return () => ({ update() {}, destroy() {} });
+        }),
       );
 
       return {};
@@ -97,6 +106,26 @@ test('mark projection caches evict culled geometry even while the document retai
   show(0);
   expect(projections).toBe(3);
   expect(painters).toBe(0);
+  expect(subscriptions.size).toBe(1);
+  layers.update({ tree, insets, inset: 28, width: 400, blocks: [] });
+  expect(subscriptions.size).toBe(1);
+  const stale = [...subscriptions][0];
+  layers.destroy();
+  expect(editor.isDestroyed).toBe(false);
+  expect(subscriptions.size).toBe(0);
+  expect(() => stale()).not.toThrow();
+
+  const remounted = createViewLayers(element, editor, {
+    register: () => () => {},
+    prepareText: () => {
+      throw new Error('No labels');
+    },
+  });
+
+  expect(subscriptions.size).toBe(1);
+  remounted.destroy();
+  remounted.destroy();
+  expect(subscriptions.size).toBe(0);
 });
 
 const review = defineMark({
@@ -116,6 +145,7 @@ test('canvas mark instances allocate overlays lazily, coalesce external updates 
   let overlay = false;
   let fail = false;
   let painted = 0;
+  let factoryLive = 0;
 
   const extension = defineExtension({
     name: 'view',
@@ -139,6 +169,10 @@ test('canvas mark instances allocate overlays lazily, coalesce external updates 
         viewLayers,
         defineMarkView(review, (view) => {
           invalidate = view.invalidate;
+          factoryLive++;
+          view.onDestroy(() => {
+            factoryLive--;
+          });
 
           return (scope) => {
             const id = mounts.length;
@@ -218,6 +252,7 @@ test('canvas mark instances allocate overlays lazily, coalesce external updates 
   expect(element.children.length).toBe(0);
   expect(failures.length).toBe(1);
   expect(editor.isDestroyed).toBe(false);
+  expect(factoryLive).toBe(0);
   expect(() => mounts[0].createOverlay()).toThrow(/destroyed/);
   expect(() => mounts[1].createOverlay()).toThrow(/destroyed/);
 });

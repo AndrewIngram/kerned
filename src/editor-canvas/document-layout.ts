@@ -365,7 +365,7 @@ export function createDocumentLayout<N extends NodeIdentity>({
             document?.projection.decorations.get(id)?.endInset ?? 0,
           ) ||
         !Number.isFinite(height) ||
-        height <= 0 ||
+        height < 0 ||
         !document?.nodeIndexes.has(id)
       )
         return;

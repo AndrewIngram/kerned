@@ -2,7 +2,7 @@ import type { DrawingRect } from './drawing';
 
 /** Shared allocation for text, native blocks, measurements and node decorations. */
 export function allocatedBlockWidth(width: number, inset: number, endInset = 0) {
-  return Math.max(80, width - inset - endInset);
+  return Math.max(0, width - inset - endInset);
 }
 
 /** Layer text coordinates include the inherited inset; node chrome starts after it. */

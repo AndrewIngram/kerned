@@ -45,7 +45,7 @@ export type MarkViewFrame<D extends MarkDefinition> = Readonly<{
 
 export type RangeViewContext<N extends NodeIdentity> = Pick<
   ViewLayerContext<N>,
-  'editor' | 'prepareText' | 'invalidate'
+  'editor' | 'prepareText' | 'invalidate' | 'onDestroy'
 >;
 
 /** The view owns overlay placement and removal. Canvas-only instances need no DOM. */

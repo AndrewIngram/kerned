@@ -30,6 +30,7 @@ export function createRangeViews<N extends NodeIdentity, Frame>(
 
   const create = createRenderer({
     editor: context.editor,
+    onDestroy: context.onDestroy,
     prepareText: context.prepareText,
     invalidate() {
       dirty = true;

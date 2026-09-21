@@ -9,13 +9,13 @@ type Settings = { width: number; size: number };
 function validateSettings(settings: Settings) {
   if (
     !(
-      settings.width > 0 &&
+      settings.width >= 0 &&
       settings.size > 0 &&
       Number.isFinite(settings.width) &&
       Number.isFinite(settings.size)
     )
   )
-    throw new Error('Width and size must be positive finite numbers');
+    throw new Error('Width must be nonnegative and size positive, both finite');
 }
 
 function copyBlock(block: OwnedBlock) {

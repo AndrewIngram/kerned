@@ -119,6 +119,8 @@ export function createWidgetViews<N extends NodeIdentity>(
       text: LayerBlock<N>['text'];
       width: number;
       height: number;
+      inset: number;
+      endInset: number | undefined;
       access: NodeAccess;
       selection: ScopedSelection;
       values: readonly Decoration[];
@@ -150,6 +152,8 @@ export function createWidgetViews<N extends NodeIdentity>(
         previous.text !== block.text ||
         previous.width !== block.width ||
         previous.height !== block.height ||
+        previous.inset !== block.inset ||
+        previous.endInset !== block.endInset ||
         previous.access !== access ||
         !equalScopedSelection(previous.selection, selection)
       ) {
@@ -176,6 +180,8 @@ export function createWidgetViews<N extends NodeIdentity>(
           text: block.text,
           width: block.width,
           height: block.height,
+          inset: block.inset,
+          endInset: block.endInset,
           values,
           frames,
           access,

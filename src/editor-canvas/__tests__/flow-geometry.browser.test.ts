@@ -168,10 +168,57 @@ const groupViews = defineExtension({
   },
 });
 
-function fixture(slots = false) {
+function fixture(slots = false, decorateFlows = false) {
+  const activated: number[] = [];
+
+  const flowDecorations = defineExtension({
+    name: 'flow-decorations',
+    options: {},
+    setup(_options, context: ContributionContext) {
+      if (decorateFlows)
+        context.provide(decorations, {
+          name: 'containers',
+          dependencies: 'node',
+          create() {
+            return {
+              read(id) {
+                if (id !== 1 && id !== 6) return [];
+
+                return [
+                  label({ key: 'flow-edge', at: { kind: 'node', edge: 'end' }, data: null }),
+                  {
+                    kind: 'node',
+                    key: 'flow-outline',
+                    outline: { color: 'blue', width: 1, radius: 4 },
+                    attributes: { 'data-flow-outline': String(id) },
+                    activation: {
+                      label: 'Select container',
+                      onActivate: () => {
+                        activated.push(id);
+                      },
+                    },
+                  },
+                ];
+              },
+              subscribe: () => () => {},
+            };
+          },
+        });
+
+      return {};
+    },
+  });
+
   const editor = createEditor({
     schema: createSchema({
-      extensions: [note, group, card, rendering, groupViews.configure({ enabled: slots })],
+      extensions: [
+        note,
+        group,
+        card,
+        rendering,
+        groupViews.configure({ enabled: slots }),
+        flowDecorations,
+      ],
     }),
     content: [
       { kind: 'note', id: 0, text: 'Before' },
@@ -208,6 +255,7 @@ function fixture(slots = false) {
     element,
     view,
     diagnostics,
+    activated,
     destroy() {
       view.destroy();
       editor.destroy();
@@ -497,3 +545,95 @@ test(
     expect(f.view.coordsAt({ id: firstId, offset: 0 })).toBeNull();
   },
 );
+
+test('flow decorations include populated and empty slots, reflow with zoom and resize, activate and cull', async ({
+  onTestFinished,
+}) => {
+  const f = fixture(true, true);
+  onTestFinished(() => f.destroy());
+  await f.view.ready;
+  await expect.poll(() => f.view.blockBounds(2)?.left).toBe(68);
+  await f.view.reveal({ id: 5, offset: 136 });
+  await expect.poll(() => f.element.querySelector('[data-flow-outline="6"]')).not.toBeNull();
+
+  function check(id: number) {
+    const outline = f.element.querySelector<HTMLElement>(`[data-flow-outline="${id}"]`);
+    const bounds = f.view.blockBounds(id, 'client');
+
+    if (!outline || !bounds) throw new Error('Missing flow decoration');
+    const rect = outline.getBoundingClientRect();
+    expect(rect.left).toBeCloseTo(bounds.left);
+    expect(rect.top).toBeCloseTo(bounds.top);
+    expect(rect.width).toBeCloseTo(bounds.width);
+    expect(rect.height).toBeCloseTo(bounds.height);
+
+    const edge = f.element.querySelector<HTMLElement>(
+      `[data-editor-focus-node="${id}"][data-edge-widget]`,
+    );
+
+    if (!edge) throw new Error('Missing flow edge widget');
+    expect(edge.getBoundingClientRect().top).toBeCloseTo(bounds.top + bounds.height);
+    expect(edge.getBoundingClientRect().width).toBeCloseTo(bounds.width);
+  }
+
+  check(1);
+  check(6);
+  const chrome = f.element.querySelector<HTMLElement>('[data-group="1"]');
+
+  if (!chrome) throw new Error('Missing flow chrome');
+  chrome.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+  expect(f.activated).toEqual([1]);
+  f.element.style.width = '380px';
+  f.view.update({ zoom: 1.25 });
+  await expect.poll(() => f.view.blockBounds(1)?.width).toBe(248);
+  await f.view.reveal({ id: 5, offset: 136 });
+  check(1);
+  check(6);
+  f.editor.transact((draft) => {
+    draft.step({ kind: 'replaceText', id: 7, from: 0, to: 5, text: 'Far below. '.repeat(1000) });
+
+    return true;
+  });
+  await f.view.reveal({ id: 7, offset: 9999 }, { align: 'start' });
+  await expect.poll(() => f.element.querySelectorAll('[data-flow-outline]').length).toBe(0);
+});
+
+test('narrow nested slots allocate descendants to the measured DOM width', async ({
+  onTestFinished,
+}) => {
+  const f = fixture(true);
+  onTestFinished(() => f.destroy());
+  await f.view.ready;
+  await expect.poll(() => f.view.blockBounds(4)?.width).toBe(268);
+  f.element.style.width = '222px';
+  await expect.poll(() => f.view.blockBounds(4)?.width).toBe(70);
+  const nested = f.element.querySelector<HTMLElement>('[data-group="3"] [data-slot-body]');
+  const cardElement = f.element.querySelector<HTMLElement>('[data-card]');
+
+  if (!nested || !cardElement) throw new Error('Missing nested slot');
+  expect(nested.getBoundingClientRect().width).toBe(86);
+  expect(cardElement.getBoundingClientRect().width).toBe(70);
+  expect(f.view.blockBounds(4)?.height).toBe(35);
+  expect(f.view.blockBounds(5)?.width).toBe(70);
+  await f.view.reveal({ id: 5, offset: 0 });
+  const caret = f.view.coordsAt({ id: 5, offset: 0 });
+
+  if (!caret) throw new Error('Missing narrow text');
+  expect(caret.left).toBeCloseTo(nested.getBoundingClientRect().left + 16);
+  const chrome = nested.parentElement;
+
+  if (!chrome) throw new Error('Missing wrapper');
+  chrome.style.paddingLeft = '57px';
+  chrome.style.paddingRight = '57px';
+  await expect.poll(() => f.view.blockBounds(5)?.width).toBe(0);
+  expect(nested.getBoundingClientRect().width).toBe(0);
+  expect(f.view.status).toBe('ready');
+  expect(f.view.coordsAt({ id: 5, offset: 0 })).not.toBeNull();
+  f.element.style.width = '420px';
+  await expect.poll(() => f.view.blockBounds(5)?.width).toBe(182);
+  expect(f.view.status).toBe('ready');
+  await f.view.reveal({ id: 5, offset: 0 });
+  expect(f.view.coordsAt({ id: 5, offset: 0 })?.left).toBeCloseTo(
+    nested.getBoundingClientRect().left + 16,
+  );
+});

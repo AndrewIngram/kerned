@@ -128,11 +128,13 @@ test('layer installation rejects duplicate names before allocation and unwinds f
 }) => {
   let created = 0;
   let released = 0;
+  const resources: string[] = [];
   const drawing = painting();
 
   const good: ViewLayerContribution = {
     name: 'same',
-    create({ paint }) {
+    create({ paint, onDestroy }) {
+      onDestroy(() => resources.push('good'));
       created++;
       paint('background', () => {});
 
@@ -151,7 +153,8 @@ test('layer installation rejects duplicate names before allocation and unwinds f
     good,
     {
       name: 'failure',
-      create({ paint }) {
+      create({ paint, onDestroy }) {
+        onDestroy(() => resources.push('failed'));
         paint('content', () => {});
         throw new Error('Factory failed');
       },
@@ -170,6 +173,7 @@ test('layer installation rejects duplicate names before allocation and unwinds f
   expect(() => createViewLayers(failed.host, failed.editor, drawing)).toThrow('Factory failed');
   expect(created).toBe(1);
   expect(released).toBe(1);
+  expect(resources).toEqual(['failed', 'good']);
   expect(failed.host.childElementCount).toBe(0);
   expect(drawing.active.size).toBe(0);
 });

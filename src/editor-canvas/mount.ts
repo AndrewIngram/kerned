@@ -137,6 +137,8 @@ export function mountEditor<N extends NodeIdentity>(
 
   const renderers = createNodeViews(editor, { clipboard, notice: reportNotice, onError: fail });
 
+  cleanup.push(() => renderers.destroy());
+
   const geometry = createViewGeometry({
     editor,
     bounds: () => canvas.getBoundingClientRect(),
@@ -459,6 +461,7 @@ export function mountEditor<N extends NodeIdentity>(
       textStyle,
       insets: doc.projection.decorations,
       blocks: visible.map(layerGeometry),
+      containers: snapshot.flows,
       inset,
       width: contentWidth,
     });
@@ -519,32 +522,33 @@ export function mountEditor<N extends NodeIdentity>(
     if (focusPending) focus();
   }
 
-  // Own the session attachment during loading too, so destroy and duplicate mounts are deterministic.
-  cleanup.push(
-    connectEditorView(editor, {
-      focus,
-      reveal() {
-        const doc = presentation.query(editor.state);
-        const head = doc.selection instanceof RangeSelection ? doc.selection.head : null;
-        const range = doc.ranges[0];
-
-        const point =
-          doc.textSelection?.head ??
-          (head?.kind === 'text'
-            ? head
-            : range?.kind === 'text'
-              ? { id: range.id, offset: range.to }
-              : null);
-
-        if (point) void geometry.reveal(point);
-        else capture.revealSelection();
-      },
-      destroy,
-    }),
-  );
   let resources: ReturnType<typeof createViewResources>;
 
   try {
+    // Own the session attachment during loading too, so destroy and duplicate mounts are deterministic.
+    cleanup.push(
+      connectEditorView(editor, {
+        focus,
+        reveal() {
+          const doc = presentation.query(editor.state);
+          const head = doc.selection instanceof RangeSelection ? doc.selection.head : null;
+          const range = doc.ranges[0];
+
+          const point =
+            doc.textSelection?.head ??
+            (head?.kind === 'text'
+              ? head
+              : range?.kind === 'text'
+                ? { id: range.id, offset: range.to }
+                : null);
+
+          if (point) void geometry.reveal(point);
+          else capture.revealSelection();
+        },
+        destroy,
+      }),
+    );
+
     if (options.diagnostics) {
       diagnostics = connectViewDiagnostics(
         options.diagnostics,

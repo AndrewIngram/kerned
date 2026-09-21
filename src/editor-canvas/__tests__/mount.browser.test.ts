@@ -28,6 +28,8 @@ const card = defineNode({
   schema: () => ({ attributes: z.strictObject({ label: z.string() }), content: { kind: 'atom' } }),
 });
 
+const factoryCounts = new WeakMap<object, number>();
+
 const views = defineExtension({
   name: 'views',
   options: {},
@@ -63,16 +65,21 @@ const views = defineExtension({
     );
     context.provide(
       nodeViews,
-      defineNodeView(card, () => (element) => {
-        const button = document.createElement('button');
-        element.append(button);
+      defineNodeView(card, ({ editor, onDestroy }) => {
+        factoryCounts.set(editor, (factoryCounts.get(editor) ?? 0) + 1);
+        onDestroy(() => factoryCounts.set(editor, (factoryCounts.get(editor) ?? 0) - 1));
 
-        return {
-          update({ attributes, node, width, onMeasure }) {
-            button.textContent = attributes.label;
-            onMeasure(node.id, width, 60);
-          },
-          destroy: () => element.replaceChildren(),
+        return (element) => {
+          const button = document.createElement('button');
+          element.append(button);
+
+          return {
+            update({ attributes, node, width, onMeasure }) {
+              button.textContent = attributes.label;
+              onMeasure(node.id, width, 60);
+            },
+            destroy: () => element.replaceChildren(),
+          };
         };
       }),
     );
@@ -320,8 +327,11 @@ test('destruction during initialization cancels readiness, releases the attachme
   onTestFinished(() => f.destroy());
   const diagnostics = createViewDiagnostics();
   const view = mountEditor(f.element, { editor: f.editor, diagnostics });
+  expect(factoryCounts.get(f.editor)).toBe(1);
   expect(() => mountEditor(f.element, { editor: f.editor })).toThrow(/one mounted view/);
+  expect(factoryCounts.get(f.editor)).toBe(1);
   view.destroy();
+  expect(factoryCounts.get(f.editor)).toBe(0);
   await expect(view.ready).rejects.toMatchObject({ name: 'AbortError' });
   expect(f.element.childElementCount).toBe(0);
   expect(diagnostics.read()).toBeNull();

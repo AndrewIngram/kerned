@@ -1,6 +1,6 @@
 # Editable content slots
 
-Status: milestone 6 is in progress. Vanilla and React renderers can attach a
+Vanilla and React renderers can attach a
 content slot to a flowing container. The mounted view measures its chrome and
 positions canvas-owned descendants inside it. Existing native tables continue
 to own their cell text rendering; this is not a grid-layout replacement.
@@ -111,6 +111,26 @@ anchor, parent/child/DOM geometry after background reflow, bounded resident text
 and mounted chrome, and removal of the moved subtree. It runs in Chromium,
 Firefox and WebKit.
 
-Milestone 6 implementation is ready for its independent architecture judge after
-the required validation and commit. Any agreed findings must be resolved before
-starting milestone 7.
+The architecture review added coverage for decorations on populated and empty
+containers, including node-edge widgets, activation, culling, resize and zoom.
+Nested allocations use the actual remaining width, including slots narrower than
+80 pixels. The outer editor column retains its own minimum-width policy. At zero available width, text layout still advances by at
+least one grapheme per line. Glyphs and inline atoms may overflow that allocation,
+just as an indivisible glyph wider than any narrow line does. Resizing restores
+ordinary wrapping without losing the mounted view or caret.
+
+## Factory resources
+
+Node, inline and mark renderer factories receive `onDestroy`. Use it to release
+subscriptions and other resources acquired once per mounted view. The hook runs
+on view destruction or failed setup, even when the document session survives.
+Individual renderer instances still own their own `destroy` method and may be
+culled and recreated without ending the factory's lifetime. React components
+continue to use effect cleanup for component-owned resources.
+
+```ts
+defineMarkView(highlight, ({ invalidate, onDestroy }) => {
+  onDestroy(externalState.subscribe(invalidate));
+  return (scope) => createHighlightRenderer(scope);
+});
+```

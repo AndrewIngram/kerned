@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status      | Required outcome                                                               |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Complete    | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Complete    | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Complete    | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Complete    | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | In progress | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending     | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending     | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status   | Required outcome                                                               |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Complete | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Complete | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Complete | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Complete | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -2839,3 +2839,46 @@ build and three serial trials passed all original budgets. The milestone's
 rendering, decoration, React ownership and content-slot implementation is now
 ready for the required independent architecture judge. Milestone 7 must wait for
 that review and any agreed fixes.
+
+### Milestone 6: architecture judge findings resolved
+
+The independent judge reviewed `47736ee..1e0b97c` and identified three accepted
+findings. Resident flowing containers were missing from decoration projection;
+the nested 80px width floor could make canvas descendants wider than their DOM
+slot; renderer factories lacked mounted-view cleanup for external subscriptions.
+
+The layer frame now distinguishes leaves from resident containers. Decoration
+sources and node-edge widgets receive both; existing leaf/ancestor drawing keeps
+its previous semantics. Container chrome activation resolves the same node as
+its outline. Descendant allocation clamps only at zero, while outer-column
+minimum sizing stays in the document layout owner. Widget geometry caches also
+include inherited padding so chrome changes update their anchors.
+
+Node, inline and mark factories expose `onDestroy`. The view owns these resources
+through periods with no resident instances, releases them after instance cleanup,
+and unwinds failed setup. Destroying the view does not destroy a borrowed session.
+Tests cover populated/empty container decorations, activation, culling, resize,
+zoom, narrow nested text/native slots, subscription lifetime, remounting and
+factory failure.
+
+`pnpm run check` passes: 801 Vitest tests, one unchanged collaboration TODO and
+42 end-to-end cases. The production build passes with its existing chunk warning.
+Three serial production trials in `artifacts/public-interface-m6/judge/` pass the
+original budgets: worst first usable 239 ms, streaming 1,224.3 ms, paste handler
+58.4 ms, paste paint 120.7 ms, typing 32.2 ms, paging 32.2 ms and loaded heap
+27,922,916 bytes. Reports record parent `1e0b97c` and measure the judge-fix tree.
+The earlier nine-case production audit at 2,000/10,000 blocks across Chromium,
+Firefox and WebKit is preserved in `artifacts/public-interface-m6/final-large.json`.
+
+The judge's follow-up also caught exhausted-width layout and failed duplicate
+mount paths. Layout accepts a zero-width allocation and advances at least one
+cluster per line; it recovers on resize. Zero-height native measurements are
+accepted. Session attachment is now inside protected mount setup, so rejecting a
+second view immediately releases its factory resources without affecting the
+first. Exhausted-slot resize recovery, inline geometry at zero width, and duplicate
+mount factory counts are covered by real-browser regressions.
+
+The full quality gate and production build pass again after these follow-up
+fixes. Final serial production trials include the complete fix tree and pass all
+original budgets. Milestone 6 is complete with this judge-fix commit; milestone 7
+can now begin. Milestone 8 remains pending.

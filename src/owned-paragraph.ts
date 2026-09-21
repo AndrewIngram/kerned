@@ -88,6 +88,8 @@ export function composeParagraph(
     while (end < clusterCount) {
       const clusterWidth = numeric ? numeric.widths[end] : clusters[end].width;
 
+      // Always fit at least one cluster, including in a temporarily zero-width slot.
+      // Its glyphs may overflow, just as a single glyph wider than a narrow line does.
       if (end > first && advance + clusterWidth > width) break;
       advance += clusterWidth;
 

@@ -315,3 +315,74 @@ test('node view composition rejects duplicate and unrelated definitions', () => 
   ).toBeUndefined();
   headless.destroy();
 });
+
+test('node factory resources survive culling and end with the view, including setup failure', ({
+  onTestFinished,
+}) => {
+  let live = 0;
+  let fail = false;
+  let instances = 0;
+
+  const rendering = defineExtension({
+    name: 'resources',
+    options: {},
+    setup(_options, context: ContributionContext) {
+      context.provide(
+        nodeViews,
+        defineNodeView(card, ({ onDestroy }) => {
+          live++;
+          onDestroy(() => {
+            live--;
+          });
+
+          if (fail) throw new Error('Factory failed');
+
+          return () => {
+            instances++;
+
+            return {
+              update() {},
+              destroy() {
+                instances--;
+              },
+            };
+          };
+        }),
+      );
+
+      return {};
+    },
+  });
+
+  const editor = createEditor({
+    schema: createSchema({ extensions: [card, rendering] }),
+    content: [{ kind: 'card' }],
+  });
+
+  onTestFinished(() => editor.destroy());
+  const environment = { clipboard() {}, notice() {} };
+  const collection = createNodeViews(editor, environment);
+  const renderer = collection.find(editor.state.nodes[0]);
+
+  if (!renderer) throw new Error('Missing card renderer');
+  const instance = renderer.mount(document.createElement('div'));
+  instance.destroy();
+  expect(instances).toBe(0);
+  expect(live).toBe(1);
+  renderer.mount(document.createElement('div'));
+  collection.destroy();
+  expect(instances).toBe(0);
+  expect(live).toBe(0);
+  expect(editor.isDestroyed).toBe(false);
+  expect(() => renderer.mount(document.createElement('div'))).toThrow(/destroyed/);
+  collection.destroy();
+  fail = true;
+  expect(() => createNodeViews(editor, environment)).toThrow('Factory failed');
+  expect(live).toBe(0);
+  fail = false;
+  const remounted = createNodeViews(editor, environment);
+  expect(live).toBe(1);
+  editor.destroy();
+  expect(live).toBe(0);
+  remounted.destroy();
+});

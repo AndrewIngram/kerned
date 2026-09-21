@@ -98,7 +98,10 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
 
       return {
         update(frame) {
-          const { blocks } = frame;
+          const blocks = frame.containers?.length
+            ? [...frame.containers, ...frame.blocks]
+            : frame.blocks;
+
           source.begin();
           active.clear();
           hits.clear();
@@ -200,7 +203,7 @@ export function decorationLayer(provider: DecorationContribution): ViewLayerCont
             source.end();
           }
 
-          widgets.update(frame);
+          widgets.update({ ...frame, blocks });
 
           for (const id of geometry.keys()) if (!present.has(id)) geometry.delete(id);
 

@@ -4,6 +4,7 @@ import type { ObserveTextPointer } from './canvas-input';
 import { decorationLayer } from './decoration-layer';
 import { decorationContributions } from './decorations';
 import type {
+  DrawingRect,
   BlockTextGeometry,
   DrawingLayer,
   DrawingPainter,
@@ -13,6 +14,7 @@ import type {
 } from './drawing';
 import type { ViewSession } from './input-contributions';
 import type { ReadTextStyle } from './text-style';
+import { createViewLifetime } from './view-lifetime';
 
 export type LayerBlock<N> = {
   readonly node: N;
@@ -34,6 +36,8 @@ export type LayerBlock<N> = {
 /** Bounds use unscaled document coordinates in the layer's positioned host. */
 export type ViewLayerFrame<N> = {
   readonly blocks: readonly LayerBlock<N>[];
+  /** Resident flowing containers, separate from leaves to preserve ancestor drawing semantics. */
+  readonly containers?: readonly LayerBlock<N>[];
   readonly textStyle?: ReadTextStyle;
 };
 
@@ -44,6 +48,8 @@ type ViewLayer<N> = {
 
 export type ViewLayerContext<N extends NodeIdentity> = {
   editor: ViewSession<N>;
+  /** Release factory resources when this view is destroyed, including failed setup. */
+  onDestroy(this: void, cleanup: () => void): void;
   element: HTMLDivElement;
   prepareText: PrepareText;
   onTextPointer: ObserveTextPointer;
@@ -147,7 +153,12 @@ export function createViewLayers<N extends NodeIdentity>(
         errors.push(error);
       }
 
-      releaseResources();
+      try {
+        releaseResources();
+      } catch (error) {
+        errors.push(error);
+      }
+
       host.remove();
     }
 
@@ -168,6 +179,7 @@ export function createViewLayers<N extends NodeIdentity>(
       const listeners = new Set<() => void>();
       const paintKey = `layer:${JSON.stringify(contribution.name)}`;
       let active = true;
+      const lifetime = createViewLifetime();
 
       function releaseResources() {
         active = false;
@@ -177,11 +189,13 @@ export function createViewLayers<N extends NodeIdentity>(
 
         for (const release of painting.values()) release();
         painting.clear();
+        lifetime.destroy();
       }
 
       try {
         const view = contribution.create({
           editor,
+          onDestroy: lifetime.onDestroy,
           element: host,
           onTextPointer(listener) {
             if (!active || destroyed) throw new Error('View layer is destroyed');
@@ -218,11 +232,17 @@ export function createViewLayers<N extends NodeIdentity>(
           nodeAt(target) {
             if (!active || destroyed || !(target instanceof Element) || !eventRoot.contains(target))
               return null;
-            const id = target.closest('[data-editor-node]')?.getAttribute('data-editor-node');
+            const owner = target.closest('[data-editor-node],[data-editor-focus-node]');
+
+            const id =
+              owner?.getAttribute('data-editor-node') ??
+              owner?.getAttribute('data-editor-focus-node');
 
             return id == null
               ? null
-              : (current?.blocks.find((block) => block.node.id === Number(id))?.node ?? null);
+              : (current?.blocks.find((block) => block.node.id === Number(id))?.node ??
+                  current?.containers?.find((block) => block.node.id === Number(id))?.node ??
+                  null);
           },
           prepareText(input) {
             if (!active || destroyed) throw new Error('View layer is destroyed');
@@ -241,8 +261,16 @@ export function createViewLayers<N extends NodeIdentity>(
 
         layers.push({ name: contribution.name, host, view, releaseResources });
       } catch (error) {
-        releaseResources();
-        host.remove();
+        try {
+          releaseResources();
+        } catch (cleanupError) {
+          throw new AggregateError([error, cleanupError], 'View layer setup failed', {
+            cause: cleanupError,
+          });
+        } finally {
+          host.remove();
+        }
+
         throw error;
       }
 
@@ -274,6 +302,7 @@ export function createViewLayers<N extends NodeIdentity>(
         text: BlockTextGeometry | null;
         inline: readonly InlineBounds[];
       }[];
+      containers?: readonly { node: N; bounds: DrawingRect }[];
       inset: number;
       width: number;
     }) {
@@ -321,7 +350,17 @@ export function createViewLayers<N extends NodeIdentity>(
         };
       });
 
-      current = { blocks, textStyle: frame.textStyle };
+      const containers = frame.containers?.map(({ node, bounds }): LayerBlock<N> => ({
+        node,
+        ...bounds,
+        left: frame.inset + bounds.left,
+        inset: 0,
+        text: null,
+        inline: [],
+        ancestors: [],
+      }));
+
+      current = { blocks, containers, textStyle: frame.textStyle };
       frameState = editor.state;
 
       for (const { name, view } of layers) {
