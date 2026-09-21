@@ -311,3 +311,69 @@ test('page scrolling reveals distant selections and preserves the client coordin
   expect(point?.top).toBeGreaterThanOrEqual(0);
   expect(point?.bottom).toBeLessThanOrEqual(window.innerHeight);
 });
+
+test('a throwing node-view destructor cannot prevent other views and the mount from being released', async ({
+  onTestFinished,
+}) => {
+  const released: string[] = [];
+
+  const throwingViews = defineExtension({
+    name: 'throwingViews',
+    options: {},
+    setup(_options, context: ContributionContext) {
+      context.provide(
+        presentations,
+        defineNodePresentation(card, () => () => ({
+          kind: 'box',
+          height: 60,
+          before: 0,
+          after: 16,
+          baselineGrid: 4,
+        })),
+      );
+      context.provide(
+        nodeViews,
+        defineNodeView(card, () => (element) => ({
+          update({ attributes }) {
+            element.textContent = attributes.label;
+          },
+          destroy() {
+            const label = element.textContent ?? '';
+            released.push(label);
+
+            if (label === 'First') throw new Error('Extension cleanup failed');
+            element.replaceChildren();
+          },
+        })),
+      );
+
+      return {};
+    },
+  });
+
+  const editor = createEditor({
+    schema: createSchema({ extensions: [card, throwingViews] }),
+    content: [
+      { kind: 'card', label: 'First' },
+      { kind: 'card', label: 'Second' },
+    ],
+  });
+
+  const host = document.createElement('div');
+  host.style.cssText = 'width:400px;height:300px;';
+  document.body.append(host);
+  const view = mountEditor(host, { editor });
+  onTestFinished(() => {
+    view.destroy();
+    editor.destroy();
+    host.remove();
+  });
+  await view.ready;
+  expect(() => view.destroy()).toThrow('Editor view cleanup failed');
+  expect(released).toEqual(['First', 'Second']);
+  expect(host.childElementCount).toBe(0);
+  expect(editor.isDestroyed).toBe(false);
+  expect(view.isDestroyed).toBe(true);
+  editor.destroy();
+  expect(released).toHaveLength(2);
+});

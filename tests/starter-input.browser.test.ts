@@ -25,7 +25,7 @@ function inputSession() {
   const notices: string[] = [];
   const notice = (message: string) => notices.push(message);
 
-  const { events: handlers, table } = createStarterKitInput({
+  const { events: handlers } = createStarterKitInput({
     editor,
     onEdit() {},
     textInput,
@@ -48,7 +48,6 @@ function inputSession() {
     textInput,
     notices,
     handlers,
-    table,
     setWritable(this: void, value: boolean) {
       writable = value;
     },
@@ -177,33 +176,4 @@ test('rejected native typing restores the capture before a later permitted edit'
   handlers.input?.(new Event('input'), input);
   expect(editor.state.nodes[0]).toMatchObject({ text: 'First accepted' });
   expect(editor.history.undo).toBe(1);
-});
-
-test('table input shares native history and current permission checks without application commands', () => {
-  const { editor, table, setWritable } = inputSession();
-  editor.commands.insertTable();
-  const node = editor.state.nodes.find((n) => n.kind === 'table');
-
-  if (!node) throw new Error('Missing table');
-  const paragraph = node.rows[0][0].paragraphs[0];
-  const original = paragraph.text;
-  editor.select(textSelection(paragraph.id, original.length));
-  expect(
-    table.onText(paragraph.id, original.length, original.length, 'A', original.length + 1),
-  ).toBe(true);
-  expect(
-    table.onText(paragraph.id, original.length + 1, original.length + 1, 'B', original.length + 2),
-  ).toBe(true);
-  expect(editor.history.undo).toBe(2);
-  setWritable(false);
-  const before = editor.state;
-  expect(table.onText(paragraph.id, 0, 0, 'Denied', 6)).toBe(false);
-  table.onUndo(false);
-  expect(editor.state).toBe(before);
-  setWritable(true);
-  table.onUndo(false);
-  expect(editor.state.nodes.find((n) => n.kind === 'table')).toEqual(node);
-  expect(editor.history.undo).toBe(1);
-  table.onUndo(true);
-  expect(editor.state.nodes).toEqual(before.nodes);
 });

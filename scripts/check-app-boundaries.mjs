@@ -43,7 +43,12 @@ for (const group of groups) {
           !/editor-(samples|stream)/.test(target),
           `${file} depends on demo loading: ${specifier}`,
         );
-        assert.ok(!target.endsWith('.css'), `${file} imports demo styling: ${specifier}`);
+        // Browser extensions own their styles. They must not import the demo's
+        // stylesheet or reach into another module's presentation rules.
+        assert.ok(
+          !target.endsWith('.css') || target.startsWith(`src/${group}/`),
+          `${file} imports styling owned outside its module: ${specifier}`,
+        );
       }
 
       if (['editor-browser', 'editor-react', 'editor-canvas'].includes(group)) {

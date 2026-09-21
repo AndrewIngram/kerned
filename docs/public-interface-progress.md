@@ -1707,3 +1707,52 @@ list markers, quote rules, inline/decorations and supported geometry contracts
 for search, comments and outline consumers. The demo still owns its controller
 assembly and graphics props. The milestone judge follows completion of those
 exit conditions. The retired checklist is not part of the remaining work.
+
+### Milestone 4 checkpoint: one contributed table view
+
+The browser starter tuple now supplies a table node-view contribution. Both the
+public mount and the writing demo use it; the demo block layer no longer has a
+special table branch or receives separate table-edit callbacks. Table commands
+use the imperative session and share the mounted clipboard dispatcher. Node
+frames receive the existing cached selection context instead of rebuilding the
+document index for every visible table on every repaint.
+
+The native table controller reads canonical nodes through schema definitions.
+Immutable render snapshots preserve keyed text controls, including custom text
+fields and marks inside cells. Search state is translated once into transient
+highlight ranges outside the browser module. Highlight-only updates retain an
+active textarea and its directional selection. Table styles moved from the demo
+stylesheet to the browser extension. The ownership check now distinguishes
+module-owned styles from forbidden demo and cross-module style imports; lint,
+test timeouts, parallelism and performance budgets remain unchanged.
+
+Node views can claim selection focus. The mount resolves nested positions to
+their rendered owner before focusing canvas capture. Mounted-table regressions
+exposed a synchronous blur/reconciliation loop during paste; focus-retention
+updates now run after DOM reconciliation and report failures through the mounted
+lifetime. Destruction also releases every mounted node view when one extension's
+cleanup throws, then reports the aggregate failure.
+
+`pnpm run check` passes with 454 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. New mounted tests cover custom cell fields, formatting,
+grouped typing, undo/redo, permission rejection, rectangular clipboard and
+continued native typing. The former callback-only table input test now exercises
+the public mount. Production table audits pass in Chromium, Firefox and WebKit,
+including the book grid, merged cells and measured layouts at desktop and narrow
+zoomed sizes. The production build passes.
+
+Three serial production trials pass every unchanged budget: worst first usable
+177 ms, streaming 1,074.8 ms, paste handler 55.7 ms, paste to paint 121.8 ms,
+typing 32.4 ms, paging 32.6 ms and loaded heap 29,309,376 bytes. Evidence lives in
+`artifacts/public-interface-m4/table-contribution/`. The reports identify
+`5ce13bd` and measure this checkpoint's uncommitted tree before the final
+exception-reporting guard on deferred focus updates.
+
+The read-only architecture investigation agreed with the session/clipboard/frame
+seam and identified the selection-index, focus and exhaustive-cleanup concerns
+addressed here. It also identified native text geometry as remaining work.
+This was not the milestone judge: milestone 4 still requires list markers, quote
+rules, inline/decorations, native geometry/reveal and diagnostics contracts, and
+the full demo migration away from manually assembled controllers and graphics
+props. Normal copy/cut and ordinary text paste in cell textareas still use native
+behavior; this checkpoint does not claim rich clipboard parity for those paths.

@@ -3,7 +3,7 @@ import { expect, test } from 'vitest';
 import { createEditor } from '../../../core';
 import { createSchema } from '../../../model';
 import { textSelection } from '../../../state';
-import { createSampleDocument } from '../../demo-model';
+import { createSampleDocument, type TableNode } from '../../demo-model';
 import { tableCells } from '../../table';
 import { createStarterDocumentQuery } from '../browser-document';
 import { starterExtensions } from '../index';
@@ -20,12 +20,12 @@ function fixture(writable = true) {
   const host = document.createElement('div');
   host.style.width = '400px';
   document.body.append(host);
-  const view = createTableView(host);
+  const view = createTableView(host, editor.schema);
   const reports: { id: number; width: number; height: number }[] = [];
   const clipboard: string[] = [];
-  let overrides: Partial<TableFrame> = {};
+  let overrides: Partial<TableFrame<TableNode>> = {};
 
-  function frame(): TableFrame {
+  function frame() {
     const node = editor.state.nodes.find((value) => value.kind === 'table');
 
     if (!node) throw new Error('Missing fixture table');
@@ -59,7 +59,7 @@ function fixture(writable = true) {
         paste: () => clipboard.push('paste'),
       },
       ...overrides,
-    };
+    } satisfies TableFrame<TableNode>;
   }
 
   const unsubscribe = editor.subscribe(() => view.update(frame()));
@@ -90,7 +90,7 @@ function fixture(writable = true) {
     button,
     input,
     frame,
-    update(next: Partial<TableFrame>) {
+    update(next: Partial<TableFrame<TableNode>>) {
       overrides = next;
       view.update(frame());
     },
@@ -238,4 +238,24 @@ test('native table input restores canonical text when permissions reject an edit
   expect(input.value).toBe('Keep the first release focused.');
   expect(f.frame().node.rows[0][0].paragraphs[0].text).toBe(input.value);
   expect(document.activeElement).toBe(input);
+});
+
+test('highlight-only frames update displayed ranges without replacing the active native input', ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const highlights = new Map([[20002, [{ from: 0, to: 4, active: false }]]]);
+  f.update({ highlights });
+  expect(f.host.querySelector('[data-find-match]')?.textContent).toBe('Keep');
+  f.button('Edit cell 1, 1').click();
+  const input = f.input();
+  input.setSelectionRange(1, 4, 'backward');
+  input.dispatchEvent(new Event('select', { bubbles: true }));
+  const selection = f.editor.state.selection;
+  f.update({ highlights: new Map([[20002, [{ from: 0, to: 4, active: true }]]]) });
+  expect(f.input()).toBe(input);
+  expect(document.activeElement).toBe(input);
+  expect(input.selectionDirection).toBe('backward');
+  expect(f.editor.state.selection.eq(selection)).toBe(true);
 });

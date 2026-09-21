@@ -265,43 +265,6 @@ footer {
   border-radius: 8px;
 }
 
-.table-block {
-  font-size: 20px;
-  line-height: 1.6;
-  color: inherit;
-  overflow-x: auto;
-}
-.table-block table {
-  width: 100%;
-  min-width: 480px;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-.table-block td,
-.table-block th {
-  border: 1px solid #d6dccb;
-  padding: 10px;
-  vertical-align: top;
-  text-align: left;
-  overflow-wrap: anywhere;
-}
-.table-block th {
-  background: #f3f4ec;
-  font-weight: 600;
-}
-.table-block p {
-  margin: 0;
-  white-space: pre-wrap;
-}
-.table-block p + p {
-  margin-top: 0.65em;
-}
-.table-block caption {
-  text-align: left;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
 /* Minimal writing demo; the instrumentation page retains its study layout. */
 body[data-demo='minimal'] {
   background: #fff;
@@ -527,56 +490,6 @@ body[data-demo='minimal'] .nearby-panel {
     padding: 7px 4px;
   }
 }
-.table-block td,
-.table-block th {
-  position: relative;
-}
-.cell-selector {
-  position: absolute;
-  right: 1px;
-  top: 1px;
-  padding: 0 3px;
-  border: 0;
-  background: transparent;
-  font-size: 11px;
-  opacity: 0.4;
-}
-.cell-selector:hover,
-.cell-selector:focus-visible {
-  opacity: 1;
-}
-.cell-content {
-  display: block;
-  width: 100%;
-  min-height: 30px;
-  text-align: left;
-  border: 0 !important;
-  background: transparent !important;
-  padding: 3px 8px 3px 0;
-  white-space: normal;
-}
-.cell-content p {
-  margin: 0;
-}
-.table-block textarea {
-  width: 100%;
-  min-height: 32px;
-  resize: none;
-  overflow: hidden;
-  border: 0;
-  background: transparent;
-  padding: 3px 8px 3px 0;
-  font: inherit;
-  line-height: inherit;
-  display: block;
-}
-.table-block [data-selected='true'] {
-  background: #dceafa !important;
-}
-.empty-cell {
-  display: block;
-}
-
 body[data-demo='minimal'] .table-block {
   font-size: 18px;
 }

@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { createSchema, defineNode } from '../../model';
+import { selectionContext } from '../../state';
 import { createNodeViews, defineNodeView, nodeViews } from '../node-views';
 
 const card = defineNode({
@@ -75,7 +76,7 @@ test('a foreign schema renders through its composed contribution with normalized
     content: [{ kind: 'card' }],
   });
 
-  const collection = createNodeViews(editor);
+  const collection = createNodeViews(editor, { clipboard() {}, notice() {} });
   const node = editor.state.nodes[0];
   const renderer = collection.find(node);
   const element = host();
@@ -87,7 +88,13 @@ test('a foreign schema renders through its composed contribution with normalized
   if (!renderer) throw new Error('Missing card view');
   const view = renderer.mount(element);
   const heights: number[] = [];
-  view.update({ node, width: 240, onMeasure: (_id, _width, height) => heights.push(height) });
+  view.update({
+    node,
+    selection: editor.state.selection,
+    context: selectionContext(editor.schema, editor.state.nodes),
+    width: 240,
+    onMeasure: (_id, _width, height) => heights.push(height),
+  });
   expect(element.textContent).toBe('Configured?');
   expect(element.dataset.node).toBe(String(node.id));
   expect(heights[0]).toBeGreaterThan(0);
@@ -100,13 +107,27 @@ test('a foreign schema renders through its composed contribution with normalized
   expect(removals).toBe(1);
   expect(editor.isDestroyed).toBe(false);
   const replacement = renderer.mount(element);
-  replacement.update({ node, width: 240, onMeasure: () => {} });
+  replacement.update({
+    node,
+    selection: editor.state.selection,
+    context: selectionContext(editor.schema, editor.state.nodes),
+    width: 240,
+    onMeasure: () => {},
+  });
   view.destroy();
   expect(element.textContent).toBe('Configured?');
   editor.destroy();
   expect(removals).toBe(2);
   expect(element.textContent).toBe('');
-  expect(() => replacement.update({ node, width: 240, onMeasure: () => {} })).toThrow(/destroyed/);
+  expect(() =>
+    replacement.update({
+      node,
+      selection: editor.state.selection,
+      context: selectionContext(editor.schema, editor.state.nodes),
+      width: 240,
+      onMeasure: () => {},
+    }),
+  ).toThrow(/destroyed/);
   expect(() => renderer.mount(element)).toThrow(/destroyed/);
 });
 
@@ -135,7 +156,9 @@ test('node view composition rejects duplicate and unrelated definitions', () => 
     content: [],
   });
 
-  expect(() => createNodeViews(duplicate)).toThrow(/Duplicate node renderer/);
+  expect(() => createNodeViews(duplicate, { clipboard() {}, notice() {} })).toThrow(
+    /Duplicate node renderer/,
+  );
   duplicate.destroy();
 
   const otherCard = defineNode({
@@ -153,7 +176,9 @@ test('node view composition rejects duplicate and unrelated definitions', () => 
     content: [],
   });
 
-  expect(() => createNodeViews(unrelated)).toThrow(/Different node definition/);
+  expect(() => createNodeViews(unrelated, { clipboard() {}, notice() {} })).toThrow(
+    /Different node definition/,
+  );
   unrelated.destroy();
 
   const headless = createEditor({
@@ -161,6 +186,8 @@ test('node view composition rejects duplicate and unrelated definitions', () => 
     content: [{ kind: 'card', label: 'No view' }],
   });
 
-  expect(createNodeViews(headless).find(headless.state.nodes[0])).toBeUndefined();
+  expect(
+    createNodeViews(headless, { clipboard() {}, notice() {} }).find(headless.state.nodes[0]),
+  ).toBeUndefined();
   headless.destroy();
 });

@@ -3,6 +3,7 @@ import { expect, test } from 'vitest';
 import { createEditor } from '../../../core';
 import { createNodeViews } from '../../../editor-browser/node-views';
 import { createSchema } from '../../../model';
+import { selectionContext } from '../../../state';
 import { starterBrowserExtensions } from '../browser';
 
 function host() {
@@ -29,7 +30,7 @@ test('the browser kit supplies images without a separate renderer list and destr
     ],
   });
 
-  const collection = createNodeViews(editor);
+  const collection = createNodeViews(editor, { clipboard() {}, notice() {} });
   const element = host();
   onTestFinished(() => {
     editor.destroy();
@@ -40,16 +41,28 @@ test('the browser kit supplies images without a separate renderer list and destr
 
   if (!renderer) throw new Error('Missing image view');
   const view = renderer.mount(element);
-  view.update({ node, width: 240, onMeasure: () => {} });
+  view.update({
+    node,
+    selection: editor.state.selection,
+    context: selectionContext(editor.schema, editor.state.nodes),
+    width: 240,
+    onMeasure: () => {},
+  });
   expect(element.textContent).toBe('Loading illustration…');
   await expect.poll(() => element.style.height).toBe('120px');
   expect(element.querySelector('img')?.alt).toBe('Illustration');
   view.destroy();
-  const other = createNodeViews(editor).find(node);
+  const other = createNodeViews(editor, { clipboard() {}, notice() {} }).find(node);
 
   if (!other) throw new Error('Missing second image view');
   const pending = other.mount(element);
-  pending.update({ node, width: 240, onMeasure: () => {} });
+  pending.update({
+    node,
+    selection: editor.state.selection,
+    context: selectionContext(editor.schema, editor.state.nodes),
+    width: 240,
+    onMeasure: () => {},
+  });
   expect(element.textContent).toBe('Loading illustration…');
   editor.destroy();
   await new Promise<void>((resolve) => setTimeout(resolve, 40));

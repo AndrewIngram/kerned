@@ -98,7 +98,6 @@ async function fixture() {
 
     return {
       doc: project(editor.state),
-      tableInput: input.table,
       clipboard: input.events,
       layout: {
         ...snapshot,
@@ -108,10 +107,13 @@ async function fixture() {
       viewport: { width: 500, zoom: 1 },
       nodeComments: new Map(),
       commentsByNode,
-      findMatches: find.state.byNode,
-      findOpen: false,
-      findState: find.state,
-      setSelection: (selection) => editor.select(selection),
+      highlights: new Map(
+        [...find.state.byNode].map(([id, matches]) => [
+          id,
+          matches.map((match) => ({ ...match, active: false })),
+        ]),
+      ),
+      notice() {},
       setFocusedWidget: (id) => focused.push(id),
       onOpen: (kind, node, id, index) => opened.push({ kind, node, id, index }),
     };

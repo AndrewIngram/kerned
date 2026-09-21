@@ -1,0 +1,84 @@
+import { defineExtension, type ContributionContext } from '../../core';
+import {
+  nodeViews,
+  type NodeViewContext,
+  type NodeViewFrame,
+} from '../../editor-browser/node-views';
+import type { NodeIdentity } from '../../model';
+import { table } from '../starter-definitions';
+import { editingCommands } from './commands';
+import { formattingCommands } from './formatting';
+import { createTableView } from './table-view';
+
+/** Grid interaction belongs to the table extension; the mount supplies shared clipboard policy. */
+export const tableView = defineExtension({
+  name: 'tableView',
+  options: {},
+  requires: ['table', 'tableCell', 'heading', 'starterEditing', 'starterFormatting'],
+  setup(_options, context: ContributionContext) {
+    context.provide(nodeViews, {
+      create<N extends NodeIdentity>({ editor, clipboard, notice }: NodeViewContext<N>) {
+        const binding = editor.schema.node(table);
+
+        function run(action: () => boolean) {
+          try {
+            const applied = action();
+            notice('');
+
+            return applied;
+          } catch (error) {
+            notice(error instanceof Error ? error.message : String(error));
+
+            return false;
+          }
+        }
+
+        return {
+          name: table.name,
+          matches: binding.matches,
+          mount(element) {
+            const view = createTableView(element, editor.schema);
+
+            return {
+              update(frame: NodeViewFrame<N>) {
+                view.update({
+                  ...frame,
+                  onSelect: (selection) => editor.select(selection),
+                  onText: (id, from, to, text, caret) =>
+                    run(() =>
+                      editor.transact(
+                        (draft) =>
+                          draft.command(editingCommands.replaceText, { id, from, to, text, caret }),
+                        { history: { group: `typing:${id}` } },
+                      ),
+                    ),
+                  onUndo: (redo) =>
+                    run(() =>
+                      editor.transact((draft) => draft.restoreHistory(redo ? 'redo' : 'undo')),
+                    ),
+                  onFormat: (format) =>
+                    run(() =>
+                      editor.transact((draft) =>
+                        draft.command(formattingCommands.toggleFormat, format),
+                      ),
+                    ),
+                  onReplace: (text) =>
+                    run(() =>
+                      editor.transact((draft) =>
+                        draft.command(editingCommands.replaceSelection, text),
+                      ),
+                    ),
+                  clipboard: { copy: clipboard, cut: clipboard, paste: clipboard },
+                });
+              },
+              focusSelection: (selection) => view.focusSelection(selection),
+              destroy: () => view.destroy(),
+            };
+          },
+        };
+      },
+    });
+
+    return {};
+  },
+});

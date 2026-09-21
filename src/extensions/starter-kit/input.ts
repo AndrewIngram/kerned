@@ -11,7 +11,6 @@ import { plainCellRectangle, cellRectangleText } from '../table-clipboard';
 import { editingCommands } from './commands';
 import { formattingCommands } from './formatting';
 import { structureCommands, structureQueries } from './structure';
-import type { TableFrame } from './table-view';
 
 type InputOptions<N extends NodeIdentity> = {
   editor: ViewSession<N>;
@@ -92,19 +91,6 @@ export function createStarterKitInput<N extends NodeIdentity>({
 
   const paste = (fragment: ClipboardFragment<N>) =>
     run(() => editor.transact((context) => editingCommands.paste.execute(context, fragment)), true);
-
-  const table: Pick<TableFrame, 'onText' | 'onUndo' | 'onFormat' | 'onReplace'> = {
-    onText: (id, from, to, text, caret) =>
-      run(() =>
-        editor.transact(
-          (context) => context.command(editingCommands.replaceText, { id, from, to, text, caret }),
-          { history: { group: `typing:${id}` } },
-        ),
-      ),
-    onUndo: restore,
-    onFormat: toggleFormat,
-    onReplace: replaceCells,
-  };
 
   function syncInput() {
     const element = input();
@@ -381,7 +367,7 @@ export function createStarterKitInput<N extends NodeIdentity>({
     },
   };
 
-  return { events: inputEvents, table };
+  return { events: inputEvents };
 }
 
 /** A table's native textarea owns focus while editing a cell; otherwise focus

@@ -1,18 +1,15 @@
+import './table-view.css';
 import type { BrowserViewOptions } from '../../editor-browser';
-import {
-  TextSelection,
-  textSelection,
-  type Selection,
-  type SelectionContext,
-  type FindMatch,
-} from '../../state';
-import type { TableNode, TableCell, TextBlockNode } from '../demo-model';
+import type { TextHighlight } from '../../editor-browser/node-views';
+import type { NodeIdentity, Schema } from '../../model';
+import { TextSelection, textSelection, type Selection, type SelectionContext } from '../../state';
 import { formattingSpans, type TextFormat } from '../formatting';
 import { tableCells } from '../table';
 import { typography } from '../typography';
+import { createTableContent, type TableText, type TableCellContent } from './table-content';
 
-export type TableFrame = {
-  node: TableNode;
+export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
+  node: N;
   width: number;
   onMeasure: (id: number, width: number, height: number) => void;
   selection: Selection;
@@ -23,25 +20,22 @@ export type TableFrame = {
   onReplace: (text: string) => void;
   onFormat: (format: TextFormat) => void;
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
-  findMatches?: ReadonlyMap<number, readonly FindMatch[]>;
-  activeMatch?: FindMatch | null;
+  highlights?: ReadonlyMap<number, readonly TextHighlight[]>;
 };
 
-const emptyMatches: readonly FindMatch[] = [];
+const emptyMatches: readonly TextHighlight[] = [];
 
-function textStyle(element: HTMLElement, paragraph: TextBlockNode) {
-  const style = paragraph.kind === 'heading' ? typography(paragraph, 18) : undefined;
+function textStyle(element: HTMLElement, paragraph: TableText) {
+  const style = paragraph.level
+    ? typography({ kind: 'heading', level: paragraph.level }, 18)
+    : undefined;
+
   element.style.fontSize = style ? `${style.size}px` : '';
   element.style.lineHeight = style ? `${style.lineHeight}px` : '';
   element.style.fontWeight = style ? '700' : '';
 }
 
-function paintText(
-  element: HTMLElement,
-  paragraph: TextBlockNode,
-  matches: readonly FindMatch[],
-  activeMatch: FindMatch | null | undefined,
-) {
+function paintText(element: HTMLElement, paragraph: TableText, matches: readonly TextHighlight[]) {
   const document = element.ownerDocument;
   const text = document.createElement('p');
   textStyle(text, paragraph);
@@ -70,7 +64,7 @@ function paintText(
 
     if (match) {
       span.dataset.findMatch = 'true';
-      span.dataset.findActive = String(match === activeMatch);
+      span.dataset.findActive = String(match.active);
     }
 
     text.append(span);
@@ -93,15 +87,18 @@ type CellView = {
 
 type ParagraphView = {
   element: HTMLButtonElement | HTMLTextAreaElement;
-  paragraph?: TextBlockNode;
-  matches?: readonly FindMatch[];
-  active?: FindMatch | null;
+  paragraph?: TableText;
+  matches?: readonly TextHighlight[];
 };
 
 /** Owns the table's DOM, native editing, selection and measurement independently of React.
  * Updates retain keyed cells and textareas so transactions never replace an active input.
  */
-export function createTableView(element: HTMLDivElement) {
+export function createTableView<N extends NodeIdentity>(
+  element: HTMLDivElement,
+  schema: Schema<N>,
+) {
+  const project = createTableContent(schema);
   const document = element.ownerDocument;
   const table = document.createElement('table');
   const caption = document.createElement('caption');
@@ -114,7 +111,8 @@ export function createTableView(element: HTMLDivElement) {
   const rows = new Map<number, HTMLTableRowElement>();
   const cells = new Map<number, CellView>();
   const paragraphs = new Map<number, ParagraphView>();
-  let frame: TableFrame | undefined;
+  let frame: (Omit<TableFrame<N>, 'node'> & { node: ReturnType<typeof project> }) | undefined;
+  let source: N | undefined;
   let editing: number | null = null;
   let destroyed = false;
   let composing = false;
@@ -159,7 +157,7 @@ export function createTableView(element: HTMLDivElement) {
     if (!frame.selection.eq(next)) frame.onSelect(next);
   }
 
-  function selectCell(cell: TableCell, extend: boolean) {
+  function selectCell(cell: TableCellContent, extend: boolean) {
     if (!frame) return;
     const { selection, node } = frame;
 
@@ -259,7 +257,7 @@ export function createTableView(element: HTMLDivElement) {
               content.element,
               view.element.children[paragraphIndex + 1] ?? null,
             );
-          const matches = frame.findMatches?.get(paragraph.id) ?? emptyMatches;
+          const matches = frame.highlights?.get(paragraph.id) ?? emptyMatches;
 
           if (content.element instanceof HTMLTextAreaElement) {
             content.element.setAttribute(
@@ -276,17 +274,12 @@ export function createTableView(element: HTMLDivElement) {
               `Edit cell ${rowIndex + 1}, ${cellIndex + 1}${paragraphIndex ? `, paragraph ${paragraphIndex + 1}` : ''}`,
             );
 
-            if (
-              content.paragraph !== paragraph ||
-              content.matches !== matches ||
-              content.active !== frame.activeMatch
-            )
-              paintText(content.element, paragraph, matches, frame.activeMatch);
+            if (content.paragraph !== paragraph || content.matches !== matches)
+              paintText(content.element, paragraph, matches);
           }
 
           content.paragraph = paragraph;
           content.matches = matches;
-          content.active = frame.activeMatch;
         }
       }
     }
@@ -444,17 +437,38 @@ export function createTableView(element: HTMLDivElement) {
   observer.observe(element);
 
   return {
-    update(next: TableFrame) {
+    update(next: TableFrame<N>) {
       if (destroyed) throw new Error('Table view is destroyed');
 
       const syncSelection =
         !frame ||
-        frame.node !== next.node ||
+        source !== next.node ||
         frame.width !== next.width ||
         !frame.selection.eq(next.selection);
 
-      frame = next;
+      source = next.node;
+      frame = { ...next, node: project(next.node) };
       render(syncSelection);
+    },
+    focusSelection(selection: Selection) {
+      if (!frame || destroyed) return false;
+
+      if (
+        selection instanceof TextSelection &&
+        selection.anchor.id === selection.head.id &&
+        paragraphs.has(selection.head.id)
+      ) {
+        editing = selection.head.id;
+      } else if (
+        selection instanceof tableCells.CellSelection &&
+        selection.tableId === frame.node.id
+      ) {
+        editing = null;
+      } else return false;
+      frame = { ...frame, selection };
+      render(true);
+
+      return true;
     },
     destroy() {
       if (destroyed) return;
@@ -463,6 +477,7 @@ export function createTableView(element: HTMLDivElement) {
 
       for (const dispose of cleanup) dispose();
       frame = undefined;
+      source = undefined;
       rows.clear();
       cells.clear();
       paragraphs.clear();

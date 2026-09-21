@@ -36,6 +36,18 @@ one text-input owner, with multiple keyboard/clipboard handlers in assembly
 order. A prevented keyboard/clipboard event stops further handlers. Without a
 text-input owner, the capture is read-only while navigation remains available.
 
+Native node-view factories receive the imperative session, the view's clipboard
+dispatcher and a notice callback. Their update frame carries the current
+selection and the mount's cached selection context. A view can implement
+`focusSelection` for native text controls; the mount resolves the selected
+descendant to its rendered owner before falling back to canvas input. The table
+extension uses this contract for cell editing and rectangular selection, with
+the same clipboard policy as the canvas capture. Its styles belong to the
+browser extension and do not require the demo stylesheet.
+
+Transient text-highlight ranges can accompany native frames. This is an internal
+rendering contract, not the final extension decoration-authoring interface.
+
 ## React
 
 ```tsx
@@ -77,13 +89,18 @@ This interface is exercised with custom-schema vanilla and React editors. The
 browser starter tuple now contributes text editing and paragraph/heading
 presentations. Its input policy supports custom text fields through schema
 capabilities and shares command definitions with the named command API.
-Mounted browser tests cover typing, stored marks, history and paragraph splits.
-Tables, list markers, quote rules and inline/decorations still require adapters
-before the complete starter content can use this mount.
+Mounted browser tests cover typing, stored marks, history, paragraph splits,
+native table-cell editing and rich rectangular clipboard operations. Table
+cells can contain custom text-node definitions. Ordinary copy/cut and text
+paste within a native cell textarea still use its native behavior; this does
+not provide rich clipboard parity for every cell text selection yet.
+List markers, quote rules and inline/decorations still require adapters before
+the complete starter content can use this mount.
 
 The writing demo still uses its existing starter composition and an internal
-`EditorEventHost`; it has not switched to this mount yet. Table,
-inline/decorations and diagnostic contributions must be migrated before that
+`EditorEventHost`; it has not switched to this mount yet. It now uses the same
+table node-view contribution as the mount, without a separate table branch.
+Inline/decorations, native text geometry and diagnostic contracts must be completed before that
 switch. The old event host is not a second public editor interface. Milestone 4
 remains open until the demo uses the shared mount and stops passing graphics
 handles through its tree.

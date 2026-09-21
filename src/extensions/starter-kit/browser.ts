@@ -6,6 +6,7 @@ import { createImageRenderer } from './image-view';
 import { starterExtensions } from './index';
 import { createStarterKitInput } from './input';
 import { starterPresentation } from './presentation';
+import { tableView } from './table-node-view';
 
 export const imageView = defineExtension({
   name: 'imageView',
@@ -40,6 +41,7 @@ export function starterBrowserExtensions({ imageDelay = 0 }: { imageDelay?: numb
     ...starterExtensions,
     imageView.configure({ delay: imageDelay }),
     starterInput,
+    tableView,
     starterPresentation,
   ] as const;
 }

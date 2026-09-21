@@ -33,7 +33,18 @@ export function mountEditor<N extends NodeIdentity>(
   const presentation = createDocumentPresentation(editor);
   // Resolve the initial projection before allocating native resources or changing the host.
   presentation.query(editor.state);
-  const renderers = createNodeViews(editor);
+  const policies: ReturnType<InputContribution['create']>[] = [];
+
+  function clipboard(event: ClipboardEvent) {
+    for (const policy of policies) {
+      if (event.type === 'copy') policy.copy?.(event);
+      else if (event.type === 'cut') policy.cut?.(event);
+      else if (event.type === 'paste') policy.paste?.(event);
+
+      if (event.defaultPrevented) break;
+    }
+  }
+
   const viewport = createEditorViewport();
   const capture = createCanvasInput({ schema: editor.schema, editor });
   const painter = createCanvasRenderer<N>({ onError: fail });
@@ -73,6 +84,13 @@ export function mountEditor<N extends NodeIdentity>(
   let layout: ReturnType<typeof createDocumentLayout<N>> | undefined;
   const blocks = new Map<number, { host: HTMLDivElement; view: NodeView<N>; name: string }>();
 
+  const renderers = createNodeViews(editor, { clipboard, notice: reportNotice });
+
+  function reportNotice(message: string) {
+    notice.textContent = message;
+    options.onNotice?.(message);
+  }
+
   function dispose() {
     const errors: unknown[] = [];
 
@@ -111,7 +129,25 @@ export function mountEditor<N extends NodeIdentity>(
     if (status === 'destroyed' || status === 'failed') return;
     focusPending = true;
 
-    if (status === 'ready') input.focus({ preventScroll: true });
+    if (status !== 'ready') return;
+    const doc = presentation.query(editor.state);
+    const owner = doc.focusId === null ? undefined : doc.blockFor(doc.focusId);
+
+    if (owner && presentation.present(owner).kind === 'box') {
+      const view = blocks.get(owner.id)?.view;
+
+      if (!view) return;
+
+      if (view.focusSelection) {
+        focusPending = false;
+        focusPending = !view.focusSelection(editor.state.selection);
+
+        return;
+      }
+    }
+
+    input.focus({ preventScroll: true });
+    focusPending = false;
   }
 
   function readScroll() {
@@ -205,7 +241,13 @@ export function mountEditor<N extends NodeIdentity>(
       block.host.style.top = `${placement.y}px`;
       block.host.style.width = `${contentWidth}px`;
       block.host.dataset.selected = String(!!doc.selectedRange(placement.node));
-      block.view.update({ node: placement.node, width: contentWidth, onMeasure: layout.measure });
+      block.view.update({
+        node: placement.node,
+        width: contentWidth,
+        onMeasure: layout.measure,
+        selection: editor.state.selection,
+        context: doc.context,
+      });
     }
 
     layout.present(snapshot);
@@ -236,6 +278,8 @@ export function mountEditor<N extends NodeIdentity>(
       focused,
       onPaint() {},
     });
+
+    if (focusPending) focus();
   }
 
   // Own the session attachment during loading too, so destroy and duplicate mounts are deterministic.
@@ -277,10 +321,20 @@ export function mountEditor<N extends NodeIdentity>(
       const controller = layout;
       cleanup.push(() => controller.destroy());
       cleanup.push(() => {
-        for (const block of blocks.values()) block.view.destroy();
+        const errors: unknown[] = [];
+
+        for (const block of blocks.values()) {
+          try {
+            block.view.destroy();
+          } catch (error) {
+            errors.push(error);
+          }
+        }
+
         blocks.clear();
+
+        if (errors.length) throw new AggregateError(errors, 'Node view cleanup failed');
       });
-      const policies: ReturnType<InputContribution['create']>[] = [];
 
       for (const policy of inputPolicies.read(editor)) {
         const installed = policy.create({
@@ -289,10 +343,7 @@ export function mountEditor<N extends NodeIdentity>(
           textInput: capture.textInput,
           selectAll: capture.selectAll,
           navigate: capture.navigate,
-          notice(message) {
-            notice.textContent = message;
-            options.onNotice?.(message);
-          },
+          notice: reportNotice,
         });
 
         policies.push(installed);
@@ -304,6 +355,8 @@ export function mountEditor<N extends NodeIdentity>(
         throw new Error('A mounted editor requires a single text input policy');
       input.readOnly = !policies.some((policy) => policy.input);
 
+      let focusUpdate = false;
+
       const trackFocus = (event: FocusEvent) => {
         const target = event.type === 'focusout' ? event.relatedTarget : event.target;
 
@@ -313,7 +366,22 @@ export function mountEditor<N extends NodeIdentity>(
             : null;
 
         focusedNode = host ? Number(host.getAttribute('data-editor-node')) : undefined;
-        updateLayout();
+
+        // Moving/replacing a native control can dispatch blur during DOM reconciliation.
+        // Publish its retention change after that operation has completed.
+        if (focusUpdate) return;
+        focusUpdate = true;
+        queueMicrotask(() => {
+          focusUpdate = false;
+
+          if (status !== 'ready') return;
+
+          try {
+            updateLayout();
+          } catch (error) {
+            fail(error instanceof Error ? error : new Error(String(error)));
+          }
+        });
       };
 
       overlay.addEventListener('focusin', trackFocus);
@@ -344,27 +412,9 @@ export function mountEditor<N extends NodeIdentity>(
         input(event, value) {
           for (const policy of policies) policy.input?.(event, value);
         },
-        copy(event) {
-          for (const policy of policies) {
-            policy.copy?.(event);
-
-            if (event.defaultPrevented) break;
-          }
-        },
-        cut(event) {
-          for (const policy of policies) {
-            policy.cut?.(event);
-
-            if (event.defaultPrevented) break;
-          }
-        },
-        paste(event) {
-          for (const policy of policies) {
-            policy.paste?.(event);
-
-            if (event.defaultPrevented) break;
-          }
-        },
+        copy: clipboard,
+        cut: clipboard,
+        paste: clipboard,
         focus(value) {
           focused = value;
           publish();

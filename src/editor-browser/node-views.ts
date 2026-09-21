@@ -1,17 +1,34 @@
 import { defineContribution } from '../core';
-import type { NodeBinding, SchemaDefinition, NodeIdentity, Schema } from '../model';
+import type { NodeBinding, SchemaDefinition, NodeIdentity } from '../model';
+import type { Selection, SelectionContext } from '../state';
+import type { ViewSession } from './input-contributions';
+
+export type TextHighlight = Readonly<{ from: number; to: number; active: boolean }>;
+
+export type NodeViewEnvironment = {
+  clipboard: (event: ClipboardEvent) => void;
+  notice: (message: string) => void;
+};
+
+export type NodeViewContext<N extends NodeIdentity> = NodeViewEnvironment & {
+  readonly editor: ViewSession<N>;
+};
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
 
 export type NodeViewFrame<N> = {
   node: N;
+  selection: Selection;
+  context: SelectionContext;
   width: number;
+  highlights?: ReadonlyMap<number, readonly TextHighlight[]>;
   onMeasure: (id: number, width: number, height: number) => void;
 };
 
 export type NodeView<N> = {
   readonly isDestroyed: boolean;
   update(frame: NodeViewFrame<N>): void;
+  focusSelection?(selection: Selection): boolean;
   destroy(): void;
 };
 
@@ -27,7 +44,7 @@ type MountedNodeRenderer<N> = Omit<NodeViewRenderer<N>, 'mount'> & {
 };
 
 export type NodeViewContribution = {
-  create<N extends NodeIdentity>(schema: Schema<N>): NodeViewRenderer<N>;
+  create<N extends NodeIdentity>(context: NodeViewContext<N>): NodeViewRenderer<N>;
 };
 
 /** The browser contract is defined here; the headless session only stores typed values. */
@@ -42,17 +59,20 @@ type NodeViewAttributes<Definition extends NodeDefinition> = NonNullable<
  */
 export function defineNodeView<Definition extends NodeDefinition>(
   definition: Definition,
-  createRenderer: () => (element: HTMLDivElement) => {
+  createRenderer: <N extends NodeIdentity>(
+    context: NodeViewContext<N>,
+  ) => (element: HTMLDivElement) => {
     update(
       frame: NodeViewFrame<NodeIdentity> & { attributes: NodeViewAttributes<Definition> },
     ): void;
+    focusSelection?(selection: Selection): boolean;
     destroy(): void;
   },
 ): NodeViewContribution {
   return {
-    create<N extends NodeIdentity>(schema: Schema<N>): NodeViewRenderer<N> {
-      const binding = schema.node(definition);
-      const renderer = createRenderer();
+    create<N extends NodeIdentity>(context: NodeViewContext<N>): NodeViewRenderer<N> {
+      const binding = context.editor.schema.node(definition);
+      const renderer = createRenderer(context);
 
       return {
         name: definition.name,
@@ -68,6 +88,9 @@ export function defineNodeView<Definition extends NodeDefinition>(
                 throw new Error(`Node does not match renderer for ${definition.name}`);
               view.update({ ...frame, attributes });
             },
+            focusSelection: view.focusSelection
+              ? (selection) => view.focusSelection?.(selection) ?? false
+              : undefined,
             destroy: () => view.destroy(),
           };
         },
@@ -78,15 +101,13 @@ export function defineNodeView<Definition extends NodeDefinition>(
 
 /** Resolve the session's contributions once per view, without a parallel renderer list. */
 export function createNodeViews<N extends NodeIdentity>(
-  editor: Parameters<typeof nodeViews.read>[0] & {
-    readonly schema: Schema<N>;
-    on(name: 'destroy', listener: () => void): () => void;
-  },
+  editor: ViewSession<N>,
+  environment: NodeViewEnvironment,
 ) {
   const renderers = new Map<string, MountedNodeRenderer<N>>();
 
   for (const contribution of nodeViews.read(editor)) {
-    const renderer = contribution.create(editor.schema);
+    const renderer = contribution.create({ editor, ...environment });
 
     if (renderers.has(renderer.name)) throw new Error(`Duplicate node renderer: ${renderer.name}`);
     renderers.set(renderer.name, {
@@ -125,6 +146,10 @@ export function createNodeViews<N extends NodeIdentity>(
             if (destroyed || editor.isDestroyed) throw new Error('Node view is destroyed');
             view.update(frame);
           },
+          focusSelection: view.focusSelection
+            ? (selection) =>
+                !destroyed && !editor.isDestroyed && (view.focusSelection?.(selection) ?? false)
+            : undefined,
           destroy,
         };
       },

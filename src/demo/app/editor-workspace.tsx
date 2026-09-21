@@ -339,7 +339,7 @@ export function EditorWorkspace({
   });
 
   // oxlint-disable-next-line react/refs -- Input bindings capture DOM getters without invoking them.
-  const { events: inputEvents, table: tableInput } = createStarterKitInput({
+  const { events: inputEvents } = createStarterKitInput({
     editor,
     onEdit: () => {
       // oxlint-disable-next-line react/purity -- The native adapter captures this edit-event callback.
@@ -378,6 +378,21 @@ export function EditorWorkspace({
       revealSelection,
     }),
     [editor, pointerSelection, inputEvents, revealSelection, projectDocument, scroller, inputRef],
+  );
+
+  const tableHighlights = useMemo(
+    () =>
+      new Map(
+        [...findMatches].map(([id, matches]) => [
+          id,
+          matches.map((match) => ({
+            from: match.from,
+            to: match.to,
+            active: findOpen && match === findState.active,
+          })),
+        ]),
+      ),
+    [findMatches, findOpen, findState.active],
   );
 
   const openAnnotation = useCallback(
@@ -483,17 +498,14 @@ export function EditorWorkspace({
                   editor={editor}
                   {...{
                     doc,
-                    tableInput,
                     layout,
                     viewport,
                     owned,
                     commentsByNode,
                     nodeComments,
                     clipboard: inputEvents,
-                    findMatches,
-                    findOpen,
-                    findState,
-                    setSelection,
+                    highlights: tableHighlights,
+                    notice: setInputNotice,
                     setFocusedWidget,
                   }}
                   onOpen={openAnnotation}

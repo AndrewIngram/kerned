@@ -1,35 +1,32 @@
 import type { BrowserViewOptions } from '../../editor-browser';
-import { createNodeViews, type NodeView } from '../../editor-browser/node-views';
+import {
+  createNodeViews,
+  type NodeView,
+  type TextHighlight,
+} from '../../editor-browser/node-views';
 import type { RegisterCanvasPainter } from '../../editor-canvas/canvas-renderer';
 import type { DocumentLayout, DocumentLayoutSnapshot } from '../../editor-canvas/document-layout';
 import { createTextLabels } from '../../editor-canvas/text-labels';
-import type { FindState, Selection } from '../../state';
 import type { StarterNode, StarterLeaf } from '../demo-model';
 import type { EditorDocument } from './browser-document';
-import type { createStarterKitInput } from './input';
-import { createTableView } from './table-view';
 import { createTextBlockView, type CommentHighlight } from './text-block-view';
 import type { EditorSession, Owned } from './types';
 
 export type BlockLayerFrame = {
   doc: EditorDocument;
-  tableInput: ReturnType<typeof createStarterKitInput>['table'];
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   layout: DocumentLayoutSnapshot<StarterLeaf> & { onMeasure: DocumentLayout['measure'] };
   viewport: { width: number; zoom: number };
   nodeComments: ReadonlyMap<number, readonly string[]>;
   commentsByNode: ReadonlyMap<number, CommentHighlight[]>;
-  findMatches: FindState['byNode'];
-  findOpen: boolean;
-  findState: FindState;
-  setSelection: (selection: Selection) => void;
+  highlights: ReadonlyMap<number, readonly TextHighlight[]>;
+  notice: (message: string) => void;
   setFocusedWidget: (id: number | null) => void;
   onOpen: (kind: 'mention' | 'comment', nodeId: number, atomId: string, index: number) => void;
 };
 
 type MountedBlock = { element: HTMLDivElement } & (
   | { kind: 'native'; view: NodeView<StarterNode> }
-  | { kind: 'table'; view: ReturnType<typeof createTableView> }
   | { kind: 'text'; view: ReturnType<typeof createTextBlockView> }
 );
 
@@ -51,7 +48,15 @@ export function createBlockLayer(
     register,
   }: { editor: EditorSession; owned: Pick<Owned, 'layoutText'>; register: RegisterCanvasPainter },
 ) {
-  const renderers = createNodeViews(editor);
+  const renderers = createNodeViews(editor, {
+    clipboard(event) {
+      if (event.type === 'copy') frame?.clipboard.copy?.(event);
+      else if (event.type === 'cut') frame?.clipboard.cut?.(event);
+      else if (event.type === 'paste') frame?.clipboard.paste?.(event);
+    },
+    notice: (message) => frame?.notice(message),
+  });
+
   const labels = createTextLabels(owned);
   const mounted = new Map<number, MountedBlock>();
   const quotes = new Map<number, HTMLSpanElement>();
@@ -146,7 +151,7 @@ export function createBlockLayer(
         }
 
         const renderer = renderers.find(p.node);
-        const kind = renderer ? 'native' : p.node.kind === 'table' ? 'table' : 'text';
+        const kind = renderer ? 'native' : 'text';
         let block = mounted.get(p.node.id);
 
         if (block && block.kind !== kind) {
@@ -158,12 +163,10 @@ export function createBlockLayer(
           const host = element.ownerDocument.createElement('div');
           element.append(host);
 
-          if (renderer || p.node.kind === 'table') {
+          if (renderer) {
             const content = element.ownerDocument.createElement('div');
             host.append(content);
-            block = renderer
-              ? { kind: 'native', element: host, view: renderer.mount(content) }
-              : { kind: 'table', element: host, view: createTableView(content) };
+            block = { kind: 'native', element: host, view: renderer.mount(content) };
           } else
             block = {
               kind: 'text',
@@ -199,20 +202,13 @@ export function createBlockLayer(
           block.element.style.width = `${contentWidth}px`;
 
           if (block.kind === 'native')
-            block.view.update({ node: p.node, width: contentWidth, onMeasure });
-
-          if (block.kind === 'table' && p.node.kind === 'table')
             block.view.update({
               node: p.node,
               width: contentWidth,
               onMeasure,
-              clipboard: next.clipboard,
-              findMatches: next.findMatches,
-              activeMatch: next.findOpen ? next.findState.active : null,
+              highlights: next.highlights,
               selection: doc.editorState.selection,
               context: doc.context,
-              onSelect: next.setSelection,
-              ...next.tableInput,
             });
         }
       }
