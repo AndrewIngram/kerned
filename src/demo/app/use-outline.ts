@@ -16,7 +16,6 @@ type OutlineOptions = Pick<EditorDocument, 'editorState' | 'tree'> & {
   toolbarHeight: number;
   scrollDocumentTo: (top: number) => void;
   readScroll: () => number;
-  setScroll: (top: number) => void;
 };
 
 export function useOutline({
@@ -30,7 +29,6 @@ export function useOutline({
   toolbarHeight,
   scrollDocumentTo,
   readScroll,
-  setScroll,
 }: OutlineOptions) {
   const pendingOutline = useMemo(
     () =>
@@ -81,7 +79,6 @@ export function useOutline({
 
     if (!target) return;
     scrollDocumentTo(Math.max(0, target.y * zoom - 24));
-    setScroll(readScroll());
 
     if (target.placementId !== entry.id)
       requestAnimationFrame(() =>
@@ -92,7 +89,6 @@ export function useOutline({
             scrollDocumentTo(
               Math.max(0, readScroll() + element.getBoundingClientRect().top - toolbarHeight - 24),
             );
-            setScroll(readScroll());
           }
         }),
       );

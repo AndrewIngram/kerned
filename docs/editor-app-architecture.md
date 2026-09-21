@@ -8,15 +8,15 @@ remaining complete-view and package migration; this page describes current code.
 
 ## What belongs where
 
-| Owner                                     | Responsibility                                                                                             |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication            |
-| `src/core`                                | Composed headless session, named commands/queries, extension lifetime and view attachment                  |
-| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                            |
-| `src/editor-react`                        | Optional subscriptions and input/painting attachment adapters; viewport state still awaits full extraction |
-| `src/editor-canvas`                       | Framework-independent surfaces, painters, selection/highlight/caret drawing and frame scheduling           |
-| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering     |
-| `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                        |
+| Owner                                     | Responsibility                                                                                         |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `src/model`, `src/transform`, `src/state` | Schema, immutable content, document operations, mapping, selections and transaction publication        |
+| `src/core`                                | Composed headless session, named commands/queries, extension lifetime and view attachment              |
+| `src/editor-browser`                      | Native events, input capture, pointer/multiclick policy and keyboard navigation                        |
+| `src/editor-react`                        | Optional subscriptions and attachment adapters for input, painting and viewport observation            |
+| `src/editor-canvas`                       | Framework-independent surfaces, painters, selection/highlight/caret drawing and frame scheduling       |
+| `src/extensions/starter-kit`              | Standard schema/command composition, document projection, incremental layout and React block rendering |
+| `src/demo/app`                            | Samples, toolbar presentation, external comment UI, search, outline and diagnostics                    |
 
 The headless modules import neither React nor browser code. Browser and canvas
 modules are independent of React, and generic adapters do not import a particular
@@ -63,6 +63,10 @@ frames. Neither depends on paragraph or heading names.
   their DOM placement before scroll anchoring. Pending anchor adjustments survive
   multiple publications; live user scrolls take precedence. Document projection
   shares one indexed snapshot across toolbar queries.
+- The viewport controller owns native measurement, zoom and scrolling. A scroll
+  command publishes the actual clamped position immediately; callers do not
+  synchronize a separate React scroll state. Repeated native events preserve
+  snapshot identity when the viewport is unchanged.
 - The input adapter positions the hidden textarea beside the visible caret.
   Placing it at the document origin can make native typing jump to the top.
 - `useSampleStream` owns append scheduling and cancels work on unmount. Its batch
@@ -70,6 +74,6 @@ frames. Neither depends on paragraph or heading names.
 - `useDiagnostics` is the only app module importing correctness fixtures. Canvas
   diagnostics expose a readonly painter count rather than a mutable registry.
 
-Complete asset readiness/cancellation, viewport ownership and public vanilla
+Complete asset readiness/cancellation, DOM-overlay ownership and public vanilla
 mounting remain milestone 4 work. The demo still initializes and passes internal
 engine resources; that is not the intended final consumer interface.

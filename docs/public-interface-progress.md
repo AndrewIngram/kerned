@@ -1219,3 +1219,36 @@ regression without changing the limits.
 Milestone 4 remains in progress. Complete viewport/DOM-overlay ownership, asset
 readiness and cancellation, browser-extension composition and the public vanilla
 mount are still required before its architecture judge and acceptance.
+
+### Milestone 4 viewport ownership
+
+`createEditorViewport` owns viewport snapshots, zoom, native measurement and
+scrolling. Its React adapter only attaches and subscribes. The old observer-only
+API and every `setScroll` synchronization callback were removed. Scroll commands
+publish the browser's clamped position immediately; duplicate native events keep
+the same snapshot. Zoom and scroll configuration reject non-finite values, and
+zoom must be positive.
+
+Each attachment owns its resize observer and scroll/resize listeners. Cleanup is
+idempotent, stale cleanup cannot detach a successor, and terminal destruction
+prevents new attachments or mutations. Page scrollports work across window
+realms. Browser tests cover actual geometry and resizing, clamping, duplicate
+notifications, zoom, page-to-embedded remounting and destruction during initial
+publication. Input/layout, outline and search callers now use the same scroll
+command without keeping a second scroll store in React.
+
+Validation: `pnpm run check` passes with 304 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. Production build passes.
+`check:editor-page-scroll` and `check:editor-navigation` pass all three browsers at
+1100px and 390px, including sticky toolbar resizing, editor-wide clicks,
+shift/modifier movement, PageUp/PageDown and distant document boundaries.
+Three serial production trials in
+`artifacts/public-interface-m4/viewport-controller/baseline.json` pass every
+unchanged budget: worst first usable 176 ms, streaming 1,081 ms, paste handler
+57.6 ms, paste to paint 119.3 ms, typing 32.4 ms, paging 32.9 ms and loaded JS heap
+29,459,516 bytes. The report identifies `ae7f689` and measures this checkpoint's
+uncommitted tree.
+
+This remains a milestone 4 checkpoint. Asset readiness/cancellation, complete
+DOM-overlay ownership, browser-extension composition and public view mounting
+remain before the milestone judge.

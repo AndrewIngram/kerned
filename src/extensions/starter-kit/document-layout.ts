@@ -23,7 +23,6 @@ export type DocumentLayoutFrame = {
     viewportHeight: number;
     readScroll: () => number;
     scrollDocumentTo: (top: number) => void;
-    setScroll: (top: number) => void;
   };
   panelId: number | undefined;
   focusedWidget: number | null;
@@ -333,7 +332,7 @@ export function createDocumentLayout({
       assertAlive();
 
       if (value !== snapshot || !frame || !detach) return;
-      const { readScroll, zoom, scrollDocumentTo, setScroll } = frame.viewport;
+      const { readScroll, zoom, scrollDocumentTo } = frame.viewport;
 
       if (readScroll() !== lastScroll) {
         build(false);
@@ -346,7 +345,6 @@ export function createDocumentLayout({
       if (Math.abs(readScroll() - desired) > 0.1) {
         scrollDocumentTo(desired);
         lastScroll = readScroll();
-        setScroll(lastScroll);
       }
 
       presented = value;

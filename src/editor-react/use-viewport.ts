@@ -1,58 +1,34 @@
-import { useCallback, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { useLayoutEffect, useMemo, useRef, useSyncExternalStore, type RefObject } from 'react';
 
-import { observeEditorViewport } from '../editor-browser';
+import { createEditorViewport } from '../editor-browser';
 
+/** React attaches browser observation and subscribes; it owns no viewport state. */
 export function useEditorViewport(scrollerRef: RefObject<HTMLDivElement | null>, page: boolean) {
   const toolbarRef = useRef<HTMLElement>(null);
-
-  const [viewportHeight, setViewportHeight] = useState(520),
-    [toolbarHeight, setToolbarHeight] = useState(50);
-
-  const [zoom, setZoom] = useState(1),
-    [width, setWidth] = useState(620),
-    [scroll, setScroll] = useState(0);
-
-  const readScroll = useCallback(() => {
-    return page ? window.scrollY : (scrollerRef.current?.scrollTop ?? 0);
-  }, [page, scrollerRef]);
-
-  const scrollDocumentTo = useCallback(
-    (top: number) => {
-      if (page) window.scrollTo({ top, behavior: 'instant' });
-      else scrollerRef.current?.scrollTo({ top, behavior: 'instant' });
-    },
-    [page, scrollerRef],
-  );
-
+  const controller = useMemo(() => createEditorViewport(), []);
+  const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot);
   useLayoutEffect(() => {
-    const el = scrollerRef.current;
+    const element = scrollerRef.current;
 
-    if (!el) return undefined;
-
-    return observeEditorViewport({
-      element: el,
-      scrollport: page ? window : el,
-      toolbar: toolbarRef.current,
-      onChange: ({ width: widthValue, height, inset, scrollTop }) => {
-        setWidth(widthValue);
-        setViewportHeight(height);
-        setToolbarHeight(inset);
-        setScroll(scrollTop);
-      },
-    });
-  }, [page, scrollerRef]);
+    return element
+      ? controller.attach({
+          element,
+          scrollport: page ? window : element,
+          toolbar: toolbarRef.current,
+        })
+      : undefined;
+  }, [controller, page, scrollerRef]);
 
   return {
     toolbarRef,
-    viewportHeight,
-    toolbarHeight,
-    zoom,
-    setZoom,
-    width,
-    scroll,
-    setScroll,
-    readScroll,
-    scrollDocumentTo,
+    viewportHeight: snapshot.height,
+    toolbarHeight: snapshot.inset,
+    zoom: snapshot.zoom,
+    setZoom: controller.setZoom,
+    width: snapshot.width,
+    scroll: snapshot.scrollTop,
+    readScroll: controller.readScroll,
+    scrollDocumentTo: controller.scrollTo,
   };
 }
 

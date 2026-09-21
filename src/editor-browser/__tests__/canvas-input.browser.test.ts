@@ -105,9 +105,7 @@ function fixture() {
         readScroll: () => host.scrollTop,
         scrollDocumentTo: (top: number) => {
           host.scrollTop = top;
-        },
-        setScroll: (top: number) => {
-          scrolls.push(top);
+          scrolls.push(host.scrollTop);
         },
       },
     };

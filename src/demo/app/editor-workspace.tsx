@@ -104,7 +104,6 @@ export function EditorWorkspace({
     setZoom,
     width,
     scroll,
-    setScroll,
     readScroll,
     scrollDocumentTo,
   } = viewport;
@@ -166,7 +165,6 @@ export function EditorWorkspace({
     toolbarHeight,
     scrollDocumentTo,
     readScroll,
-    setScroll,
   });
 
   const findGeometry = useMemo(

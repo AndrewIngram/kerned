@@ -62,7 +62,6 @@ async function fixture(nodes: StarterNode[]) {
       scrollDocumentTo: (top) => {
         host.scrollTop = top;
       },
-      setScroll: () => {},
     },
     panelId: undefined,
     focusedWidget: null,

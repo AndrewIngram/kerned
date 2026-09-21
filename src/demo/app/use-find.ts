@@ -175,7 +175,7 @@ export function useFindReveal({
   viewport: Viewport;
 }) {
   const revealFind = useRef(false);
-  const { zoom, viewportHeight, readScroll, scrollDocumentTo, setScroll } = viewport;
+  const { zoom, viewportHeight, readScroll, scrollDocumentTo } = viewport;
   useLayoutEffect(() => {
     revealFind.current = true;
     // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Each find request or active-match change must rearm viewport reveal.
@@ -224,7 +224,6 @@ export function useFindReveal({
 
     if (matchTop < scrollTop + clearance || matchBottom > scrollTop + viewportHeight - 24) {
       scrollDocumentTo(Math.max(0, matchTop - Math.max(clearance, viewportHeight * 0.35)));
-      setScroll(readScroll());
     }
   }, [
     scene,
@@ -237,6 +236,5 @@ export function useFindReveal({
     canvasRef,
     readScroll,
     scrollDocumentTo,
-    setScroll,
   ]);
 }

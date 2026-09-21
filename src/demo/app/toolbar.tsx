@@ -1,4 +1,4 @@
-import { useEffect, type Dispatch, type RefObject, type SetStateAction } from 'react';
+import { useEffect, type RefObject } from 'react';
 
 import { FindIcon } from '../../demo/find-bar';
 import { bookSamples, type EditorSample } from '../../editor-samples';
@@ -17,7 +17,7 @@ type ToolbarProps = { doc: EditorDocument; actions: EditorControls } & {
   onSampleChange: (id: string) => void;
   editor: EditorSession;
   zoom: number;
-  setZoom: Dispatch<SetStateAction<number>>;
+  setZoom: (zoom: number) => void;
 };
 
 export function Toolbar({

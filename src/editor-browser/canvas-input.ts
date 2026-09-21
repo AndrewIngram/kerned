@@ -41,7 +41,6 @@ export type CanvasInputFrame<N extends NodeIdentity> = {
     viewportHeight: number;
     readScroll: () => number;
     scrollDocumentTo: (top: number) => void;
-    setScroll: (top: number) => void;
   };
   afterSelectAll?: () => void;
   onStart?: PointerSelectionOptions['onStart'];
@@ -208,7 +207,7 @@ export function createCanvasInput<N extends NodeIdentity>({
     if (!attachment || !frame || !revealPending || frame.selection !== editor.state.selection)
       return;
     const { selection, placements, caret, activeTop, viewport } = frame;
-    const { zoom, viewportHeight, readScroll, scrollDocumentTo, setScroll } = viewport;
+    const { zoom, viewportHeight, readScroll, scrollDocumentTo } = viewport;
 
     const node =
       selection instanceof NodeSelection
@@ -241,7 +240,6 @@ export function createCanvasInput<N extends NodeIdentity>({
 
     if (target !== currentScroll) {
       scrollDocumentTo(Math.max(0, target));
-      setScroll(readScroll());
     }
   }
 

@@ -4,7 +4,7 @@ import { createPointerSelection, type PointerSelectionOptions } from './pointer-
 
 export { createPointerSelection, type PointerSelectionOptions } from './pointer-selection';
 
-export { observeEditorViewport, type EditorViewport } from './viewport';
+export { createEditorViewport, type EditorViewport } from './viewport';
 
 export { createTextInput } from './text-input';
 
