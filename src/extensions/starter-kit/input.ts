@@ -2,37 +2,19 @@ import { createTextInput, type BrowserViewOptions } from '../../editor-browser';
 import { readClipboard, writeClipboard, type ClipboardFragment } from '../../extensions/clipboard';
 import { plainText, type StarterNode } from '../../extensions/demo-model';
 import { tablePlainText } from '../../extensions/table';
-import { type NodeIdentity, type Schema } from '../../model';
+import { type Schema } from '../../model';
 import { supportsOwnedText } from '../../owned-text-support';
 import { TextSelection } from '../../state';
 import type { TextFormat } from '../formatting';
 import { tableCells } from '../table';
 import { plainCellRectangle } from '../table-clipboard';
 import { createStarterDocumentQuery } from './document';
+import type { TableFrame } from './table-view';
 import type { EditorSession } from './types';
-
-export type InputActions = {
-  insertText: (
-    text: string,
-    range: { from: number; to: number },
-    history: 'separate' | { group: string },
-  ) => boolean;
-  pasteText: (text: string) => boolean;
-  replaceText: (id: number, from: number, to: number, text: string, caret: number) => boolean;
-  allocate: () => NodeIdentity;
-  splitBlock: () => boolean;
-  deleteText: (backward: boolean) => boolean;
-  indentList: (outdent?: boolean) => boolean;
-  blocks: { item: number | undefined };
-  restore: (redo?: boolean) => boolean;
-  toggleFormat: (format: TextFormat) => boolean;
-  replaceCells: (text: string) => boolean;
-  paste: (fragment: ClipboardFragment) => boolean;
-};
 
 type InputOptions = {
   editor: EditorSession;
-  actions: InputActions;
+  onEdit: () => void;
   textInput: ReturnType<typeof createTextInput<StarterNode>>;
   input: () => HTMLTextAreaElement | null;
   notice: (message: string) => void;
@@ -46,7 +28,7 @@ type InputOptions = {
  * without this adapter, a textarea, or React. */
 export function createStarterKitInput({
   editor,
-  actions,
+  onEdit,
   textInput,
   input,
   notice,
@@ -56,7 +38,55 @@ export function createStarterKitInput({
   navigate,
 }: InputOptions) {
   const project = createStarterDocumentQuery(editor.schema);
-  const { allocate, restore, toggleFormat, replaceCells, paste } = actions;
+  const allocate = () => ({ id: editor.allocateBlockId(), key: crypto.randomUUID() });
+
+  function run(action: () => boolean, focusAfter = false) {
+    try {
+      onEdit();
+      const applied = action();
+      notice('');
+
+      if (!applied) syncInput();
+
+      if (applied && focusAfter) editor.commands.focus();
+
+      return applied;
+    } catch (error) {
+      notice(error instanceof Error ? error.message : 'Command failed');
+      syncInput();
+
+      return false;
+    }
+  }
+
+  function restore(redo = false) {
+    return run(() => {
+      const changed = redo ? editor.commands.redo() : editor.commands.undo();
+
+      if (changed) closePanel();
+
+      return changed;
+    }, true);
+  }
+
+  const toggleFormat = (format: TextFormat) =>
+    run(() => editor.commands.toggleFormat(format), true);
+
+  const replaceCells = (text: string) => run(() => editor.commands.replaceSelection(text), true);
+  const paste = (fragment: ClipboardFragment) => run(() => editor.commands.paste(fragment), true);
+
+  const table: Pick<TableFrame, 'onText' | 'onUndo' | 'onFormat' | 'onReplace'> = {
+    onText: (id, from, to, text, caret) =>
+      run(() =>
+        editor
+          .chain({ history: { group: `typing:${id}` } })
+          .replaceText({ id, from, to, text, caret })
+          .run(),
+      ),
+    onUndo: restore,
+    onFormat: toggleFormat,
+    onReplace: replaceCells,
+  };
 
   function syncInput() {
     const element = input();
@@ -88,7 +118,7 @@ export function createStarterKitInput({
     }
 
     if (paragraphs && clean.includes('\n')) {
-      if (actions.pasteText(clean)) closePanel();
+      if (run(() => editor.commands.pasteText(clean))) closePanel();
 
       return;
     }
@@ -100,7 +130,7 @@ export function createStarterKitInput({
         };
 
     if (
-      actions.insertText(clean, { from, to }, history) &&
+      run(() => editor.chain({ history }).insertText(clean, { from, to }).run()) &&
       selection.anchor.id !== selection.head.id
     )
       closePanel();
@@ -174,14 +204,25 @@ export function createStarterKitInput({
 
     if (event.key === 'Backspace' || event.key === 'Delete') {
       event.preventDefault();
-      actions.deleteText(event.key === 'Backspace');
+      run(() => {
+        const selection = editor.state.selection;
+
+        const chain = editor.chain({
+          history:
+            selection instanceof TextSelection
+              ? { group: `delete:${selection.head.id}` }
+              : 'separate',
+        });
+
+        return (event.key === 'Backspace' ? chain.deleteBackward() : chain.deleteForward()).run();
+      });
 
       return;
     }
 
-    if (event.key === 'Tab' && actions.blocks.item !== undefined) {
+    if (event.key === 'Tab' && editor.queries.blockState().item !== undefined) {
       event.preventDefault();
-      actions.indentList(event.shiftKey);
+      run(() => editor.commands.indentList(event.shiftKey), true);
 
       return;
     }
@@ -189,7 +230,7 @@ export function createStarterKitInput({
     if (event.key === 'Enter') {
       event.preventDefault();
 
-      if (actions.splitBlock()) closePanel();
+      if (run(() => editor.commands.splitBlock())) closePanel();
     }
   }
 
@@ -295,7 +336,7 @@ export function createStarterKitInput({
     },
   };
 
-  return inputEvents;
+  return { events: inputEvents, table };
 }
 
 /** A table's native textarea owns focus while editing a cell; otherwise focus

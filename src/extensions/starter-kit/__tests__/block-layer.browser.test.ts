@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { beforeAll, expect, test } from 'vitest';
 
 import { createEditor } from '../../../core';
+import { createTextInput } from '../../../editor-browser';
 import { createCanvasRenderer } from '../../../editor-canvas/canvas-renderer';
 import { CanvasLayerProvider } from '../../../editor-react';
 import { createSchema } from '../../../model';
@@ -15,6 +16,7 @@ import { BlockLayer } from '../block-layer';
 import { starterBrowserExtensions } from '../browser';
 import { createStarterDocumentQuery } from '../document';
 import { createDocumentLayout, type DocumentLayoutFrame } from '../document-layout';
+import { createStarterKitInput } from '../input';
 import { createBlockLayer, type BlockLayerFrame } from '../native-block-layer';
 
 let kit: CanvasKit;
@@ -50,6 +52,21 @@ async function fixture() {
     source: { getSnapshot: () => project(editor.state), subscribe: editor.subscribe },
   });
 
+  const capture = document.createElement('textarea');
+  const textInput = createTextInput(editor.schema, editor);
+
+  const input = createStarterKitInput({
+    editor,
+    textInput,
+    input: () => capture,
+    onEdit() {},
+    notice() {},
+    closePanel() {},
+    escape() {},
+    selectAll: () => editor.commands.selectAll(),
+    navigate: () => false,
+  });
+
   const find = createFind(editor.schema, () => editor.state.nodes);
   const opened: { kind: string; node: number; id: string; index: number }[] = [];
   const focused: (number | null)[] = [];
@@ -79,14 +96,8 @@ async function fixture() {
 
     return {
       doc: project(editor.state),
-      actions: {
-        replaceText: (id, from, to, text, caret) =>
-          editor.commands.replaceText({ id, from, to, text, caret }),
-        restore: (redo) => (redo ? editor.commands.redo() : editor.commands.undo()),
-        toggleFormat: (format) => editor.commands.toggleFormat(format),
-        replaceCells: (text) => editor.commands.replaceSelection(text),
-      },
-      clipboard: {},
+      tableInput: input.table,
+      clipboard: input.events,
       layout: {
         ...snapshot,
         visible: snapshot.visible.filter((p) => !visible || visible.has(p.node.id)),
@@ -159,6 +170,7 @@ async function fixture() {
       stopEditor();
       stopLayout();
       layer.destroy();
+      textInput.destroy();
       layout.destroy();
       renderer.destroy();
       editor.destroy();

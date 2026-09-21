@@ -1497,3 +1497,35 @@ Milestone 4 remains open. The block layer is now framework-independent, but
 Table actions/clipboard and inline/decorations still need extension contribution
 contracts. The public mount, supported geometry queries and removal of kit/owned
 from the demo remain required before the milestone judge.
+
+### Milestone 4 checkpoint: native editing command ownership
+
+The native starter input adapter now executes typing, deletion, paragraph splits,
+clipboard insertion, formatting shortcuts, history and table input against the
+session. Deleted the caller-supplied `InputActions` interface and the corresponding
+demo implementations. The block layer receives the adapter's table handlers;
+it no longer depends on the application's toolbar controls. The demo controls
+now only wrap toolbar commands with application feedback and focus.
+
+A command rejected by permissions previously left the attempted text in the
+hidden capture. The adapter now synchronizes canonical text and selection after
+rejection. A subsequent permitted edit starts from the current document rather
+than the rejected input buffer.
+
+The input and selection integration tests no longer import demo controls. The
+native block-layer fixture also uses the real input adapter for table edits.
+New browser cases cover typing/deletion history groups, composition boundaries,
+keyboard undo, denied-input recovery, table history and permission revocation.
+`pnpm run check` passes with 387 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes, and a second lint-fix and
+format pass leaves source files unchanged.
+
+Three serial production trials in `artifacts/public-interface-m4/native-input/`
+pass every unchanged performance budget. Worst first usable is 176 ms, streaming
+1,040.8 ms, paste handler 58.6 ms, paste to paint 121.4 ms, typing 32.5 ms, paging
+32.6 ms and loaded heap 28,818,496 bytes. The reports identify `57abb0c` and measure
+this checkpoint's uncommitted tree.
+
+This remains an intermediate milestone 4 checkpoint. Complete mount composition,
+schema-independent presentation contributions, supported geometry queries and
+removing kit/owned from the demo are still required before its architecture judge.

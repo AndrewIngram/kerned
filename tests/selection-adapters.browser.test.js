@@ -18,7 +18,6 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const { createStarterDocumentQuery } =
       await import('../src/extensions/starter-kit/document.ts');
 
-    const { createEditorControls } = await import('../src/demo/app/editor-controls.ts');
     const { createStarterKitInput } = await import('../src/extensions/starter-kit/input.ts');
     const { createTextInput } = await import('../src/editor-browser/text-input.ts');
     let next = 10;
@@ -63,15 +62,6 @@ test('starter commands target the selected node and disjoint cells, never the fi
     flushSync(() => root.render(React.createElement(Probe)));
     const notices = [];
 
-    const actions = () =>
-      createEditorControls({
-        editor,
-        onEdit() {},
-        notice: (m) => notices.push(m),
-        closePanel() {},
-        syncInput() {},
-      });
-
     const input = document.createElement('textarea'),
       capture = createTextInput(demoSchema, editor);
 
@@ -86,13 +76,13 @@ test('starter commands target the selected node and disjoint cells, never the fi
       text: doc.textSelection,
     };
 
-    flushSync(() => actions().setHeading(2));
+    flushSync(() => editor.commands.setHeading(2));
     const firstAfterHeading = editor.state.nodes[0].kind;
     const clipboard = new DataTransfer();
 
-    const events = createStarterKitInput({
+    const { events } = createStarterKitInput({
       editor,
-      actions: actions(),
+      onEdit() {},
       textInput: capture,
       input: () => input,
       notice: (m) => notices.push(m),
@@ -112,8 +102,8 @@ test('starter commands target the selected node and disjoint cells, never the fi
       image: editor.state.nodes.some((n) => n.id === 2),
     };
 
-    flushSync(() => actions().restore());
-    flushSync(() => actions().insertTable());
+    flushSync(() => editor.commands.undo());
+    flushSync(() => editor.commands.insertTable());
     const order = editor.state.nodes.map((n) => n.kind);
     const { TextSelection } = await import('../src/state/index.ts');
 
@@ -137,12 +127,12 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const context = selectionContext(demoSchema, editor.state.nodes);
     const expected = editor.state.selection.ranges(context).map((r) => r.id);
     const targets = doc.selectedBlocks.map((n) => n.id);
-    flushSync(() => actions().setHeading(3));
+    flushSync(() => editor.commands.setHeading(3));
     const updated = selectionContext(demoSchema, editor.state.nodes);
     const selectedKinds = expected.map((id) => updated.node(id).kind);
     const untouched = updated.node(table.rows[0][1].paragraphs[0].id).kind;
     flushSync(() => editor.select(new NodeSelection(2)));
-    flushSync(() => actions().replaceCells('Replacement'));
+    flushSync(() => editor.commands.replaceSelection('Replacement'));
     const replacement = editor.state.nodes.map((n) => ({ kind: n.kind, text: n.text }));
     root.unmount();
     host.remove();

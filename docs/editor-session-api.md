@@ -137,10 +137,12 @@ receive fresh IDs. Copying retains canonical attributes, formatting and locks
 without importing or normalizing them again. Paste uses this operation rather
 than assuming field names or serializing content through a codec.
 
-Browser handlers created by `createStarterKitInput` read current editor state
-when invoked. They no longer accept a captured `document` snapshot. Holding the
-same handler across selection changes does not require a React render to update
-its target.
+The internal `createStarterKitInput` adapter owns native editing commands and
+returns browser event handlers plus table input handlers. Hosts supply feedback
+and navigation callbacks, not implementations of typing, deletion, history or
+paste. Handlers read the current session state, so selection changes do not
+require a React render to update their target. A rejected edit restores the
+hidden capture to canonical text before another input event.
 
 ## Commands
 

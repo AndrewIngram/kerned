@@ -1,7 +1,6 @@
-import { expect, test } from 'vitest';
+import { expect, test, onTestFinished } from 'vitest';
 
 import { createEditor } from '../src/core';
-import { createEditorControls } from '../src/demo/app/editor-controls';
 import { createTextInput } from '../src/editor-browser';
 import { starterExtensions } from '../src/extensions/starter-kit';
 import { createStarterKitInput } from '../src/extensions/starter-kit/input';
@@ -9,10 +8,12 @@ import { createSchema } from '../src/model';
 import { TextSelection, textSelection } from '../src/state';
 
 function inputSession() {
+  let writable = true;
   const schema = createSchema({ extensions: starterExtensions });
 
   const editor = createEditor({
     schema,
+    permissions: { access: () => (writable ? 'editable' : 'read-only') },
     content: [
       { kind: 'paragraph', id: 1, text: 'First' },
       { kind: 'paragraph', id: 2, text: 'Second' },
@@ -24,17 +25,9 @@ function inputSession() {
   const notices: string[] = [];
   const notice = (message: string) => notices.push(message);
 
-  const actions = createEditorControls({
+  const { events: handlers, table } = createStarterKitInput({
     editor,
-    notice,
     onEdit() {},
-    closePanel() {},
-    syncInput: () => textInput.sync(input),
-  });
-
-  const handlers = createStarterKitInput({
-    editor,
-    actions,
     textInput,
     input: () => input,
     notice,
@@ -44,7 +37,22 @@ function inputSession() {
     navigate: () => false,
   });
 
-  return { editor, input, textInput, notices, handlers };
+  onTestFinished(() => {
+    textInput.destroy();
+    editor.destroy();
+  });
+
+  return {
+    editor,
+    input,
+    textInput,
+    notices,
+    handlers,
+    table,
+    setWritable(this: void, value: boolean) {
+      writable = value;
+    },
+  };
 }
 
 test('retained clipboard handlers read the current selection and share the session paste command', () => {
@@ -109,4 +117,93 @@ test('retained keyboard and text callbacks invoke current session commands', () 
   handlers.input?.(new Event('input'), input);
   expect(editor.state.nodes[0]).toMatchObject({ text: 'First!' });
   expect(notices.filter(Boolean)).toEqual([]);
+});
+
+test('native input groups typing and deletion, isolates composition, and owns keyboard undo', () => {
+  const { editor, input, textInput, handlers } = inputSession();
+  editor.select(textSelection(1, 5));
+
+  function type(value: string) {
+    textInput.sync(input);
+    input.value += value;
+    input.setSelectionRange(input.value.length, input.value.length);
+    handlers.input?.(new Event('input'), input);
+  }
+
+  function key(value: string, ctrlKey = false) {
+    const event = new KeyboardEvent('keydown', { key: value, ctrlKey, cancelable: true });
+    handlers.keydown?.(event);
+
+    return event;
+  }
+
+  type('!');
+  type('?');
+  expect(editor.history.undo).toBe(1);
+  handlers.compositionstart?.();
+  type('é');
+  expect(key('Enter').defaultPrevented).toBe(false);
+  expect(editor.state.nodes).toHaveLength(2);
+  handlers.compositionend?.();
+  expect(editor.history.undo).toBe(2);
+  expect(key('z', true).defaultPrevented).toBe(true);
+  expect(editor.state.nodes[0]).toMatchObject({ text: 'First!?' });
+  key('z', true);
+  expect(editor.state.nodes[0]).toMatchObject({ text: 'First' });
+  editor.select(textSelection(2, 6));
+  key('Backspace');
+  key('Backspace');
+  expect(editor.state.nodes[1]).toMatchObject({ text: 'Seco' });
+  key('z', true);
+  expect(editor.state.nodes[1]).toMatchObject({ text: 'Second' });
+});
+
+test('rejected native typing restores the capture before a later permitted edit', () => {
+  const { editor, input, textInput, handlers, setWritable } = inputSession();
+  editor.select(textSelection(1, 5));
+  textInput.sync(input);
+  const before = editor.state;
+  setWritable(false);
+  input.value = 'First rejected';
+  input.setSelectionRange(input.value.length, input.value.length);
+  handlers.input?.(new Event('input'), input);
+  expect(editor.state).toBe(before);
+  expect(input.value).toBe('First');
+  expect(input.selectionStart).toBe(5);
+  expect(editor.history.undo).toBe(0);
+  setWritable(true);
+  input.value = 'First accepted';
+  input.setSelectionRange(input.value.length, input.value.length);
+  handlers.input?.(new Event('input'), input);
+  expect(editor.state.nodes[0]).toMatchObject({ text: 'First accepted' });
+  expect(editor.history.undo).toBe(1);
+});
+
+test('table input shares native history and current permission checks without application commands', () => {
+  const { editor, table, setWritable } = inputSession();
+  editor.commands.insertTable();
+  const node = editor.state.nodes.find((n) => n.kind === 'table');
+
+  if (!node) throw new Error('Missing table');
+  const paragraph = node.rows[0][0].paragraphs[0];
+  const original = paragraph.text;
+  editor.select(textSelection(paragraph.id, original.length));
+  expect(
+    table.onText(paragraph.id, original.length, original.length, 'A', original.length + 1),
+  ).toBe(true);
+  expect(
+    table.onText(paragraph.id, original.length + 1, original.length + 1, 'B', original.length + 2),
+  ).toBe(true);
+  expect(editor.history.undo).toBe(2);
+  setWritable(false);
+  const before = editor.state;
+  expect(table.onText(paragraph.id, 0, 0, 'Denied', 6)).toBe(false);
+  table.onUndo(false);
+  expect(editor.state).toBe(before);
+  setWritable(true);
+  table.onUndo(false);
+  expect(editor.state.nodes.find((n) => n.kind === 'table')).toEqual(node);
+  expect(editor.history.undo).toBe(1);
+  table.onUndo(true);
+  expect(editor.state.nodes).toEqual(before.nodes);
 });

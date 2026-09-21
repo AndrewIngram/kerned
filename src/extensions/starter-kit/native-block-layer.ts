@@ -6,14 +6,14 @@ import type { FindState, Selection } from '../../state';
 import type { StarterNode } from '../demo-model';
 import type { EditorDocument } from './document';
 import type { DocumentLayout, DocumentLayoutSnapshot } from './document-layout';
-import type { InputActions } from './input';
+import type { createStarterKitInput } from './input';
 import { createTableView } from './table-view';
 import { createTextBlockView, type CommentHighlight } from './text-block-view';
 import type { EditorSession, Owned } from './types';
 
 export type BlockLayerFrame = {
   doc: EditorDocument;
-  actions: Pick<InputActions, 'replaceText' | 'restore' | 'toggleFormat' | 'replaceCells'>;
+  tableInput: ReturnType<typeof createStarterKitInput>['table'];
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   layout: DocumentLayoutSnapshot & { onMeasure: DocumentLayout['measure'] };
   viewport: { width: number; zoom: number };
@@ -212,10 +212,7 @@ export function createBlockLayer(
               selection: doc.editorState.selection,
               context: doc.context,
               onSelect: next.setSelection,
-              onText: next.actions.replaceText,
-              onUndo: next.actions.restore,
-              onFormat: next.actions.toggleFormat,
-              onReplace: next.actions.replaceCells,
+              ...next.tableInput,
             });
         }
       }

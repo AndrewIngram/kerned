@@ -339,9 +339,12 @@ export function EditorWorkspace({
   });
 
   // oxlint-disable-next-line react/refs -- Input bindings capture DOM getters without invoking them.
-  const inputEvents = createStarterKitInput({
+  const { events: inputEvents, table: tableInput } = createStarterKitInput({
     editor,
-    actions,
+    onEdit: () => {
+      // oxlint-disable-next-line react/purity -- The native adapter captures this edit-event callback.
+      editStarted.current = performance.now();
+    },
     textInput,
     input: () => inputRef.current,
     notice: setInputNotice,
@@ -480,7 +483,7 @@ export function EditorWorkspace({
                   editor={editor}
                   {...{
                     doc,
-                    actions,
+                    tableInput,
                     layout,
                     viewport,
                     owned,
