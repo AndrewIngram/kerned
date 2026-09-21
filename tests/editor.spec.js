@@ -17,6 +17,7 @@ for (const width of [1100, 390]) {
     await page.keyboard.type('Hello ');
     await expect.poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes[0].text))
       .toBe(`Hello ${original[0].text}`);
+
     for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+ArrowLeft');
     await page.getByRole('button', {name: 'Bold', exact: true}).click();
     await expect.poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes[0].marks

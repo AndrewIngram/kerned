@@ -2,7 +2,9 @@ import {createSchema, createEditor, textSelection} from '../../src/editor/index.
 
 // Deliberately independent of the demo schema, text fields and renderer.
 const text = (id, value, role = 'body') => ({id, key: `n-${id}`, kind: 'text', role, value});
+
 const group = (id, role, children = []) => ({id, key: `n-${id}`, kind: 'group', role, children});
+
 export const schema = createSchema([
   {name: 'writing', version: 1, kind: 'text', accepts: n => n.kind === 'text', validateUpdate() {}, editing: {
     text: n => n.value,
@@ -43,12 +45,16 @@ export async function mountStateProbe(editor, element) {
   const {createRoot} = await import('react-dom/client');
   const {flushSync} = await import('react-dom');
   const {useEditorState} = await import('../../src/editor-react/index.tsx');
+
   function Probe() {
     const value = useEditorState(editor, state => `${state.revision}:${state.selection.type}`);
+
     return createElement('span', null, value);
   }
+
   const root = createRoot(element);
   flushSync(() => root.render(createElement(Probe)));
+
   return {flush: action => flushSync(action), unmount: () => root.unmount()};
 }
 
@@ -58,12 +64,25 @@ export async function mountOptimizedProbe(editor, element) {
   const counts={revision:0,selection:0,pointer:0,input:0,renderer:0};
   const selectRevision=state=>state.revision;
   const selectSelection=state=>({kind:state.selection.type});
-  function Revision(){counts.revision++;return React.createElement('output',null,useEditorState(editor,selectRevision));}
-  function Selection(){counts.selection++;useEditorState(editor,selectSelection,(a,b)=>a.kind===b.kind);return null;}
-  const View=createReactRenderers([{name:'custom',component:({value})=>{const [n,setN]=React.useState(0);counts.renderer++;return React.createElement('button',{onClick:()=>setN(n+1)},`${value}:${n}`);}}]);
+
+  function Revision(){counts.revision++;
+
+return React.createElement('output',null,useEditorState(editor,selectRevision));}
+
+  function Selection(){counts.selection++;useEditorState(editor,selectSelection,(a,b)=>a.kind===b.kind);
+
+return null;}
+
+  const View=createReactRenderers([{name:'custom',component:({value})=>{const [n,setN]=React.useState(0);counts.renderer++;
+
+return React.createElement('button',{onClick:()=>setN(n+1)},`${value}:${n}`);}}]);
+
   const props={pointer:{hitTest:()=>({point:{id:3,offset:0},upstream:false}),selection:()=>editor.state.selection,onSelect:()=>{counts.pointer++;},focus:()=>{}},input:{element:()=>element.querySelector('textarea'),input:()=>{counts.input++;}}};
+
   function Probe(){return React.createElement(Editor,{view:props},React.createElement(Revision),React.createElement(Selection),React.createElement('textarea'),React.createElement(View,{type:'custom',value:'node'}));}
+
   const root=createRoot(element);
   flushSync(()=>root.render(React.createElement(React.StrictMode,null,React.createElement(Probe))));
+
   return {counts,flush:flushSync,unmount:()=>flushSync(()=>root.unmount())};
 }

@@ -3,18 +3,22 @@ import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 
 const browser=await chromium.launch();
+
 try{
   const page=await browser.newPage();
   await page.routeWebSocket(url=>url.pathname==='/',()=>{});
   await page.goto('http://127.0.0.1:5173/editor.html');
   let cdp;
+
   if(process.env.PROFILE){cdp=await page.context().newCDPSession(page);await cdp.send('Profiler.enable');await cdp.send('Profiler.start');}
+
   const results=await page.evaluate(async()=>{
     const {createEditor,TextSelection,createAnchor,resolveAnchor}=await import('/src/editor/index.ts');
     const {demoSchema}=await import('/src/extensions/demo-schema.ts');
     const {replaceStructuredText}=await import('/src/extensions/blocks.ts');
     const reports=[];
     const check=(condition,message)=>{if(!condition)throw new Error(message);};
+
     const same=(a,b,message)=>check(JSON.stringify(a)===JSON.stringify(b),message);
     const leaf=(id,text='Editable content.')=>({id,key:`p-${id}`,kind:'paragraph',text,marks:[],inline:[]});
     const apply=(editor,command)=>editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:'separate',time:0,...command});
@@ -22,6 +26,7 @@ try{
     const last={...leaf(4,'Goodbye world'),marks:[{from:5,to:13,mark:{type:'italic',attrs:null}}]};
     const table={id:40,key:'table',kind:'table',caption:'Embedded',rows:[[{id:41,key:'cell',kind:'tableCell',row:0,header:false,colspan:1,rowspan:1,paragraphs:[leaf(42,'Cell text')]}]]};
     const initial=[leaf(100,'Before'),{id:20,key:'quote-1',kind:'quote',children:[first,{id:30,key:'list',kind:'list',ordered:true,start:3,children:[{id:31,key:'item-1',kind:'listItem',children:[leaf(2)]},{id:32,key:'item-2',kind:'listItem',children:[leaf(3)]}]}]},table,{id:21,key:'quote-2',kind:'quote',children:[last,leaf(5,'Keep this sibling')]},leaf(6,'After')];
+
     for(const inserted of ['', 'New text']){
       const selection=new TextSelection({id:4,offset:4},{id:1,offset:3});
       const bulk=createEditor(demoSchema,initial,selection),reference=createEditor(demoSchema,initial,selection);
@@ -46,17 +51,21 @@ try{
       check(bulk.state.nodes[0]===initial[0]&&bulk.state.nodes.at(-1)===initial.at(-1),'Unaffected roots retain identity');
       check(bulk.state.nodes[1].children[0].text===`Hel${inserted}bye world`,'Boundary text joins at the deletion point');
       check(result.changes.length===1,'Bulk replacement publishes once');
+
       for(let offset=0;offset<=3+inserted.length+9;offset++)for(const bias of [-1,1])anchors.push(createAnchor(demoSchema,bulk.state,'doc',1,offset,bias));
       const resolve=editor=>anchors.map(anchor=>resolveAnchor(demoSchema,anchor,'doc',editor.state,editor.journal));
       same(resolve(bulk),resolve(reference),'Durable anchors match individual replacement/join steps');
       const streamed=leaf(200,'Stream arrival');
+
       for(const editor of [bulk,reference])editor.dispatch({baseRevision:editor.state.revision,origin:'stream',history:'exclude',steps:[{kind:'append',nodes:[streamed]}]});
       bulk.undo();reference.undo();same(bulk.state.nodes,[...initial,streamed],'Undo preserves a later stream arrival');
       same(resolve(bulk),resolve(reference),'Undo maps anchors consistently');
       bulk.redo();reference.redo();same(bulk.state.nodes,reference.state.nodes,'Redo retains the stream and replacement');
       same(resolve(bulk),resolve(reference),'Redo maps anchors consistently');
     }
+
     const atomic=createEditor(demoSchema,[leaf(1,'a😀b'),leaf(2)],new TextSelection({id:1,offset:0}));
+
     for(const step of [
       {ranges:[{kind:'text',id:1,from:2,to:3}],pruneEmpty:[]},
       {ranges:[{kind:'text',id:1,from:0,to:1},{kind:'text',id:1,from:0,to:1}],pruneEmpty:[]},
@@ -64,20 +73,30 @@ try{
       {ranges:[{kind:'text',id:1,from:0,to:1}],pruneEmpty:[2]},
     ]){
       const before=atomic.state;let rejected=false;
+
       try{apply(atomic,{steps:[{kind:'replaceRanges',text:'',...step}]});}catch{rejected=true;}
+
       check(rejected&&atomic.state===before&&atomic.history.undo===0&&atomic.journal.length===0,'Invalid bulk replacement is atomic');
     }
+
     const merging=createEditor(demoSchema,[leaf(1,'ex'),leaf(2,'\u0301b')],new TextSelection({id:1,offset:1},{id:2,offset:0}));
     let invalidJoin=false;
+
     try{apply(merging,replaceStructuredText(demoSchema,merging.state,''));}catch{invalidJoin=true;}
+
     check(invalidJoin&&merging.history.undo===0,'Joining boundaries must not split a newly combined grapheme');
+
     for(const count of [100,500])for(const mode of ['flat','nested','selection-api']){
       const nested=mode==='nested';
       const leaves=Array.from({length:count},(_,i)=>leaf(i+1));
       const nodes=leaves.map((node,i)=>nested?{id:count+i+1,key:`q-${i}`,kind:'quote',children:[node]}:node);
       nodes.splice(count/2,0,{id:count*2+1,key:'atom',kind:'image',src:'',alt:''});
       let visits=0;
-      const schema={...demoSchema,resolve(node){visits++;return demoSchema.resolve(node);}};
+
+      const schema={...demoSchema,resolve(node){visits++;
+
+return demoSchema.resolve(node);}};
+
       const editor=createEditor(schema,nodes,new TextSelection({id:1,offset:0},{id:count,offset:17}));
       visits=0;let started=performance.now();
       const command=mode==='selection-api'?editor.selectionEdit(''):replaceStructuredText(schema,editor.state,'');
@@ -91,10 +110,14 @@ try{
       editor.redo();
       reports.push({count,mode,planMs,applyMs,undoMs,planVisits,applyVisits,changes:result.changes.length,restored,redone:JSON.stringify(editor.state.nodes)===after});
     }
+
     return reports;
   });
+
   if(cdp){const {profile}=await cdp.send('Profiler.stop');await writeFile(process.env.PROFILE,JSON.stringify(profile));}
+
   console.log(JSON.stringify(results,null,2));
+
   for(const result of results){
     assert.ok(result.restored&&result.redone,'Bulk delete must round-trip exact structure through history');
     assert.ok(result.planVisits+result.applyVisits<result.count*100,'Deleting a range must use a bounded number of tree passes');

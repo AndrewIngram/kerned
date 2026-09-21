@@ -5,8 +5,10 @@ test('retained core, extension and inline-layout contracts', async ({page}) => {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/extensions.html');
   await page.waitForFunction(() => window.editorDiagnostics);
+
   const results = await page.evaluate(() => {
     const editor = window.editorDiagnostics;
+
     return {
       extensions: editor.checkExtensions(),
       containers: editor.checkContainers(),
@@ -15,6 +17,7 @@ test('retained core, extension and inline-layout contracts', async ({page}) => {
       inline: editor.checkInline(),
     };
   });
+
   for (const result of Object.values(results)) expect(result.assertions).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
@@ -67,7 +70,9 @@ test('comments remain external through replies, text edits, undo and rich paste'
     window.editorDiagnostics.select(last.id, last.text.length);
     window.__commentClipboard = Object.fromEntries([...event.clipboardData.types].map(type=>[type,event.clipboardData.getData(type)]));
   });
-  await page.evaluate(() => {const event=new ClipboardEvent('paste', {clipboardData:new DataTransfer(),bubbles:true,cancelable:true});for(const [type,value] of Object.entries(window.__commentClipboard))event.clipboardData.setData(type,value);document.querySelector('.text-capture').dispatchEvent(event);});
+  await page.evaluate(() => {const event=new ClipboardEvent('paste', {clipboardData:new DataTransfer(),bubbles:true,cancelable:true});
+
+for(const [type,value] of Object.entries(window.__commentClipboard))event.clipboardData.setData(type,value);document.querySelector('.text-capture').dispatchEvent(event);});
   await expect.poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes.length)).toBeGreaterThan(4);
   expect(await page.evaluate(() => window.editorDiagnostics.comments().threads.length)).toBe(1);
 });

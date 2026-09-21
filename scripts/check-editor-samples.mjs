@@ -1,12 +1,15 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
+
  try{
   const page=await browser.newPage(),errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>requests.push(r.url()));
   await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
   const origin=await page.evaluate(()=>performance.timeOrigin);requests.length=0;
   const picker=page.getByLabel('Sample',{exact:true});
+
   for(let i=0;i<2;i++){
    await picker.selectOption('warbreaker');
    await page.waitForFunction(()=>new URL(location.href).searchParams.get('sample')==='warbreaker'&&document.querySelector('select')?.disabled===false);
@@ -14,6 +17,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
    await picker.selectOption('minimal');await page.waitForFunction(()=>!location.search&&document.querySelector('select')?.disabled===false);
    await page.waitForFunction(()=>window.editorDiagnostics.read().nodes.length===4);
   }
+
   assert.equal(await page.evaluate(()=>performance.timeOrigin),origin);
   assert.equal(requests.filter(url=>url.endsWith('/samples/warbreaker.html')).length,1);
   assert.deepEqual(requests.filter(url=>!url.endsWith('/samples/warbreaker.html')),[]);

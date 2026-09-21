@@ -3,18 +3,23 @@ import assert from 'node:assert/strict';
 
 for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
   const browser=await {chromium,firefox,webkit}[name].launch();
+
   try{
     const page=await browser.newPage({viewport:{width:1100,height:900}});
     await page.routeWebSocket(url=>url.pathname==='/',()=>{});
     await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
+
     const result=async label=>{
       await page.keyboard.press('Meta+a');
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+
       return page.evaluate(label=>{
         const state=window.editorDiagnostics.read(),last=state.nodes.at(-1),selection=state.selection;
+
         return {label,focus:document.activeElement?.getAttribute('aria-label')??document.activeElement?.tagName,selection,selectedAll:selection.anchorId===state.nodes[0].id&&selection.anchor===0&&selection.id===last.id&&selection.focus===last.text.length};
       },label);
     };
+
     const cases=[await result('fresh page')];
     const canvas=await page.getByLabel('Canvas document').boundingBox();
     await page.mouse.click(canvas.x+90,canvas.y+48);cases.push(await result('clicked text'));

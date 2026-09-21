@@ -1,8 +1,11 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
+
 const base=process.env.EDITOR_URL??'http://127.0.0.1:5176/extensions.html';
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   const browser=await type.launch();
+
   try{
     const page=await browser.newPage({viewport:{width:1100,height:950}}),errors=[];
     page.on('pageerror',e=>errors.push(e.message));
@@ -22,15 +25,21 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
     const rendered=page.locator(`[data-table="${bookTable.id}"]`);await rendered.waitFor();
     assert.equal(await rendered.locator('tr').count(),11);assert.equal(await rendered.locator('td,th').count(),33);
     assert.match(await rendered.innerText(),/Aura Recognition/);
+
     for(const [width,zoom] of [[1100,'1'],[420,'1.5']]){
       await page.setViewportSize({width,height:950});await page.getByLabel('Zoom').selectOption(zoom);
       await page.waitForFunction(()=>window.editorDiagnostics.probe([]).reflowPending===0,null,{timeout:90000});
       await page.evaluate(id=>window.editorDiagnostics.scrollTo(id),bookTable.id);
       await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
-      const geometry=await rendered.evaluate(el=>{const s=window.editorDiagnostics.read(),id=Number(el.dataset.table),p=s.scene.find(p=>p.id===id),next=s.scene[s.scene.findIndex(p=>p.id===id)+1],r=el.getBoundingClientRect();return {height:r.height/ s.zoom,expected:p.height,gap:next.y-p.y-p.height,overflow:document.documentElement.scrollWidth>innerWidth};});
+
+      const geometry=await rendered.evaluate(el=>{const s=window.editorDiagnostics.read(),id=Number(el.dataset.table),p=s.scene.find(p=>p.id===id),next=s.scene[s.scene.findIndex(p=>p.id===id)+1],r=el.getBoundingClientRect();
+
+return {height:r.height/ s.zoom,expected:p.height,gap:next.y-p.y-p.height,overflow:document.documentElement.scrollWidth>innerWidth};});
+
       assert.ok(Math.abs(geometry.height-geometry.expected)<1.5,JSON.stringify(geometry));assert.equal(geometry.gap,24);assert.equal(geometry.overflow,false);
       await page.screenshot({path:`artifacts/warbreaker-table-${name}-${width}.png`});
     }
+
     assert.deepEqual(errors,[]);console.log(`${name}: table import, spans, book grid and measured layout passed`);
   }finally{await browser.close();}
 }

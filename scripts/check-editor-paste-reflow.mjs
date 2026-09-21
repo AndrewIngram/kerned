@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 
 const reports=[];
+
 for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
   const browser=await {chromium,firefox,webkit}[name].launch();
+
   try{
     const page=await browser.newPage({viewport:{width:1100,height:850}}),errors=[];
     page.on('pageerror',error=>errors.push(error.message));
@@ -21,6 +23,7 @@ for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
     });await settle();
     await page.locator('.text-capture').evaluate(el=>{
       const event=new ClipboardEvent('paste',{bubbles:true,cancelable:true,clipboardData:new DataTransfer()});
+
       for(const [type,value] of Object.entries(window.pasteData))event.clipboardData.setData(type,value);
       el.dispatchEvent(event);
     });await settle();
@@ -30,6 +33,7 @@ for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
     await page.keyboard.press('Meta+a');await settle();
     assert.ok(await page.evaluate(()=>{
       const {nodes,selection}=window.editorDiagnostics.read();
+
       return selection.anchorId===nodes[0].id&&selection.anchor===0&&selection.id===nodes.at(-1).id&&selection.focus===nodes.at(-1).text.length;
     }),'Cmd-A selects both copies while layout is pending');
     await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();await done();
@@ -43,7 +47,11 @@ for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
     assert.equal(await page.evaluate(id=>window.editorDiagnostics.probe([id]).nodes[0].text,last.id),last.text);
     await page.setViewportSize({width:700,height:850});await settle();
     await page.setViewportSize({width:1100,height:850});await settle();
-    const middle=await page.evaluate(()=>{const nodes=window.editorDiagnostics.read().nodes;return nodes[Math.floor(nodes.length*.75)].id;});
+
+    const middle=await page.evaluate(()=>{const nodes=window.editorDiagnostics.read().nodes;
+
+return nodes[Math.floor(nodes.length*.75)].id;});
+
     await page.evaluate(id=>window.editorDiagnostics.scrollTo(id,8),middle);await settle();
     const before=await page.evaluate(id=>window.editorDiagnostics.probe([id]),middle);
     assert.ok(before.reflowPending>0,'Scrolling promotes inserted content before background completion');
@@ -58,4 +66,5 @@ for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
     reports.push({browser:name,reference,stalePaints});console.log(JSON.stringify(reports.at(-1)));
   }finally{await browser.close();}
 }
+
 await writeFile('artifacts/editor-paste-reflow.json',JSON.stringify(reports,null,2)+'\n');

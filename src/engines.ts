@@ -2,6 +2,7 @@ import type { Canvas } from "canvaskit-wasm";
 import type { Direction, Position, Span } from "./model";
 
 export type Rect = [number, number, number, number];
+
 export type Line = {
   start: number;
   end: number;
@@ -10,7 +11,9 @@ export type Line = {
   baseline: number;
   width: number;
 };
+
 export type Geometry = { caret: Rect; rects: Rect[] };
+
 type Input = {
   lineHeight?: number;
   baselineGrid?: number;
@@ -20,6 +23,7 @@ type Input = {
   width: number;
   size: number;
 };
+
 export interface LaidOut {
   height: number;
   lines: Line[];
@@ -34,11 +38,13 @@ export interface LaidOut {
   move(index: number, upstream: boolean, direction: Direction): Position;
   dispose(): void;
 }
+
 export interface Engine {
   name: string;
   layout(input: Input): LaidOut;
   clear(): void;
 }
+
 export const fontFiles = [
   "NotoSans-Regular.ttf",
   "NotoSans-Bold.ttf",

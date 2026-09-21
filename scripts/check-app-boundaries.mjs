@@ -10,11 +10,13 @@ const groups = [
   'extensions/starter-kit',
   'demo/app',
 ];
+
 // Traverse syntax, not just top-level import declarations: a barrel or lazy
 // import must not provide a back door through the same ownership boundary.
 function dependencies(file, code) {
   const source = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true);
   const result = [];
+
   function visit(node) {
     if (
       (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
@@ -22,6 +24,7 @@ function dependencies(file, code) {
       ts.isStringLiteral(node.moduleSpecifier)
     )
       result.push(node.moduleSpecifier.text);
+
     if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
       const argument = node.arguments[0];
       assert.ok(
@@ -30,11 +33,15 @@ function dependencies(file, code) {
       );
       result.push(argument.text);
     }
+
     ts.forEachChild(node, visit);
   }
+
   visit(source);
+
   return result;
 }
+
 assert.deepEqual(
   dependencies(
     'fixture.ts',
@@ -42,17 +49,21 @@ assert.deepEqual(
   ),
   ['./one', './two', './three'],
 );
+
 assert.throws(() => dependencies('fixture.ts', 'import(variable)'), /statically checkable/);
 
 let checked = 0;
+
 for (const group of groups) {
   for (const name of readdirSync(`src/${group}`, { recursive: true })) {
     if (!/\.tsx?$/.test(name)) continue;
     const file = `src/${group}/${name}`;
+
     for (const specifier of dependencies(file, readFileSync(file, 'utf8'))) {
       const target = specifier.startsWith('.')
         ? path.normalize(path.join(path.dirname(file), specifier))
         : specifier;
+
       if (group !== 'demo/app') {
         assert.ok(
           !target.startsWith('src/demo/'),
@@ -64,15 +75,18 @@ for (const group of groups) {
         );
         assert.ok(!target.endsWith('.css'), `${file} imports demo styling: ${specifier}`);
       }
+
       if (['editor-browser', 'editor-react', 'editor-canvas'].includes(group)) {
         assert.ok(
           !target.startsWith('src/extensions/'),
           `${file} depends on a specific schema: ${specifier}`,
         );
       }
+
       if(file==='src/extensions/starter-kit/actions.ts'){
         assert.ok(!/src\/editor-(browser|react|canvas)/.test(target),`${file} depends on a view adapter: ${specifier}`);
       }
+
       if (group === 'editor-browser') {
         assert.ok(
           !['react', 'react-dom', 'canvaskit-wasm'].some(
@@ -81,6 +95,7 @@ for (const group of groups) {
           `${file} couples native input to a renderer: ${specifier}`,
         );
       }
+
       if (/checks$/.test(target)) {
         assert.equal(
           file,
@@ -89,9 +104,11 @@ for (const group of groups) {
         );
       }
     }
+
     checked++;
   }
 }
+
 for (const html of ['editor.html', 'extensions.html']) {
   assert.match(
     readFileSync(html, 'utf8'),
@@ -99,4 +116,5 @@ for (const html of ['editor.html', 'extensions.html']) {
     `${html} must mount the React app`,
   );
 }
+
 console.log(`Checked ownership boundaries across ${checked} app, adapter and starter-kit modules`);

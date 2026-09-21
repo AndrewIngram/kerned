@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 
 const results = [];
+
 for (const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')) {
   const type={chromium,firefox,webkit}[name];
   const browser = await type.launch();
+
   try {
     const page = await browser.newPage({viewport:{width:1100,height:850}}), errors=[];
     // The application needs no socket; suppress the dev server's hot reload.
@@ -17,11 +19,13 @@ for (const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(','))
     const settle=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     const done=()=>page.waitForFunction(()=>window.editorDiagnostics.probe([]).reflowPending===0, undefined, {timeout:120000});
     const pending=()=>page.evaluate(()=>window.editorDiagnostics.probe([]).reflowPending);
+
     const click=async name=>{
       if(name==='Bold'||name==='Italic')await page.keyboard.press(name==='Bold'?'Meta+b':'Meta+i');
       else await page.getByRole('button',{name,exact:true}).click();
       await settle();
     };
+
     const original=await page.evaluate(()=>window.editorDiagnostics.read().nodes);
     await page.evaluate(()=>window.editorDiagnostics.select(1,0));await page.keyboard.press('Meta+a');await settle();
     await click('Bold');assert.ok(await pending()>1000,'Formatting must defer offscreen layout');

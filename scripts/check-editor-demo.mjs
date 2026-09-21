@@ -1,7 +1,9 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
+
  try{for(const width of [1100,390]){
   const page=await browser.newPage({viewport:{width,height:850}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
@@ -10,7 +12,9 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   const original=(await read()).nodes;
   assert.equal(await page.getByRole('button',{name:'Bold',exact:true}).isDisabled(),false);
   await page.evaluate(()=>window.editorDiagnostics.select(1,0));
-  await page.keyboard.down('Shift');for(let i=0;i<10;i++)await page.keyboard.press('ArrowRight');await page.keyboard.up('Shift');await settle();
+  await page.keyboard.down('Shift');
+
+for(let i=0;i<10;i++)await page.keyboard.press('ArrowRight');await page.keyboard.up('Shift');await settle();
   const before=(await read()).selection;
   await page.getByRole('button',{name:'Bold',exact:true}).click();await settle();
   let s=await read();assert.ok(s.nodes[0].marks.some(s=>(s.mark.type==='bold')&&s.from===0&&s.to===before.focus));assert.deepEqual(s.selection,before);

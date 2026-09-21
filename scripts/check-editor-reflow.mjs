@@ -1,10 +1,14 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
+
 const url=process.env.EDITOR_URL??'http://127.0.0.1:5176/extensions.html';
+
 const results=[];
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
+
  try{for(const total of [2000,10000]){
   const page=await browser.newPage({viewport:{width:1100,height:950}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const probe=(ids=[])=>page.evaluate(ids=>window.editorDiagnostics.probe(ids),ids);
@@ -38,12 +42,15 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   assert.deepEqual(errors,[]);const m=await page.evaluate(()=>window.editorDiagnostics.metrics());results.push({browser:name,total,reference,finalReference,runs:m.reflows.filter(r=>r.blocks===total),stalePaints:m.stalePaints});
   await writeFile('artifacts/editor-reflow-checks.json',JSON.stringify(results,null,2)+'\n');console.log(name,total,'passed');await page.close();
  }
+
   const page=await browser.newPage({viewport:{width:1100,height:950}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(`${url}?stream=10000&paused=1`);await page.waitForFunction(()=>window.editorDiagnostics);await page.evaluate(()=>window.editorDiagnostics.resume());
   await page.waitForFunction(()=>window.editorDiagnostics.probe([]).count>1000);await page.evaluate(()=>window.editorDiagnostics.pause());await page.waitForTimeout(50);
   await page.setViewportSize({width:700,height:950});await page.waitForFunction(()=>window.editorDiagnostics.probe([]).reflowPending>0);
   await page.evaluate(()=>{window.editorDiagnostics.resume();window.editorDiagnostics.select(1,0);});await page.keyboard.insertText('Concurrent ');
-  await page.waitForFunction(()=>{const p=window.editorDiagnostics.probe([]);return p.complete&&!p.reflowPending;});
+  await page.waitForFunction(()=>{const p=window.editorDiagnostics.probe([]);
+
+return p.complete&&!p.reflowPending;});
   const final=await page.evaluate(()=>window.editorDiagnostics.probe([1]));assert.equal(final.count,10000);assert.equal(final.stalePaints,0);assert.ok(final.nodes[0].text.startsWith('Concurrent '));
   const reference=await page.evaluate(()=>window.editorDiagnostics.verifyReflow());assert.deepEqual(errors,[]);results.push({browser:name,total:10000,streaming:true,reference,stalePaints:final.stalePaints});
   await writeFile('artifacts/editor-reflow-checks.json',JSON.stringify(results,null,2)+'\n');console.log(name,'concurrent stream passed');await page.close();

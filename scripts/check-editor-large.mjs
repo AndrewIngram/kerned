@@ -2,10 +2,14 @@ import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 import os from 'node:os';
+
 const base=process.env.EDITOR_URL??'http://127.0.0.1:5176/extensions.html';
+
 const report={recordedAt:new Date().toISOString(),cpu:os.cpus()[0]?.model,cases:[]};
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
+
  try{for(const [total,width,dpr] of [[2000,1100,1],[10000,1100,1],[10000,420,1.5]]){
   const page=await browser.newPage({viewport:{width,height:950},deviceScaleFactor:dpr});const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const probe=(ids=[])=>page.evaluate(ids=>window.editorDiagnostics.probe(ids),ids);
@@ -53,10 +57,12 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   const loaded=await probe([1,3]);assert.equal(loaded.count,total);assert.ok(loaded.nodes[0].text.startsWith('Edited '));assert.equal(loaded.nodes[1].notes,'Keep this note while loading.');assert.deepEqual(loaded.selection,atResume.selection);
   await page.getByRole('button',{name:'Undo',exact:true}).focus();await settle();
   const beforeScroll=await probe();
+
   for(const id of [Math.floor(total/2)+6,total+5,1]){
     await page.evaluate(id=>window.editorDiagnostics.scrollTo(id),id);await settle();
     const state=await probe();assert.ok(state.mounted.length<10);assert.equal(state.stats.shapeCalls,beforeScroll.stats.shapeCalls);assert.ok(state.layoutCalls-beforeScroll.layoutCalls<100);assert.equal(state.stalePaints,0);
   }
+
   // Edits to a styled paragraph should touch just that paragraph.
   await page.evaluate(()=>window.editorDiagnostics.scrollTo(11));await settle();
   await page.evaluate(()=>window.editorDiagnostics.select(11,0));await settle();const styledBefore=await probe([11]);

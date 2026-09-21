@@ -5,8 +5,11 @@ import type { PackedGlyphs } from './owned-packed';
 import { createPackedCarets } from './owned-carets';
 
 export type Glyph = { id: number; start: number; advance: number; dx: number; dy: number; font: number };
+
 export type Cluster = { start: number; end: number; width: number; glyphs: Glyph[]; stops: number[] };
+
 export type Shaped = { clusters: Cluster[]; breaks: Set<number> };
+
 type Stop = Position & { x: number; line: number };
 
 // All coordinates and character offsets are paragraph-local. Never modify a
@@ -25,31 +28,40 @@ export function composeParagraph(shaped: Shaped | PackedShaping, textLength: num
   const glyphs: number[][] = Array.from({ length: fontCount }, () => []);
   const positions: number[][] = Array.from({ length: fontCount }, () => []);
   let first = 0;
+
   do {
     let end = first, advance = 0, lastBreak = first;
+
     while (end < clusterCount) {
       const clusterWidth = numeric ? numeric.widths[end] : clusters[end].width;
+
       if (end > first && advance + clusterWidth > width) break;
       advance += clusterWidth;
       const canBreak = numeric ? numeric.breaks[end] : shaped.breaks instanceof Set && shaped.breaks.has(clusters[end].end);
       end++;
+
       if (canBreak) lastBreak = end;
     }
+
     if (end < clusterCount && lastBreak > first) end = lastBreak;
     const start = (numeric ? numeric.clusterStarts[first] : clusters[first]?.start) ?? 0;
     const finish = (numeric ? numeric.clusterEnds[end - 1] : clusters[end - 1]?.end) ?? 0;
     const line = lines.length, top = line * lineHeight;
     const row: Stop[] = [];
     numericCarets?.beginLine();
+
     function append(index: number, x: number, upstream: boolean) {
       if (numericCarets) numericCarets.append(index, x, upstream);
       else { const stop = { index, x, line, upstream }; row.push(stop); stops.push(stop); }
     }
+
     append(start, 0, false);
     let x = 0;
+
     for (let i = first; i < end; i++) {
       const clusterWidth = numeric ? numeric.widths[i] : clusters[i].width;
       let pen = x;
+
       if (packed && packedPositions) {
         for (let g = packed.starts[i]; g < packed.starts[i + 1]; g++) {
           const output = packedPositions[packed.fonts[g]], slot = packed.slots[g];
@@ -64,8 +76,10 @@ export function composeParagraph(shaped: Shaped | PackedShaping, textLength: num
           pen += glyph.advance;
         }
       }
+
       if (numeric) {
         const from = numeric.stopStarts[i], to = numeric.stopStarts[i + 1];
+
         for (let s = from; s < to; s++) {
           const index = numeric.stops[s];
           append(index, x + clusterWidth * (s - from + 1) / (to - from), index === finish && finish < textLength);
@@ -73,15 +87,19 @@ export function composeParagraph(shaped: Shaped | PackedShaping, textLength: num
       } else clusters[i].stops.forEach((index, n) => append(index, x + clusterWidth * (n + 1) / clusters[i].stops.length, index === finish && finish < textLength));
       x += clusterWidth;
     }
+
     lines.push({ start, end: finish, top, bottom: top + lineHeight, baseline: top + baseline, width: x });
+
     if (!numericCarets) rows.push(row);
     first = end;
   } while (first < clusterCount);
+
   const runs = packed && packedPositions
     ? packed.ids.flatMap((ids, font) => ids.length ? [{ font, glyphs: ids, positions: packedPositions[font] }] : [])
     : glyphs.flatMap((ids, font) => ids.length ? [{
     font, glyphs: new Uint16Array(ids), positions: new Float32Array(positions[font]),
   }] : []);
+
   return finishParagraph(width, textLength, lineHeight, lines, runs, numericCarets, stops, rows);
 }
 
@@ -95,23 +113,32 @@ function finishParagraph(
 ) {
   if (numericCarets) {
     numericCarets.finish();
+
     return { inkTop: 0, inkBottom: lines.length * lineHeight, width, textLength, height: lines.length * lineHeight, lines, runs, storage: () => ({ ...numericCarets.storage(), glyphBufferBytes: runs.reduce((n, r) => n + r.glyphs.byteLength + r.positions.byteLength, 0) }), hit: numericCarets.hit, geometry: numericCarets.geometry, move: numericCarets.move };
   }
+
   const byOffset = new Map<number, { downstream: Stop; upstream: Stop }>();
+
   for (const stop of stops) {
     const pair = byOffset.get(stop.index);
+
     if (!pair) byOffset.set(stop.index, { downstream: stop, upstream: stop });
     else if (stop.upstream) pair.upstream = stop;
     else pair.downstream = stop;
   }
+
   function locate(index: number, upstream: boolean) {
     const pair = byOffset.get(index);
+
     return pair ? upstream ? pair.upstream : pair.downstream : stops[stops.length - 1];
   }
+
   function closest(x: number, line: number) {
     return rows[Math.max(0, Math.min(rows.length - 1, line))].reduce((a, b) => Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a);
   }
+
   function position(stop: Stop): Position { return { index: stop.index, upstream: stop.upstream }; }
+
   return {
     inkTop: 0, inkBottom: lines.length * lineHeight, width, textLength, height: lines.length * lineHeight, lines, runs,
     storage: () => ({ caretBufferBytes: 0, caretUsedBytes: 0, caretUnusedBytes: 0, caretCapacity: stops.length, caretCount: stops.length, lineCapacity: rows.length, lineCount: rows.length, glyphBufferBytes: runs.reduce((n, r) => n + r.glyphs.byteLength + r.positions.byteLength, 0) }),
@@ -119,23 +146,31 @@ function finishParagraph(
     geometry(anchor: number, focus: number, upstream: boolean): Geometry {
       const stop = locate(focus, upstream), line = lines[stop.line];
       const rects: Rect[] = [];
+
       if (anchor !== focus) {
         const low = Math.min(anchor, focus), high = Math.max(anchor, focus);
+
         for (let n = 0; n < lines.length; n++) {
           if (lines[n].end < low || lines[n].start > high) continue;
           const row = rows[n].filter(p => p.index >= low && p.index <= high);
+
           if (row.length > 1) rects.push([row[0].x, lines[n].top, row[row.length - 1].x, lines[n].bottom]);
         }
       }
+
       return { caret: [stop.x, line.top, stop.x + 1, line.bottom], rects };
     },
     move(index: number, upstream: boolean, direction: Direction): Position {
       const stop = locate(index, upstream);
+
       if (direction === 'up' || direction === 'down') return position(closest(stop.x, stop.line + (direction === 'up' ? -1 : 1)));
+
       if (direction === 'home' || direction === 'end') return position(closest(direction === 'home' ? 0 : lines[stop.line].width, stop.line));
       const ordinal = stops.indexOf(stop);
+
       return position(stops[Math.max(0, Math.min(stops.length - 1, ordinal + (direction === 'left' ? -1 : 1)))]);
     },
   };
 }
+
 export type ComposedParagraph = ReturnType<typeof composeParagraph>;

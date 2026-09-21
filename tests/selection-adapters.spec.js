@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test('selection projection preserves node, container, cell and empty selections', async ({ page }) => {
   await page.goto('/editor.html');
   await page.waitForFunction(() => window.editorDiagnostics);
+
   const result = await page.evaluate(async () => {
     const { fixture, schema } = await import('/tests/fixtures/editor-foundation.js');
     const { selectionView, selectionContext, NodeSelection, AllSelection } = await import('/src/editor/index.ts');
@@ -13,6 +14,7 @@ test('selection projection preserves node, container, cell and empty selections'
     const container = selectionView(schema, new NodeSelection(1), context, indexes);
     const all = selectionView(schema, new AllSelection(), context, indexes);
     const empty = selectionView(schema, new AllSelection(), selectionContext(schema, []), new Map());
+
     return {
       identity: view.selection === node, text: view.textSelection, focus: view.focusId,
       first: view.selectedRange(nodes[0]), atom: view.selectedRange(nodes.at(-1)),
@@ -21,6 +23,7 @@ test('selection projection preserves node, container, cell and empty selections'
       empty: {focus: empty.focusId, text: empty.textSelection, start: empty.start, ranges: empty.ranges},
     };
   });
+
   expect(result.identity).toBe(true);
   expect(result.text).toBeNull();
   expect(result.focus).toBe(17);
@@ -34,6 +37,7 @@ test('selection projection preserves node, container, cell and empty selections'
 test('starter commands target the selected node and disjoint cells, never the first paragraph', async ({ page }) => {
   await page.goto('/editor.html');
   await page.waitForFunction(() => window.editorDiagnostics);
+
   const result = await page.evaluate(async () => {
     const {React, createRoot, flushSync} = await import('/tests/fixtures/selection-probe.js');
     const {createEditor, NodeSelection, textSelection, selectionContext} = await import('/src/editor/index.ts');
@@ -49,7 +53,11 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const table = createTable(allocate);
     const editor = createEditor(demoSchema, [paragraph(1,'First'), {id:2,key:'image',kind:'image',src:'',alt:'Image'}, table], textSelection(1,2), [tableCells.extension]);
     let doc;
-    function Probe(){doc=useEditorDocument(editor);return null;}
+
+    function Probe(){doc=useEditorDocument(editor);
+
+return null;}
+
     const host=document.createElement('div');document.body.append(host);
     const root=createRoot(host);flushSync(()=>root.render(React.createElement(Probe)));
     const notices=[];
@@ -84,8 +92,10 @@ test('starter commands target the selected node and disjoint cells, never the fi
     flushSync(()=>actions().replaceCells('Replacement'));
     const replacement=editor.state.nodes.map(n=>({kind:n.kind,text:n.text}));
     root.unmount();host.remove();
+
     return {node,cut,spanning,firstAfterHeading,order,expected,targets,selectedKinds,untouched,replacement,errors:notices.filter(Boolean)};
   });
+
   expect(result.node).toEqual({targets:[2],focus:2,input:'',text:null});
   expect(result.cut).toEqual({text:'Image',first:'First',image:false});
   expect(result.firstAfterHeading).toBe('paragraph');
@@ -102,12 +112,14 @@ test('starter commands target the selected node and disjoint cells, never the fi
 test('atomic navigation respects document order and preserves shift ranges', async ({page}) => {
   await page.goto('/editor.html');
   await page.waitForFunction(() => window.editorDiagnostics);
+
   const result = await page.evaluate(async () => {
     const {moveNodeSelection,NodeSelection,RangeSelection,TextSelection,textSelection} = await import('/src/editor/index.ts');
     const nodes=[{id:1,text:'Before',selectable:true},{id:2,text:null,selectable:true},{id:3,text:null,selectable:false},{id:4,text:null,selectable:true},{id:5,text:'After',selectable:true}];
     const key=(key,shiftKey=false)=>({key,shiftKey,altKey:false,ctrlKey:false,metaKey:false});
     const describe=s=>(s instanceof TextSelection||s instanceof RangeSelection)?{type:s.type,anchor:s.anchor,head:s.head}:s?{type:s.type,id:s.id}:null;
     const move=(selection,event,textMove=null)=>describe(moveNodeSelection(selection,event,nodes,textMove));
+
     return {
       enter:move(textSelection(1,6),key('ArrowRight'),textSelection(5,0)),
       adjacent:move(new NodeSelection(2),key('ArrowRight')),
@@ -119,6 +131,7 @@ test('atomic navigation respects document order and preserves shift ranges', asy
       edge:describe(moveNodeSelection(new NodeSelection(2),key('ArrowLeft'),[nodes[1]],null)),
     };
   });
+
   expect(result.enter).toEqual({type:'node',id:2});
   expect(result.adjacent).toEqual({type:'node',id:4});
   expect(result.back.head).toEqual({id:1,offset:6});

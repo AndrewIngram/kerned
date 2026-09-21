@@ -17,10 +17,15 @@ export function FindBar({state,initialQuery,initialOptions,stale,focusRequest,on
   const pending=stale||query!==state.query||matchCase!==state.matchCase;
   useLayoutEffect(()=>{input.current?.focus({preventScroll:true});input.current?.select();},[focusRequest]);
   const count=state.matches.length;
+
   return <div className="find-bar" role="search" aria-label="Find in document" onKeyDown={event=>{
     if(event.nativeEvent.isComposing)return;
+
     if(event.key==='Escape'){event.preventDefault();event.stopPropagation();onClose();}
-    if(event.key==='Enter'&&event.target===input.current){event.preventDefault();if(!pending)onMove(event.shiftKey);}
+
+    if(event.key==='Enter'&&event.target===input.current){event.preventDefault();
+
+if(!pending)onMove(event.shiftKey);}
   }}>
     <input ref={input} type="text" aria-label="Find in document" aria-describedby={statusId} placeholder="Find in document" value={query} spellCheck={false} autoComplete="off" onChange={event=>{setQuery(event.target.value);onQuery(event.target.value,{matchCase});}}/>
     <output id={statusId} className="find-count" aria-live="polite" aria-atomic="true" aria-busy={pending}>{pending?'…':!query?'':count?`${state.activeIndex+1} of ${count}`:'No results'}</output>

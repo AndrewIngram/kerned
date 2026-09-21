@@ -13,11 +13,18 @@ type NodeViewValue={
   checklist:Omit<ComponentProps<typeof Checklist>,'node'>;
   text:ComponentProps<typeof ParagraphExtensions>;
 };
+
 /** Starter-kit registrations. The React integration does not know these node names. */
 export const DemoNodeView=createReactRenderers<NodeViewValue>([
-  {name:'table',component:({value})=>{if(value.node.kind!=='table')throw new Error('Expected table');return <TableBlock {...value.table} node={value.node}/>;}},
-  {name:'image',component:({value})=>{if(value.node.kind!=='image')throw new Error('Expected image');return <ImageBlock {...value.image} node={value.node}/>;}},
-  {name:'checklist',component:({value})=>{if(value.node.kind!=='checklist')throw new Error('Expected checklist');return <Checklist {...value.checklist} node={value.node}/>;}},
+  {name:'table',component:({value})=>{if(value.node.kind!=='table')throw new Error('Expected table');
+
+return <TableBlock {...value.table} node={value.node}/>;}},
+  {name:'image',component:({value})=>{if(value.node.kind!=='image')throw new Error('Expected image');
+
+return <ImageBlock {...value.image} node={value.node}/>;}},
+  {name:'checklist',component:({value})=>{if(value.node.kind!=='checklist')throw new Error('Expected checklist');
+
+return <Checklist {...value.checklist} node={value.node}/>;}},
   {name:'paragraph',component:({value})=><ParagraphExtensions {...value.text}/>},
   {name:'heading',component:({value})=><ParagraphExtensions {...value.text}/>},
 ]);

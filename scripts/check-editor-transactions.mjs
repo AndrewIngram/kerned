@@ -1,9 +1,12 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
+
 const base=process.env.EDITOR_URL??'http://127.0.0.1:5176/extensions.html',results=[];
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
+
  try{for(const width of [1100,420]){
   const page=await browser.newPage({viewport:{width,height:950}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(`${base}?stream=2000&paused=1`);await page.waitForFunction(()=>window.editorDiagnostics);
@@ -45,4 +48,5 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   results.push({browser:name,width,core,extensions,containers,selections,checks:'passed'});console.log(name,width,core);await page.close();
  }}finally{await browser.close();}
 }
+
 await writeFile('artifacts/editor-transactions.json',JSON.stringify(results,null,2)+'\n');

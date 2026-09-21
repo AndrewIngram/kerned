@@ -7,14 +7,18 @@ export type ShapingRun = { words: Uint32Array; floats: Float32Array; font: numbe
 export function decodeShaping(text: string, runs: ShapingRun[], lineBreaks: Uint32Array) {
   const counts = new Uint32Array(Math.max(4,...runs.map(run=>run.font+1)));
   let count = 0, glyphCount = 0, previous = -1;
+
   for (const run of runs) {
     glyphCount += run.words[0];
     counts[run.font] += run.words[0];
+
     for (let i = 0; i < run.words[0]; i++) {
       const p = 3 + i * 5, start = run.words[p + 1] + run.offset;
+
       if (start !== previous) { count++; previous = start; }
     }
   }
+
   const graphemes = boundaries(text);
   const stopCount = Math.max(0, graphemes.length - 1);
   const buffer = new ArrayBuffer(count * 21 + 4 + stopCount * 4);
@@ -34,8 +38,10 @@ export function decodeShaping(text: string, runs: ShapingRun[], lineBreaks: Uint
   counts.fill(0);
   let cluster = -1, glyph = 0;
   previous = -1;
+
   for (const run of runs) for (let i = 0; i < run.words[0]; i++, glyph++) {
     const p = 3 + i * 5, start = run.words[p + 1] + run.offset;
+
     if (start !== previous) {
       if (cluster >= 0) clusterEnds[cluster] = start;
       cluster++;
@@ -43,6 +49,7 @@ export function decodeShaping(text: string, runs: ShapingRun[], lineBreaks: Uint
       starts[cluster] = glyph;
       previous = start;
     }
+
     const slot = counts[run.font]++;
     ids[run.font][slot] = run.words[p];
     fonts[glyph] = run.font;
@@ -52,22 +59,30 @@ export function decodeShaping(text: string, runs: ShapingRun[], lineBreaks: Uint
     dy[glyph] = run.floats[p + 4] * run.scale;
     widths[cluster] += advance[glyph];
   }
+
   if (count) clusterEnds[count - 1] = text.length;
   starts[count] = glyphCount;
   let cursor = 0, stop = 1, boundary = 0;
+
   for (let c = 0; c < count; c++) {
     stopStarts[c] = cursor;
+
     while (stop < graphemes.length && graphemes[stop] <= clusterEnds[c]) {
       if (graphemes[stop] > clusterStarts[c]) stops[cursor++] = graphemes[stop];
       stop++;
     }
+
     while (boundary < lineBreaks.length && lineBreaks[boundary] < clusterEnds[c]) boundary++;
     breaks[c] = Number(lineBreaks[boundary] === clusterEnds[c]);
   }
+
   stopStarts[count] = cursor;
   const glyphs = { starts, fonts, slots, advance, dx, dy, ids };
+
   const bytes = buffer.byteLength + starts.byteLength + fonts.byteLength + slots.byteLength
     + advance.byteLength + dx.byteLength + dy.byteLength + ids.reduce((n, id) => n + id.byteLength, 0);
+
   return { clusterStarts, clusterEnds, widths, stopStarts, stops: stops.subarray(0, cursor), breaks, glyphs, bytes };
 }
+
 export type PackedShaping = ReturnType<typeof decodeShaping>;

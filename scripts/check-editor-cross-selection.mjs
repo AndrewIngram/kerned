@@ -1,21 +1,32 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
+
  try{
   const page=await browser.newPage({viewport:{width:1100,height:950}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto(process.env.EDITOR_URL??'http://127.0.0.1:5173/extensions.html');await page.waitForFunction(()=>window.editorDiagnostics);
   const read=()=>page.evaluate(()=>window.editorDiagnostics.read());
   const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
   const canvas=page.getByLabel('Canvas document');
-  const point=async(id,x)=>{const state=await read(),box=await canvas.boundingBox(),p=state.scene.find(p=>p.id===id);return {x:box.x+(28+x)*state.zoom,y:box.y+(p.y+15)*state.zoom-state.scroll};};
+
+  const point=async(id,x)=>{const state=await read(),box=await canvas.boundingBox(),p=state.scene.find(p=>p.id===id);
+
+return {x:box.x+(28+x)*state.zoom,y:box.y+(p.y+15)*state.zoom-state.scroll};};
+
   const drag=async(from,to)=>{await page.mouse.move(from.x,from.y);await page.mouse.down();await page.mouse.move(to.x,to.y,{steps:12});await page.mouse.up();await settle();};
+
   const original=(await read()).nodes;
   await drag(await point(1,45),await point(2,55));
   let state=await read();assert.equal(state.selection.id,2,`${name}: drag head reaches second paragraph`);assert.equal(state.selection.anchorId,1,`${name}: drag anchor remains in first paragraph`);
   const input=page.getByLabel('Canvas text input');
   const a=state.selection.anchor,h=state.selection.focus;
-  const copied=await input.evaluate(el=>{const data=new DataTransfer();const event=new ClipboardEvent('copy',{bubbles:true,cancelable:true,clipboardData:data});el.dispatchEvent(event);return event.clipboardData.getData('text/plain');});
+
+  const copied=await input.evaluate(el=>{const data=new DataTransfer();const event=new ClipboardEvent('copy',{bubbles:true,cancelable:true,clipboardData:data});el.dispatchEvent(event);
+
+return event.clipboardData.getData('text/plain');});
+
   assert.ok(copied.includes('\n'));assert.ok(copied.endsWith(original[1].text.slice(0,h)));
   await canvas.screenshot({path:`artifacts/cross-selection-${name}.png`});
   await page.keyboard.type('XYZ');await settle();

@@ -3,6 +3,10 @@
 A canvas text editor with a schema-independent editing core and React extensions.
 The examples below use source imports from this repository.
 
+The planned consumer interface and package migration are specified in the
+[public-interface implementation plan](docs/public-interface-implementation-plan.md).
+Its proposed APIs are not yet implemented; the examples below describe current usage.
+
 ## Add the editor to a page
 
 The current canvas host mounts into `#root` when its module loads. Serve this page

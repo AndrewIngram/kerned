@@ -1,11 +1,15 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
- const browser=await type.launch();try{for(const width of [1100,390,320]){
+ const browser=await type.launch();
+
+try{for(const width of [1100,390,320]){
  const page=await browser.newPage({viewport:{width,height:800}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
  const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
  const summary=page.locator('.blocks-menu summary');const label=async expected=>assert.equal((await summary.innerText()).trim(),expected);
  const menu=async name=>{if(name!=='Block quote')await summary.click();await page.getByRole('button',{name,exact:true}).click();await settle();};
+
  await label('Paragraph');const pickerWidth=(await summary.boundingBox()).width;
  const rects=await page.locator('.toolbar-inner').evaluate(el=>[...el.children].map(n=>({label:n.getAttribute('aria-label')??n.className,x:n.getBoundingClientRect().x,right:n.getBoundingClientRect().right})));
  assert.equal(rects[0].label,'blocks-menu');assert.equal(rects.at(-1).label,'toolbar-trailing');assert.ok(rects.every(r=>r.x>=0&&r.right<=width));

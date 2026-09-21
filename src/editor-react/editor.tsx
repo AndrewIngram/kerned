@@ -7,8 +7,10 @@ export function Editor({view,children,...props}:ComponentPropsWithoutRef<'div'>&
   useLayoutEffect(()=>{
     if(!element.current)return;
     const mounted=mountEditorView(element.current,view);runtime.current=mounted;
+
     return()=>{mounted.destroy();runtime.current=null;};
   },[]);
   useLayoutEffect(()=>{runtime.current?.update(view);});
+
   return <div {...props} ref={element}>{children}</div>;
 }

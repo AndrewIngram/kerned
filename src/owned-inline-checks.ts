@@ -4,16 +4,21 @@ import type { InlineAtom } from './owned-inline';
 /** Checks use real shaping and layout, including retained snapshots after updates. */
 export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>) {
   let assertions = 0;
+
   function check(value: boolean, message: string) {
     if (!value) throw new Error(message);
     assertions++;
   }
+
   const id = -900;
+
   try {
     for (const text of ['\ufffc', '\ufffc tail', 'head \ufffc', 'head \ufffc tail', '\ufffc\ufffc', 'café \ufffc office']) {
       const atoms: InlineAtom[] = [...text].flatMap((c, index) => c === '\ufffc' ? [{ id: String(index), index, label: 'Atom', width: 75, ascent: 30, descent: 12 }] : []);
+
       for (const width of [1, 74, 75, 140, 400]) {
         const layout = owned.layoutInline({ id, text, atoms, spans: [], width, size: 20 });
+
         for (const box of layout.inlineBoxes) {
           check(Number.isFinite(box.x + box.y) && box.height === 42, 'Invalid inline rectangle');
           const before = layout.geometry(box.index, box.index, false).caret;
@@ -24,6 +29,7 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
           check(layout.hit(box.x + box.width - 1, box.y + 20).index === box.index + 1, 'Atom right hit');
           check(layout.move(box.index, false, 'right').index === box.index + 1, 'Atom right movement');
         }
+
         const saved = JSON.stringify([layout.lines, layout.geometry(0, text.length, false), layout.inlineBoxes]);
         const shapes = owned.stats.shapeCalls;
         owned.releaseLayout(id);
@@ -36,12 +42,17 @@ export function checkInline(owned: Awaited<ReturnType<typeof createOwnedEngine>>
         check(saved === JSON.stringify([layout.lines, layout.geometry(0, text.length, false), layout.inlineBoxes]), 'Retained snapshot changed');
       }
     }
+
     const atom = {id:'atom',index:0,label:'Atom',width:75,ascent:20,descent:5};
+
     for (const atoms of [[], [atom,atom], [{...atom,width:NaN}], [{...atom,index:1}]]) {
       let rejected = false;
+
       try { owned.layoutInline({id,text:'\ufffc',atoms,spans:[],width:100,size:20}); } catch { rejected = true; }
+
       check(rejected, 'Invalid atom accepted');
     }
+
     return {assertions};
   } finally { owned.release(id); }
 }

@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+
 test.beforeEach(async({page})=>{await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);});
 
 test('caret toolbar formats subsequent typing and Enter without a document edit on toggle',async({page})=>{
@@ -34,9 +35,13 @@ test('stored marks are explicit, reset on movement, restore with history and pre
   editor.setStoredMarks([bold]);
   editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:'separate',time:1,input:true,steps:[{kind:'replaceText',id:1,from:1,to:1,text:'\u0301'}],selection:textSelection(1,2)});
   const grapheme=editor.state.nodes[0].marks.some(s=>(s.mark.type==='bold')&&s.from===0&&s.to>=2);
-  const snapshot=editor.state;let rejected=false;try{editor.setStoredMarks([{type:'missing',attrs:null}]);}catch{rejected=true;}
+  const snapshot=editor.state;let rejected=false;
+
+try{editor.setStoredMarks([{type:'missing',attrs:null}]);}catch{rejected=true;}
+
   return {inherited,revision,plain,undone,redone,reset,active,grapheme,rejected,atomic:editor.state===snapshot};
  });
+
  expect(result).toEqual({inherited:[{type:'bold',attrs:null}],revision:0,plain:true,undone:[],redone:[],reset:null,active:[{type:'bold',attrs:null}],grapheme:true,rejected:true,atomic:true});
 });
 
@@ -53,9 +58,13 @@ test('replacement inherits selected text and loading preserves a pending overrid
   editor.dispatch({baseRevision:editor.state.revision,origin:'stream',history:'exclude',steps:[{kind:'append',nodes:[node(3,'Loaded')]}]});
   const pending=inputMarks(demoSchema,editor.state);
   const locked=createEditor(demoSchema,[node(4,'No')],textSelection(4,0),[],{permissions:{access:()=> 'read-only'}});
-  let denied=false;try{locked.setStoredMarks([{type:'bold',attrs:null}]);}catch{denied=true;}
+  let denied=false;
+
+try{locked.setStoredMarks([{type:'bold',attrs:null}]);}catch{denied=true;}
+
   return {replacement,pending,denied,untouched:locked.state.storedMarks===null};
  });
+
  expect(result).toEqual({replacement:true,pending:[{type:'italic',attrs:null}],denied:true,untouched:true});
 });
 

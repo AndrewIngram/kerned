@@ -1,8 +1,11 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
+
 const url=process.env.EDITOR_URL??'http://127.0.0.1:5173/extensions.html';
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
+
  try{
   const page=await browser.newPage({viewport:{width:1100,height:900}}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
@@ -16,6 +19,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   await page.keyboard.type('TEST');await settle();
   assert.equal((await read()).nodes[0].text,before.nodes[0].text.slice(0,at)+'TEST'+before.nodes[0].text.slice(at),`${name}: click then type`);
   await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();
+
   for(const zoom of ['1','1.5']){
    await page.getByLabel('Zoom').selectOption(zoom);await settle();
    const box=await canvas.boundingBox(),scale=Number(zoom);
@@ -30,6 +34,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
    assert.equal((await read()).nodes[0].text,state.nodes[0].text.slice(0,from)+'X'+state.nodes[0].text.slice(to),`${name}: typing replaces drag selection`);
    await page.getByRole('button',{name:'Undo',exact:true}).click();await settle();
   }
+
   await page.getByLabel('Zoom').selectOption('1');await settle();
   const highlight=page.getByLabel('Open comment on highlighted text').first();
   const rect=await highlight.boundingBox();

@@ -1,9 +1,12 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
  const browser=await type.launch();
+
  try{
   const page=await browser.newPage();await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
+
   const result=await page.evaluate(async()=>{
    const {textCommands}=await import('/src/extensions/text-commands.ts');
    const {createEditor,TextSelection}=await import('/src/editor/index.ts');
@@ -26,8 +29,10 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
    const expanded=resolveDecorations(commentDecorations(store.state.threads),editor.positions).resolved[0].ranges[0].to===19;
    editor.undo();const removed=resolveDecorations(commentDecorations(store.state.threads),editor.positions).resolved[0].ranges[0].to===16;
    editor.redo();const recovered=store.state.threads.length===1;
+
    return {underline,unchanged,cleared,restored,annotations,expanded,removed,recovered};
   });
+
   for(const key of ['underline','unchanged','cleared','restored','expanded','removed','recovered'])assert.equal(result[key],true,key);
   assert.deepEqual(result.annotations.map(c=>[c.from,c.to]),[[6,16],[0,10]]);
   console.log(name,'underline, clear formatting, cross-paragraph comments and undo/redo passed');

@@ -1,5 +1,9 @@
 # Editor foundation implementation plan
 
+The current package/schema/view refactor is tracked in the
+[public-interface implementation plan](public-interface-implementation-plan.md).
+This older plan remains the reference for foundation and collaboration work.
+
 Status: proposed implementation sequence, 2026-09-20. Planning is complete enough to start the first milestone. Collaboration, permission enforcement and the new APIs are not implemented by this document.
 
 Implementation progress: [implemented APIs, validation and remaining work](editor-foundation-progress.md). Snapshot mapping, independently serialized relative ranges, node access/locking, projection, command chains, optimistic text proposals, external comment decorations and a React state hook are implemented. The rejected registered-range store has been removed. [Position persistence](editor-references.md) currently retains document mapping metadata and is not a final collaboration storage design.

@@ -9,9 +9,15 @@ import {boundaries} from './model';
 
 export function checkTransactions(){
   let assertions=0;
-  function check(value:boolean,message:string){assertions++;if(!value)throw new Error(message);}
+
+  function check(value:boolean,message:string){assertions++;
+
+if(!value)throw new Error(message);}
+
   function equal(a:unknown,b:unknown,message:string){check(JSON.stringify(a)===JSON.stringify(b),message);}
+
   const paragraph:TextBlockNode={kind:'paragraph',id:1,key:'original',text:'café office \ufffc tail',marks:formattingMarks([{start:5,end:11,bold:true,italic:false}]),inline:[createMention({id:'mention',index:12,label:'Maya',width:70,ascent:20,descent:5})]};
+
   for(const at of boundaries(paragraph.text)){
     const editor=createEditor(demoSchema,[paragraph],textSelection(1,at,at));
     const beforeAnchor=createAnchor(demoSchema,editor.state,'doc',1,at,-1),afterAnchor=createAnchor(demoSchema,editor.state,'doc',1,at,1);
@@ -31,35 +37,52 @@ export function checkTransactions(){
     const resolved=resolveAnchor(demoSchema,afterAnchor,'doc',editor.state,editor.journal);
     check(resolved.status==='resolved'&&resolved.anchor.blockKey==='original'&&resolved.anchor.offset===at,'Anchor follows undo/redo structural maps');
   }
+
   const editor=createEditor(demoSchema,createSampleDocument(),textSelection(1,0,0));
   const initial=editor.state.nodes[0],anchors=[-1,1] as const;
   const saved=anchors.map(bias=>createAnchor(demoSchema,editor.state,'doc',1,0,bias));
+
   for(let i=0;i<3;i++)editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:{group:'typing:1'},time:i*100,steps:[{kind:'replaceText',id:1,from:i,to:i,text:'x'}]});
   check(editor.history.undo===1,'Adjacent typing groups');
   const stream:StarterNode={kind:'image',id:900,key:'streamed',src:'test',alt:'test'};
   editor.dispatch({baseRevision:editor.state.revision,origin:'stream',history:'exclude',steps:[{kind:'append',nodes:[stream]}]});
   const persisted=JSON.parse(JSON.stringify({state:editor.state,journal:editor.journal,anchors:saved}));
+
   for(let i=0;i<2;i++){
     const resolved=resolveAnchor(demoSchema,parseAnchor(persisted.anchors[i]),'doc',persisted.state,persisted.journal);
     check(resolved.status==='resolved'&&resolved.anchor.offset===(i===0?0:3),'Persisted insertion affinity');
   }
+
   editor.undo();equal(editor.state.nodes[0],initial,'Grouped undo');check(editor.state.nodes.at(-1)===stream,'Undo preserves streamed block');editor.redo();
   editor.select(textSelection(1,0));
   editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:{group:'typing:1'},time:350,steps:[{kind:'replaceText',id:1,from:0,to:0,text:'y'}]});
   check(editor.history.undo===2,'Selection movement breaks typing groups');
   const before=editor.state;
+
   for(const tx of [
     {baseRevision:0,origin:'local',history:'separate',time:400,steps:[]},
     {baseRevision:before.revision,origin:'local',history:'separate',time:400,steps:[{kind:'replaceText',id:1,from:0,to:0,text:'valid'},{kind:'split',id:1,at:1,rightId:2,rightKey:'collision'}]},
   ] satisfies Transaction<StarterNode>[]){
-    let rejected=false;try{editor.dispatch(tx);}catch{rejected=true;}check(rejected&&editor.state===before,'Failed transaction is atomic');
+    let rejected=false;
+
+try{editor.dispatch(tx);}catch{rejected=true;}
+
+check(rejected&&editor.state===before,'Failed transaction is atomic');
   }
+
   const target=createAnchor(demoSchema,editor.state,'doc',1,1,1);
   editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:'separate',time:500,steps:[{kind:'replaceText',id:1,from:0,to:3,text:''}]});
   check(resolveAnchor(demoSchema,target,'doc',editor.state,editor.journal).status==='deleted','Deleted reference is explicit');
   const missing=resolveAnchor(demoSchema,saved[0],'doc',editor.state,[]);check(missing.status==='unavailable'&&missing.reason==='history-unavailable','Missing history is not guessed');
   check(resolveAnchor(demoSchema,target,'other',editor.state,editor.journal).status==='unavailable','Cross-document reference rejected');
-  for(const value of [null,{}, {...target,offset:-1},{...target,revision:Infinity},{...target,bias:0}]){let rejected=false;try{parseAnchor(value);}catch{rejected=true;}check(rejected,'Malformed persisted anchor rejected');}
+
+  for(const value of [null,{}, {...target,offset:-1},{...target,revision:Infinity},{...target,bias:0}]){let rejected=false;
+
+try{parseAnchor(value);}catch{rejected=true;}
+
+check(rejected,'Malformed persisted anchor rejected');}
+
   equal(mapPosition(1,4,1,{kind:'replace',id:1,from:0,to:0,inserted:3}),{id:1,index:7},'Text position map');
+
   return {assertions,checks:'passed'};
 }

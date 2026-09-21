@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('durable mixed ranges survive nested edits, deletion, undo and checkpoint reload without registration', async ({page}) => {
   await page.goto('/editor.html'); await page.waitForFunction(()=>window.editorDiagnostics);
+
   const result=await page.evaluate(async()=>{
     const {schema,dispatch}=await import('/tests/fixtures/editor-foundation.js');
     const {createEditor,RangeSelection,NodeSelection,parseDocumentRange,textSelection}=await import('/src/editor/index.ts');
@@ -36,9 +37,13 @@ test('durable mixed ranges survive nested edits, deletion, undo and checkpoint r
     dispatch(editor,[{kind:'removeChildren',parent:null,index:1,count:1}]);
     const deleted=editor.positions.resolveDocumentRange(nodeRange);
     editor.undo();const restored=editor.positions.resolveDocumentRange(nodeRange);
-    let malformed=false;try{parseDocumentRange({...range,end:{...range.end,documentId:'other'}});}catch{malformed=true;}
+    let malformed=false;
+
+try{parseDocumentRange({...range,end:{...range.end,documentId:'other'}});}catch{malformed=true;}
+
     return {initial,insertion,deletedStart,unwrapped,split,reloaded,decorations:decorations.resolved.length,undo,deleted,restored,unregistered,malformed};
   });
+
   expect(result.unregistered&&result.malformed).toBe(true);
   expect(result.initial.ranges).toEqual([{kind:'node',id:2},{kind:'node',id:3},{kind:'text',id:6,from:0,to:2}]);
   expect(result.insertion.ranges).toEqual(result.initial.ranges);
@@ -54,6 +59,7 @@ test('durable mixed ranges survive nested edits, deletion, undo and checkpoint r
 
 test('node boundaries follow split, join, moves and unwrap with inward deletion semantics',async({page})=>{
   await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
+
   const result=await page.evaluate(async()=>{
     const {schema,dispatch}=await import('/tests/fixtures/editor-foundation.js');
     const {createEditor,NodeSelection,RangeSelection}=await import('/src/editor/index.ts');
@@ -69,8 +75,10 @@ test('node boundaries follow split, join, moves and unwrap with inward deletion 
     editor.select(new RangeSelection({kind:'node',id:1,side:'before'},{kind:'node',id:4,side:'after'}));const range=editor.positions.captureRange(editor.state.selection);
     dispatch(editor,[{kind:'removeChildren',parent:null,index:3,count:1},{kind:'removeChildren',parent:null,index:1,count:1}]);
     const bothDeleted=editor.positions.resolveDocumentRange(range);
+
     return {split,joined,move,bothDeleted};
   });
+
   expect(result.split.ranges).toEqual([{kind:'node',id:2},{kind:'node',id:5}]);
   expect(result.joined.ranges).toEqual([{kind:'node',id:2}]);
   expect(result.move.ranges).toEqual([{kind:'node',id:3}]);
@@ -79,7 +87,11 @@ test('node boundaries follow split, join, moves and unwrap with inward deletion 
 
 test('image comments use the public range API and open from their decoration',async({page})=>{
   await page.goto('/editor.html?stream=32');await page.waitForFunction(()=>window.editorDiagnostics);
-  const id=await page.evaluate(()=>{const node=window.editorDiagnostics.read().nodes.find(n=>n.kind==='image');window.editorDiagnostics.scrollTo(node.id);return node.id;});
+
+  const id=await page.evaluate(()=>{const node=window.editorDiagnostics.read().nodes.find(n=>n.kind==='image');window.editorDiagnostics.scrollTo(node.id);
+
+return node.id;});
+
   const image=page.locator(`[data-image="${id}"]`);await image.scrollIntoViewIfNeeded();await image.click();
   const add=page.getByRole('button',{name:'Add comment',exact:true});await expect(add).toBeEnabled();await add.click();
   await expect(page.locator(`[data-editor-node="${id}"]`)).toHaveAttribute('data-commented','true');
@@ -93,6 +105,7 @@ test('image comments use the public range API and open from their decoration',as
 
 test('external ranges resolve identically across replicas after accepted edits and container unwrap',async({page})=>{
  await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
+
  const result=await page.evaluate(async()=>{
   const {schema,dispatch}=await import('/tests/fixtures/editor-foundation.js');
   const {createEditor,NodeSelection,RangeSelection,parseDocumentRange}=await import('/src/editor/index.ts');
@@ -102,7 +115,9 @@ test('external ranges resolve identically across replicas after accepted edits a
   const right=createEditor(schema,structuredClone(nodes),new NodeSelection(1),[],{documentId:'shared'});
   const range=parseDocumentRange(JSON.parse(JSON.stringify(left.positions.captureRange(left.state.selection))));
   const changes=[[{kind:'replaceText',id:2,from:2,to:2,text:' by Alice '}],[{kind:'insertChildren',parent:1,index:2,nodes:[a(5)]}],[{kind:'unwrap',id:1}]];
+
   for(const steps of changes){dispatch(left,steps);dispatch(right,structuredClone(steps));}
+
   const aResult=left.positions.resolveDocumentRange(range),bResult=right.positions.resolveDocumentRange(range);
   left.select(new RangeSelection({kind:'text',id:2,offset:2},{kind:'node',id:3,side:'after'}));
   const partial=left.positions.captureRange(left.state.selection);
@@ -111,8 +126,10 @@ test('external ranges resolve identically across replicas after accepted edits a
   dispatch(left,[{kind:'replaceRanges',ranges:[{kind:'text',id:2,from:9,to:left.state.nodes[0].value.length},{kind:'node',id:3}],text:'',pruneEmpty:[]}]);
   const removed=left.positions.resolveDocumentRange(partial);
   left.undo();const undo=left.positions.resolveDocumentRange(partial);
+
   return {aResult,bResult,affinity,removed,undo};
  });
+
  expect(result.aResult).toEqual(result.bResult);
  expect(result.aResult.ranges).toEqual([{kind:'node',id:2},{kind:'node',id:3},{kind:'node',id:5},{kind:'node',id:4}]);
  expect(result.affinity.ranges[0].from).toBe(9);
@@ -123,6 +140,7 @@ test('external ranges resolve identically across replicas after accepted edits a
 
 test('text endpoints retain an interior atom after both endpoint paragraphs are removed',async({page})=>{
  await page.goto('/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
+
  const result=await page.evaluate(async()=>{
   const {schema,dispatch}=await import('/tests/fixtures/editor-foundation.js');
   const {createEditor,TextSelection}=await import('/src/editor/index.ts');
@@ -133,8 +151,10 @@ test('text endpoints retain an interior atom after both endpoint paragraphs are 
   const surviving=editor.positions.resolveDocumentRange(range);
   dispatch(editor,[{kind:'removeChildren',parent:null,index:0,count:1}]);const deleted=editor.positions.resolveDocumentRange(range);
   editor.undo();const undo=editor.positions.resolveDocumentRange(range);
+
   return {surviving,deleted,undo};
  });
+
  expect(result.surviving).toEqual({status:'resolved',ranges:[{kind:'node',id:2}]});
  expect(result.deleted.status).toBe('deleted');
  expect(result.undo).toEqual(result.surviving);

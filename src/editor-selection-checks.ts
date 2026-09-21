@@ -1,22 +1,56 @@
 import {createSchema,createEditor,TextSelection,NodeSelection,AllSelection,textSelection,selectionContext,selectionMapping,createSelectionRegistry,type NodeIdentity,type NodeExtension,type Selection,type Step} from './editor';
 import {createCellSelectionExtension} from './extensions/cell-selection';
+
 type Node=NodeIdentity&({kind:'text';text:string}|{kind:'atom'}|{kind:'table'|'row'|'cell'|'group';children:Node[];colspan:number;rowspan:number});
+
 const leaf=(id:number,text:string):Node=>({id,key:`key-${id}`,kind:'text',text});
+
 const container=(id:number,kind:'table'|'row'|'cell'|'group',children:Node[],colspan=1,rowspan=1):Node=>({id,key:`key-${id}`,kind,children,colspan,rowspan});
+
 const extensions:NodeExtension<Node>[]=[
-  {name:'text',version:1,kind:'text',accepts:node=>node.kind==='text',validateUpdate(){},editing:{text:node=>node.kind==='text'?node.text:'',replace(node,from,to,text){if(node.kind!=='text')throw new Error('Not text');return {...node,text:node.text.slice(0,from)+text+node.text.slice(to)};},split(node,at,identity){if(node.kind!=='text')throw new Error('Not text');return [{...node,text:node.text.slice(0,at)},{...node,...identity,text:node.text.slice(at)}];},join(left,right){if(left.kind!=='text'||right.kind!=='text')throw new Error('Not text');return {...left,text:left.text+right.text};}}},
+  {name:'text',version:1,kind:'text',accepts:node=>node.kind==='text',validateUpdate(){},editing:{text:node=>node.kind==='text'?node.text:'',replace(node,from,to,text){if(node.kind!=='text')throw new Error('Not text');
+
+return {...node,text:node.text.slice(0,from)+text+node.text.slice(to)};},split(node,at,identity){if(node.kind!=='text')throw new Error('Not text');
+
+return [{...node,text:node.text.slice(0,at)},{...node,...identity,text:node.text.slice(at)}];},join(left,right){if(left.kind!=='text'||right.kind!=='text')throw new Error('Not text');
+
+return {...left,text:left.text+right.text};}}},
   {name:'atom',version:1,kind:'atom',accepts:node=>node.kind==='atom',validateUpdate(){}},
-  {name:'containers',version:1,kind:'container',accepts:node=>'children'in node,validateUpdate(){},content:{children:node=>'children'in node?node.children:[],withChildren(node,children){if(!('children'in node))throw new Error('Not container');return {...node,children};},validateChildren(){}}},
+  {name:'containers',version:1,kind:'container',accepts:node=>'children'in node,validateUpdate(){},content:{children:node=>'children'in node?node.children:[],withChildren(node,children){if(!('children'in node))throw new Error('Not container');
+
+return {...node,children};},validateChildren(){}}},
 ];
+
 const schema=createSchema(extensions);
-const tables=createCellSelectionExtension({rows(context,id){const table=context.node(id);if(!table||!('kind'in table)||table.kind!=='table')return null;return context.children(id).map(row=>context.children(row.id).map(cell=>{if(!('colspan'in cell)||!('rowspan'in cell)||typeof cell.colspan!=='number'||typeof cell.rowspan!=='number')throw new Error('Not a cell');return {id:cell.id,colspan:cell.colspan,rowspan:cell.rowspan};}));}});
+
+const tables=createCellSelectionExtension({rows(context,id){const table=context.node(id);
+
+if(!table||!('kind'in table)||table.kind!=='table')return null;
+
+return context.children(id).map(row=>context.children(row.id).map(cell=>{if(!('colspan'in cell)||!('rowspan'in cell)||typeof cell.colspan!=='number'||typeof cell.rowspan!=='number')throw new Error('Not a cell');
+
+return {id:cell.id,colspan:cell.colspan,rowspan:cell.rowspan};}));}});
+
 export function checkSelections(){
- let assertions=0;const check=(value:boolean,message:string)=>{assertions++;if(!value)throw new Error(message);};
+ let assertions=0;
+
+const check=(value:boolean,message:string)=>{assertions++;
+
+if(!value)throw new Error(message);};
+
  const equal=(a:unknown,b:unknown,message:string)=>check(JSON.stringify(a)===JSON.stringify(b),message);
- const rejected=(fn:()=>unknown,message:string)=>{let failed=false;try{fn();}catch{failed=true;}check(failed,message);};
+
+ const rejected=(fn:()=>unknown,message:string)=>{let failed=false;
+
+try{fn();}catch{failed=true;}
+
+check(failed,message);};
+
  const editor=createEditor(schema,[leaf(1,'Alpha'),{id:9,key:'atom',kind:'atom'},leaf(2,'Beta'),leaf(3,'Gamma')],new TextSelection({id:1,offset:2},{id:2,offset:2}));
  const context=()=>selectionContext(schema,editor.state.nodes);
+
  function dispatch(steps:Step<Node>[],selection?:Selection){return editor.dispatch({baseRevision:editor.state.revision,origin:'local',history:'separate',time:0,steps,selection});}
+
  equal(editor.state.selection.ranges(context()),[{kind:'text',id:1,from:2,to:5},{kind:'node',id:9},{kind:'text',id:2,from:0,to:2}],'Cross-block ranges include intervening atoms');
  equal(editor.state.selection.content(context()).fragments.map(fragment=>fragment.kind==='text'?fragment.text:fragment.node.key),['pha','atom','Be'],'Content extraction preserves disjoint fragments');
  const backward=new TextSelection({id:2,offset:2},{id:1,offset:2});equal(backward.ranges(context()),editor.state.selection.ranges(context()),'Backward text selection covers same content');check(!backward.eq(editor.state.selection),'Direction remains part of identity');
@@ -32,16 +66,19 @@ export function checkSelections(){
  const twoAtoms=createEditor(schema,[{id:7,key:'a',kind:'atom'},{id:8,key:'b',kind:'atom'}],new NodeSelection(7));twoAtoms.dispatch({baseRevision:0,origin:'local',history:'separate',time:0,steps:twoAtoms.selectionEdit('').steps});check(twoAtoms.state.selection.eq(new NodeSelection(8)),'Deleted node falls back to surviving atom');
  const grouped=createEditor(schema,[container(60,'group',[leaf(61,'a')]),container(70,'group',[leaf(71,'b')])],new TextSelection({id:61,offset:0},{id:71,offset:1}));const unchanged=grouped.state;rejected(()=>grouped.selectionEdit('x'),'Cross-container replacement requires a schema command');check(grouped.state===unchanged,'Unsupported replacement does not mutate state');grouped.select(new NodeSelection(60));check(grouped.state.selection.content(selectionContext(schema,grouped.state.nodes)).fragments[0].node.id===60,'Containers support node selection');
  const unselectable=createSchema<Node>([{...extensions[1],selectable:false}]);rejected(()=>createEditor(unselectable,[{id:7,key:'only',kind:'atom'}],new NodeSelection(7)),'Schema controls node selection');
+
  for(const value of [null,{}, {...json,version:2},{...json,type:'missing'},{...json,data:{anchor:{key:'missing',offset:0},head:{key:'key-1',offset:0},upstream:false}}])rejected(()=>editor.readSelection(value),'Malformed selection rejected');
  rejected(()=>createSelectionRegistry([{type:'text',read:()=>new AllSelection()}]),'Duplicate selection registration');
  // Stable-key persistence resolves against new local handles.
  const freshNodes=[leaf(101,'Alpha'),leaf(102,'Beta')].map((node,i)=>({...node,key:`key-${i+1}`}));const fresh=createEditor(schema,freshNodes,textSelection(101,0));const restored=fresh.readSelection(json);check(restored instanceof TextSelection&&restored.anchor.id===101&&restored.head.id===102,'Persisted selection uses keys, not handles');
  // An isolated bookmark maps without a document and resolves after the change.
  const before=selectionContext(schema,[leaf(1,'ab')]),after=selectionContext(schema,[leaf(1,'aXb')]);const bookmark=textSelection(1,1).getBookmark().map(selectionMapping(before,after,[{kind:'replace',id:1,from:1,to:1,inserted:1}]));check(bookmark.resolve(after).eq(textSelection(1,2)),'Bookmark maps and resolves');
+
  const table=container(10,'table',[
   container(11,'row',[container(21,'cell',[leaf(31,'A')]),container(22,'cell',[leaf(32,'B')]),container(23,'cell',[leaf(33,'C')])]),
   container(12,'row',[container(24,'cell',[leaf(34,'D')]),container(25,'cell',[leaf(35,'E')]),container(26,'cell',[leaf(36,'F')])]),
  ]);
+
  const cellSelection=new tables.CellSelection(10,21,24);
  rejected(()=>createEditor(schema,[table],cellSelection),'Cell type requires registration');
  const cells=createEditor(schema,[table],cellSelection,[tables.extension]);const cellContext=()=>selectionContext(schema,cells.state.nodes);
@@ -59,5 +96,6 @@ export function checkSelections(){
  const spanContext=selectionContext(schema,[spanning]),span=new tables.CellSelection(100,110,112);equal(span.cells(spanContext),[112,110,111],'Spanning cells appear once');equal([...tables.grid(spanContext,100).slots],[0,0,1,0,0,2],'Packed grid repeats spanning cell indexes');
  rejected(()=>new tables.CellSelection(10,21,112).validate(cellContext()),'Different-table endpoints rejected');
  const broken=container(200,'table',[container(201,'row',[container(210,'cell',[leaf(220,'x')],2)]),container(202,'row',[container(211,'cell',[leaf(221,'y')])])]);rejected(()=>tables.grid(selectionContext(schema,[broken]),200),'Ragged grid rejected');
+
  return {assertions,checks:'passed'};
 }

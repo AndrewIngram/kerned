@@ -12,12 +12,14 @@ export function packGlyphs(shaped: Shaped) {
   const dx = new Float64Array(count);
   const dy = new Float64Array(count);
   const counts = new Uint32Array(shaped.clusters.reduce((max,cluster)=>cluster.glyphs.reduce((n,glyph)=>Math.max(n,glyph.font+1),max),4));
+
   for (const cluster of shaped.clusters) for (const glyph of cluster.glyphs) counts[glyph.font]++;
   const ids = Array.from(counts, n => new Uint16Array(n));
   counts.fill(0);
   let index = 0;
   shaped.clusters.forEach((cluster, c) => {
     starts[c] = index;
+
     for (const glyph of cluster.glyphs) {
       const slot = counts[glyph.font]++;
       fonts[index] = glyph.font;
@@ -30,6 +32,8 @@ export function packGlyphs(shaped: Shaped) {
     }
   });
   starts[shaped.clusters.length] = index;
+
   return { starts, fonts, slots, advance, dx, dy, ids };
 }
+
 export type PackedGlyphs = ReturnType<typeof packGlyphs>;

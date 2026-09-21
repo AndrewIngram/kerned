@@ -4,15 +4,24 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 
 const base=process.env.EDITOR_URL??'http://127.0.0.1:5176/extensions.html';
+
 const html=await readFile('public/samples/warbreaker.html','utf8');
+
 const manifest=JSON.parse(await readFile('public/samples/warbreaker.json','utf8'));
+
 assert.equal(createHash('sha256').update(html).digest('hex'),manifest.htmlSha256);
+
 const fullHtml=await readFile('public/samples/warbreaker-full.html','utf8');
+
 const fullManifest=JSON.parse(await readFile('public/samples/warbreaker-full.json','utf8'));
+
 assert.equal(createHash('sha256').update(fullHtml).digest('hex'),fullManifest.htmlSha256);
+
 const results=[];
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
   const browser=await type.launch();
+
   try{
     const page=await browser.newPage({viewport:{width:1100,height:950}}),errors=[];
     page.on('pageerror',error=>errors.push(error.message));
@@ -30,8 +39,10 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
       const table=parse('<table><tr><td><p>A</p></td><td>B</td></tr></table><p><a href="javascript:alert(1)">Link</a><sup>2</sup></p>');
       const combining=parse('<p><strong>e</strong>\u0301lan</p>');
       const empty=parse('<script>bad()</script><p> </p>');
+
       return {marked,inert,table,combining,empty,injected:!!window.injected};
     });
+
     assert.deepEqual(parsed.marked.nodes.map(n=>n.text),['Heading','one two three four\nfive & six']);
     assert.deepEqual(parsed.marked.nodes[1].marks,[
       {from:4,to:13,mark:{type:'bold',attrs:null}},
@@ -65,6 +76,7 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
 
     const fidelity=await page.evaluate(html=>{
       const template=document.createElement('template');template.innerHTML=html;
+
       for(const br of template.content.querySelectorAll('br'))br.replaceWith(document.createTextNode('\n'));
       const normal=text=>text.replace(/\s+/g,' ').trim();
       const expected=[...template.content.querySelectorAll('p,h1,h2,h3,h4,h5,h6')].map(e=>normal(e.textContent));
@@ -73,8 +85,10 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
       const mismatches=expected.flatMap((text,i)=>text===normal(paragraphs[i]?.text??'')?[]:[i]);
       const underlineText=paragraphs.flatMap(n=>n.marks.filter(s=>(s.mark.type==='underline')).map(s=>n.text.slice(s.from,s.to))).join('');
       const expectedUnderline=[...template.content.querySelectorAll('u')].map(e=>e.textContent).join('');
+
       return {count:nodes.length,textBlocks:paragraphs.length,expected:expected.length,mismatches,underline:underlineText.replace(/\s/g,'')===expectedUnderline.replace(/\s/g,''),last:nodes.at(-1).id,lastText:expected.at(-1)};
     },html);
+
     assert.deepEqual(fidelity.mismatches,[]);assert.equal(fidelity.textBlocks,fidelity.expected);assert.equal(fidelity.textBlocks,manifest.blocks);assert.equal(fidelity.underline,true);
     await page.screenshot({path:`artifacts/warbreaker-${name}.png`});
     await page.evaluate(id=>window.editorDiagnostics.scrollTo(id),fidelity.last);await settle();
@@ -94,4 +108,5 @@ for(const [name,type] of Object.entries({chromium,firefox,webkit})){
     await page.close();
   }finally{await browser.close();}
 }
+
 await writeFile('artifacts/editor-book-checks.json',JSON.stringify({sourceSha256:manifest.sourceSha256,results},null,2)+'\n');

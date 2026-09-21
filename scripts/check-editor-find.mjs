@@ -3,27 +3,41 @@ import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 
 const reports=[];
+
 for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
   const browser=await {chromium,firefox,webkit}[name].launch();
+
   try{
     for(const width of [1100,390]){
       const page=await browser.newPage({viewport:{width,height:900}}),errors=[];
       page.on('pageerror',error=>errors.push(error.message));
       await page.routeWebSocket(url=>url.pathname==='/',()=>{});
       const settle=async()=>{await page.waitForFunction(()=>document.querySelector('.find-count')?.getAttribute('aria-busy')!=='true');await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));};
+
       const input=page.getByRole('textbox',{name:'Find in document',exact:true});
-      const count=async()=>{await page.locator('.find-count[aria-busy="false"]').waitFor();return page.locator('.find-count').innerText();};
+
+      const count=async()=>{await page.locator('.find-count[aria-busy="false"]').waitFor();
+
+return page.locator('.find-count').innerText();};
+
       const pixels=()=>page.evaluate(()=>{
         const canvas=document.querySelector('canvas'),data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
-        let active=0,other=0;for(let i=0;i<data.length;i+=4){if(data[i]===245&&data[i+1]===185&&data[i+2]===65)active++;if(data[i]===255&&data[i+1]===236&&data[i+2]===151)other++;}
+        let active=0,other=0;
+
+for(let i=0;i<data.length;i+=4){if(data[i]===245&&data[i+1]===185&&data[i+2]===65)active++;
+
+if(data[i]===255&&data[i+1]===236&&data[i+2]===151)other++;}
+
         return {active,other};
       });
+
       await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
       const selection=await page.evaluate(()=>window.editorDiagnostics.read().selection);
       await page.keyboard.press('Meta+f');await input.fill('ideas');await settle();
       assert.equal(await count(),'1 of 2');
       assert.ok(await page.evaluate(()=>{
         const bar=document.querySelector('.find-bar').getBoundingClientRect(),canvas=document.querySelector('canvas').getBoundingClientRect(),state=window.editorDiagnostics.read();
+
         return canvas.top+state.scene[0].y-state.scroll>=bar.bottom;
       }),'Floating bar leaves the first match visible');
       let colors=await pixels();assert.ok(colors.active>20&&colors.other>20,'Canvas draws current and other matches');
@@ -73,11 +87,16 @@ for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
       await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');
       await page.waitForFunction(()=>window.editorDiagnostics?.metrics().completedAt,{},{timeout:60000});
       const before=await page.evaluate(()=>({selection:window.editorDiagnostics.read().selection,layouts:window.editorDiagnostics.metrics().layoutCalls}));
+
       const apiTimings=await page.evaluate(async()=>{
         const {createFind}=await import('/src/editor/index.ts'),{demoSchema}=await import('/src/extensions/demo-schema.ts');
         const nodes=window.editorDiagnostics.read().nodes,find=createFind(demoSchema,()=>nodes);
-        return ['Breath','Vivenna','the','e','[.*]'].map(query=>{const start=performance.now(),state=find.setQuery(query);return {query,matches:state.matches.length,ms:performance.now()-start};});
+
+        return ['Breath','Vivenna','the','e','[.*]'].map(query=>{const start=performance.now(),state=find.setQuery(query);
+
+return {query,matches:state.matches.length,ms:performance.now()-start};});
       });
+
       await page.keyboard.press('Meta+f');
       const started=performance.now();await input.fill('Breath');await settle();const searchPaintMs=performance.now()-started;
       const total=await page.evaluate(()=>window.editorDiagnostics.find().matches.length);assert.ok(total>100);
@@ -103,4 +122,5 @@ for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
     }
   }finally{await browser.close();}
 }
+
 await writeFile('artifacts/editor-find.json',JSON.stringify(reports,null,2)+'\n');

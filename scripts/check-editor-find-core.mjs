@@ -3,21 +3,27 @@ import assert from 'node:assert/strict';
 
 for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
   const browser=await {chromium,firefox,webkit}[name].launch();
+
   try{
     const page=await browser.newPage();
     await page.routeWebSocket(url=>url.pathname==='/',()=>{});
     await page.goto('http://127.0.0.1:5173/editor.html');
+
     const result=await page.evaluate(async()=>{
       const {createSchema,createEditor,textSelection}=await import('/src/editor/index.ts');
       let reads=0,checks=0;
       const check=(ok,message)=>{if(!ok)throw new Error(message);checks++;};
+
       const schema=createSchema([
         {name:'text',version:1,kind:'text',accepts:n=>n.kind==='text',validateUpdate(){},editing:{
-          text:n=>{reads++;return n.text;},replace:(n,from,to,text)=>({...n,text:n.text.slice(0,from)+text+n.text.slice(to)}),
+          text:n=>{reads++;
+
+return n.text;},replace:(n,from,to,text)=>({...n,text:n.text.slice(0,from)+text+n.text.slice(to)}),
           split:(n,at,right)=>[{...n,text:n.text.slice(0,at)},{...n,...right,text:n.text.slice(at)}],join:(a,b)=>({...a,text:a.text+b.text}),
         }},
         {name:'group',version:1,kind:'container',accepts:n=>n.kind==='group',validateUpdate(){},content:{children:n=>n.children,withChildren:(n,children)=>({...n,children}),validateChildren(){}}},
       ]);
+
       const leaf=(id,text)=>({id,key:`text-${id}`,kind:'text',text});
       const group=(id,children)=>({id,key:`group-${id}`,kind:'group',children});
       const editor=createEditor(schema,[leaf(1,'Idea ideas IDEA'),group(20,[leaf(2,'ideas [.*]'),group(21,[leaf(3,'Last idea')])])],textSelection(1,2));
@@ -99,9 +105,13 @@ for(const name of (process.env.BROWSERS??'chromium,firefox,webkit').split(',')){
       const large=createEditor(schema,Array.from({length:7280},(_,i)=>leaf(i+1,'Warbreaker. This is a paragraph with ideas, ideas, and punctuation. '.repeat(3))),textSelection(1,0));
       const started=performance.now();const found=large.find.setQuery('ideas');const searchMs=performance.now()-started;
       check(found.matches.length===43680,'Book-size result set is complete');
-      const navStarted=performance.now();for(let i=0;i<1000;i++)large.find.next();
+      const navStarted=performance.now();
+
+for(let i=0;i<1000;i++)large.find.next();
+
       return {checks,searchMs,navigate1000Ms:performance.now()-navStarted,matches:found.matches.length};
     });
+
     assert.ok(result.searchMs<500,`${name} find should stay interactive: ${result.searchMs}ms`);
     console.log(name,JSON.stringify(result));
   }finally{await browser.close();}

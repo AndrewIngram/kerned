@@ -1,15 +1,24 @@
 import {readFile,writeFile} from 'node:fs/promises';
+
 const benchmark=JSON.parse(await readFile('artifacts/editor-large-benchmark.json','utf8'));
+
 const checks=JSON.parse(await readFile('artifacts/editor-large-checks.json','utf8'));
+
 const median=a=>[...a].sort((a,b)=>a-b)[Math.floor(a.length/2)];
+
 const f=n=>n.toFixed(1),mb=n=>(n/1e6).toFixed(1);
+
 const rows=[];
+
 for(const browser of ['chromium','firefox','webkit'])for(const total of [2000,10000]){
  const t=benchmark.trials.filter(t=>t.browser===browser&&t.total===total);
  rows.push(`| ${browser} | ${total.toLocaleString('en-US')} | ${f(median(t.map(t=>t.firstCanvasFlushMs)))} | ${f(median(t.map(t=>t.loadAfterMountMs)))} | ${f(median(t.map(t=>t.chunkWorkMs.p95)))} | ${f(Math.max(...t.map(t=>t.frameGapMs.max)))} |`);
 }
+
 const resizing=checks.cases.filter(c=>c.total===10000).map(c=>`| ${c.browser} | ${c.width} | ${f(c.widthChanges.at(-1).workMs)} |`);
+
 const memory=benchmark.memory.map(m=>`| ${m.total.toLocaleString('en-US')} | ${mb(m.delta.usedSize)} | ${mb(m.delta.backingStorageSize)} | ${mb(m.buffers.caretUnusedBytes)} |`);
+
 const doc=`# Large editor documents
 
 For the current viewport-first resize implementation and paired timing comparisons, see [viewport-first reflow](editor-viewport-reflow.md).
@@ -105,4 +114,5 @@ Culling reduces drawing and mounted DOM, but does not evict offscreen shaping or
 
 Placement arrays and block arrays still scan or copy in several updates; this is not yet a tree-backed document store. Per-paragraph layout is retained eagerly as each chunk arrives. The extension demo remains separate from the text-only block session and the original streaming experiment. Full IME support, cross-block selection, accessibility for canvas text and DOM-widget export remain open work.
 `;
+
 await writeFile('docs/editor-large-documents.md',doc);

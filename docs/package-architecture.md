@@ -3,6 +3,9 @@
 Status: proposed target for the approved public-interface refactor. Package names
 below are intended module entry points, not existing published packages.
 
+Execution: [detailed public-interface implementation plan](public-interface-implementation-plan.md)
+with milestone tasks, acceptance cases, migration gates and completion checklist.
+
 Design evidence: [Tiptap API audit](tiptap-api-audit.md) and its
 [adapter and persistence findings](tiptap-adapters-research.md).
 

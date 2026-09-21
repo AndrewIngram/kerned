@@ -12,8 +12,10 @@ export function selectionView<N extends NodeIdentity>(
 ) {
   const ranges = value.ranges(context);
   const text = value instanceof TextSelection ? value : null;
+
   const focusId =
     value instanceof RangeSelection ? value.head.id : (text?.head.id ?? ranges[0]?.id ?? null);
+
   const anchorIndex = text ? indexes.get(text.anchor.id) : undefined;
   const headIndex = text ? indexes.get(text.head.id) : undefined;
 

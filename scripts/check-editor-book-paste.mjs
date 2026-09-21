@@ -1,14 +1,19 @@
 import {chromium,firefox,webkit} from 'playwright';
 import assert from 'node:assert/strict';
+
 for(const [name,type] of Object.entries({chromium,firefox,webkit})){
 const browser=await type.launch();
+
 try{
  const page=await browser.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');
  await page.waitForFunction(()=>window.editorDiagnostics?.probe([]).complete);
  await page.evaluate(()=>window.editorDiagnostics.select(1,0));
  await page.keyboard.press('ControlOrMeta+a');
- const text=await page.locator('.text-capture').evaluate(el=>{const event=new ClipboardEvent('copy',{bubbles:true,cancelable:true,clipboardData:new DataTransfer()});el.dispatchEvent(event);return event.clipboardData.getData('text/plain');});
+
+ const text=await page.locator('.text-capture').evaluate(el=>{const event=new ClipboardEvent('copy',{bubbles:true,cancelable:true,clipboardData:new DataTransfer()});el.dispatchEvent(event);
+
+return event.clipboardData.getData('text/plain');});
 
  assert.ok(text.length>1_000_000,'Must copy the complete book');
  await page.goto('http://127.0.0.1:5173/editor.html');await page.waitForFunction(()=>window.editorDiagnostics);
@@ -25,6 +30,7 @@ try{
  assert.deepEqual(await page.evaluate(()=>window.editorDiagnostics.read().nodes.map(n=>n.text)),expected);
  await page.getByRole('button',{name:'Undo',exact:true}).click();
  const original=await page.evaluate(()=>window.editorDiagnostics.read().nodes[0].text);
+
  for(const value of ['A\tB','one\r\ntwo\n\nthree\n']){
   await page.evaluate(()=>window.editorDiagnostics.select(1,5));
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
@@ -37,6 +43,7 @@ try{
   await page.getByRole('button',{name:'Undo',exact:true}).click();
   assert.equal(await page.evaluate(()=>window.editorDiagnostics.read().nodes[0].text),original);
  }
+
  assert.deepEqual(errors,[]);
  console.log(name,'full book copy/paste, exact text, tabs, CRLF, blank paragraphs, suffix and undo/redo passed');
 }finally{await browser.close();}
