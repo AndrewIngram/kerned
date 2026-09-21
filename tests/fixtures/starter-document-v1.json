@@ -1,0 +1,529 @@
+{
+  "content": [
+    {
+      "kind": "paragraph",
+      "id": 1,
+      "key": "block-1",
+      "text": "Review the draft with ￼ before sharing it with the team.",
+      "marks": [],
+      "inline": [
+        {
+          "type": "mention",
+          "id": "maya",
+          "index": 22,
+          "attrs": {
+            "label": "@Maya Chen",
+            "width": 132,
+            "ascent": 23,
+            "descent": 7
+          }
+        }
+      ]
+    },
+    {
+      "kind": "paragraph",
+      "id": 2,
+      "key": "block-2",
+      "text": "We should keep the first release focused and gather feedback before expanding the scope.",
+      "marks": [],
+      "inline": []
+    },
+    {
+      "kind": "checklist",
+      "id": 3,
+      "key": "block-3",
+      "checked": [true, false, false],
+      "expanded": false,
+      "notes": ""
+    },
+    {
+      "kind": "paragraph",
+      "id": 4,
+      "key": "block-4",
+      "text": "The checklist stays part of the document. The next paragraph moves when its content expands.",
+      "marks": [],
+      "inline": []
+    },
+    {
+      "kind": "heading",
+      "id": 200,
+      "key": "fixture-201",
+      "level": 3,
+      "text": "Title",
+      "marks": [
+        {
+          "from": 0,
+          "to": 5,
+          "mark": {
+            "type": "bold",
+            "attrs": null
+          }
+        }
+      ],
+      "inline": []
+    },
+    {
+      "kind": "image",
+      "id": 201,
+      "key": "fixture-202",
+      "locked": true,
+      "src": "/image.jpg",
+      "alt": "An image"
+    },
+    {
+      "kind": "quote",
+      "id": 202,
+      "key": "fixture-203",
+      "children": [
+        {
+          "kind": "paragraph",
+          "id": 203,
+          "key": "fixture-204",
+          "text": "Quote",
+          "marks": [],
+          "inline": []
+        }
+      ]
+    },
+    {
+      "kind": "list",
+      "id": 204,
+      "key": "fixture-205",
+      "ordered": true,
+      "start": 4,
+      "children": [
+        {
+          "kind": "listItem",
+          "id": 205,
+          "key": "fixture-206",
+          "children": [
+            {
+              "kind": "paragraph",
+              "id": 206,
+              "key": "fixture-207",
+              "text": "Item",
+              "marks": [],
+              "inline": []
+            },
+            {
+              "kind": "list",
+              "id": 207,
+              "key": "fixture-208",
+              "ordered": false,
+              "start": 1,
+              "children": [
+                {
+                  "kind": "listItem",
+                  "id": 208,
+                  "key": "fixture-209",
+                  "children": [
+                    {
+                      "kind": "paragraph",
+                      "id": 209,
+                      "key": "fixture-210",
+                      "text": "Nested",
+                      "marks": [],
+                      "inline": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "table",
+      "id": 210,
+      "key": "fixture-211",
+      "caption": "",
+      "rows": [
+        [
+          {
+            "kind": "tableCell",
+            "id": 211,
+            "key": "fixture-212",
+            "row": 0,
+            "header": true,
+            "colspan": 1,
+            "rowspan": 1,
+            "paragraphs": [
+              {
+                "kind": "paragraph",
+                "id": 212,
+                "key": "fixture-213",
+                "text": "",
+                "marks": [],
+                "inline": []
+              }
+            ]
+          },
+          {
+            "kind": "tableCell",
+            "id": 213,
+            "key": "fixture-214",
+            "row": 0,
+            "header": true,
+            "colspan": 1,
+            "rowspan": 1,
+            "paragraphs": [
+              {
+                "kind": "paragraph",
+                "id": 214,
+                "key": "fixture-215",
+                "text": "",
+                "marks": [],
+                "inline": []
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "kind": "tableCell",
+            "id": 215,
+            "key": "fixture-216",
+            "row": 1,
+            "header": false,
+            "colspan": 1,
+            "rowspan": 1,
+            "paragraphs": [
+              {
+                "kind": "paragraph",
+                "id": 216,
+                "key": "fixture-217",
+                "text": "",
+                "marks": [],
+                "inline": []
+              }
+            ]
+          },
+          {
+            "kind": "tableCell",
+            "id": 217,
+            "key": "fixture-218",
+            "row": 1,
+            "header": false,
+            "colspan": 1,
+            "rowspan": 1,
+            "paragraphs": [
+              {
+                "kind": "paragraph",
+                "id": 218,
+                "key": "fixture-219",
+                "text": "",
+                "marks": [],
+                "inline": []
+              }
+            ]
+          }
+        ]
+      ]
+    }
+  ],
+  "encoded": {
+    "version": 1,
+    "nodes": [
+      {
+        "type": "paragraph",
+        "version": 2,
+        "id": 1,
+        "key": "block-1",
+        "data": {
+          "text": "Review the draft with ￼ before sharing it with the team.",
+          "marks": [],
+          "inline": [
+            {
+              "type": "mention",
+              "id": "maya",
+              "index": 22,
+              "attrs": {
+                "label": "@Maya Chen",
+                "width": 132,
+                "ascent": 23,
+                "descent": 7
+              },
+              "version": 1
+            }
+          ]
+        },
+        "children": []
+      },
+      {
+        "type": "paragraph",
+        "version": 2,
+        "id": 2,
+        "key": "block-2",
+        "data": {
+          "text": "We should keep the first release focused and gather feedback before expanding the scope.",
+          "marks": [],
+          "inline": []
+        },
+        "children": []
+      },
+      {
+        "type": "checklist",
+        "version": 1,
+        "id": 3,
+        "key": "block-3",
+        "data": {
+          "checked": [true, false, false],
+          "expanded": false,
+          "notes": ""
+        },
+        "children": []
+      },
+      {
+        "type": "paragraph",
+        "version": 2,
+        "id": 4,
+        "key": "block-4",
+        "data": {
+          "text": "The checklist stays part of the document. The next paragraph moves when its content expands.",
+          "marks": [],
+          "inline": []
+        },
+        "children": []
+      },
+      {
+        "type": "heading",
+        "version": 2,
+        "id": 200,
+        "key": "fixture-201",
+        "data": {
+          "text": "Title",
+          "marks": [
+            {
+              "from": 0,
+              "to": 5,
+              "mark": {
+                "type": "bold",
+                "attrs": null,
+                "version": 1
+              }
+            }
+          ],
+          "inline": [],
+          "level": 3
+        },
+        "children": []
+      },
+      {
+        "type": "image",
+        "version": 1,
+        "id": 201,
+        "key": "fixture-202",
+        "data": {
+          "src": "/image.jpg",
+          "alt": "An image"
+        },
+        "children": [],
+        "locked": true
+      },
+      {
+        "type": "quote",
+        "version": 1,
+        "id": 202,
+        "key": "fixture-203",
+        "data": {},
+        "children": [
+          {
+            "type": "paragraph",
+            "version": 2,
+            "id": 203,
+            "key": "fixture-204",
+            "data": {
+              "text": "Quote",
+              "marks": [],
+              "inline": []
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "version": 1,
+        "id": 204,
+        "key": "fixture-205",
+        "data": {
+          "ordered": true,
+          "start": 4
+        },
+        "children": [
+          {
+            "type": "listItem",
+            "version": 1,
+            "id": 205,
+            "key": "fixture-206",
+            "data": {},
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 2,
+                "id": 206,
+                "key": "fixture-207",
+                "data": {
+                  "text": "Item",
+                  "marks": [],
+                  "inline": []
+                },
+                "children": []
+              },
+              {
+                "type": "list",
+                "version": 1,
+                "id": 207,
+                "key": "fixture-208",
+                "data": {
+                  "ordered": false,
+                  "start": 1
+                },
+                "children": [
+                  {
+                    "type": "listItem",
+                    "version": 1,
+                    "id": 208,
+                    "key": "fixture-209",
+                    "data": {},
+                    "children": [
+                      {
+                        "type": "paragraph",
+                        "version": 2,
+                        "id": 209,
+                        "key": "fixture-210",
+                        "data": {
+                          "text": "Nested",
+                          "marks": [],
+                          "inline": []
+                        },
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "table",
+        "version": 1,
+        "id": 210,
+        "key": "fixture-211",
+        "data": {
+          "caption": "",
+          "rowLengths": [2, 2]
+        },
+        "children": [
+          {
+            "type": "tableCell",
+            "version": 1,
+            "id": 211,
+            "key": "fixture-212",
+            "data": {
+              "row": 0,
+              "header": true,
+              "colspan": 1,
+              "rowspan": 1
+            },
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 2,
+                "id": 212,
+                "key": "fixture-213",
+                "data": {
+                  "text": "",
+                  "marks": [],
+                  "inline": []
+                },
+                "children": []
+              }
+            ]
+          },
+          {
+            "type": "tableCell",
+            "version": 1,
+            "id": 213,
+            "key": "fixture-214",
+            "data": {
+              "row": 0,
+              "header": true,
+              "colspan": 1,
+              "rowspan": 1
+            },
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 2,
+                "id": 214,
+                "key": "fixture-215",
+                "data": {
+                  "text": "",
+                  "marks": [],
+                  "inline": []
+                },
+                "children": []
+              }
+            ]
+          },
+          {
+            "type": "tableCell",
+            "version": 1,
+            "id": 215,
+            "key": "fixture-216",
+            "data": {
+              "row": 1,
+              "header": false,
+              "colspan": 1,
+              "rowspan": 1
+            },
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 2,
+                "id": 216,
+                "key": "fixture-217",
+                "data": {
+                  "text": "",
+                  "marks": [],
+                  "inline": []
+                },
+                "children": []
+              }
+            ]
+          },
+          {
+            "type": "tableCell",
+            "version": 1,
+            "id": 217,
+            "key": "fixture-218",
+            "data": {
+              "row": 1,
+              "header": false,
+              "colspan": 1,
+              "rowspan": 1
+            },
+            "children": [
+              {
+                "type": "paragraph",
+                "version": 2,
+                "id": 218,
+                "key": "fixture-219",
+                "data": {
+                  "text": "",
+                  "marks": [],
+                  "inline": []
+                },
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

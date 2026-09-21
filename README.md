@@ -137,67 +137,49 @@ steps, streamed appends, history grouping, and durable anchors.
 
 ## Define a node extension
 
-A schema registers node behavior independently of rendering. Each node must match
-exactly one extension's `accepts` function. An extension has a unique name, a
-positive integer version, and one of three capabilities:
-
-| Kind        | Contract                                                       |
-| ----------- | -------------------------------------------------------------- |
-| `text`      | Read, replace, split, and join editable text through `editing` |
-| `atom`      | Treat the node as a block without core-editable text           |
-| `container` | Read, replace, and validate children through `content`         |
-
-This extension gives a custom `Note` node ordinary text editing and undo:
+Define content independently of rendering. The extension name identifies the node
+kind; its synchronous Standard Schema validator describes attributes and defaults.
+The editor generates text editing, mark mapping, child traversal and persistence
+from the definition.
 
 ```ts
-import { createSchema, type NodeExtension } from './src/model';
+import { z } from 'zod';
+import { createSchema, defineNode } from './src/model';
 import { createEditor, textSelection } from './src/state';
 
-type Note = { id: number; key: string; kind: 'note'; text: string };
-
-const noteExtension: NodeExtension<Note> = {
+const note = defineNode({
   name: 'note',
   version: 1,
-  kind: 'text',
-  accepts: (node) => node.kind === 'note',
-  validateUpdate() {},
-  editing: {
-    text: (node) => node.text,
-    replace: (node, from, to, text) => ({
-      ...node,
-      text: node.text.slice(0, from) + text + node.text.slice(to),
-    }),
-    split: (node, at, right) => [
-      { ...node, text: node.text.slice(0, at) },
-      { ...node, ...right, text: node.text.slice(at) },
-    ],
-    join: (left, right) => ({ ...left, text: left.text + right.text }),
-  },
-};
+  options: {},
+  schema: () => ({
+    attributes: z.strictObject({ text: z.string() }),
+    content: { kind: 'text', field: 'text' },
+  }),
+});
 
-const schema = createSchema([noteExtension]);
-const notes = createEditor(
-  schema,
-  [{ kind: 'note', id: 1, key: 'first-note', text: 'A note' }],
-  textSelection(1, 0),
-);
+const schema = createSchema({ extensions: [note] });
+const result = schema['~standard'].validate([{ kind: 'note', key: 'first-note', text: 'A note' }]);
+if (result.issues) throw new Error('Invalid content');
+const notes = createEditor(schema, result.value, textSelection(result.value[0].id, 0));
 ```
 
-`validateUpdate` checks extension-specific property changes. This plain-text node
-has no extra properties to validate. The core enforces identity, editable-text,
-and child-list invariants. Extension operations return new nodes and preserve
-unchanged content. Rich text extensions also map their formatting, inline objects,
-and annotations when text changes.
+Content types derive from the installed extension tuple. Validation assigns missing
+identities and returns immutable content. Attribute validators may normalize
+imports; edits preserve position mappings and reject text-changing normalization.
+Zod is used here as a Standard Schema implementation; it is not required in an
+extension author's code.
 
-[`demoStarterKit`](src/extensions/demo-schema.ts) registers the existing
-paragraphs, headings, checklists, images, tables, quotes, and lists. Its formatting
-and block commands use the `StarterNode` model; a custom schema supplies commands
-for its own nodes. See the [extension contracts](docs/editor-extension-boundary.md)
-for containers and validation.
+Use `content: { kind: 'atom' }` for an object without editable text, or
+`content: { kind: 'container', field: 'children' }` for nested nodes. Containers
+can restrict children by explicit names or installed groups. The starter kit's
+blockquote accepts the `block` and `list` groups, so it works in a small kit
+without requiring tables or images. `defineMark` and `defineInline` add typed
+formatting and inline objects to the same assembly.
 
-Persistence codecs use Zod internally to validate JSON, selection data and position
-checkpoints. Extension implementations continue to use the editor contracts and
-do not need to depend on Zod.
+The [starter definitions](src/extensions/starter-definitions.ts) own paragraphs,
+headings, checklists, images, tables, quotes, lists, formatting and mentions.
+The object-configured session and extension command APIs remain scheduled for
+milestone 3; the example above uses the current imperative session constructor.
 
 ## Render extensions
 

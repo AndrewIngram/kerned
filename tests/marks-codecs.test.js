@@ -1,32 +1,29 @@
 import { test, expect } from 'vitest';
+import { z } from 'zod';
 
 test('custom attribute marks replace only their type and round-trip with versions', async () => {
   const result = await (async () => {
-    const { createMarkSchema, setMark, removeMark, hasMark, sliceMarks, jsonRecord, jsonString } =
+    const { createSchema, defineMark, setMark, removeMark, hasMark, sliceMarks } =
       await import('../src/model/index.ts');
 
-    const schema = createMarkSchema([
-      {
-        name: 'link',
-        version: 2,
-        parse(value) {
-          const href = jsonString(jsonRecord(value).href);
-
-          if (!href.startsWith('https://')) throw new Error('Invalid link');
-
-          return { href };
-        },
-      },
-      {
-        name: 'emphasis',
-        version: 1,
-        parse(value) {
-          if (value !== null) throw new Error('Invalid emphasis');
-
-          return null;
-        },
-      },
-    ]);
+    const { marks: schema } = createSchema({
+      extensions: [
+        defineMark({
+          name: 'link',
+          version: 2,
+          options: {},
+          schema: () => ({
+            attributes: z.strictObject({ href: z.string().startsWith('https://') }),
+          }),
+        }),
+        defineMark({
+          name: 'emphasis',
+          version: 1,
+          options: {},
+          schema: () => ({ attributes: z.null() }),
+        }),
+      ],
+    });
 
     const a = schema.create('link', { href: 'https://a.test' }),
       b = schema.create('link', { href: 'https://b.test' }),
@@ -84,6 +81,8 @@ test('mark commands use a foreign node shape and preserve permissions and atomic
   const result = await (async () => {
     const {
       createSchema,
+      defineNode,
+      defineMark,
       createEditor,
       textSelection,
       TextSelection,
@@ -95,28 +94,25 @@ test('mark commands use a foreign node shape and preserve permissions and atomic
       await import('../src/state/index.ts'),
     );
 
-    const extension = {
-      name: 'line',
-      version: 1,
-      kind: 'text',
-      accepts: (n) => n.kind === 'line',
-      validateUpdate() {},
-      editing: {
-        text: (n) => n.value,
-        replace() {
-          throw new Error('unused');
-        },
-        split() {
-          throw new Error('unused');
-        },
-        join() {
-          throw new Error('unused');
-        },
-        marks: { read: (n) => n.styles, write: (n, styles) => ({ ...n, styles }) },
-      },
-    };
-
-    const schema = createSchema([extension]),
+    const schema = createSchema({
+        extensions: [
+          defineNode({
+            name: 'line',
+            version: 1,
+            options: {},
+            schema: () => ({
+              attributes: z.strictObject({ value: z.string() }),
+              content: { kind: 'text', field: 'value', marks: 'styles' },
+            }),
+          }),
+          defineMark({
+            name: 'review',
+            version: 1,
+            options: {},
+            schema: () => ({ attributes: z.strictObject({ severity: z.number() }) }),
+          }),
+        ],
+      }),
       initial = [1, 2].map((id) => ({
         id,
         key: `n${id}`,
@@ -236,31 +232,29 @@ test('document codecs reload durable comment endpoints with their independent ch
 
 test('third-party node codecs own their payload while core enforces identities', async () => {
   const result = await (async () => {
-    const { createSchema, createDocumentCodec, jsonRecord, jsonString } =
+    const { createSchema, defineNode, createDocumentCodec, jsonRecord, jsonString } =
       await import('../src/model/index.ts');
 
     let corrupt = false;
 
-    const extension = {
+    const extension = defineNode({
       name: 'card',
       version: 3,
-      kind: 'atom',
-      accepts: (n) => n.kind === 'card',
-      validateUpdate() {},
-      codec: {
-        encode: (n) => ({ title: n.title }),
-        decode(value, { identity }) {
-          return {
-            kind: 'card',
-            ...identity,
-            key: corrupt ? 'changed' : identity.key,
-            title: jsonString(jsonRecord(value).title),
-          };
+      options: {},
+      schema: () => ({
+        attributes: z.strictObject({ title: z.string() }),
+        content: { kind: 'atom' },
+        persistence: {
+          encode: (data) => ({ title: jsonString(jsonRecord(data).title) }),
+          decode: (data) =>
+            corrupt
+              ? { key: 'changed', title: jsonString(jsonRecord(data).title) }
+              : { title: jsonString(jsonRecord(data).title) },
         },
-      },
-    };
+      }),
+    });
 
-    const codec = createDocumentCodec(createSchema([extension]));
+    const codec = createDocumentCodec(createSchema({ extensions: [extension] }));
 
     const original = [
         { kind: 'card', id: 7, key: 'stable', locked: true, title: 'Custom content' },
@@ -292,8 +286,9 @@ test('third-party node codecs own their payload while core enforces identities',
       rejects.push(true);
     }
 
-    return { same: JSON.stringify(round) === JSON.stringify(original), rejects };
+    return { round, original, rejects };
   })();
 
-  expect(result).toEqual({ same: true, rejects: [true, true, true, true] });
+  expect(result.round).toEqual(result.original);
+  expect(result.rejects).toEqual([true, true, true, true]);
 });

@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import type { StarterNode } from '../src/extensions/demo-model';
 import { demoDocumentCodec } from '../src/extensions/demo-schema';
+import starterFixture from './fixtures/starter-document-v1.json?raw';
 
 test('document nesting counts document nodes independently of JSON nesting', () => {
   let node: StarterNode = {
@@ -30,4 +31,14 @@ test('document nesting counts document nodes independently of JSON nesting', () 
   };
 
   expect(() => demoDocumentCodec.decode({ version: 1, nodes: [extra] })).toThrow(z.ZodError);
+});
+
+test('the assembled starter kit reads and writes the captured pre-migration format', () => {
+  const fixture = z
+    .object({ content: z.unknown(), encoded: z.unknown() })
+    .parse(JSON.parse(starterFixture));
+
+  const decoded = demoDocumentCodec.decode(fixture.encoded);
+  expect(decoded).toEqual(fixture.content);
+  expect(demoDocumentCodec.encode(decoded)).toEqual(fixture.encoded);
 });

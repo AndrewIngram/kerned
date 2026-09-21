@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { TableNode, StarterNode, TextBlockNode, TableCell } from './demo-model';
+import type { TableNode } from './demo-model';
 
 /** Plain-text clipboard representation for a read-only table block. */
 export function tablePlainText(table: TableNode): string {
@@ -11,7 +11,7 @@ export function tablePlainText(table: TableNode): string {
   return (table.caption ? [table.caption, ...rows] : rows).join('\n');
 }
 
-import type { NodeExtension, NodeIdentity } from '../model';
+import type { NodeIdentity } from '../model';
 import { createCellSelectionExtension } from './cell-selection';
 
 const cellCoordinates = z.object({
@@ -45,64 +45,6 @@ export const tableCells = createCellSelectionExtension({
       }, []);
   },
 });
-
-export const editableTableExtension: NodeExtension<StarterNode> = {
-  name: 'table',
-  version: 1,
-  kind: 'container',
-  accepts: (node) => node.kind === 'table',
-  validateUpdate() {},
-  content: {
-    children: (node) => (node.kind === 'table' ? node.rows.flat() : []),
-    withChildren(node, children) {
-      if (node.kind !== 'table') throw new Error('Expected table');
-      const rows: TableCell[][] = [];
-
-      for (const child of children) {
-        if (child.kind !== 'tableCell') throw new Error('Expected cell');
-        (rows[child.row] ??= []).push(child);
-      }
-
-      return { ...node, rows };
-    },
-    validateChildren(node, children) {
-      if (node.kind !== 'table' || !children.length || children.some((c) => c.kind !== 'tableCell'))
-        throw new Error('Tables require cells');
-    },
-  },
-};
-
-export const tableCellExtension: NodeExtension<StarterNode> = {
-  name: 'tableCell',
-  version: 1,
-  kind: 'container',
-  accepts: (node) => node.kind === 'tableCell',
-  validateUpdate() {},
-  content: {
-    children: (node) => (node.kind === 'tableCell' ? node.paragraphs : []),
-    withChildren(node, children) {
-      if (node.kind !== 'tableCell') throw new Error('Expected cell');
-      const paragraphs: TextBlockNode[] = [];
-
-      for (const child of children) {
-        if (child.kind !== 'paragraph' && child.kind !== 'heading')
-          throw new Error('Cells require paragraphs');
-        paragraphs.push(child);
-      }
-
-      return { ...node, paragraphs };
-    },
-    validateChildren(node, children, context) {
-      if (
-        context.parent?.kind !== 'table' ||
-        node.kind !== 'tableCell' ||
-        !children.length ||
-        children.some((c) => c.kind !== 'paragraph' && c.kind !== 'heading')
-      )
-        throw new Error('Invalid table cell');
-    },
-  },
-};
 
 export function createTable(allocate: () => NodeIdentity, rows = 3, columns = 3): TableNode {
   return {

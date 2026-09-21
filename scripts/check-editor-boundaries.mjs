@@ -34,6 +34,7 @@ for (const file of sources) {
     if (headless) {
       assert.ok(
         target === 'zod' ||
+          target === '@standard-schema/spec' ||
           (targetLayer === layer && !target.includes('/__tests__/')) ||
           allowed[layer].includes(targetLayer),
         `${file}: ${layer} must not depend on ${specifier}`,
@@ -60,7 +61,9 @@ for (const fixture of [
   for (const specifier of dependencies(fixture, readFileSync(fixture, 'utf8'))) {
     assert.ok(
       /^(?:\.\/|\.\.\/)(?:model|transform|state|editor-browser)$/.test(specifier) ||
-        specifier.startsWith('./extensions/'),
+        specifier.startsWith('./extensions/') ||
+        // Attribute validators are consumer-owned Standard Schema implementations.
+        specifier === 'zod',
       `${fixture}: independent fixture bypasses public entry points: ${specifier}`,
     );
   }

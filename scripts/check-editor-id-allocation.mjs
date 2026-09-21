@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 
+const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:5173';
+
 import { chromium } from 'playwright';
 
 const browser = await chromium.launch();
@@ -10,10 +12,10 @@ try {
     (url) => url.pathname === '/',
     () => {},
   );
-  await page.goto('http://127.0.0.1:5173/editor.html');
+  await page.goto(`${baseURL}/editor.html`);
 
   const result = await page.evaluate(async () => {
-    const { createEditor, createSchema, textSelection } = Object.assign(
+    const { createEditor, createSchema, defineNode, textSelection } = Object.assign(
       {},
       await import('/src/state/index.ts'),
       await import('/src/model/index.ts'),
@@ -21,39 +23,32 @@ try {
 
     let visits = 0;
 
-    const schema = createSchema([
-      {
-        name: 'text',
-        version: 1,
-        kind: 'text',
-        accepts: (n) => n.kind === 'text',
-        validateUpdate() {},
-        editing: {
-          text: (n) => n.text,
-          replace: (n, from, to, text) => ({
-            ...n,
-            text: n.text.slice(0, from) + text + n.text.slice(to),
+    const { z } = await import('/node_modules/zod/index.js');
+
+    const compiled = createSchema({
+      extensions: [
+        defineNode({
+          name: 'text',
+          version: 1,
+          options: {},
+          schema: () => ({
+            attributes: z.strictObject({ text: z.string() }),
+            content: { kind: 'text', field: 'text' },
           }),
-          split: (n, at, right) => [
-            { ...n, text: n.text.slice(0, at) },
-            { ...n, ...right, text: n.text.slice(at) },
-          ],
-          join: (a, b) => ({ ...a, text: a.text + b.text }),
-        },
-      },
-      {
-        name: 'group',
-        version: 1,
-        kind: 'container',
-        accepts: (n) => n.kind === 'group',
-        validateUpdate() {},
-        content: {
-          children: (n) => n.children,
-          withChildren: (n, children) => ({ ...n, children }),
-          validateChildren() {},
-        },
-      },
-    ]);
+        }),
+        defineNode({
+          name: 'group',
+          version: 1,
+          options: {},
+          schema: () => ({
+            attributes: z.strictObject({}),
+            content: { kind: 'container', field: 'children' },
+          }),
+        }),
+      ],
+    });
+
+    const schema = compiled;
 
     const counted = {
       ...schema,

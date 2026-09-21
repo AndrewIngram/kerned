@@ -1,34 +1,25 @@
 import { expect, test } from 'vitest';
+import { z } from 'zod';
 
-import { createSchema, parseRelativeRange, type NodeIdentity } from '../src/model';
+import { createSchema, defineNode, parseRelativeRange, type DocumentNode } from '../src/model';
 import { createEditor, textSelection } from '../src/state';
 import { applySteps, createPositionSnapshot, restoreChanges } from '../src/transform';
 
-type Line = NodeIdentity & { content: string };
+const line = defineNode({
+  name: 'line',
+  version: 1,
+  options: {},
+  schema: () => ({
+    attributes: z.strictObject({ content: z.string() }),
+    content: { kind: 'text', field: 'content' },
+  }),
+});
 
-const schema = createSchema<Line>([
-  {
-    name: 'line',
-    version: 1,
-    kind: 'text',
-    accepts: () => true,
-    validateUpdate() {},
-    editing: {
-      text: (node) => node.content,
-      replace: (node, from, to, text) => ({
-        ...node,
-        content: node.content.slice(0, from) + text + node.content.slice(to),
-      }),
-      split: (node, at, identity) => [
-        { ...node, content: node.content.slice(0, at) },
-        { ...node, ...identity, content: node.content.slice(at) },
-      ],
-      join: (left, right) => ({ ...left, content: left.content + right.content }),
-    },
-  },
-]);
+const schema = createSchema({ extensions: [line] });
 
-const original: Line[] = [{ id: 1, key: 'line-one', content: 'Hello world' }];
+type Line = DocumentNode<readonly [typeof line]>;
+
+const original: Line[] = [{ id: 1, key: 'line-one', kind: 'line', content: 'Hello world' }];
 
 test('public headless modules edit and invert a document without a session or browser', () => {
   expect('document' in globalThis).toBe(false);
@@ -54,7 +45,7 @@ test('public headless modules edit and invert a document without a session or br
 
 test('append produces invertible document changes without choosing a session history policy', () => {
   const result = applySteps(schema, original, [
-    { kind: 'append', nodes: [{ id: 2, key: 'line-two', content: 'Next line' }] },
+    { kind: 'append', nodes: [{ id: 2, key: 'line-two', kind: 'line', content: 'Next line' }] },
   ]);
 
   expect(result.changedIds).toEqual([2]);

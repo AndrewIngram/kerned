@@ -107,10 +107,13 @@ export async function loadEditorSample(url = new URL(location.href)): Promise<Ed
     const second = initial[1];
 
     if (second.kind === 'paragraph' || second.kind === 'heading')
-      second.marks = formattingMarks([
-        { start: 25, end: 38, bold: true, italic: false },
-        { start: 54, end: 73, bold: false, italic: true },
-      ]);
+      initial[1] = {
+        ...second,
+        marks: formattingMarks([
+          { start: 25, end: 38, bold: true, italic: false },
+          { start: 54, end: 73, bold: false, italic: true },
+        ]),
+      };
 
     return { id: 'minimal', title: 'Draft', description: '', total: 0, initial, chunk: () => [] };
   }

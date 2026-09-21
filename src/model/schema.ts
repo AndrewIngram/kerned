@@ -3,7 +3,7 @@ import type { NodeCodec } from './schema-codec';
 
 export type NodeIdentity = { id: number; key: string; locked?: boolean };
 
-export type TextBehavior<N extends NodeIdentity> = {
+export type TextBehavior<N> = {
   text(node: N): string;
   marks?: {
     validate?(marks: readonly Mark[]): readonly Mark[];
@@ -16,12 +16,11 @@ export type TextBehavior<N extends NodeIdentity> = {
   join(left: N, right: N): N;
 };
 
-export type NodeExtension<N extends NodeIdentity> = {
+export type NodeType<N> = {
   selectable?: boolean;
   codec?: NodeCodec<N>;
   name: string;
   version: number;
-  accepts(node: N): boolean;
   validateUpdate(before: N, after: N): void;
 } & (
   | { kind: 'text'; editing: TextBehavior<N> }
@@ -37,25 +36,18 @@ export type NodeExtension<N extends NodeIdentity> = {
 );
 
 /** Registration happens once. No schema name is privileged by the engine. */
-export function createSchema<N extends NodeIdentity>(extensions: readonly NodeExtension<N>[]) {
-  const registered: readonly NodeExtension<N>[] = [...extensions];
-  const names = new Set<string>();
-
-  for (const extension of registered) {
-    if (!extension.name || !Number.isSafeInteger(extension.version) || extension.version < 1)
-      throw new Error('Extensions require a name and positive schema version');
-
-    if (names.has(extension.name)) throw new Error(`Duplicate extension: ${extension.name}`);
-    names.add(extension.name);
-  }
+export function createRuntimeSchema<N extends NodeIdentity & { kind: string }>(
+  extensions: readonly NodeType<N>[],
+) {
+  const registered = [...extensions];
+  const registry = new Map(registered.map((extension) => [extension.name, extension]));
 
   function resolve(node: N) {
-    const matches = registered.filter((extension) => extension.accepts(node));
+    const type = registry.get(node.kind);
 
-    if (matches.length !== 1)
-      throw new Error(`Expected one extension for block ${node.key}, found ${matches.length}`);
+    if (!type) throw new Error(`Unknown node kind: ${node.kind}`);
 
-    return matches[0];
+    return type;
   }
 
   return {
@@ -109,4 +101,14 @@ export function createSchema<N extends NodeIdentity>(extensions: readonly NodeEx
   };
 }
 
-export type Schema<N extends NodeIdentity> = ReturnType<typeof createSchema<N>>;
+export type Schema<N> = {
+  extensions: readonly NodeType<N>[];
+  manifest: { name: string; version: number }[];
+  resolve(this: void, node: N): NodeType<N>;
+  children(this: void, node: N): readonly N[];
+  withChildren(this: void, node: N, children: N[]): N;
+  validateChildren(this: void, node: N, parent: N | null): void;
+  text(this: void, node: N): string | null;
+  editing(this: void, node: N): TextBehavior<N>;
+  validateUpdate(this: void, before: N, after: N): void;
+};

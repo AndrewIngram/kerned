@@ -8,7 +8,7 @@ export type JsonValue =
   | boolean
   | number
   | string
-  | JsonValue[]
+  | readonly JsonValue[]
   | { [key: string]: JsonValue };
 
 type EncodedNode = NodeIdentity & {
@@ -18,7 +18,7 @@ type EncodedNode = NodeIdentity & {
   children: EncodedNode[];
 };
 
-export type NodeCodec<N extends NodeIdentity> = {
+export type NodeCodec<N> = {
   encode(node: N): JsonValue;
   decode(data: JsonValue, context: { identity: NodeIdentity; children: N[] }): N;
 };

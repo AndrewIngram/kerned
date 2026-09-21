@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 
+const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:5173';
+
 import { chromium, firefox, webkit } from 'playwright';
 
 for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
@@ -7,7 +9,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
 
   try {
     const streaming = await browser.newPage({ viewport: { width: 1100, height: 800 } });
-    await streaming.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker&paused=1');
+    await streaming.goto(`${baseURL}/editor.html?sample=warbreaker&paused=1`);
     await streaming.waitForFunction(() => window.editorDiagnostics);
     await streaming.getByRole('button', { name: 'Open document outline', exact: true }).focus();
     const pendingButtons = streaming.locator('.outline-items button');
@@ -51,7 +53,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
         errors = [];
 
       page.on('pageerror', (e) => errors.push(e.message));
-      await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');
+      await page.goto(`${baseURL}/editor.html?sample=warbreaker`);
       await page.waitForFunction(() => window.editorDiagnostics);
       await page.getByRole('button', { name: 'Open document outline', exact: true }).waitFor();
       await page.waitForFunction(() => window.editorDiagnostics.probe([]).complete);
@@ -138,28 +140,29 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     }
 
     const page = await browser.newPage();
-    await page.goto('http://127.0.0.1:5173/editor.html');
+    await page.goto(`${baseURL}/editor.html`);
     await page.waitForFunction(() => window.editorDiagnostics);
     assert.equal(await page.locator('.document-outline').count(), 0);
 
     const result = await page.evaluate(async () => {
-      const { createSchema } = await import('/src/model/index.ts');
+      const { createSchema, defineNode } = await import('/src/model/index.ts');
       const { createOutlineExtension } = await import('/src/extensions/outline.ts');
 
-      const schema = createSchema([
-        {
-          name: 'custom',
-          version: 1,
-          kind: 'container',
-          accepts: () => true,
-          validateUpdate() {},
-          content: {
-            children: (n) => n.children ?? [],
-            withChildren: (n, children) => ({ ...n, children }),
-            validateChildren() {},
-          },
-        },
-      ]);
+      const { z } = await import('/node_modules/zod/index.js');
+
+      const schema = createSchema({
+        extensions: [
+          defineNode({
+            name: 'custom',
+            version: 1,
+            options: {},
+            schema: () => ({
+              attributes: z.strictObject({ heading: z.number(), label: z.string() }),
+              content: { kind: 'container', field: 'children' },
+            }),
+          }),
+        ],
+      });
 
       let reads = 0;
 
@@ -169,11 +172,22 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
         return n.heading ? { level: n.heading, title: n.label } : null;
       });
 
-      const first = { id: 1, key: 'a', heading: 1, label: 'Title' },
-        deep = { id: 3, key: 'c', heading: 4, label: 'Deep' },
-        second = { id: 2, key: 'b', heading: 2, label: 'Duplicate', children: [deep] };
+      const first = { id: 1, key: 'a', kind: 'custom', children: [], heading: 1, label: 'Title' },
+        deep = { id: 3, key: 'c', kind: 'custom', children: [], heading: 4, label: 'Deep' },
+        second = {
+          id: 2,
+          key: 'b',
+          kind: 'custom',
+          heading: 2,
+          label: 'Duplicate',
+          children: [deep],
+        };
 
-      const nodes = [first, second, { id: 4, key: 'd', heading: 2, label: 'Duplicate' }];
+      const nodes = [
+        first,
+        second,
+        { id: 4, key: 'd', kind: 'custom', children: [], heading: 2, label: 'Duplicate' },
+      ];
 
       const a = outline.read(nodes),
         calls = reads,
@@ -182,7 +196,10 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       const edited = outline.read([first, { ...second, label: 'Changed' }, nodes[2]]),
         afterEdit = reads;
 
-      const streamed = outline.read([first, { id: 5, key: 'e', heading: 3, label: '' }]);
+      const streamed = outline.read([
+        first,
+        { id: 5, key: 'e', kind: 'custom', children: [], heading: 3, label: '' },
+      ]);
 
       return { a, edited, streamed, same, newReads: afterEdit - calls };
     });

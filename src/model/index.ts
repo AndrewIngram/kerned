@@ -1,10 +1,4 @@
-export {
-  createSchema,
-  type NodeExtension,
-  type NodeIdentity,
-  type Schema,
-  type TextBehavior,
-} from './schema';
+export { type NodeType, type NodeIdentity, type Schema, type TextBehavior } from './schema';
 
 export {
   parseRelativePosition,
@@ -34,7 +28,7 @@ export {
   type InlineExtension,
 } from './inline';
 
-export { createInlineSchema, type InlineValue, type InlineValueExtension } from './inline-schema';
+export { type InlineValue } from './inline-schema';
 
 export { boundaries, validateTextRange, wordBoundary, wordRange } from './text';
 
@@ -50,7 +44,6 @@ export {
 export { type TextPoint, type SelectionRange, type DocumentSnapshot } from './coordinates';
 
 export {
-  createMarkSchema,
   sameMark,
   setMark,
   removeMark,
@@ -59,7 +52,6 @@ export {
   sliceMarks,
   type Mark,
   type MarkRange,
-  type MarkExtension,
 } from './marks';
 
 export {
@@ -82,3 +74,18 @@ export {
   type RelativeEndpoint,
   type RelativeNodeBoundary,
 } from './range-values';
+
+export {
+  defineExtension,
+  defineNode,
+  defineMark,
+  defineInline,
+  type SchemaDefinition,
+  type DocumentNode,
+  type DocumentInput,
+  type DocumentMark,
+  type DocumentInline,
+  type DocumentOutput,
+} from './definitions';
+
+export { createSchema } from './assembly';

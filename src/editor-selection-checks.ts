@@ -1,5 +1,7 @@
+import { z } from 'zod';
+
 import { createCellSelectionExtension } from './extensions/cell-selection';
-import { jsonNumber, createSchema, type NodeIdentity, type NodeExtension } from './model';
+import { jsonNumber, createSchema, defineNode, type DocumentNode } from './model';
 import {
   createEditor,
   TextSelection,
@@ -13,17 +15,56 @@ import {
 } from './state';
 import { type Step } from './transform';
 
-type Node = NodeIdentity &
-  (
-    | { kind: 'text'; text: string }
-    | { kind: 'atom' }
-    | {
-        kind: 'table' | 'row' | 'cell' | 'group';
-        children: Node[];
-        colspan: number;
-        rowspan: number;
-      }
-  );
+const textDefinition = defineNode({
+  name: 'text',
+  version: 1,
+  options: {},
+  schema: () => ({
+    attributes: z.strictObject({ text: z.string() }),
+    content: { kind: 'text', field: 'text' },
+  }),
+});
+
+type AtomOptions = { selectable: boolean };
+
+const atomOptions: AtomOptions = { selectable: true };
+
+const atomDefinition = defineNode({
+  name: 'atom',
+  version: 1,
+  options: atomOptions,
+  schema: ({ selectable }) => ({
+    selectable,
+    attributes: z.strictObject({}),
+    content: { kind: 'atom' },
+  }),
+});
+
+function containerDefinition<const Name extends string>(name: Name) {
+  return defineNode({
+    name,
+    version: 1,
+    options: {},
+    schema: () => ({
+      attributes: z.strictObject({
+        colspan: z.number().int().positive(),
+        rowspan: z.number().int().positive(),
+      }),
+      content: { kind: 'container', field: 'children' },
+    }),
+  });
+}
+
+const definitions = [
+  textDefinition,
+  atomDefinition,
+  containerDefinition('table'),
+  containerDefinition('row'),
+  containerDefinition('cell'),
+  containerDefinition('group'),
+] as const;
+
+type Node = DocumentNode<typeof definitions>;
 
 const leaf = (id: number, text: string): Node => ({ id, key: `key-${id}`, kind: 'text', text });
 
@@ -35,61 +76,7 @@ const container = (
   rowspan = 1,
 ): Node => ({ id, key: `key-${id}`, kind, children, colspan, rowspan });
 
-const extensions: NodeExtension<Node>[] = [
-  {
-    name: 'text',
-    version: 1,
-    kind: 'text',
-    accepts: (node) => node.kind === 'text',
-    validateUpdate() {},
-    editing: {
-      text: (node) => (node.kind === 'text' ? node.text : ''),
-      replace(node, from, to, text) {
-        if (node.kind !== 'text') throw new Error('Not text');
-
-        return { ...node, text: node.text.slice(0, from) + text + node.text.slice(to) };
-      },
-      split(node, at, identity) {
-        if (node.kind !== 'text') throw new Error('Not text');
-
-        return [
-          { ...node, text: node.text.slice(0, at) },
-          { ...node, ...identity, text: node.text.slice(at) },
-        ];
-      },
-      join(left, right) {
-        if (left.kind !== 'text' || right.kind !== 'text') throw new Error('Not text');
-
-        return { ...left, text: left.text + right.text };
-      },
-    },
-  },
-  {
-    name: 'atom',
-    version: 1,
-    kind: 'atom',
-    accepts: (node) => node.kind === 'atom',
-    validateUpdate() {},
-  },
-  {
-    name: 'containers',
-    version: 1,
-    kind: 'container',
-    accepts: (node) => 'children' in node,
-    validateUpdate() {},
-    content: {
-      children: (node) => ('children' in node ? node.children : []),
-      withChildren(node, children) {
-        if (!('children' in node)) throw new Error('Not container');
-
-        return { ...node, children };
-      },
-      validateChildren() {},
-    },
-  },
-];
-
-const schema = createSchema(extensions);
+const schema = createSchema({ extensions: definitions });
 
 const tables = createCellSelectionExtension({
   rows(context, id) {
@@ -135,7 +122,7 @@ export function checkSelections() {
     check(failed, message);
   };
 
-  const editor = createEditor(
+  const editor = createEditor<Node>(
     schema,
     [leaf(1, 'Alpha'), { id: 9, key: 'atom', kind: 'atom' }, leaf(2, 'Beta'), leaf(3, 'Gamma')],
     new TextSelection({ id: 1, offset: 2 }, { id: 2, offset: 2 }),
@@ -286,7 +273,11 @@ export function checkSelections() {
       .id === 60,
     'Containers support node selection',
   );
-  const unselectable = createSchema<Node>([{ ...extensions[1], selectable: false }]);
+
+  const unselectable = createSchema({
+    extensions: [atomDefinition.configure({ selectable: false })],
+  });
+
   rejected(
     () => createEditor(unselectable, [{ id: 7, key: 'only', kind: 'atom' }], new NodeSelection(7)),
     'Schema controls node selection',

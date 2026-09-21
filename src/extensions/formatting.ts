@@ -1,23 +1,15 @@
-import { normalizeMarks, createMarkSchema, type JsonValue, type MarkRange } from '../model';
+import { normalizeMarks, type MarkRange } from '../model';
 import type { StarterSpan } from './demo-model';
+import { demoSchema } from './demo-schema';
+import { formattingDefinitions } from './starter-definitions';
 
-export type TextFormat = 'bold' | 'italic' | 'underline';
+export type TextFormat = (typeof formattingDefinitions)[number]['name'];
 
-const formats: readonly TextFormat[] = ['bold', 'italic', 'underline'];
+const formats = formattingDefinitions.map((definition) => definition.name);
 
-export const formattingSchema = createMarkSchema(
-  formats.map((name) => ({
-    name,
-    version: 1,
-    parse(attrs: JsonValue) {
-      if (attrs !== null) throw new Error(`${name} takes no attributes`);
+export const formattingSchema = demoSchema.marks;
 
-      return null;
-    },
-  })),
-);
-
-export function formattingMarks(spans: readonly StarterSpan[]): MarkRange[] {
+export function formattingMarks(spans: readonly StarterSpan[]) {
   return normalizeMarks(
     spans.flatMap((span) =>
       formats.flatMap((type) =>

@@ -1,4 +1,6 @@
-import { createSchema } from '../../src/model/index.ts';
+import { z } from 'zod';
+
+import { createSchema, defineNode } from '../../src/model/index.ts';
 import { createEditor, textSelection } from '../../src/state/index.ts';
 
 // Deliberately independent of the demo schema, text fields and renderer.
@@ -6,46 +8,34 @@ const text = (id, value, role = 'body') => ({ id, key: `n-${id}`, kind: 'text', 
 
 const group = (id, role, children = []) => ({ id, key: `n-${id}`, kind: 'group', role, children });
 
-export const schema = createSchema([
-  {
-    name: 'writing',
-    version: 1,
-    kind: 'text',
-    accepts: (n) => n.kind === 'text',
-    validateUpdate() {},
-    editing: {
-      text: (n) => n.value,
-      replace: (n, from, to, value) => ({
-        ...n,
-        value: n.value.slice(0, from) + value + n.value.slice(to),
+export const schema = createSchema({
+  extensions: [
+    defineNode({
+      name: 'text',
+      version: 1,
+      options: {},
+      schema: () => ({
+        attributes: z.strictObject({ value: z.string(), role: z.string().optional() }),
+        content: { kind: 'text', field: 'value' },
       }),
-      split: (n, at, identity) => [
-        { ...n, value: n.value.slice(0, at) },
-        { ...n, ...identity, value: n.value.slice(at) },
-      ],
-      join: (left, right) => ({ ...left, value: left.value + right.value }),
-    },
-  },
-  {
-    name: 'structure',
-    version: 1,
-    kind: 'container',
-    accepts: (n) => n.kind === 'group',
-    validateUpdate() {},
-    content: {
-      children: (n) => n.children,
-      withChildren: (n, children) => ({ ...n, children }),
-      validateChildren() {},
-    },
-  },
-  {
-    name: 'object',
-    version: 1,
-    kind: 'atom',
-    accepts: (n) => n.kind === 'atom',
-    validateUpdate() {},
-  },
-]);
+    }),
+    defineNode({
+      name: 'group',
+      version: 1,
+      options: {},
+      schema: () => ({
+        attributes: z.strictObject({ role: z.string().optional() }),
+        content: { kind: 'container', field: 'children' },
+      }),
+    }),
+    defineNode({
+      name: 'atom',
+      version: 1,
+      options: {},
+      schema: () => ({ attributes: z.strictObject({}), content: { kind: 'atom' } }),
+    }),
+  ],
+});
 
 export function fixture(options = {}) {
   return createEditor(

@@ -1,6 +1,9 @@
+import { z } from 'zod';
+
 // This fixture uses only public API imports, with no demo nodes or built-in paragraph.
 import {
   createSchema,
+  defineNode,
   replaceAnnotations,
   sliceAnnotations,
   joinAnnotations,
@@ -8,20 +11,38 @@ import {
   sliceInlineObjects,
   validateInlineObjects,
   inlinePlainText,
-  type NodeExtension,
+  type DocumentNode,
+  type Schema,
   type RangeAnnotation,
   type InlineObject,
 } from './model';
 import { textSelection, createEditor, createAnchor, resolveAnchor } from './state';
 
-type Heading = { id: number; key: string; type: 'heading'; value: string; level: number };
+const headingDefinition = defineNode({
+  name: 'heading',
+  version: 1,
+  options: {},
+  schema: () => ({
+    attributes: z.strictObject({ value: z.string(), level: z.number().int().positive() }),
+    content: { kind: 'text', field: 'value' },
+  }),
+});
 
-type Card = { id: number; key: string; type: 'card'; url: string };
+const cardDefinition = defineNode({
+  name: 'card',
+  version: 1,
+  options: {},
+  schema: () => ({ attributes: z.strictObject({ url: z.string() }), content: { kind: 'atom' } }),
+});
 
-type Node = Heading | Card;
+const definitions = [headingDefinition, cardDefinition] as const;
+
+type Node = DocumentNode<typeof definitions>;
+
+type Heading = Extract<Node, { kind: 'heading' }>;
 
 function heading(node: Node): Heading {
-  if (node.type !== 'heading') throw new Error('Heading required');
+  if (node.kind !== 'heading') throw new Error('Heading required');
 
   return node;
 }
@@ -39,54 +60,12 @@ export function checkExtensions() {
     check(JSON.stringify(a) === JSON.stringify(b), message);
   }
 
-  const headingExtension: NodeExtension<Node> = {
-    name: 'heading',
-    version: 1,
-    kind: 'text',
-    accepts: (n) => n.type === 'heading',
-    validateUpdate(before, after) {
-      if (heading(before).value !== heading(after).value) throw new Error('Use text operations');
-    },
-    editing: {
-      text: (n) => heading(n).value,
-      replace(n, from, to, text) {
-        const h = heading(n);
-
-        return { ...h, value: h.value.slice(0, from) + text + h.value.slice(to) };
-      },
-      split(n, at, right) {
-        const h = heading(n);
-
-        return [
-          { ...h, value: h.value.slice(0, at) },
-          { ...h, ...right, value: h.value.slice(at) },
-        ];
-      },
-      join(a, b) {
-        const left = heading(a),
-          right = heading(b);
-
-        if (left.level !== right.level) throw new Error('Incompatible heading levels');
-
-        return { ...left, value: left.value + right.value };
-      },
-    },
-  };
-
-  const cardExtension: NodeExtension<Node> = {
-    name: 'card',
-    version: 1,
-    kind: 'atom',
-    accepts: (n) => n.type === 'card',
-    validateUpdate() {},
-  };
-
-  const schema = createSchema([headingExtension, cardExtension]);
+  const schema = createSchema({ extensions: definitions });
 
   const original: Heading = {
     id: 1,
     key: 'title',
-    type: 'heading',
+    kind: 'heading',
     level: 2,
     value: 'Independent schema',
   };
@@ -134,27 +113,40 @@ export function checkExtensions() {
   );
 
   for (const extensions of [
-    [cardExtension],
-    [headingExtension, headingExtension],
-    [headingExtension, { ...headingExtension, name: 'overlapping' }],
+    [cardDefinition],
+    [headingDefinition, headingDefinition],
+    [
+      headingDefinition,
+      defineNode({
+        name: 'dependent',
+        version: 1,
+        options: {},
+        requires: ['missing'],
+        schema: () => ({ attributes: z.strictObject({}), content: { kind: 'atom' } }),
+      }),
+    ],
   ]) {
     let rejected = false;
 
     try {
-      createEditor(createSchema(extensions), [original], textSelection(1, 0, 0));
+      createEditor(createSchema({ extensions }), [original], textSelection(1, 0, 0));
     } catch {
       rejected = true;
     }
 
-    check(rejected, 'Missing, duplicate or ambiguous registration rejected');
+    check(rejected, 'Missing node, duplicate name or dependency rejected');
   }
 
-  const bad: NodeExtension<Node> = {
-    ...headingExtension,
-    editing: { ...headingExtension.editing, replace: (n) => ({ ...heading(n), value: 'wrong' }) },
+  // Test the imperative transform contract independently of declarative definitions.
+  const bad: Schema<Node> = {
+    ...schema,
+    editing: (node) => ({
+      ...schema.editing(node),
+      replace: (value) => ({ ...heading(value), value: 'wrong' }),
+    }),
   };
 
-  const broken = createEditor(createSchema([bad]), [original], textSelection(1, 0, 0));
+  const broken = createEditor(bad, [original], textSelection(1, 0, 0));
   let rejected = false;
 
   try {

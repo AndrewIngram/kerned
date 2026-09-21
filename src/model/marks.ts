@@ -93,14 +93,14 @@ export function hasMark(
   return false;
 }
 
-export function normalizeMarks(ranges: readonly MarkRange[]): MarkRange[] {
+export function normalizeMarks<Range extends MarkRange>(ranges: readonly Range[]): Range[] {
   const sorted = [...ranges].toSorted(
       (a, b) =>
         (a.mark.type < b.mark.type ? -1 : a.mark.type > b.mark.type ? 1 : 0) ||
         a.from - b.from ||
         a.to - b.to,
     ),
-    result: MarkRange[] = [];
+    result: Range[] = [];
 
   for (const range of sorted) {
     if (

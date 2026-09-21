@@ -1,4 +1,5 @@
 import { test, expect } from 'vitest';
+import { z } from 'zod';
 
 test('extension state publishes atomically and commands report mixed state without running effects', async () => {
   const result = await (async () => {
@@ -152,51 +153,44 @@ test('serialized structural references follow wrapping and movement and recover 
 
 test('mark extensions control caret boundary inheritance independently of rendering', async () => {
   const result = await (async () => {
-    const { createMarkSchema, createSchema, marksAt } = await import('../src/model/index.ts');
+    const { createSchema, defineNode, defineMark, marksAt } = await import('../src/model/index.ts');
 
-    const marks = createMarkSchema([
-      {
-        name: 'link',
-        version: 1,
-        parse: (value) => value,
-        inclusiveStart: false,
-        inclusiveEnd: false,
-      },
-      {
-        name: 'highlight',
-        version: 1,
-        parse: (value) => value,
-        inclusiveStart: true,
-        inclusiveEnd: true,
-      },
-    ]);
+    const schema = createSchema({
+      extensions: [
+        defineNode({
+          name: 'text',
+          version: 1,
+          options: {},
+          schema: () => ({
+            attributes: z.strictObject({ text: z.string() }),
+            content: { kind: 'text', field: 'text', marks: 'ranges' },
+          }),
+        }),
+        defineMark({
+          name: 'link',
+          version: 1,
+          options: {},
+          schema: () => ({ attributes: z.string(), inclusiveStart: false, inclusiveEnd: false }),
+        }),
+        defineMark({
+          name: 'highlight',
+          version: 1,
+          options: {},
+          schema: () => ({ attributes: z.string(), inclusiveStart: true, inclusiveEnd: true }),
+        }),
+      ],
+    });
 
     const node = {
       id: 1,
       key: 'p',
+      kind: 'text',
       text: 'abcde',
       ranges: [
-        { from: 1, to: 3, mark: marks.create('link', 'url') },
-        { from: 1, to: 3, mark: marks.create('highlight', 'gold') },
+        { from: 1, to: 3, mark: schema.marks.create('link', 'url') },
+        { from: 1, to: 3, mark: schema.marks.create('highlight', 'gold') },
       ],
     };
-
-    const schema = createSchema([
-      {
-        name: 'text',
-        version: 1,
-        kind: 'text',
-        accepts: () => true,
-        validateUpdate() {},
-        editing: {
-          text: (n) => n.text,
-          marks: { read: (n) => n.ranges, boundary: marks.boundary },
-          replace() {},
-          split() {},
-          join() {},
-        },
-      },
-    ]);
 
     return [0, 1, 2, 3, 4].map((offset) => marksAt(schema, node, offset).map((mark) => mark.type));
   })();
@@ -256,7 +250,8 @@ test('gap association distinguishes insertions, empty containers and deleted par
 test('foreign inline extensions own attributes, layout and versioned serialization', async () => {
   const result = await (async () => {
     const {
-      createInlineSchema,
+      createSchema,
+      defineInline,
       jsonArray,
       jsonRecord,
       jsonString,
@@ -264,17 +259,21 @@ test('foreign inline extensions own attributes, layout and versioned serializati
       sliceInlineObjects,
     } = await import('../src/model/index.ts');
 
-    const values = createInlineSchema([
-      {
-        name: 'equation',
-        version: 3,
-        parse(raw) {
-          return { formula: jsonString(jsonRecord(raw).formula) };
-        },
-        plainText: (attrs) => attrs.formula,
-        layout: (value) => ({ label: value.attrs.formula, width: 20 }),
-      },
-    ]);
+    const { inline: values } = createSchema({
+      extensions: [
+        defineInline({
+          name: 'equation',
+          version: 3,
+          options: {},
+          schema: () => ({
+            attributes: z.strictObject({ formula: z.string() }),
+            plainText: (attrs) => jsonString(jsonRecord(attrs).formula),
+          }),
+        }),
+      ],
+    });
+
+    const layout = (value) => ({ label: value.attrs.formula, width: 20 });
 
     const value = values.create('equation', 'eq', 1, { formula: 'a+b' }),
       encoded = values.encode([value]);
@@ -294,7 +293,7 @@ test('foreign inline extensions own attributes, layout and versioned serializati
 
     return {
       restored,
-      layout: values.layout(value),
+      layout: layout(value),
       text: values.plainText(value),
       moved: moved[0].index,
       sliced: sliced[0].index,
@@ -373,6 +372,7 @@ test('selection projection and multiclick ranges work with a foreign schema', as
   const result = await (async () => {
     const {
       createSchema,
+      defineNode,
       indexTree,
       selectionContext,
       selectionView,
@@ -385,25 +385,23 @@ test('selection projection and multiclick ranges work with a foreign schema', as
       await import('../src/editor-browser/index.ts'),
     );
 
-    const schema = createSchema([
-      {
-        name: 'foreign',
-        version: 1,
-        kind: 'text',
-        accepts: () => true,
-        validateUpdate() {},
-        editing: {
-          text: (node) => node.body,
-          replace: (node) => node,
-          split: (node) => [node, node],
-          join: (node) => node,
-        },
-      },
-    ]);
+    const schema = createSchema({
+      extensions: [
+        defineNode({
+          name: 'foreign',
+          version: 1,
+          options: {},
+          schema: () => ({
+            attributes: z.strictObject({ body: z.string() }),
+            content: { kind: 'text', field: 'body' },
+          }),
+        }),
+      ],
+    });
 
     const nodes = [
-      { id: 71, key: 'one', body: 'First words' },
-      { id: 99, key: 'two', body: 'Second sentence' },
+      { id: 71, key: 'one', kind: 'foreign', body: 'First words' },
+      { id: 99, key: 'two', kind: 'foreign', body: 'Second sentence' },
     ];
 
     const tree = indexTree(schema, nodes),

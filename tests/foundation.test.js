@@ -1013,11 +1013,22 @@ test('node locks survive starter-kit heading conversion and end-of-heading split
 
 test('permission inheritance protects nested content and opaque property changes', async () => {
   const result = await (async () => {
-    const { fixture, schema, dispatch } = await import('./fixtures/editor-foundation.js');
+    const {
+      fixture,
+      schema: serializableSchema,
+      dispatch,
+    } = await import('./fixtures/editor-foundation.js');
+
     const { indexTree } = await import('../src/model/index.ts');
+    const { createEditor } = await import('../src/state/index.ts');
+    // Exercise the lower-level permission guard with deliberately opaque data.
+    // Public extension attributes are JSON; this adapter isolates the state contract.
+    const schema = { ...serializableSchema, validateUpdate() {} };
     let readonly = false;
 
-    const editor = fixture({
+    const initial = fixture();
+
+    const editor = createEditor(schema, initial.state.nodes, initial.state.selection, [], {
       permissions: { access: (n) => (n.id === 1 && readonly ? 'read-only' : 'editable') },
     });
 

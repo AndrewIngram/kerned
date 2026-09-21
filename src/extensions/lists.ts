@@ -1,10 +1,4 @@
-import {
-  indexTree,
-  childrenAt,
-  type NodeIdentity,
-  type NodeExtension,
-  type Schema,
-} from '../model';
+import { indexTree, childrenAt, type NodeIdentity, type Schema } from '../model';
 import { textSelection, type EditorState, type Selection } from '../state';
 import { type Step } from '../transform';
 
@@ -21,55 +15,8 @@ export type ListAdapter<N extends NodeIdentity> = {
 
 export type ListCommand<N extends NodeIdentity> = { steps: Step<N>[]; selection?: Selection };
 
-/** Lists own their schema and commands. The core only sees container operations. */
-export function createListExtensions<N extends NodeIdentity>(adapter: ListAdapter<N>) {
-  const listExtension: NodeExtension<N> = {
-    name: 'list',
-    version: 1,
-    kind: 'container',
-    accepts: (node) => adapter.list(node) !== null,
-    validateUpdate() {},
-    content: {
-      children: (node) => adapter.list(node)?.children ?? [],
-      withChildren: adapter.withChildren,
-      validateChildren(node, children) {
-        const list = adapter.list(node);
-
-        if (
-          !list ||
-          !Number.isSafeInteger(list.start) ||
-          list.start < 1 ||
-          children.length === 0 ||
-          children.some((child) => !adapter.item(child))
-        )
-          throw new Error('Lists require a positive start and list-item children');
-      },
-    },
-  };
-
-  const itemExtension: NodeExtension<N> = {
-    name: 'listItem',
-    version: 1,
-    kind: 'container',
-    accepts: (node) => adapter.item(node) !== null,
-    validateUpdate() {},
-    content: {
-      children: (node) => adapter.item(node)?.children ?? [],
-      withChildren: adapter.withChildren,
-      validateChildren(_node, children, contextValue) {
-        if (!contextValue.parent || !adapter.list(contextValue.parent))
-          throw new Error('List items must belong to a list');
-
-        if (
-          !children.length ||
-          !adapter.isBlock(children[0]) ||
-          children.some((child) => !adapter.isBlock(child) && !adapter.list(child))
-        )
-          throw new Error('List items require an initial block followed by blocks or nested lists');
-      },
-    },
-  };
-
+/** List commands operate through schema-owned container operations. */
+export function createListCommands<N extends NodeIdentity>(adapter: ListAdapter<N>) {
   function context(schema: Schema<N>, state: EditorState<N>, itemId: number) {
     const tree = indexTree(schema, state.nodes),
       item = tree.byId.get(itemId),
@@ -85,7 +32,6 @@ export function createListExtensions<N extends NodeIdentity>(adapter: ListAdapte
   }
 
   const commands = {
-    extensions: [listExtension, itemExtension],
     wrap(
       schema: Schema<N>,
       state: EditorState<N>,

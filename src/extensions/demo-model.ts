@@ -1,53 +1,31 @@
-import { boundaries, type Span } from '../layout-types';
-import {
-  replaceInlineObjects,
-  type InlineValue,
-  type MarkRange,
-  type NodeIdentity,
-} from '../model';
+import type { Span } from '../layout-types';
+import type { DocumentNode } from '../model';
 import { createMention, inlineSchema } from './mention';
+import type { starterDefinitions } from './starter-definitions';
 
 export type StarterSpan = Span & { underline?: boolean };
 
-export type HeadingLevel = 1 | 2 | 3 | 4;
+export type StarterNode = DocumentNode<typeof starterDefinitions>;
 
-export type TextBlockNode = ({ kind: 'paragraph' } | { kind: 'heading'; level: HeadingLevel }) &
-  NodeIdentity & { text: string; marks: MarkRange[]; inline: InlineValue[] };
+export type TextBlockNode = Extract<StarterNode, { kind: 'paragraph' | 'heading' }>;
 
-export type ChecklistNode = NodeIdentity & {
-  kind: 'checklist';
-  checked: boolean[];
-  expanded: boolean;
-  notes: string;
-};
+export type HeadingLevel = Extract<StarterNode, { kind: 'heading' }>['level'];
 
-export type ImageNode = NodeIdentity & { kind: 'image'; src: string; alt: string };
+export type ChecklistNode = Extract<StarterNode, { kind: 'checklist' }>;
 
-export type TableCell = NodeIdentity & {
-  kind: 'tableCell';
-  row: number;
-  header: boolean;
-  colspan: number;
-  rowspan: number;
-  paragraphs: TextBlockNode[];
-};
+export type ImageNode = Extract<StarterNode, { kind: 'image' }>;
 
-export type TableNode = NodeIdentity & { kind: 'table'; caption: string; rows: TableCell[][] };
+export type TableCell = Extract<StarterNode, { kind: 'tableCell' }>;
+
+export type TableNode = Extract<StarterNode, { kind: 'table' }>;
+
+export type QuoteNode = Extract<StarterNode, { kind: 'quote' }>;
+
+export type ListNode = Extract<StarterNode, { kind: 'list' }>;
+
+export type ListItemNode = Extract<StarterNode, { kind: 'listItem' }>;
 
 export type StarterLeaf = TextBlockNode | ChecklistNode | ImageNode | TableNode;
-
-export type QuoteNode = NodeIdentity & { kind: 'quote'; children: StarterNode[] };
-
-export type ListNode = NodeIdentity & {
-  kind: 'list';
-  ordered: boolean;
-  start: number;
-  children: StarterNode[];
-};
-
-export type ListItemNode = NodeIdentity & { kind: 'listItem'; children: StarterNode[] };
-
-export type StarterNode = StarterLeaf | QuoteNode | ListNode | ListItemNode | TableCell;
 
 export function createSampleDocument(): StarterNode[] {
   const first = 'Review the draft with \ufffc before sharing it with the team.';
@@ -114,39 +92,6 @@ export function createSampleDocument(): StarterNode[] {
     );
 
   return nodes;
-}
-
-export function replaceText(
-  node: TextBlockNode,
-  from: number,
-  to: number,
-  value: string,
-): TextBlockNode {
-  const delta = value.length - (to - from);
-  const inline = replaceInlineObjects(node.inline, from, to, value.length);
-  const text = node.text.slice(0, from) + value + node.text.slice(to);
-  const stops = boundaries(text);
-
-  const spans = node.marks.flatMap((span) => {
-    if (to <= span.from) return [{ ...span, from: span.from + delta, to: span.to + delta }];
-
-    if (from >= span.to) return [span];
-
-    // Keep the unaffected parts of formatting around a replaced range.
-    const start = Math.min(span.from, from),
-      end = Math.max(from + value.length, span.to + delta);
-
-    return start < end ? [{ ...span, from: start, to: end }] : [];
-  });
-
-  // A combining mark typed at a style edge belongs to its complete grapheme.
-  const formatted = spans.map((span) => ({
-    ...span,
-    from: stops.findLast((p) => p <= span.from) ?? 0,
-    to: stops.find((p) => p >= span.to) ?? text.length,
-  }));
-
-  return { ...node, text, inline, marks: formatted };
 }
 
 export function plainText(node: TextBlockNode, from = 0, to = node.text.length) {

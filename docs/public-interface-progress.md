@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status   | Required outcome                                                               |
-| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Pending  | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Pending  | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Pending  | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Pending  | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status      | Required outcome                                                               |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | In progress | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Pending     | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Pending     | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Pending     | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending     | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending     | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending     | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -287,3 +287,181 @@ reports roots whose subtrees require invalidation. That distinction preserves
 existing history behavior. Active README and session/extension documentation now
 import the owning module instead of the removed barrel. Historical proposals and
 baseline inventories retain their original paths as historical evidence.
+
+## Milestone 2: assembly and runtime integration (in progress)
+
+Milestone 1 review fixes were committed as `b20a27d`, with the complete gate
+passing again. The official `@standard-schema/spec` 1.1.0 type package is now
+installed for conformance and inferred input/output tests. The new assembly now
+compiles both synchronous content validation and the runtime schema used by
+transform and state. The starter kit now uses the assembled definitions too;
+the retained custom-schema fixtures still exercise the old registration interface.
+Completing their migration and behavior-definition factories remains required
+before this milestone is complete.
+
+The starter migration removed the parallel manual `StarterNode` union and the
+separate codec attachment map. `starter-definitions.ts` owns attributes, child
+constraints, marks and inline types; document aliases and constructors derive
+from that assembly. Preserve versioned
+saved documents, structured table children, custom text storage and the existing
+transform/permission invariants. Whole-document validation belongs at import and
+session creation, not ordinary typing. The standard permits promises, so the
+editor must explicitly reject async validators in its synchronous contract.
+
+The in-progress implementation includes reusable configured node, mark and inline
+definitions. Static tuples infer recursive content, attribute defaults, mark
+attributes and child constraints; runtime-loaded arrays expose a less specific
+JSON content contract. Input may omit generated identities and empty child,
+mark and inline arrays. Validated output owns a copied, deeply frozen document,
+with immutable output types. Supplied numeric handles are reserved before
+allocation; durable keys are preserved or newly generated.
+
+Validation returns nested Standard Schema issues for invalid attributes, unknown
+kinds, marks, inline positions, duplicate identities, cycles, child constraints
+and conflicting mark ranges. Attribute validators control unknown attribute
+fields; the fixtures use strict validators. Reserved identity/content fields
+cannot be supplied by attribute normalization. Traversal stops at 256 nested
+node levels or one million visited nodes, including invalid ones. Attribute
+values must be JSON. Asynchronous validators fail synchronously and rejected
+promises are observed without becoming unhandled rejections.
+
+The runtime compiler derives text editing and custom container storage from the
+same definitions. Grouped child arrays declare their grouping attribute; import
+checks its agreement with array position. Text splits can select a declared
+empty-text target with that target's defaults. A headless consumer exercises
+replacement, split/join, history and retained positions with foreign text and
+child field names. In a 2,000-node document, the typing fixture validates only the
+edited node's attributes and preserves the other nodes' object identities.
+Configured attribute restrictions apply to edits; a validator cannot silently
+normalize edited text in a way that would invalidate position mappings.
+
+The temporary `assembleSchema` entry point will replace the previous public
+`createSchema` registration interface when default and retained consumers are
+migrated. There is not yet a completed milestone commit or architecture review.
+
+The integration checkpoint passed `pnpm run check`: lint, formatting, typecheck,
+ownership checks, **128 Vitest passes with the existing convergence todo**, and
+**39 Playwright passes** across Chromium, Firefox and WebKit. This establishes
+the new headless assembly's compatibility with the current repository; it does
+not establish migration of the demo, codec preservation or milestone completion.
+
+### Starter-kit and persistence migration
+
+The main demo now uses the generated runtime schema. The separate paragraph,
+heading, quote and table runtime registrations and `demo-codecs.ts` are removed.
+Mark and inline constructors retain installed names and inferred attributes.
+The old handwritten text-replacement helper is also removed; core compilation
+owns that behavior. Sample creation now replaces a node instead of mutating its
+marks in place.
+
+`tests/fixtures/starter-document-v1.json` was captured with the previous codec
+before migration. It covers every starter node type, nested lists, table rows,
+marks, inline mentions and node locking. The new codec both decodes the captured
+document and reproduces its encoded representation exactly. The table definition
+owns its small legacy row-length adapter; generic codecs own identity, children,
+attribute validation and mark/inline version checks.
+
+The first production benchmark caught a full-document copy failure not covered
+by the existing smaller browser cases. The new split implementation spread the
+entire identity argument, while clipboard slicing sometimes passes a full node.
+That leaked a heading's `level` into the empty paragraph target and restored
+source content during partial copies. Two minimal clipboard tests reproduced
+both failures in all three browsers before the fix. Split now takes only `id`
+and `key` from the identity source. The six browser cases then passed.
+
+Grouped-child checks now run during final tree validation, allowing intermediate
+structural steps to temporarily empty a row. This preserves rectangular table
+paste operations while rejecting invalid final grouping. The complete gate after
+these fixes and the copy optimization below passed **140 Vitest cases with the
+existing convergence todo** and **39 Playwright cases**. The production build
+passed.
+
+The initial successful production trials also exposed a copy-time regression:
+119–121ms versus 31–36ms at milestone 1, even though the established budgets
+passed. Fully selected text blocks now reuse their existing immutable nodes;
+only partially selected endpoints are sliced. Regression coverage distinguishes
+selected empty paragraphs from a collapsed empty caret.
+
+Three final serial production trials for this starter-migration checkpoint are
+in `artifacts/public-interface-m2`. They were captured from the uncommitted
+worktree whose parent is `b20a27d`; the report's commit field identifies that
+parent, not a completed milestone commit. All existing budgets pass. Worst
+values: first usable paint 181ms, streaming 1,099ms, paste handler 48.6ms, paste
+paint 93.1ms, typing 32.4ms, paging 32.1ms, loaded heap 28,646,316 bytes. Copy now
+takes 28.6–32.5ms across the three trials. These are checkpoint measurements;
+repeat relevant measurements if the remaining milestone work changes runtime
+behavior.
+
+Before the milestone commit and judge: migrate retained custom-schema consumers
+off array-based `createSchema`/`NodeExtension` registration, remove that public
+legacy interface, finish reusable behavior-definition/state factories, and
+review standalone container composition so default container definitions do not
+force unrelated kit nodes to be installed. The node/mark/inline assembly and
+starter-kit migration are implemented; those remaining requirements are not.
+
+### Public schema migration checkpoint
+
+All retained node-schema callers now use `createSchema({ extensions })`, including
+headless consumers, foreign-field editing, nested-list and selection checks,
+mark/inline codec tests and the four standalone diagnostics. The temporary
+`assembleSchema` export and array-based constructor are gone. Runtime node types
+are compiled capabilities; extension authors no longer implement `accepts`,
+replace, split, join or container traversal. Runtime resolution uses a kind map.
+The list command module no longer maintains a duplicate schema registration.
+
+The assembled object retains its definition tuple, including each definition's
+configuration API. Definition options expose recursively readonly types and are
+cloned/frozen at runtime. Content groups compile once for validation and editing;
+blockquote accepts installed block/list members and table cells accept installed
+text-block members. Minimal paragraph/blockquote and paragraph/table kits have
+coverage, so optional starter nodes are not accidental dependencies.
+
+Retained assertions still cover imperative transform failures and opaque-value
+permission comparisons. The latter uses a deliberately permissive low-level
+schema adapter local to that test: Date values are not admitted into the public
+JSON attribute schema. Codec round trips compare structural equality instead of
+JSON property insertion order. Tests have not been removed or skipped.
+
+The first complete migration gate passed 142 Vitest cases plus the existing
+convergence todo, and all 39 E2E cases. The final configuration-ownership and minimal-table checkpoint passed
+**144 Vitest cases plus the existing todo**, **39 E2E cases**, and the production
+build. A second lint/format pass left source files unchanged.
+ID allocation, bulk updates (37 assertions), find (40 assertions per browser),
+and outline/streaming/responsive diagnostics passed on an isolated test server.
+The user's port 5173 server was returning 504 Outdated Optimize Dep for its
+cached dependencies; its process was left untouched. Diagnostic scripts now
+accept BASE_URL so they can run against an independent test cache/server.
+
+Remaining before the milestone commit and architecture judge: reusable behavior
+definitions and per-session state factories, plus a final public-interface audit.
+The public schema registration and standalone container requirements from the
+previous checkpoint are now implemented. Milestone 2 is still incomplete.
+
+Three serial production trials after the public API migration are recorded in
+`artifacts/public-interface-m2/api-migration`. Every established budget passes:
+first usable paint at most 175ms, streaming 1,088.1ms, paste handler 36ms,
+paste paint 77.2ms, typing 32.3ms, paging 32.6ms, loaded heap 28,690,324 bytes.
+As with the earlier checkpoint, the report identifies parent commit `b20a27d`;
+these measurements cover the uncommitted migration, not a finished milestone.
+
+### Milestone 2 implementation ready for review
+
+`defineExtension` now supplies non-content behavior definitions with names,
+dependencies, immutable configuration and per-session setup factories. Assembly
+retains their exact types and validates names/dependencies without executing setup.
+Behavior definitions neither enter document unions nor acquire persistence
+versions. A headless two-session fixture verifies independent state fields and
+separate updates from the same configured definition. The model does not import
+state, commands or browser contracts; object-configured sessions will compose
+these factories in milestone 3.
+
+All milestone 2 implementation requirements are represented in source and tests.
+Final validation and the required implementation commit precede the independent
+architecture judge. Milestone 2 is not marked complete until that review and any
+accepted fixes have been committed.
+
+Final pre-review validation passed `pnpm run check`: **146 Vitest passes, one
+unchanged convergence todo, and 39 Playwright passes**. `pnpm run build` passed.
+The test-discovery audit preserved all 105 baseline Vitest identities and all
+39 E2E identities before the two added behavior tests. The public registration
+migration has no remaining array-constructor callers in source, tests or scripts.

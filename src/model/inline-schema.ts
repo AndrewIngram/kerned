@@ -10,16 +10,15 @@ import {
 
 export type InlineValue = Readonly<{ id: string; index: number; type: string; attrs: JsonValue }>;
 
-export type InlineValueExtension<Layout> = {
+type InlineValueProgram = {
   name: string;
   version: number;
   parse: (attrs: JsonValue) => JsonValue;
   plainText: (attrs: JsonValue) => string;
-  layout: (value: InlineValue) => Layout;
 };
 
-export function createInlineSchema<Layout>(extensions: readonly InlineValueExtension<Layout>[]) {
-  const registry = new Map<string, InlineValueExtension<Layout>>();
+export function createInlineValues(extensions: readonly InlineValueProgram[]) {
+  const registry = new Map<string, InlineValueProgram>();
 
   for (const extension of extensions) {
     if (
@@ -49,7 +48,6 @@ export function createInlineSchema<Layout>(extensions: readonly InlineValueExten
 
   return {
     create,
-    layout: (value: InlineValue) => resolve(value.type).layout(value),
     plainText: (value: InlineValue) => resolve(value.type).plainText(value.attrs),
     encode(values: readonly InlineValue[]): JsonValue[] {
       return values.map((value) => ({

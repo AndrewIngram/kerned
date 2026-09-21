@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 
+const baseURL = process.env.BASE_URL ?? 'http://127.0.0.1:5173';
+
 import { chromium, firefox, webkit } from 'playwright';
 
 for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(',')) {
@@ -11,10 +13,10 @@ for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(','
       (url) => url.pathname === '/',
       () => {},
     );
-    await page.goto('http://127.0.0.1:5173/editor.html');
+    await page.goto(`${baseURL}/editor.html`);
 
     const result = await page.evaluate(async () => {
-      const { createSchema, createEditor, textSelection } = Object.assign(
+      const { createSchema, defineNode, createEditor, textSelection } = Object.assign(
         {},
         await import('/src/model/index.ts'),
         await import('/src/state/index.ts'),
@@ -28,43 +30,39 @@ for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(','
         checks++;
       };
 
-      const schema = createSchema([
-        {
-          name: 'text',
-          version: 1,
-          kind: 'text',
-          accepts: (n) => n.kind === 'text',
-          validateUpdate() {},
-          editing: {
-            text: (n) => {
-              reads++;
+      const { z } = await import('/node_modules/zod/index.js');
 
-              return n.text;
-            },
-            replace: (n, from, to, text) => ({
-              ...n,
-              text: n.text.slice(0, from) + text + n.text.slice(to),
+      const compiled = createSchema({
+        extensions: [
+          defineNode({
+            name: 'text',
+            version: 1,
+            options: {},
+            schema: () => ({
+              attributes: z.strictObject({ text: z.string(), bold: z.boolean().optional() }),
+              content: { kind: 'text', field: 'text' },
             }),
-            split: (n, at, right) => [
-              { ...n, text: n.text.slice(0, at) },
-              { ...n, ...right, text: n.text.slice(at) },
-            ],
-            join: (a, b) => ({ ...a, text: a.text + b.text }),
-          },
+          }),
+          defineNode({
+            name: 'group',
+            version: 1,
+            options: {},
+            schema: () => ({
+              attributes: z.strictObject({}),
+              content: { kind: 'container', field: 'children' },
+            }),
+          }),
+        ],
+      });
+
+      const schema = {
+        ...compiled,
+        text(node) {
+          reads++;
+
+          return compiled.text(node);
         },
-        {
-          name: 'group',
-          version: 1,
-          kind: 'container',
-          accepts: (n) => n.kind === 'group',
-          validateUpdate() {},
-          content: {
-            children: (n) => n.children,
-            withChildren: (n, children) => ({ ...n, children }),
-            validateChildren() {},
-          },
-        },
-      ]);
+      };
 
       const leaf = (id, text) => ({ id, key: `text-${id}`, kind: 'text', text });
       const group = (id, children) => ({ id, key: `group-${id}`, kind: 'group', children });

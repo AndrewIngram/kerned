@@ -1,7 +1,9 @@
 # Public interface implementation plan
 
-Date: 2026-09-21. Status: ready for implementation; all milestones below are
-pending. This plan describes target interfaces, not currently available exports.
+Date: 2026-09-21. Status: implementation in progress. Milestones 0–1 are complete;
+milestone 2 is in progress. See [verified progress](public-interface-progress.md)
+for shipped interfaces and remaining requirements. This plan describes the full
+target, including interfaces that are not yet implemented.
 
 This is the execution plan for the approved scope: package discipline, complete
 view lifetime, extension and command composition, configurable typography,

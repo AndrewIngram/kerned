@@ -111,6 +111,9 @@ export function writeClipboard(
       if (range.from === range.to)
         return schema.text(node) === '' && ranges.length > 1 ? [node] : [];
 
+      // A whole text block is already an immutable fragment; only endpoints need slicing.
+      if (range.from === 0 && range.to === schema.text(node)?.length) return [node];
+
       const editing = schema.editing(node),
         left = editing.split(node, range.to, node)[0];
 

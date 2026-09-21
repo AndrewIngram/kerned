@@ -1,10 +1,4 @@
-import {
-  indexTree,
-  type NodeExtension,
-  type Schema,
-  type NodeIdentity,
-  type SelectionRange,
-} from '../model';
+import { indexTree, type Schema, type NodeIdentity, type SelectionRange } from '../model';
 import {
   type EditorState,
   RangeSelection,
@@ -14,40 +8,17 @@ import {
 } from '../state';
 import { type Step } from '../transform';
 import type { StarterNode, StarterLeaf } from './demo-model';
-import { createListExtensions } from './lists';
+import { demoSchema } from './demo-schema';
+import { createListCommands } from './lists';
 
-export const listCommands = createListExtensions<StarterNode>({
+export const listCommands = createListCommands<StarterNode>({
   list: (node) => (node.kind === 'list' ? node : null),
   item: (node) => (node.kind === 'listItem' ? node : null),
   isBlock: (node) => node.kind !== 'list' && node.kind !== 'listItem' && node.kind !== 'tableCell',
-  withChildren(node, children) {
-    if (!('children' in node)) throw new Error('Expected a container');
-
-    return { ...node, children };
-  },
+  withChildren: (node, children) => demoSchema.withChildren(node, children),
   createList: (identity, settings) => ({ kind: 'list', ...identity, ...settings, children: [] }),
   createItem: (identity) => ({ kind: 'listItem', ...identity, children: [] }),
 });
-
-export const quoteExtension: NodeExtension<StarterNode> = {
-  name: 'quote',
-  version: 1,
-  kind: 'container',
-  accepts: (node) => node.kind === 'quote',
-  validateUpdate() {},
-  content: {
-    children: (node) => ('children' in node ? node.children : []),
-    withChildren(node, children) {
-      if (node.kind !== 'quote') throw new Error('Expected quote');
-
-      return { ...node, children };
-    },
-    validateChildren(_node, children) {
-      if (!children.length || children.some((n) => n.kind === 'listItem'))
-        throw new Error('Quotes require block children');
-    },
-  },
-};
 
 export type BlockDecoration = {
   inset: number;
@@ -55,7 +26,7 @@ export type BlockDecoration = {
   marker: string;
 };
 
-export function projectBlocks(roots: StarterNode[]) {
+export function projectBlocks(roots: readonly StarterNode[]) {
   const nodes: StarterLeaf[] = [],
     decorations = new Map<number, BlockDecoration>();
 
@@ -190,11 +161,10 @@ export function blockCommands(
           index,
           count: last - index + 1,
           nodes: [
-            {
-              kind: 'quote',
-              ...allocate(),
-              children: children.slice(index, last + 1).flatMap(flatten),
-            },
+            schema.withChildren(
+              { kind: 'quote', ...allocate(), children: [] },
+              children.slice(index, last + 1).flatMap(flatten),
+            ),
           ],
         },
       ];

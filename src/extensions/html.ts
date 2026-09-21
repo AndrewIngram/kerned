@@ -209,26 +209,31 @@ export function importHtml(html: string): HtmlImport {
           if (child.kind === 'listItem') return child;
           const id = nextId++;
 
-          return { kind: 'listItem', id, key: `html-${id}`, children: [child] };
+          return demoSchema.withChildren(
+            { kind: 'listItem', id, key: `html-${id}`, children: [] },
+            [child],
+          );
         });
 
       const id = nextId++,
         identity = { id, key: `html-${id}` };
 
       const start = Number(node.getAttribute('start') ?? 1);
-      nodes.push(
+
+      const container: StarterNode =
         tag === 'BLOCKQUOTE'
-          ? { kind: 'quote', ...identity, children }
+          ? { kind: 'quote', ...identity, children: [] }
           : tag === 'LI'
-            ? { kind: 'listItem', ...identity, children }
+            ? { kind: 'listItem', ...identity, children: [] }
             : {
                 kind: 'list',
                 ...identity,
                 ordered: tag === 'OL',
                 start: Number.isSafeInteger(start) && start > 0 ? start : 1,
-                children,
-              },
-      );
+                children: [],
+              };
+
+      nodes.push(demoSchema.withChildren(container, children));
       tables += imported.tables;
 
       for (const key of [

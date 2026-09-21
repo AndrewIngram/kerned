@@ -1,17 +1,63 @@
-import { createListExtensions, type ListCommand } from './extensions/lists';
-import { createSchema, indexTree, type NodeIdentity, type NodeExtension } from './model';
+import { z } from 'zod';
+
+import { createListCommands, type ListCommand } from './extensions/lists';
+import { createSchema, defineNode, indexTree, type NodeIdentity, type DocumentNode } from './model';
 import { textSelection, TextSelection, createEditor, createAnchor, resolveAnchor } from './state';
 import { type Step } from './transform';
 
-type Text = NodeIdentity & { kind: 'text'; value: string };
+const definitions = [
+  defineNode({
+    name: 'text',
+    version: 1,
+    options: {},
+    schema: () => ({
+      attributes: z.strictObject({ value: z.string() }),
+      content: { kind: 'text', field: 'value' },
+    }),
+  }),
+  defineNode({
+    name: 'group',
+    version: 1,
+    options: {},
+    schema: () => ({
+      attributes: z.strictObject({}),
+      content: { kind: 'container', field: 'children' },
+    }),
+  }),
+  defineNode({
+    name: 'list',
+    version: 1,
+    options: {},
+    schema: () => ({
+      attributes: z.strictObject({ ordered: z.boolean(), start: z.number().int().positive() }),
+      content: { kind: 'container', field: 'children', allowed: ['item'], minChildren: 1 },
+    }),
+  }),
+  defineNode({
+    name: 'item',
+    version: 1,
+    options: {},
+    schema: () => ({
+      attributes: z.strictObject({}),
+      content: {
+        kind: 'container',
+        field: 'children',
+        allowed: ['text', 'list'],
+        first: ['text'],
+        parents: ['list'],
+        minChildren: 1,
+      },
+    }),
+  }),
+] as const;
 
-type Group = NodeIdentity & { kind: 'group'; children: Node[] };
+const schema = createSchema({ extensions: definitions });
 
-type List = NodeIdentity & { kind: 'list'; ordered: boolean; start: number; children: Node[] };
+type Node = DocumentNode<typeof definitions>;
 
-type Item = NodeIdentity & { kind: 'item'; children: Node[] };
+type Text = Extract<Node, { kind: 'text' }>;
 
-type Node = Text | Group | List | Item;
+type Group = Extract<Node, { kind: 'group' }>;
 
 function text(node: Node): Text {
   if (node.kind !== 'text') throw new Error('Text required');
@@ -19,62 +65,14 @@ function text(node: Node): Text {
   return node;
 }
 
-const textExtension: NodeExtension<Node> = {
-  name: 'body',
-  version: 1,
-  kind: 'text',
-  accepts: (n) => n.kind === 'text',
-  validateUpdate() {},
-  editing: {
-    text: (n) => text(n).value,
-    replace(n, from, to, value) {
-      const p = text(n);
-
-      return { ...p, value: p.value.slice(0, from) + value + p.value.slice(to) };
-    },
-    split(n, at, right) {
-      const p = text(n);
-
-      return [
-        { ...p, value: p.value.slice(0, at) },
-        { ...p, ...right, value: p.value.slice(at) },
-      ];
-    },
-    join: (a, b) => ({ ...text(a), value: text(a).value + text(b).value }),
-  },
-};
-
-const groupExtension: NodeExtension<Node> = {
-  name: 'section',
-  version: 1,
-  kind: 'container',
-  accepts: (n) => n.kind === 'group',
-  validateUpdate() {},
-  content: {
-    children: (n) => (n.kind === 'group' ? n.children : []),
-    withChildren(n, children) {
-      if (n.kind !== 'group') throw new Error('Group required');
-
-      return { ...n, children };
-    },
-    validateChildren() {},
-  },
-};
-
-const lists = createListExtensions<Node>({
+const lists = createListCommands<Node>({
   list: (n) => (n.kind === 'list' ? n : null),
   item: (n) => (n.kind === 'item' ? n : null),
   isBlock: (n) => n.kind === 'text',
-  withChildren(n, children) {
-    if (n.kind === 'text') throw new Error('Container required');
-
-    return { ...n, children };
-  },
+  withChildren: schema.withChildren,
   createList: (identity, settings) => ({ ...identity, kind: 'list', ...settings, children: [] }),
   createItem: (identity) => ({ ...identity, kind: 'item', children: [] }),
 });
-
-const schema = createSchema([textExtension, groupExtension, ...lists.extensions]);
 
 const leaf = (id: number, value: string): Text => ({ id, key: `text-${id}`, kind: 'text', value });
 
