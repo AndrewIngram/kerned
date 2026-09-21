@@ -120,7 +120,7 @@ export type AssembledSchema<Definitions extends readonly SchemaDefinition[]> = S
 /** Compile structured-content validation and editing from the same definition tuple. */
 export function createSchema<const Definitions extends readonly SchemaDefinition[]>(config: {
   extensions: Definitions;
-}): AssembledSchema<Definitions>;
+}): NoInfer<AssembledSchema<Definitions>>;
 export function createSchema(config: {
   extensions: readonly SchemaDefinition[];
 }): AssembledSchema<readonly SchemaDefinition[]> {

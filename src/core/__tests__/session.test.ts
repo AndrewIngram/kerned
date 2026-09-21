@@ -57,7 +57,7 @@ const editing = defineExtension({
   options: { suffix: '?' },
   setup: (options) => ({
     queries: {
-      textLengths: ({ state }: { state: { nodes: Note[] } }) =>
+      textLengths: ({ state }: { state: { nodes: readonly Note[] } }) =>
         selectedValue(state.nodes.map((node) => node.text.length)),
     },
     commands: {

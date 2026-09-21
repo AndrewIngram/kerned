@@ -56,10 +56,10 @@ export type Transaction<N extends NodeIdentity> = {
 );
 
 export type EditorState<N extends NodeIdentity> = {
-  nodes: N[];
-  selection: Selection;
-  revision: number;
-  storedMarks?: readonly Mark[] | null;
+  readonly nodes: readonly N[];
+  readonly selection: Selection;
+  readonly revision: number;
+  readonly storedMarks?: readonly Mark[] | null;
 };
 
 type Applied<N extends NodeIdentity> = {
@@ -196,7 +196,7 @@ export function applyTransaction<N extends NodeIdentity>(
  * stale transactions are rejected rather than silently replayed over newer state. */
 export function createEditor<N extends NodeIdentity>(
   schema: Schema<N>,
-  initial: N[],
+  initial: readonly N[],
   selection: Selection,
   extensions: readonly SelectionExtension[] = [],
   options: EditorOptions<N> = {},
@@ -614,7 +614,7 @@ export function createEditor<N extends NodeIdentity>(
 
         // Apply only the new steps, but project fields from the chain's original
         // snapshot. Intermediate commands belong to one transaction and revision.
-        result.state.revision = base.revision + (marksOnly ? 0 : 1);
+        const next = { ...result.state, revision: base.revision + (marksOnly ? 0 : 1) };
 
         const transaction = {
           ...tx,
@@ -629,19 +629,19 @@ export function createEditor<N extends NodeIdentity>(
             ? {
                 kind: 'storedMarks',
                 before: base,
-                after: result.state,
+                after: next,
               }
             : {
                 kind: 'transaction',
                 before: base,
-                after: result.state,
+                after: next,
                 transaction,
-                mapping: { before: base, after: result.state, maps },
+                mapping: { before: base, after: next, maps },
               },
         );
-        drafts.set(result.state, { steps, maps, marks });
+        drafts.set(next, { steps, maps, marks });
 
-        return result.state;
+        return next;
       },
       dispatch(tx: Transaction<N>) {
         if (

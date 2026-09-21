@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest';
+import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
 import { createSchema, defineNode, defineMark, type DocumentNode } from '../../model';
@@ -494,4 +494,56 @@ test('command history options group typing and publish identical draft and final
   expect(editor.state.nodes[0].text).toBe('ABC');
   editor.undo();
   expect(editor.state.nodes[0].text).toBe('A');
+});
+
+test('snapshots expose readonly fields and accept a frozen document without copying untouched nodes', () => {
+  const nodes = Object.freeze([
+    Object.freeze({ kind: 'note', id: 1, key: 'one', text: 'A', marks: [] }),
+    Object.freeze({ kind: 'note', id: 2, key: 'two', text: 'B', marks: [] }),
+  ] satisfies Note[]);
+
+  const editor = createEditor(schema, nodes, textSelection(1, 1));
+  const before = editor.state;
+  expectTypeOf(before).toEqualTypeOf<Readonly<typeof before>>();
+  expectTypeOf(before.nodes).toEqualTypeOf<readonly Note[]>();
+  expect(before.nodes).toBe(nodes);
+  expect(editor.chain().command(append, '!').command(append, '?').run()).toBe(true);
+  expect(before.nodes[0].text).toBe('A');
+  expect(before.revision).toBe(0);
+  expect(editor.state.nodes[0].text).toBe('A!?');
+  expect(editor.state.nodes[1]).toBe(nodes[1]);
+  editor.undo();
+  expect(editor.state.nodes[0]).toBe(nodes[0]);
+  editor.redo();
+  expect(editor.state.nodes[0].text).toBe('A!?');
+  expect(editor.state.nodes[1]).toBe(nodes[1]);
+});
+
+test('draft fields see stable snapshot identities and cumulative revisions before publication', () => {
+  const observations: { state: Parameters<typeof append>[0]['state']; revision: number }[] = [];
+
+  const field = createStateField<Note, number>({
+    create: () => 0,
+    update(count, event) {
+      if (event.kind === 'transaction') {
+        expect(event.mapping.after).toBe(event.after);
+        observations.push({ state: event.after, revision: event.after.revision });
+      }
+
+      return count + 1;
+    },
+  });
+
+  const editor = session({ fields: [field] });
+  const before = editor.state;
+  expect(editor.chain().command(append, '!').command(append, '?').run()).toBe(true);
+  expect(observations).toHaveLength(3);
+
+  for (const observation of observations) {
+    expect(observation.state.revision).toBe(observation.revision);
+    expect(observation.revision).toBe(before.revision + 1);
+    expect(field.read(observation.state)).toBe(1);
+  }
+
+  expect(field.read(before)).toBe(0);
 });

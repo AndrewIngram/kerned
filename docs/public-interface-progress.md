@@ -921,3 +921,40 @@ Three final production trials in
 budget: first usable 177ms, full stream 1084.1ms, paste handler 55.7ms, paste paint
 116.2ms, typing 32.4ms, paging 32.5ms, loaded heap 29,018,764 bytes. The report
 identifies `9db6201` and measures this checkpoint's uncommitted working tree.
+
+### Milestone 3 extension lifetime and snapshot contract
+
+Factories can register resources with `ExtensionContext.onDestroy` as soon as
+those resources are acquired. Session destruction disposes its view first,
+extension resources in reverse registration order, then application observers.
+Cleanup is idempotent, attempts every callback, and releases late registrations
+immediately. Failed initialization also disposes resources from the throwing
+factory and all earlier factories, including failures while initializing fields
+or registering commands and queries. Initialization and cleanup errors remain
+available together in an aggregate error.
+
+`EditorState` now exposes readonly fields and readonly document arrays. The
+transform functions and lower state constructor accept readonly documents,
+preserving unchanged node identities. Command previews create their final
+revision-bearing snapshot before projecting fields instead of mutating an
+already-created snapshot. Tests exercise frozen input arrays/nodes, undo/redo,
+structural sharing, stable draft revisions and matching field/mapping snapshots.
+No whole-document freeze or copy was added to editing.
+
+Inline `createSchema` inside `createEditor` exposed contextual inference from the
+session's erased construction contract. The schema builder's return type now
+uses `NoInfer`, retaining inference from installed extensions while preventing
+that backwards inference. The resource-lifetime fixture exercises the inline
+construction form; existing schema, command and declaration tests also pass.
+
+Full checks, declaration emission and production build passed: **238 Vitest
+tests, one unchanged convergence todo, and 39 Playwright scenarios**. Three
+production trials in
+`artifacts/public-interface-m3/extension-lifetime/baseline.json` passed all
+unchanged budgets: first usable 175ms, full stream 1079ms, paste handler 55.7ms,
+paste paint 114ms, typing 32.2ms, paging 33.1ms, loaded heap 28,984,240 bytes.
+The report identifies `f735ac1` and measures this checkpoint's uncommitted tree.
+
+Milestone 3 remains in progress. History-provider ownership and the migration of
+undo/redo into extension commands remain before the completion commit and
+architecture judge. The judge must review the complete milestone since `c3cdf8b`.

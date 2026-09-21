@@ -14,7 +14,7 @@ import type { PositionMap } from './positions';
  * fragment. The command owns which empty containers may be removed. */
 export function replaceRanges<N extends NodeIdentity>(
   schema: Schema<N>,
-  nodes: N[],
+  nodes: readonly N[],
   tree: TreeIndex<N>,
   ranges: readonly SelectionRange[],
   text: string,

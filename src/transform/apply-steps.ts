@@ -19,7 +19,7 @@ import type { Step } from './steps';
 export type DocumentChange<N extends NodeIdentity> = { index: number; before: N[]; after: N[] };
 
 export type TransformResult<N extends NodeIdentity> = {
-  nodes: N[];
+  nodes: readonly N[];
   changes: DocumentChange<N>[];
   maps: PositionMap[];
   anchorMaps: AnchorMap[];
@@ -38,7 +38,7 @@ export type TransformOptions<N extends NodeIdentity> = {
 /** Apply document operations without a session, selection, revision or history policy. */
 export function applySteps<N extends NodeIdentity>(
   schema: Schema<N>,
-  initial: N[],
+  initial: readonly N[],
   steps: readonly Step<N>[],
   options: TransformOptions<N> = {},
 ): TransformResult<N> {
@@ -57,7 +57,7 @@ export function applySteps<N extends NodeIdentity>(
   }
 
   function splice(
-    value: N[],
+    value: readonly N[],
     parent: number | null,
     index: number,
     count: number,
@@ -509,7 +509,7 @@ export function applySteps<N extends NodeIdentity>(
  * changedIds identifies invalidation roots, not an exhaustive list of changed descendants.
  * Consumers must invalidate those roots and their subtrees. */
 export function restoreChanges<N extends NodeIdentity>(
-  initial: N[],
+  initial: readonly N[],
   changes: readonly DocumentChange<N>[],
   direction: 'forward' | 'backward',
 ) {

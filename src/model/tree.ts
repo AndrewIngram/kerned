@@ -74,7 +74,7 @@ export function childrenAt<N extends NodeIdentity>(
 
 export function spliceChildren<N extends NodeIdentity>(
   schema: Schema<N>,
-  nodes: N[],
+  nodes: readonly N[],
   parent: number | null,
   index: number,
   count: number,

@@ -260,8 +260,12 @@ Callbacks observe the committed state. Mutation and destruction during
 publication are rejected; schedule a later edit instead. Listener exceptions are
 reported asynchronously without interrupting other notifications or turning an
 already-published transaction into an apparent failed transaction. No React
-import is present in core. Snapshots remain immutable by convention pending the
-public snapshot typing review.
+import is present in core. Snapshot fields and their root node arrays are readonly
+in TypeScript. Canonical nodes inferred from the assembled schema are also
+readonly. Consumers must treat snapshots as immutable values and make edits
+through commands or transactions. Unchanged nodes retain their identity; ordinary
+edits do not deep-copy or recursively freeze the document. Custom imperative
+schemas remain responsible for immutable node values.
 
 `editor.destroy()` is idempotent and sets `isDestroyed` before invoking destroy
 listeners. It clears subscriptions, history and the revision journal. The final
@@ -356,6 +360,35 @@ Text extensions can provide a mark-storage adapter, and node extensions can prov
 `Editor` from `src/editor-react` mounts this runtime around its children. The caller supplies `view.pointer`, optional `view.input`, and a renderer as children. The editor session belongs to the caller and survives React unmount/remount. Both demos use this host and the native runtime. Schema-specific commands and clipboard policy live in the starter-kit extensions. Generic canvas painting, viewport lifecycle, multiclick policy and navigation binding live in reusable adapters. The demo assembles these pieces; this is not a zero-configuration rich-text widget. See [app ownership](editor-app-architecture.md).
 
 `createReactRenderers<Value>([{name, component}])` creates a typed `ExtensionView` taking `{type, value}`. Build registries outside render so components retain their identity. Components may return DOM, `CanvasPrimitive` registrations, or both. Duplicate names and missing registrations reject explicitly. The starter kit registers block renderers, a mention inline renderer, underline drawing, and external comment decorations through this public interface. Layout geometry is passed by the host; React is absent from core and from the browser runtime.
+
+## Extension resource lifetime
+
+Session factories receive `onDestroy` alongside `schema`. Register cleanup when
+acquiring a resource, including before any subsequent setup that might throw.
+
+```ts
+const connection = defineExtension({
+  name: 'connection',
+  options: {},
+  setup(_options, { onDestroy }: Pick<ExtensionContext<MyNode>, 'onDestroy'>) {
+    const subscription = applicationUpdates.subscribe(handleUpdate);
+    onDestroy(() => subscription.unsubscribe());
+    return {};
+  },
+});
+```
+
+Each session owns its registrations. Destruction releases the attached view,
+then extension resources in reverse registration order, then application destroy
+listeners. Cleanup runs once. A registration made after disposal runs immediately,
+which also covers a resource acquired by asynchronous work after the session ends.
+
+Failed initialization releases resources from every factory that started,
+including the factory that threw. Registry collisions and state-field
+initialization errors follow the same path. All callbacks run even if one fails.
+A setup failure plus cleanup failures produces an `AggregateError` retaining the
+original setup error; cleanup errors during ordinary destruction use the
+lifecycle event error reporting described above.
 
 ## Typed extension state
 

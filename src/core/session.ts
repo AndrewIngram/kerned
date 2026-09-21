@@ -27,11 +27,14 @@ import {
   type NamedChain,
   type CommandStateQuery,
 } from './commands';
+import { createExtensionLifetime } from './extension-lifetime';
 import { queryRegistry, type QueryDefinitions, type NamedQueries } from './queries';
 import { createViewEffects, registerViewEffects, type ViewCommands } from './view-effects';
 
 export type ExtensionContext<N extends NodeIdentity> = {
   readonly schema: Schema<N>;
+  /** Register resource cleanup immediately; late registrations clean up at once. */
+  onDestroy(this: void, cleanup: () => void): void;
 };
 
 export type SessionContribution<N extends NodeIdentity> = {
@@ -152,92 +155,112 @@ export function createEditor(
 
   if (result.issues) throw new Error(result.issues.map((issue) => issue.message).join('; '));
 
-  const contributions = schema.definitions.flatMap((definition) => {
-    if (!definition.setup) return [];
+  const lifetime = createExtensionLifetime();
 
-    // SAFETY: The public construction contract checks every installed setup output
-    // against the assembled node type. Model storage deliberately erases behavior types.
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- The public overload verifies setup accepts this assembled schema and returns compatible session contributions; model stores the erased callback.
-    const setup = definition.setup as (
-      context: ExtensionContext<DocumentNode<readonly SchemaDefinition[]>>,
-    ) => SessionContribution<DocumentNode<readonly SchemaDefinition[]>> | undefined;
+  try {
+    const contributions = schema.definitions.flatMap((definition) => {
+      if (!definition.setup) return [];
 
-    const contribution = setup({ schema });
+      // SAFETY: The public construction contract checks every installed setup output
+      // against the assembled node type. Model storage deliberately erases behavior types.
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- The public overload verifies setup accepts this assembled schema and returns compatible session contributions; model stores the erased callback.
+      const setup = definition.setup as (
+        context: ExtensionContext<DocumentNode<readonly SchemaDefinition[]>>,
+      ) => SessionContribution<DocumentNode<readonly SchemaDefinition[]>> | undefined;
 
-    return contribution ? [{ ...contribution, name: definition.name }] : [];
-  });
+      const contribution = setup({ schema, onDestroy: lifetime.onDestroy });
 
-  const content = [...result.value];
+      return contribution ? [{ ...contribution, name: definition.name }] : [];
+    });
 
-  const editor = createStateEditor(
-    schema,
-    content,
-    config.selection ?? selectionNear(selectionContext(schema, content)),
-    contributions.flatMap((contribution) => contribution.selections ?? []),
-    {
-      documentId: config.documentId,
-      revision: config.revision,
-      positionCheckpoint: config.positionCheckpoint,
-      permissions: config.permissions,
-      fields: contributions.flatMap((contribution) => contribution.fields ?? []),
-    },
-  );
+    const content = [...result.value];
 
-  const effects = createViewEffects(editor);
-  editor.on('destroy', () => effects.destroy());
-  const registry = commandRegistry(editor, contributions, effects.commands);
+    const editor = createStateEditor(
+      schema,
+      content,
+      config.selection ?? selectionNear(selectionContext(schema, content)),
+      contributions.flatMap((contribution) => contribution.selections ?? []),
+      {
+        documentId: config.documentId,
+        revision: config.revision,
+        positionCheckpoint: config.positionCheckpoint,
+        permissions: config.permissions,
+        fields: contributions.flatMap((contribution) => contribution.fields ?? []),
+      },
+    );
 
-  const session: Editor<readonly SchemaDefinition[], DocumentNode<readonly SchemaDefinition[]>> = {
-    documentId: editor.documentId,
-    positions: editor.positions,
-    get journal() {
-      return editor.journal;
-    },
-    find: editor.find,
-    breakHistory: () => editor.breakHistory(),
-    allocateBlockId: () => editor.allocateBlockId(),
-    selectionEdit: (text: string) => editor.selectionEdit(text),
-    setStoredMarks: (marks) => editor.setStoredMarks(marks),
-    dispatch: (transaction: Transaction<DocumentNode<readonly SchemaDefinition[]>>) => {
-      return editor.dispatch(transaction);
-    },
-    transact: (
-      command: Command<DocumentNode<readonly SchemaDefinition[]>>,
-      options?: CommandOptions,
-    ) => editor.chain(options).command(command).run(),
-    select: (selection: Selection) => {
-      editor.select(selection);
-    },
-    undo: () => editor.undo() !== null,
-    redo: () => editor.redo() !== null,
-    subscribe: (listener: () => void) => editor.subscribe(listener),
-    on: editor.on,
-    destroy: () => editor.destroy(),
-    get isDestroyed() {
-      return editor.isDestroyed;
-    },
-    get state() {
-      return editor.state;
-    },
-    get history() {
-      return editor.history;
-    },
-    schema,
-    commands: registry.direct(),
-    getCommandState: registry.state,
-    queries: queryRegistry(() => ({ state: editor.state, schema }), contributions),
-    chain(options?: CommandOptions) {
-      return registry.chain(false, options);
-    },
-    can() {
-      return {
-        ...registry.direct(true),
-        chain: (options?: CommandOptions) => registry.chain(true, options),
-      };
-    },
-  };
+    const effects = createViewEffects(editor);
+    editor.on('destroy', () => effects.destroy());
+    editor.on('destroy', () => lifetime.dispose());
+    const registry = commandRegistry(editor, contributions, effects.commands);
 
-  registerViewEffects(session, effects);
+    const session: Editor<
+      readonly SchemaDefinition[],
+      DocumentNode<readonly SchemaDefinition[]>
+    > = {
+      documentId: editor.documentId,
+      positions: editor.positions,
+      get journal() {
+        return editor.journal;
+      },
+      find: editor.find,
+      breakHistory: () => editor.breakHistory(),
+      allocateBlockId: () => editor.allocateBlockId(),
+      selectionEdit: (text: string) => editor.selectionEdit(text),
+      setStoredMarks: (marks) => editor.setStoredMarks(marks),
+      dispatch: (transaction: Transaction<DocumentNode<readonly SchemaDefinition[]>>) => {
+        return editor.dispatch(transaction);
+      },
+      transact: (
+        command: Command<DocumentNode<readonly SchemaDefinition[]>>,
+        options?: CommandOptions,
+      ) => editor.chain(options).command(command).run(),
+      select: (selection: Selection) => {
+        editor.select(selection);
+      },
+      undo: () => editor.undo() !== null,
+      redo: () => editor.redo() !== null,
+      subscribe: (listener: () => void) => editor.subscribe(listener),
+      on: editor.on,
+      destroy: () => editor.destroy(),
+      get isDestroyed() {
+        return editor.isDestroyed;
+      },
+      get state() {
+        return editor.state;
+      },
+      get history() {
+        return editor.history;
+      },
+      schema,
+      commands: registry.direct(),
+      getCommandState: registry.state,
+      queries: queryRegistry(() => ({ state: editor.state, schema }), contributions),
+      chain(options?: CommandOptions) {
+        return registry.chain(false, options);
+      },
+      can() {
+        return {
+          ...registry.direct(true),
+          chain: (options?: CommandOptions) => registry.chain(true, options),
+        };
+      },
+    };
 
-  return session;
+    registerViewEffects(session, effects);
+
+    return session;
+  } catch (error) {
+    try {
+      lifetime.dispose();
+    } catch (cleanupError) {
+      throw new AggregateError(
+        [error, cleanupError],
+        'Editor initialization and extension cleanup failed',
+        { cause: cleanupError },
+      );
+    }
+
+    throw error;
+  }
 }
