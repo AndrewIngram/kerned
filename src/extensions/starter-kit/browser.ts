@@ -1,8 +1,11 @@
 import { defineExtension, type ContributionContext } from '../../core';
+import { inputPolicies } from '../../editor-browser';
 import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
 import { image } from '../starter-definitions';
 import { createImageRenderer } from './image-view';
 import { starterExtensions } from './index';
+import { createStarterKitInput } from './input';
+import { starterPresentation } from './presentation';
 
 export const imageView = defineExtension({
   name: 'imageView',
@@ -33,5 +36,35 @@ export const imageView = defineExtension({
 
 /** Browser composition shares the headless definitions and adds view capabilities. */
 export function starterBrowserExtensions({ imageDelay = 0 }: { imageDelay?: number } = {}) {
-  return [...starterExtensions, imageView.configure({ delay: imageDelay })] as const;
+  return [
+    ...starterExtensions,
+    imageView.configure({ delay: imageDelay }),
+    starterInput,
+    starterPresentation,
+  ] as const;
 }
+
+/** Schema-specific editing policy installed through the same composed session. */
+export const starterInput = defineExtension({
+  name: 'starterInput',
+  requires: ['starterEditing', 'starterFormatting', 'starterStructure', 'starterTables'],
+  options: {},
+  setup(_options, context: ContributionContext) {
+    context.provide(inputPolicies, {
+      create({ editor, input, textInput, selectAll, navigate, notice }) {
+        const adapter = createStarterKitInput({
+          editor,
+          input: () => input,
+          textInput,
+          selectAll,
+          navigate,
+          notice,
+        });
+
+        return adapter.events;
+      },
+    });
+
+    return {};
+  },
+});

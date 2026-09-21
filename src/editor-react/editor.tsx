@@ -17,14 +17,15 @@ export function Editor<N extends NodeIdentity>({
   toolbar,
   onReady,
   onError,
+  onNotice,
   ...props
 }: EditorProps<N>) {
   const host = useRef<HTMLDivElement>(null);
-  const callbacks = useRef({ onReady, onError });
+  const callbacks = useRef({ onReady, onError, onNotice });
   const [error, setError] = useState<Error | null>(null);
 
   useLayoutEffect(() => {
-    callbacks.current = { onReady, onError };
+    callbacks.current = { onReady, onError, onNotice };
   });
   useLayoutEffect(() => {
     const element = host.current;
@@ -47,7 +48,14 @@ export function Editor<N extends NodeIdentity>({
       if (!active || editor.isDestroyed) return;
 
       try {
-        mounted = mountEditor(target, { editor, resolveAsset, scroll, toolbar, onError: report });
+        mounted = mountEditor(target, {
+          editor,
+          resolveAsset,
+          scroll,
+          toolbar,
+          onError: report,
+          onNotice: (message) => callbacks.current.onNotice?.(message),
+        });
         await mounted.ready;
 
         if (active && !mounted.isDestroyed) {

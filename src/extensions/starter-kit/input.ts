@@ -1,32 +1,33 @@
-import { createTextInput, type BrowserViewOptions } from '../../editor-browser';
+import { createTextInput, type BrowserViewOptions, type ViewSession } from '../../editor-browser';
+import { createDocumentQuery } from '../../editor-browser/document';
 import { readClipboard, writeClipboard, type ClipboardFragment } from '../../extensions/clipboard';
-import { plainText, type StarterNode } from '../../extensions/demo-model';
-import { tablePlainText } from '../../extensions/table';
-import { type Schema } from '../../model';
+import { textContent, type NodeIdentity, type Schema } from '../../model';
 import { supportsOwnedText } from '../../owned-text-support';
 import { TextSelection } from '../../state';
 import type { TextFormat } from '../formatting';
+import { table as tableDefinition, tableCell, image } from '../starter-definitions';
 import { tableCells } from '../table';
-import { plainCellRectangle } from '../table-clipboard';
-import { createStarterDocumentQuery } from './browser-document';
+import { plainCellRectangle, cellRectangleText } from '../table-clipboard';
+import { editingCommands } from './commands';
+import { formattingCommands } from './formatting';
+import { structureCommands, structureQueries } from './structure';
 import type { TableFrame } from './table-view';
-import type { EditorSession } from './types';
 
-type InputOptions = {
-  editor: EditorSession;
-  onEdit: () => void;
-  textInput: ReturnType<typeof createTextInput<StarterNode>>;
+type InputOptions<N extends NodeIdentity> = {
+  editor: ViewSession<N>;
+  onEdit?: () => void;
+  textInput: ReturnType<typeof createTextInput<N>>;
   input: () => HTMLTextAreaElement | null;
-  notice: (message: string) => void;
-  closePanel: () => void;
-  escape: () => void;
+  notice?: (message: string) => void;
+  closePanel?: () => void;
+  escape?: () => void;
   selectAll: () => void;
   navigate: (event: KeyboardEvent) => boolean;
 };
 
 /** Browser input policy for the starter-kit schema. Commands remain usable
  * without this adapter, a textarea, or React. */
-export function createStarterKitInput({
+export function createStarterKitInput<N extends NodeIdentity>({
   editor,
   onEdit,
   textInput,
@@ -36,15 +37,23 @@ export function createStarterKitInput({
   escape,
   selectAll,
   navigate,
-}: InputOptions) {
-  const project = createStarterDocumentQuery(editor.schema);
+}: InputOptions<N>) {
+  const tableType = editor.schema.node(tableDefinition);
+
+  const project = createDocumentQuery<N, N, null>(editor.schema, {
+    initial: null,
+    isBlock: (node): node is N =>
+      editor.schema.resolve(node).kind !== 'container' || tableType.matches(node),
+    child: () => null,
+  });
+
   const allocate = () => ({ id: editor.allocateBlockId(), key: crypto.randomUUID() });
 
   function run(action: () => boolean, focusAfter = false) {
     try {
-      onEdit();
+      onEdit?.();
       const applied = action();
-      notice('');
+      notice?.('');
 
       if (!applied) syncInput();
 
@@ -52,7 +61,7 @@ export function createStarterKitInput({
 
       return applied;
     } catch (error) {
-      notice(error instanceof Error ? error.message : 'Command failed');
+      notice?.(error instanceof Error ? error.message : 'Command failed');
       syncInput();
 
       return false;
@@ -61,27 +70,36 @@ export function createStarterKitInput({
 
   function restore(redo = false) {
     return run(() => {
-      const changed = redo ? editor.commands.redo() : editor.commands.undo();
+      const changed = editor.transact((context) => context.restoreHistory(redo ? 'redo' : 'undo'));
 
-      if (changed) closePanel();
+      if (changed) closePanel?.();
 
       return changed;
     }, true);
   }
 
   const toggleFormat = (format: TextFormat) =>
-    run(() => editor.commands.toggleFormat(format), true);
+    run(
+      () => editor.transact((context) => context.command(formattingCommands.toggleFormat, format)),
+      true,
+    );
 
-  const replaceCells = (text: string) => run(() => editor.commands.replaceSelection(text), true);
-  const paste = (fragment: ClipboardFragment) => run(() => editor.commands.paste(fragment), true);
+  const replaceCells = (text: string) =>
+    run(
+      () => editor.transact((context) => context.command(editingCommands.replaceSelection, text)),
+      true,
+    );
+
+  const paste = (fragment: ClipboardFragment<N>) =>
+    run(() => editor.transact((context) => editingCommands.paste.execute(context, fragment)), true);
 
   const table: Pick<TableFrame, 'onText' | 'onUndo' | 'onFormat' | 'onReplace'> = {
     onText: (id, from, to, text, caret) =>
       run(() =>
-        editor
-          .chain({ history: { group: `typing:${id}` } })
-          .replaceText({ id, from, to, text, caret })
-          .run(),
+        editor.transact(
+          (context) => context.command(editingCommands.replaceText, { id, from, to, text, caret }),
+          { history: { group: `typing:${id}` } },
+        ),
       ),
     onUndo: restore,
     onFormat: toggleFormat,
@@ -104,7 +122,7 @@ export function createStarterKitInput({
     }
 
     function reject(message: string) {
-      notice(message);
+      notice?.(message);
       syncInput();
     }
 
@@ -118,7 +136,10 @@ export function createStarterKitInput({
     }
 
     if (paragraphs && clean.includes('\n')) {
-      if (run(() => editor.commands.pasteText(clean))) closePanel();
+      if (
+        run(() => editor.transact((context) => context.command(editingCommands.pasteText, clean)))
+      )
+        closePanel?.();
 
       return;
     }
@@ -130,10 +151,15 @@ export function createStarterKitInput({
         };
 
     if (
-      run(() => editor.chain({ history }).insertText(clean, { from, to }).run()) &&
+      run(() =>
+        editor.transact(
+          (context) => context.command(editingCommands.insertText, clean, { from, to }),
+          { history },
+        ),
+      ) &&
       selection.anchor.id !== selection.head.id
     )
-      closePanel();
+      closePanel?.();
   }
 
   function copyText() {
@@ -146,8 +172,8 @@ export function createStarterKitInput({
 
         if (!node) return '';
 
-        return range.kind === 'text' && (node.kind === 'paragraph' || node.kind === 'heading')
-          ? plainText(node, range.from, range.to)
+        return range.kind === 'text' && editor.schema.text(node) !== null
+          ? textContent(editor.schema, node, range.from, range.to)
           : nodeText(node, editor.schema);
       })
       .join('\n');
@@ -193,9 +219,9 @@ export function createStarterKitInput({
       return;
     }
 
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && escape) {
       event.preventDefault();
-      escape();
+      escape?.();
 
       return;
     }
@@ -207,22 +233,37 @@ export function createStarterKitInput({
       run(() => {
         const selection = editor.state.selection;
 
-        const chain = editor.chain({
-          history:
-            selection instanceof TextSelection
-              ? { group: `delete:${selection.head.id}` }
-              : 'separate',
-        });
-
-        return (event.key === 'Backspace' ? chain.deleteBackward() : chain.deleteForward()).run();
+        return editor.transact(
+          (context) =>
+            context.command(
+              event.key === 'Backspace'
+                ? editingCommands.deleteBackward
+                : editingCommands.deleteForward,
+            ),
+          {
+            history:
+              selection instanceof TextSelection
+                ? { group: `delete:${selection.head.id}` }
+                : 'separate',
+          },
+        );
       });
 
       return;
     }
 
-    if (event.key === 'Tab' && editor.queries.blockState().item !== undefined) {
+    if (
+      event.key === 'Tab' &&
+      structureQueries.blockState({ schema: editor.schema, state: editor.state }).item !== undefined
+    ) {
       event.preventDefault();
-      run(() => editor.commands.indentList(event.shiftKey), true);
+      run(
+        () =>
+          editor.transact((context) =>
+            context.command(structureCommands.indentList, event.shiftKey),
+          ),
+        true,
+      );
 
       return;
     }
@@ -230,7 +271,8 @@ export function createStarterKitInput({
     if (event.key === 'Enter') {
       event.preventDefault();
 
-      if (run(() => editor.commands.splitBlock())) closePanel();
+      if (run(() => editor.transact((context) => context.command(editingCommands.splitBlock))))
+        closePanel?.();
     }
   }
 
@@ -248,7 +290,7 @@ export function createStarterKitInput({
       try {
         writeClipboard(e.clipboardData, editor.schema, editor.state, copyText());
       } catch (error) {
-        notice(error instanceof Error ? error.message : String(error));
+        notice?.(error instanceof Error ? error.message : String(error));
 
         return;
       }
@@ -262,7 +304,7 @@ export function createStarterKitInput({
       try {
         writeClipboard(e.clipboardData, editor.schema, editor.state, copyText());
       } catch (error) {
-        notice(error instanceof Error ? error.message : String(error));
+        notice?.(error instanceof Error ? error.message : String(error));
 
         return;
       }
@@ -276,10 +318,10 @@ export function createStarterKitInput({
       if (!e.clipboardData) return;
 
       try {
-        const fragment = readClipboard(e.clipboardData);
+        const fragment = readClipboard(e.clipboardData, editor.schema);
 
         const rectangle =
-          fragment?.nodes.length === 1 && fragment.nodes[0].kind === 'table'
+          fragment?.nodes.length === 1 && tableType.matches(fragment.nodes[0])
             ? fragment.nodes[0]
             : null;
 
@@ -299,29 +341,32 @@ export function createStarterKitInput({
           let source = rectangle;
 
           if (!source) {
-            source = plainCellRectangle(e.clipboardData.getData('text/plain'), allocate);
+            source = plainCellRectangle(
+              editor.schema,
+              e.clipboardData.getData('text/plain'),
+              allocate,
+            );
 
             if (fragment) {
-              if (
-                fragment.nodes.some((node) => node.kind !== 'paragraph' && node.kind !== 'heading')
-              )
-                throw new Error('Table cells currently support paragraphs and headings.');
+              if (fragment.nodes.some((node) => editor.schema.text(node) === null))
+                throw new Error('Table cells currently support text blocks.');
+              const first = editor.schema.children(source)[0];
+              const cellType = editor.schema.node(tableCell);
+              const attrs = first && cellType.read(first);
 
-              const paragraphs = fragment.nodes.filter(
-                (node) => node.kind === 'paragraph' || node.kind === 'heading',
-              );
-
-              source = { ...source, rows: [[{ ...source.rows[0][0], paragraphs }]] };
+              if (!attrs) throw new Error('Expected a clipboard table cell');
+              const cell = cellType.create(first, attrs, fragment.nodes);
+              source = tableType.create(source, { caption: '' }, [cell]);
             }
           }
 
-          if (paste({ nodes: [source], inline: false })) closePanel();
+          if (paste({ nodes: [source], inline: false })) closePanel?.();
 
           return;
         }
 
         if (fragment) {
-          if (paste(fragment)) closePanel();
+          if (paste(fragment)) closePanel?.();
         } else {
           const { start, end } = project(editorState);
 
@@ -331,7 +376,7 @@ export function createStarterKitInput({
         }
       } catch (error) {
         e.preventDefault();
-        notice(error instanceof Error ? error.message : String(error));
+        notice?.(error instanceof Error ? error.message : String(error));
       }
     },
   };
@@ -354,15 +399,21 @@ export function focusStarterKitInput(
   (cell ?? input)?.focus({ preventScroll: true });
 }
 
-function nodeText(node: StarterNode, schema: Schema<StarterNode>): string {
-  return node.kind === 'paragraph' || node.kind === 'heading'
-    ? plainText(node)
-    : node.kind === 'image'
-      ? node.alt
-      : node.kind === 'table'
-        ? tablePlainText(node)
-        : schema
-            .children(node)
-            .map((child) => nodeText(child, schema))
-            .join('\n');
+function nodeText<N extends NodeIdentity>(node: N, schema: Schema<N>): string {
+  if (schema.text(node) !== null) return textContent(schema, node);
+  const type = schema.resolve(node);
+
+  if (type.name === image.name) return schema.node(image).read(node)?.alt ?? '';
+
+  if (type.name === tableDefinition.name) {
+    const caption = schema.node(tableDefinition).read(node)?.caption;
+    const text = cellRectangleText(schema, node);
+
+    return caption ? `${caption}\n${text}` : text;
+  }
+
+  return schema
+    .children(node)
+    .map((child) => nodeText(child, schema))
+    .join('\n');
 }

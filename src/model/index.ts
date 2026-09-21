@@ -92,3 +92,5 @@ export {
 export { createSchema, type AssembledSchema, type SchemaValues } from './assembly';
 
 export { type NodeBinding } from './node-binding';
+
+export { textContent } from './text-content';

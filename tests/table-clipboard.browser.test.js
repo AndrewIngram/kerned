@@ -31,20 +31,20 @@ test('clipboard HTML is a cropped rectangle and TSV preserves empty and quoted c
     const external = new DataTransfer();
     external.setData('text/html', data.getData('text/html'));
 
-    const fragment = readClipboard(external),
+    const fragment = readClipboard(external, demoSchema),
       command = pasteFragment(demoSchema, editor.state, fragment, allocate);
 
     editor.dispatch({ baseRevision: 0, origin: 'local', history: 'separate', time: 0, ...command });
 
     const tsv = '"a\tb"\t"line 1\nline 2"\n"quote ""here"""\t\n',
-      parsed = plainCellRectangle(tsv, allocate);
+      parsed = plainCellRectangle(demoSchema, tsv, allocate);
 
     return {
       html: data.getData('text/html'),
       plain: data.getData('text/plain'),
       dimensions: fragment.nodes[0].rows.map((row) => row.length),
       marks: editor.state.nodes[0].rows[1][1].paragraphs[0].marks,
-      tsv: cellRectangleText(parsed),
+      tsv: cellRectangleText(demoSchema, parsed),
       values: parsed.rows.map((row) => row.map((c) => c.paragraphs[0].text)),
     };
   })();

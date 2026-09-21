@@ -1,6 +1,6 @@
 # Rich clipboard
 
-The demo clipboard adapter in `src/extensions/clipboard.ts` uses public schema,
+The clipboard adapter in `src/extensions/clipboard.ts` uses public schema,
 selection and transaction APIs. Copy writes plain text, semantic HTML and an
 opaque local-fragment token. Paste prefers a known local fragment, then imports
 HTML in an inert template, then falls back to plain text.
@@ -11,9 +11,13 @@ source identities are replaced, so repeated pastes cannot duplicate block IDs.
 Inline insertion uses split/join transactions to map surviving positions, and
 each paste creates one history entry.
 
-Local fragments retain the extension model, including mentions
-and images. The page retains up to eight immutable fragments;
-unknown or expired tokens use HTML instead. Custom extension data is therefore
+Local fragments retain canonical extension nodes, including custom text fields,
+mentions and images. Transfers within the exact same compiled schema retain
+immutable node identity without encoding or parsing. Transfers to another schema
+use the source codec and validate against the destination schema. Imported HTML
+also passes through destination validation before it can become editor content.
+The page retains up to eight immutable fragments; unknown or expired tokens use
+HTML instead. Custom extension data is therefore
 not yet portable across reloads or separate tabs. In exported HTML, mentions
 become their labels, and images their alternative text.
 Comments are not exported. Portable extension serialization remains separate
@@ -39,7 +43,9 @@ headings, marks and local inline extension content. Existing destination cell id
 stable; pasted text blocks and inline objects receive fresh identities. The whole operation uses one
 transaction and undo entry. Permissions validate the complete result before publication.
 
-Cells currently accept paragraphs and headings. Nested lists, quotes and embedded blocks are not
+Cells accept installed text-block definitions, including custom text nodes as well as paragraphs
+and headings. The clipboard reads text, marks and inline labels through schema capabilities rather
+than assuming particular field names. Nested lists, quotes and embedded blocks are not
 accepted cell content. Copying complete merged cells retains their spans; copying a rectangle that
 bisects a merged cell is rejected. Rectangular paste currently requires unmerged source and
 destination tables. It never silently falls back to destructive plain text after a rejected rich paste.

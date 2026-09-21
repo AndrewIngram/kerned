@@ -51,95 +51,98 @@ function quoteActivity<N extends NodeIdentity>(context: ReadContext<N>) {
   return values.some(Boolean) ? (values.every(Boolean) ? 'active' : 'mixed') : 'inactive';
 }
 
+export const structureCommands = {
+  setHeading: defineCommand({
+    execute(context, level: HeadingLevel | null) {
+      const selected = selectedStructure(context);
+
+      const steps = setTextBlockType(
+        context.schema,
+        context.state,
+        selected.ids,
+        level,
+        selected.tree,
+      );
+
+      if (!steps.length) return false;
+      context.steps(steps);
+
+      return true;
+    },
+  }),
+  toggleQuote: defineCommand({
+    execute(context) {
+      const selected = selectedStructure(context);
+
+      const steps = createStructuralPolicies(context.schema)
+        .blocks(context.schema, context.state, selected.ids, context.allocate, selected.tree)
+        .quote();
+
+      if (!steps.length) return false;
+      context.steps(steps);
+
+      return true;
+    },
+    activity: quoteActivity,
+  }),
+  toggleList: defineCommand({
+    execute(context, ordered: boolean) {
+      const selected = selectedStructure(context);
+
+      const steps = createStructuralPolicies(context.schema)
+        .blocks(context.schema, context.state, selected.ids, context.allocate, selected.tree)
+        .list(ordered);
+
+      if (!steps.length) return false;
+      context.steps(steps);
+
+      return true;
+    },
+  }),
+  indentList: defineCommand({
+    execute(context, outdent = false) {
+      const selected = selectedStructure(context);
+      const policy = createStructuralPolicies(context.schema);
+      const first = selected.ids[0];
+
+      const item =
+        first === undefined ? undefined : selected.ancestor(first, policy.itemType.matches);
+
+      if (!item || (!outdent && item.index === 0)) return false;
+
+      const change = (outdent ? policy.lists.outdent : policy.lists.indent)(
+        context.schema,
+        context.state,
+        item.node.id,
+        context.allocate,
+      );
+
+      context.apply(change);
+
+      return true;
+    },
+  }),
+};
+
+export const structureQueries = {
+  blockState: defineQuery((context) => {
+    const selected = selectedStructure(context);
+    const first = selected.ids[0];
+    const itemType = context.schema.node(listItem);
+
+    return {
+      item: first === undefined ? undefined : selected.ancestor(first, itemType.matches)?.node.id,
+      quoted: quoteActivity(context) === 'active',
+    };
+  }),
+};
+
 export const starterStructure = defineExtension({
   name: 'starterStructure',
   options: {},
   requires: ['paragraph', 'heading', 'quote', 'list', 'listItem'],
   setup: () => ({
-    commands: {
-      setHeading: defineCommand({
-        execute(context, level: HeadingLevel | null) {
-          const selected = selectedStructure(context);
-
-          const steps = setTextBlockType(
-            context.schema,
-            context.state,
-            selected.ids,
-            level,
-            selected.tree,
-          );
-
-          if (!steps.length) return false;
-          context.steps(steps);
-
-          return true;
-        },
-      }),
-      toggleQuote: defineCommand({
-        execute(context) {
-          const selected = selectedStructure(context);
-
-          const steps = createStructuralPolicies(context.schema)
-            .blocks(context.schema, context.state, selected.ids, context.allocate, selected.tree)
-            .quote();
-
-          if (!steps.length) return false;
-          context.steps(steps);
-
-          return true;
-        },
-        activity: quoteActivity,
-      }),
-      toggleList: defineCommand({
-        execute(context, ordered: boolean) {
-          const selected = selectedStructure(context);
-
-          const steps = createStructuralPolicies(context.schema)
-            .blocks(context.schema, context.state, selected.ids, context.allocate, selected.tree)
-            .list(ordered);
-
-          if (!steps.length) return false;
-          context.steps(steps);
-
-          return true;
-        },
-      }),
-      indentList: defineCommand({
-        execute(context, outdent = false) {
-          const selected = selectedStructure(context);
-          const policy = createStructuralPolicies(context.schema);
-          const first = selected.ids[0];
-
-          const item =
-            first === undefined ? undefined : selected.ancestor(first, policy.itemType.matches);
-
-          if (!item || (!outdent && item.index === 0)) return false;
-
-          const change = (outdent ? policy.lists.outdent : policy.lists.indent)(
-            context.schema,
-            context.state,
-            item.node.id,
-            context.allocate,
-          );
-
-          context.apply(change);
-
-          return true;
-        },
-      }),
-    },
-    queries: {
-      blockState: defineQuery((context) => {
-        const selected = selectedStructure(context);
-        const first = selected.ids[0];
-        const itemType = context.schema.node(listItem);
-
-        return {
-          item:
-            first === undefined ? undefined : selected.ancestor(first, itemType.matches)?.node.id,
-          quoted: quoteActivity(context) === 'active',
-        };
-      }),
-    },
+    commands: structureCommands,
+    queries: structureQueries,
   }),
 });

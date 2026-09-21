@@ -34,7 +34,10 @@ native event -> browser/input adapter -> named session command
   -> generic document layout controller -> canvas controller and native block layer
 ```
 
-Toolbar, native input and programmatic calls share named session commands.
+Toolbar, native input and programmatic calls share command definitions. Native
+input applies those definitions through the imperative transaction context;
+consumers use the named command API. The browser starter tuple contributes
+its input policy and paragraph/heading presentations to the public mount.
 `EditorWorkspace` still assembles the rendering, input and layout adapters; the
 new mounted-view interface must take over that assembly in the demo. The browser starter
 kit adds image rendering through the same extension tuple as schema and commands.

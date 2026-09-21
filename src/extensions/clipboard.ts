@@ -1,4 +1,10 @@
-import { indexTree, type NodeIdentity, type Schema } from '../model';
+import {
+  indexTree,
+  textContent,
+  createDocumentCodec,
+  type NodeIdentity,
+  type Schema,
+} from '../model';
 import { supportsOwnedText } from '../owned-text-support';
 import {
   RangeSelection,
@@ -10,9 +16,11 @@ import {
 } from '../state';
 import { type Step } from '../transform';
 import { replaceStructuredText } from './blocks';
-import { plainText, type StarterNode } from './demo-model';
+import type { StarterNode } from './demo-model';
+import { demoDocumentCodec } from './demo-schema';
 import { importHtml } from './html';
-import { paragraph, table } from './starter-definitions';
+import { paragraph, heading, list, image, table, tableCell } from './starter-definitions';
+import { tableRows } from './table';
 import { copyCellRectangle, cellRectangleText, pasteCellRectangle } from './table-clipboard';
 
 export type ClipboardFragment<N = StarterNode> = { nodes: readonly N[]; inline: boolean };
@@ -21,7 +29,43 @@ const mime = 'application/x-gprose-fragment';
 
 // The token refers only to immutable fragments created in this page. Untrusted
 // clipboard JSON never becomes editor state; other pages use the inert HTML importer.
-const fragments = new Map<string, ClipboardFragment>();
+const fragments = new Map<
+  string,
+  {
+    read<N extends NodeIdentity>(schema: Schema<N>): ClipboardFragment<N>;
+  }
+>();
+
+function remember<N extends NodeIdentity>(schema: Schema<N>, fragment: ClipboardFragment<N>) {
+  const token = crypto.randomUUID();
+  fragments.set(token, {
+    read<T extends NodeIdentity>(target: Schema<T>): ClipboardFragment<T> {
+      if (Object.is(target, schema)) {
+        const canonical: ClipboardFragment<NodeIdentity> = fragment;
+
+        // SAFETY: Schema object identity proves that these canonical nodes belong to
+        // the target schema. No externally supplied value enters this local store.
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Restore the node type after checking the exact schema owner; retaining immutable node identity avoids a serialization boundary.
+        return canonical as ClipboardFragment<T>;
+      }
+
+      return {
+        inline: fragment.inline,
+        nodes: createDocumentCodec(target).decode(
+          createDocumentCodec(schema).encode(fragment.nodes),
+        ),
+      };
+    },
+  });
+
+  if (fragments.size > 8) {
+    const first = fragments.keys().next().value;
+
+    if (first) fragments.delete(first);
+  }
+
+  return token;
+}
 
 const escape = (text: string) =>
   text
@@ -30,78 +74,104 @@ const escape = (text: string) =>
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
 
-function html(node: StarterNode): string {
-  switch (node.kind) {
-    case 'paragraph':
-    case 'heading': {
-      const edges = [
-        ...new Set([
-          0,
-          node.text.length,
-          ...node.marks.flatMap((s) => [s.from, s.to]),
-          ...node.inline.flatMap((a) => [a.index, a.index + 1]),
-        ]),
-      ].toSorted((a, b) => a - b);
+function html<N extends NodeIdentity>(schema: Schema<N>, node: N): string {
+  const type = schema.resolve(node);
 
-      let body = '';
+  const children = () =>
+    schema
+      .children(node)
+      .map((child) => html(schema, child))
+      .join('');
 
-      for (let i = 0; i < edges.length - 1; i++) {
-        const from = edges[i],
-          to = edges[i + 1],
-          marks = node.marks.filter((s) => s.from <= from && s.to >= to);
+  if (type.kind === 'text') {
+    const text = type.editing.text(node);
+    const ranges = type.editing.marks?.read(node) ?? [];
+    const inline = type.editing.inline?.read(node) ?? [];
 
-        let part = escape(plainText(node, from, to)).replaceAll('\n', '<br>');
+    const edges = [
+      ...new Set([
+        0,
+        text.length,
+        ...ranges.flatMap((range) => [range.from, range.to]),
+        ...inline.flatMap((value) => [value.index, value.index + 1]),
+      ]),
+    ].toSorted((a, b) => a - b);
 
-        if (marks.some((s) => s.mark.type === 'bold')) part = `<strong>${part}</strong>`;
+    let body = '';
 
-        if (marks.some((s) => s.mark.type === 'italic')) part = `<em>${part}</em>`;
+    for (let i = 0; i < edges.length - 1; i++) {
+      const from = edges[i],
+        to = edges[i + 1];
 
-        if (marks.some((s) => s.mark.type === 'underline')) part = `<u>${part}</u>`;
-        body += part;
-      }
+      const marks = ranges.filter((range) => range.from <= from && range.to >= to);
+      let part = escape(textContent(schema, node, from, to)).replaceAll('\n', '<br>');
 
-      const tag = node.kind === 'heading' ? `h${node.level}` : 'p';
+      if (marks.some((s) => s.mark.type === 'bold')) part = `<strong>${part}</strong>`;
 
-      return `<${tag}>${body}</${tag}>`;
+      if (marks.some((s) => s.mark.type === 'italic')) part = `<em>${part}</em>`;
+
+      if (marks.some((s) => s.mark.type === 'underline')) part = `<u>${part}</u>`;
+      body += part;
     }
 
-    case 'quote':
-      return `<blockquote>${node.children.map(html).join('')}</blockquote>`;
-    case 'list': {
-      const tag = node.ordered ? 'ol' : 'ul';
+    const level = type.name === heading.name ? schema.node(heading).read(node)?.level : undefined;
+    const tag = level ? `h${level}` : 'p';
 
-      return `<${tag} start="${node.start}">${node.children.map(html).join('')}</${tag}>`;
+    return `<${tag}>${body}</${tag}>`;
+  }
+
+  switch (type.name) {
+    case 'quote':
+      return `<blockquote>${children()}</blockquote>`;
+    case 'list': {
+      const attrs = schema.node(list).read(node);
+
+      if (!attrs) throw new Error('Expected list');
+      const tag = attrs.ordered ? 'ol' : 'ul';
+
+      return `<${tag} start="${attrs.start}">${children()}</${tag}>`;
     }
 
     case 'listItem':
-      return `<li>${node.children.map(html).join('')}</li>`;
-    case 'table':
-      return `<table><caption>${escape(node.caption)}</caption>${node.rows.map((row) => `<tr>${row.map(html).join('')}</tr>`).join('')}</table>`;
-    case 'tableCell': {
-      const tag = node.header ? 'th' : 'td';
+      return `<li>${children()}</li>`;
+    case 'table': {
+      const attrs = schema.node(table).read(node);
 
-      return `<${tag} colspan="${node.colspan}" rowspan="${node.rowspan}">${node.paragraphs.map(html).join('')}</${tag}>`;
+      if (!attrs) throw new Error('Expected table');
+
+      const rows = tableRows(schema, node)
+        .map((row) => `<tr>${row.map((cell) => html(schema, cell)).join('')}</tr>`)
+        .join('');
+
+      return `<table><caption>${escape(attrs.caption)}</caption>${rows}</table>`;
+    }
+
+    case 'tableCell': {
+      const attrs = schema.node(tableCell).read(node);
+
+      if (!attrs) throw new Error('Expected table cell');
+      const tag = attrs.header ? 'th' : 'td';
+
+      return `<${tag} colspan="${attrs.colspan}" rowspan="${attrs.rowspan}">${children()}</${tag}>`;
     }
 
     case 'image':
-      return `<p>${escape(node.alt)}</p>`;
-    default: {
-      const exhaustive: never = node;
-      throw new Error(String(exhaustive));
-    }
+      return `<p>${escape(schema.node(image).read(node)?.alt ?? '')}</p>`;
+    default:
+      return children();
   }
 }
 
-export function writeClipboard(
+export function writeClipboard<N extends NodeIdentity>(
   data: DataTransfer,
-  schema: Schema<StarterNode>,
-  state: EditorState<StarterNode>,
+  schema: Schema<N>,
+  state: EditorState<N>,
   text: string,
 ) {
   const ranges = state.selection.ranges(selectionContext(schema, state.nodes)),
     byId = new Map(ranges.map((r) => [r.id, r]));
 
-  function slice(node: StarterNode): StarterNode[] {
+  function slice(node: N): N[] {
     const range = byId.get(node.id);
 
     if (range?.kind === 'node') return [node];
@@ -134,29 +204,25 @@ export function writeClipboard(
 
   const inline =
     nodes.length === 1 &&
-    (nodes[0].kind === 'paragraph' || nodes[0].kind === 'heading') &&
+    schema.text(nodes[0]) !== null &&
     ranges.some(
       (r) => r.kind === 'text' && (r.from > 0 || r.to < (context.text(r.id)?.length ?? 0)),
     );
 
-  const token = crypto.randomUUID();
-  fragments.set(token, { nodes, inline });
+  const token = remember(schema, { nodes, inline });
 
-  if (fragments.size > 8) {
-    const first = fragments.keys().next().value;
-
-    if (first) fragments.delete(first);
-  }
-
-  data.setData('text/plain', rectangle ? cellRectangleText(rectangle) : text);
-  data.setData('text/html', nodes.map(html).join(''));
+  data.setData('text/plain', rectangle ? cellRectangleText(schema, rectangle) : text);
+  data.setData('text/html', nodes.map((node) => html(schema, node)).join(''));
   data.setData(mime, token);
 }
 
-export function readClipboard(data: DataTransfer): ClipboardFragment | null {
+export function readClipboard<N extends NodeIdentity>(
+  data: DataTransfer,
+  schema: Schema<N>,
+): ClipboardFragment<N> | null {
   const local = fragments.get(data.getData(mime));
 
-  if (local) return local;
+  if (local) return local.read(schema);
   const source = data.getData('text/html');
 
   if (!source) return null;
@@ -164,7 +230,10 @@ export function readClipboard(data: DataTransfer): ClipboardFragment | null {
 
   if (!nodes.length) return null;
 
-  return { nodes, inline: nodes.length === 1 && nodes[0].kind === 'paragraph' };
+  return {
+    nodes: createDocumentCodec(schema).decode(demoDocumentCodec.encode(nodes)),
+    inline: nodes.length === 1 && nodes[0].kind === 'paragraph',
+  };
 }
 
 export function pasteFragment<N extends NodeIdentity>(

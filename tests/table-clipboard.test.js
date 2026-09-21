@@ -43,7 +43,7 @@ test('cell rectangles preserve formatting, grow tables, retain unaffected identi
     const from = createEditor(demoSchema, [source], selected, [tableCells.extension]);
 
     const copied = copyCellRectangle(demoSchema, from.state),
-      plain = cellRectangleText(copied);
+      plain = cellRectangleText(demoSchema, copied);
 
     const target = structuredClone(createTable(demoSchema, allocate, 2, 2)),
       original = structuredClone(target);

@@ -1,3 +1,4 @@
+import type { InlineValue } from './inline-schema';
 import type { Mark, MarkRange } from './marks';
 import { bindNode, type NodeBinding, type NodeDefinition, type NodeFactory } from './node-binding';
 import type { NodeCodec } from './schema-codec';
@@ -6,6 +7,10 @@ export type NodeIdentity = { id: number; key: string; locked?: boolean };
 
 export type TextBehavior<N> = Readonly<{
   text(node: N): string;
+  inline?: Readonly<{
+    read(node: N): readonly InlineValue[];
+    plainText(value: InlineValue): string;
+  }>;
   marks?: Readonly<{
     validate?(marks: readonly Mark[]): readonly Mark[];
     boundary?(mark: Mark, edge: 'start' | 'end'): boolean | undefined;
@@ -54,7 +59,11 @@ function ownType<N>(type: NodeType<N>): NodeType<N> {
       codec,
       factory,
       groups,
-      editing: Object.freeze({ ...type.editing, marks }),
+      editing: Object.freeze({
+        ...type.editing,
+        marks,
+        inline: type.editing.inline ? Object.freeze({ ...type.editing.inline }) : undefined,
+      }),
     });
   }
 

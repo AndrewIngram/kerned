@@ -1669,3 +1669,41 @@ outline and diagnostic consumers need supported view contracts before removing
 its remaining kit/owned props. The native mount is working with custom schemas,
 but this checkpoint does not claim the writing demo uses it yet. The milestone
 judge remains due after those exit conditions are met.
+
+### Milestone 4 checkpoint: contributed starter input and typed clipboard
+
+The browser starter tuple now contributes its native input policy and text
+presentations to the shared mount. Input receives the imperative session,
+capture and navigation helpers. It shares stateless command definitions with
+the named command API, preserving history grouping and permission rejection.
+The native mount announces input notices through a status element and an
+optional callback; React forwards the callback without remounting.
+
+The input and clipboard adapters retain the consumer's node type. They read
+text, marks and inline labels through schema capabilities, including custom
+field names. Rectangular clipboard operations now preserve custom text nodes
+inside cells. Same-schema local clipboard fragments retain immutable node
+identity without serialization. Cross-schema transfers and external HTML are
+validated by the destination schema before insertion. Portable HTML still uses
+the existing semantic formats; arbitrary extension serialization remains work
+for milestone 7.
+
+Real mounted-editor tests cover custom text fields, stored formatting, typing,
+undo/redo and paragraph splits. Clipboard tests cover local node identity,
+cross-schema validation and custom table-cell content. `pnpm run check` passes
+with 445 Vitest tests, one unchanged collaboration TODO and 42 end-to-end cases.
+The production build passes, as does the rich-paste audit in Chromium, Firefox
+and WebKit, including the full book.
+
+Three serial production trials pass every unchanged performance budget: worst
+first usable 174 ms, streaming 1,055.7 ms, paste handler 55.7 ms, paste to paint
+117.5 ms, typing 32 ms, paging 32.6 ms and loaded heap 29,312,776 bytes. Evidence
+in `artifacts/public-interface-m4/starter-input-contributions/` identifies
+`2f091fe` and measures this checkpoint's uncommitted tree. These timings still
+cover the existing demo composition, not a completed migration to the mount.
+
+Milestone 4 remains open. The mounted composition still needs table views,
+list markers, quote rules, inline/decorations and supported geometry contracts
+for search, comments and outline consumers. The demo still owns its controller
+assembly and graphics props. The milestone judge follows completion of those
+exit conditions. The retired checklist is not part of the remaining work.

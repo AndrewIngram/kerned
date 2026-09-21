@@ -7,7 +7,14 @@ import type { BrowserViewOptions } from './index';
 export type ViewSession<N extends NodeIdentity> = EditorViewSession &
   Pick<
     Editor<readonly SchemaDefinition[], N>,
-    'state' | 'select' | 'subscribe' | 'transact' | 'breakHistory' | 'allocateBlockId' | 'on'
+    | 'state'
+    | 'select'
+    | 'subscribe'
+    | 'transact'
+    | 'breakHistory'
+    | 'allocateBlockId'
+    | 'on'
+    | 'commands'
   > & { readonly schema: Schema<N> };
 
 export type InputContribution = {
@@ -15,6 +22,9 @@ export type InputContribution = {
     editor: ViewSession<N>;
     input: HTMLTextAreaElement;
     textInput: ReturnType<typeof createCanvasInput<N>>['textInput'];
+    navigate: (event: KeyboardEvent) => boolean;
+    selectAll: () => void;
+    notice: (message: string) => void;
   }): Omit<
     NonNullable<BrowserViewOptions['input']>,
     'element' | 'focus' | 'compositionstart' | 'compositionend'

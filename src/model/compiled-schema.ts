@@ -117,6 +117,12 @@ export function compileSchema(definitions: readonly SchemaDefinition[]) {
 
     const behavior: TextBehavior<RuntimeDocumentNode> = {
       text: (node) => textOf(node, content),
+      inline: content.inline
+        ? {
+            read: (node) => inlineOf(node, content),
+            plainText: inlineValues.plainText,
+          }
+        : undefined,
       replace(node, from, to, value) {
         const text = textOf(node, content);
         const nextText = text.slice(0, from) + value + text.slice(to);

@@ -15,8 +15,8 @@ test('copying a heading does not carry its attributes into the empty split targe
   writeClipboard(data, demoSchema, editor.state, 'Title');
   expect(data.getData('text/plain')).toBe('Title');
   expect(data.getData('text/html')).toBe('<h2>Title</h2>');
-  expect(readClipboard(data)?.nodes).toEqual(nodes);
-  expect(readClipboard(data)?.nodes[0]).toBe(nodes[0]);
+  expect(readClipboard(data, demoSchema)?.nodes).toEqual(nodes);
+  expect(readClipboard(data, demoSchema)?.nodes[0]).toBe(nodes[0]);
 });
 
 test('copying a partial styled paragraph slices both ends without restoring source content', () => {
@@ -35,7 +35,7 @@ test('copying a partial styled paragraph slices both ends without restoring sour
   const data = new DataTransfer();
   writeClipboard(data, demoSchema, editor.state, 'ell');
   expect(data.getData('text/html')).toBe('<p><strong>ell</strong></p>');
-  expect(readClipboard(data)?.nodes[0]).toMatchObject({
+  expect(readClipboard(data, demoSchema)?.nodes[0]).toMatchObject({
     text: 'ell',
     marks: [{ from: 0, to: 3, mark: { type: 'bold', attrs: null } }],
   });
@@ -56,9 +56,9 @@ test('whole-block copying keeps selected empty blocks but excludes a collapsed e
 
   const selected = new DataTransfer();
   writeClipboard(selected, demoSchema, editor.state, 'A\n\nB');
-  expect(readClipboard(selected)?.nodes).toEqual(nodes);
+  expect(readClipboard(selected, demoSchema)?.nodes).toEqual(nodes);
   editor.select(textSelection(2, 0));
   const collapsed = new DataTransfer();
   writeClipboard(collapsed, demoSchema, editor.state, '');
-  expect(readClipboard(collapsed)?.nodes).toEqual([]);
+  expect(readClipboard(collapsed, demoSchema)?.nodes).toEqual([]);
 });

@@ -21,6 +21,7 @@ export type MountEditorOptions<N extends NodeIdentity> = {
   scroll?: 'container' | 'page';
   toolbar?: HTMLElement;
   onError?: (error: Error) => void;
+  onNotice?: (message: string) => void;
 };
 
 /** The view owns its DOM and resources. Its session can be detached and mounted again. */
@@ -42,6 +43,10 @@ export function mountEditor<N extends NodeIdentity>(
   const canvas = document.createElement('canvas');
   const overlay = document.createElement('div');
   const input = document.createElement('textarea');
+  const notice = document.createElement('div');
+  notice.setAttribute('role', 'status');
+  notice.style.cssText =
+    'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);';
   const page = options.scroll === 'page';
   root.dataset.editorView = '';
   root.style.cssText = `position:relative;width:100%;height:100%;min-height:240px;${page ? '' : 'overflow:auto;'}`;
@@ -57,7 +62,7 @@ export function mountEditor<N extends NodeIdentity>(
   input.spellcheck = false;
   input.tabIndex = -1;
   space.append(canvas, overlay);
-  root.append(space, input);
+  root.append(space, input, notice);
 
   let status: 'loading' | 'ready' | 'failed' | 'destroyed' = 'loading';
   const cleanup: (() => void)[] = [];
@@ -278,7 +283,18 @@ export function mountEditor<N extends NodeIdentity>(
       const policies: ReturnType<InputContribution['create']>[] = [];
 
       for (const policy of inputPolicies.read(editor)) {
-        const installed = policy.create({ editor, input, textInput: capture.textInput });
+        const installed = policy.create({
+          editor,
+          input,
+          textInput: capture.textInput,
+          selectAll: capture.selectAll,
+          navigate: capture.navigate,
+          notice(message) {
+            notice.textContent = message;
+            options.onNotice?.(message);
+          },
+        });
+
         policies.push(installed);
 
         if (installed.destroy) cleanup.push(() => installed.destroy?.());

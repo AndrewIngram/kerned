@@ -1,16 +1,15 @@
-import { indexTree, type NodeIdentity, type Schema } from '../model';
+import { indexTree, textContent, type NodeIdentity, type Schema } from '../model';
 import { supportsOwnedText } from '../owned-text-support';
 import { selectionContext, TextSelection, type EditorState } from '../state';
 import { type Step } from '../transform';
-import { plainText, type StarterNode, type TableNode, type TableCell } from './demo-model';
 import { table as tableDefinition, tableCell, paragraph } from './starter-definitions';
 import { tableCells, tableRows } from './table';
 
 /** Copy a logical rectangle rather than a tree slice ordered by the active cell. */
-export function copyCellRectangle(
-  schema: Schema<StarterNode>,
-  state: EditorState<StarterNode>,
-): TableNode | null {
+export function copyCellRectangle<N extends NodeIdentity>(
+  schema: Schema<N>,
+  state: EditorState<N>,
+): N | null {
   const selection = state.selection;
 
   if (!(selection instanceof tableCells.CellSelection)) return null;
@@ -20,10 +19,13 @@ export function copyCellRectangle(
 
   const table = indexTree(schema, state.nodes).byId.get(selection.tableId)?.node;
 
-  if (table?.kind !== 'table') throw new Error('Missing table');
-  const rows: TableCell[][] = Array.from({ length: rect.bottom - rect.top }, () => []);
+  const tableType = schema.node(tableDefinition);
+  const cellType = schema.node(tableCell);
 
-  for (const row of table.rows)
+  if (!table || !tableType.matches(table)) throw new Error('Missing table');
+  const rows: N[][] = Array.from({ length: rect.bottom - rect.top }, () => []);
+
+  for (const row of tableRows(schema, table))
     for (const cell of row) {
       const bounds = map.bounds.get(cell.id);
 
@@ -43,29 +45,50 @@ export function copyCellRectangle(
         bounds.bottom > rect.bottom
       )
         throw new Error('Select complete merged cells before copying.');
-      rows[bounds.top - rect.top].push({ ...cell, row: bounds.top - rect.top });
+      const attributes = cellType.read(cell);
+
+      if (!attributes) throw new Error('Expected table cell');
+      rows[bounds.top - rect.top].push(
+        cellType.create(cell, { ...attributes, row: bounds.top - rect.top }, schema.children(cell)),
+      );
     }
 
-  return { ...table, caption: '', rows };
+  return tableType.create(table, { caption: '' }, rows.flat());
 }
 
-export function cellRectangleText(table: TableNode): string {
-  const width = table.rows[0]?.reduce((n, c) => n + c.colspan, 0) ?? 0;
+export function cellRectangleText<N extends NodeIdentity>(schema: Schema<N>, table: N): string {
+  const rows = tableRows(schema, table);
+  const cellType = schema.node(tableCell);
 
-  const occupied = Array.from({ length: table.rows.length }, () =>
+  function attributes(node: N) {
+    const result = cellType.read(node);
+
+    if (!result) throw new Error('Expected table cell');
+
+    return result;
+  }
+
+  const width = rows[0]?.reduce((n, cell) => n + attributes(cell).colspan, 0) ?? 0;
+
+  const occupied = Array.from({ length: rows.length }, () =>
     Array<string | null>(width).fill(null),
   );
 
-  for (let row = 0; row < table.rows.length; row++) {
+  for (let row = 0; row < rows.length; row++) {
     let col = 0;
 
-    for (const cell of table.rows[row]) {
+    for (const cell of rows[row]) {
+      const attrs = attributes(cell);
+
       while (occupied[row][col] !== null && col < width) col++;
 
-      for (let y = row; y < row + cell.rowspan; y++)
-        for (let x = col; x < col + cell.colspan; x++) occupied[y][x] = '';
-      occupied[row][col] = cell.paragraphs.map((p) => plainText(p)).join('\n');
-      col += cell.colspan;
+      for (let y = row; y < row + attrs.rowspan; y++)
+        for (let x = col; x < col + attrs.colspan; x++) occupied[y][x] = '';
+      occupied[row][col] = schema
+        .children(cell)
+        .map((node) => textContent(schema, node))
+        .join('\n');
+      col += attrs.colspan;
     }
   }
 
@@ -239,7 +262,11 @@ export function pasteCellRectangle<N extends NodeIdentity>(
 }
 
 /** Parse spreadsheet TSV, including quoted tabs, newlines and doubled quotes. */
-export function plainCellRectangle(text: string, allocate: () => NodeIdentity): TableNode {
+export function plainCellRectangle<N extends NodeIdentity>(
+  schema: Schema<N>,
+  text: string,
+  allocate: () => NodeIdentity,
+): N {
   const rows: string[][] = [[]];
 
   let value = '',
@@ -284,24 +311,24 @@ export function plainCellRectangle(text: string, allocate: () => NodeIdentity): 
   if (!source.endsWith('\n') || value) rows[rows.length - 1].push(value);
   const width = rows.reduce((width, row) => Math.max(width, row.length), 0);
 
-  return {
-    kind: 'table',
-    ...allocate(),
-    caption: '',
-    rows: rows.map((row, y) =>
-      Array.from({ length: width }, (_, x) => ({
-        kind: 'tableCell',
-        ...allocate(),
-        row: y,
-        header: false,
-        colspan: 1,
-        rowspan: 1,
-        paragraphs: [
-          { kind: 'paragraph', ...allocate(), text: row[x] ?? '', marks: [], inline: [] },
-        ],
-      })),
+  const table = schema.node(tableDefinition);
+  const cell = schema.node(tableCell);
+  const textBlock = schema.node(paragraph);
+  const identity = allocate();
+
+  return table.create(
+    identity,
+    { caption: '' },
+    rows.flatMap((row, y) =>
+      Array.from({ length: width }, (_, x) => {
+        const cellId = allocate();
+
+        return cell.create(cellId, { row: y, header: false, colspan: 1, rowspan: 1 }, [
+          textBlock.create(allocate(), { text: row[x] ?? '' }),
+        ]);
+      }),
     ),
-  };
+  );
 }
 
 const escape = (value: string) =>

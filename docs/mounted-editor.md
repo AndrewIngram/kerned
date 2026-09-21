@@ -22,13 +22,14 @@ engine, schema copy, presentation callback or parallel renderer list.
 
 `defineNodePresentation(definition, factory)` binds to the installed definition
 family, including configured variants. The factory runs once per view and returns
-a function receiving normalized attributes plus node identity, child count and
-semantic mark ranges. It returns text/box metrics or a flowing-container policy.
+a function receiving normalized attributes plus node identity, child count,
+semantic mark ranges and inline values. It returns text/box metrics or a flowing-container policy.
 Immutable node presentations are cached per view. Duplicate or missing
 presentations produce explicit errors.
 
 Input extensions contribute through `inputPolicies` from `src/editor-browser`.
-They receive the imperative session and native text capture. Navigation,
+They receive the imperative session, native text capture, navigation/select-all
+helpers and a notice callback. Navigation,
 select-all, composition lifetime and focus synchronization belong to the mount;
 extensions implement schema-specific edits and clipboard policy. There can be
 one text-input owner, with multiple keyboard/clipboard handlers in assembly
@@ -47,6 +48,8 @@ React attaches the same native mount and disposes it on unmount or session
 replacement. It does not own the session. Callback changes do not remount the
 view. Strict Mode cleanup cancels obsolete initialization. `onError` receives
 initialization and background view failures, also displayed in an alert.
+`onNotice` receives nonfatal input messages such as a rejected paste. The native
+mount also announces these messages through a status element.
 
 ## Lifetime and coordinates
 
@@ -71,8 +74,15 @@ initialization and background view failures, also displayed in an alert.
 ## Migration status
 
 This interface is exercised with custom-schema vanilla and React editors. The
-writing demo still uses its existing starter composition and an internal
-`EditorEventHost`; it has not switched to this mount yet. Starter input, table,
+browser starter tuple now contributes text editing and paragraph/heading
+presentations. Its input policy supports custom text fields through schema
+capabilities and shares command definitions with the named command API.
+Mounted browser tests cover typing, stored marks, history and paragraph splits.
+Tables, list markers, quote rules and inline/decorations still require adapters
+before the complete starter content can use this mount.
+
+The writing demo still uses its existing starter composition and an internal
+`EditorEventHost`; it has not switched to this mount yet. Table,
 inline/decorations and diagnostic contributions must be migrated before that
 switch. The old event host is not a second public editor interface. Milestone 4
 remains open until the demo uses the shared mount and stops passing graphics

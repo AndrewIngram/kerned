@@ -1,6 +1,13 @@
 import { defineContribution } from '../core';
 import { createDocumentQuery } from '../editor-browser/document';
-import type { MarkRange, NodeBinding, NodeIdentity, Schema, SchemaDefinition } from '../model';
+import type {
+  InlineValue,
+  MarkRange,
+  NodeBinding,
+  NodeIdentity,
+  Schema,
+  SchemaDefinition,
+} from '../model';
 import type { BlockPresentation } from './scene';
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
@@ -22,6 +29,7 @@ export type PresentationContext = {
   readonly identity: NodeIdentity;
   readonly childCount: number;
   readonly marks: readonly MarkRange[];
+  readonly inline: readonly InlineValue[];
 };
 
 type PresentationRenderer<N> = {
@@ -59,6 +67,7 @@ export function defineNodePresentation<D extends NodeDefinition>(
             identity: node,
             childCount: schema.children(node).length,
             marks: type.kind === 'text' ? (type.editing.marks?.read(node) ?? []) : [],
+            inline: type.kind === 'text' ? (type.editing.inline?.read(node) ?? []) : [],
           });
 
           if (result.kind === 'flow' && type.kind !== 'container')

@@ -1,4 +1,4 @@
-import type { HeadingLevel, TextBlockNode } from './demo-model';
+import type { HeadingLevel } from './demo-model';
 
 const headings: Record<
   HeadingLevel,
@@ -10,7 +10,10 @@ const headings: Record<
   4: { size: 20, lineHeight: 28, before: 24, after: 8 },
 };
 
-export function typography(node: TextBlockNode, bodySize: number) {
+export function typography(
+  node: { kind: 'paragraph' } | { kind: 'heading'; level: HeadingLevel },
+  bodySize: number,
+) {
   const scale = bodySize / 18;
 
   const style =
