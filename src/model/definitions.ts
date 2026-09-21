@@ -112,6 +112,17 @@ export interface BehaviorDefinition<
   configure(next: Partial<Options>): BehaviorDefinition<Name, Options, Contribution, Args>;
 }
 
+/** Content builders add an empty setup path; supplied factories still return a definite contribution. */
+export type DefinitionContribution<Definition> = Definition extends {
+  setup: (...args: never[]) => infer Contribution;
+}
+  ? Definition extends { readonly [definitionFamily]: symbol }
+    ? NonNullable<Contribution>
+    : Contribution
+  : Definition extends { setup?: (...args: never[]) => infer Contribution }
+    ? Contribution | undefined
+    : never;
+
 function definition<
   const Category extends 'node' | 'mark' | 'inline',
   const Name extends string,

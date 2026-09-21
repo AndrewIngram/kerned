@@ -68,46 +68,73 @@ test('a failing factory cleans up both its own resources and completed factories
   expect(released).toEqual(['failing', 'first']);
 });
 
-test('registry collisions and state initialization failures dispose prepared extension resources', () => {
-  for (const mode of ['command', 'query', 'field'] as const) {
-    const released: string[] = [];
+test('command collisions dispose prepared extension resources', () => {
+  const released: string[] = [];
 
-    const invalid = defineExtension({
-      name: 'invalid',
-      options: {},
-      setup(_options, { onDestroy }: Pick<ExtensionContext<NodeIdentity>, 'onDestroy'>) {
-        onDestroy(() => released.push('invalid'));
+  const invalid = defineExtension({
+    name: 'invalid',
+    options: {},
+    setup(_options, { onDestroy }: Pick<ExtensionContext<NodeIdentity>, 'onDestroy'>) {
+      onDestroy(() => released.push('invalid'));
 
-        if (mode === 'command') return { commands: { focus: { execute: () => true } } };
+      return { commands: { focus: { execute: () => true } } };
+    },
+  });
 
-        if (mode === 'query') return { queries: { shared: () => 2 } };
+  const schema = createSchema({ extensions: [note, resource('first', released), invalid] });
+  expect(() => createEditor({ schema, content: [] })).toThrow(/Duplicate command/);
+  expect(released).toEqual(['invalid', 'first']);
+});
 
-        return {
-          fields: [
-            createStateField<DocumentNode<readonly [typeof note]>, number>({
-              create: () => {
-                throw new Error('Field failed');
-              },
-              update: (value) => value,
-            }),
-          ],
-        };
-      },
-    });
+test('query collisions dispose prepared extension resources', () => {
+  const released: string[] = [];
 
-    const query = defineExtension({
-      name: 'query',
-      options: {},
-      setup: () => ({ queries: { shared: () => 1 } }),
-    });
+  const invalid = defineExtension({
+    name: 'invalid',
+    options: {},
+    setup(_options, { onDestroy }: Pick<ExtensionContext<NodeIdentity>, 'onDestroy'>) {
+      onDestroy(() => released.push('invalid'));
 
-    const schema = createSchema({
-      extensions: [note, resource('first', released), query, invalid],
-    });
+      return { queries: { shared: () => 2 } };
+    },
+  });
 
-    expect(() => createEditor({ schema, content: [] })).toThrow(/Duplicate|Field failed/);
-    expect(released).toEqual(['invalid', 'first']);
-  }
+  const query = defineExtension({
+    name: 'query',
+    options: {},
+    setup: () => ({ queries: { shared: () => 1 } }),
+  });
+
+  const schema = createSchema({ extensions: [note, resource('first', released), query, invalid] });
+  expect(() => createEditor({ schema, content: [] })).toThrow(/Duplicate query/);
+  expect(released).toEqual(['invalid', 'first']);
+});
+
+test('state initialization failures dispose prepared extension resources', () => {
+  const released: string[] = [];
+
+  const invalid = defineExtension({
+    name: 'invalid',
+    options: {},
+    setup(_options, { onDestroy }: Pick<ExtensionContext<NodeIdentity>, 'onDestroy'>) {
+      onDestroy(() => released.push('invalid'));
+
+      return {
+        fields: [
+          createStateField<DocumentNode<readonly [typeof note]>, number>({
+            create: () => {
+              throw new Error('Field failed');
+            },
+            update: (value) => value,
+          }),
+        ],
+      };
+    },
+  });
+
+  const schema = createSchema({ extensions: [note, resource('first', released), invalid] });
+  expect(() => createEditor({ schema, content: [] })).toThrow(/Field failed/);
+  expect(released).toEqual(['invalid', 'first']);
 });
 
 test('cleanup failures retain the initialization error and do not skip other resources', () => {

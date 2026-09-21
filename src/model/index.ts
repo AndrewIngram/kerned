@@ -81,6 +81,7 @@ export {
   defineMark,
   defineInline,
   type SchemaDefinition,
+  type DefinitionContribution,
   type DocumentNode,
   type DocumentInput,
   type DocumentMark,
@@ -88,6 +89,6 @@ export {
   type DocumentOutput,
 } from './definitions';
 
-export { createSchema, type AssembledSchema } from './assembly';
+export { createSchema, type AssembledSchema, type SchemaValues } from './assembly';
 
 export { type NodeBinding } from './node-binding';

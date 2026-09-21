@@ -6,6 +6,8 @@ import {
   type SchemaDefinition,
   type NodeIdentity,
   type Schema,
+  type SchemaValues,
+  type DefinitionContribution,
 } from '../model';
 import {
   createEditor as createStateEditor,
@@ -46,11 +48,11 @@ export type SessionContribution<N extends NodeIdentity> = {
   history?: HistoryOptions;
 };
 
-type Contribution<Definition> = Definition extends { setup: (...args: never[]) => infer Value }
-  ? Value
+type ValuesOf<Value, Key extends string> = Value extends Value
+  ? Key extends keyof Value
+    ? NonNullable<Value[Key]>
+    : never
   : never;
-
-type ValuesOf<Value, Key extends string> = Value extends Record<Key, infer Values> ? Values : never;
 
 type KeysOf<Union> = Union extends Union ? keyof Union : never;
 
@@ -60,12 +62,45 @@ type ValueOf<Union, Key extends PropertyKey> = Union extends Union
     : never
   : never;
 
-type Installed<D extends readonly SchemaDefinition[], Key extends string> = {
-  [Name in KeysOf<ValuesOf<Contribution<D[number]>, Key>>]: ValueOf<
-    ValuesOf<Contribution<D[number]>, Key>,
-    Name
-  >;
+type Capabilities<Value, Key extends string> = {
+  [Name in KeysOf<ValuesOf<Value, Key>>]: ValueOf<ValuesOf<Value, Key>, Name>;
 };
+
+// An array can be empty; only a tuple proves its definitions are installed.
+type Installed<
+  D extends readonly SchemaDefinition[],
+  Key extends string,
+> = number extends D['length'] ? {} : Capabilities<DefinitionContribution<D[number]>, Key>;
+
+type IsUnion<Value, Whole = Value> = Value extends Whole
+  ? [Whole] extends [Value]
+    ? false
+    : true
+  : never;
+
+type UnstableCapability<Value, Key extends string> = keyof Capabilities<Value, Key> extends never
+  ? never
+  : Exclude<keyof Capabilities<Value, Key>, string> extends never
+    ? string extends keyof Capabilities<Value, Key>
+      ? Key
+      : [Value] extends [Record<Key, Required<Capabilities<Value, Key>>>]
+        ? {
+            [Name in keyof Capabilities<Value, Key>]: true extends IsUnion<
+              Capabilities<Value, Key>[Name]
+            >
+              ? Name
+              : never;
+          }[keyof Capabilities<Value, Key>]
+        : Key
+    : Key;
+
+// Check each assembly slot before distributing definition unions: either branch must
+// install the same callable capabilities. Availability belongs in command execution.
+type UnstableContributions<D extends readonly SchemaDefinition[]> = {
+  [Index in keyof D]:
+    | UnstableCapability<DefinitionContribution<D[Index]>, 'commands'>
+    | UnstableCapability<DefinitionContribution<D[Index]>, 'queries'>;
+}[number];
 
 type InvalidContribution<Definition, N extends NodeIdentity> = Definition extends {
   setup: (...args: never[]) => object | undefined;
@@ -78,21 +113,24 @@ type InvalidContribution<Definition, N extends NodeIdentity> = Definition extend
 type CompatibleContributions<D extends readonly SchemaDefinition[], N extends NodeIdentity> = [
   InvalidContribution<D[number], N>,
 ] extends [never]
-  ? unknown
+  ? [UnstableContributions<D>] extends [never]
+    ? unknown
+    : { readonly sessionCapabilitiesMustBeStable: never }
   : { incompatibleSessionContribution: never };
 
-type SessionSchema<D extends readonly SchemaDefinition[], N extends NodeIdentity> = Schema<N> & {
-  readonly definitions: D;
-  // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Canonical document validation accepts external persisted content.
-  readonly validateDocument: (input: unknown) => StandardSchemaV1.Result<readonly N[]>;
-  readonly '~standard': {
-    readonly version: 1;
-    readonly vendor: string;
-    readonly types?: { readonly input: DocumentInput<D>; readonly output: readonly N[] };
-    // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Standard Schema accepts unknown content at its validation boundary.
-    validate(input: unknown): StandardSchemaV1.Result<readonly N[]>;
+type SessionSchema<D extends readonly SchemaDefinition[], N extends NodeIdentity> = Schema<N> &
+  SchemaValues<D> & {
+    readonly definitions: D;
+    // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Canonical document validation accepts external persisted content.
+    readonly validateDocument: (input: unknown) => StandardSchemaV1.Result<readonly N[]>;
+    readonly '~standard': {
+      readonly version: 1;
+      readonly vendor: string;
+      readonly types?: { readonly input: DocumentInput<D>; readonly output: readonly N[] };
+      // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Standard Schema accepts unknown content at its validation boundary.
+      validate(input: unknown): StandardSchemaV1.Result<readonly N[]>;
+    };
   };
-};
 
 type EditorConfig<D extends readonly SchemaDefinition[], N extends NodeIdentity> = {
   schema: SessionSchema<D, N>;

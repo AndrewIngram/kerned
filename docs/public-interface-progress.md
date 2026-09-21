@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status      | Required outcome                                                               |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Complete    | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | In progress | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Pending     | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Pending     | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending     | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending     | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending     | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status   | Required outcome                                                               |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Complete | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Pending  | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Pending  | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -1048,3 +1048,35 @@ Removing duplicate restored-document preparation reduced the prior trial's
 Both reports identify `b74f3b0` and measure their respective uncommitted trees.
 The pre-review commit covers the completed implementation; milestone acceptance
 still requires the judge and any agreed fixes.
+
+### Milestone 3 judge fixes and acceptance
+
+The independent judge reviewed `c3cdf8b..5ad50fe` and required two fixes at the
+composition seam. Conditional/optional commands and queries could appear as
+required methods despite being absent at runtime. Session schema types also
+omitted the assembly's typed mark and inline factories.
+
+Composition now checks each tuple slot for stable, finite string capability names
+and callable signatures. Disabled features retain their methods and report
+availability through execution/`can()`. Variable-length assemblies do not claim
+statically installed names. Content-definition builders retain their normal
+setup inference; their internal absent-factory path does not make supplied
+contributions optional. Negative consumer fixtures cover optional factories,
+namespace/member/name alternatives, changing signatures, symbol/numeric names,
+index signatures and dynamic assemblies. Existing configured node, mark and
+inline contribution fixtures remain positive.
+
+`SchemaValues` keeps the model-owned typed factories available through both
+`schema` and `editor.schema`, without forcing recursive node inference into the
+session overload. Consumer fixtures verify installed discriminants and attributes,
+reject unknown names/invalid attributes and confirm the schema identity is
+unchanged. The judge's full report and resolution are in
+[milestone-3-architecture-review.md](milestone-3-architecture-review.md).
+
+Post-review full checks and production build passed: **253 Vitest passes, one
+unchanged convergence todo and all 39 Playwright scenarios**. Final type-only
+name-validation additions were also typechecked and linted. Production runtime
+code is unchanged by these fixes; the final pre-review three-trial performance
+report remains applicable. README and session examples now describe the composed
+session interface. The post-review commit closes milestone 3; milestone 4 owns
+the remaining complete view lifecycle and demo assembly removal.

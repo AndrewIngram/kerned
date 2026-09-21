@@ -57,6 +57,17 @@ argument tuple determine `commands`, `chain`, `can` and `getCommandState` types.
 receive `{ schema, state }`; commands additionally receive draft operations.
 Query return values retain their inferred types.
 
+Setup factories must install stable command and query names and signatures.
+Conditional namespaces or optional members are rejected when constructing a typed
+session. Keep the command installed and return `false` when unavailable; callers
+can use `can()` without first checking whether a method exists. Tuple assemblies
+infer installed methods. Variable-length extension arrays retain runtime
+registration but do not promise named methods in the static session interface.
+
+`editor.schema` retains the assembly's typed node, mark and inline factories.
+Constructing values through the session checks installed names and required
+attributes just as it does through the original schema.
+
 `content` is import input and applies schema defaults and normalization.
 `document` accepts canonical content, preserving existing identities and checking
 normalized attributes without replaying import transforms. Both construction
@@ -431,12 +442,29 @@ lifecycle event error reporting described above.
 ## Typed extension state
 
 ```ts
-const stats = createStateField<MyNode, number>({
-  create: () => 0,
-  update: (count, event) => count + (event.kind === 'transaction' ? 1 : 0),
+import { createEditor, defineExtension, defineQuery } from './src/core';
+import { createSchema, type NodeIdentity } from './src/model';
+import { createStateField } from './src/state';
+import { paragraph } from './src/extensions/starter-definitions';
+
+const Stats = defineExtension({
+  name: 'stats',
+  options: {},
+  setup() {
+    const count = createStateField<NodeIdentity, number>({
+      create: () => 0,
+      update: (value, event) => value + (event.kind === 'transaction' ? 1 : 0),
+    });
+    return {
+      fields: [count],
+      queries: { changeCount: defineQuery(({ state }) => count.read(state)) },
+    };
+  },
 });
-const editor = createEditor(schema, nodes, selection, [], { fields: [stats] });
-const count = stats.read(editor.state);
+
+const schema = createSchema({ extensions: [paragraph, Stats] });
+const editor = createEditor({ schema, content: [{ kind: 'paragraph', text: 'Draft' }] });
+const count = editor.queries.changeCount();
 ```
 
 State fields are independent of schema nodes and stored in weakly held session snapshots. Reducers receive before/after state and transaction or undo/redo mapping, or selection/stored-mark events. They prepare before publication; a thrown error leaves document, history and reference metadata unchanged. Readers notified after commit see updated fields. Reducers also run for draft command previews, must have no external effects, and cannot reenter editor mutation. A failed preview is never published. Fields do not automatically serialize, persist externally, or rewind on undo; their reducer defines the response to undo/redo.

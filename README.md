@@ -8,7 +8,8 @@ The examples below use source imports from this repository.
 
 The planned consumer interface and package migration are specified in the
 [public-interface implementation plan](docs/public-interface-implementation-plan.md).
-Its proposed APIs are not yet implemented; the examples below describe current usage.
+Schema assembly and composed session commands are implemented. The complete mounted
+view, React integration and built package interfaces remain in the plan.
 
 ## Add the editor to a page
 
@@ -39,101 +40,86 @@ execution flow and lifecycle constraints. The optional React `Editor` component
 mounts native event handling around a caller-supplied renderer; it does not select
 a schema or create a document session for you.
 
-## Create editor state
+## Create an editor session
 
-`createEditor` owns document state, selection, transaction history, and search.
-It does not create a view. A custom host can start with the existing document
-schema:
+Assemble the extensions once, then create a session from that schema. The starter
+kit installs content types, editing commands, table selections and local history.
+The session works without React or a mounted view.
 
 ```ts
-import { createEditor, textSelection } from './src/state';
-import type { Step } from './src/transform';
-import { demoSchema } from './src/extensions/demo-schema';
-import { tableCells } from './src/extensions/table';
-import type { StarterNode } from './src/extensions/demo-model';
+import { createEditor } from './src/core';
+import { createSchema } from './src/model';
+import { textSelection } from './src/state';
+import { starterExtensions } from './src/extensions/starter-kit';
 
-const editor = createEditor(
-  demoSchema,
-  [
-    {
-      kind: 'paragraph',
-      id: 1,
-      key: 'intro',
-      text: 'Hello world',
-      marks: [],
-      inline: [],
-    },
-  ],
-  textSelection(1, 0),
-  [tableCells.extension],
-);
+const schema = createSchema({ extensions: starterExtensions });
+const editor = createEditor({
+  schema,
+  content: [{ kind: 'paragraph', id: 1, key: 'intro', text: 'Hello world' }],
+});
 ```
 
-`editor.state` contains `nodes`, `selection`, and `revision`. Each node has a
-numeric `id` for local operations and a stable string `key` for saved references.
-The schema defines its remaining fields. The fourth argument registers custom
-selection types, here the table extension's cell selection.
+`editor.state` exposes readonly document nodes, selection, revision and stored
+marks. Each node has a numeric `id` for local operations and a stable string
+`key` for saved references. The assembled schema validates content and supplies
+missing defaults and identities. Selection types come from the installed
+extensions.
 
 The page host above owns its own editor instance. This example creates a separate
 instance for a custom host.
 
 ## Run commands
 
-Commands return transaction steps. Create commands from the current state, then
-apply their steps with `editor.dispatch`:
-
 ```ts
-import { textCommands } from './src/extensions/text-commands';
-
-function dispatch(steps: readonly Step<StarterNode>[]) {
-  return editor.dispatch({
-    baseRevision: editor.state.revision,
-    origin: 'local',
-    history: 'separate',
-    time: performance.now(),
-    steps,
-  });
-}
-
 editor.select(textSelection(1, 0, 5));
-dispatch(textCommands(demoSchema, editor.state).toggle('bold'));
+editor.commands.toggleFormat('bold');
+editor.select(textSelection(1, 5));
+editor.commands.insertText(' canvas');
+editor.commands.undo();
+editor.commands.redo();
 
-dispatch([{ kind: 'replaceText', id: 1, from: 5, to: 5, text: ' canvas' }]);
-
-editor.undo();
-editor.redo();
+const available = editor.can().toggleFormat('italic');
+const activity = editor.getCommandState('toggleFormat', 'bold');
+// Connect your persistence callback to committed content changes.
+const unsubscribe = editor.on('content', ({ after }) => save(after.nodes));
 ```
 
-The paragraph now reads `Hello canvas world`, with `Hello` in bold. The host
-updates its view after dispatch, selection changes, undo, or redo. `dispatch`
-returns the new `state` and `changedIds`; undo and redo return `null` when their
-history is empty. There is no state subscription API.
+The paragraph now reads `Hello canvas world`, with `Hello` in bold. Commands return
+whether they succeeded. `can()` checks the same command without publication.
+Availability is separate from active, inactive or mixed formatting. Named methods
+and argument types derive from the installed extensions.
 
-Text offsets use UTF-16 positions and must follow grapheme boundaries. A stale
-`baseRevision` rejects the transaction. `history: 'separate'` creates an undo
-boundary; `history: {group: 'typing'}` allows compatible adjacent edits to group.
+`editor.chain().focus().toggleFormat('bold').scrollIntoView().run()` combines
+commands into one undoable edit and defers view effects until successful
+publication. Headless focus/reveal are no-ops. A false command rejects the entire
+chain. History replay may accompany view effects or read-only commands; invoke
+new edits and undo/redo as separate calls.
 
-| Operation                       | API                                                                                                     |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Caret or range within one block | `editor.select(textSelection(id, from, to))`; omit `to` for a caret                                     |
-| Range across blocks             | `editor.select(new TextSelection(anchor, head))`; each endpoint is `{id, offset}`                       |
-| Bold, italic, underline         | `textCommands(schema, state).toggle('bold' \| 'italic' \| 'underline')`                                 |
-| Toolbar state                   | `textCommands(schema, state).available` and `.active(format)`                                           |
-| Clear formatting                | `textCommands(schema, state).clear()`                                                                   |
-| Comment on selected text        | `textCommands(schema, state).comment(id)` returns `{steps, target}`                                     |
-| Quote or list                   | `blockCommands(schema, state, ids, allocate).quote()` or `.list(ordered)`                               |
-| Paragraph or heading            | `setTextBlockType(schema, state, ids, level)`; `level` is `1`, `2`, `3`, `4`, or `null` for a paragraph |
+Use `editor.on(...)` for typed content, transaction, selection and destruction
+events, or `editor.subscribe(...)` for view invalidation. Both return cleanup.
+`editor.destroy()` releases the attached view and extension resources. It leaves
+the final snapshot readable and rejects subsequent edits.
 
-Formatting commands require a nonempty text selection. Block commands receive
-selected block IDs and an `allocate` function returning a fresh `{id, key}`.
-Use `editor.allocateBlockId()` for the ID and a unique stable key of your choice.
+| Operation                       | Interface                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| Caret or range within one block | `editor.select(textSelection(id, from, to))`; omit `to` for a caret            |
+| Range across blocks             | `editor.select(new TextSelection(anchor, head))`; endpoints are `{id, offset}` |
+| Bold, italic, underline         | `editor.commands.toggleFormat(format)`                                         |
+| Clear formatting                | `editor.commands.clearMarks()`                                                 |
+| Quote or list                   | `editor.commands.toggleQuote()` or `.toggleList(ordered)`                      |
+| Paragraph or heading            | `editor.commands.setHeading(level)`; `1`–`4`, or `null` for a paragraph        |
+| Table                           | `editor.commands.insertTable()`, `.addTableRow()`, `.addTableColumn()`         |
 
-The command implementations live in
-[`text-commands.ts`](src/extensions/text-commands.ts),
-[`blocks.ts`](src/extensions/blocks.ts), and
-[`headings.ts`](src/extensions/headings.ts). The
-[transaction reference](docs/editor-transactions-and-anchors.md) covers structural
-steps, streamed appends, history grouping, and durable anchors.
+Caret formatting applies to subsequent input without changing existing content.
+Comments are external extension data based on durable ranges; see
+[the session reference](docs/editor-session-api.md#external-comments-and-decorations).
+
+The imperative `editor.transact(context => ...)` and `editor.dispatch(transaction)`
+interfaces remain available beneath named commands. Text offsets use UTF-16
+positions at grapheme boundaries. Stale revisions reject. See the
+[session reference](docs/editor-session-api.md) for extension authoring and chain
+semantics, and the [transaction reference](docs/editor-transactions-and-anchors.md)
+for steps, streamed appends, grouping and durable references.
 
 ## Define a node extension
 
@@ -145,7 +131,7 @@ from the definition.
 ```ts
 import { z } from 'zod';
 import { createSchema, defineNode } from './src/model';
-import { createEditor, textSelection } from './src/state';
+import { createEditor } from './src/core';
 
 const note = defineNode({
   name: 'note',
@@ -158,9 +144,10 @@ const note = defineNode({
 });
 
 const schema = createSchema({ extensions: [note] });
-const result = schema['~standard'].validate([{ kind: 'note', key: 'first-note', text: 'A note' }]);
-if (result.issues) throw new Error('Invalid content');
-const notes = createEditor(schema, result.value, textSelection(result.value[0].id, 0));
+const notes = createEditor({
+  schema,
+  content: [{ kind: 'note', key: 'first-note', text: 'A note' }],
+});
 ```
 
 Content types derive from the installed extension tuple. Validation assigns missing
@@ -182,8 +169,8 @@ formatting and inline objects to the same assembly.
 
 The [starter definitions](src/extensions/starter-definitions.ts) own paragraphs,
 headings, checklists, images, tables, quotes, lists, formatting and mentions.
-The object-configured session and extension command APIs remain scheduled for
-milestone 3; the example above uses the current imperative session constructor.
+The [session reference](docs/editor-session-api.md) describes the object-configured
+session, reusable commands, queries and per-session extension state.
 
 ## Render extensions
 

@@ -96,26 +96,31 @@ type TypedInline<D extends readonly SchemaDefinition[]> = string extends D[numbe
       }
     >;
 
-export type AssembledSchema<Definitions extends readonly SchemaDefinition[]> = Schema<
-  DocumentNode<Definitions>
-> & {
+/** Typed value factories are independent of recursive document-node inference. */
+export type SchemaValues<Definitions extends readonly SchemaDefinition[]> = {
   readonly marks: TypedMarks<Definitions>;
   readonly inline: TypedInline<Definitions>;
-  readonly definitions: Readonly<Definitions>;
-  /** Validate canonical nodes without replaying import normalization. */
-  // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Persisted normalized content still needs validation at the document boundary.
-  readonly validateDocument: (
-    // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Canonical document validation is an external content boundary.
-    input: unknown,
-  ) => StandardSchemaV1.Result<DocumentOutput<Definitions>>;
-  readonly '~standard': Omit<
-    StandardSchemaV1.Props<DocumentInput<Definitions>, DocumentOutput<Definitions>>,
-    'validate'
-  > & {
-    // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Standard Schema requires an unknown-input validation boundary.
-    validate(input: unknown): StandardSchemaV1.Result<DocumentOutput<Definitions>>;
-  };
 };
+
+export type AssembledSchema<Definitions extends readonly SchemaDefinition[]> = Schema<
+  DocumentNode<Definitions>
+> &
+  SchemaValues<Definitions> & {
+    readonly definitions: Readonly<Definitions>;
+    /** Validate canonical nodes without replaying import normalization. */
+    // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Persisted normalized content still needs validation at the document boundary.
+    readonly validateDocument: (
+      // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Canonical document validation is an external content boundary.
+      input: unknown,
+    ) => StandardSchemaV1.Result<DocumentOutput<Definitions>>;
+    readonly '~standard': Omit<
+      StandardSchemaV1.Props<DocumentInput<Definitions>, DocumentOutput<Definitions>>,
+      'validate'
+    > & {
+      // oxlint-disable-next-line anti-slop/no-unknown-parameters -- Standard Schema requires an unknown-input validation boundary.
+      validate(input: unknown): StandardSchemaV1.Result<DocumentOutput<Definitions>>;
+    };
+  };
 
 /** Compile structured-content validation and editing from the same definition tuple. */
 export function createSchema<const Definitions extends readonly SchemaDefinition[]>(config: {
