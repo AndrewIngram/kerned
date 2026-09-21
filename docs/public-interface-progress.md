@@ -1411,3 +1411,41 @@ Three serial production trials pass all unchanged budgets: worst first usable
 typing 32.2 ms, paging 32.6 ms and loaded heap 28,947,408 bytes. The report records
 `02183dd` and measures this checkpoint's uncommitted tree. Milestone 4 remains
 open; checklist migration is no longer part of its remaining work.
+
+### Milestone 4 checkpoint: native table editing and measurement
+
+Table DOM reconciliation, editing state, selection direction, clipboard routing,
+keyboard commands, composition handling and ResizeObserver ownership now live in
+`extensions/starter-kit/table-view.ts`. The React table component only attaches,
+updates and destroys that controller. Both native callers and the demo exercise
+one implementation; table edits continue through the existing session commands.
+The ownership checker rejects React imports in the native table module.
+
+Rows, cells and paragraphs retain keyed DOM identities across transactions, so
+editing and structural updates preserve the active textarea. Backward native
+selections retain their direction. Formatting, undo/redo, rectangular selection,
+Tab navigation and rich clipboard routing keep their existing behavior. A denied
+text transaction restores canonical text instead of leaving an uncontrolled
+textarea showing an edit absent from the document. Destruction removes listeners,
+measurement observation and mounted content; callbacks ignore late measurements.
+
+Validation: `pnpm run check` passes with 372 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. Twelve new browser cases exercise the
+native controller with real session transactions across Chromium, Firefox and
+WebKit. They cover typing, retained input identity, focus, backward selection,
+formatting, undo/redo, structure changes, cell navigation, rectangular selection,
+clipboard routing, composition, overlapping IDs, permission rejection and cleanup.
+The production build passes; large-document and viewport-first reflow audits each
+pass all nine cases, including the new table fixture.
+
+Three serial production trials in `artifacts/public-interface-m4/native-table/`
+pass every unchanged budget: worst first usable 180 ms, streaming 1,079.4 ms,
+paste handler 56.6 ms, paste to paint 120.8 ms, typing 32.3 ms, paging 32.8 ms and
+loaded heap 28,975,024 bytes. The report records `597e683` and measures this
+checkpoint's uncommitted tree. Separate large-document and reflow reports are in
+the same directory.
+
+Milestone 4 remains open. Native table behavior is ready for the mounted view,
+but table actions/clipboard and inline/mark/decorations still need composition
+through extension contributions. The complete mount must own their placement and
+lifecycle and remove kit/owned from the demo tree before the milestone judge.

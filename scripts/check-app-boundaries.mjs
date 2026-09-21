@@ -79,6 +79,7 @@ for (const group of groups) {
         [
           'src/extensions/starter-kit/document-layout.ts',
           'src/extensions/starter-kit/image-view.ts',
+          'src/extensions/starter-kit/table-view.ts',
         ].includes(file)
       ) {
         assert.ok(

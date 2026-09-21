@@ -16,6 +16,10 @@ portals. The mention panel reads its parent's React context. An inline atom
 occupies one U+FFFC code unit, with caret stops before and after it. Plain-text
 copy substitutes its label.
 
+Tables use a native DOM controller for editing, selection, keyboard input and
+measurement; their React component only mounts and updates it. Native table
+callers use the same session commands as the React demo.
+
 Tables and images report their measured height through `ResizeObserver`.
 Measurements carry their width so the host can discard stale reports. Height
 changes move later blocks without reshaping their text. Table cell text lives in document state with undo/redo and survives unmounting.
