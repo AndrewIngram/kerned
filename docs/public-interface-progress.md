@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status    | Required outcome                                                               |
-| ----------------------------------- | --------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete  | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | In review | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Pending   | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Pending   | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Pending   | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Pending   | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Pending   | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending   | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending   | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status   | Required outcome                                                               |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Pending  | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Pending  | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Pending  | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Pending  | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Pending  | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -272,3 +272,18 @@ passes with the existing convergence todo**, and **39 Playwright passes**. The
 production build passed. Discovery comparison preserved all 105 baseline Vitest
 identities/statuses, including the todo and repeated browser identities, and all
 39 E2E identities. The four new headless consumer cases account for the increase.
+
+### Milestone 1 architecture review
+
+Implementation commit: `a400102`. The independent judge and its explorer passed
+milestone 1, finding real model/transform/state ownership and no introduced
+mapping, permission, history or durable-reference regression. Its targeted
+verification passed 39 relevant tests with the existing convergence todo.
+
+Both suggested clarifications are accepted. `beforeStep` now receives a read-only
+array and explicitly forbids mutation of nodes/steps. The transform interface
+states that ordinary application reports descendant changes, while restoration
+reports roots whose subtrees require invalidation. That distinction preserves
+existing history behavior. Active README and session/extension documentation now
+import the owning module instead of the removed barrel. Historical proposals and
+baseline inventories retain their original paths as historical evidence.

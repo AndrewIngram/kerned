@@ -46,7 +46,8 @@ It does not create a view. A custom host can start with the existing document
 schema:
 
 ```ts
-import { createEditor, textSelection, type Step } from './src/editor';
+import { createEditor, textSelection } from './src/state';
+import type { Step } from './src/transform';
 import { demoSchema } from './src/extensions/demo-schema';
 import { tableCells } from './src/extensions/table';
 import type { StarterNode } from './src/extensions/demo-model';
@@ -149,7 +150,8 @@ positive integer version, and one of three capabilities:
 This extension gives a custom `Note` node ordinary text editing and undo:
 
 ```ts
-import { createSchema, createEditor, textSelection, type NodeExtension } from './src/editor';
+import { createSchema, type NodeExtension } from './src/model';
+import { createEditor, textSelection } from './src/state';
 
 type Note = { id: number; key: string; kind: 'note'; text: string };
 

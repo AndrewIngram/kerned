@@ -23,14 +23,16 @@ export type TransformResult<N extends NodeIdentity> = {
   changes: DocumentChange<N>[];
   maps: PositionMap[];
   anchorMaps: AnchorMap[];
+  /** Changed node handles, including descendants of edited roots. */
   changedIds: number[];
   tree: TreeIndex<N>;
 };
 
 export type TransformOptions<N extends NodeIdentity> = {
   insertedMarks?: readonly Mark[];
-  /** Called before each step; throwing rejects the transform without publishing a document. */
-  beforeStep?: (nodes: N[], step: Step<N>) => void;
+  /** Observe the current draft without mutating nodes or steps. Throwing rejects
+   * the transform before the caller publishes a document. */
+  beforeStep?: (nodes: readonly N[], step: Step<N>) => void;
 };
 
 /** Apply document operations without a session, selection, revision or history policy. */
@@ -501,7 +503,9 @@ export function applySteps<N extends NodeIdentity>(
   return { nodes, changes, maps, anchorMaps, changedIds: [...changedIds], tree };
 }
 
-/** Restore identity-checked change slices; rejects stale history instead of overwriting edits. */
+/** Restore identity-checked change slices; rejects stale history instead of overwriting edits.
+ * changedIds identifies invalidation roots, not an exhaustive list of changed descendants.
+ * Consumers must invalidate those roots and their subtrees. */
 export function restoreChanges<N extends NodeIdentity>(
   initial: N[],
   changes: readonly DocumentChange<N>[],

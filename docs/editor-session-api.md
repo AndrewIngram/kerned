@@ -1,6 +1,6 @@
 # Implemented editor session APIs
 
-The APIs below are exported from `src/editor/index.ts`. They are headless; React is optional. They describe the current implementation, while [the broader API proposal](editor-api-proposal.md) includes work not yet implemented.
+Session and selection interfaces are exported from `src/state/index.ts`. Schema, content and durable-reference value codecs are exported from `src/model/index.ts`; document operations and mappings are exported from `src/transform/index.ts`. These modules are headless; React is optional. They describe the current implementation, while [the broader API proposal](editor-api-proposal.md) includes work not yet implemented.
 
 ## Commands
 
