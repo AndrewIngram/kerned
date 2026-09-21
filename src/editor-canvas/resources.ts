@@ -2,6 +2,7 @@ import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 
 import { createOwnedEngine } from '../owned-layout';
 import { readEditorAsset, type ResolveEditorAsset } from './assets';
+import { createFontCatalog, type FontConfiguration } from './font-catalog';
 
 type NativeResources = {
   kit: CanvasKit;
@@ -15,12 +16,15 @@ type ResourceState =
   | { status: 'destroyed' };
 
 /** Private view lifetime. Ordinary consumers mount a view, rather than borrowing these handles. */
-export function createViewResources(options: { resolveAsset?: ResolveEditorAsset } = {}) {
+export function createViewResources(
+  options: { resolveAsset?: ResolveEditorAsset; fonts?: FontConfiguration } = {},
+) {
   const abort = new AbortController();
   const assets = { ...options, signal: abort.signal };
   let state: ResourceState = { status: 'loading' };
 
   async function initialize() {
+    const fonts = createFontCatalog(options.fonts);
     const bytes = await readEditorAsset('engines/canvaskit.wasm', assets);
 
     if (!WebAssembly.validate(bytes)) throw new Error('Invalid graphics WebAssembly asset');
@@ -38,7 +42,7 @@ export function createViewResources(options: { resolveAsset?: ResolveEditorAsset
     }
 
     abort.signal.throwIfAborted();
-    const layout = await createOwnedEngine(kit, 'shaping', assets);
+    const layout = await createOwnedEngine(kit, 'shaping', { ...assets, fonts });
 
     if (abort.signal.aborted) {
       layout.destroy();

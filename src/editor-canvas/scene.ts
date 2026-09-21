@@ -505,6 +505,9 @@ function sameText(a: TextPresentation, b: TextPresentation) {
     a === b ||
     (a.text === b.text &&
       a.size === b.size &&
+      a.font?.family === b.font?.family &&
+      a.font?.weight === b.font?.weight &&
+      a.font?.style === b.font?.style &&
       a.lineHeight === b.lineHeight &&
       a.baselineGrid === b.baselineGrid &&
       (a.spans === b.spans ||

@@ -15,7 +15,7 @@ export function packGlyphs(paragraphGlyphs: ParagraphGlyphs) {
   const counts = new Uint32Array(
     paragraphGlyphs.clusters.reduce(
       (max, cluster) => cluster.glyphs.reduce((n, glyph) => Math.max(n, glyph.font + 1), max),
-      4,
+      0,
     ),
   );
 

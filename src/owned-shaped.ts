@@ -11,7 +11,7 @@ export type ShapingRun = {
 };
 
 export function decodeShaping(text: string, runs: ShapingRun[], lineBreaks: Uint32Array) {
-  const counts = new Uint32Array(Math.max(4, ...runs.map((run) => run.font + 1)));
+  const counts = new Uint32Array(Math.max(0, ...runs.map((run) => run.font + 1)));
 
   let count = 0,
     glyphCount = 0,

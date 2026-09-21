@@ -8,6 +8,7 @@ import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
 import { createSchema, defineNode } from '../../model';
 import { TextSelection, textSelection } from '../../state';
 import { createViewDiagnostics, type DiagnosticEvent } from '../diagnostics';
+import { defaultFonts } from '../font-catalog';
 import { mountEditor, defineNodePresentation, presentations } from '../index';
 
 const note = defineNode({
@@ -711,4 +712,35 @@ test('a centered column keeps outer editor margins clickable and updates paint i
   view.update({ maxWidth: null });
   await expect.poll(() => view.getSnapshot()?.viewport.width).toBe(420);
   expect(canvas.getBoundingClientRect().width).toBe(420);
+});
+
+test('public mounts resolve their configured font family independently', async ({
+  onTestFinished,
+}) => {
+  const first = fixture();
+  const second = fixture();
+  onTestFinished(() => {
+    first.destroy();
+    second.destroy();
+  });
+  const regular = mountEditor(first.element, { editor: first.editor });
+
+  const display = mountEditor(second.element, {
+    editor: second.editor,
+    fonts: {
+      ...defaultFonts,
+      defaultFamily: 'Display',
+      faces: [...defaultFonts.faces, { ...defaultFonts.faces[1], family: 'Display', weight: 400 }],
+    },
+  });
+
+  await Promise.all([regular.ready, display.ready]);
+  const start = { id: 1, offset: 0 };
+  const end = { id: 1, offset: 16 };
+  const regularWidth = regular.coordsAt(end)!.left - regular.coordsAt(start)!.left;
+  const displayWidth = display.coordsAt(end)!.left - display.coordsAt(start)!.left;
+  expect(displayWidth).not.toBe(regularWidth);
+  display.destroy();
+  expect(regular.coordsAt(end)).not.toBeNull();
+  expect(regular.coordsAt(end)!.left - regular.coordsAt(start)!.left).toBe(regularWidth);
 });

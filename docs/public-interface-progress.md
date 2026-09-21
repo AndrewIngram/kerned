@@ -2191,3 +2191,41 @@ and separate diagnostics; extension input, node views and layers share that
 lifetime. Typography/font configuration, final React authoring interfaces,
 codec/input composition and built workspace packages remain milestones 5–8.
 Milestone 4 is complete after the post-review fix commit.
+
+### Milestone 5 checkpoint: semantic font resolution
+
+The mount and React attachment accept an optional font configuration. A validated,
+immutable catalogue describes family/weight/style and asset sources; it is captured
+before asynchronous loading. The native font collection owns matching shaper and
+painter registrations, sized font objects and cleanup. Default Noto faces preserve
+the demo appearance. Numeric native slots no longer encode regular, bold, italic
+or emoji semantics. Font selection and inline formatting resolve through the same
+catalogue, and resolved identities participate in shaping and metric cache keys.
+
+An exact-pixel comparison with reversed font registration exposed a one-channel,
+one-pixel difference caused by painting grouped fonts in slot order. Composition
+now records contiguous runs in text order, borrowing subarrays of the existing
+numeric buffers. This preserves overlap compositing independently of registration
+order. Removing the assumed minimum of four font buckets also avoids unnecessary
+empty buffers for ordinary single-face text. The byte-sized packed font identity
+is protected by a validated maximum of 256 registered faces.
+
+Coverage includes static font matching and fallbacks, duplicate/invalid catalogue
+rejection, immutable loading snapshots, different families in simultaneous public
+mounts, changed family/weight/style at the same node identity, shaping reuse across
+width changes, and exact geometry/pixel parity for styled text, emoji and inline
+content with reversed registrations. `pnpm run check` passes with 561 Vitest tests,
+one unchanged collaboration TODO and 42 end-to-end cases. The production build
+passes. The existing Unicode editing audit passes in all three browsers.
+
+Three serial production trials pass every unchanged budget: worst first usable
+220 ms, streaming 1,181.9 ms, paste handler 57.8 ms, paste to paint 116.8 ms,
+typing 32.1 ms, paging 32.2 ms and loaded heap 27,393,912 bytes. Reports in
+`artifacts/public-interface-m5/font-resolution/` identify `c25f91e` and measure
+this checkpoint's uncommitted tree. The interface and ownership decision are in
+`docs/view-fonts.md`.
+
+Milestone 5 remains open: shared canvas/DOM typography, configurable node rules,
+font readiness/replacement during live updates, metric/paint invalidation and
+scroll-preserving theme changes are still required. This checkpoint is not the
+milestone completion or its architecture-judge gate.

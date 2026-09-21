@@ -64,11 +64,20 @@ export function composeParagraph(
     ? 0
     : clusters.reduce(
         (max, cluster) => cluster.glyphs.reduce((n, glyph) => Math.max(n, glyph.font + 1), max),
-        4,
+        0,
       );
 
   const glyphs: number[][] = Array.from({ length: fontCount }, () => []);
   const positions: number[][] = Array.from({ length: fontCount }, () => []);
+  const ranges: { font: number; from: number; to: number }[] = [];
+
+  function appendRun(font: number, slot: number) {
+    const previous = ranges.at(-1);
+
+    if (previous?.font === font) previous.to = slot + 1;
+    else ranges.push({ font, from: slot, to: slot + 1 });
+  }
+
   let first = 0;
 
   do {
@@ -124,10 +133,12 @@ export function composeParagraph(
 
           output[slot] = pen + packed.dx[g];
           output[slot + 1] = top + baseline - packed.dy[g];
+          appendRun(packed.fonts[g], slot / 2);
           pen += packed.advance[g];
         }
       } else {
         for (const glyph of clusters[i].glyphs) {
+          appendRun(glyph.font, glyphs[glyph.font].length);
           glyphs[glyph.font].push(glyph.id);
           positions[glyph.font].push(pen + glyph.dx, top + baseline - glyph.dy);
           pen += glyph.advance;
@@ -170,22 +181,16 @@ export function composeParagraph(
     first = end;
   } while (first < clusterCount);
 
-  const runs =
-    packed && packedPositions
-      ? packed.ids.flatMap((ids, font) =>
-          ids.length ? [{ font, glyphs: ids, positions: packedPositions[font] }] : [],
-        )
-      : glyphs.flatMap((ids, font) =>
-          ids.length
-            ? [
-                {
-                  font,
-                  glyphs: new Uint16Array(ids),
-                  positions: new Float32Array(positions[font]),
-                },
-              ]
-            : [],
-        );
+  // Preserve visual text order when glyph ink overlaps across faces. Native
+  // registration order must not affect compositing. Runs borrow numeric buffers.
+  const ids = packed?.ids ?? glyphs.map((values) => new Uint16Array(values));
+  const coordinates = packedPositions ?? positions.map((values) => new Float32Array(values));
+
+  const runs = ranges.map(({ font, from, to }) => ({
+    font,
+    glyphs: ids[font].subarray(from, to),
+    positions: coordinates[font].subarray(from * 2, to * 2),
+  }));
 
   return finishParagraph(width, textLength, lineHeight, lines, runs, numericCarets, stops, rows);
 }

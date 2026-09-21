@@ -1,8 +1,10 @@
-import type { CanvasKit, Font, Typeface } from 'canvaskit-wasm';
+import type { CanvasKit, Font } from 'canvaskit-wasm';
 import { z } from 'zod';
 
 import { readEditorAsset, type EditorAssetOptions } from './editor-canvas/assets';
-import { fontFiles, type LayoutInput, type LaidOut } from './engines';
+import { createFontCatalog, type FontSelection } from './editor-canvas/font-catalog';
+import { createNativeFonts, markedFont, type TextFaces } from './editor-canvas/native-fonts';
+import type { LayoutInput, LaidOut } from './engines';
 import { boundaries, type Span } from './layout-types';
 import { createBlockSession } from './owned-blocks';
 import { placeParagraphs } from './owned-document';
@@ -29,11 +31,13 @@ type PreparedParagraph = {
 export async function createOwnedEngine(
   kit: CanvasKit,
   storage: OwnedStorage = 'objects',
-  assets: EditorAssetOptions = {},
+  assets: EditorAssetOptions & { fonts?: ReturnType<typeof createFontCatalog> } = {},
 ) {
+  const catalog = assets.fonts ?? createFontCatalog();
+
   const [wasm, data] = await Promise.all([
     readEditorAsset('engines/owned.wasm', assets),
-    Promise.all(fontFiles.map((f) => readEditorAsset(`fonts/${f}`, assets))),
+    Promise.all(catalog.faces.map((face) => readEditorAsset(face.asset, assets))),
   ]);
 
   assets.signal?.throwIfAborted();
@@ -72,41 +76,14 @@ export async function createOwnedEngine(
     return ptr;
   }
 
-  const faces: Typeface[] = [];
+  const nativeFonts = createNativeFonts(kit, catalog, data, (bytes) =>
+    call('register_font', allocate(new Uint8Array(bytes)), bytes.byteLength),
+  );
+
+  const { font } = nativeFonts;
   const paint = new kit.Paint();
-
-  try {
-    paint.setColor(kit.Color(37, 42, 35));
-    paint.setAntiAlias(true);
-
-    for (const [index, bytes] of data.entries()) {
-      if (call('register_font', allocate(new Uint8Array(bytes)), bytes.byteLength) !== index)
-        throw new Error('Font registration failed');
-      const face = kit.Typeface.MakeFreeTypeFaceFromData(bytes);
-
-      if (!face) throw new Error('Skia font registration failed');
-      faces.push(face);
-    }
-  } catch (error) {
-    for (const face of faces) face.delete();
-    paint.delete();
-    throw error;
-  }
-
-  const fonts = new Map<string, Font>();
-
-  function font(id: number, size: number) {
-    const key = `${id}:${size}`;
-    let value = fonts.get(key);
-
-    if (!value) {
-      value = new kit.Font(faces[id], size);
-      value.setSubpixel(true);
-      fonts.set(key, value);
-    }
-
-    return value;
-  }
+  paint.setColor(kit.Color(37, 42, 35));
+  paint.setAntiAlias(true);
 
   const stats = {
     glyphCalls: 0,
@@ -165,7 +142,9 @@ export async function createOwnedEngine(
         end = stops[i + 1],
         value = text.slice(start, end);
 
-      const chosen = emojiSequence.test(value) && !value.includes('\ufe0e') ? 4 : id;
+      const chosen =
+        emojiSequence.test(value) && !value.includes('\ufe0e') ? nativeFonts.emoji : id;
+
       const last = segments.at(-1);
 
       if (last?.font === chosen) last.end = end;
@@ -213,13 +192,14 @@ export async function createOwnedEngine(
     cached?: RetainedParagraph,
     requestedHeight = size * 1.6,
     grid = 0,
+    faces: TextFaces = nativeFonts.defaults,
   ): PreparedParagraph {
-    const metricKey = `${size}:${requestedHeight}:${grid}`;
+    const metricKey = `${faces.normal}:${size}:${requestedHeight}:${grid}`;
     let metrics = paragraphMetrics.get(metricKey);
 
     if (!metrics) {
       const lineHeight = requestedHeight;
-      const fontMetrics = font(0, size).getMetrics();
+      const fontMetrics = font(faces.normal, size).getMetrics();
       metrics = {
         lineHeight,
         baseline:
@@ -235,7 +215,7 @@ export async function createOwnedEngine(
 
     if (paragraphGlyphs) stats.cacheHits++;
     else if (storage === 'shaping') {
-      const base = resolveGlyphRuns(text, 0, size);
+      const base = resolveGlyphRuns(text, faces.normal, size);
 
       if (!spans.length) paragraphGlyphs = decodeShaping(text, base.runs, base.breaks);
       else {
@@ -252,7 +232,11 @@ export async function createOwnedEngine(
         for (let i = 0; i < cuts.length - 1; i++) {
           const start = cuts[i];
           const active = spans.filter((s) => s.start <= start && s.end > start);
-          const id = Number(active.some((s) => s.bold)) + 2 * Number(active.some((s) => s.italic));
+
+          const id = markedFont(faces, {
+            bold: active.some((s) => s.bold),
+            italic: active.some((s) => s.italic),
+          });
 
           for (const run of resolveGlyphRuns(text.slice(start, cuts[i + 1]), id, size).runs) {
             const words = run.words.slice();
@@ -268,7 +252,7 @@ export async function createOwnedEngine(
         paragraphGlyphs = decodeShaping(text, runs, lineBreaks);
       }
     } else {
-      const base = resolveGlyphs(text, 0, size);
+      const base = resolveGlyphs(text, faces.normal, size);
       let glyphs = base.glyphs;
 
       if (spans.length) {
@@ -278,7 +262,11 @@ export async function createOwnedEngine(
 
         glyphs = cuts.slice(0, -1).flatMap((start, i) => {
           const active = spans.filter((s) => s.start <= start && s.end > start);
-          const id = Number(active.some((s) => s.bold)) + 2 * Number(active.some((s) => s.italic));
+
+          const id = markedFont(faces, {
+            bold: active.some((s) => s.bold),
+            italic: active.some((s) => s.italic),
+          });
 
           return resolveGlyphs(text.slice(start, cuts[i + 1]), id, size).glyphs.map((g) => ({
             ...g,
@@ -440,6 +428,7 @@ export async function createOwnedEngine(
         assertOwner();
         const started = performance.now();
         const size = input.size;
+        const faces = input.font ? nativeFonts.resolve(input.font) : nativeFonts.defaults;
 
         if (
           !(
@@ -480,6 +469,7 @@ export async function createOwnedEngine(
             input.size,
             input.lineHeight,
             input.baselineGrid,
+            faces.key,
           ]);
 
           const cached = retained.get(key) ?? previous?.get(key);
@@ -492,6 +482,7 @@ export async function createOwnedEngine(
             cached,
             input.lineHeight,
             input.baselineGrid,
+            faces,
           );
 
           retained.set(key, { paragraphGlyphs, composed, packed });
@@ -514,6 +505,7 @@ export async function createOwnedEngine(
         size: number;
         lineHeight?: number;
         baselineGrid?: number;
+        font?: FontSelection;
       }) {
         assertOwner();
         const started = performance.now();
@@ -528,6 +520,8 @@ export async function createOwnedEngine(
         )
           throw new Error('Invalid inline layout dimensions');
 
+        const faces = input.font ? nativeFonts.resolve(input.font) : nativeFonts.defaults;
+
         const key = JSON.stringify([
           input.text,
           input.spans,
@@ -535,19 +529,20 @@ export async function createOwnedEngine(
           input.size,
           input.lineHeight,
           input.baselineGrid,
+          faces.key,
         ]);
 
         const previous = documents.get(input.id)?.get(key);
 
         const paragraphGlyphs =
           previous?.paragraphGlyphs ??
-          layoutInlineParagraph(input.text, input.spans, input.atoms, (text, fontValue) =>
-            resolveGlyphs(text, fontValue, input.size),
+          layoutInlineParagraph(input.text, input.spans, input.atoms, (text, marks) =>
+            resolveGlyphs(text, markedFont(faces, marks), input.size),
           );
 
         if (!('clusters' in paragraphGlyphs)) throw new Error('Inline cache kind mismatch');
         const packed = previous?.packed ?? packGlyphs(paragraphGlyphs);
-        const fontMetrics = font(0, input.size).getMetrics();
+        const fontMetrics = font(faces.normal, input.size).getMetrics();
         const defaultHeight = input.lineHeight ?? input.size * 1.6;
 
         const normalBaseline =
@@ -692,10 +687,7 @@ export async function createOwnedEngine(
 
       for (const session of blockSessions) session.release();
 
-      for (const value of fonts.values()) value.delete();
-      fonts.clear();
-
-      for (const face of faces) face.delete();
+      nativeFonts.destroy();
       paint.delete();
       inkBounds.clear();
       paragraphMetrics.clear();

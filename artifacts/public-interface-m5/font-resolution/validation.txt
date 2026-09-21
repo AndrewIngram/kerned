@@ -1,0 +1,24 @@
+Font-resolution checkpoint
+
+pnpm run check: PASS (561 Vitest tests, one unchanged TODO, 42 E2E)
+pnpm run build: PASS (existing bundle-size warning)
+
+
+> gprose-engine-prototype@0.0.0 check:editor-unicode /Users/andrewingram/Code/gprose
+> node scripts/check-editor-unicode.mjs
+
+chromium emoji sequences, missing glyphs, accents, grapheme deletion, undo and safe unsupported input passed
+firefox emoji sequences, missing glyphs, accents, grapheme deletion, undo and safe unsupported input passed
+webkit emoji sequences, missing glyphs, accents, grapheme deletion, undo and safe unsupported input passed
+
+
+> gprose-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/gprose
+> node scripts/check-editor-performance.mjs artifacts/public-interface-m5/font-resolution/baseline.json
+
+firstUsableMs: 220.0 <= 248.4
+streamingMs: 1181.9 <= 1331.3
+pasteHandlerMs: 57.8 <= 62.8
+pastePaintMs: 116.8 <= 123.1
+typingFrameMs: 32.1 <= 48.6
+pagingFrameMs: 32.2 <= 48.7
+loadedHeapBytes: 27393912.0 <= 36069308.4

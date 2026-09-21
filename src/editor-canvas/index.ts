@@ -7,3 +7,10 @@ export type { ResolveEditorAsset, EditorAsset } from './assets';
 export type { ViewConfiguration, RevealOptions } from './view-options';
 
 export type { ViewSnapshot, BlockBounds } from './view-geometry';
+
+export {
+  defaultFonts,
+  type FontConfiguration,
+  type FontSelection,
+  type FontSource,
+} from './font-catalog';

@@ -16,6 +16,7 @@ import { createCanvasRenderer } from './canvas-renderer';
 import { createDiagnosticSource } from './diagnostic-source';
 import type { ViewDiagnostics } from './diagnostics';
 import { createDocumentLayout } from './document-layout';
+import type { FontConfiguration } from './font-catalog';
 import { createLayerDrawing } from './layer-drawing';
 import { createLayerGeometry } from './layer-geometry';
 import { createDocumentPresentation } from './presentation';
@@ -28,6 +29,7 @@ import { readViewConfiguration, type ViewConfiguration } from './view-options';
 export type MountEditorOptions<N extends NodeIdentity> = ViewConfiguration & {
   editor: ViewSession<N>;
   resolveAsset?: ResolveEditorAsset;
+  fonts?: FontConfiguration;
   scroll?: 'container' | 'page';
   toolbar?: HTMLElement;
   onError?: (error: Error) => void;
@@ -464,7 +466,7 @@ export function mountEditor<N extends NodeIdentity>(
 
     element.append(root);
     cleanup.push(() => root.remove());
-    resources = createViewResources({ resolveAsset: options.resolveAsset });
+    resources = createViewResources({ resolveAsset: options.resolveAsset, fonts: options.fonts });
     cleanup.push(() => resources.destroy());
     cleanup.push(
       () => viewport.destroy(),

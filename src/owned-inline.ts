@@ -15,7 +15,10 @@ export function layoutInlineParagraph(
   text: string,
   spans: Span[],
   atoms: readonly InlineAtom[],
-  resolveGlyphs: (text: string, font: number) => { glyphs: Glyph[]; breaks: number[] },
+  resolveGlyphs: (
+    text: string,
+    marks: Pick<Span, 'bold' | 'italic'>,
+  ) => { glyphs: Glyph[]; breaks: number[] },
 ): ParagraphGlyphs {
   const stops = new Set(boundaries(text));
   const sorted = [...atoms].toSorted((a, b) => a.index - b.index);
@@ -64,7 +67,7 @@ export function layoutInlineParagraph(
     if (start === end) return;
 
     const value = text.slice(start, end),
-      base = resolveGlyphs(value, 0);
+      base = resolveGlyphs(value, { bold: false, italic: false });
 
     for (const b of base.breaks) breaks.add(b + start);
 
@@ -83,9 +86,9 @@ export function layoutInlineParagraph(
 
       glyphs = cuts.slice(0, -1).flatMap((from, i) => {
         const active = local.filter((s) => s.start <= from && s.end > from),
-          font = Number(active.some((s) => s.bold)) + 2 * Number(active.some((s) => s.italic));
+          marks = { bold: active.some((s) => s.bold), italic: active.some((s) => s.italic) };
 
-        return resolveGlyphs(value.slice(from, cuts[i + 1]), font).glyphs.map((g) => ({
+        return resolveGlyphs(value.slice(from, cuts[i + 1]), marks).glyphs.map((g) => ({
           ...g,
           start: g.start + from,
         }));

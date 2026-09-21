@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
-import { fontFiles } from '../../engines';
 import type { EditorAsset } from '../assets';
+import { defaultFonts } from '../font-catalog';
 import { createViewResources } from '../resources';
 
 test('resolves every asset, initializes native resources and disposes all layout handles', async () => {
@@ -24,7 +24,7 @@ test('resolves every asset, initializes native resources and disposes all layout
     expect(requested).toEqual([
       'engines/canvaskit.wasm',
       'engines/owned.wasm',
-      ...fontFiles.map((file) => `fonts/${file}`),
+      ...defaultFonts.faces.map((face) => face.asset),
     ]);
     const { kit, layout } = owner.read();
     const paragraph = layout.layoutText({ text: 'Ready to edit', width: 200, size: 20, spans: [] });
@@ -77,7 +77,7 @@ test('destruction during font resolution cancels native initialization', async (
   expect(requested).toEqual([
     'engines/canvaskit.wasm',
     'engines/owned.wasm',
-    `fonts/${fontFiles[0]}`,
+    defaultFonts.faces[0].asset,
   ]);
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   expect(owner.status).toBe('destroyed');
@@ -141,7 +141,7 @@ test('rejects corrupt graphics bytes before starting the native graphics loader'
 test('a corrupt later font fails after partial native setup without publishing resources', async () => {
   const owner = createViewResources({
     resolveAsset: (asset) =>
-      asset === `fonts/${fontFiles[1]}`
+      asset === defaultFonts.faces[1].asset
         ? 'data:application/octet-stream,invalid-font'
         : `/${asset}`,
   });
@@ -150,4 +150,22 @@ test('a corrupt later font fails after partial native setup without publishing r
   expect(owner.status).toBe('failed');
   expect(() => owner.read()).toThrow(/failed/);
   owner.destroy();
+});
+
+test('font configuration is captured before asynchronous asset loading', async ({
+  onTestFinished,
+}) => {
+  const faces = defaultFonts.faces.map((entry) => ({ ...entry }));
+  const owner = createViewResources({ fonts: { ...defaultFonts, faces } });
+  onTestFinished(() => owner.destroy());
+  faces[0].asset = 'fonts/missing-after-creation.ttf';
+  faces[0].family = 'Changed while loading';
+  await owner.ready;
+  expect(owner.status).toBe('ready');
+
+  const text = owner
+    .read()
+    .layout.layoutText({ text: 'Stable font snapshot', spans: [], size: 20, width: 200 });
+
+  expect(text.lines.length).toBeGreaterThan(0);
 });

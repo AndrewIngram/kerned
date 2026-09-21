@@ -1,5 +1,6 @@
 import type { Canvas } from 'canvaskit-wasm';
 
+import type { FontSelection } from './editor-canvas/font-catalog';
 import type { Direction, Position, Span } from './layout-types';
 
 export type Rect = [number, number, number, number];
@@ -16,6 +17,7 @@ export type Line = {
 export type Geometry = { caret: Rect; rects: Rect[] };
 
 export type LayoutInput = {
+  font?: FontSelection;
   lineHeight?: number;
   baselineGrid?: number;
   id: number;
@@ -45,11 +47,3 @@ export interface LaidOut {
   move(index: number, upstream: boolean, direction: Direction): Position;
   dispose(): void;
 }
-
-export const fontFiles = [
-  'NotoSans-Regular.ttf',
-  'NotoSans-Bold.ttf',
-  'NotoSans-Italic.ttf',
-  'NotoSans-BoldItalic.ttf',
-  'NotoColorEmoji.ttf',
-];

@@ -97,7 +97,7 @@ call. It returns an immutable, view-owned token with width and height.
 `drawing.text(label, left, top)` paints it without shaping in the paint callback.
 The view keeps a bounded label cache across viewport culling. Tokens cannot be
 drawn by another view, and text preparation rejects calls after layer destruction.
-The current label contract uses the existing default font; configurable font
+The current label contract uses the view's default font family; per-label font
 resolution remains milestone 5 work.
 
 The starter `underlineView` uses this geometry and drawing contract. It reads mark
@@ -202,7 +202,7 @@ mount also announces these messages through a status element.
 `zoom` and `paddingTop` props update the existing view, including while assets are
 loading. They preserve its input element, focus and selection. Omitting either
 prop restores its default (`1` and `0` respectively). Changing attachment options
-such as the session, scroll mode or asset resolver creates a new view.
+such as the session, scroll mode, font configuration or asset resolver creates a new view.
 
 ## Lifetime and coordinates
 
@@ -261,6 +261,8 @@ such as the session, scroll mode or asset resolver creates a new view.
 - `scroll: 'page'` uses page scrolling and an optional `toolbar` element as the
   sticky inset. The default uses a scroll container inside the supplied host.
   `editor.commands.scrollIntoView()` reveals the current selection.
+- `fonts` supplies view-owned font sources, default family and emoji fallback. See
+  [font configuration](view-fonts.md) for matching, readiness and current limits.
 - `resolveAsset` maps graphics, shaping and font asset paths to application URLs.
   Native engine handles stay private to the mounted view. Successful immutable
   asset bytes are cached by resolved URL (at most 32 entries / 64 MiB); native

@@ -19,6 +19,7 @@ type EditorProps<N extends NodeIdentity> = MountEditorOptions<N> &
 export function Editor<N extends NodeIdentity>({
   editor,
   resolveAsset,
+  fonts,
   scroll,
   toolbar,
   diagnostics,
@@ -73,6 +74,7 @@ export function Editor<N extends NodeIdentity>({
         mounted = mountEditor(target, {
           editor,
           resolveAsset,
+          fonts,
           scroll,
           toolbar,
           diagnostics,
@@ -100,7 +102,7 @@ export function Editor<N extends NodeIdentity>({
       if (view.current === mounted) view.current = undefined;
       mounted?.destroy();
     };
-  }, [editor, resolveAsset, scroll, toolbar, diagnostics]);
+  }, [editor, resolveAsset, fonts, scroll, toolbar, diagnostics]);
 
   return (
     <>
