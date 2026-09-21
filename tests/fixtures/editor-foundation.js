@@ -97,11 +97,11 @@ export async function mountOptimizedProbe(editor, element) {
     { createRoot } = await import('react-dom/client'),
     { flushSync } = await import('react-dom');
 
-  const { useEditorState, createReactRenderers } = await import('../../src/editor-react/index.tsx');
+  const { useEditorState } = await import('../../src/editor-react/index.tsx');
 
   const { mountEditorView } = await import('../../src/editor-browser/index.ts');
 
-  const counts = { revision: 0, selection: 0, pointer: 0, input: 0, renderer: 0 };
+  const counts = { revision: 0, selection: 0, pointer: 0, input: 0 };
   const selectRevision = (state) => state.revision;
   const selectSelection = (state) => ({ kind: state.selection.type });
 
@@ -120,17 +120,11 @@ export async function mountOptimizedProbe(editor, element) {
     return null;
   }
 
-  const View = createReactRenderers([
-    {
-      name: 'custom',
-      component: ({ value }) => {
-        const [n, setN] = React.useState(0);
-        counts.renderer++;
+  function View({ value }) {
+    const [n, setN] = React.useState(0);
 
-        return React.createElement('button', { onClick: () => setN(n + 1) }, `${value}:${n}`);
-      },
-    },
-  ]);
+    return React.createElement('button', { onClick: () => setN(n + 1) }, `${value}:${n}`);
+  }
 
   const props = {
     pointer: {
@@ -163,7 +157,7 @@ export async function mountOptimizedProbe(editor, element) {
       React.createElement(Revision),
       React.createElement(Selection),
       React.createElement('textarea'),
-      React.createElement(View, { type: 'custom', value: 'node' }),
+      React.createElement(View, { value: 'node' }),
     );
   }
 

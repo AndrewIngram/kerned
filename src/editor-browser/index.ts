@@ -181,3 +181,13 @@ export {
 } from './text-decorations';
 
 export { applyTextStyle, type TextStyle, type ReadTextStyle } from './text-style';
+
+export {
+  nodeViews,
+  defineNodeView,
+  type NodeViewContribution,
+  type NodeViewContext,
+  type NodeViewFrame,
+  type NodeViewAttributes,
+  type NodeView,
+} from './node-views';

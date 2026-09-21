@@ -2457,3 +2457,50 @@ See [React integration](react-integration.md) for the public usage and ownership
 choices. M6 remains open: React node/mark/widget rendering, context-preserving
 overlays and the general decoration API/migrations still need implementation and
 verification before the milestone commit and independent architecture judge.
+
+### Milestone 6 checkpoint: measured React node views in the shared mount
+
+`defineReactNodeView(definition, Component)` now registers React blocks through
+`nodeViews`, the same contribution used by native tables and images. Attributes
+are inferred from the bound Standard Schema definition. Components receive
+readonly node identity, normalized attributes, width and selected state. The
+browser entry now exports the native node-view contract instead of requiring
+extension authors to import its internal file.
+
+`EditorContent` owns a private portal store. Node destinations resolve their
+nearest content host when mounted; React reconciliation remains within the
+application's providers and error boundaries. The native view still owns node
+placement, culling and destination lifetime. A scoped ResizeObserver reports
+unscaled heights to the existing layout controller. Node/width/selection identity
+suppresses unrelated React updates, while provider changes still render. Events
+bubble through the content host. Initial React readiness waits for the portal
+commit after native view readiness. Cleanup releases observers, portals, pending
+readiness and the host registration. No React imports enter browser or canvas
+modules.
+
+The old standalone `createReactRenderers` registry and public type were removed.
+Its listener/selector probe uses a normal React component; the new browser tests
+exercise actual schema-bound rendering through `EditorContent`. Tests cover
+Strict Mode, inferred defaulted attributes, live context, local component state,
+measurement, interactive buttons, selection, unchanged-node render suppression,
+culling and semantic document state after remount, application error boundaries,
+and isolation between editors with overlapping node IDs. A vanilla mount with a
+React node contribution fails explicitly and releases its view resources rather
+than silently creating an isolated React root.
+
+`pnpm run check` passes with 679 Vitest tests, one unchanged collaboration TODO
+and 42 end-to-end cases. The production build passes. Three serial production
+trials in `artifacts/public-interface-m6/react-node-views/` preserve every original
+budget: worst first usable 227 ms, streaming 1,194.9 ms, paste handler 57.2 ms,
+paste paint 117.6 ms, typing 32 ms, paging 32.4 ms and loaded heap 27,044,264 bytes.
+These measurements cover the existing production demo with the new content host;
+they do not claim a large React-widget throughput benchmark. The report records
+parent commit `8854044` and measures this checkpoint's uncommitted implementation.
+The second lint fix/format pass leaves tracked and untracked files unchanged.
+
+[React extensions](react-extensions.md) documents the interface, ownership decision
+and culling semantics. Persistent state belongs in document/session/external
+stores; local React state ends with its mounted component. M6 remains open for
+editable content slots and complete selection/editability contracts, React marks
+and widgets, general decorations and migration of existing extension renderers.
+The milestone architecture judge follows completion of those requirements.

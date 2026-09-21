@@ -378,14 +378,19 @@ Text extensions can provide a mark-storage adapter, and node extensions can prov
 
 `mountEditorView(element, options)` from `src/editor-browser` owns pointer selection, native input/key/composition/clipboard routing and focus events. `update(options)` changes callbacks without reinstalling listeners; `destroy()` releases them and cancels dragging. Embedded controls opt out of canvas hit testing. Input events are routed only from the configured capture textarea, so interactive overlays retain their native behavior. `createTextInput(schema, editor)` owns schema-independent textarea synchronization, diffing, composition and native Select All observation. Call `sync` after selection/text changes outside composition, route native input through `read`, and release the cleanup returned by `mount`. `observeEditorViewport` handles page scrolling with a sticky toolbar or an embedded scrollport and returns cleanup.
 
-`Editor` from `src/editor-react` mounts this runtime around its children. The caller supplies `view.pointer`, optional `view.input`, and a renderer as children. The editor session belongs to the caller and survives React unmount/remount. Both demos use this host and the native runtime. Schema-specific commands and clipboard policy live in the starter-kit extensions. Generic canvas painting, viewport lifecycle, multiclick policy and navigation binding live in reusable adapters. The demo assembles these pieces; this is not a zero-configuration rich-text widget. See [app ownership](editor-app-architecture.md).
+`EditorContent` from `src/editor-react` attaches the complete native mount.
+`useEditor` owns a headless session after commit; `useEditorState`,
+`useCommandState` and `useViewState` subscribe to session and view snapshots.
+The demo uses those interfaces and no longer assembles private renderer resources.
+Schema-specific commands and clipboard policy belong to browser extensions.
+See [React integration](react-integration.md) and [app ownership](editor-app-architecture.md).
 
-`Editor` from `src/editor-react` attaches the full native mount, while
-`useEditorState` and `useViewState` subscribe to session and view snapshots.
-The demo uses this interface. The small `createReactRenderers<Value>` registry
-maps application names to components; it is not the planned node/mark/decoration
-registration API. That integration remains milestone 6 work. Browser extension
-contributions and drawing are described in [the mounted view reference](mounted-editor.md).
+`defineReactNodeView(definition, Component)` contributes a typed React block to
+`nodeViews`. `EditorContent` reconciles it through portals in the application
+React tree, with automatic measurement and native view culling/cleanup. The old
+standalone renderer registry is removed. General mark/widget rendering, editable
+content slots and public decorations remain milestone 6 work. See
+[React extensions](react-extensions.md) for the implemented contract.
 
 ## History ownership
 

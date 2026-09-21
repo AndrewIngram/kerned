@@ -13,6 +13,7 @@ import {
   type MountedEditor,
 } from '../editor-canvas';
 import type { NodeIdentity } from '../model';
+import { createPortalHost, EditorPortals } from './portals';
 
 export type EditorContentProps<N extends NodeIdentity> = Omit<MountEditorOptions<N>, 'editor'> & {
   editor: MountEditorOptions<N>['editor'] | null;
@@ -42,6 +43,7 @@ export function EditorContent<N extends NodeIdentity>({
   ...props
 }: EditorContentProps<N>) {
   const host = useRef<HTMLDivElement>(null);
+  const [portals] = useState(createPortalHost);
   const callbacks = useRef({ onReady, onError, onNotice });
   const configuration = useRef({ zoom, paddingTop, maxWidth, background, theme, fonts });
   const view = useRef<MountedEditor | undefined>(undefined);
@@ -87,6 +89,7 @@ export function EditorContent<N extends NodeIdentity>({
 
     if (!element || !editor || editor.isDestroyed) return undefined;
     const session = editor;
+    const detachPortals = portals.attach(element);
     let mounted: MountedEditor | undefined;
     let active = true;
     let reported = false;
@@ -118,6 +121,7 @@ export function EditorContent<N extends NodeIdentity>({
         });
         view.current = mounted;
         await mounted.ready;
+        await portals.whenCommitted();
 
         if (active && !mounted.isDestroyed) {
           setError(null);
@@ -134,13 +138,20 @@ export function EditorContent<N extends NodeIdentity>({
       active = false;
 
       if (view.current === mounted) view.current = undefined;
-      mounted?.destroy();
+
+      try {
+        mounted?.destroy();
+      } finally {
+        detachPortals();
+      }
     };
-  }, [editor, resolveAsset, scroll, toolbar, diagnostics]);
+  }, [editor, resolveAsset, scroll, toolbar, diagnostics, portals]);
 
   return (
     <>
-      <div {...props} ref={host} />
+      <div {...props} ref={host}>
+        <EditorPortals host={portals} />
+      </div>
       {editor && error && <div role="alert">{error.message}</div>}
     </>
   );

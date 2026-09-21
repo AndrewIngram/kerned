@@ -1,46 +1,88 @@
 # React extensions
 
-The writing demo at `/editor.html` and extension diagnostics at
-`/extensions.html` share `src/demo/app/main.tsx`. Both use the same editing core,
-owned layout engine, and extension schema. The diagnostics page keeps fixtures
-for extension behavior that the writing demo does not expose.
+Status: milestone 6 is in progress. Measured React block views are implemented;
+mark/widget registration, content slots and public decorations are still pending.
 
-`Editor` attaches the same native mount used by vanilla applications. It borrows
-the session and owns attachment cleanup. `useEditorState` selects session state;
-`useViewState` observes viewport/layout geometry without owning the view. See
-[the mounted view reference](mounted-editor.md) for configuration and readiness.
+`EditorContent` attaches the same complete view used by vanilla applications.
+It borrows the session and owns its view and React portal host. React components
+are registered through the browser's existing node-view contribution:
 
-The demo no longer coordinates graphics, layout, native input or culled DOM.
-Tables, images, mentions, underlines, comments and search are browser extension
-contributions discovered by the mount. React detail/comment panels use supported
-geometry queries and portals; the mention panel retains its parent's context.
-An inline atom occupies one U+FFFC code unit, with caret stops before and after
-it. Plain-text copy substitutes its label.
+```tsx
+function Card({ attributes, selected }: ReactNodeViewProps<typeof card>) {
+  const theme = useContext(ApplicationTheme);
+  return (
+    <section className={theme.card} data-selected={selected}>
+      {attributes.label}
+    </section>
+  );
+}
 
-The earlier graphics-handle-based `CanvasPrimitive` and manual block-layer
-attachment have been removed. A general React node/mark/decoration registration
-contract is still milestone 6 work. Existing `createReactRenderers` is a small
-application component registry, not a registration with the mounted editor.
+const cardViews = defineExtension({
+  name: 'cardViews',
+  options: {},
+  setup(_options, context: ContributionContext) {
+    context.provide(nodeViews, defineReactNodeView(card, Card));
+    // Also contribute a box presentation for card with an initial height.
+    return {};
+  },
+});
+```
 
-Tables and images report their measured height through `ResizeObserver`.
-Measurements carry their width so the host can discard stale reports. Height
-changes move later blocks without reshaping their text. Table cell text lives in document state with undo/redo and survives unmounting.
-Comment replies belong to the external comments extension.
+`defineReactNodeView` and `ReactNodeViewProps` come from `src/editor-react`;
+`nodeViews` and `defineNodeView` come from `src/editor-browser`. Assemble the view
+extension alongside its node definition and presentation. There is no second
+renderer list on `EditorContent` and no schema name lookup inside the component.
+Binding recognizes configured variants of the same definition family.
 
-Canvas drawing and DOM placement use the same block coordinates. The host mounts
-visible blocks with overscan and pins focused widgets until focus leaves them.
-The scene retains shaping while releasing offscreen geometry. See
-[retained geometry](editor-retained-geometry.md) and
-[viewport reflow](editor-viewport-reflow.md).
+The component receives immutable normalized `attributes`, readonly node identity,
+available `width` and a `selected` flag. Attribute types come from the node's
+Standard Schema, including defaults and transforms. The component can use its
+application providers and typed editor context to invoke commands. It does not
+receive a renderer, shaper, native graphics handle or mutable document reference.
 
-Run `pnpm run build`, `pnpm run preview`, then `pnpm run check:editor` to check
-mentions, portals, atomic navigation, copy/paste, widget measurements, focus,
-and inline layout in Chromium, Firefox, and WebKit. `pnpm run check:transactions`
-also checks independent schemas, containers, selections, and durable anchors.
-The [public extension boundary](editor-extension-boundary.md) describes those
-contracts.
+The native view owns placement, viewport culling and selection. A scoped
+`ResizeObserver` reports the component's unscaled height with the current width,
+so late reports can be rejected by layout. React node updates are suppressed when
+the node, width and selected state are unchanged. Application context updates
+still reach the component. Interactive controls follow the existing pointer
+policy and do not move the editor selection. Events bubble through the content
+host and the application's React tree.
 
-The inline layout path builds object clusters around atoms before packing glyphs
-and carets. Atom metric changes reshape their paragraph. Dynamic inline sizing,
-a general nested React renderer, accessible canvas reading, and print/export
-remain open work.
+`EditorContent.onReady` waits for the initial portal commit after native view
+readiness. Errors thrown by custom components reach the application's React error
+boundary. When that boundary unmounts the content host, native and React resources
+are released. A React node contribution requires `EditorContent`; a vanilla mount
+fails explicitly rather than creating a separate React root without context.
+
+## State and culling
+
+The host mounts visible blocks with overscan and pins focused widgets until focus
+leaves them. Culling unmounts the component and releases its effects and observer.
+Keep persistent semantic state in document attributes, session extension state or
+an external store. Local React state belongs to the mounted component and resets
+when that component is culled. The tests update a card's document attributes,
+scroll it out of the mounted region and verify those attributes on remount.
+
+The existing table and image contributions remain framework-independent. Their
+measurement, clipboard and native-input behavior uses the same view lifetime.
+Comments, mentions, underlines and canvas search remain browser layer
+contributions. The general React mark/widget and decoration contracts still need
+to replace the remaining specialized integration points.
+
+## Ownership choice
+
+We considered one independent React root per node and portals under the existing
+content host. Separate roots would require copying provider values and managing
+another error boundary and root lifetime for every node. Portals preserve the
+application tree and let the existing node-view owner request render/removal.
+
+A private registry associates each content-host element with its portal store.
+A node destination resolves the nearest registered ancestor only when mounted.
+Cleanup removes that registration and pending portals. No React-specific state
+or import enters the headless session, browser view or canvas implementation.
+The store publishes resident portals through React's external-store subscription;
+React owns reconciliation, while the native view owns destination lifetime.
+
+The old `createReactRenderers` application registry is removed. Its test probe now
+uses an ordinary React component; mounted custom-node tests exercise the real
+registration API, context, measurement, selection and lifetime.

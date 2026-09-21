@@ -10,7 +10,7 @@ export { useEditor } from './use-editor';
 
 export { createEditorContext } from './context';
 
-export { createReactRenderers, type ReactRenderer } from './renderers';
+export { defineReactNodeView, type ReactNodeViewProps } from './node-view';
 
 type SnapshotSource<State> = {
   readonly state: State;

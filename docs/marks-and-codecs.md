@@ -1,6 +1,6 @@
 # Marks and document codecs
 
-The core supports semantic mark ranges without imposing a node storage shape. Text extensions expose `editing.marks.read(node)` and `write(node, ranges)`. They may store ranges directly or project them to their own representation. The starter kit stores semantic `marks` directly. It projects bold, italic and underline into compact style runs only at layout. React renderers for marks and decorations are registered through `createReactRenderers`; the host supplies their geometry.
+The core supports semantic mark ranges without imposing a node storage shape. Text extensions expose `editing.marks.read(node)` and `write(node, ranges)`. They may store ranges directly or project them to their own representation. The starter kit stores semantic `marks` directly. It projects bold, italic and underline into compact style runs only at layout. React mark and decoration registration remains milestone 6 work. The mounted React node-view API is documented in [React extensions](react-extensions.md).
 
 ## Mark schema
 

@@ -55,7 +55,7 @@ export type NodeViewContribution = {
 /** The browser contract is defined here; the headless session only stores typed values. */
 export const nodeViews = defineContribution<NodeViewContribution>();
 
-type NodeViewAttributes<Definition extends NodeDefinition> = NonNullable<
+export type NodeViewAttributes<Definition extends NodeDefinition> = NonNullable<
   ReturnType<NodeBinding<NodeIdentity, Definition>['read']>
 >;
 
