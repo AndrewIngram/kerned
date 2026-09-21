@@ -361,6 +361,7 @@ export function mountEditor<N extends NodeIdentity>(
           () => layout?.getSnapshot().inset ?? 0,
           createTextLabels(native.layout),
         ),
+        { onError: fail, onTextPointer: capture.onTextPointer },
       );
       const installedLayers = layers;
       cleanup.push(() => installedLayers.destroy());

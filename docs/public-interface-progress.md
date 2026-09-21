@@ -1951,3 +1951,44 @@ Milestone 4 remains open for comments/search decoration integration, supported
 view updates and diagnostics, and complete demo migration. General custom-inline
 presentation and font configuration remain their respective planned milestones.
 This is a checkpoint, not the milestone's commit-and-judge gate.
+
+### Milestone 4 checkpoint: shared comment rendering and external updates
+
+`commentView(source)` now projects externally stored durable ranges through the
+same view-layer contribution in the public mount and demo. Applications configure
+highlight color and observe activation; the extension owns wrapped highlights,
+native block outlines and their lifecycle. Discussion UI and messages remain
+outside the document. The demo hook uses the shared projection, and the obsolete
+text-block overlay renderer and empty text hosts have been removed.
+
+View layers can invalidate their own frame when an external source changes.
+Invalidations coalesce, use the latest geometry and are cancelled on destruction.
+Scoped listeners and text-pointer subscriptions are released with the layer.
+Failures during external updates reach the mount's error handler. Source updates
+do not dispatch document transactions.
+
+Real-browser checks exposed pointer capture retargeting clicks away from comment
+highlights in Chromium and WebKit. Text activation now observes the editor's
+normalized text-pointer events after selection; native block activation observes
+pointerdown before capture. This preserves clicks within highlighted words and
+supports reopening image comments. Keyboard activation remains available.
+
+Validation: `pnpm run check` passes with 502 Vitest tests, one unchanged
+collaboration TODO and 42 end-to-end cases. The production build and all six
+toolbar audit cases pass. New public-mount tests cover external source updates,
+wrapped ranges, real caret placement, edits and undo, native activation, and
+destroy/remount subscription ownership. The sample-navigation test now verifies
+document and JavaScript object identity instead of exact `performance.timeOrigin`
+equality, which differed by 1 ms in WebKit despite preserving the page.
+
+Three serial production trials pass every unchanged performance budget: worst
+first usable 175 ms, streaming 1,079.4 ms, paste handler 57.4 ms, paste to paint
+121.6 ms, typing 32.3 ms, paging 32.8 ms and loaded heap 29,422,084 bytes.
+Reports are in `artifacts/public-interface-m4/comment-contribution/`; they identify
+`2f860ab` and measure this checkpoint's uncommitted tree. Paste timing still has
+little margin.
+
+Milestone 4 remains open for search and native text-range decorations, supported
+view updates and diagnostics, and complete demo migration. Native table-cell
+comment text ranges need the shared native decoration contract. This checkpoint
+does not satisfy the milestone's commit-and-judge gate.

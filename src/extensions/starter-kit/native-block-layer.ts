@@ -1,4 +1,4 @@
-import type { BrowserViewOptions } from '../../editor-browser';
+import type { BrowserViewOptions, ObserveTextPointer } from '../../editor-browser';
 import {
   createNodeViews,
   type NodeView,
@@ -12,8 +12,6 @@ import { createLayerGeometry } from '../../editor-canvas/layer-geometry';
 import { createTextLabels } from '../../editor-canvas/text-labels';
 import type { StarterNode, StarterLeaf } from '../demo-model';
 import type { EditorDocument } from './browser-document';
-import { onMentionActivate } from './mention-view';
-import { createTextBlockView, type CommentHighlight } from './text-block-view';
 import type { EditorSession, Owned } from './types';
 
 export type BlockLayerFrame = {
@@ -21,20 +19,12 @@ export type BlockLayerFrame = {
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
   layout: DocumentLayoutSnapshot<StarterLeaf> & { onMeasure: DocumentLayout['measure'] };
   viewport: { width: number; zoom: number };
-  nodeComments: ReadonlyMap<number, readonly string[]>;
-  commentsByNode: ReadonlyMap<number, CommentHighlight[]>;
   highlights: ReadonlyMap<number, readonly TextHighlight[]>;
   notice: (message: string) => void;
   setFocusedWidget: (id: number | null) => void;
-  onOpen: (kind: 'mention' | 'comment', nodeId: number, atomId: string, index: number) => void;
 };
 
-type MountedBlock = { element: HTMLDivElement } & (
-  | { kind: 'native'; view: NodeView<StarterNode> }
-  | { kind: 'text'; view: ReturnType<typeof createTextBlockView> }
-);
-
-const noComments: readonly CommentHighlight[] = [];
+type MountedBlock = { element: HTMLDivElement; view: NodeView<StarterNode> };
 
 function nodeId(root: HTMLElement, target: EventTarget | null) {
   if (!(target instanceof Element) || !root.contains(target)) return null;
@@ -50,7 +40,13 @@ export function createBlockLayer(
     editor,
     owned,
     register,
-  }: { editor: EditorSession; owned: Pick<Owned, 'layoutText'>; register: RegisterCanvasPainter },
+    onTextPointer,
+  }: {
+    editor: EditorSession;
+    owned: Pick<Owned, 'layoutText'>;
+    register: RegisterCanvasPainter;
+    onTextPointer?: ObserveTextPointer;
+  },
 ) {
   const renderers = createNodeViews(editor, {
     clipboard(event) {
@@ -69,10 +65,7 @@ export function createBlockLayer(
     element,
     editor,
     createLayerDrawing(register, () => frame?.layout.inset ?? 0, labels),
-  );
-
-  const stopMentions = onMentionActivate(editor, ({ nodeId: blockId, id, index }) =>
-    frame?.onOpen('mention', blockId, id, index),
+    { onTextPointer },
   );
 
   const layerGeometry = createLayerGeometry();
@@ -89,21 +82,8 @@ export function createBlockLayer(
       frame?.setFocusedWidget(nodeId(element, event.relatedTarget));
   }
 
-  function pointer(event: PointerEvent) {
-    if (
-      !(event.target instanceof Element) ||
-      event.target.closest('button,input,a,textarea,select,[data-editor-interactive]')
-    )
-      return;
-    const id = nodeId(element, event.target);
-    const comment = id === null ? undefined : frame?.nodeComments.get(id)?.[0];
-
-    if (id !== null && comment) frame?.onOpen('comment', id, comment, 0);
-  }
-
   element.addEventListener('focusin', focus);
   element.addEventListener('focusout', blur);
-  element.addEventListener('pointerdown', pointer, true);
 
   function remove(id: number, block: MountedBlock) {
     block.view.destroy();
@@ -135,30 +115,22 @@ export function createBlockLayer(
         width: contentWidth,
       });
 
-      for (const [index, p] of visible.entries()) {
-        const renderer = renderers.find(p.node);
-        const kind = renderer ? 'native' : 'text';
-        let block = mounted.get(p.node.id);
+      let nativeIndex = 0;
 
-        if (block && block.kind !== kind) {
-          remove(p.node.id, block);
-          block = undefined;
-        }
+      for (const p of visible) {
+        const renderer = renderers.find(p.node);
+
+        if (!renderer) continue;
+        const index = nativeIndex++;
+        let block = mounted.get(p.node.id);
 
         if (!block) {
           const host = element.ownerDocument.createElement('div');
           element.append(host);
 
-          if (renderer) {
-            const content = element.ownerDocument.createElement('div');
-            host.append(content);
-            block = { kind: 'native', element: host, view: renderer.mount(content) };
-          } else
-            block = {
-              kind: 'text',
-              element: host,
-              view: createTextBlockView(host, register),
-            };
+          const content = element.ownerDocument.createElement('div');
+          host.append(content);
+          block = { element: host, view: renderer.mount(content) };
           mounted.set(p.node.id, block);
         }
 
@@ -171,32 +143,21 @@ export function createBlockLayer(
             focused.focus({ preventScroll: true });
         }
 
-        if (block.kind === 'text' && (p.node.kind === 'paragraph' || p.node.kind === 'heading')) {
-          block.view.update({
-            placement: { ...p, node: p.node },
-            inset,
-            comments: next.commentsByNode.get(p.node.id) ?? noComments,
-            open: (annotation, id, offset) => frame?.onOpen(annotation, p.node.id, id, offset),
-          });
-        } else {
-          block.element.classList.add('block-position');
-          block.element.dataset.editorNode = String(p.node.id);
-          block.element.dataset.selected = String(!!doc.selectedRange(p.node));
-          block.element.dataset.commented = String(!!next.nodeComments.get(p.node.id)?.length);
-          block.element.style.left = `${inset}px`;
-          block.element.style.top = `${p.y}px`;
-          block.element.style.width = `${contentWidth}px`;
+        block.element.classList.add('block-position');
+        block.element.dataset.editorNode = String(p.node.id);
+        block.element.dataset.selected = String(!!doc.selectedRange(p.node));
+        block.element.style.left = `${inset}px`;
+        block.element.style.top = `${p.y}px`;
+        block.element.style.width = `${contentWidth}px`;
 
-          if (block.kind === 'native')
-            block.view.update({
-              node: p.node,
-              width: contentWidth,
-              onMeasure,
-              highlights: next.highlights,
-              selection: doc.editorState.selection,
-              context: doc.context,
-            });
-        }
+        block.view.update({
+          node: p.node,
+          width: contentWidth,
+          onMeasure,
+          highlights: next.highlights,
+          selection: doc.editorState.selection,
+          context: doc.context,
+        });
       }
     },
     destroy() {
@@ -206,10 +167,8 @@ export function createBlockLayer(
       frame = undefined;
       element.removeEventListener('focusin', focus);
       element.removeEventListener('focusout', blur);
-      element.removeEventListener('pointerdown', pointer, true);
 
       for (const [id, block] of mounted) remove(id, block);
-      stopMentions();
       layers.destroy();
       element.replaceChildren();
       element.classList.remove('dom-layer');

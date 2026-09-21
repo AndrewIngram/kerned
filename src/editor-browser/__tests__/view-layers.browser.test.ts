@@ -173,3 +173,116 @@ test('layer installation rejects duplicate names before allocation and unwinds f
   expect(failed.host.childElementCount).toBe(0);
   expect(drawing.active.size).toBe(0);
 });
+
+test('external invalidation coalesces per layer and releases scoped event listeners', async ({
+  onTestFinished,
+}) => {
+  const updates = [0, 0];
+  const invalidations: (() => void)[] = [];
+  const clicks: number[] = [];
+
+  const f = fixture(
+    [0, 1].map((index) => ({
+      name: `layer-${index}`,
+      create({ invalidate, listen, nodeAt }) {
+        invalidations.push(invalidate);
+        listen('click', (event) => {
+          const node = nodeAt(event.target);
+
+          if (node) clicks.push(node.id);
+        });
+
+        return {
+          update() {
+            updates[index]++;
+          },
+          destroy() {},
+        };
+      },
+    })),
+  );
+
+  const layers = createViewLayers(f.host, f.editor, painting());
+  onTestFinished(() => {
+    layers.destroy();
+    f.destroy();
+  });
+  const node = document.createElement('div');
+  node.dataset.editorNode = '1';
+  f.host.append(node);
+  invalidations[0]();
+  layers.update({
+    tree: indexTree(f.editor.schema, f.editor.state.nodes),
+    insets: new Map(),
+    blocks: [{ node: f.editor.state.nodes[0], y: 0, height: 40, text: null, inline: [] }],
+    inset: 0,
+    width: 400,
+  });
+  expect(updates).toEqual([1, 1]);
+  invalidations[0]();
+  invalidations[0]();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  expect(updates).toEqual([2, 1]);
+  node.click();
+  expect(clicks).toEqual([1, 1]);
+  invalidations[1]();
+  layers.destroy();
+  node.click();
+  invalidations[0]();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  expect(updates).toEqual([2, 1]);
+  expect(clicks).toEqual([1, 1]);
+});
+
+test('external update errors reach the owner and release pending layer resources', async ({
+  onTestFinished,
+}) => {
+  const errors: Error[] = [];
+  let invalidate = () => {};
+
+  let fail = false;
+
+  const f = fixture([
+    {
+      name: 'external',
+      create(context) {
+        invalidate = context.invalidate;
+        context.paint('background', () => {});
+
+        return {
+          update() {
+            if (fail) throw new Error('External update failed');
+          },
+          destroy() {},
+        };
+      },
+    },
+  ]);
+
+  const drawing = painting();
+
+  const layers = createViewLayers(f.host, f.editor, drawing, {
+    onError(error) {
+      errors.push(error);
+      layers.destroy();
+    },
+  });
+
+  onTestFinished(() => {
+    layers.destroy();
+    f.destroy();
+  });
+  layers.update({
+    tree: indexTree(f.editor.schema, f.editor.state.nodes),
+    insets: new Map(),
+    blocks: [],
+    inset: 0,
+    width: 400,
+  });
+  fail = true;
+  invalidate();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  expect(errors.map((error) => error.message)).toEqual(['External update failed']);
+  expect(drawing.active.size).toBe(0);
+  expect(f.host.children).toHaveLength(0);
+});

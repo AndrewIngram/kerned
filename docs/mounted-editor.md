@@ -65,6 +65,18 @@ ancestor includes its canonical node, child index and inherited inset. The mount
 uses its existing document index and caches these paths; extensions do not receive
 graphics handles or private layout objects.
 
+Layers can subscribe to external state and call `invalidate()`. Repeated requests
+coalesce into one update of that layer using the latest published frame. They do
+not create document transactions or rerun unrelated layers. Pending updates are
+cancelled at destruction; late invalidations are harmless. The mount reports
+asynchronous update failures through its normal error contract.
+
+`listen(eventName, listener)` observes native events within the editor overlay,
+with automatic cleanup. `nodeAt(event.target)` resolves a resident native owner.
+`onTextPointer(listener)` observes normalized text starts/drags from the shared
+input controller after selection has been applied. This handles pointer capture,
+which can redirect a final DOM click away from the original text or image.
+
 For canvas text, `block.text.fragments(from, to)` returns rectangles and baselines
 for a UTF-16 range. Coordinates are block-local and include the inherited text
 inset; add `block.left` and `block.top` to obtain document coordinates. Native
@@ -110,6 +122,31 @@ Listeners belong to one session and are cleared when it is destroyed. Unmounting
 a view removes its buttons and painters while session listeners remain available
 for a later mount. Mention IDs are scoped to their text node.
 
+Comments are an optional extension with an externally owned source:
+
+```ts
+import { createCommentStore } from '../src/extensions/comment';
+import { commentView, onCommentActivate } from '../src/extensions/comment-view';
+
+const comments = createCommentStore<{ body: string }>();
+const extension = commentView(comments).configure({ color: '#f6eab4' });
+// Include extension before the browser starter tuple in createSchema({ extensions }).
+const unsubscribe = onCommentActivate(editor, ({ nodeId, id, index, focus }) => {
+  // Open application discussion UI. focus === 'text' preserves the current caret.
+});
+```
+
+Source injection is separate from serializable visual options. Its `state.threads`
+and `subscribe` contract also accepts an application-owned discussion store.
+Sources publish immutable snapshots: replace `state.threads` when threads change
+before notifying subscribers. The projection reuses unchanged snapshots.
+The extension projects durable ranges, draws wrapped text highlights and outlines
+commented native blocks. It keeps typing/caret behavior on non-atomic highlights,
+and ignores buttons and inputs inside native blocks. Messages stay outside schema
+content and text history. Unmounting releases source subscriptions; remounting
+reads the current source. Native text descendants, such as individual table-cell
+text ranges, still need the general native decoration contract.
+
 The layer owns its DOM and styling. The host ignores pointer events by default;
 interactive descendants can opt in. Nonsemantic decoration layers set their own
 `aria-hidden` attribute. Duplicate names fail before allocation, failed factories
@@ -119,8 +156,8 @@ one throws. Semantic state belongs outside the culled DOM.
 The starter `containerDecorations` extension uses this contract for list markers
 and quote rules. Numbering, nested containers and continuation paragraphs are
 resolved through installed schema definitions. The demo and public mount share
-this extension and its stylesheet. This layer lifecycle does not yet provide the
-planned public range-decoration and external-invalidation interface.
+this extension and its stylesheet. External invalidation is supported; the planned
+general range-decoration and localized change-range interface remains milestone 6 work.
 
 ## React
 
@@ -175,13 +212,13 @@ native table-cell editing and rich rectangular clipboard operations. Table
 cells can contain custom text-node definitions. Ordinary copy/cut and text
 paste within a native cell textarea still use its native behavior; this does
 not provide rich clipboard parity for every cell text selection yet.
-Comments and search decorations still require adapters before
-the complete starter content can use this mount. Mention geometry and rendering
+Search decorations still require adapters before
+the complete starter content can use this mount. Comment and mention rendering
 are shared; a general custom-inline presentation contract remains future work.
 
 The writing demo still uses its existing starter composition and an internal
 `EditorEventHost`; it has not switched to this mount yet. It now uses the same
-table node-view, container-decoration, underline and mention contributions as the mount.
+table node-view, container-decoration, underline, mention and comment contributions as the mount.
 Remaining decorations and diagnostic contracts must be completed before that
 switch. The old event host is not a second public editor interface. Milestone 4
 remains open until the demo uses the shared mount and stops passing graphics

@@ -1,5 +1,5 @@
 import type { Rect } from '../engines';
-import type { NodeIdentity, Schema } from '../model';
+import type { NodeIdentity, Schema, TextPoint } from '../model';
 import {
   TextSelection,
   NodeSelection,
@@ -20,6 +20,12 @@ export type CanvasInputSession<N extends NodeIdentity> = {
   breakHistory(this: void): void;
   select(this: void, selection: Selection): void;
 };
+
+export type TextPointerEvent =
+  | { readonly kind: 'start'; readonly point: TextPoint; readonly clicks: number }
+  | { readonly kind: 'drag'; readonly point: TextPoint };
+
+export type ObserveTextPointer = (listener: (event: TextPointerEvent) => void) => () => void;
 
 export type CanvasInputFrame<N extends NodeIdentity> = {
   context: SelectionContext;
@@ -65,6 +71,13 @@ export function createCanvasInput<N extends NodeIdentity>({
   let revealPending = false;
   let scheduled = 0;
   let synced: { node: N | undefined; selection: Selection } | undefined;
+  const pointerListeners = new Set<(event: TextPointerEvent) => void>();
+
+  function publishPointer(event: TextPointerEvent) {
+    const pending = [...pointerListeners];
+
+    for (const listener of pending) listener(event);
+  }
 
   function assertActive() {
     if (destroyed) throw new Error('Canvas input is destroyed');
@@ -199,8 +212,14 @@ export function createCanvasInput<N extends NodeIdentity>({
 
       return viewport.viewportHeight / viewport.zoom;
     },
-    onStart: (hit, clicks) => currentFrame().onStart?.(hit, clicks),
-    onDrag: (hit) => currentFrame().onDrag?.(hit),
+    onStart(hit, clicks) {
+      currentFrame().onStart?.(hit, clicks);
+      publishPointer({ kind: 'start', point: hit.point, clicks });
+    },
+    onDrag(hit) {
+      currentFrame().onDrag?.(hit);
+      publishPointer({ kind: 'drag', point: hit.point });
+    },
   });
 
   function reveal() {
@@ -276,6 +295,14 @@ export function createCanvasInput<N extends NodeIdentity>({
   }
 
   return {
+    onTextPointer: (listener: (event: TextPointerEvent) => void) => {
+      assertActive();
+      pointerListeners.add(listener);
+
+      return () => {
+        pointerListeners.delete(listener);
+      };
+    },
     textInput,
     selectAll,
     revealSelection,
@@ -307,6 +334,7 @@ export function createCanvasInput<N extends NodeIdentity>({
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      pointerListeners.clear();
       detach();
       textInput.destroy();
     },

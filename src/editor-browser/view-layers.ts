@@ -1,5 +1,6 @@
 import { defineContribution } from '../core';
 import type { NodeIdentity, TreeIndex } from '../model';
+import type { ObserveTextPointer } from './canvas-input';
 import type {
   BlockTextGeometry,
   DrawingLayer,
@@ -38,6 +39,16 @@ export type ViewLayerContext<N extends NodeIdentity> = {
   editor: ViewSession<N>;
   element: HTMLDivElement;
   prepareText: PrepareText;
+  onTextPointer: ObserveTextPointer;
+  /** Request this layer's next frame after an external source changes. */
+  invalidate(this: void): void;
+  /** Scoped to the editor overlay; listeners are released with the layer. */
+  listen<K extends keyof HTMLElementEventMap>(
+    this: void,
+    type: K,
+    listener: (event: HTMLElementEventMap[K]) => void,
+  ): () => void;
+  nodeAt(this: void, target: EventTarget | null): N | null;
   /** One registration per plane, replaced on the next call and released with this layer. */
   paint: (layer: DrawingLayer, painter: DrawingPainter | null) => void;
 };
@@ -54,6 +65,7 @@ export function createViewLayers<N extends NodeIdentity>(
   element: HTMLElement,
   editor: ViewSession<N>,
   drawing: LayerDrawing,
+  options: { onError?: (error: Error) => void; onTextPointer?: ObserveTextPointer } = {},
 ) {
   if (editor.isDestroyed) throw new Error('Editor is destroyed');
   const contributions = viewLayers.read(editor);
@@ -64,27 +76,59 @@ export function createViewLayers<N extends NodeIdentity>(
     names.add(contribution.name);
   }
 
-  const layers: { host: HTMLDivElement; view: ViewLayer<N>; releasePaint: () => void }[] = [];
+  const layers: {
+    name: string;
+    host: HTMLDivElement;
+    view: ViewLayer<N>;
+    releaseResources: () => void;
+  }[] = [];
+
+  const dirty = new Set<string>();
+  let current: ViewLayerFrame<N> | undefined;
+  let scheduled = 0;
   let destroyed = false;
   let tree: TreeIndex<N> | undefined;
   let insets: ReadonlyMap<number, { inset: number }> | undefined;
   const ancestors = new Map<number, LayerBlock<N>['ancestors']>();
   let detach: (() => void) | undefined;
 
+  function flush() {
+    scheduled = 0;
+
+    if (destroyed || !current) return;
+
+    try {
+      for (const layer of layers) {
+        if (destroyed) break;
+
+        if (!dirty.delete(layer.name)) continue;
+        layer.view.update(current);
+      }
+    } catch (error) {
+      if (options.onError)
+        options.onError(error instanceof Error ? error : new Error(String(error)));
+      else throw error;
+    }
+  }
+
   function destroy() {
     if (destroyed) return;
     destroyed = true;
+    cancelAnimationFrame(scheduled);
+    scheduled = 0;
+    dirty.clear();
+    current = undefined;
     detach?.();
     const errors: unknown[] = [];
 
-    for (const { host, view, releasePaint } of layers.splice(0).toReversed()) {
+    for (const { host, view, releaseResources } of layers.splice(0).toReversed()) {
       try {
         view.destroy();
       } catch (error) {
         errors.push(error);
       }
 
-      releasePaint();
+      releaseResources();
       host.remove();
     }
 
@@ -102,11 +146,15 @@ export function createViewLayers<N extends NodeIdentity>(
       host.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
       element.append(host);
       const painting = new Map<DrawingLayer, () => void>();
+      const listeners = new Set<() => void>();
       const paintKey = `layer:${JSON.stringify(contribution.name)}`;
       let active = true;
 
-      function releasePaint() {
+      function releaseResources() {
         active = false;
+
+        for (const release of listeners) release();
+        listeners.clear();
 
         for (const release of painting.values()) release();
         painting.clear();
@@ -116,6 +164,47 @@ export function createViewLayers<N extends NodeIdentity>(
         const view = contribution.create({
           editor,
           element: host,
+          onTextPointer(listener) {
+            if (!active || destroyed) throw new Error('View layer is destroyed');
+            const stop = options.onTextPointer?.(listener);
+
+            const release = () => {
+              stop?.();
+              listeners.delete(release);
+            };
+
+            listeners.add(release);
+
+            return release;
+          },
+          invalidate() {
+            if (!active || destroyed) return;
+            dirty.add(contribution.name);
+
+            if (current && !scheduled) scheduled = requestAnimationFrame(flush);
+          },
+          listen(type, listener) {
+            if (!active || destroyed) throw new Error('View layer is destroyed');
+            element.addEventListener(type, listener);
+
+            const release = () => {
+              element.removeEventListener(type, listener);
+              listeners.delete(release);
+            };
+
+            listeners.add(release);
+
+            return release;
+          },
+          nodeAt(target) {
+            if (!active || destroyed || !(target instanceof Element) || !element.contains(target))
+              return null;
+            const id = target.closest('[data-editor-node]')?.getAttribute('data-editor-node');
+
+            return id == null
+              ? null
+              : (current?.blocks.find((block) => block.node.id === Number(id))?.node ?? null);
+          },
           prepareText(input) {
             if (!active || destroyed) throw new Error('View layer is destroyed');
 
@@ -131,9 +220,9 @@ export function createViewLayers<N extends NodeIdentity>(
           },
         });
 
-        layers.push({ host, view, releasePaint });
+        layers.push({ name: contribution.name, host, view, releaseResources });
       } catch (error) {
-        releasePaint();
+        releaseResources();
         host.remove();
         throw error;
       }
@@ -211,7 +300,17 @@ export function createViewLayers<N extends NodeIdentity>(
         };
       });
 
-      for (const { view } of layers) view.update({ blocks });
+      current = { blocks };
+
+      for (const { name, view } of layers) {
+        dirty.delete(name);
+        view.update(current);
+      }
+
+      if (!dirty.size && scheduled) {
+        cancelAnimationFrame(scheduled);
+        scheduled = 0;
+      }
     },
     destroy,
   };

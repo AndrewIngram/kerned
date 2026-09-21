@@ -8,6 +8,8 @@ export { createEditorViewport, type EditorViewport } from './viewport';
 
 export { createTextInput } from './text-input';
 
+export type { ObserveTextPointer, TextPointerEvent } from './canvas-input';
+
 export type BrowserViewOptions = {
   session?: EditorViewSession;
   focusSelection?: () => void;

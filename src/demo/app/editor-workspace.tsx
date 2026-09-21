@@ -15,11 +15,12 @@ import { useDocumentLayout } from '../../editor-react/use-document-layout';
 import { type EditorSample } from '../../editor-samples';
 import { streamConfig } from '../../editor-stream';
 import type { Rect } from '../../engines';
-import { captureComment } from '../../extensions/comment';
+import { captureComment, createCommentStore } from '../../extensions/comment';
+import { commentView, onCommentActivate } from '../../extensions/comment-view';
 import { demoSchema } from '../../extensions/demo-schema';
 import { OutlineMenu } from '../../extensions/outline-view';
 import { BlockLayer } from '../../extensions/starter-kit/block-layer';
-import { starterBrowserExtensions } from '../../extensions/starter-kit/browser';
+import { starterBrowserExtensions, onMentionActivate } from '../../extensions/starter-kit/browser';
 import { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
 import { createStarterKitInput, focusStarterKitInput } from '../../extensions/starter-kit/input';
 import { createStarterPresentation } from '../../extensions/starter-kit/presentation';
@@ -34,10 +35,6 @@ import { useDiagnostics } from './use-diagnostics';
 import { useFind, useFindReveal } from './use-find';
 import { useOutline } from './use-outline';
 import { recordSampleLayout, recordSamplePaint, useSampleStream } from './use-sample-stream';
-
-const editorSchema = createSchema({
-  extensions: starterBrowserExtensions({ imageDelay: streamConfig.imageDelay }),
-});
 
 type Owned = Awaited<ReturnType<typeof createOwnedEngine>>;
 
@@ -58,9 +55,16 @@ export function EditorWorkspace({
   // oxlint-disable-next-line react/purity -- Render timing is telemetry only and never influences the rendered output.
   const renderStarted = performance.now();
 
+  const [comments] = useState(() => createCommentStore<{ body: string; reply: string }>());
+
   const [editor] = useState(() =>
     createEditor({
-      schema: editorSchema,
+      schema: createSchema({
+        extensions: [
+          commentView(comments),
+          ...starterBrowserExtensions({ imageDelay: streamConfig.imageDelay }),
+        ],
+      }),
       document: sample.initial,
       selection: textSelection(1, 0),
     }),
@@ -86,8 +90,12 @@ export function EditorWorkspace({
     [editor],
   );
 
-  const { comments, commentState, decorations, commentsByNode, nodeComments, seedComments } =
-    useComments(editor, editorState, sample, doc.context);
+  const { commentState, decorations, seedComments } = useComments(
+    editor,
+    editorState,
+    sample,
+    comments,
+  );
 
   const [panel, setPanel] = useState<ActivePanel | null>(null);
   const [focusedWidget, setFocusedWidget] = useState<number | null>(null);
@@ -233,40 +241,28 @@ export function EditorWorkspace({
     recordRender(performance.now() - renderStarted);
   });
 
-  const { textInput, selectAll, pointerSelection, navigate, revealSelection } = useCanvasInput({
-    context: doc.context,
-    inset: layout.inset,
-    schema: demoSchema,
-    editor,
-    selection,
-    nodes,
-    canvasRef,
-    inputRef,
-    node: (id) => tree.byId.get(id)?.node,
-    placements: scene.placements,
-    layout: layout.layoutFor,
-    caret,
-    activeTop: activePlacement?.y,
-    viewport,
-    afterSelectAll: () => setPanel(null),
-    onStart(hit, clicks) {
-      const node = tree.byId.get(hit.point.id)?.node;
-
-      const comment =
-        clicks === 1 && (node?.kind === 'paragraph' || node?.kind === 'heading')
-          ? commentsByNode
-              .get(node.id)
-              ?.find((c) => hit.point.offset >= c.from && hit.point.offset <= c.to)
-          : undefined;
-
-      setPanel(
-        comment
-          ? { kind: 'comment', nodeId: hit.point.id, atomId: comment.id, focus: 'text' }
-          : null,
-      );
-    },
-    onDrag: () => setPanel(null),
-  });
+  const { textInput, selectAll, pointerSelection, navigate, revealSelection, onTextPointer } =
+    useCanvasInput({
+      context: doc.context,
+      inset: layout.inset,
+      schema: demoSchema,
+      editor,
+      selection,
+      nodes,
+      canvasRef,
+      inputRef,
+      node: (id) => tree.byId.get(id)?.node,
+      placements: scene.placements,
+      layout: layout.layoutFor,
+      caret,
+      activeTop: activePlacement?.y,
+      viewport,
+      afterSelectAll: () => setPanel(null),
+      onStart() {
+        setPanel(null);
+      },
+      onDrag: () => setPanel(null),
+    });
 
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
@@ -403,6 +399,22 @@ export function EditorWorkspace({
     [doc.context, setSelection],
   );
 
+  useLayoutEffect(
+    () =>
+      onMentionActivate(editor, ({ nodeId, id, index }) => {
+        openAnnotation('mention', nodeId, id, index);
+      }),
+    [editor, openAnnotation],
+  );
+  useLayoutEffect(
+    () =>
+      onCommentActivate(editor, ({ nodeId, id, index, focus }) => {
+        if (focus === 'panel') openAnnotation('comment', nodeId, id, index);
+        else setPanel({ kind: 'comment', nodeId, atomId: id, focus: 'text' });
+      }),
+    [editor, openAnnotation],
+  );
+
   useDiagnostics({
     editor,
     comments,
@@ -496,19 +508,17 @@ export function EditorWorkspace({
                 />
                 <BlockLayer
                   editor={editor}
+                  onTextPointer={onTextPointer}
                   {...{
                     doc,
                     layout,
                     viewport,
                     owned,
-                    commentsByNode,
-                    nodeComments,
                     clipboard: inputEvents,
                     highlights: tableHighlights,
                     notice: setInputNotice,
                     setFocusedWidget,
                   }}
-                  onOpen={openAnnotation}
                 />
               </div>
             </div>

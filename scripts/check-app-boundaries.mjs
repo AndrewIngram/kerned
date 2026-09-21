@@ -83,7 +83,6 @@ for (const group of groups) {
         [
           'src/extensions/starter-kit/image-view.ts',
           'src/extensions/starter-kit/table-view.ts',
-          'src/extensions/starter-kit/text-block-view.ts',
           'src/extensions/starter-kit/native-block-layer.ts',
         ].includes(file)
       ) {

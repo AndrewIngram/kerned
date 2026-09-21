@@ -15,9 +15,11 @@ import { CanvasLayerProvider } from '../../../editor-react';
 import { createSchema } from '../../../model';
 import { createOwnedEngine } from '../../../owned-layout';
 import { createFind, textSelection } from '../../../state';
+import { createCommentStore } from '../../comment';
+import { commentView, onCommentActivate } from '../../comment-view';
 import { createSampleDocument, type StarterNode } from '../../demo-model';
 import { BlockLayer } from '../block-layer';
-import { starterBrowserExtensions } from '../browser';
+import { starterBrowserExtensions, onMentionActivate } from '../browser';
 import { createStarterDocumentQuery } from '../browser-document';
 import { createStarterKitInput } from '../input';
 import { createBlockLayer, type BlockLayerFrame } from '../native-block-layer';
@@ -34,11 +36,20 @@ const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() 
 async function fixture() {
   const owned = await createOwnedEngine(kit, 'shaping');
 
+  const comments = createCommentStore<string>();
+
   const editor = createEditor({
-    schema: createSchema({ extensions: starterBrowserExtensions({ imageDelay: 80 }) }),
+    schema: createSchema({
+      extensions: [commentView(comments), ...starterBrowserExtensions({ imageDelay: 80 })],
+    }),
     document: createSampleDocument().slice(0, 4),
   });
 
+  comments.put({
+    id: 'discussion',
+    messages: ['Comment'],
+    range: editor.positions.range(editor.positions.at(2, 0, 1), editor.positions.at(2, 9, -1)),
+  });
   const project = createStarterDocumentQuery(editor.schema);
   const root = document.createElement('div');
   root.style.cssText = 'position:relative;width:500px;height:700px;';
@@ -72,7 +83,21 @@ async function fixture() {
   });
 
   const find = createFind(editor.schema, () => editor.state.nodes);
-  const opened: { kind: string; node: number; id: string; index: number }[] = [];
+
+  const opened: {
+    kind: string;
+    node: number;
+    id: string;
+    index: number;
+    focus?: 'text' | 'panel';
+  }[] = [];
+
+  onMentionActivate(editor, ({ nodeId, id, index }) =>
+    opened.push({ kind: 'mention', node: nodeId, id, index }),
+  );
+  onCommentActivate(editor, ({ nodeId, id, index, focus }) =>
+    opened.push({ kind: 'comment', node: nodeId, id, index, focus }),
+  );
   const focused: (number | null)[] = [];
   let visible: Set<number> | undefined;
 
@@ -91,8 +116,6 @@ async function fixture() {
     onLayout: () => {},
   };
 
-  const commentsByNode = new Map([[2, [{ id: 'discussion', from: 0, to: 9 }]]]);
-
   function frame(): BlockLayerFrame {
     const snapshot = layout.getSnapshot();
 
@@ -105,8 +128,6 @@ async function fixture() {
         onMeasure: layout.measure,
       },
       viewport: { width: 500, zoom: 1 },
-      nodeComments: new Map(),
-      commentsByNode,
       highlights: new Map(
         [...find.state.byNode].map(([id, matches]) => [
           id,
@@ -115,7 +136,6 @@ async function fixture() {
       ),
       notice() {},
       setFocusedWidget: (id) => focused.push(id),
-      onOpen: (kind, node, id, index) => opened.push({ kind, node, id, index }),
     };
   }
 
@@ -204,7 +224,12 @@ test('native block layer paints and positions comments and mentions, preserves l
   comment.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
   expect(f.opened).toHaveLength(1);
   comment.click();
-  expect(f.opened.at(-1)).toMatchObject({ kind: 'comment', node: 2, id: 'discussion' });
+  expect(f.opened.at(-1)).toMatchObject({
+    kind: 'comment',
+    node: 2,
+    id: 'discussion',
+    focus: 'panel',
+  });
   expect(comment.hasAttribute('data-editor-text-hit')).toBe(true);
   const placement = f.frame().layout.visible.find((p) => p.node.id === 1);
 
@@ -297,7 +322,13 @@ test('React strict remounts attach the native block layer without retaining pain
           createElement(
             CanvasLayerProvider,
             { value: f.renderer.register },
-            createElement(BlockLayer, { ...frame, key, editor: f.editor, owned: f.owned }),
+            createElement(BlockLayer, {
+              onTextPointer: () => () => {},
+              ...frame,
+              key,
+              editor: f.editor,
+              owned: f.owned,
+            }),
           ),
         ),
       ),

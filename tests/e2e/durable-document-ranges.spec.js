@@ -17,10 +17,7 @@ test('image comments use the public range API and open from their decoration', a
   const add = page.getByRole('button', { name: 'Add comment', exact: true });
   await expect(add).toBeEnabled();
   await add.click();
-  await expect(page.locator(`[data-editor-node="${id}"]`)).toHaveAttribute(
-    'data-commented',
-    'true',
-  );
+  await expect(page.locator(`[data-commented-node="${id}"]`)).toBeVisible();
   await expect(page.locator('.nearby-panel')).toBeVisible();
   await page.locator('.close-panel').click();
   await image.click();

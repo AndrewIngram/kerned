@@ -61,7 +61,14 @@ test('sample replacement releases only the old layout owner and keeps assets res
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/editor.html');
   await page.waitForFunction(() => window.editorDiagnostics);
-  const origin = await page.evaluate(() => performance.timeOrigin);
+
+  const witness = await page.evaluate(() => {
+    // Document/realm identity proves no reload without depending on timer precision.
+    window.sampleNavigationWitness = { document, token: crypto.randomUUID() };
+
+    return window.sampleNavigationWitness.token;
+  });
+
   page.on('request', (request) => requests.push(request.url()));
   const picker = page.getByLabel('Sample', { exact: true });
 
@@ -97,7 +104,14 @@ test('sample replacement releases only the old layout owner and keeps assets res
   await expect
     .poll(() => page.evaluate(() => window.editorDiagnostics.read().nodes[0].text))
     .toMatch(/^Still editable\./);
-  expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin);
+  expect(
+    await page.evaluate(
+      (token) =>
+        window.sampleNavigationWitness?.document === document &&
+        window.sampleNavigationWitness.token === token,
+      witness,
+    ),
+  ).toBe(true);
   expect(requests.filter((url) => url.endsWith('/samples/warbreaker.html'))).toHaveLength(1);
   expect(requests.filter((url) => /\.(wasm|ttf)(?:\?|$)/.test(url))).toEqual([]);
   expect(errors).toEqual([]);

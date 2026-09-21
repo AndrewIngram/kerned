@@ -1,0 +1,22 @@
+.range-hit {
+  position: absolute;
+  pointer-events: auto;
+  display: block;
+  background: transparent !important;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  cursor: text;
+  touch-action: none;
+  user-select: none;
+}
+.range-hit:focus-visible {
+  outline: 2px solid #526b42;
+  outline-offset: 1px;
+}
+.comment-node-outline {
+  position: absolute;
+  pointer-events: none;
+  box-shadow: 0 0 0 3px #e9cb7880;
+  border-radius: 8px;
+}

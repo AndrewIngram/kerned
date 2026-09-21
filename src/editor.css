@@ -128,25 +128,6 @@ canvas {
   padding: 8px;
   margin-top: 6px;
 }
-.range-hit {
-  position: absolute;
-  pointer-events: auto;
-  display: block;
-  background: transparent !important;
-  border: 0;
-  padding: 0;
-  border-radius: 4px;
-}
-.range-hit {
-  border-radius: 0;
-  cursor: text;
-  touch-action: none;
-  user-select: none;
-}
-.range-hit:focus-visible {
-  outline: 2px solid #526b42;
-  outline-offset: 1px;
-}
 .text-capture {
   pointer-events: none;
   position: fixed;
@@ -691,9 +672,4 @@ body[data-demo='minimal'] .table-block th {
 .editor-surface {
   cursor: text;
   touch-action: none;
-}
-
-.block-position[data-commented='true'] {
-  box-shadow: 0 0 0 3px #e9cb7880;
-  border-radius: 8px;
 }
