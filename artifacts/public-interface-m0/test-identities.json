@@ -1,0 +1,727 @@
+{
+  "note": "Vitest JSON reporter omits project labels; repeated browser identities are retained as a multiset. Configured browser projects: Chromium, Firefox, WebKit. E2E identities are collected, with execution independently verified by pnpm check.",
+  "vitest": [
+    {
+      "file": "tests/document-codec.test.ts",
+      "name": "document nesting counts document nodes independently of JSON nesting",
+      "status": "passed"
+    },
+    {
+      "file": "tests/durable-document-ranges.test.js",
+      "name": "durable mixed ranges survive nested edits, deletion, undo and checkpoint reload without registration",
+      "status": "passed"
+    },
+    {
+      "file": "tests/durable-document-ranges.test.js",
+      "name": "node boundaries follow split, join, moves and unwrap with inward deletion semantics",
+      "status": "passed"
+    },
+    {
+      "file": "tests/durable-document-ranges.test.js",
+      "name": "external ranges resolve identically across replicas after accepted edits and container unwrap",
+      "status": "passed"
+    },
+    {
+      "file": "tests/durable-document-ranges.test.js",
+      "name": "text endpoints retain an interior atom after both endpoint paragraphs are removed",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "nested text selection and non-contiguous table cells",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "serialized comment endpoints expand across interior insertion and follow split/move/join",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "both insertion associations and grapheme-safe atomic rejection",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "stale agent coordinates reject atomically rather than overwriting another edit",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "snapshot positions resolve tree context, structural gaps and document order",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "snapshot positions reject foreign coordinates and invalid boundaries",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "comment range survives deletion of its original start while content remains",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "old external endpoints resolve after journal compaction and checkpoint reload",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "transaction mapping connects nested text and structural gaps to the exact next snapshot",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "durable references follow split/move/join, deletion and undo/redo",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "reference edge associations, grouped history, and validation are explicit",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "wrapped gaps, text-only edits, removal and undo produce usable position mappings",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "disjoint ranges preserve surviving cells and references created after an edit survive undo/redo",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "external endpoints require no registration and survive endpoint-block deletion",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "new text blocks inside a range are included and checkpoint state does not alias results",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "read-only and protected nodes can move or be deleted, but reject content edits atomically",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "general locks protect descendant deletion and history uses current permissions",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "permission projections omit protected subtrees in initial and subsequent snapshots",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "agent proposals follow unrelated edits, reject changed targets and commit against the checked revision",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "headless command chains share draft state, commit once, and capability checks have no effects",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "command capability checks respect current permissions without mutating state",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "external comment threads produce decorations without changing schema or range storage",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "revoking edit permission after chain preparation prevents execution and capability success",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "node locks survive starter-kit heading conversion and end-of-heading splits",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "permission inheritance protects nested content and opaque property changes",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "position checkpoint rejects missing original operations and invalid undo sequences",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "joins and range replacements cannot copy protected source text into visible nodes",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "undo cannot merge a newly protected split into an editable node",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "indexed mapping agrees with exact replay across varied histories and capture revisions",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "mapping shortcuts retain boundary deletion and mixed-delta semantics",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "batched command steps publish once and undo together",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.test.js",
+      "name": "concurrent split and insert converge with the insert following moved text",
+      "status": "todo"
+    },
+    {
+      "file": "tests/marks-codecs.test.js",
+      "name": "custom attribute marks replace only their type and round-trip with versions",
+      "status": "passed"
+    },
+    {
+      "file": "tests/marks-codecs.test.js",
+      "name": "mark commands use a foreign node shape and preserve permissions and atomic undo",
+      "status": "passed"
+    },
+    {
+      "file": "tests/marks-codecs.test.js",
+      "name": "document codecs reload durable comment endpoints with their independent checkpoint",
+      "status": "passed"
+    },
+    {
+      "file": "tests/marks-codecs.test.js",
+      "name": "third-party node codecs own their payload while core enforces identities",
+      "status": "passed"
+    },
+    {
+      "file": "tests/retained-contracts.test.ts",
+      "name": "retained containers contracts",
+      "status": "passed"
+    },
+    {
+      "file": "tests/retained-contracts.test.ts",
+      "name": "retained extensions contracts",
+      "status": "passed"
+    },
+    {
+      "file": "tests/retained-contracts.test.ts",
+      "name": "retained selections contracts",
+      "status": "passed"
+    },
+    {
+      "file": "tests/retained-contracts.test.ts",
+      "name": "retained transactions contracts",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.test.js",
+      "name": "extension state publishes atomically and commands report mixed state without running effects",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.test.js",
+      "name": "serialized structural references follow wrapping and movement and recover on undo or reload",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.test.js",
+      "name": "mark extensions control caret boundary inheritance independently of rendering",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.test.js",
+      "name": "gap association distinguishes insertions, empty containers and deleted parents",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.test.js",
+      "name": "foreign inline extensions own attributes, layout and versioned serialization",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.test.js",
+      "name": "mark command queries cover partial text and caret chains reset on movement",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.test.js",
+      "name": "selection projection and multiclick ranges work with a foreign schema",
+      "status": "passed"
+    },
+    {
+      "file": "tests/stored-marks.test.js",
+      "name": "stored marks are explicit, reset on movement, restore with history and preserve graphemes",
+      "status": "passed"
+    },
+    {
+      "file": "tests/stored-marks.test.js",
+      "name": "replacement inherits selected text and loading preserves a pending override",
+      "status": "passed"
+    },
+    {
+      "file": "tests/structural-selection.test.js",
+      "name": "structural ranges preserve direction, hierarchy, codecs and transaction history",
+      "status": "passed"
+    },
+    {
+      "file": "tests/structural-selection.test.js",
+      "name": "node edges follow split and join, and node-only ranges support replacement and gaps",
+      "status": "passed"
+    },
+    {
+      "file": "tests/structural-selection.test.js",
+      "name": "structural edits clean empty containers and keep surviving endpoints when an ancestor is deleted",
+      "status": "passed"
+    },
+    {
+      "file": "tests/structural-selection.test.js",
+      "name": "large node-only deletion batches siblings and undoes atomically",
+      "status": "passed"
+    },
+    {
+      "file": "tests/table-clipboard.test.js",
+      "name": "cell rectangles preserve formatting, grow tables, retain unaffected identities and undo atomically",
+      "status": "passed"
+    },
+    {
+      "file": "tests/table-clipboard.test.js",
+      "name": "rectangle paste uses source size and rejects protected targets and merged grids without edits",
+      "status": "passed"
+    },
+    {
+      "file": "tests/table-clipboard.test.js",
+      "name": "large rectangles expand in both dimensions and retain header formatting",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "JSON codecs copy nested values and preserve special keys without prototype pollution",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value undefined",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value NaN",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value Infinity",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value 1n",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value Symbol(value)",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value () => 1",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value Mon Sep 21 2026 02:47:33 GMT+0100 (British Summer Time)",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value Value { value: 1 }",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects non-JSON value { value: undefined }",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "rejects cyclic objects and arrays",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/schema-codec.test.ts",
+      "name": "accepts JSON at the nesting limit and rejects one level beyond it",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/selection-adapters.test.js",
+      "name": "selection projection preserves node, container, cell and empty selections",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor/__tests__/selection-adapters.test.js",
+      "name": "atomic navigation respects document order and preserves shift ranges",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.browser.test.js",
+      "name": "React state hook subscribes to a headless editor and unmounts cleanly",
+      "status": "passed"
+    },
+    {
+      "file": "tests/marks-codecs.browser.test.js",
+      "name": "demo codecs preserve nested blocks, marks, mentions, locks and table structure",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.browser.test.js",
+      "name": "React selectors suppress unchanged values and view listeners clean up under StrictMode",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.browser.test.js",
+      "name": "framework-free text capture handles a foreign schema and nested selection",
+      "status": "passed"
+    },
+    {
+      "file": "tests/selection-adapters.browser.test.js",
+      "name": "starter commands target the selected node and disjoint cells, never the first paragraph",
+      "status": "passed"
+    },
+    {
+      "file": "tests/table-clipboard.browser.test.js",
+      "name": "clipboard HTML is a cropped rectangle and TSV preserves empty and quoted cells",
+      "status": "passed"
+    },
+    {
+      "file": "src/__tests__/owned-inline.browser.test.ts",
+      "name": "inline layout preserves atom geometry and retained snapshots with real shaping",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-browser/__tests__/viewport.browser.test.ts",
+      "name": "observes real scrollport geometry, scrolling and resizing, then releases listeners",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-react/__tests__/adapter-audit.browser.test.js",
+      "name": "canvas input follows session, inset and scrollport changes without remounting",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-react/__tests__/adapter-audit.browser.test.js",
+      "name": "text capture reuses the document index while the caret moves and refreshes it after edits",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.browser.test.js",
+      "name": "React state hook subscribes to a headless editor and unmounts cleanly",
+      "status": "passed"
+    },
+    {
+      "file": "tests/marks-codecs.browser.test.js",
+      "name": "demo codecs preserve nested blocks, marks, mentions, locks and table structure",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.browser.test.js",
+      "name": "React selectors suppress unchanged values and view listeners clean up under StrictMode",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.browser.test.js",
+      "name": "framework-free text capture handles a foreign schema and nested selection",
+      "status": "passed"
+    },
+    {
+      "file": "tests/selection-adapters.browser.test.js",
+      "name": "starter commands target the selected node and disjoint cells, never the first paragraph",
+      "status": "passed"
+    },
+    {
+      "file": "tests/table-clipboard.browser.test.js",
+      "name": "clipboard HTML is a cropped rectangle and TSV preserves empty and quoted cells",
+      "status": "passed"
+    },
+    {
+      "file": "src/__tests__/owned-inline.browser.test.ts",
+      "name": "inline layout preserves atom geometry and retained snapshots with real shaping",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-react/__tests__/adapter-audit.browser.test.js",
+      "name": "canvas input follows session, inset and scrollport changes without remounting",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-react/__tests__/adapter-audit.browser.test.js",
+      "name": "text capture reuses the document index while the caret moves and refreshes it after edits",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-browser/__tests__/viewport.browser.test.ts",
+      "name": "observes real scrollport geometry, scrolling and resizing, then releases listeners",
+      "status": "passed"
+    },
+    {
+      "file": "tests/foundation.browser.test.js",
+      "name": "React state hook subscribes to a headless editor and unmounts cleanly",
+      "status": "passed"
+    },
+    {
+      "file": "tests/marks-codecs.browser.test.js",
+      "name": "demo codecs preserve nested blocks, marks, mentions, locks and table structure",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.browser.test.js",
+      "name": "React selectors suppress unchanged values and view listeners clean up under StrictMode",
+      "status": "passed"
+    },
+    {
+      "file": "tests/runtime-extensions.browser.test.js",
+      "name": "framework-free text capture handles a foreign schema and nested selection",
+      "status": "passed"
+    },
+    {
+      "file": "tests/selection-adapters.browser.test.js",
+      "name": "starter commands target the selected node and disjoint cells, never the first paragraph",
+      "status": "passed"
+    },
+    {
+      "file": "tests/table-clipboard.browser.test.js",
+      "name": "clipboard HTML is a cropped rectangle and TSV preserves empty and quoted cells",
+      "status": "passed"
+    },
+    {
+      "file": "src/__tests__/owned-inline.browser.test.ts",
+      "name": "inline layout preserves atom geometry and retained snapshots with real shaping",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-browser/__tests__/viewport.browser.test.ts",
+      "name": "observes real scrollport geometry, scrolling and resizing, then releases listeners",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-react/__tests__/adapter-audit.browser.test.js",
+      "name": "canvas input follows session, inset and scrollport changes without remounting",
+      "status": "passed"
+    },
+    {
+      "file": "src/editor-react/__tests__/adapter-audit.browser.test.js",
+      "name": "text capture reuses the document index while the caret moves and refreshes it after edits",
+      "status": "passed"
+    }
+  ],
+  "e2e": [
+    {
+      "file": "durable-document-ranges.spec.js",
+      "name": "image comments use the public range API and open from their decoration",
+      "project": "chromium"
+    },
+    {
+      "file": "durable-document-ranges.spec.js",
+      "name": "image comments use the public range API and open from their decoration",
+      "project": "firefox"
+    },
+    {
+      "file": "durable-document-ranges.spec.js",
+      "name": "image comments use the public range API and open from their decoration",
+      "project": "webkit"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "writing demo edits and formats text at 1100px",
+      "project": "chromium"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "writing demo edits and formats text at 390px",
+      "project": "chromium"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "the site root opens the writing demo and preserves query parameters",
+      "project": "chromium"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "writing demo edits and formats text at 1100px",
+      "project": "firefox"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "writing demo edits and formats text at 390px",
+      "project": "firefox"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "the site root opens the writing demo and preserves query parameters",
+      "project": "firefox"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "writing demo edits and formats text at 1100px",
+      "project": "webkit"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "writing demo edits and formats text at 390px",
+      "project": "webkit"
+    },
+    {
+      "file": "editor.spec.js",
+      "name": "the site root opens the writing demo and preserves query parameters",
+      "project": "webkit"
+    },
+    {
+      "file": "extensions.spec.js",
+      "name": "extension diagnostics retain mentions and editable React checklists",
+      "project": "chromium"
+    },
+    {
+      "file": "extensions.spec.js",
+      "name": "comments remain external through replies, text edits, undo and rich paste",
+      "project": "chromium"
+    },
+    {
+      "file": "extensions.spec.js",
+      "name": "extension diagnostics retain mentions and editable React checklists",
+      "project": "firefox"
+    },
+    {
+      "file": "extensions.spec.js",
+      "name": "comments remain external through replies, text edits, undo and rich paste",
+      "project": "firefox"
+    },
+    {
+      "file": "extensions.spec.js",
+      "name": "extension diagnostics retain mentions and editable React checklists",
+      "project": "webkit"
+    },
+    {
+      "file": "extensions.spec.js",
+      "name": "comments remain external through replies, text edits, undo and rich paste",
+      "project": "webkit"
+    },
+    {
+      "file": "selection-adapters.spec.js",
+      "name": "clicking an atomic view selects it while interactive descendants retain native input",
+      "project": "chromium"
+    },
+    {
+      "file": "selection-adapters.spec.js",
+      "name": "clicking an atomic view selects it while interactive descendants retain native input",
+      "project": "firefox"
+    },
+    {
+      "file": "selection-adapters.spec.js",
+      "name": "clicking an atomic view selects it while interactive descendants retain native input",
+      "project": "webkit"
+    },
+    {
+      "file": "stored-marks.spec.js",
+      "name": "caret toolbar formats subsequent typing and Enter without a document edit on toggle",
+      "project": "chromium"
+    },
+    {
+      "file": "stored-marks.spec.js",
+      "name": "caret formatting retains table input focus and formats cell text",
+      "project": "chromium"
+    },
+    {
+      "file": "stored-marks.spec.js",
+      "name": "caret toolbar formats subsequent typing and Enter without a document edit on toggle",
+      "project": "firefox"
+    },
+    {
+      "file": "stored-marks.spec.js",
+      "name": "caret formatting retains table input focus and formats cell text",
+      "project": "firefox"
+    },
+    {
+      "file": "stored-marks.spec.js",
+      "name": "caret toolbar formats subsequent typing and Enter without a document edit on toggle",
+      "project": "webkit"
+    },
+    {
+      "file": "stored-marks.spec.js",
+      "name": "caret formatting retains table input focus and formats cell text",
+      "project": "webkit"
+    },
+    {
+      "file": "structural-selection.spec.js",
+      "name": "dragging from an image and shift-clicking it creates a usable structural selection",
+      "project": "chromium"
+    },
+    {
+      "file": "structural-selection.spec.js",
+      "name": "node-only document supports drag, shift reversal and document-edge extension",
+      "project": "chromium"
+    },
+    {
+      "file": "structural-selection.spec.js",
+      "name": "dragging from an image and shift-clicking it creates a usable structural selection",
+      "project": "firefox"
+    },
+    {
+      "file": "structural-selection.spec.js",
+      "name": "node-only document supports drag, shift reversal and document-edge extension",
+      "project": "firefox"
+    },
+    {
+      "file": "structural-selection.spec.js",
+      "name": "dragging from an image and shift-clicking it creates a usable structural selection",
+      "project": "webkit"
+    },
+    {
+      "file": "structural-selection.spec.js",
+      "name": "node-only document supports drag, shift reversal and document-edge extension",
+      "project": "webkit"
+    },
+    {
+      "file": "table-clipboard.spec.js",
+      "name": "table view routes copy, paste and cut through rich clipboard commands",
+      "project": "chromium"
+    },
+    {
+      "file": "table-clipboard.spec.js",
+      "name": "table view routes copy, paste and cut through rich clipboard commands",
+      "project": "firefox"
+    },
+    {
+      "file": "table-clipboard.spec.js",
+      "name": "table view routes copy, paste and cut through rich clipboard commands",
+      "project": "webkit"
+    },
+    {
+      "file": "warbreaker-table.spec.js",
+      "name": "Warbreaker retains its editable table after outline navigation",
+      "project": "chromium"
+    },
+    {
+      "file": "warbreaker-table.spec.js",
+      "name": "Warbreaker retains its editable table after outline navigation",
+      "project": "firefox"
+    },
+    {
+      "file": "warbreaker-table.spec.js",
+      "name": "Warbreaker retains its editable table after outline navigation",
+      "project": "webkit"
+    }
+  ]
+}

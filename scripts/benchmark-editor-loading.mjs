@@ -34,7 +34,9 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
             await route.fulfill({ response, body: old });
           });
         const navigation = Date.now();
-        await page.goto(`http://127.0.0.1:5173/editor.html?sample=${sample}&paused=1`);
+        await page.goto(
+          `${process.env.BASE_URL ?? 'http://127.0.0.1:5173'}/editor.html?sample=${sample}&paused=1`,
+        );
         await page.waitForFunction(() => window.editorDiagnostics);
         const firstUsableMs = Date.now() - navigation;
 

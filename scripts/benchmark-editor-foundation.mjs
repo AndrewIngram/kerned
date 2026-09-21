@@ -22,7 +22,9 @@ const report = {
     platform: os.platform(),
     arch: os.arch(),
     node: process.version,
-    mode: 'Vite development server; fresh browser/context per phase; OS/server caches not cleared',
+    mode: process.env.BENCHMARK_MODE ?? 'development',
+    baseURL: process.env.BASE_URL ?? 'http://127.0.0.1:5173',
+    isolation: 'Fresh browser/context per phase; OS/server caches not cleared',
     viewport: { width: 1100, height: 900 },
     sample: 'warbreaker',
   },
@@ -81,7 +83,9 @@ for (let trial = 0; trial < trials; trial++) {
       (url) => url.pathname === '/',
       () => {},
     );
-    await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');
+    await page.goto(
+      `${process.env.BASE_URL ?? 'http://127.0.0.1:5173'}/editor.html?sample=warbreaker`,
+    );
     await page.waitForFunction(() => window.editorDiagnostics?.probe([]).complete, null, {
       timeout: 120000,
     });

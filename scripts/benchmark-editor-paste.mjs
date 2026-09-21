@@ -17,7 +17,9 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
       (url) => url.pathname === '/',
       () => {},
     );
-    await page.goto('http://127.0.0.1:5173/editor.html?sample=warbreaker');
+    await page.goto(
+      `${process.env.BASE_URL ?? 'http://127.0.0.1:5173'}/editor.html?sample=warbreaker`,
+    );
     await page.waitForFunction(() => window.editorDiagnostics?.probe([]).complete);
 
     const settle = () =>
