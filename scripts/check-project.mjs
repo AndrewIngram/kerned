@@ -58,6 +58,26 @@ for (const entry of ['apps/demo/editor.html', 'apps/demo/extensions.html']) {
   for (const [, source] of scripts) visit(path.join('apps/demo', source.replace(/^\//, '')));
 }
 
+// Static reference pages are served directly, outside Vite's module graph.
+const publicDirectory = 'apps/demo/public';
+
+for (const file of readdirSync(publicDirectory, { recursive: true, encoding: 'utf8' })) {
+  if (!file.endsWith('.html')) continue;
+  const entry = path.join(publicDirectory, file);
+  const html = readFileSync(entry, 'utf8');
+
+  for (const [, href] of html.matchAll(/<link\b[^>]*\bhref=["']([^"']+\.css)["']/g)) {
+    if (/^(?:[a-z]+:|\/\/)/i.test(href)) continue;
+
+    const stylesheet = href.startsWith('/')
+      ? path.join(publicDirectory, href.slice(1))
+      : path.join(path.dirname(entry), href);
+
+    assert.ok(existsSync(stylesheet), `${entry}: missing stylesheet ${href}`);
+    visit(stylesheet);
+  }
+}
+
 // Public headless entry points are supported even when the demo does not import every export.
 for (const name of readdirSync('packages')) {
   const directory = `packages/${name}`;

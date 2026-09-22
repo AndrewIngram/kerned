@@ -1,0 +1,23 @@
+{
+  "id": "hayy-ibn-yaqzan",
+  "title": "Hayy ibn Yaqzan",
+  "nativeTitle": "حي بن يقظان",
+  "author": "Ibn Tufayl",
+  "language": "ar",
+  "sourceUrl": "https://ar.wikisource.org/w/index.php?title=%D8%AD%D9%8A_%D8%A8%D9%86_%D9%8A%D9%82%D8%B8%D8%A7%D9%86&oldid=374590",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "attribution": "Ibn Tufayl; Arabic Wikisource contributors, revision 374590. Medieval work in the public domain; editorial contributions under CC BY-SA 4.0. The transcription does not identify its print edition.",
+  "contents": "Complete narrative in the selected transcription; no invented chapters.",
+  "direction": "rtl",
+  "source": "hayy-ibn-yaqzan-source.html.txt",
+  "sourceSha256": "109064035e35f0c0461d4cea89881cb67495fb83a06e016099f121aa338d2834",
+  "htmlSha256": "4b3896f3d71108baae280394c3e8c9f40dd27ab0c17166c5064c6e25fceec0ab",
+  "blocks": 125,
+  "headings": 1,
+  "words": 18301,
+  "combiningMarks": 468,
+  "latinLetters": 0,
+  "digits": 0,
+  "sourceTextVerified": true,
+  "normalization": "Whitespace normalized; original letters, punctuation and combining marks preserved without Unicode normalization. Links and superscripts flattened to text; italics retained. Hebrew poem table becomes two lines. Arabic title added from source page title. Website navigation, images and source styling omitted."
+}

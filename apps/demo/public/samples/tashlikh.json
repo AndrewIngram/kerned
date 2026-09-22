@@ -1,0 +1,23 @@
+{
+  "id": "tashlikh",
+  "title": "Tashlikh",
+  "nativeTitle": "הצופה לבית ישראל: תשליך",
+  "author": "Isaac Erter",
+  "language": "he",
+  "sourceUrl": "https://www.gutenberg.org/cache/epub/45252/pg45252-images.html",
+  "licenseUrl": "tashlikh-source.html.txt",
+  "attribution": "Isaac Erter, 1840 Prague edition. Project Gutenberg ebook 45252, produced by Enrico Segre and the Distributed Proofreading team at DP-test Italia. Public-domain literary text. The original source snapshot includes the Project Gutenberg licence and transcription notes.",
+  "contents": "Title matter, introduction, complete satire and five footnotes; later transcription notes retained in the source snapshot.",
+  "direction": "rtl",
+  "source": "tashlikh-source.html.txt",
+  "sourceSha256": "3dbdecb5d01718711a82e4a90aa7cda8da8a4564aab8d84a832ba25e4ef737a7",
+  "htmlSha256": "896bceffc4ffeebd1f96ece5b580aaa0016465316a13c59ebd095bf6e58d255f",
+  "blocks": 39,
+  "headings": 3,
+  "words": 7040,
+  "combiningMarks": 222,
+  "latinLetters": 48,
+  "digits": 14,
+  "sourceTextVerified": true,
+  "normalization": "Whitespace normalized; original letters, punctuation and combining marks preserved without Unicode normalization. Links and superscripts flattened to text; italics retained. Hebrew poem table becomes two lines. Arabic title added from source page title. Website navigation, images and source styling omitted."
+}

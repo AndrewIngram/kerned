@@ -1,5 +1,57 @@
 # HTML book samples
 
+## International reference books
+
+[International samples](http://127.0.0.1:5173/samples/international.html) provides
+two additional books, with readable HTML reference pages and pinned source snapshots:
+
+| Book                                                                            | Language |  Words | Blocks | Useful coverage                                                 |
+| ------------------------------------------------------------------------------- | -------- | -----: | -----: | --------------------------------------------------------------- |
+| [Hayy ibn Yaqzan](../apps/demo/public/samples/hayy-ibn-yaqzan.html), Ibn Tufayl | Arabic   | 18,301 |    125 | Joining, 468 combining marks, punctuation, long paragraphs      |
+| [Tashlikh](../apps/demo/public/samples/tashlikh.html), Isaac Erter              | Hebrew   |  7,040 |     39 | 222 combining marks, German title matter, numbers, notes, verse |
+
+These pages use the browser's text renderer as a reference. They are **not yet
+enabled in the canvas editor's sample selector**. Font fallback, directional run
+integration and safe Arabic wrapping remain prerequisites; see
+[international text progress](research-international-text.md). Neither book is
+intended to replace War and Peace as a very-large-document benchmark.
+
+The HTML `main#book` contains only book content. Headers and footers provide
+reference status, attribution, licence links and conversion notes. To import a
+book for testing, pass that element's `innerHTML` to the normal schema HTML
+parser. Import checks preserve the logical text and heading structure; they do
+not yet establish preservation of `lang`/`dir` in editor schema nodes.
+
+Regenerate offline from the checked-in source snapshots:
+
+```sh
+node scripts/convert-international-books.mjs
+```
+
+This uses installed Playwright Chromium, parses source markup in an inert DOM,
+and verifies all non-whitespace text against the selected source content, in
+block order. It never executes downloaded scripts or mounts source elements.
+Original downloads use `.html.txt` so they are served as source data rather than
+active pages. Generated JSON manifests contain SHA-256 hashes, counts and
+attribution. Vitest checks the hashes and imports every block in Chromium,
+Firefox and WebKit as part of `pnpm run check`.
+
+The Arabic sample retains the text of Wikisource revision 374590, with CC BY-SA
+4.0 attribution for editorial contributions. Its print source is unidentified;
+it is a useful text fixture, not a critical edition. The Hebrew sample preserves
+the title matter, introduction, satire and five notes from Gutenberg ebook
+45252, an 1840 edition. Later transcription notes and the Gutenberg licence
+remain in the unmodified source. See [source research](research-international-books.md)
+for rights evidence and the editions considered.
+
+Conversion normalizes whitespace, preserves original Unicode sequences, keeps
+italics, flattens link labels/superscripts, and turns the Hebrew verse table into
+two lines. It adds the Arabic title from the source page title and does not invent
+chapter divisions. The Arabic narrative has one heading; the Hebrew sample has
+three. Browser reference typography uses the bundled Noto Arabic/Hebrew fonts.
+
+## Canvas editor samples
+
 Both editor views offer **Warbreaker** and **War and Peace** in the **Sample**
 selector. Add `?sample=warbreaker` or `?sample=war-and-peace` to `/editor.html`
 or `/extensions.html` to open a book directly.
