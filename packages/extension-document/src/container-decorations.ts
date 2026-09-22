@@ -1,9 +1,10 @@
-import './container-decorations.css';
 import { defineExtension, type ContributionContext } from '@gprose/core';
 import type { NodeIdentity, Schema } from '@gprose/model';
+import { viewStyles } from '@gprose/view';
 import { applyTextStyle } from '@gprose/view';
 import { viewLayers, type ViewLayerFrame } from '@gprose/view';
 
+import { containerStyles } from './container-decorations-styles.js';
 import { quote, list, listItem } from './definitions.js';
 
 function createContainerDecorations<N extends NodeIdentity>(
@@ -114,6 +115,7 @@ export const containerDecorations = defineExtension({
   options: {},
   requires: [quote.name, list.name, listItem.name],
   setup(_options, context: ContributionContext) {
+    context.provide(viewStyles, containerStyles);
     context.provide(viewLayers, {
       name: 'containers',
       create: ({ element, editor }) => createContainerDecorations(element, editor.schema),

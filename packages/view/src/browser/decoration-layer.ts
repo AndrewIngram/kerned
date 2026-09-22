@@ -1,6 +1,5 @@
 import type { NodeIdentity } from '@gprose/model';
 
-import './decorations.css';
 import { allocatedBlockBounds } from './block-geometry.js';
 import {
   createDecorationSource,

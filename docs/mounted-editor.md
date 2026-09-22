@@ -351,3 +351,21 @@ engine handles and manual layout, input and painting orchestration are gone.
 Outline, find and annotation panels use geometry/reveal queries. Streaming
 backpressure and the audit harness use separate diagnostics. Independent engine
 checks allocate their own temporary resources outside the application view.
+
+## View-owned styles
+
+Browser extensions can provide inert CSS through `viewStyles` from `@gprose/view`:
+
+```ts
+context.provide(viewStyles, '.my-editor-card { border-radius: 8px; }');
+```
+
+The mount installs base and contributed styles in a style element inside its own
+root. It removes that element on destruction or initialization failure. Each view
+owns its style element, so destroying one editor cannot remove another editor's
+styles. A host inside a shadow root receives styles in that same root. Extension
+selectors should use their own class names; CSS follows normal cascade rules.
+Importing the view, React adapter or standard browser extensions does not install
+styles, read a DOM global or require a CSS loader. React server rendering is
+verified against emitted packages in ordinary Node. Applications do not need to
+assemble a separate stylesheet list for the supplied browser kit.

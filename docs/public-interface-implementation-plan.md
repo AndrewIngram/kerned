@@ -1,8 +1,8 @@
 # Public interface implementation plan
 
-Date: 2026-09-21. Status: implementation in progress. Milestones 0–7 are complete, including independent architecture review and agreed fixes. Milestone 8 implementation and validation are complete; its independent architecture review is pending. See [verified progress](public-interface-progress.md)
-for shipped interfaces and remaining requirements. This plan describes the full
-target, including interfaces that are not yet implemented.
+Date: 2026-09-21. Status: complete. All milestones 0–8 are implemented, independently reviewed and validated, including agreed fixes. See [verified progress](public-interface-progress.md)
+and the [completion audit](public-interface-completion-audit.md) for the shipped
+interfaces, executable evidence and explicitly deferred work.
 
 This is the execution plan for the approved scope: package discipline, complete
 view lifetime, extension and command composition, configurable typography,
@@ -366,13 +366,13 @@ work. None is implied by a new interface name.
 
 ## Completion checklist
 
-- [ ] All eight implementation milestones plus baseline are complete.
-- [ ] Built consumer examples work without internal imports or engine factories.
-- [ ] Assembled schema passes inference, validation and Standard Schema tests.
-- [ ] Custom schemas and extensions work without starter-kit or React.
-- [ ] Commands, permissions, selections, references and clipboard retain behavior.
-- [ ] Configurable typography reaches canvas, DOM and geometry consistently.
-- [ ] Mount/destroy and two-editor lifecycle tests pass.
-- [ ] Production browser checks and agreed performance budgets pass.
-- [ ] Existing limitations and any remaining skips are documented accurately.
-- [ ] Docs describe implemented interfaces, and replaced interfaces are removed.
+- [x] All eight implementation milestones plus baseline are complete.
+- [x] Built consumer examples work without internal imports or engine factories.
+- [x] Assembled schema passes inference, validation and Standard Schema tests.
+- [x] Custom schemas and extensions work without starter-kit or React.
+- [x] Commands, permissions, selections, references and clipboard retain behavior.
+- [x] Configurable typography reaches canvas, DOM and geometry consistently.
+- [x] Mount/destroy and two-editor lifecycle tests pass.
+- [x] Production browser checks and agreed performance budgets pass.
+- [x] Existing limitations and any remaining skips are documented accurately.
+- [x] Docs describe implemented interfaces, and replaced interfaces are removed.

@@ -3,7 +3,6 @@ import { defineNodePresentation, presentations } from '@gprose/view';
 
 import { paragraph, heading, image, quote, list, listItem } from './definitions.js';
 import { formattingSpans } from './formatting.js';
-import { mentionLayout } from './mention.js';
 import { typography } from './typography.js';
 
 /** Browser defaults are contributed alongside the installed schema; mounts discover them. */
@@ -20,7 +19,7 @@ export const documentPresentation = defineExtension({
         baselineGrid: 4,
         text: attrs.text,
         spans: formattingSpans(node.marks),
-        atoms: node.inline.map(mentionLayout),
+        atoms: node.layoutInline(),
       })),
     );
     context.provide(
@@ -35,7 +34,7 @@ export const documentPresentation = defineExtension({
           baselineGrid: 4,
           text: attrs.text,
           spans,
-          atoms: node.inline.map(mentionLayout),
+          atoms: node.layoutInline(),
         };
       }),
     );

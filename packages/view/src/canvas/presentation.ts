@@ -6,14 +6,57 @@ import type {
   NodeIdentity,
   Schema,
   SchemaDefinition,
+  ValueBinding,
 } from '@gprose/model';
 
 import { createDocumentQuery } from '../browser/document.js';
+import type { InlineAtom } from '../internal/owned-inline.js';
 import { emptySlotInsets, type SlotInsets, type FlowLayoutEvent } from './flow-layout.js';
 import type { BlockPresentation } from './scene.js';
 import { createThemeStyles, type ViewTheme } from './theme.js';
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;
+
+type InlineDefinition = Extract<SchemaDefinition, { category: 'inline' }>;
+
+export type InlinePresentation = Pick<InlineAtom, 'width' | 'ascent' | 'descent' | 'label'>;
+
+export type InlinePresentationContribution = {
+  create<N extends NodeIdentity>(
+    schema: Schema<N>,
+  ): {
+    readonly name: string;
+    read(value: InlineValue): InlinePresentation;
+  };
+};
+
+/** Inline allocation is supplied by the inline definition's browser extension. */
+export const inlinePresentations = defineContribution<InlinePresentationContribution>();
+
+export function defineInlinePresentation<D extends InlineDefinition>(
+  definition: D,
+  create: () => (
+    attributes: NonNullable<ReturnType<ValueBinding<D>['read']>>['attrs'],
+  ) => InlinePresentation,
+): InlinePresentationContribution {
+  return {
+    create(schema) {
+      const binding = schema.value(definition);
+      const render = create();
+
+      return {
+        name: definition.name,
+        read(value) {
+          const bound = binding.read(value);
+
+          if (!bound) throw new Error(`Inline does not match presentation for ${definition.name}`);
+
+          return render(bound.attrs);
+        },
+      };
+    },
+  };
+}
 
 type Attributes<D extends NodeDefinition> = NonNullable<
   ReturnType<NodeBinding<NodeIdentity, D>['read']>
@@ -33,6 +76,8 @@ export type PresentationContext = {
   readonly childCount: number;
   readonly marks: readonly MarkRange[];
   readonly inline: readonly InlineValue[];
+  /** Allocate installed inline types without coupling a text node to their attributes. */
+  layoutInline(): readonly InlineAtom[];
 };
 
 type PresentationRenderer<N> = {
@@ -41,7 +86,10 @@ type PresentationRenderer<N> = {
 };
 
 export type PresentationContribution = {
-  create<N extends NodeIdentity>(schema: Schema<N>): PresentationRenderer<N>;
+  create<N extends NodeIdentity>(
+    schema: Schema<N>,
+    layoutInline: (values: readonly InlineValue[]) => readonly InlineAtom[],
+  ): PresentationRenderer<N>;
 };
 
 /** View contributions are installed with the schema, but never executed by the headless core. */
@@ -53,7 +101,10 @@ export function defineNodePresentation<D extends NodeDefinition>(
   create: () => (attributes: Attributes<D>, context: PresentationContext) => NodePresentation,
 ): PresentationContribution {
   return {
-    create<N extends NodeIdentity>(schema: Schema<N>): PresentationRenderer<N> {
+    create<N extends NodeIdentity>(
+      schema: Schema<N>,
+      layoutInline: (values: readonly InlineValue[]) => readonly InlineAtom[],
+    ): PresentationRenderer<N> {
       const binding = schema.node(definition);
       const render = create();
 
@@ -66,11 +117,14 @@ export function defineNodePresentation<D extends NodeDefinition>(
             throw new Error(`Node does not match presentation for ${definition.name}`);
           const type = schema.resolve(node);
 
+          const inline = type.kind === 'text' ? (type.editing.inline?.read(node) ?? []) : [];
+
           const result = render(attributes, {
             identity: node,
             childCount: schema.children(node).length,
             marks: type.kind === 'text' ? (type.editing.marks?.read(node) ?? []) : [],
-            inline: type.kind === 'text' ? (type.editing.inline?.read(node) ?? []) : [],
+            inline,
+            layoutInline: () => layoutInline(inline),
           });
 
           if (result.kind === 'flow' && type.kind !== 'container')
@@ -89,10 +143,30 @@ export function createDocumentPresentation<N extends NodeIdentity>(
   theme?: ViewTheme,
   validateColor?: (color: string) => void,
 ) {
+  const inlineRenderers = new Map<string, ReturnType<InlinePresentationContribution['create']>>();
+
+  for (const contribution of inlinePresentations.read(editor)) {
+    const renderer = contribution.create(editor.schema);
+
+    if (inlineRenderers.has(renderer.name))
+      throw new Error(`Duplicate inline presentation: ${renderer.name}`);
+    inlineRenderers.set(renderer.name, renderer);
+  }
+
+  function layoutInline(values: readonly InlineValue[]): readonly InlineAtom[] {
+    return values.map((value) => {
+      const renderer = inlineRenderers.get(value.type);
+
+      if (!renderer) throw new Error(`Missing inline presentation: ${value.type}`);
+
+      return { ...renderer.read(value), id: value.id, index: value.index };
+    });
+  }
+
   const renderers = new Map<string, PresentationRenderer<N>>();
 
   for (const contribution of presentations.read(editor)) {
-    const renderer = contribution.create(editor.schema);
+    const renderer = contribution.create(editor.schema, layoutInline);
 
     if (renderers.has(renderer.name))
       throw new Error(`Duplicate node presentation: ${renderer.name}`);

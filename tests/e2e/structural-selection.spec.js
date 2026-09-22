@@ -94,64 +94,8 @@ fixtureTest(
   'node-only document supports drag, shift reversal and document-edge extension',
   async ({ fixturePage: page }) => {
     await page.evaluate(async () => {
-      const { schema } = await import('/tests/fixtures/editor-foundation.js');
-      const { createEditor, NodeSelection, selectionContext } = await import('/@id/@gprose/state');
-      const { mountEditorView, createTextInteraction } = await import('/@id/@gprose/view');
-
-      const nodes = [
-          { id: 1, key: 'one', kind: 'atom' },
-          { id: 2, key: 'two', kind: 'atom' },
-        ],
-        editor = createEditor(schema, nodes, new NodeSelection(1));
-
-      const context = selectionContext(schema, nodes),
-        interaction = createTextInteraction(),
-        root = document.createElement('div');
-
-      root.style.cssText = 'position:fixed;inset:100px 100px auto;z-index:100;background:white';
-      root.innerHTML =
-        '<div data-atom="1" style="height:80px">One</div><div data-atom="2" style="height:80px">Two</div><textarea aria-label="Atom capture" style="position:fixed;left:0;top:0;width:1px;height:1px;opacity:.01"></textarea>';
-      document.body.append(root);
-      const input = root.querySelector('textarea');
-      let view;
-
-      function options() {
-        const binding = interaction.bind({
-          selection: editor.state.selection,
-          context,
-          nodes: () => nodes.map((n) => ({ id: n.id, text: null, selectable: true })),
-          nodeAt: (target) =>
-            Number(target.closest('[data-atom]')?.getAttribute('data-atom')) || null,
-          select(selection) {
-            editor.select(selection);
-            view.update(options());
-          },
-          breakHistory() {},
-          focus() {
-            input.focus({ preventScroll: true });
-          },
-          reveal() {},
-          point: () => null,
-          regions: () => [],
-          text: () => null,
-          blocks: () => [],
-          layout() {
-            throw new Error('Atoms have no text layout');
-          },
-          viewportHeight: 500,
-        });
-
-        return {
-          pointer: binding.pointer,
-          input: { element: () => input, keydown: binding.keydown },
-        };
-      }
-
-      view = mountEditorView(root, options());
-      window.atomProbe = () => ({
-        type: editor.state.selection.type,
-        ranges: editor.state.selection.ranges(context),
-      });
+      const { mountNodeOnly } = await import('/tests/fixtures/node-only.ts');
+      window.atomProbe = await mountNodeOnly();
     });
     await page.locator('[data-atom="1"]').click();
     await page.keyboard.press('Shift+ArrowRight');

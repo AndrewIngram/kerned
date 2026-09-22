@@ -107,6 +107,33 @@ persistent meaning; mounted React state is temporary. Culling unmounts component
 Focused controls pin their owning text block until focus leaves, so scrolling
 does not tear down the active control.
 
+## Inline allocation
+
+A text node need not know the attributes of each inline extension. Its presentation
+can use `atoms: context.layoutInline()` to allocate all installed inline types.
+The standard paragraph and heading presentations do this automatically.
+An inline browser extension contributes its own typed metrics:
+
+```ts
+context.provide(
+  inlinePresentations,
+  defineInlinePresentation(badge, () => (attributes) => ({
+    width: 76,
+    ascent: 24,
+    descent: 6,
+    label: attributes.code,
+  })),
+);
+```
+
+Import both helpers from `@gprose/view`. The callback receives the installed
+inline definition's canonical attributes; it does not parse another inline type's
+attributes. The factory runs once per view, and metrics are cached with the owning
+node presentation. The view attaches the inline identity and text offset.
+`defineInlineView` or `defineReactInlineView` paints the allocated box. Duplicate
+allocators and missing allocators produce errors. Custom text presentations can
+still supply their own explicit atom array when they own the entire layout.
+
 ## Ownership decision
 
 We considered extending each feature's layer with its own DOM map and adding

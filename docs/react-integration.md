@@ -89,3 +89,8 @@ that relation in the type system and verifies the schema instance at the provide
 It adds one module-level context declaration while preserving simple provider and
 consumer usage. Neither the provider nor the content host takes ownership of a
 borrowed session.
+
+The built React entry and starter browser extensions can be imported by ordinary
+Node during server rendering without a CSS loader. Styles are inert extension
+contributions until a browser view mounts. `tests/consumers/react-server.mjs`
+checks both owned and borrowed sessions against emitted packages.

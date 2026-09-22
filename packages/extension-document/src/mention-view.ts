@@ -1,15 +1,17 @@
 import { defineContribution, defineExtension, type ExtensionContext } from '@gprose/core';
 import type { NodeIdentity } from '@gprose/model';
+import { viewStyles } from '@gprose/view';
 import {
   viewLayers,
+  inlinePresentations,
+  defineInlinePresentation,
   defineInlineView,
   type InlineViewFrame,
   type PreparedText,
 } from '@gprose/view';
 
 import { mentionDefinition } from './definitions.js';
-
-import './mention-view.css';
+import { mentionStyles } from './mention-view-styles.js';
 
 export type MentionActivation = Readonly<{ nodeId: number; id: string; index: number }>;
 
@@ -34,6 +36,16 @@ export const mentionView = defineExtension({
   requires: [mentionDefinition.name],
   options: { background: '#e5edda', size: 18, padding: 6, radius: 4 },
   setup(options, context: Pick<ExtensionContext<NodeIdentity>, 'provide' | 'onDestroy'>) {
+    context.provide(viewStyles, mentionStyles);
+    context.provide(
+      inlinePresentations,
+      defineInlinePresentation(mentionDefinition, () => (attributes) => ({
+        width: attributes.width,
+        ascent: attributes.ascent,
+        descent: attributes.descent,
+        label: attributes.label,
+      })),
+    );
     const listeners = new Set<Listener>();
     context.onDestroy(() => listeners.clear());
     context.provide(activations, {

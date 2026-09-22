@@ -1,12 +1,11 @@
 import { connectEditorView } from '@gprose/core';
-
-import './mount.css';
 import type { NodeIdentity } from '@gprose/model';
 import { RangeSelection } from '@gprose/state';
 
 import { allocatedBlockWidth } from '../browser/block-geometry.js';
 import { createCanvasInput } from '../browser/canvas-input.js';
 import { createContentSlot } from '../browser/content-slot.js';
+import { decorationStyles } from '../browser/decorations-styles.js';
 import {
   inputPolicies,
   type ViewSession,
@@ -17,6 +16,7 @@ import { createNodeViews, type NodeView } from '../browser/node-views.js';
 import { createPasteRules } from '../browser/paste-rules.js';
 import { createKeyboardShortcuts } from '../browser/shortcuts.js';
 import { createViewLayers } from '../browser/view-layers.js';
+import { viewStyles } from '../browser/view-styles.js';
 import { createEditorViewport } from '../browser/viewport.js';
 import type { ResolveEditorAsset } from './assets.js';
 import { createCanvasRenderer } from './canvas-renderer.js';
@@ -25,6 +25,7 @@ import { createDocumentLayout } from './document-layout.js';
 import type { FontConfiguration } from './font-catalog.js';
 import { createLayerDrawing } from './layer-drawing.js';
 import { createLayerGeometry } from './layer-geometry.js';
+import { mountStyles } from './mount-styles.js';
 import { createDocumentPresentation } from './presentation.js';
 import { createViewResources } from './resources.js';
 import { createTextColors } from './text-colors.js';
@@ -102,6 +103,9 @@ export function mountEditor<N extends NodeIdentity>(
   const capture = createCanvasInput({ schema: editor.schema, editor });
   const painter = createCanvasRenderer<N>({ onError: fail });
   const root = document.createElement('div');
+  const styles = document.createElement('style');
+  styles.dataset.editorStyles = '';
+  styles.textContent = [mountStyles, decorationStyles, ...viewStyles.read(editor)].join('\n');
   const space = document.createElement('div');
   const canvas = document.createElement('canvas');
   const overlay = document.createElement('div');
@@ -132,7 +136,7 @@ export function mountEditor<N extends NodeIdentity>(
   input.spellcheck = false;
   input.tabIndex = -1;
   space.append(nativeNodes, canvas, overlay);
-  root.append(space, input, notice);
+  root.append(styles, space, input, notice);
 
   let status: 'loading' | 'ready' | 'failed' | 'destroyed' = 'loading';
   const cleanup: (() => void)[] = [() => presentation.clear()];

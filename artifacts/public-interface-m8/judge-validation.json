@@ -1,0 +1,107 @@
+{
+  "check": "passed",
+  "builtConsumers": {
+    "node": "passed",
+    "browser": [
+      "vanilla",
+      "table",
+      "starter-kit",
+      "custom-inline",
+      "react"
+    ],
+    "browsers": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "declarations": "passed",
+    "reactSSR": "passed"
+  },
+  "vitest": {
+    "files": 235,
+    "passed": 968,
+    "todo": 1
+  },
+  "e2e": {
+    "passed": 42
+  },
+  "production": {
+    "file": "apps/demo/dist/assets/main-D-Fusz-6.js",
+    "sha256": "4bb29a249449cef1e52ef4d1fc7f35f861f8111b1a750e3e062126c9cd024ff7",
+    "previewURL": "http://127.0.0.1:5186"
+  },
+  "collection": {
+    "before": 886,
+    "after": 895,
+    "missing": [],
+    "added": [
+      [
+        "packages/starter-kit/src/__tests__/custom-inline.browser.test.ts",
+        "starter paragraphs and headings allocate custom inline definitions alongside mentions",
+        "browser-chromium"
+      ],
+      [
+        "packages/starter-kit/src/__tests__/custom-inline.browser.test.ts",
+        "starter paragraphs and headings allocate custom inline definitions alongside mentions",
+        "browser-firefox"
+      ],
+      [
+        "packages/starter-kit/src/__tests__/custom-inline.browser.test.ts",
+        "starter paragraphs and headings allocate custom inline definitions alongside mentions",
+        "browser-webkit"
+      ],
+      [
+        "packages/view/src/canvas/__tests__/inline-boxes.browser.test.ts",
+        "inline rectangle shape is independent of allocation property order",
+        "browser-chromium"
+      ],
+      [
+        "packages/view/src/canvas/__tests__/inline-boxes.browser.test.ts",
+        "inline rectangle shape is independent of allocation property order",
+        "browser-firefox"
+      ],
+      [
+        "packages/view/src/canvas/__tests__/inline-boxes.browser.test.ts",
+        "inline rectangle shape is independent of allocation property order",
+        "browser-webkit"
+      ],
+      [
+        "packages/view/src/canvas/__tests__/view-styles.browser.test.ts",
+        "styles belong to each mounted view and failed initialization releases them",
+        "browser-chromium"
+      ],
+      [
+        "packages/view/src/canvas/__tests__/view-styles.browser.test.ts",
+        "styles belong to each mounted view and failed initialization releases them",
+        "browser-firefox"
+      ],
+      [
+        "packages/view/src/canvas/__tests__/view-styles.browser.test.ts",
+        "styles belong to each mounted view and failed initialization releases them",
+        "browser-webkit"
+      ]
+    ],
+    "normalization": "Private controller tests relocated to view; added custom-inline, style-lifetime and deterministic rectangle-output regressions in three browsers."
+  },
+  "reflow": {
+    "cases": 9,
+    "passed": true
+  },
+  "performanceBudgets": "all passed",
+  "maximums": {
+    "firstUsableMs": 233,
+    "streamingMs": 1273.7000000476837,
+    "pasteHandlerMs": 49.299999952316284,
+    "pastePaintMs": 115,
+    "typingFrameMs": 32.200000047683716,
+    "pagingFrameMs": 32.200000047683716,
+    "loadedHeapBytes": 28115740
+  },
+  "milestone8": "complete; independent judge findings resolved and follow-up approved",
+  "judge": {
+    "implementationCommit": "15bee1a",
+    "findings": 3,
+    "resolved": 3,
+    "followUp": "approved, including rectangle output correction"
+  }
+}

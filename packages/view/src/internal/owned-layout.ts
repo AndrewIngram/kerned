@@ -597,7 +597,12 @@ export async function createOwnedEngine(
           if (!line) throw new Error('Missing inline line');
 
           return {
-            ...atom,
+            id: atom.id,
+            index: atom.index,
+            label: atom.label,
+            width: atom.width,
+            ascent: atom.ascent,
+            descent: atom.descent,
             x: caret[0],
             y: line.baseline - atom.ascent,
             height: atom.ascent + atom.descent,

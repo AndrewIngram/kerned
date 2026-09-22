@@ -1,7 +1,7 @@
 # Package architecture
 
-Status: proposed target for the approved public-interface refactor. Package names
-below are intended module entry points, not existing published packages.
+Status: implemented through the public-interface milestones. The workspace
+packages and supported entry points exist; they remain private and unpublished.
 
 Execution: [detailed public-interface implementation plan](public-interface-implementation-plan.md)
 with milestone tasks, acceptance cases, migration gates and completion checklist.
@@ -124,8 +124,8 @@ view while retaining shared immutable asset bytes.
 React rendering, decorations, content slots, extension codecs/input policies and
 durable delayed edits are implemented and reviewed. Workspace packages now have
 explicit built exports, and the Vite demo consumes those interfaces alongside
-independent Node and browser fixtures. Milestone 8 is undergoing final verification
-and architecture review; the progress log records its remaining checks.
+independent Node and browser fixtures. All milestones and their architecture
+reviews are complete; the progress log and completion audit record the evidence.
 
 ## Standard Schema document contract
 

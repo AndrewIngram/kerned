@@ -156,12 +156,14 @@ Chromium, Firefox and WebKit. Use `pnpm run test:unit`, `pnpm run test:browser`,
 `pnpm run test:e2e` or `pnpm run test:watch` for narrower feedback.
 
 Runnable built consumers live in [tests/consumers](tests/consumers): a complete
-starter-kit editor, independent vanilla and React schemas, and a standalone table
-with custom cell text. `pnpm run check:built-consumers` verifies them without
+starter-kit editor, independent vanilla and React schemas, a standalone table
+with custom cell text, and custom inline objects in standard paragraphs/headings.
+A plain Node React SSR fixture also verifies imports and static rendering. `pnpm run check:built-consumers` verifies them without
 private source imports. `pnpm run format` applies the shared Oxfmt configuration.
 
 See the [repository map](docs/repository-map.md),
 [app ownership guide](docs/editor-app-architecture.md),
 [implementation plan](docs/public-interface-implementation-plan.md) and
-[progress record](docs/public-interface-progress.md) for responsibilities and
-remaining migration work.
+[progress record](docs/public-interface-progress.md) and
+[completion audit](docs/public-interface-completion-audit.md) for responsibilities,
+verified behavior and deferred work.

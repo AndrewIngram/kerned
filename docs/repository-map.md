@@ -1,8 +1,9 @@
 # Repository map
 
-This is the target layout after the public-interface milestones, not a claim
-that the packages already exist. See the
-[implementation plan](public-interface-implementation-plan.md) for tasks and gates.
+The workspace packages and demo described below are implemented. The deeper
+internal directory decomposition remains advisory. See the
+[completion audit](public-interface-completion-audit.md) for verified responsibilities
+and the [implementation plan](public-interface-implementation-plan.md) for tasks and gates.
 
 ## Current workspace
 

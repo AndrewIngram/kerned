@@ -1,0 +1,53 @@
+{
+  "before": 886,
+  "after": 895,
+  "missing": [],
+  "added": [
+    [
+      "packages/starter-kit/src/__tests__/custom-inline.browser.test.ts",
+      "starter paragraphs and headings allocate custom inline definitions alongside mentions",
+      "browser-chromium"
+    ],
+    [
+      "packages/starter-kit/src/__tests__/custom-inline.browser.test.ts",
+      "starter paragraphs and headings allocate custom inline definitions alongside mentions",
+      "browser-firefox"
+    ],
+    [
+      "packages/starter-kit/src/__tests__/custom-inline.browser.test.ts",
+      "starter paragraphs and headings allocate custom inline definitions alongside mentions",
+      "browser-webkit"
+    ],
+    [
+      "packages/view/src/canvas/__tests__/inline-boxes.browser.test.ts",
+      "inline rectangle shape is independent of allocation property order",
+      "browser-chromium"
+    ],
+    [
+      "packages/view/src/canvas/__tests__/inline-boxes.browser.test.ts",
+      "inline rectangle shape is independent of allocation property order",
+      "browser-firefox"
+    ],
+    [
+      "packages/view/src/canvas/__tests__/inline-boxes.browser.test.ts",
+      "inline rectangle shape is independent of allocation property order",
+      "browser-webkit"
+    ],
+    [
+      "packages/view/src/canvas/__tests__/view-styles.browser.test.ts",
+      "styles belong to each mounted view and failed initialization releases them",
+      "browser-chromium"
+    ],
+    [
+      "packages/view/src/canvas/__tests__/view-styles.browser.test.ts",
+      "styles belong to each mounted view and failed initialization releases them",
+      "browser-firefox"
+    ],
+    [
+      "packages/view/src/canvas/__tests__/view-styles.browser.test.ts",
+      "styles belong to each mounted view and failed initialization releases them",
+      "browser-webkit"
+    ]
+  ],
+  "normalization": "Private controller tests relocated to view; added custom-inline, style-lifetime and deterministic rectangle-output regressions in three browsers."
+}

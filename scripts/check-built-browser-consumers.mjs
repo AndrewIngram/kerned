@@ -41,6 +41,7 @@ try {
           'tests/consumers/react.html',
           'tests/consumers/table.html',
           'tests/consumers/starter.html',
+          'tests/consumers/inline.html',
         ],
       },
     },
@@ -149,6 +150,11 @@ try {
         await page.waitForSelector('#editor[data-ready="destroyed"]');
         assert.equal(await page.locator('canvas').count(), 0);
 
+        await page.goto(url + 'tests/consumers/inline.html');
+        await page.waitForSelector('#editor[data-ready="ready"]');
+        assert.equal(await page.locator('[data-badge][data-width="76"]').count(), 2);
+        assert.equal(await page.locator('[data-mention]').count(), 2);
+
         await page.goto(url + 'tests/consumers/react.html');
         await page.waitForSelector('body[data-ready="ready"]');
         await page.getByRole('button', { name: 'Custom node: 0', exact: true }).click();
@@ -163,7 +169,7 @@ try {
         assert.equal(await page.locator('canvas').count(), 0);
         assert.deepEqual(errors, []);
         console.log(
-          `${name}: built vanilla, standalone table, starter-kit and React consumers passed`,
+          `${name}: built vanilla, standalone table, starter-kit, custom inline and React consumers passed`,
         );
       } finally {
         await browser.close();

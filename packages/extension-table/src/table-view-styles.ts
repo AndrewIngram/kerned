@@ -1,4 +1,4 @@
-.table-block {
+export const tableStyles = `.table-block {
   color: inherit;
   overflow-x: auto;
 }
@@ -79,3 +79,4 @@
 .empty-cell {
   display: block;
 }
+`;

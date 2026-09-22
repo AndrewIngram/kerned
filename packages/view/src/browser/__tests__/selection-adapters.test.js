@@ -1,10 +1,10 @@
-import * as editorBrowserModule from '@gprose/view';
+import * as stateModule from '@gprose/state';
+import * as rangeSelectionModule from '@gprose/state';
+import * as selectionModule from '@gprose/state';
 import { test, expect } from 'vitest';
 
-import * as editorFoundationModule from '../../../../tests/fixtures/editor-foundation.js';
-import * as stateModule from '../index.js';
-import * as rangeSelectionModule from '../range-selection.js';
-import * as selectionModule from '../selection.js';
+import * as editorFoundationModule from '../../../../../tests/fixtures/editor-foundation.js';
+import * as editorBrowserModule from '../node-navigation.js';
 
 test('selection projection preserves node, container, cell and empty selections', async () => {
   const result = await (async () => {

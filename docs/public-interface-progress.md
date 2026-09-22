@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status      | Required outcome                                                                      |
-| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------- |
-| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate        |
-| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                          |
-| 2 — typed schema assembly           | Complete    | Extension-derived content types and synchronous Standard Schema validation            |
-| 3 — session commands and state      | Complete    | Shared named commands, draft chains, queries and per-session extension state          |
-| 4 — complete view lifetime          | Complete    | Vanilla mounting owns rendering, input, assets and cleanup                            |
-| 5 — presentation                    | Complete    | Per-view typography, fonts and appropriate cache invalidation                         |
-| 6 — renderers and React             | Complete    | Public rendering/decorations and React adapters over the same view                    |
-| 7 — codecs and delayed edits        | Complete    | Extension codecs/input rules and durable async targets                                |
-| 8 — workspace consumers             | In progress | Implementation and final validation complete; independent architecture review pending |
+| Milestone                           | Status   | Required outcome                                                               |
+| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
+| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
+| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
+| 3 — session commands and state      | Complete | Shared named commands, draft chains, queries and per-session extension state   |
+| 4 — complete view lifetime          | Complete | Vanilla mounting owns rendering, input, assets and cleanup                     |
+| 5 — presentation                    | Complete | Per-view typography, fonts and appropriate cache invalidation                  |
+| 6 — renderers and React             | Complete | Public rendering/decorations and React adapters over the same view             |
+| 7 — codecs and delayed edits        | Complete | Extension codecs/input rules and durable async targets                         |
+| 8 — workspace consumers             | Complete | Built workspace consumers, public interfaces and review fixes validated        |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -3471,3 +3471,48 @@ owners, executable contracts and actual limitations.
 This commit completes M8 implementation and precedes its required independent
 architecture judge. M8 and the overall goal remain open until that review and
 any agreed fixes have been validated and committed.
+
+### Milestone 8: architecture review and completion
+
+The independent judge reviewed `b75c193..15bee1a` and required three changes:
+inert server imports for React/browser extensions, schema-bound allocation for
+custom inline objects in standard paragraphs/headings, and removal of the public
+manual event-mount/controller interface. All three findings are accepted and
+resolved. The [review record](milestone-8-architecture-review.md) explains the
+seams and evidence; its follow-up found no remaining blocking issues.
+
+`viewStyles` now contributes inert CSS. The mounted view owns its style element,
+including two-editor and failed-initialization cleanup. Plain-Node SSR tests load
+emitted React, starter browser, comment and search packages without a CSS loader.
+`defineInlinePresentation` binds geometry to installed inline definitions;
+standard text presentations dispatch through `layoutInline()`. A custom badge
+and mention coexist in standard paragraphs and headings, with renderer and caret
+geometry verified in source and built consumers.
+
+`InputHandlers` is the shared native policy contract. Composition, focus and
+capture remain owned by the complete mount. Old manual mount, interaction and
+navigation exports are removed; private controller tests live beside their owner.
+The node-only E2E regression now mounts the complete public editor.
+
+Production reflow exposed a property-order coupling in private inline rectangle
+records. A real-engine regression proved equal geometry with differently ordered
+input fields. Explicit rectangle construction fixes the output shape while
+preserving every field and the unchanged audit assertion. The judge approved
+this follow-up too.
+
+Final evidence in `artifacts/public-interface-m8/judge-*` records:
+
+- `pnpm check`: 968 Vitest passes across 235 files, the unchanged collaboration
+  TODO, 42 E2E scenarios, built headless Node/React SSR and five browser consumers
+  across Chromium, Firefox and WebKit.
+- Collection 886 → 895: no lost cases and nine new browser regressions.
+- Production build and all nine 2,000/10,000-block/concurrent-stream reflow cases.
+- Three serial production trials within every unchanged budget: first usable
+  paint 233 ms, streaming 1,273.7 ms, paste handler 49.3 ms, paste paint 115 ms,
+  typing and paging 32.2 ms, loaded heap 28,115,740 bytes.
+
+The post-review fix commit completes milestone 8. All milestones 0–8, their
+required independent judges and agreed fixes are complete. The checklist
+extension remains removed. Collaboration convergence/transport, full international
+text, publishing and other explicitly deferred work are outside this plan, as
+recorded in the [completion audit](public-interface-completion-audit.md).

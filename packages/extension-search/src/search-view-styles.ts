@@ -1,0 +1,4 @@
+export const searchStyles = `[data-find-active='true'] {
+  box-shadow: inset 0 -1px #a86b0a;
+}
+`;

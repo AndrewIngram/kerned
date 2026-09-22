@@ -1,6 +1,7 @@
 import { connectEditorView, type EditorViewSession } from '@gprose/core';
 import type { Selection } from '@gprose/state';
 
+import type { InputHandlers } from './input-contributions.js';
 import { createPointerSelection, type PointerSelectionOptions } from './pointer-selection.js';
 
 export type BrowserViewOptions = {
@@ -8,13 +9,8 @@ export type BrowserViewOptions = {
   focusSelection?: () => void;
   revealSelection?: (selection: Selection) => void;
   pointer: PointerSelectionOptions;
-  input?: {
+  input?: InputHandlers & {
     element: () => HTMLTextAreaElement | null;
-    keydown?: (event: KeyboardEvent) => void;
-    input?: (event: Event, input: HTMLTextAreaElement) => void;
-    copy?: (event: ClipboardEvent) => void;
-    cut?: (event: ClipboardEvent) => void;
-    paste?: (event: ClipboardEvent) => void;
     compositionstart?: () => void;
     compositionend?: () => void;
     focus?: (focused: boolean) => void;

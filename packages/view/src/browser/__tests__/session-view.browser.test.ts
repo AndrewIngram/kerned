@@ -1,9 +1,10 @@
 import { createEditor } from '@gprose/core';
 import { createSchema, defineNode } from '@gprose/model';
 import { textSelection } from '@gprose/state';
-import { mountEditorView, type BrowserViewOptions } from '@gprose/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
+
+import { mountEditorView, type BrowserViewOptions } from '../native-view.js';
 
 const schema = createSchema({
   extensions: [

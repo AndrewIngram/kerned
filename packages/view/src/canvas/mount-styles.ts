@@ -1,4 +1,4 @@
-[data-editor-view] [data-editor-node][data-selected='true']::after {
+export const mountStyles = `[data-editor-view] [data-editor-node][data-selected='true']::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -7,3 +7,4 @@
   pointer-events: none;
   border-radius: 8px;
 }
+`;

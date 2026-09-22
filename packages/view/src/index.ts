@@ -2,28 +2,10 @@ export { createTextInput } from './browser/text-input.js';
 
 export type { ObserveTextPointer, TextPointerEvent } from './browser/canvas-input.js';
 
-export { createTextInteraction, positionTextInput } from './browser/text-interaction.js';
-
-export { hitTestTextLines, type TextHit, type TextHitRegion } from './browser/hit-testing.js';
-
-export {
-  createTextNavigation,
-  type NavigationBlock,
-  type NavigationLayout,
-  type NavigationKey,
-} from './browser/keyboard-navigation.js';
-
-export { textSelectionAtClick } from './browser/selection-view.js';
-
-export {
-  textBoundaryNearNode,
-  moveNodeSelection,
-  type NavigationNode,
-} from './browser/node-navigation.js';
-
 export {
   inputPolicies,
   type InputContribution,
+  type InputHandlers,
   type ViewSession,
 } from './browser/input-contributions.js';
 
@@ -123,6 +105,10 @@ export { mountEditor, type MountedEditor, type MountEditorOptions } from './canv
 
 export {
   defineNodePresentation,
+  defineInlinePresentation,
+  inlinePresentations,
+  type InlinePresentation,
+  type InlinePresentationContribution,
   presentations,
   type NodePresentation,
 } from './canvas/presentation.js';
@@ -142,8 +128,6 @@ export {
 
 export { defineStyleRule, type StyleRule, type NodeStyle, type ViewTheme } from './canvas/theme.js';
 
-export { mountEditorView, type BrowserViewOptions } from './browser/native-view.js';
-
 export { createDocumentQuery } from './browser/document.js';
 
 export { nativeTextCaret, revealNativeText } from './browser/native-text-geometry.js';
@@ -153,3 +137,5 @@ export type { PresentationContext, PresentationContribution } from './canvas/pre
 export type { BlockPresentation } from './canvas/scene.js';
 
 export type { Span as TextSpan } from './internal/layout-types.js';
+
+export { viewStyles } from './browser/view-styles.js';

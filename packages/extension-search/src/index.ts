@@ -1,13 +1,15 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
-
-import './search-view.css';
+import { viewStyles } from '@gprose/view';
 import { decorations, type TextDecoration } from '@gprose/view';
+
+import { searchStyles } from './search-view-styles.js';
 
 /** Search results are session state; the contribution paints only resident text. */
 export const searchView = defineExtension({
   name: 'searchView',
   options: { color: '#ffec97', activeColor: '#f5b941' },
   setup(options, context: ContributionContext) {
+    context.provide(viewStyles, searchStyles);
     context.provide(decorations, {
       name: 'search',
       create(editor) {

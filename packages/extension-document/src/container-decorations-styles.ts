@@ -1,4 +1,4 @@
-.block-decoration {
+export const containerStyles = `.block-decoration {
   position: absolute;
   pointer-events: none;
 }
@@ -15,3 +15,4 @@
   top: 0;
   font: inherit;
 }
+`;

@@ -144,11 +144,11 @@ test('native input groups typing and deletion, isolates composition, and shares 
   type('!');
   type('?');
   expect(editor.history.undo).toBe(1);
-  handlers.compositionstart?.();
+  textInput.compositionStart();
   type('é');
   expect(key('Enter').defaultPrevented).toBe(false);
   expect(editor.state.nodes).toHaveLength(2);
-  handlers.compositionend?.();
+  textInput.compositionEnd(input);
   expect(editor.history.undo).toBe(2);
   expect(key('z', true).defaultPrevented).toBe(true);
   expect(editor.state.nodes[0]).toMatchObject({ text: 'First!?' });

@@ -1,16 +1,14 @@
-.editor-decoration-hit {
+export const mentionStyles = `.mention-hit {
   position: absolute;
   pointer-events: auto;
   display: block;
   background: transparent !important;
   border: 0;
   padding: 0;
-  border-radius: 0;
-  cursor: text;
-  touch-action: none;
-  user-select: none;
+  border-radius: 4px;
 }
-.editor-decoration-hit:focus-visible {
+.mention-hit:focus-visible {
   outline: 2px solid #526b42;
   outline-offset: 1px;
 }
+`;

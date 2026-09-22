@@ -8,7 +8,7 @@ import { TextSelection } from '@gprose/state';
 import {
   createEditorHtmlParser,
   createTextInput,
-  type BrowserViewOptions,
+  type InputHandlers,
   type ViewSession,
 } from '@gprose/view';
 import { createDocumentQuery } from '@gprose/view';
@@ -266,11 +266,8 @@ export function createDocumentInput<N extends NodeIdentity>({
     }
   }
 
-  const inputEvents: NonNullable<BrowserViewOptions['input']> = {
-    element: () => input(),
+  const inputEvents: InputHandlers = {
     keydown: key,
-    compositionstart: textInput.compositionStart,
-    compositionend: () => textInput.compositionEnd(input(), afterComposition),
     input: (event, inputValue) =>
       textInput.read(inputValue, (from, to, text) =>
         replace(from, to, text, {

@@ -1,4 +1,3 @@
-import './table-view.css';
 import { formattingSpans } from '@gprose/extension-document';
 import type { NodeIdentity, Schema, TextPoint } from '@gprose/model';
 import {
@@ -8,7 +7,7 @@ import {
   type SelectionContext,
   type NodeAccess,
 } from '@gprose/state';
-import type { BrowserViewOptions } from '@gprose/view';
+import type { InputHandlers } from '@gprose/view';
 import { nativeTextCaret, revealNativeText } from '@gprose/view';
 import type { ReadTextDecorations, TextDecoration } from '@gprose/view';
 import { applyTextStyle, type ReadTextStyle, type TextStyle } from '@gprose/view';
@@ -36,7 +35,7 @@ export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
   afterComposition?: () => void;
   onKeyDown: (event: KeyboardEvent) => boolean;
   onReplace: (text: string) => void;
-  clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
+  clipboard: Pick<InputHandlers, 'copy' | 'cut' | 'paste'>;
   textDecorations?: ReadTextDecorations;
   textStyle: ReadTextStyle;
 };

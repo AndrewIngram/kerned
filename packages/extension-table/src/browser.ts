@@ -2,10 +2,12 @@ import { defineExtension, createInputRules, type ContributionContext } from '@gp
 import { replaceText } from '@gprose/extension-document';
 import type { NodeIdentity } from '@gprose/model';
 import { selectionContext } from '@gprose/state';
+import { viewStyles } from '@gprose/view';
 import { createKeyboardShortcuts } from '@gprose/view';
 import { nodeViews, type NodeViewContext, type NodeViewFrame } from '@gprose/view';
 
 import { table } from './definitions.js';
+import { tableStyles } from './table-view-styles.js';
 import { createTableView } from './table-view.js';
 import { tableCells } from './table.js';
 
@@ -15,6 +17,7 @@ export const tableView = defineExtension({
   options: {},
   requires: ['table', 'tableCell', 'tableEditing'],
   setup(_options, context: ContributionContext) {
+    context.provide(viewStyles, tableStyles);
     context.provide(nodeViews, {
       create<N extends NodeIdentity>({ editor, clipboard, notice }: NodeViewContext<N>) {
         const rules = createInputRules(editor);
