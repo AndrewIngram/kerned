@@ -3,12 +3,12 @@ import { applySteps, type Step } from '@gprose/transform';
 
 import { documentCoordinates } from '../coordinates.js';
 import { rebase, sameEdit, type Edit } from '../protocol.js';
-import type { Body, ProjectedProposal, WriteReceipt } from './wire.js';
+import type { Body, ProjectedProposal, WriteReceipt, Frame } from './wire.js';
 
 type Basis = { epoch: number; revision: number; texts: Map<string, string> };
 
 /** Own canonical edits and the private mapping from sent views to revisions.
- * No canonical revision, rejected text or mapped edit leaves this module. */
+ * Only edits visible throughout a delivery interval may leave this module. */
 export function createProjectedDocument<N extends NodeIdentity>(options: {
   schema: Schema<N>;
   nodes: readonly N[];
@@ -17,9 +17,12 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
 }) {
   const { schema } = options;
   let nodes = options.nodes;
-  let edits: Edit[] = [];
+  let edits: { edit: Edit; source: { session: string; operation: number } | null }[] = [];
 
-  function apply(steps: readonly Step<N>[]) {
+  function apply(
+    steps: readonly Step<N>[],
+    source: { session: string; operation: number } | null = null,
+  ) {
     let next = nodes;
     const changes: Edit[] = [];
 
@@ -45,7 +48,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
     nodes = next;
 
     if (structural) edits = [];
-    else edits.push(...changes);
+    else edits.push(...changes.map((edit) => ({ edit, source })));
     options.changed(structural);
   }
 
@@ -53,12 +56,38 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
     get nodes() {
       return nodes;
     },
-    apply,
+    apply(steps: readonly Step<N>[]) {
+      apply(steps);
+    },
     writer(session: string, canEdit: (key: string) => boolean) {
       const views = new Map<number, Basis>();
+
       const receipts = new Map<number, { proposal: ProjectedProposal; receipt: WriteReceipt }>();
 
       return {
+        delivery(
+          base: number | null,
+          epoch: number,
+          bodies: ReadonlyMap<string, Body>,
+        ): Frame['writes'] {
+          const basis = base === null ? undefined : views.get(base);
+
+          const changes =
+            basis?.epoch === epoch
+              ? edits
+                  .slice(basis.revision)
+                  .flatMap(({ edit, source }) =>
+                    basis.texts.has(edit.key) && bodies.has(edit.key)
+                      ? [{ edit, operation: source?.session === session ? source.operation : null }]
+                      : [],
+                  )
+              : [];
+
+          return structuredClone({
+            changes,
+            receipts: [...receipts.values()].map((value) => value.receipt),
+          });
+        },
         sent(sequence: number, epoch: number, bodies: ReadonlyMap<string, Body>) {
           views.set(sequence, {
             epoch,
@@ -114,7 +143,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
             let edit: Edit | null = proposal.edit;
 
             for (const subsequent of edits.slice(basis.revision)) {
-              edit = rebase(edit, subsequent);
+              edit = rebase(edit, subsequent.edit);
 
               if (!edit) return reject('conflict');
             }
@@ -122,7 +151,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
             const step = documentCoordinates(schema, nodes).edit(edit);
 
             if (!step) return reject('precondition');
-            apply([step]);
+            apply([step], { session, operation: proposal.operation });
 
             return { kind: 'accepted', operation: proposal.operation };
           }

@@ -253,17 +253,25 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
               : [],
           );
 
+          const full = reset || sentEpoch !== epoch;
+          const writes = writer.delivery(full ? null : sequence, epoch, view.bodies);
+
           const nextSignature = JSON.stringify({
             manifest: view.manifest,
             bodies: [...view.bodies],
             comments: visibleComments,
             outline: view.outline,
             presence: visiblePresence,
+            receipts: writes.receipts,
           });
 
-          const full = reset || sentEpoch !== epoch;
-
-          if (!full && nextSignature === signature && requested.size === 0) return false;
+          if (
+            !full &&
+            nextSignature === signature &&
+            requested.size === 0 &&
+            writes.changes.length === 0
+          )
+            return false;
           const updates: Update[] = [];
           const nextBodies = new Map<string, string>();
           const nextHeads = new Map<string, string[]>();
@@ -302,6 +310,7 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
             outline: view.outline,
             presence: visiblePresence,
             attachments: responses,
+            writes,
           };
 
           // Reserve the immutable view before handing control to the transport.

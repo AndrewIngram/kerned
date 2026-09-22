@@ -338,6 +338,7 @@ test('wire audit detects hidden native history even when current materialized co
     outline: [],
     presence: [],
     attachments: [],
+    writes: { changes: [], receipts: [] },
   });
 
   expect(JSON.stringify(doc)).not.toContain(secret);

@@ -109,7 +109,7 @@ export function createProtectedRecipient(session: string) {
 
         // Native docs retain only admitted partitions. Don't retain delivered byte
         // arrays as an extra cache after they have been applied.
-        latest = { ...frame, updates: [], attachments: [] };
+        latest = { ...frame, updates: [], attachments: [], writes: { changes: [], receipts: [] } };
         status = 'ready';
 
         return true;

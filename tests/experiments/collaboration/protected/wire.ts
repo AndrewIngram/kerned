@@ -48,6 +48,18 @@ const attachment = z.discriminatedUnion('status', [
 
 export type AttachmentResult = z.infer<typeof attachment>;
 
+const receiptSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('invalid') }),
+  z.object({ kind: z.literal('accepted'), operation: z.number().int().positive() }),
+  z.object({
+    kind: z.literal('rejected'),
+    operation: z.number().int().positive(),
+    reason: z.enum(['denied', 'stale', 'conflict', 'precondition', 'identity']),
+  }),
+]);
+
+export type WriteReceipt = z.infer<typeof receiptSchema>;
+
 const frameSchema = z.object({
   session: key,
   epoch: z.number().int().positive(),
@@ -59,6 +71,12 @@ const frameSchema = z.object({
   outline: z.array(z.object({ key, title: z.string() })),
   presence: z.array(z.object({ session: key, selection })),
   attachments: z.array(attachment),
+  writes: z.object({
+    changes: z.array(
+      z.object({ edit: editSchema, operation: z.number().int().positive().nullable() }),
+    ),
+    receipts: z.array(receiptSchema),
+  }),
 });
 
 export type Frame = z.infer<typeof frameSchema>;
@@ -80,18 +98,6 @@ const proposalSchema = z.object({
 });
 
 export type ProjectedProposal = z.infer<typeof proposalSchema>;
-
-const receiptSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('invalid') }),
-  z.object({ kind: z.literal('accepted'), operation: z.number().int().positive() }),
-  z.object({
-    kind: z.literal('rejected'),
-    operation: z.number().int().positive(),
-    reason: z.enum(['denied', 'stale', 'conflict', 'precondition', 'identity']),
-  }),
-]);
-
-export type WriteReceipt = z.infer<typeof receiptSchema>;
 
 export function encodeProposal(value: ProjectedProposal) {
   return new TextEncoder().encode(JSON.stringify(value));

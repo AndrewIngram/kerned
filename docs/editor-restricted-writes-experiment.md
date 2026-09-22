@@ -14,6 +14,10 @@ It remains headless and is not connected to `editor.html`.
 pnpm exec vitest run --project unit tests/collaboration-restricted-writes.test.ts tests/collaboration-protected.test.ts
 ```
 
+The subsequent [optimistic typing experiment](./editor-optimistic-collaboration-experiment.md)
+adds a local queue and authorised visible edit mappings to projected frames. The
+confirmed-only recipient below remains the lower-level delivery interface.
+
 ## Caller flow
 
 ```ts
@@ -117,8 +121,9 @@ preserving the tested disclosure rules. The Automerge mode is an outgoing encodi
 for these tests; native CRDT write admission across protected partitions is still
 unproved. Do not use these results to claim a CRDT concurrency comparison.
 
-Next integration gates are optimistic local editing and acknowledgement/recovery,
-durable references, client structural commands around opaque blocks, collaborative
-undo and mounted editor bindings. The previous experiment's native identity loss
+Optimistic local editing and acknowledgement/recovery are now covered by that
+subsequent experiment. Remaining integration gates include durable references,
+client structural commands around opaque blocks, collaborative undo and mounted
+editor bindings. The previous experiment's native identity loss
 on access-epoch rotation is unchanged. Transport authentication, quotas, persisted
 receipts, large-document costs and production asset delivery are also outstanding.

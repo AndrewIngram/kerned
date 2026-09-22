@@ -272,7 +272,11 @@ for (const mode of ['json', 'automerge'] as const) {
       ),
     ).toEqual({ kind: 'rejected', operation: 2, reason: 'precondition' });
     expect(guest.submit(new TextEncoder().encode('{bad json'))).toEqual({ kind: 'invalid' });
-    expect(guest.flush()).toBe(false);
+    expect(guest.flush()).toBe(true);
+    expect(decodeFrame(guest.frames[1]).writes.receipts).toEqual([
+      { kind: 'rejected', operation: 1, reason: 'stale' },
+      { kind: 'rejected', operation: 2, reason: 'precondition' },
+    ]);
     owner.destroy();
     guest.destroy();
     f.authority.destroy();
