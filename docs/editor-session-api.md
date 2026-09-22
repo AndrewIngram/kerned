@@ -251,15 +251,12 @@ Destroying the session destroys its attached view once, before application
 permits a later mount. Extensions cannot replace the session-owned `focus` and
 `scrollIntoView` command names.
 
-`mountEditorView` accepts `session`, `focusSelection` and `revealSelection`
-bindings. It releases native event listeners on session destruction, cleans up
-listeners after a rejected duplicate mount, and rejects changes to the session
-of an already-mounted view. Callback updates within the same attachment are
-supported. The React host remounts when its session changes and skips updates
-to destroyed views. The React demo supplies those bindings; toolbar focus no longer needs
-a demo callback. Its canvas adapter schedules reveal even when selection and
-content are unchanged. Complete layout/graphics lifetime ownership remains
-milestone 4 work.
+`mountEditor(element, { editor })` owns the view attachment, layout, graphics,
+native input and event listeners. Focus and reveal commands reach that attachment
+without application callbacks. Reveal also runs when the selection and content
+are unchanged. `EditorContent` mounts the same view and replaces it when its
+session changes, releasing the previous view's resources and composition state.
+See [mounted editor lifetime](mounted-editor.md) for configuration and cleanup.
 
 ## Observation and React
 
@@ -425,7 +422,8 @@ See [React integration](react-integration.md) and [app ownership](editor-app-arc
 React tree, with automatic measurement and native view culling/cleanup. The old
 standalone renderer registry is removed. Mark/inline renderers and decoration
 widgets use the same mounted ownership, with optional React registrations.
-Editable content slots and complete selection/editability props remain milestone 6 work. See
+Custom nodes can use [editable content slots](content-slots.md); renderer props
+include scoped selection and live access state. See
 [React extensions](react-extensions.md) for the implemented contract.
 
 ## History ownership

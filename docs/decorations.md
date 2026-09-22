@@ -112,7 +112,8 @@ Setup and update errors fail the view and reach its error handler. The session
 remains available. Cleanup attempts every owned resource even if one disposer
 throws. A pending invalidation cannot update geometry from an older editor state.
 
-Editable content slots remain milestone 6 work. Semantic marks and inline objects have separate
+Custom nodes can host editor-owned children through [editable content slots](content-slots.md).
+Semantic marks and inline objects have separate
 [canvas and React rendering registrations](rendering-extensions.md).
 
 ## Widgets

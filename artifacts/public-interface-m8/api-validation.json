@@ -1,0 +1,53 @@
+{
+  "check": "passed",
+  "builtConsumers": {
+    "node": "passed",
+    "browser": [
+      "vanilla",
+      "table",
+      "starter-kit",
+      "react"
+    ],
+    "browsers": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "declarations": "passed"
+  },
+  "vitest": {
+    "files": 222,
+    "passed": 959,
+    "todo": 1
+  },
+  "e2e": {
+    "passed": 42
+  },
+  "production": {
+    "file": "apps/demo/dist/assets/main-yyW2LGIp.js",
+    "sha256": "6a011b876d909fbed1f545be80746bbec1d88d668a0f943ee3923143aa042dbc",
+    "previewURL": "http://127.0.0.1:5186"
+  },
+  "collection": {
+    "before": 886,
+    "after": 886,
+    "missing": [],
+    "added": [],
+    "normalization": "Legacy hook regression replaced with EditorContent lifecycle coverage; text-input index regression moved unchanged into view."
+  },
+  "reflow": {
+    "cases": 9,
+    "passed": true
+  },
+  "performanceBudgets": "all passed",
+  "maximums": {
+    "firstUsableMs": 231,
+    "streamingMs": 1259.6,
+    "pasteHandlerMs": 51.5,
+    "pastePaintMs": 115.1,
+    "typingFrameMs": 32,
+    "pagingFrameMs": 32.2,
+    "loadedHeapBytes": 28105488
+  },
+  "milestone8": "implementation validated; independent architecture review pending"
+}

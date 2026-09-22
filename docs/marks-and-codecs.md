@@ -1,6 +1,6 @@
 # Marks and document codecs
 
-The core supports semantic mark ranges without imposing a node storage shape. Text extensions expose `editing.marks.read(node)` and `write(node, ranges)`. They may store ranges directly or project them to their own representation. The starter kit stores semantic `marks` directly. It projects bold and italic into compact style runs at layout; underline uses a schema-bound mark renderer. Canvas and React mark/inline registrations are documented in [Rendering extensions](rendering-extensions.md). Arbitrary decoration widgets remain milestone 6 work.
+The core supports semantic mark ranges without imposing a node storage shape. Text extensions expose `editing.marks.read(node)` and `write(node, ranges)`. They may store ranges directly or project them to their own representation. The starter kit stores semantic `marks` directly. It projects bold and italic into compact style runs at layout; underline uses a schema-bound mark renderer. Canvas and React mark/inline registrations are documented in [Rendering extensions](rendering-extensions.md). View-only controls use public [decoration widgets](decorations.md#widgets), with canvas, DOM and React registrations.
 
 ## Mark schema
 

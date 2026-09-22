@@ -125,8 +125,9 @@ rerunning validation or transforms. Input still enters through schema validation
 These contracts currently render canvas text's inline objects and mark ranges.
 Native text views retain their native rendering policy. View-only controls use
 [decoration widgets](decorations.md#widgets), including React registrations.
-Editable content slots remain milestone 6 work. These renderers do not claim to replace native text input
-or implement a second editable DOM tree.
+[Editable content slots](content-slots.md) allow custom node renderers to host
+editor-owned child content. Inline and mark renderers augment that content;
+they do not replace native text input or create a second editable DOM tree.
 
 ## Scoped selection
 

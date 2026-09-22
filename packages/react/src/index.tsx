@@ -1,8 +1,6 @@
 import type { CommandState } from '@gprose/state';
 import { useMemo, useSyncExternalStore } from 'react';
 
-export { usePointerSelection } from './pointer-selection.js';
-
 export { EditorContent, useViewState, type EditorContentProps } from './editor-content.js';
 
 export { useEditor } from './use-editor.js';
@@ -94,9 +92,5 @@ export function useCommandState<State, Request extends unknown[]>(
     (a, b) => a?.available === b?.available && a?.activity === b?.activity,
   );
 }
-
-export { useCanvasInput } from './use-canvas-input.js';
-
-export { useEditorViewport, type Viewport } from './use-viewport.js';
 
 export { NodeViewContent } from './node-view-content.js';

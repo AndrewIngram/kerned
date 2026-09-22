@@ -121,13 +121,11 @@ sample and mounts React; it does not allocate or pass internal view resources.
 Scenes have independent cache owners, and sample changes release the previous
 view while retaining shared immutable asset bytes.
 
-The remaining differences from the target are:
-
-- Milestone 6: React node/mark/widget rendering, context-preserving overlays and
-  public decoration contributions. The session hook, provider/context, content
-  host and typed selectors are implemented, but do not complete the milestone.
-- Milestone 7: extension codecs/input policies and durable delayed-edit contracts.
-- Milestone 8: built workspace exports, external consumers and final migration.
+React rendering, decorations, content slots, extension codecs/input policies and
+durable delayed edits are implemented and reviewed. Workspace packages now have
+explicit built exports, and the Vite demo consumes those interfaces alongside
+independent Node and browser fixtures. Milestone 8 is undergoing final verification
+and architecture review; the progress log records its remaining checks.
 
 ## Standard Schema document contract
 

@@ -1,10 +1,3 @@
-export {
-  createPointerSelection,
-  type PointerSelectionOptions,
-} from './browser/pointer-selection.js';
-
-export { createEditorViewport, type EditorViewport } from './browser/viewport.js';
-
 export { createTextInput } from './browser/text-input.js';
 
 export type { ObserveTextPointer, TextPointerEvent } from './browser/canvas-input.js';
@@ -150,12 +143,6 @@ export {
 export { defineStyleRule, type StyleRule, type NodeStyle, type ViewTheme } from './canvas/theme.js';
 
 export { mountEditorView, type BrowserViewOptions } from './browser/native-view.js';
-
-export {
-  createCanvasInput,
-  type CanvasInputFrame,
-  type CanvasInputSession,
-} from './browser/canvas-input.js';
 
 export { createDocumentQuery } from './browser/document.js';
 

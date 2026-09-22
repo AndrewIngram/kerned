@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status      | Required outcome                                                                  |
-| ----------------------------------- | ----------- | --------------------------------------------------------------------------------- |
-| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate    |
-| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                      |
-| 2 — typed schema assembly           | Complete    | Extension-derived content types and synchronous Standard Schema validation        |
-| 3 — session commands and state      | Complete    | Shared named commands, draft chains, queries and per-session extension state      |
-| 4 — complete view lifetime          | Complete    | Vanilla mounting owns rendering, input, assets and cleanup                        |
-| 5 — presentation                    | Complete    | Per-view typography, fonts and appropriate cache invalidation                     |
-| 6 — renderers and React             | Complete    | Public rendering/decorations and React adapters over the same view                |
-| 7 — codecs and delayed edits        | Complete    | Extension codecs/input rules and durable async targets                            |
-| 8 — workspace consumers             | In progress | Headless, view and React packages validated; extensions and demo migration remain |
+| Milestone                           | Status      | Required outcome                                                                      |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------- |
+| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate        |
+| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                          |
+| 2 — typed schema assembly           | Complete    | Extension-derived content types and synchronous Standard Schema validation            |
+| 3 — session commands and state      | Complete    | Shared named commands, draft chains, queries and per-session extension state          |
+| 4 — complete view lifetime          | Complete    | Vanilla mounting owns rendering, input, assets and cleanup                            |
+| 5 — presentation                    | Complete    | Per-view typography, fonts and appropriate cache invalidation                         |
+| 6 — renderers and React             | Complete    | Public rendering/decorations and React adapters over the same view                    |
+| 7 — codecs and delayed edits        | Complete    | Extension codecs/input rules and durable async targets                                |
+| 8 — workspace consumers             | In progress | Implementation and final validation complete; independent architecture review pending |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -3436,3 +3436,38 @@ Validation for this checkpoint:
 Milestone 8 remains open for the final public-export/obsolete-adapter audit,
 consumer documentation completion and architecture judge. The required complete
 milestone commit and judge/fix cycle still follow that work.
+
+### Milestone 8: implementation ready for architecture review
+
+The final public-export audit removed the obsolete React `useCanvasInput`,
+`useEditorViewport` and `usePointerSelection` hooks. Applications use
+`EditorContent`; the native mount owns input, viewport and pointer controllers.
+Those private controllers are no longer re-exported from the view package.
+Input contributions name the text-input contract directly rather than deriving
+it through a complete canvas controller. Supported guides now describe the
+implemented rendering, content slots and workspace interfaces.
+
+The replacement React regression exercises the public host in Strict Mode:
+session replacement during composition, current caret geometry after a width
+change, stale composition rejection, subsequent typing and page/container
+scrollport changes. The text-input index regression moved unchanged beside its
+view owner. Normalized collection comparison retained all 886 declared cases.
+
+Final validation passed:
+
+- `pnpm check`: 959 Vitest passes in 222 browser/unit files, one unchanged
+  collaboration TODO, all 42 E2E scenarios and built Node/browser consumers.
+- Production build, declaration checks, sealed exports and dependency checks.
+- Nine production reflow cases and three serial foundation benchmark trials.
+  Worst values remain inside the unchanged budgets: first usable paint 231 ms,
+  streaming 1,259.6 ms, paste handler 51.5 ms, paste paint 115.1 ms, typing 32 ms,
+  paging 32.2 ms and loaded heap 28,105,488 bytes.
+
+Evidence is in `artifacts/public-interface-m8/api-*`. Benchmark reports identify
+pre-commit HEAD `afc9bb1` and measure this final implementation tree. The
+[completion audit](public-interface-completion-audit.md) maps the plan to current
+owners, executable contracts and actual limitations.
+
+This commit completes M8 implementation and precedes its required independent
+architecture judge. M8 and the overall goal remain open until that review and
+any agreed fixes have been validated and committed.

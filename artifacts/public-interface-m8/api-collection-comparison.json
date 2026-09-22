@@ -1,0 +1,7 @@
+{
+  "before": 886,
+  "after": 886,
+  "missing": [],
+  "added": [],
+  "normalization": "Legacy hook regression replaced with EditorContent lifecycle coverage; text-input index regression moved unchanged into view."
+}

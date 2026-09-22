@@ -77,13 +77,15 @@ the app's find hook owns opening, focus and controls.
 - Node views own decoding, measurement and cancellation. Culled DOM does not own
   semantic state. React node views and public decoration contributions share the
   mounted lifetime. Canvas and React mark/inline views share schema binding,
-  placement and culling, also used by decoration widgets. Editable content slots and complete
-  selection/editability props remain milestone 6 work.
+  placement and culling, also used by decoration widgets. Custom nodes can host
+  editor-owned children in editable content slots, and renderer props expose
+  scoped selection and live access state.
 - `useSampleStream` owns sample append scheduling and cancels work on unmount. Its
   controller measures new composition work rather than total document size.
 - `useDiagnostics` is the only app module importing correctness fixtures. It uses
   the separate diagnostics interface rather than private native resources.
 
-Built workspace exports and external consumer migration remain milestone 8 work.
+Built workspace exports are exercised by ordinary Node, vanilla browser and React
+consumers in `tests/consumers`. The demo imports the same supported entry points.
 The [implementation progress](public-interface-progress.md) records completed
 checks, architecture reviews and remaining requirements.

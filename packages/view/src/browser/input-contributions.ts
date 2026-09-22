@@ -1,8 +1,8 @@
 import { defineContribution, type Editor, type EditorViewSession } from '@gprose/core';
 import type { NodeIdentity, Schema, SchemaDefinition } from '@gprose/model';
 
-import type { createCanvasInput } from './canvas-input.js';
 import type { BrowserViewOptions } from './native-view.js';
+import type { createTextInput } from './text-input.js';
 
 /** Extension input policies use the imperative session, not one consumer's command tuple. */
 export type ViewSession<N extends NodeIdentity> = EditorViewSession &
@@ -27,7 +27,7 @@ export type InputContribution = {
   create<N extends NodeIdentity>(context: {
     editor: ViewSession<N>;
     input: HTMLTextAreaElement;
-    textInput: ReturnType<typeof createCanvasInput<N>>['textInput'];
+    textInput: ReturnType<typeof createTextInput<N>>;
     navigate: (event: KeyboardEvent) => boolean;
     selectAll: () => void;
     notice: (message: string) => void;

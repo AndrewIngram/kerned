@@ -1,10 +1,10 @@
 # React extensions
 
-Status: milestone 6 is in progress. Measured React block views and public
-[decorations](decorations.md) are implemented, along with
-[React inline and mark renderers](rendering-extensions.md) and typed
-[React widgets](decorations.md#widgets), scoped selection and live access props.
-Editable content slots remain.
+Measured React block views, public [decorations](decorations.md),
+[React inline and mark renderers](rendering-extensions.md), typed
+[React widgets](decorations.md#widgets), scoped selection and live access props
+are implemented. [Editable content slots](content-slots.md) let a custom node
+render its children through the editor while React owns the surrounding UI.
 
 `EditorContent` attaches the same complete view used by vanilla applications.
 It borrows the session and owns its view and React portal host. React components

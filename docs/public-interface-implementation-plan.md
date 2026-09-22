@@ -1,6 +1,6 @@
 # Public interface implementation plan
 
-Date: 2026-09-21. Status: implementation in progress. Milestones 0–5 are complete, including independent architecture review and agreed fixes. Milestone 6 is in progress. See [verified progress](public-interface-progress.md)
+Date: 2026-09-21. Status: implementation in progress. Milestones 0–7 are complete, including independent architecture review and agreed fixes. Milestone 8 implementation and validation are complete; its independent architecture review is pending. See [verified progress](public-interface-progress.md)
 for shipped interfaces and remaining requirements. This plan describes the full
 target, including interfaces that are not yet implemented.
 

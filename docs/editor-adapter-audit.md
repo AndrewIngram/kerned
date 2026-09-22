@@ -1,5 +1,13 @@
 # Second editor architecture audit
 
+Historical audit of the earlier manually assembled React adapters. Milestone 8
+removed `useCanvasInput`, `useEditorViewport` and `usePointerSelection` from the
+public React package. `EditorContent` now owns those responsibilities through the
+complete native mount. Regression coverage lives in
+`packages/react/src/__tests__/adapter-audit.browser.test.tsx` and
+`packages/view/src/browser/__tests__/text-input-index.browser.test.js`.
+The findings below describe the implementation at the time of this audit.
+
 This pass traced session replacement, textarea synchronization, viewport changes,
 and the dependency rules added by the app refactor.
 

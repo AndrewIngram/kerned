@@ -97,8 +97,8 @@ call. It returns an immutable, view-owned token with width and height.
 `drawing.text(label, left, top)` paints it without shaping in the paint callback.
 The view keeps a bounded label cache across viewport culling. Tokens cannot be
 drawn by another view, and text preparation rejects calls after layer destruction.
-The current label contract uses the view's default font family; per-label font
-resolution remains milestone 5 work.
+Prepared labels use the view's default font family. The label contract accepts
+text, width and size; it does not expose a per-label font-family override.
 
 The starter `underlineView` uses `defineMarkView`, the schema-bound
 [mark rendering contract](rendering-extensions.md). Custom text and mark fields
@@ -173,8 +173,9 @@ mounted view's error handler. Comments and search exercise the same contract;
 native renderers contain no comment/search-specific branches. Sources can target
 invalidation to particular node IDs and declare node-local dependencies.
 [Decoration widgets](decorations.md#widgets) use the same sources and shared range
-owner, including React registrations. Editable content slots remain milestone 6 work. Semantic
-marks and inline objects have separate schema-bound rendering registrations.
+owner, including React registrations. [Editable content slots](content-slots.md)
+allow custom nodes to host editor-owned children. Semantic marks and inline
+objects have separate schema-bound rendering registrations.
 
 The layer owns its DOM and styling. The host ignores pointer events by default;
 interactive descendants can opt in. Nonsemantic decoration layers set their own
