@@ -135,9 +135,10 @@ position checkpoints and undo history serve different purposes. See
 [references](docs/editor-references.md), [static serialization](docs/static-serialization.md),
 [HTML parsing](docs/html-parsing.md) and [delayed edits](docs/delayed-edits.md).
 
-The renderer currently supports Latin text with combining marks, common symbols
-and emoji. It does not provide complete international shaping or bidirectional
-editing. The implementation includes text, node and rectangular table selections;
+The renderer supports Latin, Greek, Cyrillic, Arabic and Hebrew, with combining
+marks, common symbols, emoji and mixed-direction visual selection. Chinese is
+available as a browser reference; complete international typography remains
+unimplemented. See [international text](docs/research-international-text.md). The implementation includes text, node and rectangular table selections;
 see [selection behavior](docs/editor-selections.md) and
 [clipboard behavior](docs/clipboard.md) for their supported operations. A network
 collaboration transport and conflict-resolution algorithm are not implemented.

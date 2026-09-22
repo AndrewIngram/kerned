@@ -1,0 +1,23 @@
+{
+  "id": "journey-to-the-west",
+  "title": "Journey to the West",
+  "nativeTitle": "西遊記",
+  "author": "Wu Cheng’en",
+  "language": "zh",
+  "sourceUrl": "https://www.gutenberg.org/cache/epub/23962/pg23962-images.html",
+  "licenseUrl": "journey-to-the-west-source.html.txt",
+  "attribution": "Wu Cheng’en; Project Gutenberg ebook 23962, produced by Leong Joana Kit Ieng. Public-domain original Chinese text. The source snapshot includes the Project Gutenberg licence. Occasional question marks in the transcription are retained.",
+  "contents": "Complete novel, all 100 chapters. Browser reference for horizontal Chinese typography; canvas CJK support remains pending.",
+  "direction": "ltr",
+  "source": "journey-to-the-west-source.html.txt",
+  "sourceSha256": "8c0b7948978d763a8d22086fe8c587005c1444a214a4b614e932b515052c8197",
+  "htmlSha256": "fadf4c9f603a3966521086fbacc3eb66fe7bd15d238e96c281698cfc1f39155c",
+  "blocks": 2968,
+  "headings": 101,
+  "hanCharacters": 588710,
+  "combiningMarks": 0,
+  "latinLetters": 3,
+  "digits": 0,
+  "sourceTextVerified": true,
+  "normalization": "Source hard line breaks removed without adding spaces; explicit verse line breaks retained. Original chapter title paragraphs promoted to headings; book title added. Producer credit moved to attribution. All non-whitespace characters and source block order verified against the snapshot. Website header and licence footer kept outside the book content."
+}

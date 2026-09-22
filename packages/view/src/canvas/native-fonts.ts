@@ -14,6 +14,8 @@ export function createNativeFonts(
   const ids = new Map<FontSource, number>();
   const faces = new Map<number, Typeface>();
   const fonts = new Map<string, Font>();
+  const sources = new Map<number, FontSource>();
+  const coverage = new Map<number, Map<number, boolean>>();
 
   function destroy() {
     for (const value of fonts.values()) value.delete();
@@ -22,6 +24,8 @@ export function createNativeFonts(
     for (const value of faces.values()) value.delete();
     faces.clear();
     ids.clear();
+    sources.clear();
+    coverage.clear();
   }
 
   try {
@@ -36,6 +40,7 @@ export function createNativeFonts(
       if (!face) throw new Error('Skia font registration failed');
       faces.set(id, face);
       ids.set(source, id);
+      sources.set(id, source);
     }
   } catch (error) {
     destroy();
@@ -72,25 +77,66 @@ export function createNativeFonts(
 
   const defaults = resolve();
 
+  function font(id: number, size: number) {
+    const key = `${id}:${size}`;
+    let value = fonts.get(key);
+
+    if (!value) {
+      const face = faces.get(id);
+
+      if (!face) throw new Error('Font resources are destroyed');
+      value = new kit.Font(face, size);
+      value.setSubpixel(true);
+      fonts.set(key, value);
+    }
+
+    return value;
+  }
+
+  function covers(id: number, text: string) {
+    let known = coverage.get(id);
+
+    if (!known) {
+      known = new Map();
+      coverage.set(id, known);
+    }
+
+    for (const char of text) {
+      if (/\p{Default_Ignorable_Code_Point}/u.test(char)) continue;
+      const point = char.codePointAt(0) ?? 0;
+      let supported = known.get(point);
+
+      if (supported === undefined) {
+        supported = font(id, 16).getGlyphIDs(char)[0] !== 0;
+        known.set(point, supported);
+      }
+
+      if (!supported) return false;
+    }
+
+    return true;
+  }
+
   return {
     defaults,
     resolve,
     emoji: identity(catalog.emoji),
-    font(this: void, id: number, size: number) {
-      const key = `${id}:${size}`;
-      let value = fonts.get(key);
+    covering(this: void, id: number, text: string) {
+      const source = sources.get(id);
 
-      if (!value) {
-        const face = faces.get(id);
+      if (!source) throw new Error('Font resources are destroyed');
 
-        if (!face) throw new Error('Font resources are destroyed');
-        value = new kit.Font(face, size);
-        value.setSubpixel(true);
-        fonts.set(key, value);
+      if (covers(id, text)) return id;
+
+      for (const fallback of catalog.fallbacks({ weight: source.weight, style: source.style })) {
+        const candidate = identity(fallback);
+
+        if (covers(candidate, text)) return candidate;
       }
 
-      return value;
+      return undefined;
     },
+    font,
     destroy,
   };
 }

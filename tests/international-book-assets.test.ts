@@ -11,7 +11,7 @@ const manifest = z.object({
   sourceTextVerified: z.literal(true),
 });
 
-test.each(['hayy-ibn-yaqzan', 'tashlikh'])(
+test.each(['hayy-ibn-yaqzan', 'tashlikh', 'journey-to-the-west'])(
   '%s retains its pinned source and verified output',
   async (id) => {
     const directory = new URL('../apps/demo/public/samples/', import.meta.url);

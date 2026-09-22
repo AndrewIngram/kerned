@@ -12,7 +12,7 @@ export type ShapingRun = {
 
 // HarfRust emits monotone clusters in the run's direction. Reverse RTL cluster
 // groups for logical storage, preserving the shaper's glyph order inside each group.
-function logicalGlyphOrder(run: ShapingRun) {
+export function logicalGlyphOrder(run: ShapingRun) {
   const count = run.words[0];
 
   if (count < 2 || run.words[4] <= run.words[4 + (count - 1) * 5]) return undefined;

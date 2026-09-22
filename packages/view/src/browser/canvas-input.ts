@@ -278,6 +278,10 @@ export function createCanvasInput<N extends NodeIdentity>({
 
     positionTextInput(input, bounds, x, y);
     const node = selection instanceof TextSelection ? frame.node(selection.head.id) : undefined;
+    input.dir =
+      selection instanceof TextSelection && caret
+        ? (frame.layout(selection.head.id).lines[0]?.direction ?? 'ltr')
+        : 'auto';
 
     if (!textInput.composing && (synced?.selection !== selection || synced.node !== node)) {
       textInput.sync(input);

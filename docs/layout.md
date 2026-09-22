@@ -30,9 +30,11 @@ starter schema into text metrics, inline dimensions and estimated block heights.
 shared span, position, and direction types and re-exports grapheme boundaries
 from the editor core. Neither module contains the former comparison editors.
 
-The layout engine accepts Latin text and supported emoji. The text-support check
-rejects unsupported scripts before an edit reaches shaping. General script
-fallback and bidirectional layout remain outside the current implementation.
+The layout engine accepts Latin, Greek, Cyrillic, Arabic, Hebrew and supported
+emoji. Directional scripts use retained Unicode bidi analysis, coverage-based font
+fallback and contextual run shaping. Logical model offsets remain unchanged;
+selection geometry follows visual runs. Unsupported scripts are rejected before
+an edit reaches shaping. See [international text](research-international-text.md).
 
 Use `pnpm run check:editor`, `pnpm run check:editor-reflow`, and
 `pnpm run check:editor-unicode` for inline geometry, reflow, and supported text

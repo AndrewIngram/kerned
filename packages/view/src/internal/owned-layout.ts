@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { readEditorAsset, type EditorAssetOptions } from '../canvas/assets.js';
 import { createFontCatalog, type FontSelection } from '../canvas/font-catalog.js';
 import { createNativeFonts, markedFont, type TextFaces } from '../canvas/native-fonts.js';
+import { analyzeBidi, type BidiAnalysis, type TextDirection } from './bidi/paragraph.js';
+import { directionalRuns, utf8Offsets } from './directional-runs.js';
 import type { LayoutInput, LaidOut } from './engines.js';
 import { boundaries, type Span } from './layout-types.js';
 import { createBlockSession } from './owned-blocks.js';
@@ -17,12 +19,18 @@ import {
   type ParagraphGlyphs,
   type ComposedParagraph,
 } from './owned-paragraph.js';
-import { decodeShaping, type ShapingRun, type PackedShaping } from './owned-shaped.js';
+import {
+  decodeShaping,
+  logicalGlyphOrder,
+  type ShapingRun,
+  type PackedShaping,
+} from './owned-shaped.js';
 import { emojiSequence, supportsLayoutText } from './owned-text-support.js';
 
 export type OwnedStorage = 'objects' | 'packed' | 'carets' | 'shaping';
 
 type PreparedParagraph = {
+  bidi?: BidiAnalysis;
   paragraphGlyphs: ParagraphGlyphs | PackedShaping;
   composed: ComposedParagraph;
   packed: PackedGlyphs | undefined;
@@ -165,6 +173,88 @@ export async function createOwnedEngine(
     return { runs, breaks };
   }
 
+  function resolveDirectionalRuns(
+    text: string,
+    spans: Span[],
+    bidi: BidiAnalysis,
+    faces: TextFaces,
+    size: number,
+    from = 0,
+    to = text.length,
+  ) {
+    const segments = directionalRuns(
+      text,
+      spans,
+      bidi,
+      {
+        marked: (marks) => markedFont(faces, marks),
+        covering: nativeFonts.covering,
+        emoji: nativeFonts.emoji,
+      },
+      from,
+      to,
+    );
+
+    const bytes = new TextEncoder().encode(text);
+    const offsets = utf8Offsets(text);
+    const ptr = allocate(bytes);
+    const unsafe = new Set<number>();
+    const runs: ShapingRun[] = [];
+    let breaks: Uint32Array;
+
+    try {
+      const breakPtr = call('line_breaks', ptr, bytes.length);
+
+      if (!breakPtr) throw new Error('Line breaking failed');
+      breaks = new Uint32Array(
+        currentRuntime().memory.buffer,
+        breakPtr,
+        call('result_words'),
+      ).slice();
+
+      for (const segment of segments) {
+        const result = call(
+          'shape_slice',
+          segment.font,
+          ptr,
+          bytes.length,
+          offsets[segment.start],
+          offsets[segment.end],
+          segment.level & 1,
+          segment.script,
+        );
+
+        if (!result) throw new Error('Directional shaping failed');
+
+        const words = new Uint32Array(
+          currentRuntime().memory.buffer,
+          result,
+          call('result_words'),
+        ).slice();
+
+        for (let i = 0; i < words[0]; i++)
+          if (words[3 + i * 5] & 0x80000000) unsafe.add(segment.start + words[4 + i * 5]);
+        runs.push({
+          words,
+          floats: new Float32Array(words.buffer),
+          scale: size / words[2],
+          font: segment.font,
+          offset: segment.start - from,
+        });
+        stats.glyphCalls++;
+      }
+    } finally {
+      call('release_text', ptr, bytes.length);
+    }
+
+    return {
+      runs,
+      breaks: breaks
+        .filter((offset) => offset > from && offset <= to && !unsafe.has(offset))
+        .map((offset) => offset - from),
+    };
+  }
+
   function resolveGlyphs(text: string, id: number, size: number) {
     const result = resolveGlyphRuns(text, id, size),
       glyphs: Glyph[] = [];
@@ -173,7 +263,7 @@ export async function createOwnedEngine(
       for (let i = 0; i < run.words[0]; i++) {
         const p = 3 + i * 5;
         glyphs.push({
-          id: run.words[p],
+          id: run.words[p] & 0xffff,
           start: run.words[p + 1] + run.offset,
           advance: run.floats[p + 2] * run.scale,
           dx: run.floats[p + 3] * run.scale,
@@ -224,12 +314,19 @@ export async function createOwnedEngine(
     requestedHeight = size * 1.6,
     grid = 0,
     faces: TextFaces = nativeFonts.defaults,
+    direction: TextDirection = 'auto',
   ): PreparedParagraph {
     const { lineHeight, baseline } = textMetrics(size, requestedHeight, grid, faces);
     let paragraphGlyphs = cached?.paragraphGlyphs;
 
+    const bidi =
+      cached?.bidi ?? (needsBidi(text, direction) ? analyzeBidi(text, direction) : undefined);
+
     if (paragraphGlyphs) stats.cacheHits++;
-    else if (storage === 'shaping') {
+    else if (bidi) {
+      const result = resolveDirectionalRuns(text, spans, bidi, faces, size);
+      paragraphGlyphs = decodeShaping(text, result.runs, result.breaks);
+    } else if (storage === 'shaping') {
       const base = resolveGlyphRuns(text, faces.normal, size);
 
       if (!spans.length) paragraphGlyphs = decodeShaping(text, base.runs, base.breaks);
@@ -344,13 +441,14 @@ export async function createOwnedEngine(
         baseline,
         packed,
         storage === 'carets' || storage === 'shaping' ? 'packed' : 'objects',
+        bidi,
       );
       includeInkBounds(composed, size);
       stats.compositions++;
       stats.renderBuffers += composed.runs.length;
     }
 
-    return { paragraphGlyphs, composed, packed };
+    return { paragraphGlyphs, composed, packed, bidi };
   }
 
   function includeInkBounds(composed: ComposedParagraph, size: number) {
@@ -384,10 +482,11 @@ export async function createOwnedEngine(
       lines: document.lines,
       coreMs: performance.now() - started,
       adapterMs: 0,
-      missing: 0,
+      missing: paragraphs.reduce((sum, paragraph) => sum + paragraph.missing, 0),
       hit: document.hit,
       geometry: document.geometry,
       move: document.move,
+      directionAt: document.directionAt,
       draw(canvas, x, y, textPaint = paint) {
         assertActive();
 
@@ -462,7 +561,7 @@ export async function createOwnedEngine(
 
         if (!supportsLayoutText(input.text))
           throw new Error(
-            'Owned prototype currently supports Latin left-to-right paragraphs and emoji.',
+            'This text contains a script or control character not yet supported by the renderer.',
           );
         const allStops = new Set(input.spans.length ? boundaries(input.text) : []);
 
@@ -483,11 +582,11 @@ export async function createOwnedEngine(
               end: Math.min(text.length, s.end - offset),
             }));
 
-          const key = JSON.stringify([text, spans, input.size, faces.key]);
+          const key = JSON.stringify([text, spans, input.size, faces.key, input.direction]);
 
           const cached = retained.get(key) ?? previous?.get(key);
 
-          const { paragraphGlyphs, composed, packed } = prepare(
+          const prepared = prepare(
             text,
             spans,
             input.width,
@@ -496,10 +595,11 @@ export async function createOwnedEngine(
             input.lineHeight,
             input.baselineGrid,
             faces,
+            input.direction,
           );
 
-          retained.set(key, { paragraphGlyphs, composed, packed });
-          paragraphs.push(composed);
+          retained.set(key, prepared);
+          paragraphs.push(prepared.composed);
           stats.paragraphs++;
           offset += text.length + 1;
         }
@@ -519,6 +619,7 @@ export async function createOwnedEngine(
         lineHeight?: number;
         baselineGrid?: number;
         font?: FontSelection;
+        direction?: TextDirection;
       }) {
         assertOwner();
         const started = performance.now();
@@ -535,15 +636,58 @@ export async function createOwnedEngine(
 
         const faces = input.font ? nativeFonts.resolve(input.font) : nativeFonts.defaults;
 
-        const key = JSON.stringify([input.text, input.spans, input.atoms, input.size, faces.key]);
+        const key = JSON.stringify([
+          input.text,
+          input.spans,
+          input.atoms,
+          input.size,
+          faces.key,
+          input.direction,
+        ]);
 
         const previous = documents.get(input.id)?.get(key);
 
+        const bidi =
+          previous?.bidi ??
+          (needsBidi(input.text, input.direction)
+            ? analyzeBidi(input.text, input.direction)
+            : undefined);
+
         const paragraphGlyphs =
           previous?.paragraphGlyphs ??
-          layoutInlineParagraph(input.text, input.spans, input.atoms, (text, marks) =>
-            resolveGlyphs(text, markedFont(faces, marks), input.size),
-          );
+          layoutInlineParagraph(input.text, input.spans, input.atoms, (text, marks, from) => {
+            if (!bidi) return resolveGlyphs(text, markedFont(faces, marks), input.size);
+
+            const result = resolveDirectionalRuns(
+              input.text,
+              [{ start: from, end: from + text.length, ...marks }],
+              bidi,
+              faces,
+              input.size,
+              from,
+              from + text.length,
+            );
+
+            const glyphs: Glyph[] = [];
+
+            for (const run of result.runs) {
+              const order = logicalGlyphOrder(run);
+
+              for (let i = 0; i < run.words[0]; i++) {
+                const p = 3 + (order?.[i] ?? i) * 5;
+                glyphs.push({
+                  id: run.words[p] & 0xffff,
+                  start: run.words[p + 1] + run.offset,
+                  advance: run.floats[p + 2] * run.scale,
+                  dx: run.floats[p + 3] * run.scale,
+                  dy: run.floats[p + 4] * run.scale,
+                  font: run.font,
+                });
+              }
+            }
+
+            return { glyphs, breaks: [...result.breaks] };
+          });
 
         if (!('clusters' in paragraphGlyphs)) throw new Error('Inline cache kind mismatch');
         const packed = previous?.packed ?? packGlyphs(paragraphGlyphs);
@@ -580,6 +724,7 @@ export async function createOwnedEngine(
                 baseline,
                 packed,
                 'packed',
+                bidi,
               );
 
         if (composed !== previous?.composed) {
@@ -592,6 +737,7 @@ export async function createOwnedEngine(
 
         const inlineBoxes = input.atoms.map((atom) => {
           const caret = composed.geometry(atom.index, atom.index, false).caret;
+          const endCaret = composed.geometry(atom.index + 1, atom.index + 1, true).caret;
           const line = composed.lines.find((l) => l.top === caret[1]);
 
           if (!line) throw new Error('Missing inline line');
@@ -603,13 +749,13 @@ export async function createOwnedEngine(
             width: atom.width,
             ascent: atom.ascent,
             descent: atom.descent,
-            x: caret[0],
+            x: Math.min(caret[0], endCaret[0]),
             y: line.baseline - atom.ascent,
             height: atom.ascent + atom.descent,
           };
         });
 
-        documents.set(input.id, new Map([[key, { paragraphGlyphs, packed, composed }]]));
+        documents.set(input.id, new Map([[key, { paragraphGlyphs, packed, composed, bidi }]]));
 
         return { ...result, inlineBoxes };
       },
@@ -629,6 +775,7 @@ export async function createOwnedEngine(
             retained.set(key, {
               paragraphGlyphs: paragraph.paragraphGlyphs,
               packed: paragraph.packed,
+              bidi: paragraph.bidi,
             });
           }
       },
@@ -773,4 +920,13 @@ export async function createOwnedEngine(
       };
     },
   };
+}
+
+function needsBidi(text: string, direction: TextDirection = 'auto') {
+  return (
+    direction === 'rtl' ||
+    /[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Greek}\p{Script=Cyrillic}\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(
+      text,
+    )
+  );
 }

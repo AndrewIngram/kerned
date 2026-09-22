@@ -9,6 +9,7 @@ export type TextStyle = Readonly<{
   baselineOffset: number;
   font: Readonly<{ family: string; weight: number; style: 'normal' | 'italic' }>;
   cssFamily: string;
+  direction?: 'auto' | 'ltr' | 'rtl';
 }>;
 
 export type ReadTextStyle = (
@@ -18,6 +19,8 @@ export type ReadTextStyle = (
 
 /** Native text and its editing input use exactly the same resolved settings. */
 export function applyTextStyle(element: HTMLElement, style: TextStyle) {
+  element.dir = style.direction ?? 'auto';
+  element.style.textAlign = 'start';
   element.style.color = style.color;
   element.style.fontFamily = style.cssFamily;
   element.style.fontWeight = String(style.font.weight);

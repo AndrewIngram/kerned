@@ -71,12 +71,16 @@ export async function createDOMFonts(
         ? '"Apple Color Emoji", "Segoe UI Emoji", emoji'
         : `"${emoji}"`;
 
+      const textFallbacks = catalog.fallbacks(selection).map((face) => `"${aliases.get(face)}"`);
+
       if (!faces.length || (!alias && source !== catalog.emoji))
         throw new Error('DOM font resources are destroyed');
 
       return {
         font: { family: source.family, weight: source.weight, style: source.style },
-        cssFamily: alias ? `"${alias}", ${fallback}` : fallback,
+        cssFamily: [alias ? `"${alias}"` : '', ...textFallbacks, fallback]
+          .filter(Boolean)
+          .join(', '),
       };
     },
     destroy,

@@ -8,9 +8,19 @@ import { demoSchema } from './demo-schema.js';
 import { sampleChunk } from './editor-stream.js';
 import { createSampleDocument } from './sample-document.js';
 
-type BookSampleId = 'warbreaker' | 'war-and-peace';
+type BookSampleId = 'warbreaker' | 'war-and-peace' | 'hayy-ibn-yaqzan' | 'tashlikh';
 
 export const bookSamples: readonly { id: BookSampleId; title: string; description: string }[] = [
+  {
+    id: 'hayy-ibn-yaqzan',
+    title: 'Hayy ibn Yaqzan · العربية',
+    description: 'Ibn Tufayl · Arabic · Complete narrative',
+  },
+  {
+    id: 'tashlikh',
+    title: 'Tashlikh · עברית',
+    description: 'Isaac Erter · Hebrew · Complete satire, 1840',
+  },
   {
     id: 'warbreaker',
     title: 'Warbreaker',
@@ -51,7 +61,13 @@ export async function loadEditorSample(url = new URL(location.href)): Promise<Ed
         const response = await fetch(`/samples/${book.id}.html`);
 
         if (!response.ok) throw new Error(`Could not load ${book.title} (${response.status})`);
-        const nodes = bookParser.parse(await response.text());
+        const html = await response.text();
+
+        const reference = new DOMParser()
+          .parseFromString(html, 'text/html')
+          .querySelector('main#book');
+
+        const nodes = bookParser.parse(reference?.innerHTML ?? html);
 
         if (!nodes.length) throw new Error(`${book.title} contains no importable text`);
 

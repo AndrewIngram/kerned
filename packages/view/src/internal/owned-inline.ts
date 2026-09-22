@@ -18,6 +18,7 @@ export function layoutInlineParagraph(
   resolveGlyphs: (
     text: string,
     marks: Pick<Span, 'bold' | 'italic'>,
+    from: number,
   ) => { glyphs: Glyph[]; breaks: number[] },
 ): ParagraphGlyphs {
   const stops = new Set(boundaries(text));
@@ -54,7 +55,7 @@ export function layoutInlineParagraph(
     if (text[i] === '\ufffc' && !indices.has(i)) throw new Error('Missing inline atom');
 
   if (text.includes('\n') || !supportsLayoutText(text))
-    throw new Error('Inline prototype supports Latin paragraphs and emoji');
+    throw new Error('Unsupported inline text or control character');
 
   for (const span of spans)
     if (!(span.start < span.end && stops.has(span.start) && stops.has(span.end)))
@@ -67,7 +68,7 @@ export function layoutInlineParagraph(
     if (start === end) return;
 
     const value = text.slice(start, end),
-      base = resolveGlyphs(value, { bold: false, italic: false });
+      base = resolveGlyphs(value, { bold: false, italic: false }, start);
 
     for (const b of base.breaks) breaks.add(b + start);
 
@@ -88,10 +89,12 @@ export function layoutInlineParagraph(
         const active = local.filter((s) => s.start <= from && s.end > from),
           marks = { bold: active.some((s) => s.bold), italic: active.some((s) => s.italic) };
 
-        return resolveGlyphs(value.slice(from, cuts[i + 1]), marks).glyphs.map((g) => ({
-          ...g,
-          start: g.start + from,
-        }));
+        return resolveGlyphs(value.slice(from, cuts[i + 1]), marks, start + from).glyphs.map(
+          (g) => ({
+            ...g,
+            start: g.start + from,
+          }),
+        );
       });
     }
 

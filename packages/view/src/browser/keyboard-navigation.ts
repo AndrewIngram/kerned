@@ -6,7 +6,14 @@ type Direction = 'left' | 'right' | 'up' | 'down' | 'home' | 'end';
 export type NavigationBlock = { id: number; text: string; top: number; height: number };
 
 export type NavigationLayout = {
-  lines: readonly { start: number; end: number; top: number; bottom: number }[];
+  lines: readonly {
+    start: number;
+    end: number;
+    top: number;
+    bottom: number;
+    direction?: 'ltr' | 'rtl';
+  }[];
+  directionAt?(index: number, upstream: boolean): 'ltr' | 'rtl';
   hit(this: void, x: number, y: number): { index: number; upstream: boolean };
   geometry(anchor: number, focus: number, upstream: boolean): { caret: readonly number[] };
   move(
@@ -100,11 +107,14 @@ export function createTextNavigation() {
         head = { id: target.id, offset: back ? 0 : target.text.length };
         desiredX = undefined;
       } else if (word && (direction === 'left' || direction === 'right')) {
-        if (back && head.offset === 0 && at > 0)
+        const runBack =
+          back !== (layout(block.id).directionAt?.(head.offset, selection.upstream) === 'rtl');
+
+        if (runBack && head.offset === 0 && at > 0)
           head = { id: blocks[at - 1].id, offset: blocks[at - 1].text.length };
-        else if (!back && head.offset === block.text.length && at + 1 < blocks.length)
+        else if (!runBack && head.offset === block.text.length && at + 1 < blocks.length)
           head = { id: blocks[at + 1].id, offset: 0 };
-        else head.offset = wordBoundary(block.text, head.offset, back, platform);
+        else head.offset = wordBoundary(block.text, head.offset, runBack, platform);
         desiredX = undefined;
       } else if (word && (direction === 'up' || direction === 'down')) {
         const index = back
@@ -134,7 +144,30 @@ export function createTextNavigation() {
           const anchorAt = blocks.findIndex((b) => b.id === selection.anchor.id),
             forward = anchorAt < at || (anchorAt === at && selection.anchor.offset <= head.offset);
 
-          head = back
+          let collapseBack = back !== (layout(block.id).lines[0]?.direction === 'rtl');
+
+          if (anchorAt === at) {
+            const current = layout(block.id);
+
+            const anchorCaret = current.geometry(
+              selection.anchor.offset,
+              selection.anchor.offset,
+              false,
+            ).caret;
+
+            const headCaret = current.geometry(
+              selection.head.offset,
+              selection.head.offset,
+              selection.upstream,
+            ).caret;
+
+            if (anchorCaret[1] === headCaret[1]) {
+              const anchorLeft = anchorCaret[0] <= headCaret[0];
+              collapseBack = back ? anchorLeft === forward : anchorLeft !== forward;
+            }
+          }
+
+          head = collapseBack
             ? forward
               ? selection.anchor
               : selection.head
@@ -206,19 +239,24 @@ export function createTextNavigation() {
         } else if (direction) {
           desiredX = undefined;
           const actual = platform === 'mac' && event.metaKey ? (back ? 'home' : 'end') : direction;
-          const hit = layout(block.id).move(head.offset, selection.upstream, actual);
+          const current = layout(block.id);
+          const before = current.geometry(head.offset, head.offset, selection.upstream).caret;
+          const hit = current.move(head.offset, selection.upstream, actual);
+          const after = current.geometry(hit.index, hit.index, hit.upstream).caret;
           head = { id: block.id, offset: hit.index };
           upstream = hit.upstream;
 
           if (
             head.offset === selection.head.offset &&
-            upstream === selection.upstream &&
+            before[0] === after[0] &&
+            before[1] === after[1] &&
             (actual === 'left' || actual === 'right')
           ) {
-            const target = blocks[at + (back ? -1 : 1)];
+            const paragraphBack = back !== (layout(block.id).lines[0]?.direction === 'rtl');
+            const target = blocks[at + (paragraphBack ? -1 : 1)];
 
             if (target) {
-              head = { id: target.id, offset: back ? target.text.length : 0 };
+              head = { id: target.id, offset: paragraphBack ? target.text.length : 0 };
               upstream = false;
             }
           }

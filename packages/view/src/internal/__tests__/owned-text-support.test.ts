@@ -23,11 +23,14 @@ test.each([
   ['Café e\u0301lan', true],
   ['“Typography”—yes!', true],
   ['👨‍👩‍👧‍👦 🇬🇧 1️⃣', true],
-  ['a\u200db', false],
+  ['a\u200db', true],
   ['a\u2028b', false],
   ['a\u2029b', false],
-  ['a\u202eb', false],
-  ['مرحبا', false],
+  ['a\u202eb', true],
+  ['مرحبا', true],
+  ['שָׁלוֹם English 123', true],
+  ['Ελληνικά Кириллица', true],
+  ['中文 日本語', false],
 ])('retains the Unicode support policy for %s', (text, accepted) => {
   expect(supportsLayoutText(text)).toBe(accepted);
 });

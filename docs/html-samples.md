@@ -3,18 +3,18 @@
 ## International reference books
 
 [International samples](http://127.0.0.1:5173/samples/international.html) provides
-two additional books, with readable HTML reference pages and pinned source snapshots:
+three additional books, with readable HTML reference pages and pinned source snapshots:
 
 | Book                                                                            | Language |  Words | Blocks | Useful coverage                                                 |
 | ------------------------------------------------------------------------------- | -------- | -----: | -----: | --------------------------------------------------------------- |
 | [Hayy ibn Yaqzan](../apps/demo/public/samples/hayy-ibn-yaqzan.html), Ibn Tufayl | Arabic   | 18,301 |    125 | Joining, 468 combining marks, punctuation, long paragraphs      |
 | [Tashlikh](../apps/demo/public/samples/tashlikh.html), Isaac Erter              | Hebrew   |  7,040 |     39 | 222 combining marks, German title matter, numbers, notes, verse |
 
-These pages use the browser's text renderer as a reference. They are **not yet
-enabled in the canvas editor's sample selector**. Font fallback, directional run
-integration and safe Arabic wrapping remain prerequisites; see
-[international text progress](research-international-text.md). Neither book is
-intended to replace War and Peace as a very-large-document benchmark.
+Arabic and Hebrew are available in the canvas editor's sample selector and retain
+browser-rendered references for comparison. _Journey to the West_ (西遊記), Wu
+Cheng’en, adds a Chinese browser reference: all 100 chapters, 2,968 blocks and
+588,710 Han characters. It remains outside the canvas selector until CJK fonts,
+line breaking and input are validated. See [international text progress](research-international-text.md).
 
 The HTML `main#book` contains only book content. Headers and footers provide
 reference status, attribution, licence links and conversion notes. To import a

@@ -23,7 +23,13 @@ export function analyzeBidi(text: string, direction: TextDirection = 'auto') {
   offsets[count] = text.length;
   const { levels, paragraphs } = getEmbeddingLevels(points, direction);
 
-  return { points, offsets, levels, paragraphs };
+  return {
+    points,
+    offsets,
+    levels,
+    paragraphs,
+    baseLevel: paragraphs[0]?.level ?? Number(direction === 'rtl'),
+  };
 }
 
 export type BidiAnalysis = ReturnType<typeof analyzeBidi>;

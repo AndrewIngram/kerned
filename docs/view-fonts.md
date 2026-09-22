@@ -30,7 +30,7 @@ await view.ready;
 ```
 
 `fonts` is optional; `defaultFonts` preserves the existing Noto Sans faces and
-Noto Color Emoji fallback. Each source declares a family, numeric weight from
+Noto Color Emoji fallback, plus regular/bold Noto Sans Arabic and Noto Sans Hebrew. Each source declares a family, numeric weight from
 1–1000, normal/italic style, and an asset key under `fonts/`. The asset resolver
 can map that key to the application's actual versioned URL. Registration order
 has no semantic meaning. The configuration must include both its default and
@@ -52,9 +52,18 @@ configured default family. Style is matched before weight. Missing normal/italic
 variants use the available style without synthetic bold or skew. Static weight
 matching follows the search order in [CSS Fonts, matching font styles](https://www.w3.org/TR/css-fonts-4/#font-style-matching).
 This does not implement the full CSS font system: variable axes, oblique angles,
-system font discovery and per-character coverage fallback are not supported here.
+system font discovery and cross-font combining-grapheme fallback are not supported here.
 Emoji keeps the existing explicit emoji-family routing and text-presentation
-variation-selector behavior. This does not expand supported scripts.
+variation-selector behavior. Directional text tries the selected face, then
+`fallbackFamilies` in order, matching weight/style and testing complete run or
+grapheme coverage. The default list is `['Noto Sans Arabic', 'Noto Sans Hebrew']`;
+every listed family must be registered. A missing script-specific italic face
+uses the available style. Latin's existing fast path is retained.
+
+Text presentations and `defineStyleRule` accept `direction: 'auto' | 'ltr' | 'rtl'`.
+Auto infers each paragraph's base direction; explicit RTL also positions an empty
+paragraph's caret at its right edge. Schema extensions own any persisted direction
+attribute and map it to presentation styles.
 
 Author bold/italic marks resolve within the selected family. Bold requests at
 least weight 700; it does not reduce a heavier base weight. Italic marks retain

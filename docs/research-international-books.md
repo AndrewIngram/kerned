@@ -1,7 +1,39 @@
-# Arabic and Hebrew book sources
+# International book sources
 
 Research date: 2026-09-22. These choices provide substantial natural RTL prose
 without relying on a modern translation's uncertain copyright status.
+
+## Chinese: Journey to the West
+
+Use **西遊記**, attributed to Wu Cheng'en, from Project Gutenberg ebook 23962.
+The catalogue identifies Chinese as the language, gives the author's dates as
+1500?–1582?, credits Leong Joana Kit Ieng for production, and marks the work
+public domain in the USA. This is the Chinese original, so a modern translation
+does not introduce separate rights. [Catalogue](https://www.gutenberg.org/ebooks/23962)
+
+The UK public-domain conclusion follows from the author's sixteenth-century
+death and the normal literary copyright term of 70 years after death.
+[UK government term guidance](https://www.gov.uk/copyright/how-long-copyright-lasts)
+Keep the ebook licence with any redistributed Gutenberg source copy and credit
+the source as described in [Gutenberg's permission guidance](https://www.gutenberg.org/policy/permission.html).
+
+The catalogue links both [UTF-8 HTML](https://www.gutenberg.org/cache/epub/23962/pg23962-images.html)
+and [UTF-8 plain text](https://www.gutenberg.org/cache/epub/23962/pg23962.txt).
+A shell download of the HTML succeeded on 2026-09-22. The downloaded file is
+2,297,840 bytes, decodes as UTF-8 without replacement characters, and contains
+all 100 numbered chapter starts, through `第一○○回`. That verifies the presence
+of the complete chapter sequence, rather than textual accuracy against a print
+edition.
+
+This is a useful large CJK corpus: traditional Han characters, Chinese
+punctuation, dialogue, prose paragraphs, and verse with explicit line breaks.
+Chapter titles are styled paragraphs, not heading elements. Later numbers use
+forms such as `第九五回` and `第一○○回`. Preserve explicit `<br>` verse breaks,
+but remove source hard-wrapping between adjacent Han characters instead of
+turning those source newlines into spaces. The source includes apparent
+transcription defects such as occasional question marks within words; preserve
+the source faithfully rather than presenting it as a corrected critical edition.
+[Inspected book text](https://www.gutenberg.org/cache/epub/23962/pg23962-images.html)
 
 ## Arabic: Hayy ibn Yaqzan
 

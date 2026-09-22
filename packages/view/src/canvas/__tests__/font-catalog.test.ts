@@ -37,6 +37,7 @@ test('style matching precedes weight matching without inventing synthetic faces'
   const catalog = createFontCatalog({
     ...defaultFonts,
     faces: [defaultFonts.faces[0], defaultFonts.faces[3], defaultFonts.faces[4]],
+    fallbackFamilies: [],
   });
 
   expect(catalog.select({ style: 'italic' })).toEqual(defaultFonts.faces[3]);

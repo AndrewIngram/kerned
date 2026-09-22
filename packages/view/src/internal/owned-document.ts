@@ -91,6 +91,11 @@ export function placeParagraphs(paragraphs: ComposedParagraph[]) {
     lines,
     hit,
     geometry,
+    directionAt(this: void, index: number, upstream: boolean) {
+      const p = placements[preceding(placements, index, 'offset')];
+
+      return p.paragraph.directionAt(index - p.offset, upstream);
+    },
     *visible(top: number, bottom: number) {
       if (!(bottom > top)) return;
 
@@ -122,21 +127,25 @@ export function placeParagraphs(paragraphs: ComposedParagraph[]) {
         );
       }
 
-      if (direction === 'left' && local === 0 && ordinal > 0) {
+      const rtl = p.paragraph.lines[0]?.direction === 'rtl';
+      const backward = direction === (rtl ? 'right' : 'left');
+      const horizontal = direction === 'left' || direction === 'right';
+      const moved = p.paragraph.move(local, upstream, direction);
+      const before = p.paragraph.geometry(local, local, upstream).caret;
+      const after = p.paragraph.geometry(moved.index, moved.index, moved.upstream).caret;
+      const stalled = moved.index === local && before[0] === after[0] && before[1] === after[1];
+
+      if (horizontal && backward && stalled && ordinal > 0) {
         const previous = placements[ordinal - 1];
 
         return { index: previous.offset + previous.paragraph.textLength, upstream: false };
       }
 
-      if (
-        direction === 'right' &&
-        local === p.paragraph.textLength &&
-        ordinal + 1 < placements.length
-      ) {
+      if (horizontal && !backward && stalled && ordinal + 1 < placements.length) {
         return { index: placements[ordinal + 1].offset, upstream: false };
       }
 
-      return documentPosition(p, p.paragraph.move(local, upstream, direction));
+      return documentPosition(p, moved);
     },
   };
 }

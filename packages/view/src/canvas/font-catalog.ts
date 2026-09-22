@@ -27,11 +27,13 @@ export type FontConfiguration = Readonly<{
   faces: readonly FontSource[];
   defaultFamily: string;
   emojiFamily: string;
+  fallbackFamilies?: readonly string[];
 }>;
 
 export const defaultFonts: FontConfiguration = Object.freeze({
   defaultFamily: 'Noto Sans',
   emojiFamily: 'Noto Color Emoji',
+  fallbackFamilies: Object.freeze(['Noto Sans Arabic', 'Noto Sans Hebrew']),
   faces: Object.freeze(
     [
       { family: 'Noto Sans', weight: 400, style: 'normal', asset: 'fonts/NotoSans-Regular.ttf' },
@@ -44,6 +46,30 @@ export const defaultFonts: FontConfiguration = Object.freeze({
         style: 'normal',
         asset: 'fonts/NotoColorEmoji.ttf',
       },
+      {
+        family: 'Noto Sans Arabic',
+        weight: 400,
+        style: 'normal',
+        asset: 'fonts/NotoSansArabic-Regular.ttf',
+      },
+      {
+        family: 'Noto Sans Arabic',
+        weight: 700,
+        style: 'normal',
+        asset: 'fonts/NotoSansArabic-Bold.ttf',
+      },
+      {
+        family: 'Noto Sans Hebrew',
+        weight: 400,
+        style: 'normal',
+        asset: 'fonts/NotoSansHebrew-Regular.ttf',
+      },
+      {
+        family: 'Noto Sans Hebrew',
+        weight: 700,
+        style: 'normal',
+        asset: 'fonts/NotoSansHebrew-Bold.ttf',
+      },
     ].map((value) => Object.freeze(face.parse(value))),
   ),
 });
@@ -52,6 +78,7 @@ const configuration = z.strictObject({
   faces: z.array(face).min(1).max(256),
   defaultFamily: family,
   emojiFamily: family,
+  fallbackFamilies: z.array(family).optional(),
 });
 
 /** Validate once, then match semantic faces independently of native registration order. */
@@ -79,6 +106,8 @@ export function createFontCatalog(input: FontConfiguration = defaultFonts) {
 
   const fallback = registered(value.defaultFamily);
   registered(value.emojiFamily);
+
+  for (const name of value.fallbackFamilies ?? []) registered(name);
   const cache = new Map<string, FontSource>();
 
   function select(request: FontSelection = {}) {
@@ -110,6 +139,9 @@ export function createFontCatalog(input: FontConfiguration = defaultFonts) {
   return {
     faces,
     select,
+    fallbacks(selection: FontSelection = {}) {
+      return (value.fallbackFamilies ?? []).map((name) => select({ ...selection, family: name }));
+    },
     emoji: select({ family: value.emojiFamily }),
   };
 }

@@ -6,6 +6,7 @@ import type { Direction, Position, Span } from './layout-types.js';
 export type Rect = [number, number, number, number];
 
 export type Line = {
+  direction?: 'ltr' | 'rtl';
   start: number;
   end: number;
   top: number;
@@ -17,6 +18,7 @@ export type Line = {
 export type Geometry = { caret: Rect; rects: Rect[] };
 
 export type LayoutInput = {
+  direction?: 'auto' | 'ltr' | 'rtl';
   font?: FontSelection;
   lineHeight?: number;
   baselineGrid?: number;
@@ -46,5 +48,6 @@ export interface LaidOut {
   hit(x: number, y: number): Position;
   geometry(anchor: number, focus: number, upstream: boolean): Geometry;
   move(index: number, upstream: boolean, direction: Direction): Position;
+  directionAt?(index: number, upstream: boolean): 'ltr' | 'rtl';
   dispose(): void;
 }

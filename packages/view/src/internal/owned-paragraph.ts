@@ -42,6 +42,7 @@ export function composeParagraph(
   const numeric = 'clusterStarts' in paragraphGlyphs ? paragraphGlyphs : undefined;
   const clusters = 'clusters' in paragraphGlyphs ? paragraphGlyphs.clusters : [];
   const clusterCount = numeric ? numeric.widths.length : clusters.length;
+  const rtlParagraph = !!((bidi?.baseLevel ?? 0) & 1);
 
   const bidiStarts = bidi
     ? (numeric?.clusterStarts ?? clusters.map((cluster) => cluster.start))
@@ -53,9 +54,7 @@ export function composeParagraph(
 
   const lines: Line[] = [];
 
-  const bidiCarets = bidi
-    ? createBidiCarets(lines, lineHeight, (bidi.paragraphs[0]?.level ?? 0) % 2 !== 0)
-    : undefined;
+  const bidiCarets = bidi ? createBidiCarets(lines, lineHeight, rtlParagraph) : undefined;
 
   const numericCarets =
     bidiCarets ??
@@ -90,7 +89,8 @@ export function composeParagraph(
     else ranges.push({ font, from: slot, to: slot + 1 });
   }
 
-  let first = 0;
+  let first = 0,
+    missing = 0;
 
   do {
     let end = first,
@@ -102,7 +102,9 @@ export function composeParagraph(
 
       // Always fit at least one cluster, including in a temporarily zero-width slot.
       // Its glyphs may overflow, just as a single glyph wider than a narrow line does.
-      if (end > first && advance + clusterWidth > width) break;
+      // Joining scripts retain shaping across a word. Until line-edge reshaping
+      // exists, overflow an unbreakable word instead of severing its joining forms.
+      if (end > first && advance + clusterWidth > width && (!bidi || lastBreak > first)) break;
       advance += clusterWidth;
 
       const canBreak = numeric
@@ -112,6 +114,8 @@ export function composeParagraph(
       end++;
 
       if (canBreak) lastBreak = end;
+
+      if (bidi && canBreak && advance > width) break;
     }
 
     if (end < clusterCount && lastBreak > first) end = lastBreak;
@@ -133,8 +137,15 @@ export function composeParagraph(
       }
     }
 
-    if (!bidi || first === end) append(start, 0, false);
-    let x = 0;
+    let lineWidth = 0;
+
+    if (rtlParagraph)
+      for (let i = first; i < end; i++)
+        lineWidth += numeric ? numeric.widths[i] : clusters[i].width;
+    const left = rtlParagraph ? width - lineWidth : 0;
+
+    if (!bidi || first === end) append(start, left, false);
+    let x = left;
 
     const visual =
       bidi && bidiStarts ? bidiClusters(bidi, bidiStarts, first, end, finish) : undefined;
@@ -152,11 +163,14 @@ export function composeParagraph(
 
           output[slot] = pen + packed.dx[g];
           output[slot + 1] = top + baseline - packed.dy[g];
+
+          if (!packed.ids[packed.fonts[g]][slot / 2]) missing++;
           appendRun(packed.fonts[g], slot / 2);
           pen += packed.advance[g];
         }
       } else {
         for (const glyph of clusters[i].glyphs) {
+          if (!glyph.id) missing++;
           appendRun(glyph.font, glyphs[glyph.font].length);
           glyphs[glyph.font].push(glyph.id);
           positions[glyph.font].push(pen + glyph.dx, top + baseline - glyph.dy);
@@ -203,14 +217,17 @@ export function composeParagraph(
       x += clusterWidth;
     }
 
-    lines.push({
+    const lineValue: Line = {
       start,
       end: finish,
       top,
       bottom: top + lineHeight,
       baseline: top + baseline,
-      width: x,
-    });
+      width: x - left,
+    };
+
+    if (bidi) lineValue.direction = rtlParagraph ? 'rtl' : 'ltr';
+    lines.push(lineValue);
 
     if (!numericCarets) rows.push(row);
     first = end;
@@ -229,7 +246,7 @@ export function composeParagraph(
         positions: coordinates[font].subarray(from * 2, to * 2),
       }));
 
-  return finishParagraph(
+  const result = finishParagraph(
     width,
     textLength,
     lineHeight,
@@ -240,6 +257,27 @@ export function composeParagraph(
     stops,
     rows,
   );
+
+  return { ...result, missing, directionAt: readDirection(bidi) };
+}
+
+function readDirection(bidi?: BidiAnalysis) {
+  return (index: number, upstream: boolean): 'ltr' | 'rtl' => {
+    if (!bidi) return 'ltr';
+    const target = Math.max(0, index - Number(upstream));
+
+    let low = 0,
+      high = bidi.levels.length;
+
+    while (low < high) {
+      const mid = (low + high) >>> 1;
+
+      if (bidi.offsets[mid] <= target) low = mid + 1;
+      else high = mid;
+    }
+
+    return (bidi.levels[Math.max(0, low - 1)] ?? bidi.baseLevel) & 1 ? 'rtl' : 'ltr';
+  };
 }
 
 // Logical glyph slots descend through RTL runs. Gather adjacent same-face slices

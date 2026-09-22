@@ -34,6 +34,19 @@ const books = [
     contents:
       'Title matter, introduction, complete satire and five footnotes; later transcription notes retained in the source snapshot.',
   },
+  {
+    id: 'journey-to-the-west',
+    title: 'Journey to the West',
+    nativeTitle: '西遊記',
+    author: 'Wu Cheng’en',
+    language: 'zh',
+    sourceUrl: 'https://www.gutenberg.org/cache/epub/23962/pg23962-images.html',
+    licenseUrl: 'journey-to-the-west-source.html.txt',
+    attribution:
+      'Wu Cheng’en; Project Gutenberg ebook 23962, produced by Leong Joana Kit Ieng. Public-domain original Chinese text. The source snapshot includes the Project Gutenberg licence. Occasional question marks in the transcription are retained.',
+    contents:
+      'Complete novel, all 100 chapters. Browser reference for horizontal Chinese typography; canvas CJK support remains pending.',
+  },
 ];
 
 const digest = (data) => createHash('sha256').update(data).digest('hex');
@@ -59,6 +72,8 @@ async function convert(book) {
 
       for (const element of root.querySelectorAll('header, footer, #TN, script, style'))
         element.remove();
+
+      if (language === 'zh') root.querySelector('#id00000')?.remove();
       const clean = (text) => text.replace(/\s+/g, ' ').trim();
       const compact = (text) => text.replace(/\s/g, '');
 
@@ -66,7 +81,13 @@ async function convert(book) {
         text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('"', '&quot;');
 
       function inline(node) {
-        if (node.nodeType === Node.TEXT_NODE) return escape(node.textContent.replace(/\s+/g, ' '));
+        if (node.nodeType === Node.TEXT_NODE) {
+          // Gutenberg hard-wraps Chinese prose; these are not word spaces.
+          const text =
+            language === 'zh' ? node.textContent.replace(/\r?\n[ \t]*/g, '') : node.textContent;
+
+          return escape(text.replace(/\s+/g, ' '));
+        }
 
         if (node.nodeType === Node.COMMENT_NODE) return '';
 
@@ -87,7 +108,7 @@ async function convert(book) {
 
       const blocks = sourceBlocks.map((element) => {
         const lang = element.closest('[lang]')?.getAttribute('lang') ?? language;
-        const direction = lang === 'de' ? 'ltr' : 'rtl';
+        const direction = ['ar', 'he'].includes(lang) ? 'rtl' : 'ltr';
         const attributes = `lang="${escape(lang)}" dir="${direction}"`;
 
         if (element.matches('.poetry')) {
@@ -100,7 +121,10 @@ async function convert(book) {
           return `<p ${attributes}>${lines.join('<br>')}</p>`;
         }
 
-        const tag = element.tagName.toLowerCase();
+        const chapter =
+          language === 'zh' && /^第[一二三四五六七八九十○]+回/.test(element.textContent.trim());
+
+        const tag = chapter ? 'h2' : element.tagName.toLowerCase();
 
         return `<${tag} ${attributes}>${[...element.childNodes].map(inline).join('').trim()}</${tag}>`;
       });
@@ -119,8 +143,11 @@ async function convert(book) {
       if (compact(root.textContent) !== compact(output.content.textContent))
         throw new Error('Conversion omitted source text outside known blocks');
 
-      const title =
-        language === 'ar' ? `<h1 lang="ar" dir="rtl">${escape(nativeTitle)}</h1>\n` : '';
+      const addedTitle = language !== 'he';
+
+      const title = addedTitle
+        ? `<h1 lang="${language}" dir="${language === 'zh' ? 'ltr' : 'rtl'}">${escape(nativeTitle)}</h1>\n`
+        : '';
 
       for (const br of output.content.querySelectorAll('br')) br.replaceWith('\n');
       const texts = [...output.content.children].map((node) => node.textContent);
@@ -128,9 +155,11 @@ async function convert(book) {
 
       return {
         content: title + content,
-        blocks: blocks.length + Number(language === 'ar'),
-        headings: output.content.querySelectorAll('h1,h2').length + Number(language === 'ar'),
-        words: clean(text).split(/\s+/).length,
+        blocks: blocks.length + Number(addedTitle),
+        headings: output.content.querySelectorAll('h1,h2').length + Number(addedTitle),
+        ...(language === 'zh'
+          ? { hanCharacters: [...text.matchAll(/\p{Script=Han}/gu)].length }
+          : { words: clean(text).split(/\s+/).length }),
         combiningMarks: [...text.matchAll(/\p{Mark}/gu)].length,
         latinLetters: [...text.matchAll(/\p{Script=Latin}/gu)].length,
         digits: [...text.matchAll(/\p{Number}/gu)].length,
@@ -142,14 +171,27 @@ async function convert(book) {
 
   await page.close();
   assert.ok(converted.blocks > 30);
-  assert.ok(converted.combiningMarks > 0);
+
+  if (book.language === 'zh') {
+    assert.equal(converted.headings, 101);
+    assert.ok(converted.hanCharacters > 500000);
+  } else assert.ok(converted.combiningMarks > 0);
   const { content, ...counts } = converted;
 
   const normalization =
-    'Whitespace normalized; original letters, punctuation and combining marks preserved without Unicode normalization. Links and superscripts flattened to text; italics retained. Hebrew poem table becomes two lines. Arabic title added from source page title. Website navigation, images and source styling omitted.';
+    book.language === 'zh'
+      ? 'Source hard line breaks removed without adding spaces; explicit verse line breaks retained. Original chapter title paragraphs promoted to headings; book title added. Producer credit moved to attribution. All non-whitespace characters and source block order verified against the snapshot. Website header and licence footer kept outside the book content.'
+      : 'Whitespace normalized; original letters, punctuation and combining marks preserved without Unicode normalization. Links and superscripts flattened to text; italics retained. Hebrew poem table becomes two lines. Arabic title added from source page title. Website navigation, images and source styling omitted.';
+
+  const direction = book.language === 'zh' ? 'ltr' : 'rtl';
+
+  const status =
+    book.language === 'zh'
+      ? 'Browser-rendered reference. Canvas CJK layout is not enabled yet.'
+      : `Browser-rendered reference. <a href="/editor.html?sample=${book.id}">Open in the canvas editor</a>.`;
 
   const html = `<!doctype html>
-<html lang="${book.language}" dir="rtl">
+<html lang="${book.language}" dir="${direction}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -160,7 +202,7 @@ async function convert(book) {
 <link rel="stylesheet" href="international-books.css">
 </head>
 <body>
-<header lang="en" dir="ltr"><a href="international.html">International book samples</a><p>Browser-rendered reference. Canvas RTL integration is still in progress.</p></header>
+<header lang="en" dir="ltr"><a href="international.html">International book samples</a><p>${status}</p></header>
 <main id="book">
 ${content}
 </main>
@@ -175,7 +217,7 @@ ${content}
     JSON.stringify(
       {
         ...book,
-        direction: 'rtl',
+        direction,
         source,
         sourceSha256: digest(input),
         htmlSha256: digest(html),

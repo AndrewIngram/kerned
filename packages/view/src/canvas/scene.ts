@@ -562,6 +562,7 @@ function sameText(a: TextPresentation, b: TextPresentation) {
   return (
     a === b ||
     (a.text === b.text &&
+      a.direction === b.direction &&
       a.size === b.size &&
       a.font?.family === b.font?.family &&
       a.font?.weight === b.font?.weight &&

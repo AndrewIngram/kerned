@@ -1,9 +1,8 @@
 # Mixed-direction text in the owned renderer
 
-Research date: 2026-09-22. Status: foundations implemented, not shipped
-Arabic/Hebrew support in the mounted editor. The immediate target is mixed Arabic/Hebrew and English,
-including visual navigation and selection. Greek/Cyrillic input is a separate,
-smaller foundation step.
+Research date: 2026-09-22. Arabic/Hebrew and mixed-direction rendering are now
+connected to the mounted canvas editor. Greek/Cyrillic use the same directional
+run path. CJK remains a browser reference, pending font/layout integration.
 
 ## Implementation progress
 
@@ -17,19 +16,39 @@ Tests load checksum-verified compressed fixtures locally and need no network.
 The existing WASM module now also exports a directional run operation with
 surrounding-text context. Real-font tests prove Hebrew combining cluster decoding
 and Arabic joining across a split run. Arabic/Hebrew regular and bold font assets
-are revision/checksum pinned, but are not yet default registered fallback faces.
+are revision/checksum pinned and registered as default fallback faces.
 
 The composer accepts retained bidi analysis. Its optional bidi path reorders whole
 clusters per line, builds separate logical/visual caret indexes and paints disjoint
 selection spans. Pure tests cover mixed runs, soft-wrap affinity, pointer/caret
 round trips, visual arrows and full-range selection. Existing LTR callers retain
-their packed fast path. The mounted renderer does not yet supply bidi analysis.
+their packed fast path. The mounted renderer supplies bidi analysis automatically for directional scripts.
 
-Remaining integration work is coverage-based font fallback, directional/script
-run itemization across marks and atoms, shaping safety at emergency line breaks,
-mounted navigation policies and browser validation. The text-support guard remains
-closed for RTL scripts until these are connected. This foundation is not evidence
-that Arabic/Hebrew can already be entered in `editor.html`.
+Font fallback selects a registered face covering a complete run, then a complete
+grapheme when the run needs multiple faces. Marks, scripts and resolved bidi levels
+form run boundaries. Each paragraph is uploaded once to the existing shaping
+module; borrowed slices retain Arabic joining context across those boundaries.
+UAX 14 opportunities are intersected with the shaper's unsafe-to-break flags.
+Unbreakable words overflow rather than being split without line-edge reshaping.
+Width-only reflow reuses shaping and bidi analysis.
+
+The complete Hebrew font builds include punctuation absent from the earlier
+sparse faces. This matters for `,ְ` in Tashlikh: neither the sparse Hebrew face
+nor the Latin face can cover that whole grapheme. The regular/bold full builds
+are pinned to notofonts/hebrew commit `0ab72f4c8461d37281c2f23c1f63c593f2587729`.
+[Noto Hebrew builds](https://notofonts.github.io/hebrew/)
+
+Public presentation styles accept `direction: 'auto' | 'ltr' | 'rtl'`, defaulting
+to auto. Font configuration accepts ordered `fallbackFamilies`. Schema authors
+can persist direction separately and map it to a presentation; HTML import does
+not yet persist arbitrary `lang`/`dir` attributes. The input proxy and DOM text
+views receive the matching direction and registered font stack.
+
+Remaining limitations: emergency intra-word wrapping with line-edge reshaping,
+script-specific italic faces, arbitrary cross-font combining clusters when no
+single configured face covers them, vertical writing, CJK typography and IME/device
+validation. The script guard rejects CJK rather than drawing missing glyphs.
+Mixed-run word-navigation conventions need further comparison with native editors.
 
 The architectural judge reviewed commit `fddf2b0`. The follow-up fixes RTL
 horizontal movement across soft wraps, coalesces reordered same-font glyphs into
@@ -53,7 +72,7 @@ than whether it appears in `package.json`. Gate it on the official conformance
 fixtures before enabling mixed-direction input. Preserve the current compact LTR
 path where its invariants actually hold.
 
-## What currently prevents this
+## Original integration audit (before this implementation)
 
 These are findings from repository source, independent of the external references:
 

@@ -45,6 +45,7 @@ async function createNativeReader(face: string) {
       encoder.encode(text.slice(0, from)).length,
       encoder.encode(text.slice(0, to)).length,
       Number(rtl),
+      0,
     );
 
     expect(ptr).not.toBe(0);
@@ -73,8 +74,9 @@ test('Arabic retains joining context when a style boundary splits a word', async
   const whole = readGlyphs(text, 0, text.length, true);
   const contextual = readGlyphs(text, 1, 2, true);
   const isolated = readGlyphs('ب', 0, 1, true);
-  expect(contextual.words[3]).toBe(whole.words[8]);
-  expect(contextual.words[3]).not.toBe(isolated.words[3]);
-  expect(contextual.words[3]).not.toBe(0);
+  expect(contextual.words[3] & 0xffff).toBe(whole.words[8] & 0xffff);
+  expect(contextual.words[3] & 0xffff).not.toBe(isolated.words[3] & 0xffff);
+  expect(contextual.words[3] & 0xffff).not.toBe(0);
+  expect(whole.words[8] >>> 31).toBe(1);
   expect(contextual.words[4]).toBe(0);
 });

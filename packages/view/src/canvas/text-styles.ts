@@ -46,6 +46,7 @@ export function createTextStyles(
       baselineOffset: metrics(presentation).baselineOffset,
       font: Object.freeze(resolved.font),
       cssFamily: resolved.cssFamily,
+      direction: presentation.direction ?? 'auto',
     });
 
     styles.set(key, style);
