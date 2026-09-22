@@ -114,3 +114,21 @@ export function encodeReceipt(value: WriteReceipt) {
 export function decodeReceipt(bytes: Uint8Array): WriteReceipt {
   return receiptSchema.parse(JSON.parse(new TextDecoder().decode(bytes)));
 }
+
+const presenceSchema = z.object({
+  session: key,
+  epoch: z.number().int().positive(),
+  base: z.number().int().positive(),
+  sequence: z.number().int().positive(),
+  selection: selection.nullable(),
+});
+
+export type ProjectedPresence = z.infer<typeof presenceSchema>;
+
+export function encodePresence(value: ProjectedPresence) {
+  return new TextEncoder().encode(JSON.stringify(value));
+}
+
+export function decodePresence(bytes: Uint8Array): ProjectedPresence {
+  return presenceSchema.parse(JSON.parse(new TextDecoder().decode(bytes)));
+}

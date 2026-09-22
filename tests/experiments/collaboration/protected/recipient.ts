@@ -1,8 +1,16 @@
 import * as Automerge from '@automerge/automerge';
 import { validateTextRange } from '@gprose/model';
 
-import type { Edit } from '../protocol.js';
-import { bodySchema, decodeFrame, encodeProposal, type Body, type Frame } from './wire.js';
+import type { Edit, PresenceSelection } from '../protocol.js';
+import { readableSelection } from './selection.js';
+import {
+  bodySchema,
+  decodeFrame,
+  encodeProposal,
+  encodePresence,
+  type Body,
+  type Frame,
+} from './wire.js';
 
 /** A cooperative recipient. An application cannot erase copies a hostile recipient
  * made while it was authorized. Frames from an older session/sequence are ignored. */
@@ -14,6 +22,7 @@ export function createProtectedRecipient(session: string) {
   let latest: Frame | null = null;
   let destroyed = false;
   let operation = 0;
+  let presenceSequence = 0;
   const bodies = new Map<string, Body>();
   const docs = new Map<string, Automerge.Doc<{ body: Body }>>();
   const attachments = new Map<string, { key: string; body: string }>();
@@ -134,6 +143,26 @@ export function createProtectedRecipient(session: string) {
         base: sequence,
         operation: ++operation,
         edit: { ...edit, expected: body.text.slice(edit.from, edit.to) },
+      });
+    },
+    presence(selection: PresenceSelection | null) {
+      if (destroyed || status !== 'ready' || !latest) return null;
+
+      const texts = new Map(
+        [...bodies].flatMap(([key, body]) =>
+          body.text === null ? [] : [[key, body.text] as const],
+        ),
+      );
+
+      if (!readableSelection(selection, texts, latest.manifest))
+        throw new Error('Invalid presence selection');
+
+      return encodePresence({
+        session,
+        epoch,
+        base: sequence,
+        sequence: ++presenceSequence,
+        selection,
       });
     },
     get status() {

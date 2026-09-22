@@ -1,7 +1,8 @@
 import { validateTextRange } from '@gprose/model';
 
-import { rebase, sameEdit, type Edit } from '../protocol.js';
+import { rebase, sameEdit, mapSelection, type PresenceSelection, type Edit } from '../protocol.js';
 import { createProtectedRecipient } from './recipient.js';
+import { readableSelection } from './selection.js';
 import { decodeFrame, decodeProposal, type Frame } from './wire.js';
 
 type Draft = { id: number; edit: Edit };
@@ -20,6 +21,7 @@ export function createOptimisticRecipient(session: string) {
   let results: Result[] = [];
   let nextId = 0;
   let needsReset = false;
+  let selection: PresenceSelection | null = null;
 
   function texts() {
     return new Map(
@@ -38,7 +40,20 @@ export function createOptimisticRecipient(session: string) {
     values.set(edit.key, before.slice(0, edit.from) + edit.text + before.slice(edit.to));
   }
 
+  function visibleTexts() {
+    const values = texts();
+
+    for (const draft of queue) apply(values, draft.edit);
+
+    return values;
+  }
+
+  function clearSelectionIn(key: string) {
+    if (selection?.anchor.key === key || selection?.head.key === key) selection = null;
+  }
+
   function discard(key: string, reason: Extract<Result, { kind: 'discarded' }>['reason']) {
+    clearSelectionIn(key);
     queue = queue.filter((draft) => {
       if (draft.edit.key !== key) return true;
       results.push({ id: draft.id, kind: 'discarded', reason });
@@ -48,6 +63,8 @@ export function createOptimisticRecipient(session: string) {
   }
 
   function reset(frame?: Frame) {
+    selection = null;
+
     const accepted =
       flight &&
       frame?.writes.receipts.some(
@@ -97,6 +114,7 @@ export function createOptimisticRecipient(session: string) {
 
         if (!local || !remote) {
           conflicts.add(draft.edit.key);
+          clearSelectionIn(draft.edit.key);
           results.push({ id: draft.id, kind: 'discarded', reason: 'conflict' });
         } else {
           mapped.push({ id: draft.id, edit: local });
@@ -105,6 +123,7 @@ export function createOptimisticRecipient(session: string) {
       }
 
       queue = mapped;
+      selection = mapSelection(selection, over);
     }
 
     if (flight) {
@@ -133,11 +152,14 @@ export function createOptimisticRecipient(session: string) {
         valid.push(draft);
       } catch {
         invalid.add(draft.edit.key);
+        clearSelectionIn(draft.edit.key);
         results.push({ id: draft.id, kind: 'discarded', reason: 'precondition' });
       }
     }
 
     queue = valid;
+
+    if (!readableSelection(selection, visibleTexts(), frame.manifest)) selection = null;
   }
 
   return {
@@ -158,8 +180,54 @@ export function createOptimisticRecipient(session: string) {
       apply(values, edit);
       const id = ++nextId;
       queue.push({ id, edit });
+      selection = mapSelection(selection, edit);
+
+      if (!readableSelection(selection, values, snapshot.manifest)) selection = null;
 
       return id;
+    },
+    select(value: PresenceSelection | null) {
+      if (needsReset || recipient.status !== 'ready') throw new Error('Recipient not ready');
+
+      if (!readableSelection(value, visibleTexts(), recipient.snapshot().manifest))
+        throw new Error('Invalid selection');
+      selection = structuredClone(value);
+    },
+    get selection() {
+      return structuredClone(selection);
+    },
+    presence() {
+      if (needsReset || recipient.status !== 'ready') return null;
+      let confirmed = selection;
+
+      for (const { edit } of queue.toReversed()) {
+        confirmed = mapSelection(confirmed, {
+          key: edit.key,
+          from: edit.from,
+          to: edit.from + edit.text.length,
+          text: edit.expected,
+          expected: edit.text,
+        });
+      }
+
+      if (!readableSelection(confirmed, texts(), recipient.snapshot().manifest)) confirmed = null;
+
+      return recipient.presence(confirmed);
+    },
+    remoteSelections() {
+      if (needsReset || recipient.status !== 'ready') return [];
+      const snapshot = recipient.snapshot();
+      const values = visibleTexts();
+
+      return snapshot.presence.flatMap((peer) => {
+        let mapped: PresenceSelection | null = peer.selection;
+
+        for (const draft of queue) mapped = mapSelection(mapped, draft.edit);
+
+        return mapped && readableSelection(mapped, values, snapshot.manifest)
+          ? [{ session: peer.session, selection: mapped }]
+          : [];
+      });
     },
     request() {
       if (needsReset || recipient.status !== 'ready') return null;
@@ -226,6 +294,7 @@ export function createOptimisticRecipient(session: string) {
       queue = [];
       flight = null;
       results = [];
+      selection = null;
       recipient.destroy();
     },
   };

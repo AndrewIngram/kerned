@@ -27,6 +27,9 @@ that copy cannot alter retry identity. Only one request is in flight at once.
 Independent typing is not blocked, but network throughput still depends on round
 trips. There is no persistent offline queue.
 
+The follow-on [selection and presence experiment](./editor-optimistic-presence-experiment.md)
+adds local and remote text-selection mapping through the pending queue.
+
 ## Confirmation belongs to a document view
 
 A standalone accepted receipt cannot tell the client whether a received document
@@ -103,8 +106,9 @@ wire auditing, combining marks, emoji and Arabic text.
 This remains a correctness experiment. Text reads and draft validation currently
 copy the projected text map and replay the queue. Server view bases, receipts and
 journals have no persistence or compaction. There are no quotas or large-document
-performance claims. The client does not yet map a mounted selection, IME composition,
-comments, durable ranges, structural commands or collaborative undo. Those require
+performance claims. Headless text selection and presence mapping now have a
+follow-on proof; the client does not yet integrate a mounted selection, IME
+composition, comments, durable ranges, structural commands or collaborative undo. Those require
 integration work before exposing a production collaboration extension. Native
 Automerge partition identity still changes on access-epoch rotation; this milestone
 does not resolve that backend question.

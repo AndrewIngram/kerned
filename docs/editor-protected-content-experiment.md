@@ -90,8 +90,10 @@ cohorts/epochs would need their own correctness and reference-lifetime proof.
 Search runs against the recipient's received text only. Outlines are computed from
 visible projected nodes. Presence inside or crossing a protected region is omitted
 before encoding; a restricted sender also cannot publish a selection into it.
-Closing a session removes its presence. Canonical edits clear transient presence
-in this small experiment rather than claiming to rebase it.
+Closing a session removes its presence. The subsequent
+[selection and presence experiment](./editor-optimistic-presence-experiment.md)
+adds view-bound presence packets and mapping through canonical and pending text
+edits; access and structural epoch changes still clear transient presence.
 
 Comments require both a readable current range and readable, explicitly supplied
 `readKeys`. These are trusted disclosure scopes, retained on the authority and

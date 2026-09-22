@@ -2,8 +2,8 @@ import { indexTree, validateTextRange, type NodeIdentity, type Schema } from '@g
 import { applySteps, type Step } from '@gprose/transform';
 
 import { documentCoordinates } from '../coordinates.js';
-import { rebase, sameEdit, type Edit } from '../protocol.js';
-import type { Body, ProjectedProposal, WriteReceipt, Frame } from './wire.js';
+import { rebase, sameEdit, mapSelection, type PresenceSelection, type Edit } from '../protocol.js';
+import type { Body, ProjectedProposal, WriteReceipt, Frame, ProjectedPresence } from './wire.js';
 
 type Basis = { epoch: number; revision: number; texts: Map<string, string> };
 
@@ -13,7 +13,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
   schema: Schema<N>;
   nodes: readonly N[];
   epoch: () => number;
-  changed: (structural: boolean) => void;
+  changed: (structural: boolean, edits: readonly Edit[]) => void;
 }) {
   const { schema } = options;
   let nodes = options.nodes;
@@ -49,7 +49,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
 
     if (structural) edits = [];
     else edits.push(...changes.map((edit) => ({ edit, source })));
-    options.changed(structural);
+    options.changed(structural, changes);
   }
 
   return {
@@ -65,6 +65,39 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
       const receipts = new Map<number, { proposal: ProjectedProposal; receipt: WriteReceipt }>();
 
       return {
+        presence(
+          packet: ProjectedPresence,
+        ): { kind: 'rejected' } | { kind: 'accepted'; selection: PresenceSelection | null } {
+          const basis = views.get(packet.base);
+
+          if (
+            packet.session !== session ||
+            packet.epoch !== options.epoch() ||
+            basis?.epoch !== packet.epoch
+          )
+            return { kind: 'rejected' };
+          let selection = packet.selection;
+
+          if (selection) {
+            for (const point of [selection.anchor, selection.head]) {
+              const text = basis.texts.get(point.key);
+
+              if (text === undefined) return { kind: 'rejected' };
+
+              try {
+                validateTextRange(text, point.offset, point.offset);
+              } catch {
+                return { kind: 'rejected' };
+              }
+            }
+          }
+
+          for (const entry of edits.slice(basis.revision))
+            selection = mapSelection(selection, entry.edit);
+          selection = documentCoordinates(schema, nodes).normalizeSelection(selection);
+
+          return { kind: 'accepted', selection };
+        },
         delivery(
           base: number | null,
           epoch: number,

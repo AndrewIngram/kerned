@@ -3,13 +3,15 @@ import { projectDocument, type NodeAccess, type ProjectedNode } from '@gprose/st
 import type { Step } from '@gprose/transform';
 
 import { documentCoordinates } from '../coordinates.js';
-import type { PresenceSelection } from '../protocol.js';
+import { mapSelection, type PresenceSelection } from '../protocol.js';
 import { createProjectedDocument } from './document.js';
 import { createPartitions } from './partitions.js';
 import {
   bodySchema,
   encodeFrame,
   decodeProposal,
+  decodePresence,
+  type ProjectedPresence,
   encodeReceipt,
   type ProjectedProposal,
   type AttachmentResult,
@@ -52,10 +54,18 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
     schema,
     nodes: options.nodes,
     epoch: () => epoch,
-    changed(structural) {
-      presence.clear();
-
+    changed(structural, edits) {
       if (structural) rotate();
+      else
+        for (const [id, value] of presence) {
+          let selection: PresenceSelection | null = value;
+
+          for (const edit of edits) selection = mapSelection(selection, edit);
+          selection = documentCoordinates(schema, document.nodes).normalizeSelection(selection);
+
+          if (selection) presence.set(id, selection);
+          else presence.delete(id);
+        }
     },
   });
 
@@ -64,6 +74,7 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
   }
 
   function rotate() {
+    presence.clear();
     partitions.clear();
     epoch++;
   }
@@ -156,6 +167,8 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
         reset = true,
         closed = false;
 
+      let presenceSequence = 0;
+
       let sentBodies = new Map<string, string>();
       let sentHeads = new Map<string, string[]>();
       const requested = new Set<string>();
@@ -203,29 +216,29 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
           connected();
           requested.add(id);
         },
-        presence(selection: PresenceSelection | null) {
+        presence(bytes: Uint8Array) {
           connected();
+          let packet: ProjectedPresence;
 
-          if (selection === null) {
-            presence.delete(session);
-
-            return true;
+          try {
+            packet = decodePresence(bytes);
+          } catch {
+            return false;
           }
 
+          if (packet.session !== session || packet.sequence <= presenceSequence) return false;
+          const selection = packet.selection;
           const view = project(principal);
 
-          const normalized = documentCoordinates(schema, document.nodes).normalizeSelection(
-            selection,
-          );
-
-          if (
-            !normalized ||
-            normalized.anchor.offset !== selection.anchor.offset ||
-            normalized.head.offset !== selection.head.offset ||
-            !view.readableRange(selection.anchor.key, selection.head.key)
-          )
+          if (selection && !view.readableRange(selection.anchor.key, selection.head.key))
             return false;
-          presence.set(session, structuredClone(selection));
+          const mapped = writer.presence(packet);
+
+          if (mapped.kind === 'rejected') return false;
+          presenceSequence = packet.sequence;
+
+          if (mapped.selection) presence.set(session, mapped.selection);
+          else presence.delete(session);
 
           return true;
         },

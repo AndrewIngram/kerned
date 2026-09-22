@@ -5,7 +5,12 @@ import { schema, type Node } from './experiments/collaboration/fixtures.js';
 import { inspectWire } from './experiments/collaboration/protected/audit.js';
 import { createProtectedAuthority } from './experiments/collaboration/protected/authority.js';
 import { createProtectedRecipient } from './experiments/collaboration/protected/recipient.js';
-import { decodeFrame, encodeFrame } from './experiments/collaboration/protected/wire.js';
+import {
+  decodeFrame,
+  encodeFrame,
+  encodePresence,
+} from './experiments/collaboration/protected/wire.js';
+import type { PresenceSelection } from './experiments/collaboration/protocol.js';
 
 const secret = 'PRIVATE_TEXT_SENTINEL';
 
@@ -70,11 +75,25 @@ function fixture(mode: 'json' | 'automerge') {
     const frames: Uint8Array[] = [];
     const connection = host.connect(principal, (bytes) => frames.push(bytes.slice()));
     const recipient = createProtectedRecipient(connection.session);
+    let presenceSequence = 0;
 
     return {
       connection,
       recipient,
       frames,
+      presence(selection: PresenceSelection | null) {
+        const view = decodeFrame(frames[frames.length - 1]);
+
+        return connection.presence(
+          encodePresence({
+            session: connection.session,
+            epoch: view.epoch,
+            base: view.sequence,
+            sequence: ++presenceSequence,
+            selection,
+          }),
+        );
+      },
       flush() {
         const sent = connection.flush();
 
@@ -104,7 +123,8 @@ for (const mode of ['json', 'automerge'] as const) {
       owner = f.connect('owner'),
       reader = f.connect('reader');
 
-    owner.connection.presence(caret(hiddenKey, 1));
+    owner.flush();
+    owner.presence(caret(hiddenKey, 1));
     guest.connection.requestAttachment('attachment-private');
     guest.connection.requestAttachment('missing');
     guest.connection.requestAttachment('attachment-public');
@@ -255,16 +275,17 @@ for (const mode of ['json', 'automerge'] as const) {
       owner = f.connect('owner'),
       guest = f.connect('guest');
 
+    owner.flush();
     expect(
-      owner.connection.presence({
+      owner.presence({
         anchor: caret('before', 0).anchor,
         head: caret('after', 3).head,
       }),
     ).toBe(true);
     guest.flush();
     expect(decodeFrame(guest.frames[0]).presence).toEqual([]);
-    expect(guest.connection.presence(caret(hiddenKey, 1))).toBe(false);
-    expect(owner.connection.presence(caret('before', 2))).toBe(true);
+    expect(guest.presence(caret(hiddenKey, 1))).toBe(false);
+    expect(owner.presence(caret('before', 2))).toBe(true);
     guest.flush();
     expect(guest.recipient.snapshot().presence).toEqual([
       { session: owner.connection.session, selection: caret('before', 2) },
