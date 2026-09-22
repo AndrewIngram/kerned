@@ -65,6 +65,24 @@ test('mounted peers type, rebase delayed edits, render selections and guard unsu
     .toBeLessThan(1);
   expect(bob.host.querySelector('[data-protected-content]')?.textContent).toBe('Protected content');
   expect(bob.host.innerHTML).not.toContain('MARIGOLD');
+  const beforeMovement = peers.map((peer) => peer.editor.state.nodes);
+  aliceInput.focus();
+  await userEvent.keyboard('{ArrowRight}{ArrowRight}{Shift>}{ArrowRight}{/Shift}');
+  await expect
+    .poll(() => source.read(2, bob.editor.state).filter((value) => value.kind === 'text'))
+    .toMatchObject([{ from: 11, to: 12 }]);
+  await expect
+    .poll(() =>
+      Math.abs(
+        caret.getBoundingClientRect().left - (bob.view.coordsAt({ id: 2, offset: 12 })?.left ?? 0),
+      ),
+    )
+    .toBeLessThan(1);
+
+  for (const [index, peer] of peers.entries())
+    expect(peer.editor.state.nodes).toBe(beforeMovement[index]);
+  expect(room.getSnapshot().pending).toBe(0);
+
   room.toggleDelivery();
   alice.editor.select(textSelection(2, 0));
   aliceInput.focus();
@@ -91,4 +109,19 @@ test('mounted peers type, rebase delayed edits, render selections and guard unsu
   bob.editor.select(textSelection(2, 0));
   await userEvent.keyboard('!');
   await expect.poll(() => text(alice)).toBe(`!${before}`);
+  room.toggleDelivery();
+  alice.editor.select(textSelection(2, 0));
+  aliceInput.focus();
+  await userEvent.keyboard('XYZ');
+  alice.editor.select(textSelection(2, 1));
+  room.toggleDelivery();
+  await expect.poll(() => room.getSnapshot().pending).toBe(0);
+  await expect
+    .poll(() =>
+      Math.abs(
+        caret.getBoundingClientRect().left - (bob.view.coordsAt({ id: 2, offset: 1 })?.left ?? 0),
+      ),
+    )
+    .toBeLessThan(1);
+  expect(bob.view.status).toBe('ready');
 });

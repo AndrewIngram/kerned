@@ -7,7 +7,9 @@ not load the book samples.
 Alice and Bob each mount an independent editor. Type in either pane, select text,
 or pause delivery and type in both before resuming. Remote selections use canvas
 text decorations and DOM caret labels through the public view contribution API.
-The panes stack on narrow screens.
+The panes stack on narrow screens. Presence sends on selection changes, including
+keyboard and pointer movement with no document edits. Presence packets do not
+create document transactions, revisions or undo entries.
 
 ## Ownership
 
@@ -47,6 +49,8 @@ not corrupt the document. Enter cannot create a new block in this experiment.
 
 Pause suspends requests and presence delivery, while local edits remain immediate.
 Resume submits both outstanding heads before delivering their projected frames.
+It publishes presence again after confirmation, so carets inside newly accepted
+text become visible without waiting for another keystroke.
 Disjoint edits converge; overlapping replacements can discard an unconfirmed
 edit, with a visible conflict notice. This deliberately conservative conflict
 policy is unchanged from the headless proof. Each keystroke is an operation, so
@@ -54,7 +58,8 @@ concurrent typing at the exact same offset can interleave characters. Preserving
 whole typing runs at that position needs further protocol work.
 
 The binding expects fixed structure and permissions for its lifetime. A changed
-manifest closes the mounted editor and requires a fresh projection and editor;
+manifest, delivery gap or malformed packet closes the mounted editor and binding
+and requires a fresh projection and editor;
 it must never keep showing an old readable projection after permission revocation.
 The headless authority supports policy changes, but the demo has no policy editor.
 There is no persistence, authenticated network transport, reconnect UI, expiry of

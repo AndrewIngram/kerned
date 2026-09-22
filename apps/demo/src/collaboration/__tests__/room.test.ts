@@ -1,5 +1,6 @@
 import { textSelection, TextSelection } from '@gprose/state';
-import { expect, test } from 'vitest';
+import { decorations } from '@gprose/view';
+import { expect, test, onTestFinished as registerCleanup } from 'vitest';
 
 import { createCollaborationRoom } from '../room.js';
 
@@ -105,3 +106,74 @@ test('destroying a room cancels scheduled delivery and permits a fresh room', as
   expect(next.text(next.alice)).not.toContain('Discard');
   next.room.destroy();
 });
+
+test('confirmation publishes a caret inside previously unconfirmed inserted text without another interaction', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.room.destroy());
+  await Promise.resolve();
+  f.room.toggleDelivery();
+  f.insert(f.alice, 0, 'XYZ');
+  f.alice.editor.select(textSelection(2, 1));
+  f.room.toggleDelivery();
+  await Promise.resolve();
+  const provider = decorations.read(f.bob.editor).find((value) => value.name === 'remotePresence');
+
+  if (!provider) throw new Error('Missing presence contribution');
+  const source = provider.create(f.bob.editor);
+  onTestFinished(() => source.destroy?.());
+  expect(
+    source.read(2, f.bob.editor.state).filter((value) => value.kind === 'widget'),
+  ).toMatchObject([{ at: { kind: 'text', offset: 1 } }]);
+  expect(f.room.getSnapshot().pending).toBe(0);
+});
+
+test.each([0, 1])(
+  'client %i publishes selection-only updates without document transactions',
+  async (senderIndex) => {
+    const f = fixture();
+    registerCleanup(() => f.room.destroy());
+    await Promise.resolve();
+    const peers = [f.alice, f.bob];
+    const before = peers.map((peer) => peer.editor.state);
+    let edits = 0;
+
+    for (const peer of peers)
+      peer.editor.on('content', () => {
+        edits++;
+      });
+
+    const sender = peers[senderIndex];
+    const receiver = peers[1 - senderIndex];
+
+    const provider = decorations
+      .read(receiver.editor)
+      .find((value) => value.name === 'remotePresence');
+
+    if (!provider) throw new Error('Missing presence contribution');
+    const source = provider.create(receiver.editor);
+    registerCleanup(() => source.destroy?.());
+    sender.editor.select(textSelection(2, 3, 8));
+    await Promise.resolve();
+    expect(
+      source.read(2, receiver.editor.state).filter((value) => value.kind === 'text'),
+    ).toMatchObject([{ from: 3, to: 8 }]);
+    sender.editor.select(textSelection(2, 12));
+    await Promise.resolve();
+    expect(source.read(2, receiver.editor.state).filter((value) => value.kind === 'text')).toEqual(
+      [],
+    );
+    expect(
+      source.read(2, receiver.editor.state).filter((value) => value.kind === 'widget'),
+    ).toMatchObject([{ at: { kind: 'text', offset: 12 } }]);
+
+    expect(edits).toBe(0);
+    expect(f.room.getSnapshot().pending).toBe(0);
+
+    for (const [index, peer] of peers.entries()) {
+      expect(peer.editor.state.nodes).toBe(before[index].nodes);
+      expect(peer.editor.state.revision).toBe(before[index].revision);
+    }
+  },
+);

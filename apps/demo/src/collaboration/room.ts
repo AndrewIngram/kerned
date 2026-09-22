@@ -117,6 +117,18 @@ export function createCollaborationRoom() {
     for (const listener of listeners) listener();
   }
 
+  function deliver() {
+    for (const client of clients) client.connection.flush();
+
+    for (const client of clients) {
+      for (const bytes of client.frames.splice(0)) client.replica.receive(bytes);
+
+      if (client.replica.takeResults().some((result) => result.kind === 'discarded'))
+        message =
+          'Overlapping edits conflicted. The confirmed version is shown; an unconfirmed edit was discarded.';
+    }
+  }
+
   function pump() {
     scheduled = false;
 
@@ -138,21 +150,17 @@ export function createCollaborationRoom() {
         if (bytes) client.connection.submit(bytes);
       }
 
+      // Reconcile acknowledgements first: a caret inside a newly confirmed
+      // insertion can now be sent in confirmed document coordinates.
+      deliver();
+
       for (const client of clients) {
         const bytes = client.replica.presence();
 
         if (bytes) client.connection.presence(bytes);
       }
 
-      for (const client of clients) client.connection.flush();
-
-      for (const client of clients) {
-        for (const bytes of client.frames.splice(0)) client.replica.receive(bytes);
-
-        if (client.replica.takeResults().some((result) => result.kind === 'discarded'))
-          message =
-            'Overlapping edits conflicted. The confirmed version is shown; an unconfirmed edit was discarded.';
-      }
+      deliver();
     } finally {
       pumping = false;
     }

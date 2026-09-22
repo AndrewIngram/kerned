@@ -68,6 +68,7 @@ function fixture(protectedBlock = false) {
     replica,
     editor,
     connection,
+    frames,
     deliver,
     destroy(this: void) {
       replica.destroy();
@@ -146,4 +147,55 @@ test('a local range crossing an opaque block is kept local and never published a
   expect(f.editor.state.selection).toEqual(
     new TextSelection({ id: 1, offset: 0 }, { id: 3, offset: 2 }),
   );
+});
+
+test('a delivery gap closes the editor before another local change can publish', ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(f.destroy);
+  f.authority.apply([{ kind: 'replaceText', id: 1, from: 0, to: 0, text: 'A' }]);
+  f.connection.flush();
+  f.frames.splice(0);
+  f.authority.apply([{ kind: 'replaceText', id: 1, from: 0, to: 0, text: 'B' }]);
+  expect(f.deliver).toThrow(/Delivery gap/);
+  expect(f.editor.isDestroyed).toBe(true);
+  expect(() =>
+    f.editor.dispatch({
+      origin: 'local',
+      history: 'separate',
+      time: 0,
+      baseRevision: 0,
+      steps: [{ kind: 'replaceText', id: 1, from: 0, to: 0, text: 'lost' }],
+    }),
+  ).toThrow(/destroyed/i);
+  expect(f.replica.request()).toBeNull();
+  expect(f.replica.presence()).toBeNull();
+});
+
+test('malformed delivery closes the binding while duplicate frames remain harmless', ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(f.destroy);
+  f.authority.apply([{ kind: 'replaceText', id: 1, from: 0, to: 0, text: 'A' }]);
+  f.connection.flush();
+  const bytes = f.frames[0];
+  expect(f.replica.receive(bytes)).toBe(true);
+  expect(f.replica.receive(bytes)).toBe(false);
+  expect(f.editor.isDestroyed).toBe(false);
+  expect(() => f.replica.receive(new TextEncoder().encode('invalid'))).toThrow(SyntaxError);
+  expect(f.editor.isDestroyed).toBe(true);
+  expect(f.replica.request()).toBeNull();
+});
+
+test('editor destruction releases the binding and rejects further delivery', ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(f.destroy);
+  f.editor.destroy();
+  expect(f.replica.request()).toBeNull();
+  expect(f.replica.presence()).toBeNull();
+  expect(() => f.replica.receive(new Uint8Array())).toThrow(/destroyed/i);
 });

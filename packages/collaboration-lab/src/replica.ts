@@ -22,11 +22,14 @@ export function createTextReplica<N extends NodeIdentity>(session: string) {
   let detach: (() => void) | null = null;
   let destroyed = false;
   let manifest = '';
-  let failClosed: (() => void) | null = null;
+  let closeEditor: (() => void) | null = null;
+  let installed = false;
 
   const field = createStateField<N, null>({
     create: () => null,
     update(value, event) {
+      if (destroyed || !refresh) throw new Error('Replica is not attached');
+
       if (applying || event.kind === 'selection' || event.kind === 'permissions') return value;
 
       if (
@@ -46,6 +49,9 @@ export function createTextReplica<N extends NodeIdentity>(session: string) {
     name: 'collaborativeText',
     options: {},
     setup(_options, _context: ExtensionContext<N>) {
+      if (installed) throw new Error('Create one replica per editor');
+      installed = true;
+
       return { fields: [field] };
     },
   });
@@ -56,6 +62,20 @@ export function createTextReplica<N extends NodeIdentity>(session: string) {
 
   function active() {
     if (destroyed) throw new Error('Replica destroyed');
+  }
+
+  function close() {
+    if (destroyed) return;
+    destroyed = true;
+    detach?.();
+    detach = null;
+    refresh = null;
+    const destroyEditor = closeEditor;
+    closeEditor = null;
+    client.destroy();
+    listeners.clear();
+    access.clear();
+    destroyEditor?.();
   }
 
   const permissions: AccessPolicy<N> = {
@@ -99,7 +119,7 @@ export function createTextReplica<N extends NodeIdentity>(session: string) {
 
       if (refresh) throw new Error('Replica already bound');
       field.read(editor.state);
-      failClosed = () => editor.destroy();
+      closeEditor = () => editor.destroy();
 
       function selection() {
         const value = editor.state.selection;
@@ -195,29 +215,40 @@ export function createTextReplica<N extends NodeIdentity>(session: string) {
         changed();
       });
 
-      detach = unsubscribe;
-
-      return () => {
+      const unsubscribeDestroy = editor.on('destroy', close);
+      detach = () => {
         unsubscribe();
-        refresh = null;
-        detach = null;
+        unsubscribeDestroy();
       };
+
+      return close;
     },
     receive(bytes: Uint8Array) {
       active();
-      const received = client.receive(bytes);
 
-      if (received) {
-        if (refresh && JSON.stringify(client.snapshot().manifest) !== manifest) {
-          failClosed?.();
-          throw new Error('Projection changed. Reconnect with a fresh editor.');
+      try {
+        const received = client.receive(bytes);
+
+        if (client.status === 'resync') {
+          close();
+          throw new Error('Delivery gap. Reconnect with a fresh editor.');
         }
 
-        refresh?.();
-        changed();
-      }
+        if (received) {
+          if (refresh && JSON.stringify(client.snapshot().manifest) !== manifest) {
+            close();
+            throw new Error('Projection changed. Reconnect with a fresh editor.');
+          }
 
-      return received;
+          refresh?.();
+          changed();
+        }
+
+        return received;
+      } catch (error) {
+        close();
+        throw error;
+      }
     },
     request: () => client.request(),
     presence: () => client.presence(),
@@ -233,16 +264,7 @@ export function createTextReplica<N extends NodeIdentity>(session: string) {
         listeners.delete(listener);
       };
     },
-    destroy() {
-      if (destroyed) return;
-      destroyed = true;
-      detach?.();
-      refresh = null;
-      detach = null;
-      client.destroy();
-      listeners.clear();
-      access.clear();
-    },
+    destroy: close,
   };
 }
 
