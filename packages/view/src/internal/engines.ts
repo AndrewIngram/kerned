@@ -48,6 +48,12 @@ export interface LaidOut {
   hit(x: number, y: number): Position;
   geometry(anchor: number, focus: number, upstream: boolean): Geometry;
   move(index: number, upstream: boolean, direction: Direction): Position;
+  moveWord?(
+    index: number,
+    upstream: boolean,
+    direction: 'left' | 'right',
+    platform: 'mac' | 'other',
+  ): { index: number; upstream: boolean } | undefined;
   directionAt?(index: number, upstream: boolean): 'ltr' | 'rtl';
   dispose(): void;
 }

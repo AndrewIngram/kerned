@@ -24,6 +24,7 @@ export function analyzeBidi(text: string, direction: TextDirection = 'auto') {
   const { levels, paragraphs } = getEmbeddingLevels(points, direction);
 
   return {
+    text,
     points,
     offsets,
     levels,

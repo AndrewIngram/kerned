@@ -2,7 +2,7 @@ import type { Geometry, Line, Rect } from '../engines.js';
 import type { Direction, Position } from '../layout-types.js';
 
 /** Separate logical and visual indexes. The builder is discarded at publication. */
-export function createBidiCarets(lines: Line[], lineHeight: number, rtl: boolean) {
+export function createBidiCarets(lines: Line[], lineHeight: number, rtl: boolean, text: string) {
   const pending: { index: number; x: number; upstream: boolean; row: number }[] = [];
   const spans: { from: number; to: number; left: number; right: number; row: number }[] = [];
   let row = -1;
@@ -25,7 +25,7 @@ export function createBidiCarets(lines: Line[], lineHeight: number, rtl: boolean
       spans.push({ from, to, left: Math.min(x1, x2), right: Math.max(x1, x2), row });
     },
     finish() {
-      snapshot = finishCarets(pending, spans, lines, lineHeight, rtl);
+      snapshot = finishCarets(pending, spans, lines, lineHeight, rtl, text);
       pending.length = 0;
       spans.length = 0;
     },
@@ -33,6 +33,12 @@ export function createBidiCarets(lines: Line[], lineHeight: number, rtl: boolean
     hit: (x: number, y: number) => current().hit(x, y),
     geometry: (anchor: number, focus: number, upstream: boolean) =>
       current().geometry(anchor, focus, upstream),
+    moveWord: (
+      index: number,
+      upstream: boolean,
+      direction: 'left' | 'right',
+      platform: 'mac' | 'other',
+    ) => current().moveWord(index, upstream, direction, platform),
     move: (index: number, upstream: boolean, direction: Direction) =>
       current().move(index, upstream, direction),
   };
@@ -44,6 +50,7 @@ function finishCarets(
   lines: Line[],
   lineHeight: number,
   rtl: boolean,
+  text: string,
 ) {
   pending.sort(
     (a, b) =>
@@ -131,16 +138,98 @@ function finishCarets(
     return lo === end ? end - 1 : lo > first && x - xs[lo - 1] < xs[lo] - x ? lo - 1 : lo;
   }
 
+  // Word movement follows physical edges, retaining each edge's model affinity.
+  // Three compact indexes cover macOS word ends and Windows/Linux word starts.
+  const wordStarts: number[] = [],
+    wordLeft: number[] = [],
+    wordRight: number[] = [];
+
+  for (const word of new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text)) {
+    if (!word.isWordLike) continue;
+    const start = locate(word.index, false);
+    const end = locate(word.index + word.segment.length, true);
+    wordStarts.push(start);
+    wordLeft.push(xs[start] <= xs[end] ? start : end);
+    wordRight.push(xs[start] <= xs[end] ? end : start);
+  }
+
+  const ordered = (values: number[]) =>
+    Uint32Array.from(values.toSorted((a, b) => rows[a] - rows[b] || xs[a] - xs[b]));
+
+  const wordIndexes = {
+    starts: ordered(wordStarts),
+    left: ordered(wordLeft),
+    right: ordered(wordRight),
+  };
+
+  const wordBytes =
+    wordIndexes.starts.byteLength + wordIndexes.left.byteLength + wordIndexes.right.byteLength;
+
+  function wordEdge(
+    index: number,
+    upstream: boolean,
+    direction: 'left' | 'right',
+    platform: 'mac' | 'other',
+  ): Position {
+    const ordinal = locate(index, upstream),
+      row = rows[ordinal],
+      x = xs[ordinal];
+
+    const values = platform === 'other' ? wordIndexes.starts : wordIndexes[direction];
+    const step = direction === 'left' ? -1 : 1;
+
+    function lowerBound(targetRow: number, targetX: number) {
+      let low = 0,
+        high = values.length;
+
+      while (low < high) {
+        const mid = (low + high) >>> 1,
+          candidate = values[mid];
+
+        if (
+          rows[candidate] < targetRow ||
+          (rows[candidate] === targetRow && xs[candidate] < targetX)
+        )
+          low = mid + 1;
+        else high = mid;
+      }
+
+      return low;
+    }
+
+    let next = lowerBound(row, x);
+
+    if (step < 0) next--;
+    else while (next < values.length && rows[values[next]] === row && xs[values[next]] <= x) next++;
+
+    if (next >= 0 && next < values.length && rows[values[next]] === row)
+      return position(values[next]);
+    const rowStep = rtl ? -step : step;
+    const adjacent = rowStep > 0 ? lowerBound(row + 1, -Infinity) : lowerBound(row, -Infinity) - 1;
+
+    if (adjacent >= 0 && adjacent < values.length) {
+      const nextRow = rows[values[adjacent]];
+      const edge = step < 0 ? lowerBound(nextRow, Infinity) - 1 : lowerBound(nextRow, -Infinity);
+
+      return position(values[edge]);
+    }
+
+    const lastRow = rowStep > 0 ? lines.length - 1 : 0;
+
+    return position(step < 0 ? rowStarts[lastRow] : rowStarts[lastRow + 1] - 1);
+  }
+
   return {
     storage: () => ({
-      caretBufferBytes: bytes,
-      caretUsedBytes: bytes,
+      caretBufferBytes: bytes + wordBytes,
+      caretUsedBytes: bytes + wordBytes,
       caretUnusedBytes: 0,
       caretCapacity: offsets.length,
       caretCount: offsets.length,
       lineCapacity: lines.length,
       lineCount: lines.length,
     }),
+    moveWord: wordEdge,
     hit: (x: number, y: number) => position(closest(x, Math.floor(y / lineHeight))),
     geometry(anchor: number, focus: number, upstream: boolean): Geometry {
       const ordinal = locate(focus, upstream),

@@ -29,6 +29,12 @@ import { emojiSequence, supportsLayoutText } from './owned-text-support.js';
 
 export type OwnedStorage = 'objects' | 'packed' | 'carets' | 'shaping';
 
+type DirectionalReader = (
+  spans: Span[],
+  from?: number,
+  to?: number,
+) => { runs: ShapingRun[]; breaks: Uint32Array };
+
 type PreparedParagraph = {
   bidi?: BidiAnalysis;
   paragraphGlyphs: ParagraphGlyphs | PackedShaping;
@@ -99,6 +105,7 @@ export async function createOwnedEngine(
 
   const stats = {
     glyphCalls: 0,
+    paragraphUploads: 0,
     cacheHits: 0,
     paragraphs: 0,
     lines: 0,
@@ -173,86 +180,100 @@ export async function createOwnedEngine(
     return { runs, breaks };
   }
 
-  function resolveDirectionalRuns(
+  // Scope the upload and paragraph-wide indexes to a single preparation. Inline
+  // segments borrow the same context; width-only reflow never opens this scope.
+  function withDirectionalParagraph<T>(
     text: string,
-    spans: Span[],
     bidi: BidiAnalysis,
     faces: TextFaces,
     size: number,
-    from = 0,
-    to = text.length,
-  ) {
-    const segments = directionalRuns(
-      text,
-      spans,
-      bidi,
-      {
-        marked: (marks) => markedFont(faces, marks),
-        covering: nativeFonts.covering,
-        emoji: nativeFonts.emoji,
-      },
-      from,
-      to,
-    );
-
+    consume: (read: DirectionalReader) => T,
+  ): T {
     const bytes = new TextEncoder().encode(text);
     const offsets = utf8Offsets(text);
     const ptr = allocate(bytes);
-    const unsafe = new Set<number>();
-    const runs: ShapingRun[] = [];
-    let breaks: Uint32Array;
+    stats.paragraphUploads++;
 
     try {
       const breakPtr = call('line_breaks', ptr, bytes.length);
 
       if (!breakPtr) throw new Error('Line breaking failed');
-      breaks = new Uint32Array(
+
+      const breaks = new Uint32Array(
         currentRuntime().memory.buffer,
         breakPtr,
         call('result_words'),
       ).slice();
 
-      for (const segment of segments) {
-        const result = call(
-          'shape_slice',
-          segment.font,
-          ptr,
-          bytes.length,
-          offsets[segment.start],
-          offsets[segment.end],
-          segment.level & 1,
-          segment.script,
+      return consume((spans, from = 0, to = text.length) => {
+        const segments = directionalRuns(
+          text,
+          spans,
+          bidi,
+          {
+            marked: (marks) => markedFont(faces, marks),
+            covering: nativeFonts.covering,
+            emoji: nativeFonts.emoji,
+          },
+          from,
+          to,
         );
 
-        if (!result) throw new Error('Directional shaping failed');
+        const unsafe = new Set<number>();
+        const runs: ShapingRun[] = [];
 
-        const words = new Uint32Array(
-          currentRuntime().memory.buffer,
-          result,
-          call('result_words'),
-        ).slice();
+        for (const segment of segments) {
+          const result = call(
+            'shape_slice',
+            segment.font,
+            ptr,
+            bytes.length,
+            offsets[segment.start],
+            offsets[segment.end],
+            segment.level & 1,
+            segment.script,
+          );
 
-        for (let i = 0; i < words[0]; i++)
-          if (words[3 + i * 5] & 0x80000000) unsafe.add(segment.start + words[4 + i * 5]);
-        runs.push({
-          words,
-          floats: new Float32Array(words.buffer),
-          scale: size / words[2],
-          font: segment.font,
-          offset: segment.start - from,
-        });
-        stats.glyphCalls++;
-      }
+          if (!result) throw new Error('Directional shaping failed');
+
+          const words = new Uint32Array(
+            currentRuntime().memory.buffer,
+            result,
+            call('result_words'),
+          ).slice();
+
+          for (let i = 0; i < words[0]; i++)
+            if (words[3 + i * 5] & 0x80000000) unsafe.add(segment.start + words[4 + i * 5]);
+          runs.push({
+            words,
+            floats: new Float32Array(words.buffer),
+            scale: size / words[2],
+            font: segment.font,
+            offset: segment.start - from,
+          });
+          stats.glyphCalls++;
+        }
+
+        let low = 0,
+          high = breaks.length;
+
+        while (low < high) {
+          const mid = (low + high) >>> 1;
+
+          if (breaks[mid] <= from) low = mid + 1;
+          else high = mid;
+        }
+
+        const selected: number[] = [];
+
+        for (let i = low; i < breaks.length && breaks[i] <= to; i++)
+          if (!unsafe.has(breaks[i])) selected.push(breaks[i] - from);
+
+        return { runs, breaks: Uint32Array.from(selected) };
+      });
     } finally {
       call('release_text', ptr, bytes.length);
     }
-
-    return {
-      runs,
-      breaks: breaks
-        .filter((offset) => offset > from && offset <= to && !unsafe.has(offset))
-        .map((offset) => offset - from),
-    };
   }
 
   function resolveGlyphs(text: string, id: number, size: number) {
@@ -324,8 +345,11 @@ export async function createOwnedEngine(
 
     if (paragraphGlyphs) stats.cacheHits++;
     else if (bidi) {
-      const result = resolveDirectionalRuns(text, spans, bidi, faces, size);
-      paragraphGlyphs = decodeShaping(text, result.runs, result.breaks);
+      paragraphGlyphs = withDirectionalParagraph(text, bidi, faces, size, (read) => {
+        const result = read(spans);
+
+        return decodeShaping(text, result.runs, result.breaks);
+      });
     } else if (storage === 'shaping') {
       const base = resolveGlyphRuns(text, faces.normal, size);
 
@@ -487,6 +511,7 @@ export async function createOwnedEngine(
       geometry: document.geometry,
       move: document.move,
       directionAt: document.directionAt,
+      moveWord: document.moveWord,
       draw(canvas, x, y, textPaint = paint) {
         assertActive();
 
@@ -653,17 +678,12 @@ export async function createOwnedEngine(
             ? analyzeBidi(input.text, input.direction)
             : undefined);
 
-        const paragraphGlyphs =
-          previous?.paragraphGlyphs ??
+        const composeInline = (read: DirectionalReader | undefined) =>
           layoutInlineParagraph(input.text, input.spans, input.atoms, (text, marks, from) => {
-            if (!bidi) return resolveGlyphs(text, markedFont(faces, marks), input.size);
+            if (!read) return resolveGlyphs(text, markedFont(faces, marks), input.size);
 
-            const result = resolveDirectionalRuns(
-              input.text,
+            const result = read(
               [{ start: from, end: from + text.length, ...marks }],
-              bidi,
-              faces,
-              input.size,
               from,
               from + text.length,
             );
@@ -688,6 +708,12 @@ export async function createOwnedEngine(
 
             return { glyphs, breaks: [...result.breaks] };
           });
+
+        const paragraphGlyphs =
+          previous?.paragraphGlyphs ??
+          (bidi
+            ? withDirectionalParagraph(input.text, bidi, faces, input.size, composeInline)
+            : composeInline(undefined));
 
         if (!('clusters' in paragraphGlyphs)) throw new Error('Inline cache kind mismatch');
         const packed = previous?.packed ?? packGlyphs(paragraphGlyphs);

@@ -13,6 +13,12 @@ export type NavigationLayout = {
     bottom: number;
     direction?: 'ltr' | 'rtl';
   }[];
+  moveWord?(
+    index: number,
+    upstream: boolean,
+    direction: 'left' | 'right',
+    platform: 'mac' | 'other',
+  ): { index: number; upstream: boolean } | undefined;
   directionAt?(index: number, upstream: boolean): 'ltr' | 'rtl';
   hit(this: void, x: number, y: number): { index: number; upstream: boolean };
   geometry(anchor: number, focus: number, upstream: boolean): { caret: readonly number[] };
@@ -107,14 +113,35 @@ export function createTextNavigation() {
         head = { id: target.id, offset: back ? 0 : target.text.length };
         desiredX = undefined;
       } else if (word && (direction === 'left' || direction === 'right')) {
-        const runBack =
-          back !== (layout(block.id).directionAt?.(head.offset, selection.upstream) === 'rtl');
+        const current = layout(block.id);
+        const visual = current.moveWord?.(head.offset, selection.upstream, direction, platform);
 
-        if (runBack && head.offset === 0 && at > 0)
-          head = { id: blocks[at - 1].id, offset: blocks[at - 1].text.length };
-        else if (!runBack && head.offset === block.text.length && at + 1 < blocks.length)
-          head = { id: blocks[at + 1].id, offset: 0 };
-        else head.offset = wordBoundary(block.text, head.offset, runBack, platform);
+        if (visual) {
+          const before = current.geometry(head.offset, head.offset, selection.upstream).caret;
+          const after = current.geometry(visual.index, visual.index, visual.upstream).caret;
+          head = { id: block.id, offset: visual.index };
+          upstream = visual.upstream;
+
+          if (before[0] === after[0] && before[1] === after[1]) {
+            const paragraphBack = back !== (current.lines[0]?.direction === 'rtl');
+            const adjacent = blocks[at + (paragraphBack ? -1 : 1)];
+
+            if (adjacent) {
+              head = { id: adjacent.id, offset: paragraphBack ? adjacent.text.length : 0 };
+              upstream = false;
+            }
+          }
+        } else {
+          const runBack =
+            back !== (layout(block.id).directionAt?.(head.offset, selection.upstream) === 'rtl');
+
+          if (runBack && head.offset === 0 && at > 0)
+            head = { id: blocks[at - 1].id, offset: blocks[at - 1].text.length };
+          else if (!runBack && head.offset === block.text.length && at + 1 < blocks.length)
+            head = { id: blocks[at + 1].id, offset: 0 };
+          else head.offset = wordBoundary(block.text, head.offset, runBack, platform);
+        }
+
         desiredX = undefined;
       } else if (word && (direction === 'up' || direction === 'down')) {
         const index = back
@@ -144,6 +171,7 @@ export function createTextNavigation() {
           const anchorAt = blocks.findIndex((b) => b.id === selection.anchor.id),
             forward = anchorAt < at || (anchorAt === at && selection.anchor.offset <= head.offset);
 
+          const anchorUpstream = !forward;
           let collapseBack = back !== (layout(block.id).lines[0]?.direction === 'rtl');
 
           if (anchorAt === at) {
@@ -152,7 +180,7 @@ export function createTextNavigation() {
             const anchorCaret = current.geometry(
               selection.anchor.offset,
               selection.anchor.offset,
-              false,
+              anchorUpstream,
             ).caret;
 
             const headCaret = current.geometry(
@@ -174,6 +202,7 @@ export function createTextNavigation() {
             : forward
               ? selection.head
               : selection.anchor;
+          upstream = head === selection.head ? selection.upstream : anchorUpstream;
           desiredX = undefined;
         } else if (vertical) {
           const current = layout(block.id),

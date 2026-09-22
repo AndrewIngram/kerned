@@ -51,7 +51,29 @@ export function directionalRuns(
   }
 
   const runs: Run[] = [];
-  let scalar = 0;
+
+  const events = spans
+    .flatMap((span) => [
+      { at: span.start, bold: Number(span.bold), italic: Number(span.italic) },
+      { at: span.end, bold: -Number(span.bold), italic: -Number(span.italic) },
+    ])
+    .toSorted((a, b) => a.at - b.at);
+
+  let event = 0,
+    bold = 0,
+    italic = 0;
+
+  let low = 0,
+    high = bidi.levels.length;
+
+  while (low < high) {
+    const mid = (low + high) >>> 1;
+
+    if (bidi.offsets[mid] <= from) low = mid + 1;
+    else high = mid;
+  }
+
+  let scalar = Math.max(0, low - 1);
 
   for (let i = 0; i < stops.length - 1; i++) {
     const start = stops[i],
@@ -59,14 +81,20 @@ export function directionalRuns(
 
     while (bidi.offsets[scalar + 1] <= start && scalar + 1 < bidi.levels.length) scalar++;
     const value = text.slice(start, end);
-    const active = spans.filter((span) => span.start <= start && span.end > start);
+
+    while (event < events.length && events[event].at <= start) {
+      bold += events[event].bold;
+      italic += events[event].italic;
+      event++;
+    }
+
     const emoji = emojiSequence.test(value) && !value.includes('\ufe0e');
 
     const font = emoji
       ? fonts.emoji
       : fonts.marked({
-          bold: active.some((span) => span.bold),
-          italic: active.some((span) => span.italic),
+          bold: bold > 0,
+          italic: italic > 0,
         });
 
     const run = { start, end, level: bidi.levels[scalar] ?? 0, script: emoji ? 0 : tags[i], font };

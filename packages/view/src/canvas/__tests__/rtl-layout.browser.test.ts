@@ -190,3 +190,128 @@ test.each(['hayy-ibn-yaqzan', 'tashlikh'])('lays out every paragraph of %s', asy
     owner.destroy();
   }
 });
+
+test('mixed-direction word arrows progress visually without bouncing at run boundaries', () => {
+  const owner = resources.read().layout.createLayout();
+
+  try {
+    for (const text of ['ab אב cd', 'אב ab גד']) {
+      const layout = owner.layout({ id: 20, text, spans: [], size: 24, width: 300 });
+
+      for (const platform of ['mac', 'other'] as const) {
+        for (const key of ['ArrowLeft', 'ArrowRight']) {
+          const navigation = createTextNavigation();
+          let selection = new TextSelection({ id: 20, offset: 3 });
+          let x = layout.geometry(3, 3, false).caret[0];
+
+          for (let i = 0; i < 6; i++) {
+            const next = navigation.move({
+              event: {
+                key,
+                shiftKey: true,
+                altKey: platform === 'mac',
+                ctrlKey: platform === 'other',
+                metaKey: false,
+              },
+              selection,
+              blocks: [{ id: 20, text, top: 0, height: 40 }],
+              layout: () => layout,
+              viewportHeight: 300,
+              platform,
+            });
+
+            if (!next) throw new Error('Expected word movement');
+            const caret = layout.geometry(next.head.offset, next.head.offset, next.upstream).caret;
+
+            expect((caret[0] - x) * (key === 'ArrowLeft' ? -1 : 1)).toBeGreaterThanOrEqual(0);
+            expect(next.anchor).toEqual(selection.anchor);
+            selection = next;
+            x = caret[0];
+          }
+
+          const edge = layout.move(
+            selection.head.offset,
+            selection.upstream,
+            key === 'ArrowLeft' ? 'home' : 'end',
+          );
+
+          expect(x).toBe(layout.geometry(edge.index, edge.index, edge.upstream).caret[0]);
+        }
+      }
+    }
+  } finally {
+    owner.destroy();
+  }
+});
+
+test('selection collapse preserves the visible side of a bidi boundary', () => {
+  const owner = resources.read().layout.createLayout();
+
+  try {
+    const text = 'ab אב cd';
+    const layout = owner.layout({ id: 21, text, spans: [], size: 24, width: 300 });
+
+    for (const selection of [
+      new TextSelection({ id: 21, offset: 0 }, { id: 21, offset: 3 }, true),
+      new TextSelection({ id: 21, offset: 3 }, { id: 21, offset: 0 }, false),
+    ]) {
+      const result = createTextNavigation().move({
+        event: {
+          key: 'ArrowRight',
+          shiftKey: false,
+          altKey: false,
+          ctrlKey: false,
+          metaKey: false,
+        },
+        selection,
+        blocks: [{ id: 21, text, top: 0, height: 40 }],
+        layout: () => layout,
+        viewportHeight: 300,
+        platform: 'mac',
+      });
+
+      expect(result).toMatchObject({ head: { id: 21, offset: 3 }, upstream: true });
+      expect(result?.anchor).toEqual(result?.head);
+    }
+  } finally {
+    owner.destroy();
+  }
+});
+
+test('a rich inline paragraph uploads its text once and retains it through width-only reflow', () => {
+  const engine = resources.read().layout;
+  const owner = engine.createLayout();
+
+  try {
+    const text = 'אב גד \ufffc '.repeat(30);
+
+    const atoms = [...text.matchAll(/\ufffc/g)].map((match, i) => ({
+      id: `atom-${i}`,
+      index: match.index,
+      label: 'tag',
+      width: 30,
+      ascent: 20,
+      descent: 4,
+    }));
+
+    const spans = Array.from({ length: 30 }, (_, i) => ({
+      start: i * 8,
+      end: i * 8 + 5,
+      bold: true,
+      italic: false,
+    }));
+
+    const input = { id: 22, text, atoms, spans, size: 24, width: 300 };
+    const before = engine.stats.paragraphUploads;
+    const layout = owner.layoutInline(input);
+    expect(layout.missing).toBe(0);
+    expect(layout.inlineBoxes).toHaveLength(30);
+    expect(engine.stats.paragraphUploads - before).toBe(1);
+    const calls = engine.stats.glyphCalls;
+    owner.layoutInline({ ...input, width: 500 });
+    expect(engine.stats.paragraphUploads - before).toBe(1);
+    expect(engine.stats.glyphCalls).toBe(calls);
+  } finally {
+    owner.destroy();
+  }
+});

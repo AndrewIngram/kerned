@@ -48,7 +48,12 @@ Remaining limitations: emergency intra-word wrapping with line-edge reshaping,
 script-specific italic faces, arbitrary cross-font combining clusters when no
 single configured face covers them, vertical writing, CJK typography and IME/device
 validation. The script guard rejects CJK rather than drawing missing glyphs.
-Mixed-run word-navigation conventions need further comparison with native editors.
+Mixed-run word arrows use retained visual word edges with caret affinity, including
+platform-specific word starts/ends. Boundary progression and selection collapse are
+covered in all three browser engines; broader native-editor parity remains to be
+checked. Inline atoms and style cuts share a single paragraph upload, UTF-8 map and
+line-break scan. Mark itemization sweeps sorted boundaries rather than scanning
+every mark for every grapheme.
 
 The architectural judge reviewed commit `fddf2b0`. The follow-up fixes RTL
 horizontal movement across soft wraps, coalesces reordered same-font glyphs into

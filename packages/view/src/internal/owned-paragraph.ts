@@ -54,7 +54,9 @@ export function composeParagraph(
 
   const lines: Line[] = [];
 
-  const bidiCarets = bidi ? createBidiCarets(lines, lineHeight, rtlParagraph) : undefined;
+  const bidiCarets = bidi
+    ? createBidiCarets(lines, lineHeight, rtlParagraph, bidi.text)
+    : undefined;
 
   const numericCarets =
     bidiCarets ??
@@ -258,7 +260,7 @@ export function composeParagraph(
     rows,
   );
 
-  return { ...result, missing, directionAt: readDirection(bidi) };
+  return { ...result, missing, directionAt: readDirection(bidi), moveWord: bidiCarets?.moveWord };
 }
 
 function readDirection(bidi?: BidiAnalysis) {

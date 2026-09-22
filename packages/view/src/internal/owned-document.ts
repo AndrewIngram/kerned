@@ -91,6 +91,36 @@ export function placeParagraphs(paragraphs: ComposedParagraph[]) {
     lines,
     hit,
     geometry,
+    moveWord(
+      this: void,
+      index: number,
+      upstream: boolean,
+      direction: 'left' | 'right',
+      platform: 'mac' | 'other',
+    ) {
+      const ordinal = preceding(placements, index, 'offset'),
+        p = placements[ordinal];
+
+      const local = index - p.offset;
+      const moved = p.paragraph.moveWord?.(local, upstream, direction, platform);
+
+      if (!moved) return undefined;
+      const before = p.paragraph.geometry(local, local, upstream).caret;
+      const after = p.paragraph.geometry(moved.index, moved.index, moved.upstream).caret;
+
+      if (before[0] === after[0] && before[1] === after[1]) {
+        const back = direction === (p.paragraph.lines[0]?.direction === 'rtl' ? 'right' : 'left');
+        const target = placements[ordinal + (back ? -1 : 1)];
+
+        if (target)
+          return {
+            index: target.offset + (back ? target.paragraph.textLength : 0),
+            upstream: false,
+          };
+      }
+
+      return documentPosition(p, moved);
+    },
     directionAt(this: void, index: number, upstream: boolean) {
       const p = placements[preceding(placements, index, 'offset')];
 
