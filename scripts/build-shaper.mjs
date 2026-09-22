@@ -17,9 +17,9 @@ const result = spawnSync(
 
 if (result.status !== 0) process.exit(result.status ?? 1);
 
-await mkdir('public/engines', { recursive: true });
+await mkdir('apps/demo/public/engines', { recursive: true });
 
 await copyFile(
   'native-owned/target/wasm32-unknown-unknown/release/gprose_owned_shaper.wasm',
-  'public/engines/owned.wasm',
+  'apps/demo/public/engines/owned.wasm',
 );

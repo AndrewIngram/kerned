@@ -87,7 +87,7 @@
       }
     },
     {
-      "files": ["tests/**", "src/**/__tests__/**", "packages/**/__tests__/**"],
+      "files": ["tests/**", "apps/*/src/**/__tests__/**", "packages/**/__tests__/**"],
       "rules": {
         // Browser-evaluated closures must be self-contained; fixtures remain local to their tests.
         "unicorn/consistent-function-scoping": "off"

@@ -112,6 +112,64 @@ importers:
         specifier: 5.0.1
         version: 5.0.1(@vitest/browser-playwright@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0)
 
+  apps/demo:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@gprose/extension-comments':
+        specifier: workspace:*
+        version: link:../../packages/extension-comments
+      '@gprose/extension-document':
+        specifier: workspace:*
+        version: link:../../packages/extension-document
+      '@gprose/extension-editing':
+        specifier: workspace:*
+        version: link:../../packages/extension-editing
+      '@gprose/extension-outline':
+        specifier: workspace:*
+        version: link:../../packages/extension-outline
+      '@gprose/extension-search':
+        specifier: workspace:*
+        version: link:../../packages/extension-search
+      '@gprose/extension-table':
+        specifier: workspace:*
+        version: link:../../packages/extension-table
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../../packages/model
+      '@gprose/react':
+        specifier: workspace:*
+        version: link:../../packages/react
+      '@gprose/starter-kit':
+        specifier: workspace:*
+        version: link:../../packages/starter-kit
+      '@gprose/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+      '@gprose/transform':
+        specifier: workspace:*
+        version: link:../../packages/transform
+      '@gprose/view':
+        specifier: workspace:*
+        version: link:../../packages/view
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: 19.2.8
+        version: 19.2.8(react@19.2.8)
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@vitejs/plugin-react':
+        specifier: ^6.1.1
+        version: 6.1.1(oxc-transform-react@0.145.0)(vite@8.3.0)
+      vite:
+        specifier: 8.3.0
+        version: 8.3.0
+
   packages/core:
     dependencies:
       '@gprose/model':

@@ -1,208 +1,13 @@
-# gprose
+# Gprose
 
-See the [target repository map](docs/repository-map.md) for the pnpm workspace
-layout and package migration, including the lint and test guarantees to preserve.
+Gprose is a canvas text editor with a framework-independent editing core and an
+optional React integration. Schemas, commands, rendering and input behavior are
+assembled from extensions. The workspace packages are private and are not yet
+published to a registry.
 
-A canvas text editor with a schema-independent editing core and React extensions.
-The examples below use source imports from this repository.
+## Run the demo
 
-The planned consumer interface and package migration are specified in the
-[public-interface implementation plan](docs/public-interface-implementation-plan.md).
-Schema assembly and composed session commands are implemented. The complete mounted
-view, React integration and built package interfaces remain in the plan.
-
-## Add the editor to a page
-
-The current canvas host mounts into `#root` when its module loads. Serve this page
-as `/editor.html` through Vite:
-
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>My editor</title>
-  </head>
-  <body data-demo="minimal">
-    <div id="root">Loading editor…</div>
-    <script type="module" src="/src/demo/app/main.tsx"></script>
-  </body>
-</html>
-```
-
-The Vite entry loads engine assets and the initial sample, then mounts the React
-app. The app owns sample navigation; the editor packages own selection, input,
-commands and rendering. Both `/editor.html` and `/extensions.html` use this app.
-
-See [editor app ownership](docs/editor-app-architecture.md) for the module map,
-execution flow and lifecycle constraints. The optional React `Editor` component
-mounts native event handling around a caller-supplied renderer; it does not select
-a schema or create a document session for you.
-
-## Create an editor session
-
-Assemble the extensions once, then create a session from that schema. The starter
-kit installs content types, editing commands, table selections and local history.
-The session works without React or a mounted view.
-
-```ts
-import { createEditor } from './src/core';
-import { createSchema } from './src/model';
-import { textSelection } from './src/state';
-import { starterExtensions } from './src/extensions/starter-kit';
-
-const schema = createSchema({ extensions: starterExtensions });
-const editor = createEditor({
-  schema,
-  content: [{ kind: 'paragraph', id: 1, key: 'intro', text: 'Hello world' }],
-});
-```
-
-`editor.state` exposes readonly document nodes, selection, revision and stored
-marks. Each node has a numeric `id` for local operations and a stable string
-`key` for saved references. The assembled schema validates content and supplies
-missing defaults and identities. Selection types come from the installed
-extensions.
-
-The page host above owns its own editor instance. This example creates a separate
-instance for a custom host.
-
-## Run commands
-
-```ts
-editor.select(textSelection(1, 0, 5));
-editor.commands.toggleFormat('bold');
-editor.select(textSelection(1, 5));
-editor.commands.insertText(' canvas');
-editor.commands.undo();
-editor.commands.redo();
-
-const available = editor.can().toggleFormat('italic');
-const activity = editor.getCommandState('toggleFormat', 'bold');
-// Connect your persistence callback to committed content changes.
-const unsubscribe = editor.on('content', ({ after }) => save(after.nodes));
-```
-
-The paragraph now reads `Hello canvas world`, with `Hello` in bold. Commands return
-whether they succeeded. `can()` checks the same command without publication.
-Availability is separate from active, inactive or mixed formatting. Named methods
-and argument types derive from the installed extensions.
-
-`editor.chain().focus().toggleFormat('bold').scrollIntoView().run()` combines
-commands into one undoable edit and defers view effects until successful
-publication. Headless focus/reveal are no-ops. A false command rejects the entire
-chain. History replay may accompany view effects or read-only commands; invoke
-new edits and undo/redo as separate calls.
-
-Use `editor.on(...)` for typed content, transaction, selection and destruction
-events, or `editor.subscribe(...)` for view invalidation. Both return cleanup.
-`editor.destroy()` releases the attached view and extension resources. It leaves
-the final snapshot readable and rejects subsequent edits.
-
-| Operation                       | Interface                                                                      |
-| ------------------------------- | ------------------------------------------------------------------------------ |
-| Caret or range within one block | `editor.select(textSelection(id, from, to))`; omit `to` for a caret            |
-| Range across blocks             | `editor.select(new TextSelection(anchor, head))`; endpoints are `{id, offset}` |
-| Bold, italic, underline         | `editor.commands.toggleFormat(format)`                                         |
-| Clear formatting                | `editor.commands.clearMarks()`                                                 |
-| Quote or list                   | `editor.commands.toggleQuote()` or `.toggleList(ordered)`                      |
-| Paragraph or heading            | `editor.commands.setHeading(level)`; `1`–`4`, or `null` for a paragraph        |
-| Table                           | `editor.commands.insertTable()`, `.addTableRow()`, `.addTableColumn()`         |
-
-Caret formatting applies to subsequent input without changing existing content.
-Comments are external extension data based on durable ranges; see
-[the session reference](docs/editor-session-api.md#external-comments-and-decorations).
-
-The imperative `editor.transact(context => ...)` and `editor.dispatch(transaction)`
-interfaces remain available beneath named commands. Text offsets use UTF-16
-positions at grapheme boundaries. Stale revisions reject. See the
-[session reference](docs/editor-session-api.md) for extension authoring and chain
-semantics, and the [transaction reference](docs/editor-transactions-and-anchors.md)
-for steps, streamed appends, grouping and durable references.
-
-## Define a node extension
-
-Define content independently of rendering. The extension name identifies the node
-kind; its synchronous Standard Schema validator describes attributes and defaults.
-The editor generates text editing, mark mapping, child traversal and persistence
-from the definition.
-
-```ts
-import { z } from 'zod';
-import { createSchema, defineNode } from './src/model';
-import { createEditor } from './src/core';
-
-const note = defineNode({
-  name: 'note',
-  version: 1,
-  options: {},
-  schema: () => ({
-    attributes: z.strictObject({ text: z.string() }),
-    content: { kind: 'text', field: 'text' },
-  }),
-});
-
-const schema = createSchema({ extensions: [note] });
-const notes = createEditor({
-  schema,
-  content: [{ kind: 'note', key: 'first-note', text: 'A note' }],
-});
-```
-
-Content types derive from the installed extension tuple. Validation assigns missing
-identities and returns immutable content. Attribute validators may normalize
-imports; edits preserve position mappings and reject text-changing normalization.
-For transformations whose output cannot be parsed unchanged by the input schema,
-provide `outputAttributes` as a canonical validator. Edits and persistence check
-that validator without normalizing values again.
-
-Zod is used here as a Standard Schema implementation; it is not required in an
-extension author's code.
-
-Use `content: { kind: 'atom' }` for an object without editable text, or
-`content: { kind: 'container', field: 'children' }` for nested nodes. Containers
-can restrict children by explicit names or installed groups. The starter kit's
-blockquote accepts the `block` and `list` groups, so it works in a small kit
-without requiring tables or images. `defineMark` and `defineInline` add typed
-formatting and inline objects to the same assembly.
-
-The [starter definitions](packages/starter-kit/src/definitions.ts) own paragraphs,
-headings, images, tables, quotes, lists, formatting and mentions.
-The [session reference](docs/editor-session-api.md) describes the object-configured
-session, reusable commands, queries and per-session extension state.
-
-## Render extensions
-
-Node registration adds editing behavior. The composed browser extensions supply
-presentation, native node views and decoration layers, which the mounted editor
-owns. Applications do not pass graphics or shaping-engine handles:
-
-```tsx
-import { Editor } from './src/editor-react';
-
-<Editor editor={editor} maxWidth={696} scroll="page" />;
-```
-
-For custom canvas drawing, a `viewLayers` contribution receives resident block
-geometry and a borrowed drawing interface. It can register background/content
-painters and attach interactive DOM controls. See the [mounted view
-reference](docs/mounted-editor.md) for the implemented geometry, drawing,
-lifetime and diagnostics contracts. The earlier `CanvasPrimitive` API exposing
-native graphics handles has been removed; React node/mark/decoration registrations
-are milestone 6 work.
-
-Inline objects use `InlineObject<Data>` and an `InlineExtension<Data, Layout>`
-with `plainText` and `layout` functions. Range annotations use
-`RangeAnnotation<Data>` and the core's replace, slice, and join helpers. The
-[mention](packages/extension-document/src/mention.ts) and [comment](packages/extension-comments/src/index.ts)
-extensions show both patterns; the text node's editing methods keep their ranges
-in sync. See [React integration](docs/react-extensions.md) for DOM controls,
-measurements, portals, and focus.
-
-## Run this repository
-
-Use Node 22.12 or later, pnpm 10.14.0 (pinned in `packageManager`), and Rust 1.93.1 or later:
+Use Node 22.12 or later, pnpm 10.14.0 and Rust 1.93.1 or later:
 
 ```sh
 rustup target add wasm32-unknown-unknown
@@ -211,22 +16,152 @@ pnpm run setup
 pnpm run demo
 ```
 
-Setup prepares fonts and the shaping bridge. `pnpm run demo:extensions` opens the
-extension fixtures. `pnpm run build` produces `dist/`, and `pnpm run preview` serves
-it. Run `pnpm exec playwright install chromium firefox webkit` once, then `pnpm test` for
-Vitest and the existing Playwright suite. `pnpm run check:project` checks source and
-documentation references.
+The Vite React application lives in `apps/demo`. `/editor.html` opens the writing
+demo; `pnpm run demo:extensions` opens `/extensions.html` with diagnostics and
+extension examples. Sample switching, the outline and incremental book loading
+belong to the app, rather than the editor packages.
 
-Use `pnpm run test:unit` for Vitest tests in Node, `pnpm run test:browser` for Vitest
-Browser Mode in headless Chromium, Firefox, and WebKit, and `pnpm run test:watch`
-during development. `pnpm run test:e2e` runs Playwright application journeys and
-low-level pointer automation in `tests/e2e/`. Vitest discovers `*.test.js`,
-`*.test.ts`, and `*.test.tsx` in sibling `__tests__` directories under `src/` and
-integration tests in root `tests/`; inserting `.browser` before `.test` selects
-Browser Mode. To select one browser, use
-`pnpm run test:vitest --project browser-firefox` (or `browser-chromium` /
-`browser-webkit`).
+`pnpm run build` builds packages and produces `apps/demo/dist`.
+`pnpm run preview` serves that production build on port 5176. Setup prepares the
+WASM and font assets under `apps/demo/public`; another application must serve
+these assets too, or supply a `resolveAsset` function to its mounted view.
 
-Run `pnpm run format` to apply Oxfmt formatting and import sorting, or
-`pnpm run format:check` to check formatting without changing files. Run
-`pnpm run check` for lint, formatting, typecheck, project checks, and all tests.
+## Mount an editor
+
+This example uses supported package exports. `starterBrowserExtensions` assembles
+the standard content definitions, editing commands, history and browser rendering
+and input contributions. Applications can instead assemble their own extensions.
+
+```ts
+import { createEditor } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
+import { mountEditor } from '@gprose/view';
+
+const editor = createEditor({
+  schema: createSchema({ extensions: starterBrowserExtensions() }),
+  content: [{ kind: 'paragraph', text: 'Start writing.' }],
+});
+
+const host = document.createElement('div');
+host.style.height = '400px';
+document.body.append(host);
+
+const view = mountEditor(host, { editor });
+await view.ready;
+editor.commands.focus();
+```
+
+The view owns rendering, native input, geometry and graphics resources. It borrows
+the session. `view.destroy()` releases the view while leaving the session usable;
+`editor.destroy()` ends the session. Handle a rejected `view.ready` promise or
+use the view's error callback. No renderer or engine factory is required.
+
+Commands operate on the current transaction draft:
+
+```ts
+editor.can().toggleFormat('bold');
+editor.chain().toggleFormat('bold').insertText('Hello').run();
+editor.commands.undo();
+```
+
+Command names and arguments are inferred from the installed extensions. The
+imperative transaction and selection interfaces remain available for custom
+commands. See [session commands](docs/editor-session-api.md),
+[mounted view lifetime](docs/mounted-editor.md) and
+[typography and fonts](docs/view-fonts.md).
+
+For headless use, assemble `starterExtensions` from `@gprose/starter-kit` instead.
+The session, schema validation, commands, history and static serialization work
+in ordinary Node without a DOM or a TypeScript loader.
+
+## React
+
+Create a stable schema outside rendering. `useEditor` owns the session;
+`EditorContent` owns its mounted view. The hook returns `null` before its effect
+commits, which the content component accepts.
+
+```tsx
+import { createSchema } from '@gprose/model';
+import { EditorContent, useEditor, useCommandState } from '@gprose/react';
+import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
+
+const schema = createSchema({ extensions: starterBrowserExtensions() });
+const editorStyle = { height: 400 };
+
+export function DocumentEditor() {
+  const editor = useEditor({
+    schema,
+    content: [{ kind: 'paragraph', text: 'Start writing.' }],
+  });
+  const undo = useCommandState(editor, 'undo');
+
+  return (
+    <>
+      <button disabled={!undo?.available} onClick={() => editor?.commands.undo()}>
+        Undo
+      </button>
+      <EditorContent editor={editor} style={editorStyle} />
+    </>
+  );
+}
+```
+
+An application that already owns a session can pass it directly to
+`EditorContent`. Selector hooks support toolbars without rerendering the entire
+app for every edit. Custom React node, mark, inline and widget views use the same
+rendering contracts as native extensions. See
+[React integration](docs/react-integration.md),
+[rendering extensions](docs/rendering-extensions.md) and
+[React extensions](docs/react-extensions.md).
+
+## Schemas, extensions and persistence
+
+`@gprose/model` defines nodes, marks and inline objects. `createSchema` assembles
+extensions into a typed schema implementing Standard Schema v1. The schema
+validates incoming content and supplies configured defaults. Custom schemas do
+not require starter-kit, React or a particular text field name.
+
+Behavior extensions contribute commands, queries and per-session state through
+`@gprose/core`. Browser extensions contribute presentations, native views,
+decorations, input policies and shortcuts through `@gprose/view`. Standard
+paragraphs, headings, lists, quotes, images and formatting belong to extension
+packages. Tables and external comment annotations are also extensions.
+
+Use the document codec for persisted content. Durable external ranges need the
+corresponding document identity and position checkpoint; they are values an
+application can store independently of the document. Ordinary document snapshots,
+position checkpoints and undo history serve different purposes. See
+[references](docs/editor-references.md), [static serialization](docs/static-serialization.md),
+[HTML parsing](docs/html-parsing.md) and [delayed edits](docs/delayed-edits.md).
+
+The renderer currently supports Latin text with combining marks, common symbols
+and emoji. It does not provide complete international shaping or bidirectional
+editing. The implementation includes text, node and rectangular table selections;
+see [selection behavior](docs/editor-selections.md) and
+[clipboard behavior](docs/clipboard.md) for their supported operations. A network
+collaboration transport and conflict-resolution algorithm are not implemented.
+
+## Validate and explore
+
+```sh
+pnpm exec playwright install chromium firefox webkit
+pnpm run check
+```
+
+The required check builds all packages, runs ordinary Node and built browser
+consumers, checks emitted declarations, then runs lint, formatting, types,
+ownership checks, Vitest and Playwright E2E tests. Browser coverage runs in
+Chromium, Firefox and WebKit. Use `pnpm run test:unit`, `pnpm run test:browser`,
+`pnpm run test:e2e` or `pnpm run test:watch` for narrower feedback.
+
+Runnable built consumers live in [tests/consumers](tests/consumers): a complete
+starter-kit editor, independent vanilla and React schemas, and a standalone table
+with custom cell text. `pnpm run check:built-consumers` verifies them without
+private source imports. `pnpm run format` applies the shared Oxfmt configuration.
+
+See the [repository map](docs/repository-map.md),
+[app ownership guide](docs/editor-app-architecture.md),
+[implementation plan](docs/public-interface-implementation-plan.md) and
+[progress record](docs/public-interface-progress.md) for responsibilities and
+remaining migration work.

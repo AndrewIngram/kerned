@@ -1,5 +1,20 @@
 import { test, expect } from '@playwright/test';
 
+import { createBrowserFixtureServer } from '../../scripts/browser-fixture-server.mjs';
+
+const fixtureTest = test.extend({
+  fixturePage: async ({ page }, use) => {
+    const server = await createBrowserFixtureServer();
+
+    try {
+      await page.goto(server.url);
+      await use(page);
+    } finally {
+      await server.close();
+    }
+  },
+});
+
 test('dragging from an image and shift-clicking it creates a usable structural selection', async ({
   page,
 }) => {
@@ -75,91 +90,92 @@ test('dragging from an image and shift-clicking it creates a usable structural s
   expect(clipboard.plain).toContain('Landscape illustration');
 });
 
-test('node-only document supports drag, shift reversal and document-edge extension', async ({
-  page,
-}) => {
-  await page.goto('/editor.html');
-  await page.waitForFunction(() => window.editorDiagnostics);
-  await page.evaluate(async () => {
-    const { schema } = await import('/tests/fixtures/editor-foundation.js');
-    const { createEditor, NodeSelection, selectionContext } = await import('/@id/@gprose/state');
-    const { mountEditorView, createTextInteraction } = await import('/@id/@gprose/view');
+fixtureTest(
+  'node-only document supports drag, shift reversal and document-edge extension',
+  async ({ fixturePage: page }) => {
+    await page.evaluate(async () => {
+      const { schema } = await import('/tests/fixtures/editor-foundation.js');
+      const { createEditor, NodeSelection, selectionContext } = await import('/@id/@gprose/state');
+      const { mountEditorView, createTextInteraction } = await import('/@id/@gprose/view');
 
-    const nodes = [
-        { id: 1, key: 'one', kind: 'atom' },
-        { id: 2, key: 'two', kind: 'atom' },
-      ],
-      editor = createEditor(schema, nodes, new NodeSelection(1));
+      const nodes = [
+          { id: 1, key: 'one', kind: 'atom' },
+          { id: 2, key: 'two', kind: 'atom' },
+        ],
+        editor = createEditor(schema, nodes, new NodeSelection(1));
 
-    const context = selectionContext(schema, nodes),
-      interaction = createTextInteraction(),
-      root = document.createElement('div');
+      const context = selectionContext(schema, nodes),
+        interaction = createTextInteraction(),
+        root = document.createElement('div');
 
-    root.style.cssText = 'position:fixed;inset:100px 100px auto;z-index:100;background:white';
-    root.innerHTML =
-      '<div data-atom="1" style="height:80px">One</div><div data-atom="2" style="height:80px">Two</div><textarea aria-label="Atom capture" style="position:fixed;left:0;top:0;width:1px;height:1px;opacity:.01"></textarea>';
-    document.body.append(root);
-    const input = root.querySelector('textarea');
-    let view;
+      root.style.cssText = 'position:fixed;inset:100px 100px auto;z-index:100;background:white';
+      root.innerHTML =
+        '<div data-atom="1" style="height:80px">One</div><div data-atom="2" style="height:80px">Two</div><textarea aria-label="Atom capture" style="position:fixed;left:0;top:0;width:1px;height:1px;opacity:.01"></textarea>';
+      document.body.append(root);
+      const input = root.querySelector('textarea');
+      let view;
 
-    function options() {
-      const binding = interaction.bind({
-        selection: editor.state.selection,
-        context,
-        nodes: () => nodes.map((n) => ({ id: n.id, text: null, selectable: true })),
-        nodeAt: (target) =>
-          Number(target.closest('[data-atom]')?.getAttribute('data-atom')) || null,
-        select(selection) {
-          editor.select(selection);
-          view.update(options());
-        },
-        breakHistory() {},
-        focus() {
-          input.focus({ preventScroll: true });
-        },
-        reveal() {},
-        point: () => null,
-        regions: () => [],
-        text: () => null,
-        blocks: () => [],
-        layout() {
-          throw new Error('Atoms have no text layout');
-        },
-        viewportHeight: 500,
+      function options() {
+        const binding = interaction.bind({
+          selection: editor.state.selection,
+          context,
+          nodes: () => nodes.map((n) => ({ id: n.id, text: null, selectable: true })),
+          nodeAt: (target) =>
+            Number(target.closest('[data-atom]')?.getAttribute('data-atom')) || null,
+          select(selection) {
+            editor.select(selection);
+            view.update(options());
+          },
+          breakHistory() {},
+          focus() {
+            input.focus({ preventScroll: true });
+          },
+          reveal() {},
+          point: () => null,
+          regions: () => [],
+          text: () => null,
+          blocks: () => [],
+          layout() {
+            throw new Error('Atoms have no text layout');
+          },
+          viewportHeight: 500,
+        });
+
+        return {
+          pointer: binding.pointer,
+          input: { element: () => input, keydown: binding.keydown },
+        };
+      }
+
+      view = mountEditorView(root, options());
+      window.atomProbe = () => ({
+        type: editor.state.selection.type,
+        ranges: editor.state.selection.ranges(context),
       });
-
-      return {
-        pointer: binding.pointer,
-        input: { element: () => input, keydown: binding.keydown },
-      };
-    }
-
-    view = mountEditorView(root, options());
-    window.atomProbe = () => ({
-      type: editor.state.selection.type,
-      ranges: editor.state.selection.ranges(context),
     });
-  });
-  await page.locator('[data-atom="1"]').click();
-  await page.keyboard.press('Shift+ArrowRight');
-  expect((await page.evaluate(() => window.atomProbe())).ranges).toEqual([
-    { kind: 'node', id: 1 },
-    { kind: 'node', id: 2 },
-  ]);
-  await page.keyboard.press('Shift+ArrowLeft');
-  expect((await page.evaluate(() => window.atomProbe())).ranges).toEqual([{ kind: 'node', id: 1 }]);
-  await page.keyboard.press('Shift+ArrowRight');
-  expect((await page.evaluate(() => window.atomProbe())).ranges).toHaveLength(2);
-  await page.locator('[data-atom="2"]').click();
-  await page.keyboard.press('Control+Shift+Home');
-  expect((await page.evaluate(() => window.atomProbe())).ranges).toHaveLength(2);
+    await page.locator('[data-atom="1"]').click();
+    await page.keyboard.press('Shift+ArrowRight');
+    expect((await page.evaluate(() => window.atomProbe())).ranges).toEqual([
+      { kind: 'node', id: 1 },
+      { kind: 'node', id: 2 },
+    ]);
+    await page.keyboard.press('Shift+ArrowLeft');
+    expect((await page.evaluate(() => window.atomProbe())).ranges).toEqual([
+      { kind: 'node', id: 1 },
+    ]);
+    await page.keyboard.press('Shift+ArrowRight');
+    expect((await page.evaluate(() => window.atomProbe())).ranges).toHaveLength(2);
+    await page.locator('[data-atom="2"]').click();
+    await page.keyboard.press('Control+Shift+Home');
+    expect((await page.evaluate(() => window.atomProbe())).ranges).toHaveLength(2);
 
-  const one = await page.locator('[data-atom="1"]').boundingBox(),
-    two = await page.locator('[data-atom="2"]').boundingBox();
+    const one = await page.locator('[data-atom="1"]').boundingBox(),
+      two = await page.locator('[data-atom="2"]').boundingBox();
 
-  await page.mouse.move(two.x + 20, two.y + 40);
-  await page.mouse.down();
-  await page.mouse.move(one.x + 20, one.y + 40, { steps: 6 });
-  await page.mouse.up();
-  expect((await page.evaluate(() => window.atomProbe())).ranges).toHaveLength(2);
-});
+    await page.mouse.move(two.x + 20, two.y + 40);
+    await page.mouse.down();
+    await page.mouse.move(one.x + 20, one.y + 40, { steps: 6 });
+    await page.mouse.up();
+    expect((await page.evaluate(() => window.atomProbe())).ranges).toHaveLength(2);
+  },
+);

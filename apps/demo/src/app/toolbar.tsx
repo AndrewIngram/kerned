@@ -1,10 +1,10 @@
 import { useEffect, type RefCallback } from 'react';
 
-import { FindIcon } from '../../demo/find-bar';
-import { bookSamples, type EditorSample } from '../../editor-samples';
 import type { EditorDocument } from '../document-query.js';
+import { bookSamples, type EditorSample } from '../editor-samples.js';
 import type { EditorSession } from '../editor-types.js';
-import type { EditorControls } from './editor-controls';
+import { FindIcon } from '../find-bar.js';
+import type { EditorControls } from './editor-controls.js';
 
 type ToolbarProps = { doc: EditorDocument; actions: EditorControls } & {
   minimal: boolean;

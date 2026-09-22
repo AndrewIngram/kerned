@@ -7,9 +7,9 @@ import { basename } from 'node:path';
 // Usage: node scripts/convert-war-and-peace.mjs [source.html] [output.html]
 import { chromium } from 'playwright';
 
-const source = process.argv[2] ?? 'public/samples/war-and-peace-full.html';
+const source = process.argv[2] ?? 'apps/demo/public/samples/war-and-peace-full.html';
 
-const output = process.argv[3] ?? 'public/samples/war-and-peace.html';
+const output = process.argv[3] ?? 'apps/demo/public/samples/war-and-peace.html';
 
 const input = await readFile(source);
 

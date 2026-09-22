@@ -6,7 +6,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
 
     const { NodeSelection, textSelection, selectionContext } = await import('@gprose/state');
 
-    const { demoSchema } = await import('../src/demo/demo-schema.js');
+    const { demoSchema } = await import('../apps/demo/src/demo-schema.js');
     const { createTable, tableCells } = await import('@gprose/extension-table');
 
     const { createEditor } = await import('@gprose/core');
@@ -15,7 +15,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const { documentInput } = await import('@gprose/extension-editing/browser');
     const { useEditorState } = await import('@gprose/react');
 
-    const { createDemoDocumentQuery } = await import('../src/demo/document-query.js');
+    const { createDemoDocumentQuery } = await import('../apps/demo/src/document-query.js');
 
     const { createDocumentInput } = await import('../packages/extension-editing/src/input.js');
     const { createTextInput } = await import('@gprose/view');

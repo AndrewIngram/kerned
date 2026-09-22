@@ -4,6 +4,7 @@ import { defaultClientConditions, defaultServerConditions } from 'vite';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  publicDir: 'apps/demo/public',
   resolve: { conditions: [...defaultClientConditions, 'gprose-source'] },
   ssr: {
     resolve: { conditions: [...defaultServerConditions, 'gprose-source'] },
@@ -29,7 +30,7 @@ export default defineConfig({
           name: 'unit',
           environment: 'node',
           include: [
-            'src/**/__tests__/**/*.test.{js,ts,tsx}',
+            'apps/*/src/**/__tests__/**/*.test.{js,ts,tsx}',
             'packages/*/src/**/__tests__/**/*.test.{js,ts,tsx}',
             'tests/**/*.test.{js,ts,tsx}',
           ],
@@ -41,7 +42,7 @@ export default defineConfig({
         test: {
           name: 'browser',
           include: [
-            'src/**/__tests__/**/*.browser.test.{js,ts,tsx}',
+            'apps/*/src/**/__tests__/**/*.browser.test.{js,ts,tsx}',
             'packages/*/src/**/__tests__/**/*.browser.test.{js,ts,tsx}',
             'tests/**/*.browser.test.{js,ts,tsx}',
           ],

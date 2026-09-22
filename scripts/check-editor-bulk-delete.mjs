@@ -3,6 +3,10 @@ import { writeFile } from 'node:fs/promises';
 
 import { chromium } from 'playwright';
 
+import { createBrowserFixtureServer } from './browser-fixture-server.mjs';
+
+const fixtureServer = await createBrowserFixtureServer();
+
 const browser = await chromium.launch();
 
 try {
@@ -11,7 +15,7 @@ try {
     (url) => url.pathname === '/',
     () => {},
   );
-  await page.goto('http://127.0.0.1:5173/editor.html');
+  await page.goto(fixtureServer.url);
   let cdp;
 
   if (process.env.PROFILE) {
@@ -24,8 +28,7 @@ try {
     const { createEditor, TextSelection, createAnchor, resolveAnchor } =
       await import('/@id/@gprose/state');
 
-    const { demoSchema } = await import('/src/demo/demo-schema.ts');
-    const { replaceStructuredText } = await import('/packages/extension-editing/src/blocks.ts');
+    const { demoSchema, replaceStructuredText } = await import('/tests/fixtures/bulk-delete.js');
     const reports = [];
 
     const check = (condition, message) => {
@@ -357,4 +360,5 @@ try {
   }
 } finally {
   await browser.close();
+  await fixtureServer.close();
 }

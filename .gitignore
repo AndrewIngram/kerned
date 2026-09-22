@@ -3,9 +3,9 @@ node_modules/
 dist/
 .cache/
 native-owned/target/
-public/engines/
-public/fonts/*.ttf
-public/fonts/*.otf
+apps/demo/public/engines/
+apps/demo/public/fonts/*.ttf
+apps/demo/public/fonts/*.otf
 test-results/
 playwright-report/
 .vitest/

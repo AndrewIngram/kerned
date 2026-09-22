@@ -14,7 +14,7 @@ assert.deepEqual(
 
 assert.throws(() => dependencies('fixture.ts', 'import(variable)'), /statically checkable/);
 
-const sources = ['src', 'packages'].flatMap((root) =>
+const sources = ['apps', 'packages'].flatMap((root) =>
   readdirSync(root, { recursive: true })
     .filter((file) => /\.tsx?$/.test(file) && !/(?:^|\/)(?:dist|node_modules)\//.test(file))
     .map((file) => `${root}/${file}`),
@@ -27,6 +27,7 @@ let checked = 0;
 for (const file of sources) {
   const owner = file.startsWith('packages/') ? file.split('/')[1] : null;
   const production = !file.includes('/__tests__/');
+  const app = file.startsWith('apps/') ? file.split('/')[1] : null;
 
   for (const specifier of dependencies(file, readFileSync(file, 'utf8'))) {
     const target = specifier.startsWith('.')
@@ -39,9 +40,23 @@ for (const file of sources) {
     if (production && packages.has(targetOwner) && targetOwner !== owner)
       assert.fail(`${file} bypasses the ${targetOwner} public interface: ${specifier}`);
 
+    if (production && app && !specifier.startsWith('.')) {
+      const manifest = JSON.parse(readFileSync(`apps/${app}/package.json`, 'utf8'));
+
+      const name = specifier.startsWith('@')
+        ? specifier.split('/').slice(0, 2).join('/')
+        : specifier.split('/')[0];
+
+      assert.ok(
+        Object.hasOwn(manifest.dependencies ?? {}, name) ||
+          Object.hasOwn(manifest.devDependencies ?? {}, name),
+        `${file}: undeclared application dependency ${specifier}`,
+      );
+    }
+
     if (production && packages.has(owner)) {
       assert.ok(
-        !target.startsWith('src/'),
+        !target.startsWith('apps/'),
         `${file} depends on application or schema implementation: ${specifier}`,
       );
       assert.ok(
@@ -113,10 +128,10 @@ for (const file of sources) {
         `${file} couples view lifecycle to React: ${specifier}`,
       );
 
-    if (production && /checks(?:\.js)?$/.test(target) && target.startsWith('src/'))
+    if (production && /checks(?:\.js)?$/.test(target) && target.startsWith('apps/'))
       assert.equal(
         file,
-        'src/demo/app/use-diagnostics.ts',
+        'apps/demo/src/app/use-diagnostics.ts',
         `${file} imports a benchmark/test fixture`,
       );
   }
@@ -124,10 +139,10 @@ for (const file of sources) {
   checked++;
 }
 
-for (const html of ['editor.html', 'extensions.html'])
+for (const html of ['apps/demo/editor.html', 'apps/demo/extensions.html'])
   assert.match(
     readFileSync(html, 'utf8'),
-    /src="\/src\/demo\/app\/main\.tsx"/,
+    /src="\/src\/app\/main\.tsx"/,
     `${html} must mount the React app`,
   );
 

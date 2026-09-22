@@ -7,7 +7,7 @@ import { defaultFonts, defineStyleRule, mountEditor } from '@gprose/view';
 import { createViewDiagnostics } from '@gprose/view/diagnostics';
 import { expect, test } from 'vitest';
 
-import { importHtml } from '../src/demo/import-html.js';
+import { importHtml } from '../apps/demo/src/import-html.js';
 
 test('Warbreaker retains its distant caret and reading anchor through live metrics, colors and font sources', async ({
   onTestFinished,

@@ -2,8 +2,8 @@ import * as clipboardModule from '@gprose/extension-editing';
 import * as stateModule from '@gprose/state';
 import { test, expect } from 'vitest';
 
+import * as demoSchemaModule from '../apps/demo/src/demo-schema.js';
 import * as blocksModule from '../packages/extension-editing/src/blocks.js';
-import * as demoSchemaModule from '../src/demo/demo-schema.js';
 import * as editorFoundationModule from './fixtures/editor-foundation.js';
 
 test('structural ranges preserve direction, hierarchy, codecs and transaction history', async () => {

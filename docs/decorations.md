@@ -6,7 +6,7 @@ public contribution, in canvas text and native table cells.
 
 ```ts
 import { defineExtension, type ContributionContext } from '@gprose/core';
-import { decorations, type Decoration, type InvalidateDecorations } from '../src/editor-browser';
+import { decorations, type Decoration, type InvalidateDecorations } from '@gprose/view';
 
 type HighlightStore = {
   read(nodeId: number): readonly Decoration[];
@@ -117,7 +117,7 @@ Editable content slots remain milestone 6 work. Semantic marks and inline object
 
 ## Widgets
 
-`defineWidgetView<Data>(create)` from `src/editor-browser` creates a typed widget
+`defineWidgetView<Data>(create)` from `@gprose/view` creates a typed widget
 factory. Call it to produce a decoration, then return that descriptor from the
 same source as your highlights. No schema node, mark or document mutation is needed.
 
@@ -166,7 +166,7 @@ only repositions its host. Treat descriptor data as immutable and invalidate its
 source when external data changes. Descriptors contain renderer closures and are
 not persistence payloads. Persist the semantic data and durable target separately.
 
-For React, use `defineReactWidgetView(Component)` from `src/editor-react`:
+For React, use `defineReactWidgetView(Component)` from `@gprose/react`:
 
 ```tsx
 function ReviewButton({ data }: ReactWidgetViewProps<{ label: string }>) {

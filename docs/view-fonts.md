@@ -104,7 +104,7 @@ and infers that definition's normalized attributes:
 
 ```ts
 import { defineStyleRule } from '@gprose/view';
-import { paragraph, heading, list } from '../src/extensions/starter-definitions';
+import { paragraph, heading, list } from '@gprose/extension-document';
 
 view.update({
   theme: {

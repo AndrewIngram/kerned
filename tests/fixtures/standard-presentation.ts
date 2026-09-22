@@ -2,7 +2,7 @@ import { formattingSpans, mentionLayout } from '@gprose/extension-document';
 import { typography } from '@gprose/extension-document/browser';
 import type { BlockPresentation } from '@gprose/view';
 
-import type { StarterLeaf } from '../../src/demo/demo-model.js';
+import type { StarterLeaf } from '../../apps/demo/src/demo-model.js';
 
 export function createFixturePresentation(size: number): (node: StarterLeaf) => BlockPresentation {
   const cache = new WeakMap<StarterLeaf, BlockPresentation>();

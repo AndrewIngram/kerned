@@ -1,9 +1,9 @@
 import type { ViewDiagnostics, DiagnosticEvent } from '@gprose/view/diagnostics';
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 
-import { type EditorSample } from '../../editor-samples';
-import { createStreamMetrics, streamConfig } from '../../editor-stream';
 import type { StarterNode } from '../demo-model.js';
+import { type EditorSample } from '../editor-samples.js';
+import { createStreamMetrics, streamConfig } from '../editor-stream.js';
 import type { EditorSession } from '../editor-types.js';
 
 export function useSampleStream(

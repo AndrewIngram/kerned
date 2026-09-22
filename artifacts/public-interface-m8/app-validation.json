@@ -1,0 +1,61 @@
+{
+  "check": "passed",
+  "builtConsumers": {
+    "node": "passed",
+    "browser": [
+      "vanilla",
+      "table",
+      "starter-kit",
+      "react"
+    ],
+    "browsers": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "declarations": "passed"
+  },
+  "vitest": {
+    "files": 219,
+    "passed": 959,
+    "todo": 1
+  },
+  "e2e": {
+    "passed": 42
+  },
+  "production": {
+    "file": "apps/demo/dist/assets/main-De1vd5c6.js",
+    "sha256": "835d1735fabffd6899ef6d2015aac7e4503c4fa98753fc14919043a628948cfb",
+    "previewURL": "http://127.0.0.1:5186"
+  },
+  "collection": {
+    "before": 886,
+    "after": 886,
+    "missing": [],
+    "added": []
+  },
+  "diagnostics": {
+    "bulkDelete": "passed",
+    "relativePositions": "passed",
+    "unicode": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ]
+  },
+  "reflow": {
+    "cases": 9,
+    "passed": true
+  },
+  "performanceBudgets": "all passed",
+  "maximums": {
+    "firstUsableMs": 233,
+    "streamingMs": 1267.5999999046326,
+    "pasteHandlerMs": 50.90000009536743,
+    "pastePaintMs": 114.89999985694885,
+    "typingFrameMs": 32.60000014305115,
+    "pagingFrameMs": 32.09999990463257,
+    "loadedHeapBytes": 28096248
+  },
+  "milestone8": "in progress"
+}

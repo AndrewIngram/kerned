@@ -1,7 +1,7 @@
 # Inline and mark rendering
 
 Register inline objects and semantic mark renderers through `viewLayers` from
-`src/editor-browser`. `defineInlineView` and `defineMarkView` bind the installed
+`@gprose/view`. `defineInlineView` and `defineMarkView` bind the installed
 schema definition and own instance placement, caching and destruction. They work
 with canvas drawing, DOM overlays, or both. Underlines and mentions use these
 contracts in the demo and vanilla mount.
@@ -91,7 +91,7 @@ context.provide(viewLayers, defineReactInlineView(badge, Badge));
 context.provide(viewLayers, defineReactMarkView(reviewMark, ReviewMark));
 ```
 
-The React registrations and prop types come from `src/editor-react`. They use
+The React registrations and prop types come from `@gprose/react`. They use
 the same instance owner and portal host as React node views. `ReviewMark` receives
 `ReactMarkViewProps<typeof reviewMark>` and can render a positioned element for
 each entry in `fragments`. One component represents the whole range, including

@@ -4,8 +4,8 @@ import { useEditorState } from '@gprose/react';
 import { type EditorState } from '@gprose/state';
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { type EditorSample } from '../../editor-samples';
 import { type StarterNode } from '../demo-model.js';
+import { type EditorSample } from '../editor-samples.js';
 import type { EditorSession } from '../editor-types.js';
 
 export function useComments(

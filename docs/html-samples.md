@@ -6,7 +6,7 @@ or `/extensions.html` to open a book directly.
 
 ## War and Peace
 
-The [editor sample](../public/samples/war-and-peace.html) contains the complete
+The [editor sample](../apps/demo/public/samples/war-and-peace.html) contains the complete
 novel by Leo Tolstoy, translated by Louise and Aylmer Maude, from Book One through
 the Second Epilogue. It has 562,489 whitespace-delimited words, about 2.9 times
 the Warbreaker sample. Its 11,718 blocks include 382 headings: 15 books, two
@@ -15,7 +15,7 @@ annotate, and all 976 italic passages survive conversion.
 
 The public-domain edition comes from [Project Gutenberg ebook 2600](https://www.gutenberg.org/ebooks/2600).
 The untouched download, including its credits, contents and licence, is saved in
-[war-and-peace-full.html](../public/samples/war-and-peace-full.html). The editor
+[war-and-peace-full.html](../apps/demo/public/samples/war-and-peace-full.html). The editor
 sample omits that front matter and uses H2 for books/epilogues and H3 for chapters
 so the outline reflects their hierarchy. It preserves the two preformatted
 passages as italic paragraphs with line breaks; fixed-column spacing is normalized.

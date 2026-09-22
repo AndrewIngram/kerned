@@ -18,7 +18,7 @@
     ".windsurf/**",
     "tools/oxlint/anti-slop/**",
     "artifacts/**",
-    "public/samples/**",
+    "apps/demo/public/samples/**",
     "pnpm-lock.yaml",
     "native-owned/Cargo.lock"
   ]

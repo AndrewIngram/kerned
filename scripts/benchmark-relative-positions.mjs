@@ -4,13 +4,17 @@ import os from 'node:os';
 
 import { chromium } from 'playwright';
 
+import { createBrowserFixtureServer } from './browser-fixture-server.mjs';
+
 const directory = process.env.REPORT_DIR ?? 'artifacts/editor-foundation-relative-index';
+
+const fixtureServer = await createBrowserFixtureServer();
 
 const browser = await chromium.launch();
 
 try {
   const page = await browser.newPage();
-  await page.goto('http://127.0.0.1:5173/editor.html');
+  await page.goto(fixtureServer.url);
 
   const results = await page.evaluate(async () => {
     const { fixture, dispatch, capture } = await import('/tests/fixtures/editor-foundation.js');
@@ -198,4 +202,5 @@ try {
   );
 } finally {
   await browser.close();
+  await fixtureServer.close();
 }

@@ -15,8 +15,8 @@ Model, transform, state, core, view, React, standard document definitions, table
 comments, history, outline extraction, search decorations, document editing and
 starter-kit now live in workspace packages with built JavaScript and declaration
 exports. Standard presentation defaults belong to the document and table packages.
-The demo remains under `src/` and is still served from the root while milestone 8
-migrates it into `apps/demo`.
+The Vite React demo now lives in `apps/demo`, with its own declared dependencies,
+HTML entries, assets and configuration. Root scripts delegate to that workspace.
 Packages must own their implementation; do not create empty manifests
 or exports pointing outside their package.
 

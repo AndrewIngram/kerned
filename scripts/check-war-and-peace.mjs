@@ -6,11 +6,11 @@ import { chromium, firefox, webkit } from 'playwright';
 
 const base = process.env.EDITOR_URL ?? 'http://127.0.0.1:5176/editor.html';
 
-const html = await readFile('public/samples/war-and-peace.html', 'utf8');
+const html = await readFile('apps/demo/public/samples/war-and-peace.html', 'utf8');
 
-const manifest = JSON.parse(await readFile('public/samples/war-and-peace.json', 'utf8'));
+const manifest = JSON.parse(await readFile('apps/demo/public/samples/war-and-peace.json', 'utf8'));
 
-const source = await readFile(`public/samples/${manifest.fullHtml}`);
+const source = await readFile(`apps/demo/public/samples/${manifest.fullHtml}`);
 
 const digest = (data) => createHash('sha256').update(data).digest('hex');
 

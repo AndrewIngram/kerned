@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { loadEditorSample, sampleUrl, type EditorSample } from '../../editor-samples';
-import { EditorWorkspace } from './editor-workspace';
+import { loadEditorSample, sampleUrl, type EditorSample } from '../editor-samples.js';
+import { EditorWorkspace } from './editor-workspace.js';
 
 export function App({ initial }: { initial: EditorSample }) {
   const [current, setCurrent] = useState({ sample: initial, generation: 0 });

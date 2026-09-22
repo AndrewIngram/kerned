@@ -13,8 +13,8 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { expect, test } from 'vitest';
 
-import { createDemoDocumentQuery } from '../../../../src/demo/document-query.js';
-import { createSampleDocument } from '../../../../src/demo/sample-document.js';
+import { createDemoDocumentQuery } from '../../../../apps/demo/src/document-query.js';
+import { createSampleDocument } from '../../../../apps/demo/src/sample-document.js';
 import { starterBrowserExtensions } from '../browser.js';
 
 const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));

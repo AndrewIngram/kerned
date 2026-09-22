@@ -1,8 +1,8 @@
 import { createRoot } from 'react-dom/client';
 
-import '../../editor.css';
-import { loadEditorSample } from '../../editor-samples';
-import { App } from './app';
+import '../editor.css';
+import { loadEditorSample } from '../editor-samples.js';
+import { App } from './app.js';
 
 const root = document.getElementById('root');
 

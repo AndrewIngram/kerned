@@ -76,8 +76,8 @@ Paste rules belong to the browser adapter and run before ordinary rich/plain
 paste, including native table clipboard handling.
 
 ```ts
-import { pasteRules } from '../src/editor-browser';
-import { editingCommands } from '../src/extensions/starter-kit/commands';
+import { pasteRules } from '@gprose/view';
+import { editingCommands } from '@gprose/extension-editing';
 
 // Inside extension setup:
 context.provide(pasteRules, {

@@ -6,8 +6,8 @@ import { createEditor, textSelection, TextSelection } from '@gprose/state';
 import { createHtmlParser } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import type { StarterNode } from '../../../../src/demo/demo-model.js';
-import { demoSchema } from '../../../../src/demo/demo-schema.js';
+import type { StarterNode } from '../../../../apps/demo/src/demo-model.js';
+import { demoSchema } from '../../../../apps/demo/src/demo-schema.js';
 
 test('copying a heading does not carry its attributes into the empty split target', () => {
   const nodes: StarterNode[] = [

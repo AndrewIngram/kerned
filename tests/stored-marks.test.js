@@ -2,7 +2,7 @@ import * as formattingModule from '@gprose/extension-document';
 import * as stateModule from '@gprose/state';
 import { test, expect } from 'vitest';
 
-import * as demoSchemaModule from '../src/demo/demo-schema.js';
+import * as demoSchemaModule from '../apps/demo/src/demo-schema.js';
 
 test('stored marks are explicit, reset on movement, restore with history and preserve graphemes', async () => {
   const result = await (async () => {

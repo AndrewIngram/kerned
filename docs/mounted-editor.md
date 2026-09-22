@@ -5,7 +5,7 @@ canonical content, transactions and history. A mounted view borrows that session
 and owns its DOM, input capture, viewport, layout, graphics and native node views.
 
 ```ts
-import { mountEditor } from '../src/editor-canvas';
+import { mountEditor } from '@gprose/view';
 
 const view = mountEditor(element, { editor });
 await view.ready;
@@ -29,7 +29,7 @@ semantic mark ranges and inline values. It returns text/box metrics or a flowing
 Immutable node presentations are cached per view. Duplicate or missing
 presentations produce explicit errors.
 
-Input extensions contribute through `inputPolicies` from `src/editor-browser`.
+Input extensions contribute through `inputPolicies` from `@gprose/view`.
 They receive the imperative session, native text capture, navigation/select-all
 helpers and a notice callback. Navigation,
 select-all, composition lifetime and focus synchronization belong to the mount;
@@ -56,7 +56,7 @@ cell text and active textareas.
 Transient text-highlight ranges accompany native frames through the public
 [decoration contribution](decorations.md), shared with canvas text.
 
-Document overlays contribute through `viewLayers` from `src/editor-browser`.
+Document overlays contribute through `viewLayers` from `@gprose/view`.
 Each named contribution creates one layer per mounted view and returns `update`
 and `destroy` methods. Its factory receives the imperative session, a positioned
 DOM host, text preparation and a `paint` registration function. Factories run
@@ -113,7 +113,7 @@ stylesheet belongs to the extension. Both the demo and public mount use it.
 Applications observe activation without supplying callbacks as serialized options:
 
 ```ts
-import { onMentionActivate } from '../src/extensions/starter-kit/browser';
+import { onMentionActivate } from '@gprose/extension-document/browser';
 
 const unsubscribe = onMentionActivate(editor, ({ nodeId, id, index }) => {
   // Open application UI for this mention. The extension does not choose a panel.
@@ -191,7 +191,7 @@ this extension and its stylesheet. General range highlights use `decorations`;
 ## React
 
 ```tsx
-import { EditorContent } from '../src/editor-react';
+import { EditorContent } from '@gprose/react';
 
 <EditorContent editor={editor} style={{ height: 480 }} onReady={(view) => view.focus()} />;
 ```
@@ -283,7 +283,7 @@ for owned sessions, context and toolbar selectors.
 Instrumentation is separate from the geometry interface used by editor UI:
 
 ```ts
-import { createViewDiagnostics } from '../src/editor-canvas/diagnostics';
+import { createViewDiagnostics } from '@gprose/view/diagnostics';
 
 const diagnostics = createViewDiagnostics();
 const unsubscribe = diagnostics.subscribe((event) => {
@@ -341,8 +341,8 @@ cells can contain custom text-node definitions. Ordinary copy/cut and text
 paste within a native cell textarea still use its native behavior; this does
 not provide rich clipboard parity for every cell text selection yet.
 Search and comment rendering are shared across canvas and native text. Mention
-rendering is shared between mounts; a general custom-inline presentation contract
-remains future work.
+rendering is shared between mounts. Custom inline, mark and widget renderers
+use the public native or React rendering registrations.
 
 The writing and extension demos now mount the same public React `EditorContent`. They
 create sessions, choose schema/browser extensions and supply application UI;

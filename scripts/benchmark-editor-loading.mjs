@@ -21,7 +21,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
         );
 
         if (process.env.BASELINE === '1')
-          await page.route('**/src/demo/app/use-sample-stream.ts*', async (route) => {
+          await page.route('**/src/app/use-sample-stream.ts*', async (route) => {
             const response = await route.fetch(),
               body = await response.text();
 
@@ -98,7 +98,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
 
         if (find === 'on') {
           const expected = await page.evaluate(async () => {
-            const { demoSchema } = await import('/src/demo/demo-schema.ts');
+            const { demoSchema } = await import('/src/demo-schema.ts');
 
             const count = (node) =>
               (demoSchema.text(node)?.match(/the/giu)?.length ?? 0) +

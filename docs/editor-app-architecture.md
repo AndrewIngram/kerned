@@ -1,7 +1,7 @@
 # Editor app ownership
 
 The writing demo and extension study are two routes of one Vite React app. Both
-HTML files load `src/demo/app/main.tsx`. The entry loads the initial sample and
+HTML files in `apps/demo` load `/src/app/main.tsx`. The entry loads the initial sample and
 mounts `App`; it does not initialize graphics or layout resources. Run
 `pnpm run demo` to open the writing route.
 
@@ -20,8 +20,8 @@ and [mounted editor lifetime](mounted-editor.md) for those interfaces.
 | `@gprose/core`                                        | Composed headless session, named commands/queries, extension state and lifetime              |
 | `@gprose/view`                                        | Mounting, native input, rendering contracts, assets, layout, viewport, painting and lifetime |
 | `@gprose/react`                                       | Optional session ownership, borrowed content host, context and selector subscriptions        |
-| `src/extensions/starter-kit`                          | Standard schema/commands, input policy, presentation and native block rendering              |
-| `src/demo/app`                                        | Sample loading, toolbar, external comment UI, find/outline panels and diagnostics            |
+| `@gprose/starter-kit`                                 | Assembly of public document, editing, table and history extensions                           |
+| `apps/demo/src/app`                                   | Sample loading, toolbar, external comment UI, find/outline panels and diagnostics            |
 
 The headless modules import neither React nor browser code. Browser and canvas
 modules are independent of React, and generic adapters do not import a particular

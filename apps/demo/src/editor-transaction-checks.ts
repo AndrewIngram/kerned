@@ -12,9 +12,9 @@ import {
 } from '@gprose/state';
 import { mapPosition } from '@gprose/transform';
 
-import type { TextBlockNode, StarterNode } from './demo/demo-model.js';
-import { demoSchema } from './demo/demo-schema.js';
-import { createSampleDocument } from './demo/sample-document';
+import type { TextBlockNode, StarterNode } from './demo-model.js';
+import { demoSchema } from './demo-schema.js';
+import { createSampleDocument } from './sample-document.js';
 
 export function checkTransactions() {
   let assertions = 0;

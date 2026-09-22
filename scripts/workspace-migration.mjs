@@ -15,6 +15,15 @@ import ts from 'typescript';
 // The source-to-package moves are explicit so reviewers can audit ownership.
 // Rerunning after a move verifies the destination rather than recreating old paths.
 export const packageMoves = [
+  { from: 'src/demo', to: 'apps/demo/src' },
+  { from: 'src/editor-samples.ts', to: 'apps/demo/src/editor-samples.ts' },
+  { from: 'src/editor-reflow-checks.ts', to: 'apps/demo/src/editor-reflow-checks.ts' },
+  { from: 'src/editor.css', to: 'apps/demo/src/editor.css' },
+  { from: 'src/editor-selection-checks.ts', to: 'apps/demo/src/editor-selection-checks.ts' },
+  { from: 'src/editor-transaction-checks.ts', to: 'apps/demo/src/editor-transaction-checks.ts' },
+  { from: 'src/editor-extension-checks.ts', to: 'apps/demo/src/editor-extension-checks.ts' },
+  { from: 'src/editor-container-checks.ts', to: 'apps/demo/src/editor-container-checks.ts' },
+  { from: 'src/editor-stream.ts', to: 'apps/demo/src/editor-stream.ts' },
   {
     from: 'src/extensions/starter-kit/index.ts',
     to: 'packages/starter-kit/src/index.ts',
@@ -431,11 +440,19 @@ const active = packageMoves.filter((move) => existsSync(move.from));
 
 for (const move of packageMoves)
   assert.ok(
-    existsSync(move.from) || existsSync(move.to),
+    existsSync(move.from) || existsSync(move.to) || existsSync(finalDestination(move.to)),
     `Missing source and destination: ${move.from}`,
   );
 
-const files = ['src', 'packages', 'tests', 'scripts'].flatMap((root) =>
+function finalDestination(file) {
+  const move = packageMoves.find(
+    (entry) => file === entry.from || file.startsWith(entry.from + '/'),
+  );
+
+  return move ? finalDestination(move.to + file.slice(move.from.length)) : file;
+}
+
+const files = ['src', 'apps', 'packages', 'tests', 'scripts'].flatMap((root) =>
   existsSync(root)
     ? readdirSync(root, { recursive: true })
         .filter(
@@ -466,7 +483,7 @@ function resolve(file) {
 }
 
 function specifier(file, value, moduleImport) {
-  const absolute = /^\/(?:src|packages)\//.test(value);
+  const absolute = /^\/(?:src|apps|packages)\//.test(value);
 
   if (!absolute && (!moduleImport || !value.startsWith('.'))) return value;
 
@@ -495,7 +512,12 @@ function specifier(file, value, moduleImport) {
   )
     return absolute ? `/@id/${owner.name}` : owner.name;
 
-  if (absolute) return destination === target ? value : `/${destination}`;
+  if (absolute) {
+    if (file.startsWith('scripts/') && destination.startsWith('apps/demo/'))
+      return '/' + destination.slice('apps/demo/'.length);
+
+    return destination === target ? value : `/${destination}`;
+  }
 
   if (destination === target && current === file) return value;
   let relative = path.relative(path.dirname(current), destination);

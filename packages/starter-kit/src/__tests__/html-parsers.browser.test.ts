@@ -2,8 +2,8 @@ import { createDocumentSerializer } from '@gprose/model';
 import { createHtmlParser } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { demoSchema } from '../../../../src/demo/demo-schema.js';
-import { importHtml } from '../../../../src/demo/import-html.js';
+import { demoSchema } from '../../../../apps/demo/src/demo-schema.js';
+import { importHtml } from '../../../../apps/demo/src/import-html.js';
 import { starterHtmlParsers } from '../html-parsers.js';
 import { starterSerializers } from '../serializers.js';
 

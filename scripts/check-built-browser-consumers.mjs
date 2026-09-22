@@ -14,6 +14,7 @@ const resolvedPackages = new Set();
 try {
   await build({
     configFile: false,
+    publicDir: 'apps/demo/public',
     logLevel: 'warn',
     plugins: [
       react({ compiler: true }),

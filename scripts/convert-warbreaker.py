@@ -263,7 +263,7 @@ def verify_sample(full_path, sample_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path)
-    parser.add_argument('--output', type=Path, default=Path('public/samples/warbreaker-full.html'))
+    parser.add_argument('--output', type=Path, default=Path('apps/demo/public/samples/warbreaker-full.html'))
     parser.add_argument('--sample', type=Path, help='Verify an existing trimmed sample and refresh its JSON metadata')
     args = parser.parse_args()
     convert(args.source, args.output)

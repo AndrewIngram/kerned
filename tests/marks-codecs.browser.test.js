@@ -2,9 +2,9 @@ import { test, expect } from 'vitest';
 
 test('demo codecs preserve nested blocks, marks, mentions, locks and table structure', async () => {
   const result = await (async () => {
-    const { demoDocumentCodec } = await import('../src/demo/demo-schema.js');
-    const { createSampleDocument } = await import('../src/demo/sample-document.ts');
-    const { importHtml } = await import('../src/demo/import-html.js');
+    const { demoDocumentCodec } = await import('../apps/demo/src/demo-schema.js');
+    const { createSampleDocument } = await import('../apps/demo/src/sample-document.js');
+    const { importHtml } = await import('../apps/demo/src/import-html.js');
 
     const content = importHtml(
       '<h2>Title</h2><blockquote><p><strong>Bold</strong> <em>italic</em></p></blockquote><ol><li><p>Item</p><ul><li><p>Nested</p></li></ul></li></ol><table><tr><th>One</th><th>Two</th></tr><tr><td>A</td><td><u>B</u></td></tr></table>',

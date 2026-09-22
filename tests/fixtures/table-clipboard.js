@@ -2,7 +2,7 @@ export { createEditor, textSelection, selectionContext } from '@gprose/state';
 
 export { indexTree } from '@gprose/model';
 
-export { demoSchema } from '../../src/demo/demo-schema.js';
+export { demoSchema } from '../../apps/demo/src/demo-schema.js';
 
 export { createTable, tableCells } from '@gprose/extension-table';
 

@@ -3,10 +3,10 @@ import { createOutlineExtension, type OutlineEntry } from '@gprose/extension-out
 import { starterHtmlParsers } from '@gprose/starter-kit/browser';
 import { createHtmlParser } from '@gprose/view';
 
-import { plainText, type StarterNode } from './demo/demo-model.js';
-import { demoSchema } from './demo/demo-schema.js';
-import { createSampleDocument } from './demo/sample-document';
-import { sampleChunk } from './editor-stream';
+import { plainText, type StarterNode } from './demo-model.js';
+import { demoSchema } from './demo-schema.js';
+import { sampleChunk } from './editor-stream.js';
+import { createSampleDocument } from './sample-document.js';
 
 type BookSampleId = 'warbreaker' | 'war-and-peace';
 

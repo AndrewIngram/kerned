@@ -8,9 +8,9 @@ import { textSelection } from '@gprose/state';
 import { createKeyboardShortcuts } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import type { TableNode } from '../../../../src/demo/demo-model.js';
-import { createDemoDocumentQuery } from '../../../../src/demo/document-query.js';
-import { createSampleDocument } from '../../../../src/demo/sample-document.js';
+import type { TableNode } from '../../../../apps/demo/src/demo-model.js';
+import { createDemoDocumentQuery } from '../../../../apps/demo/src/document-query.js';
+import { createSampleDocument } from '../../../../apps/demo/src/sample-document.js';
 import { createDocumentPresentation } from '../../../view/src/canvas/presentation.js';
 import { createTableView, type TableFrame } from '../table-view.js';
 import { tableCells } from '../table.js';

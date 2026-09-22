@@ -1,0 +1,33 @@
+{
+  "name": "@gprose/demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 5176"
+  },
+  "dependencies": {
+    "@gprose/state": "workspace:*",
+    "react": "19.2.8",
+    "@gprose/extension-document": "workspace:*",
+    "@gprose/extension-outline": "workspace:*",
+    "@gprose/starter-kit": "workspace:*",
+    "@gprose/view": "workspace:*",
+    "@gprose/extension-table": "workspace:*",
+    "@gprose/model": "workspace:*",
+    "@gprose/transform": "workspace:*",
+    "zod": "4.6.5",
+    "@gprose/core": "workspace:*",
+    "@gprose/extension-editing": "workspace:*",
+    "@gprose/extension-comments": "workspace:*",
+    "@gprose/react": "workspace:*",
+    "react-dom": "19.2.8",
+    "@gprose/extension-search": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "8.3.0",
+    "@vitejs/plugin-react": "^6.1.1"
+  }
+}

@@ -6,7 +6,7 @@ listen for DOM events.
 
 ```ts
 import { defineExtension, type ContributionContext } from '@gprose/core';
-import { keyboardShortcuts } from '../src/editor-browser';
+import { keyboardShortcuts } from '@gprose/view';
 
 const historyKeys = defineExtension({
   name: 'historyKeys',

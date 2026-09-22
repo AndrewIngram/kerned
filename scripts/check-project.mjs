@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import ts from 'typescript';
 
-const sourceFiles = ['src', 'packages']
+const sourceFiles = ['apps', 'packages']
   .flatMap((root) => readdirSync(root, { recursive: true }).map((file) => path.join(root, file)))
   .filter(
     (file) =>
@@ -48,12 +48,14 @@ function visit(file) {
   }
 }
 
-for (const entry of ['editor.html', 'extensions.html']) {
+visit('apps/demo/vite.config.ts');
+
+for (const entry of ['apps/demo/editor.html', 'apps/demo/extensions.html']) {
   const html = readFileSync(entry, 'utf8');
   const scripts = [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g)];
   assert.ok(scripts.length, `${entry}: missing editor entry point`);
 
-  for (const [, source] of scripts) visit(source.replace(/^\//, ''));
+  for (const [, source] of scripts) visit(path.join('apps/demo', source.replace(/^\//, '')));
 }
 
 // Public headless entry points are supported even when the demo does not import every export.

@@ -6,7 +6,7 @@ transaction, selection and history implementation is exported from
 `@gprose/model`; document operations and mappings live in
 `@gprose/transform`. These modules are headless. The
 [implementation plan](public-interface-implementation-plan.md) distinguishes
-shipped interfaces from the remaining view, lifecycle and package work.
+implemented interfaces from remaining migration work.
 
 ## Composed sessions and reusable extensions
 
@@ -18,7 +18,7 @@ the definition; transactional state belongs to registered fields.
 ```ts
 import { createEditor, defineCommand, defineExtension } from '@gprose/core';
 import { createSchema, indexTree } from '@gprose/model';
-import { paragraph } from './src/extensions/starter-definitions';
+import { paragraph } from '@gprose/extension-document';
 import { localHistory } from '@gprose/extension-history';
 
 const Append = defineExtension({
@@ -305,7 +305,7 @@ its native listeners on session destruction. The mounted view owns graphics and 
 see [mounted editor lifetime](mounted-editor.md).
 
 ```tsx
-import { useEditorState } from './src/editor-react';
+import { useEditorState } from '@gprose/react';
 
 function Revision({ editor }) {
   const revision = useEditorState(editor, (state) => state.revision);
@@ -404,9 +404,16 @@ Text extensions can provide a mark-storage adapter, and node extensions can prov
 
 ## Browser view and React host
 
-`mountEditorView(element, options)` from `src/editor-browser` owns pointer selection, native input/key/composition/clipboard routing and focus events. `update(options)` changes callbacks without reinstalling listeners; `destroy()` releases them and cancels dragging. Embedded controls opt out of canvas hit testing. Input events are routed only from the configured capture textarea, so interactive overlays retain their native behavior. `createTextInput(schema, editor)` owns schema-independent textarea synchronization, diffing, composition and native Select All observation. Call `sync` after selection/text changes outside composition, route native input through `read`, and release the cleanup returned by `mount`. `observeEditorViewport` handles page scrolling with a sticky toolbar or an embedded scrollport and returns cleanup.
+`mountEditor(element, { editor })` from `@gprose/view` owns rendering, pointer
+selection, native input, viewport observation and focus routing. Its `ready`
+promise reports initialization, `update` changes view configuration, and `destroy`
+releases the view without destroying the borrowed session. Native interactive
+controls retain their own input behavior. Most applications use this complete
+mount rather than assembling the lower-level event and text-input adapters.
+See [mounted editor lifetime](mounted-editor.md) for assets, configuration and
+geometry contracts.
 
-`EditorContent` from `src/editor-react` attaches the complete native mount.
+`EditorContent` from `@gprose/react` attaches the complete native mount.
 `useEditor` owns a headless session after commit; `useEditorState`,
 `useCommandState` and `useViewState` subscribe to session and view snapshots.
 The demo uses those interfaces and no longer assembles private renderer resources.
@@ -493,7 +500,7 @@ lifecycle event error reporting described above.
 import { createEditor, defineExtension, defineQuery } from '@gprose/core';
 import { createSchema, type NodeIdentity } from '@gprose/model';
 import { createStateField } from '@gprose/state';
-import { paragraph } from './src/extensions/starter-definitions';
+import { paragraph } from '@gprose/extension-document';
 
 const Stats = defineExtension({
   name: 'stats',

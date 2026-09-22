@@ -7,19 +7,19 @@ import type { MountedEditor } from '@gprose/view';
 import { createViewDiagnostics } from '@gprose/view/diagnostics';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { FindBar } from '../../demo/find-bar';
-import type { EditorSample } from '../../editor-samples';
 import { createDemoDocumentQuery } from '../document-query.js';
+import type { EditorSample } from '../editor-samples.js';
 import type { EditorSession } from '../editor-types.js';
+import { FindBar } from '../find-bar.js';
 import { OutlineMenu } from '../outline-menu.js';
-import { AnnotationPanel, type ActivePanel } from './annotation-panel';
-import { createEditorControls } from './editor-controls';
-import { Toolbar } from './toolbar';
-import { useComments } from './use-comments';
-import { useDiagnostics } from './use-diagnostics';
-import { useFind, useFindReveal } from './use-find';
-import { useOutline } from './use-outline';
-import { useSampleStream } from './use-sample-stream';
+import { AnnotationPanel, type ActivePanel } from './annotation-panel.js';
+import { createEditorControls } from './editor-controls.js';
+import { Toolbar } from './toolbar.js';
+import { useComments } from './use-comments.js';
+import { useDiagnostics } from './use-diagnostics.js';
+import { useFind, useFindReveal } from './use-find.js';
+import { useOutline } from './use-outline.js';
+import { useSampleStream } from './use-sample-stream.js';
 
 export function EditorWorkspaceView({
   editor,

@@ -13,8 +13,8 @@ import { createStateField, textSelection } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
-import type { StarterNode } from '../../../../src/demo/demo-model.js';
-import { demoSchema } from '../../../../src/demo/demo-schema.js';
+import type { StarterNode } from '../../../../apps/demo/src/demo-model.js';
+import { demoSchema } from '../../../../apps/demo/src/demo-schema.js';
 import {
   createEditor,
   defineExtension,

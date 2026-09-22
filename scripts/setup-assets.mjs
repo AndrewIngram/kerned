@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, copyFile, writeFile, readFile } from 'node:fs/promises';
 
-const checksums = JSON.parse(await readFile('public/fonts/checksums.json', 'utf8'));
+const checksums = JSON.parse(await readFile('apps/demo/public/fonts/checksums.json', 'utf8'));
 
 function verify(name, bytes) {
   const checksum = createHash('sha256').update(bytes).digest('hex');
@@ -12,11 +12,14 @@ function verify(name, bytes) {
     );
 }
 
-await mkdir('public/engines', { recursive: true });
+await mkdir('apps/demo/public/engines', { recursive: true });
 
-await mkdir('public/fonts', { recursive: true });
+await mkdir('apps/demo/public/fonts', { recursive: true });
 
-await copyFile('node_modules/canvaskit-wasm/bin/canvaskit.wasm', 'public/engines/canvaskit.wasm');
+await copyFile(
+  'node_modules/canvaskit-wasm/bin/canvaskit.wasm',
+  'apps/demo/public/engines/canvaskit.wasm',
+);
 
 const sources = [
   [
@@ -42,7 +45,7 @@ const sources = [
 ];
 
 for (const [name, url] of sources) {
-  const path = `public/fonts/${name}`;
+  const path = `apps/demo/public/fonts/${name}`;
 
   try {
     const bytes = await readFile(path);
@@ -68,7 +71,7 @@ for (const [name, url] of [
     'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/LICENSE',
   ],
 ]) {
-  const path = `public/fonts/${name}`;
+  const path = `apps/demo/public/fonts/${name}`;
 
   try {
     const bytes = await readFile(path);

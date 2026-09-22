@@ -1,7 +1,7 @@
 import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 
-import type { TextBlockNode } from '../../../../../src/demo/demo-model.js';
+import type { TextBlockNode } from '../../../../../apps/demo/src/demo-model.js';
 import { createFixturePresentation } from '../../../../../tests/fixtures/standard-presentation';
 import { createEditorScene } from '../../canvas/scene.js';
 import { createOwnedEngine } from '../owned-layout.js';

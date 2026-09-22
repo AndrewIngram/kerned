@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import type { StarterNode } from '../src/demo/demo-model.js';
-import { demoDocumentCodec } from '../src/demo/demo-schema.js';
+import type { StarterNode } from '../apps/demo/src/demo-model.js';
+import { demoDocumentCodec } from '../apps/demo/src/demo-schema.js';
 import starterFixture from './fixtures/starter-document-v1.json?raw';
 
 test('document nesting counts document nodes independently of JSON nesting', () => {

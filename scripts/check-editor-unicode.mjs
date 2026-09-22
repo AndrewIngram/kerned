@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 
 import { chromium, firefox, webkit } from 'playwright';
 
+import { createBrowserFixtureServer } from './browser-fixture-server.mjs';
+
 for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
   const browser = await type.launch();
 
@@ -10,7 +12,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       errors = [];
 
     page.on('pageerror', (e) => errors.push(e.message));
-    await page.goto('http://127.0.0.1:5173/editor.html');
+    await page.goto(`${process.env.BASE_URL ?? 'http://127.0.0.1:5173'}/editor.html`);
     await page.waitForFunction(() => window.editorDiagnostics);
 
     const settle = () =>
@@ -69,45 +71,55 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     assert.deepEqual(errors, []);
 
     if (name === 'chromium') {
-      const variants = await page.evaluate(async () => {
-        const { default: initialize } = await import('/tests/fixtures/canvas-kit.js'),
-          { createOwnedEngine } = await import('/packages/view/src/internal/owned-layout.ts');
+      const fixtureServer = await createBrowserFixtureServer();
+      const enginePage = await browser.newPage();
 
-        const kit = await initialize({ locateFile: () => '/engines/canvaskit.wasm' }),
-          results = [];
+      try {
+        await enginePage.goto(fixtureServer.url);
 
-        for (const storage of ['objects', 'packed', 'carets', 'shaping']) {
-          const owned = await createOwnedEngine(kit, storage),
-            surface = kit.MakeSurface(500, 200);
+        const variants = await enginePage.evaluate(async () => {
+          const { default: initialize } = await import('/tests/fixtures/canvas-kit.js'),
+            { createOwnedEngine } = await import('/packages/view/src/internal/owned-layout.ts');
 
-          const text = 'Bold 👩‍💻 and 🇬🇧 café 🜀';
+          const kit = await initialize({ locateFile: () => '/engines/canvaskit.wasm' }),
+            results = [];
 
-          const layout = owned.layoutText({
-            text,
-            spans: [{ start: 0, end: text.length, bold: true, italic: false }],
-            width: 400,
-            size: 24,
-          });
+          for (const storage of ['objects', 'packed', 'carets', 'shaping']) {
+            const owned = await createOwnedEngine(kit, storage),
+              surface = kit.MakeSurface(500, 200);
 
-          layout.draw(surface.getCanvas(), 0, 0);
-          surface.flush();
-          results.push({
-            storage,
-            lines: layout.lines,
-            caret: layout.geometry(text.length, text.length, false).caret,
-          });
-          layout.dispose();
-          owned.destroy();
-          surface.delete();
+            const text = 'Bold 👩‍💻 and 🇬🇧 café 🜀';
+
+            const layout = owned.layoutText({
+              text,
+              spans: [{ start: 0, end: text.length, bold: true, italic: false }],
+              width: 400,
+              size: 24,
+            });
+
+            layout.draw(surface.getCanvas(), 0, 0);
+            surface.flush();
+            results.push({
+              storage,
+              lines: layout.lines,
+              caret: layout.geometry(text.length, text.length, false).caret,
+            });
+            layout.dispose();
+            owned.destroy();
+            surface.delete();
+          }
+
+          return results;
+        });
+
+        for (const result of variants) {
+          assert.deepEqual(result.lines, variants[0].lines);
+          assert.deepEqual(result.caret, variants[0].caret);
+          assert.ok(result.caret.every(Number.isFinite));
         }
-
-        return results;
-      });
-
-      for (const result of variants) {
-        assert.deepEqual(result.lines, variants[0].lines);
-        assert.deepEqual(result.caret, variants[0].caret);
-        assert.ok(result.caret.every(Number.isFinite));
+      } finally {
+        await enginePage.close();
+        await fixtureServer.close();
       }
     }
 

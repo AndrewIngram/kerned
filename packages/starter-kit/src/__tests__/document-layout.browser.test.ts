@@ -3,9 +3,9 @@ import { textSelection } from '@gprose/state';
 import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 
-import type { StarterNode, TextBlockNode } from '../../../../src/demo/demo-model.js';
-import { demoSchema } from '../../../../src/demo/demo-schema.js';
-import { createDemoDocumentQuery } from '../../../../src/demo/document-query.js';
+import type { StarterNode, TextBlockNode } from '../../../../apps/demo/src/demo-model.js';
+import { demoSchema } from '../../../../apps/demo/src/demo-schema.js';
+import { createDemoDocumentQuery } from '../../../../apps/demo/src/document-query.js';
 import { createFixturePresentation } from '../../../../tests/fixtures/standard-presentation.js';
 import {
   createDocumentLayout,

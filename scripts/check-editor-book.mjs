@@ -6,15 +6,17 @@ import { chromium, firefox, webkit } from 'playwright';
 
 const base = process.env.EDITOR_URL ?? 'http://127.0.0.1:5176/extensions.html';
 
-const html = await readFile('public/samples/warbreaker.html', 'utf8');
+const html = await readFile('apps/demo/public/samples/warbreaker.html', 'utf8');
 
-const manifest = JSON.parse(await readFile('public/samples/warbreaker.json', 'utf8'));
+const manifest = JSON.parse(await readFile('apps/demo/public/samples/warbreaker.json', 'utf8'));
 
 assert.equal(createHash('sha256').update(html).digest('hex'), manifest.htmlSha256);
 
-const fullHtml = await readFile('public/samples/warbreaker-full.html', 'utf8');
+const fullHtml = await readFile('apps/demo/public/samples/warbreaker-full.html', 'utf8');
 
-const fullManifest = JSON.parse(await readFile('public/samples/warbreaker-full.json', 'utf8'));
+const fullManifest = JSON.parse(
+  await readFile('apps/demo/public/samples/warbreaker-full.json', 'utf8'),
+);
 
 assert.equal(createHash('sha256').update(fullHtml).digest('hex'), fullManifest.htmlSha256);
 

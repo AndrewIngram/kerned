@@ -13,7 +13,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     const result = await page.evaluate(async () => {
       const { textCommands } = await import('/@id/@gprose/extension-document');
       const { createEditor, TextSelection } = await import('/@id/@gprose/state');
-      const { demoSchema } = await import('/src/demo/demo-schema.ts');
+      const { demoSchema } = await import('/src/demo-schema.ts');
 
       const nodes = [1, 2].map((id) => ({
         kind: 'paragraph',

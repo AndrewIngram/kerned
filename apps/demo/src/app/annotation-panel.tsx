@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { EditorDocument } from '../document-query.js';
-import type { useComments } from './use-comments';
+import type { useComments } from './use-comments.js';
 
 const TeamContext = createContext('');
 

@@ -3397,3 +3397,42 @@ for this checkpoint is recorded under `artifacts/public-interface-m8/kit-*`.
 Milestone 8 remains open. The `apps/demo` migration, final public-interface and
 obsolete-adapter audit, consumer documentation and milestone architecture judge
 remain. This checkpoint is not the completed milestone's pre-judge commit.
+
+### Milestone 8 checkpoint: workspace demo and independent diagnostics
+
+The writing and extension routes now belong to `@gprose/demo` in `apps/demo`.
+Its manifest declares application and build dependencies. It owns its Vite React
+configuration, HTML entries, samples, font assets and generated WASM files. Root
+development, build and preview commands delegate to this workspace. Production
+output is `apps/demo/dist`; application URLs and sample behavior are unchanged.
+
+Vitest serves the demo asset directory while retaining workspace-wide test
+projects. The built consumer fixtures use the same asset location. Asset setup,
+native compilation, sample conversion and diagnostic scripts now address their
+new owner. Package checks scan both packages and apps, forbid production private
+package imports and verify the demo's declared imports. Existing lint, formatting,
+React compiler and isolated E2E settings are retained.
+
+Independent source diagnostics use a small dedicated Vite fixture server rather
+than requiring the demo to expose repository test files. The node-only E2E
+selection fixture, bulk-delete check, relative-position benchmark and Unicode
+engine parity checks all run through this server. The application itself consumes
+supported package entry points. README examples now use the built vanilla and
+React interfaces; supported guides have current package import paths.
+
+Validation for this checkpoint:
+
+- `pnpm check` passed: 959 Vitest tests in 219 files, one unchanged TODO,
+  42 E2E cases and all four built browser consumers across three browsers.
+- Production build passed. Collection retained all 886 cases with no additions
+  or removals. Both demo routes, sample switching, outline navigation and the
+  Warbreaker table are exercised by the preserved E2E suite.
+- Bulk-delete, durable-position benchmark and Unicode checks passed. All nine
+  production reflow scenarios passed. Three serial production trials met every
+  unchanged budget: first usable paint 233 ms, streaming 1,267.6 ms, paste handler
+  50.9 ms, paste paint 114.9 ms, typing 32.6 ms, paging 32.1 ms and loaded heap
+  28,096,248 bytes. Evidence is under `artifacts/public-interface-m8/app-*`.
+
+Milestone 8 remains open for the final public-export/obsolete-adapter audit,
+consumer documentation completion and architecture judge. The required complete
+milestone commit and judge/fix cycle still follow that work.

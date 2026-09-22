@@ -7,9 +7,9 @@ import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
 import { textSelection } from '@gprose/state';
 import { useMemo, useState } from 'react';
 
-import type { EditorSample } from '../../editor-samples';
-import { streamConfig } from '../../editor-stream';
-import { EditorWorkspaceView } from './editor-workspace-view';
+import type { EditorSample } from '../editor-samples.js';
+import { streamConfig } from '../editor-stream.js';
+import { EditorWorkspaceView } from './editor-workspace-view.js';
 
 export function EditorWorkspace(props: {
   sample: EditorSample;

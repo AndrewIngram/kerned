@@ -13,7 +13,7 @@ const allowed = {
   core: ['model', 'transform', 'state'],
 };
 
-const sources = ['src', 'packages', 'tests', 'scripts'].flatMap((root) =>
+const sources = ['apps', 'packages', 'tests', 'scripts'].flatMap((root) =>
   readdirSync(root, { recursive: true })
     .filter(
       (file) => /\.(?:ts|tsx|js|mjs)$/.test(file) && !/(?:^|\/)(?:dist|node_modules)\//.test(file),
@@ -72,9 +72,9 @@ for (const file of sources) {
 }
 
 for (const fixture of [
-  'src/editor-extension-checks.ts',
-  'src/editor-container-checks.ts',
-  'src/editor-selection-checks.ts',
+  'apps/demo/src/editor-extension-checks.ts',
+  'apps/demo/src/editor-container-checks.ts',
+  'apps/demo/src/editor-selection-checks.ts',
   'packages/extension-table/src/selection.ts',
 ]) {
   for (const specifier of dependencies(fixture, readFileSync(fixture, 'utf8'))) {

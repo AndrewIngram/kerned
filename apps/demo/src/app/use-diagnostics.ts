@@ -14,16 +14,16 @@ import type { ViewDiagnostics } from '@gprose/view/diagnostics';
 import { checkInlineResources } from '@gprose/view/diagnostics';
 import { useLayoutEffect, type RefObject } from 'react';
 
-import { benchmarkContainerEdits, checkContainers } from '../../editor-container-checks';
-import { checkExtensions } from '../../editor-extension-checks';
-import { checkReflow } from '../../editor-reflow-checks';
-import { checkSelections } from '../../editor-selection-checks';
-import { checkTransactions } from '../../editor-transaction-checks';
 import { demoSchema } from '../demo-schema.js';
 import type { createDemoDocumentQuery } from '../document-query.js';
+import { benchmarkContainerEdits, checkContainers } from '../editor-container-checks.js';
+import { checkExtensions } from '../editor-extension-checks.js';
+import { checkReflow } from '../editor-reflow-checks.js';
+import { checkSelections } from '../editor-selection-checks.js';
+import { checkTransactions } from '../editor-transaction-checks.js';
 import type { EditorSession } from '../editor-types.js';
 import { importHtml } from '../import-html.js';
-import type { StreamState } from './use-sample-stream';
+import type { StreamState } from './use-sample-stream.js';
 
 type DiagnosticsOptions = {
   editor: EditorSession;

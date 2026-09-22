@@ -1,9 +1,9 @@
 import { expect, test } from 'vitest';
 
-import { checkContainers } from '../src/editor-container-checks';
-import { checkExtensions } from '../src/editor-extension-checks';
-import { checkSelections } from '../src/editor-selection-checks';
-import { checkTransactions } from '../src/editor-transaction-checks';
+import { checkContainers } from '../apps/demo/src/editor-container-checks.js';
+import { checkExtensions } from '../apps/demo/src/editor-extension-checks.js';
+import { checkSelections } from '../apps/demo/src/editor-selection-checks.js';
+import { checkTransactions } from '../apps/demo/src/editor-transaction-checks.js';
 
 test.each([
   ['containers', checkContainers],
