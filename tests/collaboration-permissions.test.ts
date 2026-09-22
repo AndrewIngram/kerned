@@ -339,3 +339,17 @@ test('admission rechecks policies against current content and rejects actor sequ
   fork.destroy();
   f.destroy();
 });
+
+test('deferred changes recheck permissions when their dependencies arrive after revocation', () => {
+  const f = fixture();
+  const first = f.edit(insert('inside', 0, '!'));
+  const second = f.edit(insert('open', 5, '?'));
+  expect(f.connection.submit(second)).toEqual({ kind: 'deferred', reason: 'dependencies' });
+  f.denied.add('open');
+  expect(f.connection.submit(first).kind).toBe('accepted');
+  expect(text(f.authority.nodes, 'inside')).toBe('!private');
+  expect(text(f.authority.nodes, 'open')).toBe('hello');
+  expect(f.connection.submit(second)).toEqual({ kind: 'rejected', reason: 'permission' });
+  expect(text(f.authority.nodes, 'open')).toBe('hello');
+  f.destroy();
+});
