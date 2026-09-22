@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { createEditor, defineExtension } from '@gprose/core';
+import { createEditor, createEditorSerializer, defineExtension } from '@gprose/core';
 import {
   captureComment,
   createCommentStore,
@@ -25,6 +25,7 @@ import {
   defineNodeSerializer,
   defineExtension as modelExtension,
 } from '@gprose/model';
+import { starterExtensions } from '@gprose/starter-kit';
 import { TextSelection, Selection, textSelection } from '@gprose/state';
 import { mapPosition } from '@gprose/transform';
 import { z } from 'zod';
@@ -44,6 +45,8 @@ for (const name of [
   'extension-outline',
   'extension-document',
   'extension-table',
+  'extension-editing',
+  'starter-kit',
 ]) {
   assert.match(import.meta.resolve(`@gprose/${name}`), /\/dist\/index\.js$/);
   assert.throws(() => import.meta.resolve(`@gprose/${name}/src/index.ts`), {
@@ -210,3 +213,25 @@ grid.destroy();
 console.log(
   'Built table package: standalone assembly, cell selection, grid commands and undo pass.',
 );
+
+// The complete kit also loads, edits, serializes and undoes without a DOM or TS loader.
+const starter = createEditor({
+  schema: createSchema({ extensions: starterExtensions }),
+  content: [{ kind: 'paragraph', id: 1, text: 'Hello' }],
+  selection: textSelection(1, 5),
+});
+
+assert.equal(starter.commands.paste({ nodes: starter.state.nodes, inline: true }), true);
+
+assert.equal(
+  createEditorSerializer(starter).serialize(starter.state.nodes).html,
+  '<p>HelloHello</p>',
+);
+
+assert.equal(starter.commands.undo(), true);
+
+assert.equal(starter.state.nodes[0].text, 'Hello');
+
+assert.equal('document' in globalThis, false);
+
+starter.destroy();

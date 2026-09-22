@@ -2,7 +2,7 @@ import type { MountedEditor, ViewSnapshot } from '@gprose/view';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
+import type { EditorDocument } from '../document-query.js';
 import type { useComments } from './use-comments';
 
 const TeamContext = createContext('');

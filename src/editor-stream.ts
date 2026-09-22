@@ -1,8 +1,8 @@
 import { formattingMarks } from '@gprose/extension-document';
 import { createMention } from '@gprose/extension-document';
 
+import type { StarterNode } from './demo/demo-model.js';
 import { createSampleDocument } from './demo/sample-document';
-import type { StarterNode } from './extensions/demo-model';
 
 const params = new URLSearchParams(location.search);
 

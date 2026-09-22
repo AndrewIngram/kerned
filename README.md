@@ -167,7 +167,7 @@ blockquote accepts the `block` and `list` groups, so it works in a small kit
 without requiring tables or images. `defineMark` and `defineInline` add typed
 formatting and inline objects to the same assembly.
 
-The [starter definitions](src/extensions/starter-definitions.ts) own paragraphs,
+The [starter definitions](packages/starter-kit/src/definitions.ts) own paragraphs,
 headings, images, tables, quotes, lists, formatting and mentions.
 The [session reference](docs/editor-session-api.md) describes the object-configured
 session, reusable commands, queries and per-session extension state.

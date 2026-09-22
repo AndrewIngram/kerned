@@ -6,19 +6,18 @@ test('starter commands target the selected node and disjoint cells, never the fi
 
     const { NodeSelection, textSelection, selectionContext } = await import('@gprose/state');
 
-    const { demoSchema } = await import('../src/extensions/demo-schema.ts');
+    const { demoSchema } = await import('../src/demo/demo-schema.js');
     const { createTable, tableCells } = await import('@gprose/extension-table');
 
     const { createEditor } = await import('@gprose/core');
     const { createSchema } = await import('@gprose/model');
-    const { starterExtensions } = await import('../src/extensions/starter-kit/index.ts');
-    const { starterInput } = await import('../src/extensions/starter-kit/browser.ts');
+    const { starterExtensions } = await import('@gprose/starter-kit');
+    const { documentInput } = await import('@gprose/extension-editing/browser');
     const { useEditorState } = await import('@gprose/react');
 
-    const { createStarterDocumentQuery } =
-      await import('../src/extensions/starter-kit/browser-document.ts');
+    const { createDemoDocumentQuery } = await import('../src/demo/document-query.js');
 
-    const { createStarterKitInput } = await import('../src/extensions/starter-kit/input.ts');
+    const { createDocumentInput } = await import('../packages/extension-editing/src/input.js');
     const { createTextInput } = await import('@gprose/view');
     let next = 10;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
@@ -35,7 +34,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const table = structuredClone(createTable(demoSchema, allocate));
 
     const editor = createEditor({
-      schema: createSchema({ extensions: [...starterExtensions, starterInput] }),
+      schema: createSchema({ extensions: [...starterExtensions, documentInput] }),
       document: [
         paragraph(1, 'First'),
         { id: 2, key: 'image', kind: 'image', src: '', alt: 'Image' },
@@ -45,7 +44,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     });
 
     let doc;
-    const projectDocument = createStarterDocumentQuery(editor.schema);
+    const projectDocument = createDemoDocumentQuery(editor.schema);
 
     function Probe() {
       const nextDocument = useEditorState(editor, projectDocument);
@@ -80,7 +79,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const firstAfterHeading = editor.state.nodes[0].kind;
     const clipboard = new DataTransfer();
 
-    const { events } = createStarterKitInput({
+    const { events } = createDocumentInput({
       editor,
       onEdit() {},
       textInput: capture,

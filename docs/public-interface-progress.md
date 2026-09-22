@@ -3356,3 +3356,44 @@ Validation:
 Milestone 8 is still open. Shared document editing policy, presentation defaults,
 starter-kit composition, the `apps/demo` migration, final consumer documentation
 and the milestone architecture judge remain.
+
+### Milestone 8 checkpoint: presentation, editing policies and starter-kit
+
+Standard node presentations, image rendering, mention/underline views and container
+paint now belong to `@gprose/extension-document/browser`. The table package owns
+its default presentation. Neither imports the demo schema or starter composition.
+The old closed-union presentation helper is now a test fixture only.
+
+`@gprose/extension-editing` owns default cross-node text editing, structural
+commands and rich clipboard fragments. Its browser entry installs input policies,
+shortcuts and HTML parsing through public contributions. The package depends on
+the document and table contracts, so neither concrete extension needs to depend
+back on the combined editing policy. Generic list adapters still support the
+independent custom-schema consumer. Unused closed-union command instances and
+the obsolete native focus helper were deleted.
+
+`@gprose/starter-kit` now contains only default definitions and extension, codec
+and presentation assembly. Its headless entry exports `starterExtensions`,
+`starterDefinitions` and `starterSerializers`; its browser entry exports
+`starterBrowserExtensions` and `starterHtmlParsers`. The demo's fixed document
+types, projection and toolbar labels moved into demo ownership. Production code
+no longer imports `src/extensions`.
+
+The built Node fixture now exercises the complete kit's rich paste, serialization
+and undo. This replaces the special source TypeScript loader, which was deleted.
+A fourth built browser consumer types through the default native input policy,
+toggles a blockquote, undoes and destroys the view. It runs in Chromium, Firefox
+and WebKit and checks emitted declarations alongside the custom-schema consumers.
+The standalone table fixture uses the table package's public presentation default.
+
+`pnpm check` passed with 959 Vitest tests in 219 files, one unchanged TODO,
+42 end-to-end cases and all built consumers. The production build passed and all
+886 collected cases remain after normalizing their moved paths. Production reflow
+passed all nine scenarios. Three serial trials passed every unchanged budget:
+first usable paint 233 ms, streaming 1,252.2 ms, paste handler 48.5 ms, paste paint
+111.1 ms, typing 32 ms, paging 32.5 ms and loaded heap 28,096,056 bytes. Evidence
+for this checkpoint is recorded under `artifacts/public-interface-m8/kit-*`.
+
+Milestone 8 remains open. The `apps/demo` migration, final public-interface and
+obsolete-adapter audit, consumer documentation and milestone architecture judge
+remain. This checkpoint is not the completed milestone's pre-judge commit.

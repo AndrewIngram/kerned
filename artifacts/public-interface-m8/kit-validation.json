@@ -1,0 +1,68 @@
+{
+  "check": "passed",
+  "builtConsumers": {
+    "node": "passed",
+    "vanilla": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "table": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "starter": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "react": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "typecheck": "emitted declarations",
+    "starterChecks": [
+      "headless kit import",
+      "rich paste and serialization",
+      "undo",
+      "native typing",
+      "blockquote wrapping",
+      "destroy"
+    ]
+  },
+  "vitest": {
+    "files": 219,
+    "passed": 959,
+    "todo": 1
+  },
+  "e2e": {
+    "passed": 42
+  },
+  "production": {
+    "file": "main-tCHsRLaJ.js",
+    "sha256": "216ae9f4d6c6a892bc6702968a664063a615feca12b6bbe369ed1fe53f5a0b78"
+  },
+  "collection": {
+    "before": 886,
+    "after": 886,
+    "missing": 0,
+    "added": 0
+  },
+  "reflow": {
+    "cases": 9,
+    "passed": true
+  },
+  "performanceBudgets": "all passed",
+  "maximums": {
+    "firstUsableMs": 233,
+    "streamingMs": 1252.1999998092651,
+    "pasteHandlerMs": 48.5,
+    "pastePaintMs": 111.10000014305115,
+    "typingFrameMs": 32,
+    "pagingFrameMs": 32.5,
+    "loadedHeapBytes": 28096056
+  },
+  "milestone8": "in progress"
+}

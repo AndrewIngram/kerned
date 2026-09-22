@@ -1,13 +1,12 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
 import { quote } from '@gprose/extension-document';
 import { createSchema } from '@gprose/model';
+import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
 import { TextSelection, textSelection } from '@gprose/state';
 import { defineNodeView, nodeViews } from '@gprose/view';
 import { mountEditor } from '@gprose/view';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
-
-import { starterBrowserExtensions } from '../src/extensions/starter-kit/browser';
 
 const chrome = defineExtension({
   name: 'quoteChrome',

@@ -10,7 +10,7 @@ import {
   type RefObject,
 } from 'react';
 
-import type { EditorSession } from '../../extensions/starter-kit/types';
+import type { EditorSession } from '../editor-types.js';
 
 export function useFind({
   editor,

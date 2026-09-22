@@ -11,7 +11,7 @@ try {
 
   const result = await page.evaluate(async () => {
     const { importHtml } = await import('/src/demo/import-html.ts');
-    const { demoDocumentCodec } = await import('/src/extensions/demo-schema.ts');
+    const { demoDocumentCodec } = await import('/src/demo/demo-schema.ts');
     const nodes = importHtml(await (await fetch('/samples/warbreaker.html')).text()).nodes;
     const trials = [];
 

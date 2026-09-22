@@ -33,6 +33,9 @@ importers:
       '@gprose/extension-document':
         specifier: workspace:*
         version: link:packages/extension-document
+      '@gprose/extension-editing':
+        specifier: workspace:*
+        version: link:packages/extension-editing
       '@gprose/extension-history':
         specifier: workspace:*
         version: link:packages/extension-history
@@ -51,6 +54,9 @@ importers:
       '@gprose/react':
         specifier: workspace:*
         version: link:packages/react
+      '@gprose/starter-kit':
+        specifier: workspace:*
+        version: link:packages/starter-kit
       '@gprose/state':
         specifier: workspace:*
         version: link:packages/state
@@ -157,6 +163,30 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
 
+  packages/extension-editing:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/extension-document':
+        specifier: workspace:*
+        version: link:../extension-document
+      '@gprose/extension-table':
+        specifier: workspace:*
+        version: link:../extension-table
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+      '@gprose/state':
+        specifier: workspace:*
+        version: link:../state
+      '@gprose/transform':
+        specifier: workspace:*
+        version: link:../transform
+      '@gprose/view':
+        specifier: workspace:*
+        version: link:../view
+
   packages/extension-history:
     dependencies:
       '@gprose/core':
@@ -237,6 +267,24 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
+
+  packages/starter-kit:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/extension-document':
+        specifier: workspace:*
+        version: link:../extension-document
+      '@gprose/extension-editing':
+        specifier: workspace:*
+        version: link:../extension-editing
+      '@gprose/extension-history':
+        specifier: workspace:*
+        version: link:../extension-history
+      '@gprose/extension-table':
+        specifier: workspace:*
+        version: link:../extension-table
 
   packages/state:
     dependencies:

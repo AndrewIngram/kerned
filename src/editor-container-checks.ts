@@ -1,3 +1,4 @@
+import { createListCommands, type ListCommand } from '@gprose/extension-editing';
 import {
   createSchema,
   defineNode,
@@ -14,8 +15,6 @@ import {
 } from '@gprose/state';
 import { type Step } from '@gprose/transform';
 import { z } from 'zod';
-
-import { createListCommands, type ListCommand } from './extensions/lists';
 
 const definitions = [
   defineNode({

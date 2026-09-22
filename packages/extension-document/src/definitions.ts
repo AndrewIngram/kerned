@@ -128,3 +128,7 @@ export const listItem = defineNode({
 });
 
 export const formattingDefinitions = [bold, italic, underline] as const;
+
+export type HeadingLevel = import('@standard-schema/spec').StandardSchemaV1.InferOutput<
+  typeof heading.spec.attributes
+>['level'];

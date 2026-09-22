@@ -24,8 +24,8 @@ try {
     const { createEditor, TextSelection, createAnchor, resolveAnchor } =
       await import('/@id/@gprose/state');
 
-    const { demoSchema } = await import('/src/extensions/demo-schema.ts');
-    const { replaceStructuredText } = await import('/src/extensions/blocks.ts');
+    const { demoSchema } = await import('/src/demo/demo-schema.ts');
+    const { replaceStructuredText } = await import('/packages/extension-editing/src/blocks.ts');
     const reports = [];
 
     const check = (condition, message) => {

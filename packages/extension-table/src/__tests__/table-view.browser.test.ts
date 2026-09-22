@@ -1,15 +1,16 @@
 import { createEditor } from '@gprose/core';
+import { documentPresentation } from '@gprose/extension-document/browser';
+import { documentInput } from '@gprose/extension-editing/browser';
+import { tablePresentation } from '@gprose/extension-table/browser';
 import { createSchema } from '@gprose/model';
+import { starterExtensions } from '@gprose/starter-kit';
 import { textSelection } from '@gprose/state';
 import { createKeyboardShortcuts } from '@gprose/view';
 import { expect, test } from 'vitest';
 
+import type { TableNode } from '../../../../src/demo/demo-model.js';
+import { createDemoDocumentQuery } from '../../../../src/demo/document-query.js';
 import { createSampleDocument } from '../../../../src/demo/sample-document.js';
-import type { TableNode } from '../../../../src/extensions/demo-model.js';
-import { createStarterDocumentQuery } from '../../../../src/extensions/starter-kit/browser-document.js';
-import { starterInput } from '../../../../src/extensions/starter-kit/browser.js';
-import { starterExtensions } from '../../../../src/extensions/starter-kit/index.js';
-import { starterPresentation } from '../../../../src/extensions/starter-kit/presentation.js';
 import { createDocumentPresentation } from '../../../view/src/canvas/presentation.js';
 import { createTableView, type TableFrame } from '../table-view.js';
 import { tableCells } from '../table.js';
@@ -18,13 +19,15 @@ function fixture(writable = true) {
   let editable = writable;
 
   const editor = createEditor({
-    schema: createSchema({ extensions: [...starterExtensions, starterPresentation, starterInput] }),
+    schema: createSchema({
+      extensions: [...starterExtensions, documentPresentation, tablePresentation, documentInput],
+    }),
     document: createSampleDocument().slice(0, 4),
     permissions: { access: () => (editable ? 'editable' : 'read-only') },
   });
 
   const shortcuts = createKeyboardShortcuts(editor);
-  const project = createStarterDocumentQuery(editor.schema);
+  const project = createDemoDocumentQuery(editor.schema);
   const presentation = createDocumentPresentation(editor);
   const host = document.createElement('div');
   host.style.width = '400px';

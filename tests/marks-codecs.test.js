@@ -3,7 +3,7 @@ import * as stateModule from '@gprose/state';
 import { test, expect } from 'vitest';
 import { z } from 'zod';
 
-import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
+import * as demoSchemaModule from '../src/demo/demo-schema.js';
 
 test('custom attribute marks replace only their type and round-trip with versions', async () => {
   const result = await (async () => {

@@ -28,3 +28,5 @@ export { textCommands } from './text-commands.js';
 export { replaceText, type TextReplacement, type TextReplacementRange } from './replace-text.js';
 
 export { documentSerializers } from './serialization.js';
+
+export type { HeadingLevel } from './definitions.js';

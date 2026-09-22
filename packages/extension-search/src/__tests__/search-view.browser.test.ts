@@ -2,10 +2,10 @@ import { createEditor } from '@gprose/core';
 import { createCommentStore } from '@gprose/extension-comments';
 import { commentView } from '@gprose/extension-comments/browser';
 import { createSchema } from '@gprose/model';
+import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
 import { mountEditor } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { starterBrowserExtensions } from '../../../../src/extensions/starter-kit/browser.js';
 import { searchView } from '../index.js';
 
 function pixels(host: HTMLElement) {

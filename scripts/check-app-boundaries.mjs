@@ -64,8 +64,8 @@ for (const file of sources) {
       }
     }
 
-    if (production && (packages.has(owner) || file.startsWith('src/extensions/starter-kit/'))) {
-      const directory = owner ? `packages/${owner}/src/` : 'src/extensions/starter-kit/';
+    if (production && packages.has(owner)) {
+      const directory = `packages/${owner}/src/`;
       assert.ok(
         !target.endsWith('.css') || target.startsWith(directory),
         `${file} imports styles owned by another module: ${specifier}`,
@@ -91,7 +91,7 @@ for (const file of sources) {
     }
 
     if (
-      ['src/extensions/starter-kit/commands.ts', 'src/extensions/starter-kit/index.ts'].includes(
+      ['packages/extension-editing/src/commands.ts', 'packages/starter-kit/src/index.ts'].includes(
         file,
       )
     )
@@ -102,7 +102,7 @@ for (const file of sources) {
 
     if (
       [
-        'src/extensions/starter-kit/image-view.ts',
+        'packages/extension-document/src/image-view.ts',
         'packages/extension-table/src/table-view.ts',
       ].includes(file)
     )

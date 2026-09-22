@@ -2,8 +2,8 @@ import { useEffect, type RefCallback } from 'react';
 
 import { FindIcon } from '../../demo/find-bar';
 import { bookSamples, type EditorSample } from '../../editor-samples';
-import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
-import type { EditorSession } from '../../extensions/starter-kit/types';
+import type { EditorDocument } from '../document-query.js';
+import type { EditorSession } from '../editor-types.js';
 import type { EditorControls } from './editor-controls';
 
 type ToolbarProps = { doc: EditorDocument; actions: EditorControls } & {

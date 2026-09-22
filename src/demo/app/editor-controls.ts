@@ -1,6 +1,6 @@
 import type { TextFormat } from '@gprose/extension-document';
 
-import type { EditorSession } from '../../extensions/starter-kit/types';
+import type { EditorSession } from '../editor-types.js';
 
 /** Demo feedback and focus wrap the editor's public commands; no document policy lives here. */
 export function createEditorControls({

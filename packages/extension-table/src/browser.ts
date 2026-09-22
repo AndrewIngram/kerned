@@ -104,3 +104,5 @@ export const tableView = defineExtension({
 });
 
 export { tableHtmlParsers } from './html-parsers.js';
+
+export { tablePresentation } from './presentation.js';

@@ -15,6 +15,190 @@ import ts from 'typescript';
 // The source-to-package moves are explicit so reviewers can audit ownership.
 // Rerunning after a move verifies the destination rather than recreating old paths.
 export const packageMoves = [
+  {
+    from: 'src/extensions/starter-kit/index.ts',
+    to: 'packages/starter-kit/src/index.ts',
+    name: '@gprose/starter-kit',
+    public: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/starter-kit/browser.ts',
+    to: 'packages/starter-kit/src/browser.ts',
+    name: '@gprose/starter-kit',
+    public: '@gprose/starter-kit/browser',
+  },
+  {
+    from: 'src/extensions/starter-definitions.ts',
+    to: 'packages/starter-kit/src/definitions.ts',
+    name: '@gprose/starter-kit',
+    public: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/static-serializers.ts',
+    to: 'packages/starter-kit/src/serializers.ts',
+    name: '@gprose/starter-kit',
+    public: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/html-parsers.ts',
+    to: 'packages/starter-kit/src/html-parsers.ts',
+    name: '@gprose/starter-kit',
+    public: '@gprose/starter-kit/browser',
+  },
+  { from: 'src/extensions/demo-model.ts', to: 'src/demo/demo-model.ts' },
+  { from: 'src/extensions/demo-schema.ts', to: 'src/demo/demo-schema.ts' },
+  {
+    from: 'src/extensions/__tests__/portable-clipboard.test.ts',
+    to: 'packages/extension-editing/src/__tests__/portable-clipboard.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/__tests__/static-serializers.test.ts',
+    to: 'packages/starter-kit/src/__tests__/static-serializers.test.ts',
+    name: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/__tests__/typed-clipboard.browser.test.ts',
+    to: 'packages/extension-editing/src/__tests__/typed-clipboard.browser.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/__tests__/clipboard.browser.test.ts',
+    to: 'packages/extension-editing/src/__tests__/clipboard.browser.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/__tests__/html-parsers.browser.test.ts',
+    to: 'packages/starter-kit/src/__tests__/html-parsers.browser.test.ts',
+    name: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/__tests__/block-commands.test.ts',
+    to: 'packages/extension-editing/src/__tests__/block-commands.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/__tests__/portable-text.test.ts',
+    to: 'packages/extension-editing/src/__tests__/portable-text.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/__tests__/starter-definitions.test.ts',
+    to: 'packages/starter-kit/src/__tests__/starter-definitions.test.ts',
+    name: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/document-layout.browser.test.ts',
+    to: 'packages/starter-kit/src/__tests__/document-layout.browser.test.ts',
+    name: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/commands.test.ts',
+    to: 'packages/extension-editing/src/__tests__/commands.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/browser-kit.browser.test.ts',
+    to: 'packages/starter-kit/src/__tests__/browser-kit.browser.test.ts',
+    name: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/input-rules.browser.test.ts',
+    to: 'packages/extension-editing/src/__tests__/input-rules.browser.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/block-layer.browser.test.ts',
+    to: 'packages/starter-kit/src/__tests__/block-layer.browser.test.ts',
+    name: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/mounted-typography.browser.test.ts',
+    to: 'packages/starter-kit/src/__tests__/mounted-typography.browser.test.ts',
+    name: '@gprose/starter-kit',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/text-editing.test.ts',
+    to: 'packages/extension-editing/src/__tests__/text-editing.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/mounted-input.browser.test.ts',
+    to: 'packages/extension-editing/src/__tests__/mounted-input.browser.test.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/blocks.ts',
+    to: 'packages/extension-editing/src/blocks.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/block-commands.ts',
+    to: 'packages/extension-editing/src/block-commands.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/lists.ts',
+    to: 'packages/extension-editing/src/lists.ts',
+    name: '@gprose/extension-editing',
+    public: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/paste.ts',
+    to: 'packages/extension-editing/src/paste.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/clipboard-fragment.ts',
+    to: 'packages/extension-editing/src/clipboard-fragment.ts',
+    name: '@gprose/extension-editing',
+    public: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/clipboard.ts',
+    to: 'packages/extension-editing/src/clipboard.ts',
+    name: '@gprose/extension-editing',
+    public: '@gprose/extension-editing/browser',
+  },
+  {
+    from: 'src/extensions/headings.ts',
+    to: 'packages/extension-editing/src/headings.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/commands.ts',
+    to: 'packages/extension-editing/src/commands.ts',
+    name: '@gprose/extension-editing',
+    public: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/structure.ts',
+    to: 'packages/extension-editing/src/structure.ts',
+    name: '@gprose/extension-editing',
+    public: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/selection.ts',
+    to: 'packages/extension-editing/src/selection.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/text-editing.ts',
+    to: 'packages/extension-editing/src/text-editing.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/input.ts',
+    to: 'packages/extension-editing/src/input.ts',
+    name: '@gprose/extension-editing',
+  },
+  {
+    from: 'src/extensions/starter-kit/shortcuts.ts',
+    to: 'packages/extension-editing/src/shortcuts.ts',
+    name: '@gprose/extension-editing',
+  },
+  { from: 'src/extensions/starter-kit/browser-document.ts', to: 'src/demo/document-query.ts' },
+  { from: 'src/extensions/starter-kit/types.ts', to: 'src/demo/editor-types.ts' },
   ...['model', 'transform', 'state', 'core'].map((name) => ({
     from: `src/${name}`,
     to: `packages/${name}/src`,
@@ -179,6 +363,65 @@ export const packageMoves = [
     from: 'src/extensions/__tests__/scoped-cell-selection.test.ts',
     to: 'packages/extension-table/src/__tests__/scoped-cell-selection.test.ts',
     name: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/starter-kit/container-decorations.ts',
+    to: 'packages/extension-document/src/container-decorations.ts',
+    name: '@gprose/extension-document',
+    public: '@gprose/extension-document/browser',
+  },
+  {
+    from: 'src/extensions/starter-kit/container-decorations.css',
+    to: 'packages/extension-document/src/container-decorations.css',
+    name: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/starter-kit/image-view.ts',
+    to: 'packages/extension-document/src/image-view.ts',
+    name: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/starter-kit/mention-view.ts',
+    to: 'packages/extension-document/src/mention-view.ts',
+    name: '@gprose/extension-document',
+    public: '@gprose/extension-document/browser',
+  },
+  {
+    from: 'src/extensions/starter-kit/mention-view.css',
+    to: 'packages/extension-document/src/mention-view.css',
+    name: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/starter-kit/underline-view.ts',
+    to: 'packages/extension-document/src/underline-view.ts',
+    name: '@gprose/extension-document',
+    public: '@gprose/extension-document/browser',
+  },
+  {
+    from: 'src/extensions/typography.ts',
+    to: 'packages/extension-document/src/typography.ts',
+    name: '@gprose/extension-document',
+    public: '@gprose/extension-document/browser',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/image-view.browser.test.ts',
+    to: 'packages/extension-document/src/__tests__/image-view.browser.test.ts',
+    name: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/mounted-mentions.browser.test.ts',
+    to: 'packages/extension-document/src/__tests__/mounted-mentions.browser.test.ts',
+    name: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/mounted-marks.browser.test.ts',
+    to: 'packages/extension-document/src/__tests__/mounted-marks.browser.test.ts',
+    name: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/mounted-containers.browser.test.ts',
+    to: 'packages/extension-document/src/__tests__/mounted-containers.browser.test.ts',
+    name: '@gprose/extension-document',
   },
 ];
 

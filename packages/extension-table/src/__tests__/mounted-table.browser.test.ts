@@ -3,6 +3,7 @@ import { formattingSpans } from '@gprose/extension-document';
 import { paragraph } from '@gprose/extension-document';
 import { formattingCommands } from '@gprose/extension-document';
 import { createSchema, defineNode } from '@gprose/model';
+import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
 import { textSelection } from '@gprose/state';
 import { keyboardShortcuts, type KeyboardShortcut } from '@gprose/view';
 import {
@@ -15,7 +16,6 @@ import {
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { starterBrowserExtensions } from '../../../../src/extensions/starter-kit/browser.js';
 import { tableCells } from '../table.js';
 
 const note = defineNode({

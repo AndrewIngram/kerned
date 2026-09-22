@@ -98,7 +98,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
 
         if (find === 'on') {
           const expected = await page.evaluate(async () => {
-            const { demoSchema } = await import('/src/extensions/demo-schema.ts');
+            const { demoSchema } = await import('/src/demo/demo-schema.ts');
 
             const count = (node) =>
               (demoSchema.text(node)?.match(/the/giu)?.length ?? 0) +

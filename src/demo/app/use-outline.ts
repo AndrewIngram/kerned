@@ -3,9 +3,9 @@ import type { MountedEditor, ViewSnapshot } from '@gprose/view';
 import { useMemo, useState } from 'react';
 
 import { type EditorSample } from '../../editor-samples';
-import { plainText } from '../../extensions/demo-model';
-import { demoSchema } from '../../extensions/demo-schema';
-import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
+import { plainText } from '../demo-model.js';
+import { demoSchema } from '../demo-schema.js';
+import type { EditorDocument } from '../document-query.js';
 
 type OutlineOptions = Pick<EditorDocument, 'editorState'> & {
   sample: EditorSample;

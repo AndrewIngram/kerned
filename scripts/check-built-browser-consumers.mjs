@@ -39,6 +39,7 @@ try {
           'tests/consumers/vanilla.html',
           'tests/consumers/react.html',
           'tests/consumers/table.html',
+          'tests/consumers/starter.html',
         ],
       },
     },
@@ -50,12 +51,16 @@ try {
       '@gprose/extension-comments',
       '@gprose/extension-comments/browser',
       '@gprose/extension-document',
+      '@gprose/extension-document/browser',
+      '@gprose/extension-editing',
+      '@gprose/extension-editing/browser',
       '@gprose/extension-history',
       '@gprose/extension-search',
       '@gprose/extension-table',
       '@gprose/extension-table/browser',
       '@gprose/model',
       '@gprose/react',
+      '@gprose/starter-kit/browser',
       '@gprose/state',
       '@gprose/transform',
       '@gprose/view',
@@ -123,6 +128,26 @@ try {
         await page.waitForSelector('#editor[data-ready="destroyed"]');
         assert.equal(await page.locator('.table-block').count(), 0);
 
+        await page.goto(url + 'tests/consumers/starter.html');
+        await page.waitForSelector('#editor[data-ready="ready"]');
+        await page.keyboard.insertText(' typed');
+        await page.waitForFunction(
+          () => document.querySelector('output').value === '<p>Starter typed</p>',
+        );
+        await page.getByRole('button', { name: 'Quote', exact: true }).click();
+        await page.waitForFunction(
+          () =>
+            document.querySelector('output').value ===
+            '<blockquote><p>Starter typed</p></blockquote>',
+        );
+        await page.getByRole('button', { name: 'Undo', exact: true }).click();
+        await page.waitForFunction(
+          () => document.querySelector('output').value === '<p>Starter typed</p>',
+        );
+        await page.getByRole('button', { name: 'Destroy', exact: true }).click();
+        await page.waitForSelector('#editor[data-ready="destroyed"]');
+        assert.equal(await page.locator('canvas').count(), 0);
+
         await page.goto(url + 'tests/consumers/react.html');
         await page.waitForSelector('body[data-ready="ready"]');
         await page.getByRole('button', { name: 'Custom node: 0', exact: true }).click();
@@ -136,7 +161,9 @@ try {
         await page.waitForSelector('body[data-ready="destroyed"]');
         assert.equal(await page.locator('canvas').count(), 0);
         assert.deepEqual(errors, []);
-        console.log(`${name}: built vanilla, standalone table and React consumers passed`);
+        console.log(
+          `${name}: built vanilla, standalone table, starter-kit and React consumers passed`,
+        );
       } finally {
         await browser.close();
       }

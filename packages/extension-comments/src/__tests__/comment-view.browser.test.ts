@@ -1,10 +1,10 @@
 import { createEditor } from '@gprose/core';
 import { createSchema } from '@gprose/model';
+import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
 import { textSelection, NodeSelection } from '@gprose/state';
 import { mountEditor } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { starterBrowserExtensions } from '../../../../src/extensions/starter-kit/browser.js';
 import { commentView, onCommentActivate, type CommentActivation } from '../browser.js';
 import { createCommentStore, captureComment } from '../comment.js';
 import { createCommentProjection } from '../projection.js';

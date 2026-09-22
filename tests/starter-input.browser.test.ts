@@ -1,16 +1,16 @@
 import { createEditor } from '@gprose/core';
+import { documentInput } from '@gprose/extension-editing/browser';
 import { createSchema } from '@gprose/model';
+import { starterExtensions } from '@gprose/starter-kit';
 import { TextSelection, textSelection } from '@gprose/state';
 import { createTextInput, createKeyboardShortcuts } from '@gprose/view';
 import { expect, test, onTestFinished } from 'vitest';
 
-import { starterExtensions } from '../src/extensions/starter-kit';
-import { starterInput } from '../src/extensions/starter-kit/browser';
-import { createStarterKitInput } from '../src/extensions/starter-kit/input';
+import { createDocumentInput } from '../packages/extension-editing/src/input.js';
 
 function inputSession() {
   let writable = true;
-  const schema = createSchema({ extensions: [...starterExtensions, starterInput] });
+  const schema = createSchema({ extensions: [...starterExtensions, documentInput] });
 
   const editor = createEditor({
     schema,
@@ -26,7 +26,7 @@ function inputSession() {
   const notices: string[] = [];
   const notice = (message: string) => notices.push(message);
 
-  const { events: handlers } = createStarterKitInput({
+  const { events: handlers } = createDocumentInput({
     editor,
     onEdit() {},
     textInput,

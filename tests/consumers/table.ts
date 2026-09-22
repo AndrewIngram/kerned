@@ -2,7 +2,7 @@ import { createEditor, defineExtension, type ContributionContext } from '@gprose
 import { paragraph } from '@gprose/extension-document';
 import { localHistory } from '@gprose/extension-history';
 import { table, tableCell, tableEditing } from '@gprose/extension-table';
-import { tableView, tableHtmlParsers } from '@gprose/extension-table/browser';
+import { tableView, tableHtmlParsers, tablePresentation } from '@gprose/extension-table/browser';
 import { createSchema } from '@gprose/model';
 import { textSelection } from '@gprose/state';
 import {
@@ -19,16 +19,6 @@ const appearance = defineExtension({
   name: 'appearance',
   options: {},
   setup(_options, context: ContributionContext) {
-    context.provide(
-      presentations,
-      defineNodePresentation(table, () => () => ({
-        kind: 'box',
-        height: 80,
-        before: 0,
-        after: 16,
-        baselineGrid: 4,
-      })),
-    );
     context.provide(
       presentations,
       defineNodePresentation(paragraph, () => (attrs) => ({
@@ -58,6 +48,7 @@ const editor = createEditor({
       tableEditing,
       localHistory,
       tableView,
+      tablePresentation,
       presentation,
       appearance,
     ],

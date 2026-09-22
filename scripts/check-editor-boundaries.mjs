@@ -79,9 +79,10 @@ for (const fixture of [
 ]) {
   for (const specifier of dependencies(fixture, readFileSync(fixture, 'utf8'))) {
     assert.ok(
-      /^@gprose\/(?:model|transform|state|extension-document|extension-table)$/.test(specifier) ||
+      /^@gprose\/(?:model|transform|state|extension-document|extension-table|extension-editing)$/.test(
+        specifier,
+      ) ||
         specifier === '@gprose/view' ||
-        specifier.startsWith('./extensions/') ||
         // Attribute validators are consumer-owned Standard Schema implementations.
         specifier === 'zod',
       `${fixture}: independent fixture bypasses public entry points: ${specifier}`,

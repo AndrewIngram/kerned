@@ -12,10 +12,11 @@ dependencies use `workspace:*`. Do not add npm/yarn lockfiles or a second toolch
 inside a package. Packages remain private until distribution is explicitly ready.
 
 Model, transform, state, core, view, React, standard document definitions, tables,
-comments, history, outline extraction and search decorations now live in workspace
-packages with built JavaScript and declaration exports. Shared editing policy,
-remaining presentation defaults, starter composition and the demo remain under
-`src/` while milestone 8 migrates them. The Vite demo is still served from the root.
+comments, history, outline extraction, search decorations, document editing and
+starter-kit now live in workspace packages with built JavaScript and declaration
+exports. Standard presentation defaults belong to the document and table packages.
+The demo remains under `src/` and is still served from the root while milestone 8
+migrates it into `apps/demo`.
 Packages must own their implementation; do not create empty manifests
 or exports pointing outside their package.
 
@@ -46,7 +47,8 @@ gprose/
 │   │   └── src/internal/        # Owned layout/shaping/painting; no public engine setup
 │   ├── react/                   # @gprose/react: hooks, hosts, React renderer adapters
 │   ├── starter-kit/             # @gprose/starter-kit: optional standard composition
-│   ├── extension-document/      # Standard definitions, formatting, mentions and codecs
+│   ├── extension-document/      # Standard definitions, formatting, presentation and codecs
+│   ├── extension-editing/       # Cross-node editing, structure, clipboard and native input
 │   ├── extension-table/         # Table semantics, cell selection, commands, clipboard
 │   ├── extension-comments/      # External threads/ranges and decoration contributions
 │   ├── extension-history/       # Optional local undo/redo provider and commands
@@ -148,6 +150,13 @@ starter-kit/src/
 ├── index.ts                # Configurable kit composition; no privileged document union
 ├── defaults/               # Included extension set and configuration defaults
 └── browser/                # Composition of those extensions' standard view contributions
+
+extension-editing/src/
+├── index.ts                # Default editing/structure commands and fragment operations
+├── text-editing.ts          # Split, join, delete and replace across supported nodes
+├── structure.ts             # Bind list/quote/heading operations to the caller's schema
+├── clipboard-fragment.ts    # Closed rich fragments and fitted document insertion
+└── browser.ts              # Native input, shortcut and clipboard policy contribution
 
 extension-table/src/
 ├── index.ts                # Headless table definition and configuration

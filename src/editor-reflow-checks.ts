@@ -1,9 +1,9 @@
 import { formattingSpans } from '@gprose/extension-document';
 import { mentionLayout } from '@gprose/extension-document';
+import { typography } from '@gprose/extension-document/browser';
 import { auditReflow, type ViewDiagnostics, type ReflowAuditBlock } from '@gprose/view/diagnostics';
 
-import type { StarterLeaf } from './extensions/demo-model';
-import { typography } from './extensions/typography';
+import type { StarterLeaf } from './demo/demo-model.js';
 
 /** The fixture owns schema-specific presentation; the view owns the independent layout audit. */
 export function checkReflow(nodes: StarterLeaf[], diagnostics: ViewDiagnostics, bodySize = 20) {

@@ -1,0 +1,30 @@
+[
+  {
+    "browser": "chromium",
+    "sample": "warbreaker",
+    "find": "off",
+    "firstUsableMs": 231,
+    "blocks": 7280,
+    "loadMs": 1245,
+    "batches": 67,
+    "batchSize": {
+      "min": 3,
+      "median": 117,
+      "max": 128
+    },
+    "workMs": {
+      "median": 4.399999618530273,
+      "p95": 7.3999998569488525
+    },
+    "elapsedMs": {
+      "median": 17,
+      "p95": 21.5
+    },
+    "layouts": 7279,
+    "vanished": 0,
+    "decreased": 0,
+    "busyFrames": 0,
+    "matches": 0,
+    "stalePaints": 0
+  }
+]

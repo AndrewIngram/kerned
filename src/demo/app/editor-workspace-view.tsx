@@ -1,5 +1,6 @@
 import { captureComment, createCommentStore } from '@gprose/extension-comments';
 import { onCommentActivate } from '@gprose/extension-comments/browser';
+import { onMentionActivate } from '@gprose/extension-document/browser';
 import { EditorContent, useEditorState, useViewState } from '@gprose/react';
 import { textSelection } from '@gprose/state';
 import type { MountedEditor } from '@gprose/view';
@@ -8,9 +9,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import { FindBar } from '../../demo/find-bar';
 import type { EditorSample } from '../../editor-samples';
-import { onMentionActivate } from '../../extensions/starter-kit/browser';
-import { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
-import type { EditorSession } from '../../extensions/starter-kit/types';
+import { createDemoDocumentQuery } from '../document-query.js';
+import type { EditorSession } from '../editor-types.js';
 import { OutlineMenu } from '../outline-menu.js';
 import { AnnotationPanel, type ActivePanel } from './annotation-panel';
 import { createEditorControls } from './editor-controls';
@@ -38,7 +38,7 @@ export function EditorWorkspaceView({
 }) {
   // oxlint-disable-next-line react/purity -- Render timing is telemetry only.
   const renderStarted = performance.now();
-  const projectDocument = useMemo(() => createStarterDocumentQuery(editor.schema), [editor]);
+  const projectDocument = useMemo(() => createDemoDocumentQuery(editor.schema), [editor]);
   const doc = useEditorState(editor, projectDocument);
   const { editorState, nodes } = doc;
 

@@ -3,8 +3,8 @@ import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 're
 
 import { type EditorSample } from '../../editor-samples';
 import { createStreamMetrics, streamConfig } from '../../editor-stream';
-import type { StarterNode } from '../../extensions/demo-model';
-import type { EditorSession } from '../../extensions/starter-kit/types';
+import type { StarterNode } from '../demo-model.js';
+import type { EditorSession } from '../editor-types.js';
 
 export function useSampleStream(
   editor: EditorSession,

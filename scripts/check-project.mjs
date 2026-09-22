@@ -65,9 +65,6 @@ for (const name of readdirSync('packages')) {
     visit(path.join(directory, entry['gprose-source']));
 }
 
-// Extensions are supported entry points even when the demo does not import them.
-for (const file of sourceFiles.filter((file) => file.startsWith('src/extensions/'))) visit(file);
-
 assert.deepEqual(
   sourceFiles.filter((file) => !reachable.has(file)),
   [],

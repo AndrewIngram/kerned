@@ -19,9 +19,9 @@ import { checkExtensions } from '../../editor-extension-checks';
 import { checkReflow } from '../../editor-reflow-checks';
 import { checkSelections } from '../../editor-selection-checks';
 import { checkTransactions } from '../../editor-transaction-checks';
-import { demoSchema } from '../../extensions/demo-schema';
-import type { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
-import type { EditorSession } from '../../extensions/starter-kit/types';
+import { demoSchema } from '../demo-schema.js';
+import type { createDemoDocumentQuery } from '../document-query.js';
+import type { EditorSession } from '../editor-types.js';
 import { importHtml } from '../import-html.js';
 import type { StreamState } from './use-sample-stream';
 
@@ -29,7 +29,7 @@ type DiagnosticsOptions = {
   editor: EditorSession;
   comments: ReturnType<typeof createCommentStore<{ body: string; reply: string }>>;
   findRef: RefObject<FindState>;
-  projectDocument: ReturnType<typeof createStarterDocumentQuery>;
+  projectDocument: ReturnType<typeof createDemoDocumentQuery>;
   view: MountedEditor | null;
   diagnostics: ViewDiagnostics;
   paused: StreamState['paused'];

@@ -5,8 +5,8 @@ import * as stateModule from '@gprose/state';
 import * as transformModule from '@gprose/transform';
 import { test, expect } from 'vitest';
 
-import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
-import * as headingsModule from '../src/extensions/headings.ts';
+import * as headingsModule from '../packages/extension-editing/src/headings.js';
+import * as demoSchemaModule from '../src/demo/demo-schema.js';
 import * as editorFoundationModule from './fixtures/editor-foundation.js';
 import * as replayPositionsModule from './fixtures/replay-positions.js';
 

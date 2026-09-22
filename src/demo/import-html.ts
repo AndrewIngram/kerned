@@ -1,8 +1,8 @@
+import { starterHtmlParsers } from '@gprose/starter-kit/browser';
 import { createHtmlParser } from '@gprose/view';
 
-import type { StarterNode } from '../extensions/demo-model.js';
-import { demoSchema } from '../extensions/demo-schema.js';
-import { starterHtmlParsers } from '../extensions/html-parsers.js';
+import type { StarterNode } from './demo-model.js';
+import { demoSchema } from './demo-schema.js';
 
 export type HtmlImport = {
   nodes: StarterNode[];
