@@ -1,6 +1,5 @@
+import { defineNode, defineMark, defineInline, jsonRecord, jsonNumber } from '@gprose/model';
 import { z } from 'zod';
-
-import { defineNode, defineMark, defineInline, jsonRecord, jsonNumber } from '../model';
 
 export const bold = defineMark({
   name: 'bold',

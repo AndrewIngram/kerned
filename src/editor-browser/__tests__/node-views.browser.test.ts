@@ -1,9 +1,9 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { selectionContext } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
-import { createSchema, defineNode } from '../../model';
-import { selectionContext } from '../../state';
 import { decorations, type TextDecoration } from '../decorations';
 import { createNodeViews, defineNodeView, nodeViews } from '../node-views';
 

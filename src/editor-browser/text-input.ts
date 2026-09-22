@@ -1,5 +1,10 @@
-import { type NodeIdentity, type Schema } from '../model';
-import { TextSelection, selectionContext, type EditorState, type SelectionContext } from '../state';
+import { type NodeIdentity, type Schema } from '@gprose/model';
+import {
+  TextSelection,
+  selectionContext,
+  type EditorState,
+  type SelectionContext,
+} from '@gprose/state';
 
 type InputSession<N extends NodeIdentity> = {
   readonly state: EditorState<N>;

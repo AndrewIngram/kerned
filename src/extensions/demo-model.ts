@@ -1,5 +1,6 @@
+import type { DocumentNode } from '@gprose/model';
+
 import type { Span } from '../layout-types';
-import type { DocumentNode } from '../model';
 import { createMention, inlineSchema } from './mention';
 import type { starterDefinitions } from './starter-definitions';
 

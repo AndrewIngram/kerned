@@ -13,30 +13,44 @@ const allowed = {
   core: ['model', 'transform', 'state'],
 };
 
-const sources = ['src', 'tests', 'scripts'].flatMap((root) =>
+const sources = ['src', 'packages', 'tests', 'scripts'].flatMap((root) =>
   readdirSync(root, { recursive: true })
-    .filter((file) => /\.(?:ts|tsx|js|mjs)$/.test(file))
+    .filter(
+      (file) => /\.(?:ts|tsx|js|mjs)$/.test(file) && !/(?:^|\/)(?:dist|node_modules)\//.test(file),
+    )
     .map((file) => `${root}/${file}`),
 );
 
 let checked = 0;
 
 for (const file of sources) {
-  const layer = file.startsWith('src/') ? file.split('/')[1] : null;
+  const layer = file.startsWith('packages/') ? file.split('/')[1] : null;
   const headless = layers.has(layer) && !file.includes('/__tests__/');
 
   for (const specifier of dependencies(file, readFileSync(file, 'utf8'))) {
     const target = specifier.startsWith('.')
       ? path.normalize(path.join(path.dirname(file), specifier))
-      : specifier.startsWith('/src/')
+      : /^\/(?:src|packages)\//.test(specifier)
         ? specifier.slice(1)
-        : specifier;
+        : specifier.replace(/^\/@id\//, '');
 
-    const targetLayer = target.startsWith('src/') ? target.split('/')[1] : null;
+    const targetLayer = target.startsWith('packages/')
+      ? target.split('/')[1]
+      : target.startsWith('@gprose/')
+        ? target.split('/')[1]
+        : null;
 
     assert.ok(!/^src\/editor(?:\/|$)/.test(target), `${file}: removed editor barrel: ${specifier}`);
 
     if (headless) {
+      if (!specifier.startsWith('.')) {
+        const manifest = JSON.parse(readFileSync(`packages/${layer}/package.json`, 'utf8'));
+        assert.ok(
+          Object.hasOwn(manifest.dependencies, specifier),
+          `${file}: undeclared dependency ${specifier}`,
+        );
+      }
+
       assert.ok(
         target === 'zod' ||
           target === '@standard-schema/spec' ||
@@ -48,7 +62,7 @@ for (const file of sources) {
 
     if (layers.has(targetLayer) && targetLayer !== layer) {
       assert.ok(
-        target === `src/${targetLayer}` || target === `src/${targetLayer}/index.ts`,
+        target === `@gprose/${targetLayer}`,
         `${file}: use the ${targetLayer} public entry point, not ${specifier}`,
       );
     }
@@ -65,7 +79,8 @@ for (const fixture of [
 ]) {
   for (const specifier of dependencies(fixture, readFileSync(fixture, 'utf8'))) {
     assert.ok(
-      /^(?:\.\/|\.\.\/)(?:model|transform|state|editor-browser)$/.test(specifier) ||
+      /^@gprose\/(?:model|transform|state)$/.test(specifier) ||
+        /^(?:\.\/|\.\.\/)editor-browser$/.test(specifier) ||
         specifier.startsWith('./extensions/') ||
         // Attribute validators are consumer-owned Standard Schema implementations.
         specifier === 'zod',

@@ -1,6 +1,7 @@
-import { indexTree, type NodeIdentity, type Schema } from '../model';
-import { selectionContext, type EditorState } from '../state';
-import { type Step } from '../transform';
+import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
+import { selectionContext, type EditorState } from '@gprose/state';
+import { type Step } from '@gprose/transform';
+
 import type { StarterNode, HeadingLevel } from './demo-model';
 import { paragraph, heading } from './starter-definitions';
 

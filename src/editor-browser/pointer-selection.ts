@@ -6,7 +6,8 @@ import {
   selectionAnchor,
   type SelectionAnchor,
   type SelectionContext,
-} from '../state';
+} from '@gprose/state';
+
 import { type TextHit } from './hit-testing';
 
 type MouseInput = Pick<

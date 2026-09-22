@@ -1,7 +1,8 @@
+import type { NodeIdentity } from '@gprose/model';
+
 import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import type { SlotInsets } from '../editor-browser/content-slot';
 import type { DrawingRect } from '../editor-browser/drawing';
-import type { NodeIdentity } from '../model';
 
 export type { SlotInsets } from '../editor-browser/content-slot';
 

@@ -1,4 +1,5 @@
-import type { Editor } from '../../core';
+import type { Editor } from '@gprose/core';
+
 import type { StarterNode } from '../demo-model';
 import type { starterExtensions } from './index';
 

@@ -1,10 +1,10 @@
+import type { TextSelection } from '@gprose/state';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 import {
   createPointerSelection,
   type PointerSelectionOptions,
 } from '../editor-browser/pointer-selection';
-import type { TextSelection } from '../state';
 
 export function usePointerSelection(
   options: Omit<PointerSelectionOptions, 'selection'> & { selection: TextSelection },

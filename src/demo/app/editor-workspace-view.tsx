@@ -1,3 +1,4 @@
+import { textSelection } from '@gprose/state';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { FindBar } from '../../demo/find-bar';
@@ -11,7 +12,6 @@ import { OutlineMenu } from '../../extensions/outline-view';
 import { onMentionActivate } from '../../extensions/starter-kit/browser';
 import { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import { textSelection } from '../../state';
 import { AnnotationPanel, type ActivePanel } from './annotation-panel';
 import { createEditorControls } from './editor-controls';
 import { Toolbar } from './toolbar';

@@ -1,4 +1,4 @@
-import { sameMark, type Schema, type NodeIdentity, indexTree } from '../model';
+import { sameMark, type Schema, type NodeIdentity, indexTree } from '@gprose/model';
 import {
   markActivity,
   inputMarks,
@@ -7,8 +7,9 @@ import {
   selectionHasMark,
   selectionContext,
   type EditorState,
-} from '../state';
-import { type Step } from '../transform';
+} from '@gprose/state';
+import { type Step } from '@gprose/transform';
+
 import type { TextFormat } from './formatting';
 
 /** Extension commands return ordinary transactions; the core owns history/mapping. */

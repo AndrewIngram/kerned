@@ -1,0 +1,21 @@
+{
+  "name": "@gprose/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "gprose-source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@gprose/model": "workspace:*",
+    "@gprose/state": "workspace:*",
+    "@standard-schema/spec": "1.1.0"
+  }
+}

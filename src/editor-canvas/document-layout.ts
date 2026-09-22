@@ -1,8 +1,9 @@
+import type { NodeIdentity } from '@gprose/model';
+import { RangeSelection } from '@gprose/state';
+
 import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import type { createDocumentQuery } from '../editor-browser/document';
 import type { Rect } from '../engines';
-import type { NodeIdentity } from '../model';
-import { RangeSelection } from '../state';
 import type { FlowLayoutEvent, FlowPlacement } from './flow-layout';
 import {
   createEditorScene,

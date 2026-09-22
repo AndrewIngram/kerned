@@ -1,10 +1,11 @@
-import type { NodeIdentity, SchemaDefinition, ValueBinding } from '../model';
+import type { NodeIdentity, SchemaDefinition, ValueBinding } from '@gprose/model';
 import {
   equalScopedSelection,
   selectionInText,
   type ScopedSelection,
   type NodeAccess,
-} from '../state';
+} from '@gprose/state';
+
 import type { Drawing, DrawingLayer, TextFragment } from './drawing';
 import { createRangeViews } from './range-view-owner';
 import type { LayerBlock, ViewLayerContext, ViewLayerContribution } from './view-layers';

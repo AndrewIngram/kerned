@@ -1,4 +1,12 @@
 import {
+  createEditor,
+  defineExtension,
+  type CommandDefinition,
+  type ContributionContext,
+} from '@gprose/core';
+import { createSchema, defineNode, type DocumentNode, type NodeIdentity } from '@gprose/model';
+import { NodeSelection, textSelection, type AccessPolicy } from '@gprose/state';
+import {
   Component,
   type ReactNode,
   createContext,
@@ -14,12 +22,6 @@ import { expect, expectTypeOf, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
-import {
-  createEditor,
-  defineExtension,
-  type CommandDefinition,
-  type ContributionContext,
-} from '../../core';
 import { nodeViews } from '../../editor-browser';
 import {
   defineNodePresentation,
@@ -27,8 +29,6 @@ import {
   presentations,
   type MountedEditor,
 } from '../../editor-canvas';
-import { createSchema, defineNode, type DocumentNode, type NodeIdentity } from '../../model';
-import { NodeSelection, textSelection, type AccessPolicy } from '../../state';
 import { defineReactNodeView, EditorContent, type ReactNodeViewProps } from '../index';
 
 const note = defineNode({

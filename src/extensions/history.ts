@@ -1,4 +1,4 @@
-import { defineExtension, defineCommand } from '../core';
+import { defineExtension, defineCommand } from '@gprose/core';
 
 /** Install one local undo history per session. */
 export const localHistory = defineExtension({

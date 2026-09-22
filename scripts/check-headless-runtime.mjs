@@ -5,15 +5,16 @@ const result = execFileSync(
   process.execPath,
   [
     '--experimental-transform-types',
+    '--conditions=gprose-source',
     '--import',
     `data:text/javascript,import {register} from 'node:module'; register(${JSON.stringify(new URL('../tests/fixtures/node-typescript-loader.mjs', import.meta.url).href)});`,
     '--input-type=module',
     '-e',
     `
       import assert from 'node:assert/strict';
-      import {createEditor, createEditorSerializer} from './src/core/index.ts';
-      import {createSchema} from './src/model/index.ts';
-      import {textSelection} from './src/state/index.ts';
+      import {createEditor, createEditorSerializer} from '@gprose/core';
+      import {createSchema} from '@gprose/model';
+      import {textSelection} from '@gprose/state';
       import {starterExtensions} from './src/extensions/starter-kit/index.ts';
       const editor = createEditor({
         schema: createSchema({extensions: starterExtensions}),

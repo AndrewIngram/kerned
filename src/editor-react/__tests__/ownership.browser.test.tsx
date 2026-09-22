@@ -1,12 +1,12 @@
+import { createEditor, type Editor } from '@gprose/core';
+import type { DocumentNode } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { StrictMode, Suspense, useLayoutEffect, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { expect, expectTypeOf, test } from 'vitest';
 
-import { createEditor, type Editor } from '../../core';
-import type { DocumentNode } from '../../model';
-import { textSelection } from '../../state';
 import { createEditorContext, useCommandState, useEditor, useEditorState } from '../index';
 import { ownershipFixture } from './ownership-fixture';
 

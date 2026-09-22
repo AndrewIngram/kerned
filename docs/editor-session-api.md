@@ -1,10 +1,10 @@
 # Implemented editor session APIs
 
-The composed session interface is exported from `src/core/index.ts`. The lower-level
+The composed session interface is exported from `@gprose/core`. The lower-level
 transaction, selection and history implementation is exported from
-`src/state/index.ts`. Schema, content and durable-reference codecs live in
-`src/model/index.ts`; document operations and mappings live in
-`src/transform/index.ts`. These modules are headless. The
+`@gprose/state`. Schema, content and durable-reference codecs live in
+`@gprose/model`; document operations and mappings live in
+`@gprose/transform`. These modules are headless. The
 [implementation plan](public-interface-implementation-plan.md) distinguishes
 shipped interfaces from the remaining view, lifecycle and package work.
 
@@ -16,8 +16,8 @@ through `setup`. Each session runs its own factories. Configuration belongs to
 the definition; transactional state belongs to registered fields.
 
 ```ts
-import { createEditor, defineCommand, defineExtension } from './src/core';
-import { createSchema, indexTree } from './src/model';
+import { createEditor, defineCommand, defineExtension } from '@gprose/core';
+import { createSchema, indexTree } from '@gprose/model';
 import { paragraph } from './src/extensions/starter-definitions';
 import { localHistory } from './src/extensions/history';
 
@@ -490,9 +490,9 @@ lifecycle event error reporting described above.
 ## Typed extension state
 
 ```ts
-import { createEditor, defineExtension, defineQuery } from './src/core';
-import { createSchema, type NodeIdentity } from './src/model';
-import { createStateField } from './src/state';
+import { createEditor, defineExtension, defineQuery } from '@gprose/core';
+import { createSchema, type NodeIdentity } from '@gprose/model';
+import { createStateField } from '@gprose/state';
 import { paragraph } from './src/extensions/starter-definitions';
 
 const Stats = defineExtension({

@@ -1,4 +1,4 @@
-import { boundaries } from './model';
+import { boundaries } from '@gprose/model';
 
 // Views into the existing shaping result. A caller must consume them before
 // another native call, or copy words first when assembling multiple style runs.

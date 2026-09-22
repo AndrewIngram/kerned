@@ -1,7 +1,9 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../../core';
 import { keyboardShortcuts, type KeyboardShortcut } from '../../../editor-browser';
 import {
   defaultFonts,
@@ -10,8 +12,6 @@ import {
   presentations,
   defineStyleRule,
 } from '../../../editor-canvas';
-import { createSchema, defineNode } from '../../../model';
-import { textSelection } from '../../../state';
 import { formattingSpans } from '../../formatting';
 import { paragraph } from '../../starter-definitions';
 import { tableCells } from '../../table';

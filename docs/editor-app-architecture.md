@@ -14,15 +14,15 @@ and [mounted editor lifetime](mounted-editor.md) for those interfaces.
 
 ## What belongs where
 
-| Owner                                     | Responsibility                                                                               |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `src/model`, `src/transform`, `src/state` | Schema, immutable content, operations, mapping, selections and transactions                  |
-| `src/core`                                | Composed headless session, named commands/queries, extension state and lifetime              |
-| `src/editor-browser`                      | Native events, input capture, navigation, document projection, node-view and layer contracts |
-| `src/editor-react`                        | Optional session ownership, borrowed content host, context and selector subscriptions        |
-| `src/editor-canvas`                       | Complete mounted view, assets, layout, viewport, graphics, paint and frame scheduling        |
-| `src/extensions/starter-kit`              | Standard schema/commands, input policy, presentation and native block rendering              |
-| `src/demo/app`                            | Sample loading, toolbar, external comment UI, find/outline panels and diagnostics            |
+| Owner                                                 | Responsibility                                                                               |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `@gprose/model`, `@gprose/transform`, `@gprose/state` | Schema, immutable content, operations, mapping, selections and transactions                  |
+| `@gprose/core`                                        | Composed headless session, named commands/queries, extension state and lifetime              |
+| `src/editor-browser`                                  | Native events, input capture, navigation, document projection, node-view and layer contracts |
+| `src/editor-react`                                    | Optional session ownership, borrowed content host, context and selector subscriptions        |
+| `src/editor-canvas`                                   | Complete mounted view, assets, layout, viewport, graphics, paint and frame scheduling        |
+| `src/extensions/starter-kit`                          | Standard schema/commands, input policy, presentation and native block rendering              |
+| `src/demo/app`                                        | Sample loading, toolbar, external comment UI, find/outline panels and diagnostics            |
 
 The headless modules import neither React nor browser code. Browser and canvas
 modules are independent of React, and generic adapters do not import a particular

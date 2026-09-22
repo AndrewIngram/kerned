@@ -17,9 +17,9 @@ These are public source entry points, not published packages or stable versioned
 
 | Layer                             | Owns                                                                                           | Does not decide                                                 |
 | --------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Model, `src/model`                | Document structure, schemas, marks, codecs and durable-reference values                        | Session history, rendering or concrete node kinds               |
-| Transform, `src/transform`        | Document operations, inversion and change maps                                                 | Selection publication, permissions or history grouping          |
-| State, `src/state`                | Revision publication, selections, permissions, local history and retained reference resolution | Paragraph, heading, list, mention or comment semantics          |
+| Model, `@gprose/model`            | Document structure, schemas, marks, codecs and durable-reference values                        | Session history, rendering or concrete node kinds               |
+| Transform, `@gprose/transform`    | Document operations, inversion and change maps                                                 | Selection publication, permissions or history grouping          |
+| State, `@gprose/state`            | Revision publication, selections, permissions, local history and retained reference resolution | Paragraph, heading, list, mention or comment semantics          |
 | Node extensions                   | Attribute validators, storage fields, child constraints and content policies                   | History ordering or revision advancement                        |
 | Inline-object API                 | Atomic inline positions, slicing, replacement and text projection                              | Whether an object is a mention, formula, emoji or another token |
 | Annotation API                    | Range mapping/slicing/joining with extension-selected policies                                 | Comment replies, permissions, rendering or storage              |

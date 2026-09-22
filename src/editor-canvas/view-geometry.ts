@@ -1,7 +1,8 @@
+import type { NodeIdentity, RelativePosition, TextPoint } from '@gprose/model';
+
 import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import type { ViewSession } from '../editor-browser/input-contributions';
 import type { NodeView } from '../editor-browser/node-views';
-import type { NodeIdentity, RelativePosition, TextPoint } from '../model';
 import type { DocumentLayoutFrame, DocumentLayoutSnapshot } from './document-layout';
 import type { createDocumentPresentation } from './presentation';
 import { readRevealOptions, type RevealOptions } from './view-options';

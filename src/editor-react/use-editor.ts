@@ -1,7 +1,6 @@
+import { createEditor, type Editor, type EditorOptions } from '@gprose/core';
+import type { NodeIdentity, SchemaDefinition } from '@gprose/model';
 import { useEffect, useLayoutEffect, useMemo, useRef, useSyncExternalStore } from 'react';
-
-import { createEditor, type Editor, type EditorOptions } from '../core';
-import type { NodeIdentity, SchemaDefinition } from '../model';
 
 /** An empty owner is safe to create during render; only attachment allocates a session. */
 function createOwner<D extends readonly SchemaDefinition[], N extends NodeIdentity>(

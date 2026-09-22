@@ -1,6 +1,7 @@
-import { defineContribution } from '../core';
-import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '../model';
-import type { NodeAccess, ScopedSelection, Selection, SelectionContext } from '../state';
+import { defineContribution } from '@gprose/core';
+import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '@gprose/model';
+import type { NodeAccess, ScopedSelection, Selection, SelectionContext } from '@gprose/state';
+
 import type { ContentSlot } from './content-slot';
 import type { ViewSession } from './input-contributions';
 import { createTextDecorations, type ReadTextDecorations } from './text-decorations';

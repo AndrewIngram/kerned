@@ -1,6 +1,4 @@
-import type { StandardSchemaV1 } from '@standard-schema/spec';
-
-import { defineContribution } from '../core';
+import { defineContribution } from '@gprose/core';
 import {
   snapTextOffset,
   normalizeMarks,
@@ -11,7 +9,8 @@ import {
   type Mark,
   type MarkRange,
   type InlineValue,
-} from '../model';
+} from '@gprose/model';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 export type ParsedHtmlText = Readonly<{
   text: string;

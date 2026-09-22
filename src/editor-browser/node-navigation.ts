@@ -1,4 +1,5 @@
-import { rangeSelection, NodeSelection, TextSelection, type Selection } from '../state';
+import { rangeSelection, NodeSelection, TextSelection, type Selection } from '@gprose/state';
+
 import type { NavigationKey } from './keyboard-navigation';
 
 /** Rendered document order, including atomic views of structured nodes. */

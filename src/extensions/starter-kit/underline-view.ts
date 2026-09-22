@@ -1,4 +1,5 @@
-import { defineExtension, type ContributionContext } from '../../core';
+import { defineExtension, type ContributionContext } from '@gprose/core';
+
 import { defineMarkView, viewLayers, type MarkViewFrame } from '../../editor-browser';
 import { underline } from '../starter-definitions';
 

@@ -4,10 +4,13 @@ import path from 'node:path';
 
 import ts from 'typescript';
 
-const sourceFiles = readdirSync('src', { recursive: true })
-  .filter((file) => !file.split(path.sep).includes('__tests__'))
-  .filter((file) => /\.(ts|tsx|css)$/.test(file))
-  .map((file) => path.join('src', file));
+const sourceFiles = ['src', 'packages']
+  .flatMap((root) => readdirSync(root, { recursive: true }).map((file) => path.join(root, file)))
+  .filter(
+    (file) =>
+      !file.split(path.sep).some((part) => ['__tests__', 'dist', 'node_modules'].includes(part)),
+  )
+  .filter((file) => /\.(ts|tsx|css)$/.test(file));
 
 const reachable = new Set();
 
@@ -17,11 +20,16 @@ function visit(file) {
   const source = readFileSync(file, 'utf8');
 
   for (const { fileName: specifier } of ts.preProcessFile(source, true, true).importedFiles) {
-    if (!specifier.startsWith('.')) continue;
-    const base = path.join(path.dirname(file), specifier);
+    if (!specifier.startsWith('.') && !specifier.startsWith('@gprose/')) continue;
+
+    const base = specifier.startsWith('@gprose/')
+      ? `packages/${specifier.slice('@gprose/'.length)}/src/index.ts`
+      : path.join(path.dirname(file), specifier);
 
     const resolved = [
       base,
+      base.replace(/\.js$/, '.ts'),
+      base.replace(/\.js$/, '.tsx'),
       `${base}.ts`,
       `${base}.tsx`,
       `${base}/index.ts`,
@@ -42,7 +50,8 @@ for (const entry of ['editor.html', 'extensions.html']) {
 }
 
 // Public headless entry points are supported even when the demo does not import every export.
-for (const entry of ['model', 'transform', 'state', 'core']) visit(`src/${entry}/index.ts`);
+for (const entry of ['model', 'transform', 'state', 'core'])
+  visit(`packages/${entry}/src/index.ts`);
 
 // Extensions are supported entry points even when the demo does not import them.
 for (const file of sourceFiles.filter((file) => file.startsWith('src/extensions/'))) visit(file);

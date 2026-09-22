@@ -1,4 +1,4 @@
-import { jsonRecord, jsonString, type SelectionRange } from '../model';
+import { jsonRecord, jsonString, type SelectionRange } from '@gprose/model';
 import {
   Selection,
   textSelection,
@@ -10,7 +10,7 @@ import {
   type SelectionExtension,
   type SelectionEdit,
   type SelectionStep,
-} from '../state';
+} from '@gprose/state';
 
 export type GridCell = { id: number; colspan: number; rowspan: number };
 

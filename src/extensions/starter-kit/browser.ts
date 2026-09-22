@@ -1,4 +1,5 @@
-import { defineExtension, type ContributionContext } from '../../core';
+import { defineExtension, type ContributionContext } from '@gprose/core';
+
 import { inputPolicies, htmlParsers, keyboardShortcuts } from '../../editor-browser';
 import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
 import { starterHtmlParsers } from '../html-parsers';

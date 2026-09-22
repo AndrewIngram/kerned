@@ -1,3 +1,6 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { createContext, StrictMode, useContext, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
@@ -5,11 +8,8 @@ import { expect, test } from 'vitest';
 import { page, server, userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { nodeViews } from '../../editor-browser';
 import { defineNodePresentation, presentations, type MountedEditor } from '../../editor-canvas';
-import { createSchema, defineNode } from '../../model';
-import { textSelection } from '../../state';
 import {
   defineReactNodeView,
   EditorContent,

@@ -1,9 +1,8 @@
+import { createSchema, defineNode, parseRelativeRange, type DocumentNode } from '@gprose/model';
+import { createEditor, textSelection } from '@gprose/state';
+import { applySteps, createPositionSnapshot, restoreChanges } from '@gprose/transform';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
-
-import { createSchema, defineNode, parseRelativeRange, type DocumentNode } from '../src/model';
-import { createEditor, textSelection } from '../src/state';
-import { applySteps, createPositionSnapshot, restoreChanges } from '../src/transform';
 
 const line = defineNode({
   name: 'line',

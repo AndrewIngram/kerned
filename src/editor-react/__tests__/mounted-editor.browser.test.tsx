@@ -1,10 +1,11 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
 import { StrictMode } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import {
   defaultFonts,
   defineNodePresentation,
@@ -13,7 +14,6 @@ import {
   type MountedEditor,
 } from '../../editor-canvas';
 import { createViewDiagnostics } from '../../editor-canvas/diagnostics';
-import { createSchema, defineNode } from '../../model';
 import { EditorContent } from '../editor-content';
 
 const note = defineNode({

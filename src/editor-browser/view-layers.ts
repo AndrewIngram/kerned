@@ -1,5 +1,6 @@
-import { defineContribution } from '../core';
-import type { NodeIdentity, TreeIndex } from '../model';
+import { defineContribution } from '@gprose/core';
+import type { NodeIdentity, TreeIndex } from '@gprose/model';
+
 import type { ObserveTextPointer } from './canvas-input';
 import { decorationLayer } from './decoration-layer';
 import { decorationContributions } from './decorations';

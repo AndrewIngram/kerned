@@ -1,10 +1,10 @@
+import { createEditor, defineExtension, inputRules, type ContributionContext } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { expect, test, onTestFinished as registerCleanup } from 'vitest';
 
-import { createEditor, defineExtension, inputRules, type ContributionContext } from '../../../core';
 import { pasteRules } from '../../../editor-browser';
 import { mountEditor } from '../../../editor-canvas';
-import { createSchema } from '../../../model';
-import { textSelection } from '../../../state';
 import { starterBrowserExtensions } from '../browser';
 import { editingCommands } from '../commands';
 

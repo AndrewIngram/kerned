@@ -1,6 +1,7 @@
+import type { NodeIdentity } from '@gprose/model';
+
 import { allocatedBlockWidth } from '../editor-browser/block-geometry';
 import type { LaidOut, LayoutInput, Rect } from '../engines';
-import type { NodeIdentity } from '../model';
 import type { InlineAtom } from '../owned-inline';
 import type { createOwnedEngine } from '../owned-layout';
 import { createFlowLayout, type FlowLayoutEvent, type FlowPlacement } from './flow-layout';

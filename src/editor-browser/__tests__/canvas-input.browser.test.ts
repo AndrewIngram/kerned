@@ -1,10 +1,10 @@
+import { createEditor } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { selectionContext, TextSelection, textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor } from '../../core';
-import { createSchema, defineNode } from '../../model';
 import { composeParagraph } from '../../owned-paragraph';
-import { selectionContext, TextSelection, textSelection } from '../../state';
 import { createCanvasInput } from '../canvas-input';
 
 const schema = createSchema({

@@ -9,7 +9,8 @@ import {
   type SelectionContext,
   TextSelection,
   type Selection,
-} from '../state';
+} from '@gprose/state';
+
 import { hitTestTextLines, type TextHitRegion } from './hit-testing';
 import {
   createTextNavigation,

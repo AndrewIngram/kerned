@@ -1,6 +1,7 @@
-import { indexTree, type Schema, type NodeIdentity } from '../model';
-import type { EditorState } from '../state';
-import type { Step } from '../transform';
+import { indexTree, type Schema, type NodeIdentity } from '@gprose/model';
+import type { EditorState } from '@gprose/state';
+import type { Step } from '@gprose/transform';
+
 import { createListCommands, type ListAdapter } from './lists';
 
 /** Structural policy supplies constructors and predicates; the document's schema

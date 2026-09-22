@@ -1,12 +1,12 @@
+import { createEditor } from '@gprose/core';
+import { createSchema, defineNode, type DocumentNode } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor } from '../../core';
 import { createDocumentQuery } from '../../editor-browser/document';
-import { createSchema, defineNode, type DocumentNode } from '../../model';
 import { createOwnedEngine } from '../../owned-layout';
-import { textSelection } from '../../state';
 import { createDocumentLayout, type DocumentLayoutFrame } from '../document-layout';
 import type { BlockPresentation } from '../scene';
 

@@ -1,10 +1,18 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import {
+  createSchema,
+  defineNode,
+  defineInline,
+  defineMark,
+  type NodeIdentity,
+} from '@gprose/model';
+import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '@gprose/state';
 import { createContext, StrictMode, useContext, useLayoutEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { expect, expectTypeOf, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { viewLayers } from '../../editor-browser';
 import {
   defineNodePresentation,
@@ -12,8 +20,6 @@ import {
   presentations,
   type MountedEditor,
 } from '../../editor-canvas';
-import { createSchema, defineNode, defineInline, defineMark, type NodeIdentity } from '../../model';
-import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '../../state';
 import {
   defineReactInlineView,
   defineReactMarkView,

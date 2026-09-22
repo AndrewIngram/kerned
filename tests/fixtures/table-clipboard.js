@@ -1,6 +1,6 @@
-export { createEditor, textSelection, selectionContext } from '../../src/state/index.ts';
+export { createEditor, textSelection, selectionContext } from '@gprose/state';
 
-export { indexTree } from '../../src/model/index.ts';
+export { indexTree } from '@gprose/model';
 
 export { demoSchema } from '../../src/extensions/demo-schema.ts';
 

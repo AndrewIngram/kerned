@@ -1,0 +1,23 @@
+{
+  "check": "passed",
+  "vitest": {
+    "files": 216,
+    "passed": 956,
+    "todo": 1
+  },
+  "e2e": {
+    "passed": 42,
+    "browsers": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ]
+  },
+  "build": "passed",
+  "productionJavaScript": {
+    "file": "main-CZKyj0Lw.js",
+    "sha256": "4d1c8332085d979f13fba3d5aacbf6bf0e4e2c6fcbb870576ff1bac6ac47f76c",
+    "sameViteHashAsMilestone7": true
+  },
+  "milestone8": "in progress"
+}

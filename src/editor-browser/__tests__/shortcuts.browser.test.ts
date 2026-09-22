@@ -1,8 +1,8 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
 import { expect, test, onTestFinished } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
-import { createSchema, defineNode } from '../../model';
 import { keyboardShortcuts, createKeyboardShortcuts, type KeyboardShortcut } from '../index';
 
 const note = defineNode({

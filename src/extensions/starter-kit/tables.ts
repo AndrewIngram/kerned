@@ -4,9 +4,10 @@ import {
   defineQuery,
   type ReadContext,
   type CommandContext,
-} from '../../core';
-import type { NodeIdentity } from '../../model';
-import { TextSelection, RangeSelection, textSelection } from '../../state';
+} from '@gprose/core';
+import type { NodeIdentity } from '@gprose/model';
+import { TextSelection, RangeSelection, textSelection } from '@gprose/state';
+
 import { paragraph, table } from '../starter-definitions';
 import { appendTableColumn, appendTableRow, createTable, tableCells } from '../table';
 import { selectedStructure } from './selection';

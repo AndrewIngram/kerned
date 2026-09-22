@@ -1,6 +1,9 @@
-import { connectEditorView } from '../core';
+import { connectEditorView } from '@gprose/core';
 
 import './mount.css';
+import type { NodeIdentity } from '@gprose/model';
+import { RangeSelection } from '@gprose/state';
+
 import {
   mountEditorView,
   createEditorViewport,
@@ -18,8 +21,6 @@ import {
 } from '../editor-browser/input-contributions';
 import { createNodeViews, type NodeView } from '../editor-browser/node-views';
 import { createViewLayers } from '../editor-browser/view-layers';
-import type { NodeIdentity } from '../model';
-import { RangeSelection } from '../state';
 import type { ResolveEditorAsset } from './assets';
 import { createCanvasRenderer } from './canvas-renderer';
 import { createDiagnosticSource } from './diagnostic-source';

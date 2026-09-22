@@ -19,7 +19,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
           const { hitTestTextLines, createTextNavigation, TextSelection } = Object.assign(
             {},
             await import('/src/editor-browser/index.ts'),
-            await import('/src/state/index.ts'),
+            await import('/@id/@gprose/state'),
           );
 
           const hits = [];

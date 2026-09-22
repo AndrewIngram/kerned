@@ -1,9 +1,9 @@
+import { createEditor } from '@gprose/core';
+import { createSchema, defineNode, indexTree } from '@gprose/model';
+import { TextSelection, textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor } from '../../../core';
-import { createSchema, defineNode, indexTree } from '../../../model';
-import { TextSelection, textSelection } from '../../../state';
 import { starterExtensions } from '../index';
 
 const caption = defineNode({

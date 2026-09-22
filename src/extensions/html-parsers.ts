@@ -1,3 +1,5 @@
+import { createDocumentSerializer, type NodeIdentity } from '@gprose/model';
+
 import {
   defineHtmlTextParser,
   defineHtmlValueParser,
@@ -5,7 +7,6 @@ import {
   type HtmlParserContribution,
   type HtmlParseContext,
 } from '../editor-browser';
-import { createDocumentSerializer, type NodeIdentity } from '../model';
 import {
   paragraph,
   heading,

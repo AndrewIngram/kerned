@@ -1,4 +1,13 @@
 import './table-view.css';
+import type { NodeIdentity, Schema, TextPoint } from '@gprose/model';
+import {
+  TextSelection,
+  textSelection,
+  type Selection,
+  type SelectionContext,
+  type NodeAccess,
+} from '@gprose/state';
+
 import type { BrowserViewOptions } from '../../editor-browser';
 import { nativeTextCaret, revealNativeText } from '../../editor-browser/native-text-geometry';
 import type { ReadTextDecorations, TextDecoration } from '../../editor-browser/text-decorations';
@@ -7,14 +16,6 @@ import {
   type ReadTextStyle,
   type TextStyle,
 } from '../../editor-browser/text-style';
-import type { NodeIdentity, Schema, TextPoint } from '../../model';
-import {
-  TextSelection,
-  textSelection,
-  type Selection,
-  type SelectionContext,
-  type NodeAccess,
-} from '../../state';
 import { formattingSpans } from '../formatting';
 import { tableCells } from '../table';
 import { createTableContent, type TableText, type TableCellContent } from './table-content';

@@ -1,7 +1,6 @@
+import { createSchema, defineNode } from '@gprose/model';
+import { createEditor, textSelection } from '@gprose/state';
 import { z } from 'zod';
-
-import { createSchema, defineNode } from '../../src/model/index.ts';
-import { createEditor, textSelection } from '../../src/state/index.ts';
 
 // Deliberately independent of the demo schema, text fields and renderer.
 const text = (id, value, role = 'body') => ({ id, key: `n-${id}`, kind: 'text', role, value });

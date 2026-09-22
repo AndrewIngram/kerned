@@ -1,11 +1,11 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { defineNodePresentation, mountEditor, presentations } from '../../editor-canvas';
-import { createSchema, defineNode } from '../../model';
-import { textSelection } from '../../state';
 import {
   decorations,
   defineWidgetView,

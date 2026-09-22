@@ -4,14 +4,13 @@ test('starter commands target the selected node and disjoint cells, never the fi
   const result = await (async () => {
     const { React, createRoot, flushSync } = await import('./fixtures/selection-probe.js');
 
-    const { NodeSelection, textSelection, selectionContext } =
-      await import('../src/state/index.ts');
+    const { NodeSelection, textSelection, selectionContext } = await import('@gprose/state');
 
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
     const { createTable, tableCells } = await import('../src/extensions/table.ts');
 
-    const { createEditor } = await import('../src/core/index.ts');
-    const { createSchema } = await import('../src/model/index.ts');
+    const { createEditor } = await import('@gprose/core');
+    const { createSchema } = await import('@gprose/model');
     const { starterExtensions } = await import('../src/extensions/starter-kit/index.ts');
     const { starterInput } = await import('../src/extensions/starter-kit/browser.ts');
     const { useEditorState } = await import('../src/editor-react/index.tsx');
@@ -106,7 +105,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     flushSync(() => editor.commands.undo());
     flushSync(() => editor.commands.insertTable());
     const order = editor.state.nodes.map((n) => n.kind);
-    const { TextSelection } = await import('../src/state/index.ts');
+    const { TextSelection } = await import('@gprose/state');
 
     const insertedTable = editor.state.nodes[2],
       after = editor.state.nodes[3];

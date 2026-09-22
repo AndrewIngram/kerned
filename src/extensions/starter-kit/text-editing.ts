@@ -1,5 +1,5 @@
-import { defineCommand, type CommandContext } from '../../core';
-import { boundaries, childrenAt, indexTree, type NodeIdentity } from '../../model';
+import { defineCommand, type CommandContext } from '@gprose/core';
+import { boundaries, childrenAt, indexTree, type NodeIdentity } from '@gprose/model';
 import {
   AllSelection,
   NodeSelection,
@@ -7,7 +7,8 @@ import {
   TextSelection,
   selectionContext,
   textSelection,
-} from '../../state';
+} from '@gprose/state';
+
 import { replaceStructuredText } from '../blocks';
 import { pasteFragment } from '../clipboard-fragment';
 import { pasteParagraphs } from '../paste';

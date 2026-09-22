@@ -1,7 +1,6 @@
+import type { Editor } from '@gprose/core';
+import type { NodeIdentity, SchemaDefinition } from '@gprose/model';
 import { createContext, useContext, type ReactNode } from 'react';
-
-import type { Editor } from '../core';
-import type { NodeIdentity, SchemaDefinition } from '../model';
 
 /** Preserve the assembled schema's commands and node types throughout a React subtree. */
 export function createEditorContext<

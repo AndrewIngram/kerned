@@ -1,6 +1,7 @@
-import { defineContribution } from '../core';
-import type { NodeIdentity } from '../model';
-import type { EditorState } from '../state';
+import { defineContribution } from '@gprose/core';
+import type { NodeIdentity } from '@gprose/model';
+import type { EditorState } from '@gprose/state';
+
 import type { ViewSession } from './input-contributions';
 import type { WidgetDecoration } from './widget-views';
 

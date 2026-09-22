@@ -1,13 +1,13 @@
+import { createEditor } from '@gprose/core';
+import { textSelection } from '@gprose/state';
 import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 
-import { createEditor } from '../../../core';
 import {
   createDocumentLayout,
   type DocumentLayoutFrame,
 } from '../../../editor-canvas/document-layout';
 import { createOwnedEngine } from '../../../owned-layout';
-import { textSelection } from '../../../state';
 import type { StarterNode, TextBlockNode } from '../../demo-model';
 import { demoSchema } from '../../demo-schema';
 import { createStarterDocumentQuery } from '../browser-document';

@@ -1,7 +1,8 @@
-import { indexTree, textContent, type NodeIdentity, type Schema } from '../model';
+import { indexTree, textContent, type NodeIdentity, type Schema } from '@gprose/model';
+import { selectionContext, TextSelection, type EditorState } from '@gprose/state';
+import { type Step } from '@gprose/transform';
+
 import { supportsOwnedText } from '../owned-text-support';
-import { selectionContext, TextSelection, type EditorState } from '../state';
-import { type Step } from '../transform';
 import { table as tableDefinition, tableCell, paragraph } from './starter-definitions';
 import { tableCells, tableRows } from './table';
 

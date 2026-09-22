@@ -1,4 +1,4 @@
-import { boundaries } from './model';
+import { boundaries } from '@gprose/model';
 
 export const emojiSequence = /\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20e3/u;
 

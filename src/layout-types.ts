@@ -1,4 +1,4 @@
-export { boundaries } from './model';
+export { boundaries } from '@gprose/model';
 
 export type Span = {
   start: number;

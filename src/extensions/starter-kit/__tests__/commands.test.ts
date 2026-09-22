@@ -1,8 +1,8 @@
+import { createEditor } from '@gprose/core';
+import { createSchema, indexTree } from '@gprose/model';
+import { AllSelection, TextSelection, textSelection } from '@gprose/state';
 import { expect, test, vi } from 'vitest';
 
-import { createEditor } from '../../../core';
-import { createSchema, indexTree } from '../../../model';
-import { AllSelection, TextSelection, textSelection } from '../../../state';
 import { tableCells } from '../../table';
 import { starterExtensions } from '../index';
 

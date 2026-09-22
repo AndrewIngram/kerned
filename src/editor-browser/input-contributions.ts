@@ -1,5 +1,6 @@
-import { defineContribution, type Editor, type EditorViewSession } from '../core';
-import type { NodeIdentity, Schema, SchemaDefinition } from '../model';
+import { defineContribution, type Editor, type EditorViewSession } from '@gprose/core';
+import type { NodeIdentity, Schema, SchemaDefinition } from '@gprose/model';
+
 import type { createCanvasInput } from './canvas-input';
 import type { BrowserViewOptions } from './index';
 

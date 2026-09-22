@@ -1,4 +1,5 @@
-import type { NodeIdentity } from '../model';
+import type { NodeIdentity } from '@gprose/model';
+
 import type { createOwnedEngine } from '../owned-layout';
 import type { DocumentLayout } from './document-layout';
 import type { ViewDiagnostics, DiagnosticSnapshot } from './view-diagnostics';

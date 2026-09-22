@@ -1,5 +1,6 @@
-import { connectEditorView, type EditorViewSession } from '../core';
-import type { Selection } from '../state';
+import { connectEditorView, type EditorViewSession } from '@gprose/core';
+import type { Selection } from '@gprose/state';
+
 import { createPointerSelection, type PointerSelectionOptions } from './pointer-selection';
 
 export { createPointerSelection, type PointerSelectionOptions } from './pointer-selection';

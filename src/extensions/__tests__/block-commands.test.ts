@@ -1,14 +1,14 @@
-import { expect, test } from 'vitest';
-import { z } from 'zod';
-
 import {
   createEditor,
   defineExtension,
   type CommandContext,
   type ExtensionContext,
-} from '../../core';
-import { createSchema, defineNode, indexTree, type DocumentNode } from '../../model';
-import { NodeSelection, textSelection } from '../../state';
+} from '@gprose/core';
+import { createSchema, defineNode, indexTree, type DocumentNode } from '@gprose/model';
+import { NodeSelection, textSelection } from '@gprose/state';
+import { expect, test } from 'vitest';
+import { z } from 'zod';
+
 import { createBlockCommands } from '../block-commands';
 import { localHistory } from '../history';
 import { createListCommands, type ListAdapter } from '../lists';

@@ -1,9 +1,9 @@
+import { createEditor, defineCommand, defineQuery } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { NodeSelection, TextSelection, textSelection, toggleMarkCommand } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor, defineCommand, defineQuery } from '../../core';
-import { createSchema, defineNode } from '../../model';
-import { NodeSelection, TextSelection, textSelection, toggleMarkCommand } from '../../state';
 import { localHistory } from '../history';
 import { starterDefinitions } from '../starter-definitions';
 import { starterFormatting } from '../starter-kit/formatting';

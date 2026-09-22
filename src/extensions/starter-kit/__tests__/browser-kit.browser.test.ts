@@ -1,9 +1,9 @@
+import { createEditor } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { selectionContext } from '@gprose/state';
 import { expect, test } from 'vitest';
 
-import { createEditor } from '../../../core';
 import { createNodeViews } from '../../../editor-browser/node-views';
-import { createSchema } from '../../../model';
-import { selectionContext } from '../../../state';
 import { starterBrowserExtensions } from '../browser';
 
 function host() {

@@ -1,8 +1,9 @@
 import './container-decorations.css';
-import { defineExtension, type ContributionContext } from '../../core';
+import { defineExtension, type ContributionContext } from '@gprose/core';
+import type { NodeIdentity, Schema } from '@gprose/model';
+
 import { applyTextStyle } from '../../editor-browser/text-style';
 import { viewLayers, type ViewLayerFrame } from '../../editor-browser/view-layers';
-import type { NodeIdentity, Schema } from '../../model';
 import { quote, list, listItem } from '../starter-definitions';
 
 function createContainerDecorations<N extends NodeIdentity>(

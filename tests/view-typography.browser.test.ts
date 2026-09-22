@@ -1,13 +1,13 @@
+import { createEditor } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 
-import { createEditor } from '../src/core';
 import { defaultFonts, defineStyleRule, mountEditor } from '../src/editor-canvas';
 import { createViewDiagnostics } from '../src/editor-canvas/diagnostics';
 import { importHtml } from '../src/extensions/html';
 import { heading, paragraph } from '../src/extensions/starter-definitions';
 import { starterBrowserExtensions } from '../src/extensions/starter-kit/browser';
-import { createSchema } from '../src/model';
-import { textSelection } from '../src/state';
 
 test('Warbreaker retains its distant caret and reading anchor through live metrics, colors and font sources', async ({
   onTestFinished,

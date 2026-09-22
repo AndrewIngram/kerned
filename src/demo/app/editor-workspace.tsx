@@ -1,3 +1,5 @@
+import { createSchema } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { useMemo, useState } from 'react';
 
 import { useEditor } from '../../editor-react';
@@ -7,8 +9,6 @@ import { createCommentStore } from '../../extensions/comment';
 import { commentView } from '../../extensions/comment-view';
 import { searchView } from '../../extensions/search-view';
 import { starterBrowserExtensions } from '../../extensions/starter-kit/browser';
-import { createSchema } from '../../model';
-import { textSelection } from '../../state';
 import { EditorWorkspaceView } from './editor-workspace-view';
 
 export function EditorWorkspace(props: {

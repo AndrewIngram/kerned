@@ -1,3 +1,4 @@
+import { type EditorState } from '@gprose/state';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { useEditorState } from '../../editor-react';
@@ -6,7 +7,6 @@ import { type createCommentStore } from '../../extensions/comment';
 import { createCommentProjection } from '../../extensions/comment-projection';
 import { type StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import { type EditorState } from '../../state';
 
 export function useComments(
   editor: EditorSession,

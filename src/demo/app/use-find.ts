@@ -1,3 +1,4 @@
+import type { FindOptions, FindState } from '@gprose/state';
 import {
   useCallback,
   useEffect,
@@ -10,7 +11,6 @@ import {
 
 import type { MountedEditor } from '../../editor-canvas';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import type { FindOptions, FindState } from '../../state';
 
 export function useFind({
   editor,

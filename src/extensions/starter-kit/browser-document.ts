@@ -1,6 +1,7 @@
+import type { Schema } from '@gprose/model';
+import type { EditorState } from '@gprose/state';
+
 import { createDocumentQuery } from '../../editor-browser/document';
-import type { Schema } from '../../model';
-import type { EditorState } from '../../state';
 import type { StarterNode, StarterLeaf } from '../demo-model';
 import { selectedBlockLabel } from '../headings';
 

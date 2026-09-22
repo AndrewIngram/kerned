@@ -1,4 +1,5 @@
-import type { NodeIdentity } from '../model';
+import type { NodeIdentity } from '@gprose/model';
+
 import type { DrawingRect } from './drawing';
 import type { RangeView, RangeViewMount, RangeViewContext } from './range-views';
 import type { LayerBlock, ViewLayerContext, ViewLayerFrame } from './view-layers';

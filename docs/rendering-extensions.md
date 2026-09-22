@@ -132,7 +132,7 @@ or implement a second editable DOM tree.
 
 `editor.getSelection(nodeId)` returns the selection inside that node's subtree,
 with `undefined` for a missing node. Renderers receive the same `ScopedSelection`
-from `src/state` without traversing the document:
+from `@gprose/state` without traversing the document:
 
 - `none`: no selection inside this scope.
 - `caret`: a `point` and `upstream` affinity. The point is a text offset or a

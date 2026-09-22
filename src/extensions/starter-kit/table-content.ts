@@ -1,4 +1,5 @@
-import { type NodeIdentity, type Schema, type MarkRange } from '../../model';
+import { type NodeIdentity, type Schema, type MarkRange } from '@gprose/model';
+
 import { table, tableCell } from '../starter-definitions';
 import { tableRows } from '../table';
 

@@ -1,5 +1,6 @@
-import { defineContribution } from '../core';
-import type { NodeIdentity } from '../model';
+import { defineContribution } from '@gprose/core';
+import type { NodeIdentity } from '@gprose/model';
+
 import type { ViewSession } from './input-contributions';
 
 export type KeyboardShortcut = {

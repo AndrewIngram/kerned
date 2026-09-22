@@ -1,13 +1,13 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { TextSelection, textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 
-import { createEditor, defineExtension, type ContributionContext } from '../src/core';
 import { defineNodeView, nodeViews } from '../src/editor-browser';
 import { mountEditor } from '../src/editor-canvas';
 import { quote } from '../src/extensions/starter-definitions';
 import { starterBrowserExtensions } from '../src/extensions/starter-kit/browser';
-import { createSchema } from '../src/model';
-import { TextSelection, textSelection } from '../src/state';
 
 const chrome = defineExtension({
   name: 'quoteChrome',

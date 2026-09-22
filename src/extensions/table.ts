@@ -11,7 +11,8 @@ export function tablePlainText(table: TableNode): string {
   return (table.caption ? [table.caption, ...rows] : rows).join('\n');
 }
 
-import type { NodeIdentity, Schema } from '../model';
+import type { NodeIdentity, Schema } from '@gprose/model';
+
 import { createCellSelectionExtension } from './cell-selection';
 import { paragraph, table as tableDefinition, tableCell } from './starter-definitions';
 

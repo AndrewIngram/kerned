@@ -1,3 +1,4 @@
+import type { NodeIdentity, Schema } from '@gprose/model';
 import { useLayoutEffect, useMemo, type RefObject } from 'react';
 
 import {
@@ -5,7 +6,6 @@ import {
   type CanvasInputFrame,
   type CanvasInputSession,
 } from '../editor-browser/canvas-input';
-import type { NodeIdentity, Schema } from '../model';
 
 type CanvasInputOptions<N extends NodeIdentity> = CanvasInputFrame<N> & {
   schema: Schema<N>;

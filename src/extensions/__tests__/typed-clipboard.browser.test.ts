@@ -1,21 +1,21 @@
-import { expect, test } from 'vitest';
-import { z } from 'zod';
-
 import {
   createEditor,
   createEditorSerializer,
   defineExtension,
   serializers,
   type ContributionContext,
-} from '../../core';
-import { createEditorHtmlParser, defineHtmlTextParser, htmlParsers } from '../../editor-browser';
+} from '@gprose/core';
 import {
   createSchema,
   createDocumentSerializer,
   defineNode,
   defineNodeSerializer,
-} from '../../model';
-import { textSelection, TextSelection } from '../../state';
+} from '@gprose/model';
+import { textSelection, TextSelection } from '@gprose/state';
+import { expect, test } from 'vitest';
+import { z } from 'zod';
+
+import { createEditorHtmlParser, defineHtmlTextParser, htmlParsers } from '../../editor-browser';
 import { readClipboard, writeClipboard } from '../clipboard';
 import { starterExtensions } from '../starter-kit';
 import { starterInput } from '../starter-kit/browser';

@@ -1,6 +1,5 @@
+import type { CommandState } from '@gprose/state';
 import { useMemo, useSyncExternalStore } from 'react';
-
-import type { CommandState } from '../state';
 
 export { usePointerSelection } from './pointer-selection';
 

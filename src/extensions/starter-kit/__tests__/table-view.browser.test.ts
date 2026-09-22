@@ -1,10 +1,10 @@
+import { createEditor } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 
-import { createEditor } from '../../../core';
 import { createKeyboardShortcuts } from '../../../editor-browser';
 import { createDocumentPresentation } from '../../../editor-canvas/presentation';
-import { createSchema } from '../../../model';
-import { textSelection } from '../../../state';
 import { createSampleDocument, type TableNode } from '../../demo-model';
 import { tableCells } from '../../table';
 import { starterInput } from '../browser';

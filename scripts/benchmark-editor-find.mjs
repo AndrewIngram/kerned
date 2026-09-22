@@ -128,7 +128,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium').split(',')) {
     }
 
     const report = await page.evaluate(async () => {
-      const { createFind } = await import('/src/state/index.ts'),
+      const { createFind } = await import('/@id/@gprose/state'),
         { demoSchema } = await import('/src/extensions/demo-schema.ts');
 
       const nodes = window.editorDiagnostics.read().nodes,

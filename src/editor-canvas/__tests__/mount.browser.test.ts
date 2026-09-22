@@ -1,12 +1,12 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { TextSelection, textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { inputPolicies } from '../../editor-browser/input-contributions';
 import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
-import { createSchema, defineNode } from '../../model';
-import { TextSelection, textSelection } from '../../state';
 import { createViewDiagnostics, type DiagnosticEvent } from '../diagnostics';
 import { defaultFonts } from '../font-catalog';
 import { mountEditor, defineNodePresentation, defineStyleRule, presentations } from '../index';

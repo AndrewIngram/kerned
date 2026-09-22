@@ -6,17 +6,17 @@ directories and interfaces are not evidence of completed extraction.
 
 ## Milestone status
 
-| Milestone                           | Status   | Required outcome                                                               |
-| ----------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| 0 — consumer contracts and baseline | Complete | Source inventory, consumer scenarios, production measurements and quality gate |
-| 1 — model, transform and state      | Complete | Real ownership seams, acyclic imports and headless execution                   |
-| 2 — typed schema assembly           | Complete | Extension-derived content types and synchronous Standard Schema validation     |
-| 3 — session commands and state      | Complete | Shared named commands, draft chains, queries and per-session extension state   |
-| 4 — complete view lifetime          | Complete | Vanilla mounting owns rendering, input, assets and cleanup                     |
-| 5 — presentation                    | Complete | Per-view typography, fonts and appropriate cache invalidation                  |
-| 6 — renderers and React             | Complete | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Complete | Extension codecs/input rules and durable async targets                         |
-| 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
+| Milestone                           | Status      | Required outcome                                                                  |
+| ----------------------------------- | ----------- | --------------------------------------------------------------------------------- |
+| 0 — consumer contracts and baseline | Complete    | Source inventory, consumer scenarios, production measurements and quality gate    |
+| 1 — model, transform and state      | Complete    | Real ownership seams, acyclic imports and headless execution                      |
+| 2 — typed schema assembly           | Complete    | Extension-derived content types and synchronous Standard Schema validation        |
+| 3 — session commands and state      | Complete    | Shared named commands, draft chains, queries and per-session extension state      |
+| 4 — complete view lifetime          | Complete    | Vanilla mounting owns rendering, input, assets and cleanup                        |
+| 5 — presentation                    | Complete    | Per-view typography, fonts and appropriate cache invalidation                     |
+| 6 — renderers and React             | Complete    | Public rendering/decorations and React adapters over the same view                |
+| 7 — codecs and delayed edits        | Complete    | Extension codecs/input rules and durable async targets                            |
+| 8 — workspace consumers             | In progress | Headless packages built and validated; view, extensions and demo migration remain |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -3167,3 +3167,52 @@ checkpoints cover the milestone's implementation and verification requirements.
 The independent judge and agreed remedies are complete, and the performance gate
 is green. Milestone 7 is complete. Milestone 8 remains pending for physical
 workspace packages, built consumer fixtures, demo migration and final docs.
+
+### Milestone 8 checkpoint: real headless workspace packages
+
+Moved model, transform, state and core implementations and colocated tests into
+`packages/{model,transform,state,core}/src`. Each private pnpm package owns its
+manifest, explicit public export, dependency declarations and emitted JavaScript
+and types. There are no compatibility barrels at the removed source locations.
+Cross-package callers use `@gprose/*`; ownership checks reject private imports
+and undeclared headless dependencies.
+
+`scripts/workspace-migration.mjs` records and applies the moves and import
+rewrites. It is idempotent after the move. `scripts/build-packages.mjs` emits
+packages in dependency order without bundling shared classes. Development and
+tests select the `gprose-source` export condition; production and ordinary Node
+use built exports. The Node test resolver also selects source and inlines
+workspace packages, preventing mixed source/built selection identities.
+Package builds run before the parallel quality suites, avoiding replacement of
+output while a consumer imports it.
+
+The emitted consumer in `tests/consumers/headless.mjs` uses only package imports,
+with no TypeScript loader. It verifies custom schema assembly, command dry runs
+and chains, shared selection classes, transformation mapping, destruction and
+rejection of private package subpaths. The source-based starter integration check
+remains until the extension package migration replaces it with a built consumer.
+
+Packaging exposed missing named type exports for inferred extension declarations.
+Model now exports `ContentDefinition`, `BehaviorDefinition` and `Immutable`;
+core exports `DocumentCommandDefinition`. This preserves inference in downstream
+declarations without forcing consumers to annotate extension factories manually.
+
+Validation:
+
+- `pnpm check` passed: lint, formatting, strict typecheck, declaration emission,
+  project/ownership checks, built Node consumer, 956 Vitest tests across 216 files
+  and 42 E2E tests. The existing single collaboration TODO is unchanged.
+- Before/after static test collection is identical after normalizing moved paths:
+  883 collected cases, no additions or omissions. Parameterized tests expand to
+  the larger runtime count. The comparison caught and removed accidental
+  collection through pnpm dependency symlinks.
+- `pnpm build` passed. The production JavaScript remains
+  `main-CZKyj0Lw.js`, 768.04 kB, identical to the milestone 7 final build.
+  The existing chunk-size and CanvasKit browser-externalization warnings remain.
+- Collection evidence and the validation summary are in
+  `artifacts/public-interface-m8/`.
+
+This is a checkpoint within milestone 8, not its completion. View/React and
+extension package delivery, moving the Vite consumer to `apps/demo`, built
+browser/React consumers, final documentation, performance verification and the
+milestone architecture judge remain outstanding.

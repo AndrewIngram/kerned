@@ -1,4 +1,7 @@
-import { createEditorSerializer, createInputRules } from '../../core';
+import { createEditorSerializer, createInputRules } from '@gprose/core';
+import { textContent, type NodeIdentity, type Schema } from '@gprose/model';
+import { TextSelection } from '@gprose/state';
+
 import {
   createEditorHtmlParser,
   createTextInput,
@@ -6,9 +9,7 @@ import {
   type ViewSession,
 } from '../../editor-browser';
 import { createDocumentQuery } from '../../editor-browser/document';
-import { textContent, type NodeIdentity, type Schema } from '../../model';
 import { supportsOwnedText } from '../../owned-text-support';
-import { TextSelection } from '../../state';
 import { readClipboard, writeClipboard } from '../clipboard';
 import type { ClipboardFragment } from '../clipboard-fragment';
 import { table as tableDefinition, tableCell, image } from '../starter-definitions';

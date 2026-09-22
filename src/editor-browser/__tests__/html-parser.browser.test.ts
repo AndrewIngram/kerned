@@ -1,8 +1,8 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode, defineMark, defineInline } from '@gprose/model';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
-import { createSchema, defineNode, defineMark, defineInline } from '../../model';
 import {
   createHtmlParser,
   createEditorHtmlParser,

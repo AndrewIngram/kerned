@@ -1,15 +1,15 @@
-import { expect, expectTypeOf, test } from 'vitest';
-import { z } from 'zod';
-
-import { createEditor } from '../../core';
+import { createEditor } from '@gprose/core';
 import {
   createSchema,
   defineNode,
   indexTree,
   type DocumentInput,
   type DocumentNode,
-} from '../../model';
-import { TextSelection, textSelection, NodeSelection } from '../../state';
+} from '@gprose/model';
+import { TextSelection, textSelection, NodeSelection } from '@gprose/state';
+import { expect, expectTypeOf, test } from 'vitest';
+import { z } from 'zod';
+
 import type { ClipboardFragment } from '../clipboard-fragment';
 import { starterExtensions } from '../starter-kit';
 import { tableCells } from '../table';

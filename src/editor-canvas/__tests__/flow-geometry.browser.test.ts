@@ -1,8 +1,10 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import {
   decorations,
   defineWidgetView,
@@ -10,8 +12,6 @@ import {
   nodeViews,
   type Decoration,
 } from '../../editor-browser';
-import { createSchema, defineNode } from '../../model';
-import { textSelection } from '../../state';
 import { createViewDiagnostics } from '../diagnostics';
 import { defineNodePresentation, mountEditor, presentations } from '../index';
 

@@ -1,7 +1,7 @@
+import { createEditor } from '@gprose/core';
 import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 
-import { createEditor } from '../../core';
 import { createEditorContext, EditorContent, useEditor, useEditorState } from '../index';
 import { ownershipFixture } from './ownership-fixture';
 

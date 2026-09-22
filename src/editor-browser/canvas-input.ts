@@ -1,5 +1,4 @@
-import type { Rect } from '../engines';
-import type { NodeIdentity, Schema, TextPoint } from '../model';
+import type { NodeIdentity, Schema, TextPoint } from '@gprose/model';
 import {
   TextSelection,
   NodeSelection,
@@ -8,7 +7,9 @@ import {
   type Selection,
   type EditorState,
   type SelectionContext,
-} from '../state';
+} from '@gprose/state';
+
+import type { Rect } from '../engines';
 import type { TextHitRegion } from './hit-testing';
 import type { NavigationLayout } from './keyboard-navigation';
 import type { PointerSelectionOptions } from './pointer-selection';

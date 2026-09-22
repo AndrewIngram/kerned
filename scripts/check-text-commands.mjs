@@ -12,7 +12,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
 
     const result = await page.evaluate(async () => {
       const { textCommands } = await import('/src/extensions/text-commands.ts');
-      const { createEditor, TextSelection } = await import('/src/state/index.ts');
+      const { createEditor, TextSelection } = await import('/@id/@gprose/state');
       const { demoSchema } = await import('/src/extensions/demo-schema.ts');
 
       const nodes = [1, 2].map((id) => ({
@@ -58,7 +58,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       const { captureComment, createCommentStore, commentDecorations } =
         await import('/src/extensions/comment.ts');
 
-      const { resolveDecorations } = await import('/src/state/index.ts');
+      const { resolveDecorations } = await import('/@id/@gprose/state');
       const store = createCommentStore();
       store.put(captureComment(demoSchema, editor, 'discussion', []));
 

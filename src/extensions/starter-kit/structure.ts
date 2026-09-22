@@ -1,5 +1,6 @@
-import { defineCommand, defineExtension, defineQuery, type ReadContext } from '../../core';
-import { type NodeIdentity, type Schema } from '../../model';
+import { defineCommand, defineExtension, defineQuery, type ReadContext } from '@gprose/core';
+import { type NodeIdentity, type Schema } from '@gprose/model';
+
 import { createBlockCommands } from '../block-commands';
 import type { HeadingLevel } from '../demo-model';
 import { setTextBlockType } from '../headings';

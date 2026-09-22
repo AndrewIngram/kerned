@@ -1,8 +1,8 @@
+import * as stateModule from '@gprose/state';
 import { test, expect } from 'vitest';
 
 import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
 import * as formattingModule from '../src/extensions/formatting.ts';
-import * as stateModule from '../src/state/index.ts';
 
 test('stored marks are explicit, reset on movement, restore with history and preserve graphemes', async () => {
   const result = await (async () => {

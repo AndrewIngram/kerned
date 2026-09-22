@@ -1,4 +1,5 @@
-import type { InlineValue } from '../model';
+import type { InlineValue } from '@gprose/model';
+
 import type { InlineAtom } from '../owned-inline';
 import { demoSchema } from './demo-schema';
 import { mentionDefinition } from './starter-definitions';

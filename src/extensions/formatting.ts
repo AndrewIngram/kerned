@@ -1,4 +1,5 @@
-import { normalizeMarks, type MarkRange } from '../model';
+import { normalizeMarks, type MarkRange } from '@gprose/model';
+
 import type { StarterSpan } from './demo-model';
 import { demoSchema } from './demo-schema';
 import { formattingDefinitions } from './starter-definitions';

@@ -1,6 +1,6 @@
+import type { NodeBinding, NodeIdentity, Schema, SchemaDefinition } from '@gprose/model';
 import { z } from 'zod';
 
-import type { NodeBinding, NodeIdentity, Schema, SchemaDefinition } from '../model';
 import { fontSelectionSchema } from './font-catalog';
 import type { NodePresentation } from './presentation';
 

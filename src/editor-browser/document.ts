@@ -1,5 +1,5 @@
-import { indexTree, type Schema, type NodeIdentity } from '../model';
-import { selectionContext, selectionView, type EditorState } from '../state';
+import { indexTree, type Schema, type NodeIdentity } from '@gprose/model';
+import { selectionContext, selectionView, type EditorState } from '@gprose/state';
 
 type ProjectionPolicy<N, Block extends N, Context> = {
   initial: Context;

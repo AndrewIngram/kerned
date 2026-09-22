@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build:wasm": "node scripts/build-shaper.mjs",
-    "build": "pnpm run setup && pnpm run check:project && tsc --noEmit && vite build",
+    "build": "pnpm run setup && pnpm run build:packages && pnpm run check:project && tsc --noEmit && vite build",
     "test": "run-p --print-label test:vitest test:e2e",
     "test:vitest": "vitest run",
     "test:unit": "vitest run --project unit",
@@ -67,8 +67,10 @@
     "check:app-boundaries": "node scripts/check-app-boundaries.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "check": "run-p --print-label lint format:check typecheck check:declarations check:project test",
-    "check:declarations": "node scripts/check-declarations.mjs"
+    "check": "pnpm run check:built-consumers && run-p --print-label lint format:check typecheck check:declarations check:project test",
+    "check:declarations": "node scripts/check-declarations.mjs",
+    "build:packages": "node scripts/build-packages.mjs",
+    "check:built-consumers": "pnpm run build:packages && node tests/consumers/headless.mjs"
   },
   "dependencies": {
     "@standard-schema/spec": "1.1.0",
@@ -91,7 +93,11 @@
     "oxlint-tsgolint": "7.0.2002",
     "typescript": "~5.9.2",
     "vite": "8.3.0",
-    "vitest": "5.0.1"
+    "vitest": "5.0.1",
+    "@gprose/model": "workspace:*",
+    "@gprose/transform": "workspace:*",
+    "@gprose/state": "workspace:*",
+    "@gprose/core": "workspace:*"
   },
   "packageManager": "pnpm@10.14.0"
 }

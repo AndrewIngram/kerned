@@ -1,4 +1,4 @@
-import type { TextPoint } from '../model';
+import type { TextPoint } from '@gprose/model';
 
 export type TextHit = { point: TextPoint; upstream: boolean };
 

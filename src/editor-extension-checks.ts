@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 // This fixture uses only public API imports, with no demo nodes or built-in paragraph.
 import {
   createSchema,
@@ -15,8 +13,9 @@ import {
   type Schema,
   type RangeAnnotation,
   type InlineObject,
-} from './model';
-import { textSelection, createEditor, createAnchor, resolveAnchor } from './state';
+} from '@gprose/model';
+import { textSelection, createEditor, createAnchor, resolveAnchor } from '@gprose/state';
+import { z } from 'zod';
 
 const headingDefinition = defineNode({
   name: 'heading',

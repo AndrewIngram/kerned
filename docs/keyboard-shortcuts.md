@@ -5,7 +5,7 @@ session still owns commands, transactions, permissions and history; it does not
 listen for DOM events.
 
 ```ts
-import { defineExtension, type ContributionContext } from '../src/core';
+import { defineExtension, type ContributionContext } from '@gprose/core';
 import { keyboardShortcuts } from '../src/editor-browser';
 
 const historyKeys = defineExtension({

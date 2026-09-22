@@ -1,8 +1,7 @@
+import { createSchema, defineExtension, defineNode, type DocumentNode } from '@gprose/model';
+import { createEditor, createStateField, textSelection } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
-
-import { createSchema, defineExtension, defineNode, type DocumentNode } from '../src/model';
-import { createEditor, createStateField, textSelection } from '../src/state';
 
 const line = defineNode({
   name: 'line',

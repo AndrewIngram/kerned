@@ -1,6 +1,7 @@
+import type { NodeIdentity } from '@gprose/model';
+
 import type { BlockTextGeometry, InlineBounds } from '../editor-browser/drawing';
 import type { LaidOut } from '../engines';
-import type { NodeIdentity } from '../model';
 import type { Placement } from './scene';
 
 /** Share pure line fragments without exposing shaping, drawing or resource disposal. */

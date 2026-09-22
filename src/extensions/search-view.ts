@@ -1,4 +1,4 @@
-import { defineExtension, type ContributionContext } from '../core';
+import { defineExtension, type ContributionContext } from '@gprose/core';
 
 import './search-view.css';
 import { decorations, type TextDecoration } from '../editor-browser';

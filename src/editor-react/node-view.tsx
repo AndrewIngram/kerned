@@ -1,8 +1,8 @@
+import type { SchemaDefinition } from '@gprose/model';
+import { equalScopedSelection } from '@gprose/state';
 import { memo, type ComponentType } from 'react';
 
 import { defineNodeView, type NodeRenderFrame } from '../editor-browser/node-views';
-import type { SchemaDefinition } from '../model';
-import { equalScopedSelection } from '../state';
 import { portalHostFor } from './portals';
 
 type NodeDefinition = Extract<SchemaDefinition, { category: 'node' }>;

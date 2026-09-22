@@ -5,7 +5,7 @@ the schema, document, history or selection. Comments and search both use this
 public contribution, in canvas text and native table cells.
 
 ```ts
-import { defineExtension, type ContributionContext } from '../src/core';
+import { defineExtension, type ContributionContext } from '@gprose/core';
 import { decorations, type Decoration, type InvalidateDecorations } from '../src/editor-browser';
 
 type HighlightStore = {

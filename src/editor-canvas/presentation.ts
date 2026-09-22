@@ -1,5 +1,4 @@
-import { defineContribution } from '../core';
-import { createDocumentQuery } from '../editor-browser/document';
+import { defineContribution } from '@gprose/core';
 import type {
   InlineValue,
   MarkRange,
@@ -7,7 +6,9 @@ import type {
   NodeIdentity,
   Schema,
   SchemaDefinition,
-} from '../model';
+} from '@gprose/model';
+
+import { createDocumentQuery } from '../editor-browser/document';
 import { emptySlotInsets, type SlotInsets, type FlowLayoutEvent } from './flow-layout';
 import type { BlockPresentation } from './scene';
 import { createThemeStyles, type ViewTheme } from './theme';

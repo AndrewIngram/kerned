@@ -1,5 +1,6 @@
-import type { NodeIdentity } from '../model';
-import type { SelectionContext } from '../state';
+import type { NodeIdentity } from '@gprose/model';
+import type { SelectionContext } from '@gprose/state';
+
 import {
   createDecorationSource,
   decorationContributions,

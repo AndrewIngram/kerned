@@ -1,5 +1,6 @@
-import { defineContribution, type CommandContext } from '../core';
-import type { NodeIdentity } from '../model';
+import { defineContribution, type CommandContext } from '@gprose/core';
+import type { NodeIdentity } from '@gprose/model';
+
 import type { ViewSession } from './input-contributions';
 
 export type ClipboardData = {

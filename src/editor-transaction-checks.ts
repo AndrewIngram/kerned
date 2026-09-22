@@ -1,12 +1,4 @@
-import {
-  createSampleDocument,
-  type TextBlockNode,
-  type StarterNode,
-} from './extensions/demo-model';
-import { demoSchema } from './extensions/demo-schema';
-import { formattingMarks } from './extensions/formatting';
-import { createMention } from './extensions/mention';
-import { parseAnchor, boundaries } from './model';
+import { parseAnchor, boundaries } from '@gprose/model';
 import {
   textSelection,
   selectionContext,
@@ -15,8 +7,17 @@ import {
   type Transaction,
   createAnchor,
   resolveAnchor,
-} from './state';
-import { mapPosition } from './transform';
+} from '@gprose/state';
+import { mapPosition } from '@gprose/transform';
+
+import {
+  createSampleDocument,
+  type TextBlockNode,
+  type StarterNode,
+} from './extensions/demo-model';
+import { demoSchema } from './extensions/demo-schema';
+import { formattingMarks } from './extensions/formatting';
+import { createMention } from './extensions/mention';
 
 export function checkTransactions() {
   let assertions = 0;

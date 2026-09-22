@@ -1,3 +1,4 @@
+import type { SchemaDefinition } from '@gprose/model';
 import { memo, type ComponentType } from 'react';
 
 import {
@@ -8,7 +9,6 @@ import {
   type RangeView,
   type RangeViewMount,
 } from '../editor-browser';
-import type { SchemaDefinition } from '../model';
 import { portalHostFor } from './portals';
 
 type InlineDefinition = Extract<SchemaDefinition, { category: 'inline' }>;

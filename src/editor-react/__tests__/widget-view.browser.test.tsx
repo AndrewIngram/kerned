@@ -1,10 +1,12 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode } from '@gprose/model';
+import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '@gprose/state';
 import { createContext, StrictMode, useContext, useLayoutEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { expect, expectTypeOf, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { decorations, type Decoration, type InvalidateDecorations } from '../../editor-browser';
 import {
   defineNodePresentation,
@@ -12,8 +14,6 @@ import {
   mountEditor,
   type MountedEditor,
 } from '../../editor-canvas';
-import { createSchema, defineNode } from '../../model';
-import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '../../state';
 import { defineReactWidgetView, EditorContent, type ReactWidgetViewProps } from '../index';
 
 const note = defineNode({

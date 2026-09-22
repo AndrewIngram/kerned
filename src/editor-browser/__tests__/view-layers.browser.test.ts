@@ -1,8 +1,8 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineNode, indexTree } from '@gprose/model';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
-import { createSchema, defineNode, indexTree } from '../../model';
 import type { RegisterDrawing } from '../drawing';
 import { createViewLayers, viewLayers, type ViewLayerContribution } from '../view-layers';
 

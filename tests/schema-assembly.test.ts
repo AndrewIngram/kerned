@@ -1,6 +1,3 @@
-import { expect, test } from 'vitest';
-import { z } from 'zod';
-
 import {
   createSchema,
   defineNode,
@@ -8,9 +5,11 @@ import {
   defineInline,
   validateTree,
   createDocumentCodec,
-} from '../src/model';
-import { createEditor, textSelection } from '../src/state';
-import { applySteps, restoreChanges } from '../src/transform';
+} from '@gprose/model';
+import { createEditor, textSelection } from '@gprose/state';
+import { applySteps, restoreChanges } from '@gprose/transform';
+import { expect, test } from 'vitest';
+import { z } from 'zod';
 
 const emphasis = defineMark({
   name: 'emphasis',

@@ -13,8 +13,8 @@ Input rules belong to the headless core. The starter browser input and native
 table views invoke them after successful text insertion.
 
 ```ts
-import { defineExtension, inputRules, type ContributionContext } from '../src/core';
-import { textSelection } from '../src/state';
+import { defineExtension, inputRules, type ContributionContext } from '@gprose/core';
+import { textSelection } from '@gprose/state';
 
 const smartDash = defineExtension({
   name: 'smartDash',

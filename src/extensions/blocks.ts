@@ -1,12 +1,13 @@
-import { indexTree, type Schema, type NodeIdentity, type SelectionRange } from '../model';
+import { indexTree, type Schema, type NodeIdentity, type SelectionRange } from '@gprose/model';
 import {
   type EditorState,
   RangeSelection,
   selectionContext,
   TextSelection,
   textSelection,
-} from '../state';
-import { type Step } from '../transform';
+} from '@gprose/state';
+import { type Step } from '@gprose/transform';
+
 import { createBlockCommands } from './block-commands';
 import type { StarterNode } from './demo-model';
 import { createListCommands, type ListAdapter } from './lists';

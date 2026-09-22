@@ -17,8 +17,8 @@ try {
   const result = await page.evaluate(async () => {
     const { createEditor, createSchema, defineNode, textSelection } = Object.assign(
       {},
-      await import('/src/state/index.ts'),
-      await import('/src/model/index.ts'),
+      await import('/@id/@gprose/state'),
+      await import('/@id/@gprose/model'),
     );
 
     let visits = 0;

@@ -1,4 +1,4 @@
-import type { NodeIdentity, Schema } from '../model';
+import type { NodeIdentity, Schema } from '@gprose/model';
 
 export type OutlineHeading = { level: number; title: string };
 

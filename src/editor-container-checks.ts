@@ -1,9 +1,21 @@
+import {
+  createSchema,
+  defineNode,
+  indexTree,
+  type NodeIdentity,
+  type DocumentNode,
+} from '@gprose/model';
+import {
+  textSelection,
+  TextSelection,
+  createEditor,
+  createAnchor,
+  resolveAnchor,
+} from '@gprose/state';
+import { type Step } from '@gprose/transform';
 import { z } from 'zod';
 
 import { createListCommands, type ListCommand } from './extensions/lists';
-import { createSchema, defineNode, indexTree, type NodeIdentity, type DocumentNode } from './model';
-import { textSelection, TextSelection, createEditor, createAnchor, resolveAnchor } from './state';
-import { type Step } from './transform';
 
 const definitions = [
   defineNode({

@@ -1,3 +1,4 @@
+import type { NodeIdentity } from '@gprose/model';
 import {
   useLayoutEffect,
   useRef,
@@ -12,7 +13,6 @@ import {
   type MountEditorOptions,
   type MountedEditor,
 } from '../editor-canvas';
-import type { NodeIdentity } from '../model';
 import { createPortalHost, EditorPortals } from './portals';
 
 export type EditorContentProps<N extends NodeIdentity> = Omit<MountEditorOptions<N>, 'editor'> & {

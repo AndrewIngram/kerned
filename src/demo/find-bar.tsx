@@ -1,6 +1,5 @@
+import type { FindOptions, FindState } from '@gprose/state';
 import { useId, useLayoutEffect, useRef, useState } from 'react';
-
-import type { FindOptions, FindState } from '../state';
 
 export function FindIcon() {
   return (

@@ -1,5 +1,5 @@
-import { type NodeIdentity, type DocumentRange } from '../model';
-import { type createEditor, type RangeDecoration } from '../state';
+import { type NodeIdentity, type DocumentRange } from '@gprose/model';
+import { type createEditor, type RangeDecoration } from '@gprose/state';
 
 /** The discussion owns its identity; the document never registers its range. */
 export type CommentThread<Message> = Readonly<{

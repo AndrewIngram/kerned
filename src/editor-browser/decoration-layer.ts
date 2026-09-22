@@ -1,4 +1,4 @@
-import type { NodeIdentity } from '../model';
+import type { NodeIdentity } from '@gprose/model';
 
 import './decorations.css';
 import { allocatedBlockBounds } from './block-geometry';

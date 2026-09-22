@@ -1,12 +1,12 @@
+import * as modelModule from '@gprose/model';
+import * as stateModule from '@gprose/state';
+import * as transformModule from '@gprose/transform';
 import { test, expect } from 'vitest';
 
 import * as cellSelectionModule from '../src/extensions/cell-selection.ts';
 import * as commentModule from '../src/extensions/comment.ts';
 import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
 import * as headingsModule from '../src/extensions/headings.ts';
-import * as modelModule from '../src/model/index.ts';
-import * as stateModule from '../src/state/index.ts';
-import * as transformModule from '../src/transform/index.ts';
 import * as editorFoundationModule from './fixtures/editor-foundation.js';
 import * as replayPositionsModule from './fixtures/replay-positions.js';
 

@@ -1,3 +1,13 @@
+import { parseAnchor } from '@gprose/model';
+import {
+  type FindState,
+  createAnchor,
+  resolveAnchor,
+  resolveRangeDecorations,
+  TextSelection,
+  RangeSelection,
+  textSelection,
+} from '@gprose/state';
 import { useLayoutEffect, type RefObject } from 'react';
 
 import type { MountedEditor } from '../../editor-canvas';
@@ -12,17 +22,7 @@ import { demoSchema } from '../../extensions/demo-schema';
 import { importHtml } from '../../extensions/html';
 import type { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import { parseAnchor } from '../../model';
 import { checkInlineResources } from '../../owned-inline-checks';
-import {
-  type FindState,
-  createAnchor,
-  resolveAnchor,
-  resolveRangeDecorations,
-  TextSelection,
-  RangeSelection,
-  textSelection,
-} from '../../state';
 import type { StreamState } from './use-sample-stream';
 
 type DiagnosticsOptions = {

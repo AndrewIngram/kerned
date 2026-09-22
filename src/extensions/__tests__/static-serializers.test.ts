@@ -1,7 +1,7 @@
+import { createEditor, createEditorSerializer } from '@gprose/core';
+import { createSchema, createDocumentCodec } from '@gprose/model';
 import { expect, test } from 'vitest';
 
-import { createEditor, createEditorSerializer } from '../../core';
-import { createSchema, createDocumentCodec } from '../../model';
 import { starterExtensions } from '../starter-kit';
 
 test('assembled headless starter output covers rich tables, heading levels, mentions and images', () => {

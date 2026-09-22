@@ -1,9 +1,9 @@
+import { createEditor } from '@gprose/core';
+import { createSchema, defineNode, type DocumentNode } from '@gprose/model';
+import { NodeSelection, TextSelection, textSelection } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor } from '../../core';
-import { createSchema, defineNode, type DocumentNode } from '../../model';
-import { NodeSelection, TextSelection, textSelection } from '../../state';
 import { createDocumentQuery } from '../document';
 
 const note = defineNode({

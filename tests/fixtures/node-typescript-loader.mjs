@@ -7,6 +7,12 @@ export async function resolve(specifier, context, nextResolve) {
   if (specifier.startsWith('.') && context.parentURL) {
     const base = new URL(specifier, context.parentURL);
 
+    if (specifier.endsWith('.js')) {
+      const source = new URL(base.href.replace(/\.js$/, '.ts'));
+
+      if (existsSync(fileURLToPath(source))) return nextResolve(source.href, context);
+    }
+
     for (const suffix of ['.ts', '.tsx', '/index.ts']) {
       const target = new URL(base.href + suffix);
 

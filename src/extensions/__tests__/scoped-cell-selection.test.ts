@@ -1,7 +1,7 @@
+import { createEditor } from '@gprose/core';
+import { createSchema } from '@gprose/model';
 import { expect, test } from 'vitest';
 
-import { createEditor } from '../../core';
-import { createSchema } from '../../model';
 import { starterExtensions } from '../starter-kit';
 import { tableCells } from '../table';
 

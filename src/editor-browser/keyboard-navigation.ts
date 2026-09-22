@@ -1,5 +1,5 @@
-import { type TextPoint, wordBoundary } from '../model';
-import { TextSelection } from '../state';
+import { type TextPoint, wordBoundary } from '@gprose/model';
+import { TextSelection } from '@gprose/state';
 
 type Direction = 'left' | 'right' | 'up' | 'down' | 'home' | 'end';
 

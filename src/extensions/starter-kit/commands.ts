@@ -3,8 +3,9 @@ import {
   defineCommand,
   defineDocumentCommand,
   type DocumentCommandArguments,
-} from '../../core';
-import { AllSelection } from '../../state';
+} from '@gprose/core';
+import { AllSelection } from '@gprose/state';
+
 import { pasteFragment, type ClipboardFragment } from '../clipboard-fragment';
 import {
   replaceSelection,

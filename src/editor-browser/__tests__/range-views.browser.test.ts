@@ -1,10 +1,10 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema, defineMark, defineNode, indexTree } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditor, defineExtension, type ContributionContext } from '../../core';
 import { defineNodePresentation, presentations, mountEditor } from '../../editor-canvas';
-import { createSchema, defineMark, defineNode, indexTree } from '../../model';
-import { textSelection } from '../../state';
 import { defineMarkView, viewLayers, type RangeViewMount } from '../index';
 import { createViewLayers } from '../view-layers';
 

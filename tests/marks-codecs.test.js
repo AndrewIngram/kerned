@@ -1,9 +1,9 @@
+import * as modelModule from '@gprose/model';
+import * as stateModule from '@gprose/state';
 import { test, expect } from 'vitest';
 import { z } from 'zod';
 
 import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
-import * as modelModule from '../src/model/index.ts';
-import * as stateModule from '../src/state/index.ts';
 
 test('custom attribute marks replace only their type and round-trip with versions', async () => {
   const result = await (async () => {

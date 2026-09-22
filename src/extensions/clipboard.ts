@@ -1,11 +1,12 @@
-import { createHtmlParser } from '../editor-browser';
 import {
   createDocumentSerializer,
   createDocumentCodec,
   type NodeIdentity,
   type Schema,
-} from '../model';
-import { type EditorState } from '../state';
+} from '@gprose/model';
+import { type EditorState } from '@gprose/state';
+
+import { createHtmlParser } from '../editor-browser';
 import { copyFragment, type ClipboardFragment } from './clipboard-fragment';
 import { starterHtmlParsers } from './html-parsers';
 import { paragraph, table } from './starter-definitions';

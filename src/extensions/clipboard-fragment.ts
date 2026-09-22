@@ -1,5 +1,4 @@
-import { indexTree, validateTree, type NodeIdentity, type Schema } from '../model';
-import { supportsOwnedText } from '../owned-text-support';
+import { indexTree, validateTree, type NodeIdentity, type Schema } from '@gprose/model';
 import {
   RangeSelection,
   NodeSelection,
@@ -8,8 +7,10 @@ import {
   selectionContext,
   textSelection,
   type EditorState,
-} from '../state';
-import type { Step } from '../transform';
+} from '@gprose/state';
+import type { Step } from '@gprose/transform';
+
+import { supportsOwnedText } from '../owned-text-support';
 import { replaceStructuredText } from './blocks';
 import type { StarterNode } from './demo-model';
 import { paragraph, table, tableCell, list, listItem } from './starter-definitions';

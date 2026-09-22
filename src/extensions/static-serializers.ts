@@ -1,10 +1,11 @@
-import { defineExtension, serializers, type ContributionContext } from '../core';
+import { defineExtension, serializers, type ContributionContext } from '@gprose/core';
 import {
   defineNodeSerializer,
   defineMarkSerializer,
   defineInlineSerializer,
   type HtmlOutput,
-} from '../model';
+} from '@gprose/model';
+
 import {
   paragraph,
   heading,

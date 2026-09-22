@@ -1,9 +1,9 @@
+import { createEditor } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { textSelection, NodeSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 
-import { createEditor } from '../../core';
 import { mountEditor } from '../../editor-canvas';
-import { createSchema } from '../../model';
-import { textSelection, NodeSelection } from '../../state';
 import { createCommentStore, captureComment } from '../comment';
 import { createCommentProjection } from '../comment-projection';
 import { commentView, onCommentActivate, type CommentActivation } from '../comment-view';

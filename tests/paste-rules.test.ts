@@ -1,11 +1,11 @@
+import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { expect, test, onTestFinished } from 'vitest';
 
-import { createEditor, defineExtension, type ContributionContext } from '../src/core';
 import { createPasteRules, pasteRules, type PasteRule } from '../src/editor-browser';
 import { starterExtensions } from '../src/extensions/starter-kit';
 import { editingCommands } from '../src/extensions/starter-kit/commands';
-import { createSchema } from '../src/model';
-import { textSelection } from '../src/state';
 
 function fixture(rules: readonly PasteRule[], writable = true) {
   const extension = defineExtension({

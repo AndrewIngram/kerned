@@ -1,14 +1,14 @@
+import { createEditor } from '@gprose/core';
+import { createSchema } from '@gprose/model';
+import { textSelection } from '@gprose/state';
 import { createElement, StrictMode } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { expect, test } from 'vitest';
 
-import { createEditor } from '../../../core';
 import { mountEditor, type MountedEditor } from '../../../editor-canvas';
 import { createViewDiagnostics } from '../../../editor-canvas/diagnostics';
 import { EditorContent } from '../../../editor-react';
-import { createSchema } from '../../../model';
-import { textSelection } from '../../../state';
 import { createCommentStore } from '../../comment';
 import { commentView, onCommentActivate } from '../../comment-view';
 import { createSampleDocument } from '../../demo-model';

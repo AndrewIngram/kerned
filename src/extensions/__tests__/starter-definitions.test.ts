@@ -1,6 +1,6 @@
+import { createSchema } from '@gprose/model';
 import { expect, test } from 'vitest';
 
-import { createSchema } from '../../model';
 import { paragraph, quote, table, tableCell } from '../starter-definitions';
 
 test('blockquote works with a minimal text kit without tables, lists or images', () => {

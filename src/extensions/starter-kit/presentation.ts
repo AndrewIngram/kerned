@@ -1,7 +1,8 @@
-import { defineExtension, type ContributionContext } from '../../core';
+import { defineExtension, type ContributionContext } from '@gprose/core';
+import type { NodeIdentity, Schema } from '@gprose/model';
+
 import { defineNodePresentation, presentations } from '../../editor-canvas/presentation';
 import type { BlockPresentation, PresentBlock } from '../../editor-canvas/scene';
-import type { NodeIdentity, Schema } from '../../model';
 import type { StarterLeaf } from '../demo-model';
 import { formattingSpans } from '../formatting';
 import { inlineSchema } from '../mention';
