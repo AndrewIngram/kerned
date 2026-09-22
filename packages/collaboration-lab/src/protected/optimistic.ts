@@ -14,8 +14,11 @@ type Result =
 /** One immutable request in flight, with further edits in optimistic coordinates.
  * Only a projected frame can settle requests: a standalone receipt does not prove
  * which document view includes the accepted edit. */
-export function createOptimisticRecipient(session: string) {
-  const recipient = createProtectedRecipient(session);
+export function createOptimisticRecipient(
+  session: string,
+  partitions?: Parameters<typeof createProtectedRecipient>[1],
+) {
+  const recipient = createProtectedRecipient(session, partitions);
   let queue: Draft[] = [];
   let flight: { id: number; key: string; operation: number; bytes: Uint8Array } | null = null;
   let results: Result[] = [];
@@ -29,15 +32,6 @@ export function createOptimisticRecipient(session: string) {
         body.text === null ? [] : [[key, body.text] as const],
       ),
     );
-  }
-
-  function apply(values: Map<string, string>, edit: Edit) {
-    const before = values.get(edit.key);
-
-    if (before === undefined || before.slice(edit.from, edit.to) !== edit.expected)
-      throw new Error('Edit precondition failed');
-    validateTextRange(before, edit.from, edit.to);
-    values.set(edit.key, before.slice(0, edit.from) + edit.text + before.slice(edit.to));
   }
 
   function visibleTexts() {
@@ -270,6 +264,9 @@ export function createOptimisticRecipient(session: string) {
         throw error;
       }
     },
+    snapshot() {
+      return recipient.snapshot();
+    },
     text(key: string) {
       if (needsReset) return undefined;
       const values = texts();
@@ -298,4 +295,13 @@ export function createOptimisticRecipient(session: string) {
       recipient.destroy();
     },
   };
+}
+
+function apply(values: Map<string, string>, edit: Edit) {
+  const before = values.get(edit.key);
+
+  if (before === undefined || before.slice(edit.from, edit.to) !== edit.expected)
+    throw new Error('Edit precondition failed');
+  validateTextRange(before, edit.from, edit.to);
+  values.set(edit.key, before.slice(0, edit.from) + edit.text + before.slice(edit.to));
 }

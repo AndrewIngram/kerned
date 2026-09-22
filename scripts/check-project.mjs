@@ -50,7 +50,11 @@ function visit(file) {
 
 visit('apps/demo/vite.config.ts');
 
-for (const entry of ['apps/demo/editor.html', 'apps/demo/extensions.html']) {
+for (const entry of [
+  'apps/demo/editor.html',
+  'apps/demo/extensions.html',
+  'apps/demo/collaboration.html',
+]) {
   const html = readFileSync(entry, 'utf8');
   const scripts = [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/g)];
   assert.ok(scripts.length, `${entry}: missing editor entry point`);

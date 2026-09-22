@@ -1,15 +1,19 @@
 import { expect, test } from 'vitest';
 
-import { replacementCases, schema, type Node } from './experiments/collaboration/fixtures.js';
-import { inspectWire } from './experiments/collaboration/protected/audit.js';
-import { createProtectedAuthority } from './experiments/collaboration/protected/authority.js';
-import { createProtectedRecipient } from './experiments/collaboration/protected/recipient.js';
+import { createProtectedAuthority } from '../packages/collaboration-lab/src/protected/authority.js';
+import {
+  createPartitions,
+  createReceivedPartitions,
+} from '../packages/collaboration-lab/src/protected/partitions.js';
+import { createProtectedRecipient } from '../packages/collaboration-lab/src/protected/recipient.js';
 import {
   decodeFrame,
   decodeProposal,
   decodeReceipt,
   encodeProposal,
-} from './experiments/collaboration/protected/wire.js';
+} from '../packages/collaboration-lab/src/protected/wire.js';
+import { replacementCases, schema, type Node } from './experiments/collaboration/fixtures.js';
+import { inspectWire } from './experiments/collaboration/protected/audit.js';
 
 const secret = 'PRIVATE_CANONICAL_TEXT';
 
@@ -28,7 +32,8 @@ function fixture(mode: 'json' | 'automerge', value = 'abcd') {
   const authority = createProtectedAuthority({
     schema,
     nodes,
-    mode,
+    delivery:
+      mode === 'json' ? { kind: 'json' } : { kind: 'automerge', partitions: createPartitions() },
     users: { owner: 'editable', guest: 'editable', reader: 'read-only' },
     comments: [],
     attachments: [],
@@ -42,7 +47,7 @@ function fixture(mode: 'json' | 'automerge', value = 'abcd') {
       replies: Uint8Array[] = [];
 
     const connection = authority.connect(principal, (bytes) => frames.push(bytes.slice()));
-    const recipient = createProtectedRecipient(connection.session);
+    const recipient = createProtectedRecipient(connection.session, createReceivedPartitions());
 
     const flush = () => {
       const changed = connection.flush();
@@ -98,7 +103,7 @@ for (const mode of ['json', 'automerge'] as const) {
       }
     });
 
-    const recipient = createProtectedRecipient(connection.session);
+    const recipient = createProtectedRecipient(connection.session, createReceivedPartitions());
 
     connection.flush();
     expect(receipts).toEqual([{ kind: 'accepted', operation: 1 }]);
@@ -353,7 +358,7 @@ test('an uncertain delivery closes its session rather than reusing a view sequen
   });
 
   expect(() => connection.flush()).toThrow('Delivery failed');
-  const replica = createProtectedRecipient(connection.session);
+  const replica = createProtectedRecipient(connection.session, createReceivedPartitions());
   replica.receive(frames[0]);
   const proposal = replica.propose(insert(0, '!'));
   expect(() => connection.submit(proposal)).toThrow('Session closed');

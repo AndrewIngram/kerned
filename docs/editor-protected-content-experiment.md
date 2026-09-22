@@ -1,5 +1,9 @@
 # Protected content: recipient-specific delivery
 
+The experimental implementation now lives in `packages/collaboration-lab`.
+A separate [mounted collaboration demo](editor-collaboration-demo.md) exercises
+text editing, presence and protected projections at `/collaboration.html`.
+
 The experiment now exercises two ways to send a restricted document: projected JSON
 updates and separately authorised Automerge partitions. Both reuse the core
 `projectDocument` function. Restricted recipients receive an opaque block's stable

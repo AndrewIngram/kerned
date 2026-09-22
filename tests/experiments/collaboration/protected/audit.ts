@@ -1,7 +1,10 @@
 import * as Automerge from '@automerge/automerge';
 import { z } from 'zod';
 
-import { decodeFrame, type Body } from './wire.js';
+import {
+  decodeFrame,
+  type Body,
+} from '../../../../packages/collaboration-lab/src/protected/wire.js';
 
 /** Inspect actual serialized frames AND decompress every native historical state.
  * Searching compressed byte arrays for a sentinel alone would be a false proof. */

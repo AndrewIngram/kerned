@@ -1,20 +1,16 @@
-import * as Automerge from '@automerge/automerge';
 import { validateTextRange } from '@gprose/model';
 
 import type { Edit, PresenceSelection } from '../protocol.js';
+import type { createReceivedPartitions } from './partitions.js';
 import { readableSelection } from './selection.js';
-import {
-  bodySchema,
-  decodeFrame,
-  encodeProposal,
-  encodePresence,
-  type Body,
-  type Frame,
-} from './wire.js';
+import { decodeFrame, encodeProposal, encodePresence, type Body, type Frame } from './wire.js';
 
 /** A cooperative recipient. An application cannot erase copies a hostile recipient
  * made while it was authorized. Frames from an older session/sequence are ignored. */
-export function createProtectedRecipient(session: string) {
+export function createProtectedRecipient(
+  session: string,
+  partitions?: ReturnType<typeof createReceivedPartitions>,
+) {
   let sequence = 0,
     epoch = 0;
 
@@ -24,7 +20,6 @@ export function createProtectedRecipient(session: string) {
   let operation = 0;
   let presenceSequence = 0;
   const bodies = new Map<string, Body>();
-  const docs = new Map<string, Automerge.Doc<{ body: Body }>>();
   const attachments = new Map<string, { key: string; body: string }>();
 
   function clear() {
@@ -32,8 +27,7 @@ export function createProtectedRecipient(session: string) {
     attachments.clear();
     latest = null;
 
-    for (const doc of docs.values()) Automerge.free(doc);
-    docs.clear();
+    partitions?.clear();
   }
 
   return {
@@ -66,11 +60,7 @@ export function createProtectedRecipient(session: string) {
 
       for (const key of bodies.keys()) if (!readable.has(key)) bodies.delete(key);
 
-      for (const [key, doc] of docs)
-        if (!readable.has(key)) {
-          Automerge.free(doc);
-          docs.delete(key);
-        }
+      partitions?.retain(readable);
 
       for (const [id, value] of attachments) if (!readable.has(value.key)) attachments.delete(id);
 
@@ -81,28 +71,8 @@ export function createProtectedRecipient(session: string) {
           if (update.kind === 'json') {
             bodies.set(update.key, update.body);
           } else {
-            if (update.mode === 'snapshot') {
-              const previous = docs.get(update.key);
-
-              if (previous) Automerge.free(previous);
-              docs.set(update.key, Automerge.load<{ body: Body }>(new Uint8Array(update.bytes[0])));
-            } else {
-              const doc = docs.get(update.key);
-
-              if (!doc) throw new Error('Missing partition');
-
-              const [next] = Automerge.applyChanges(
-                doc,
-                update.bytes.map((value) => new Uint8Array(value)),
-              );
-
-              docs.set(update.key, next);
-            }
-
-            const doc = docs.get(update.key);
-
-            if (!doc) throw new Error('Missing partition');
-            bodies.set(update.key, bodySchema.parse(doc.body));
+            if (!partitions) throw new Error('Automerge delivery is not installed');
+            bodies.set(update.key, partitions.receive(update));
           }
         }
 

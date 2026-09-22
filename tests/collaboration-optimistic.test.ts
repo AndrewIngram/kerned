@@ -1,14 +1,18 @@
 import { expect, test } from 'vitest';
 
-import { replacementCases, schema } from './experiments/collaboration/fixtures.js';
-import { inspectWire } from './experiments/collaboration/protected/audit.js';
-import { createProtectedAuthority } from './experiments/collaboration/protected/authority.js';
-import { createOptimisticRecipient } from './experiments/collaboration/protected/optimistic.js';
+import { createProtectedAuthority } from '../packages/collaboration-lab/src/protected/authority.js';
+import { createOptimisticRecipient } from '../packages/collaboration-lab/src/protected/optimistic.js';
+import {
+  createPartitions,
+  createReceivedPartitions,
+} from '../packages/collaboration-lab/src/protected/partitions.js';
 import {
   decodeFrame,
   decodeProposal,
   decodeReceipt,
-} from './experiments/collaboration/protected/wire.js';
+} from '../packages/collaboration-lab/src/protected/wire.js';
+import { replacementCases, schema } from './experiments/collaboration/fixtures.js';
+import { inspectWire } from './experiments/collaboration/protected/audit.js';
 
 const insert = (from: number, text: string, key = 'one') => ({ key, from, to: from, text });
 
@@ -20,7 +24,8 @@ function fixture(mode: 'json' | 'automerge') {
       { kind: 'note', id: 2, key: 'two', value: 'next' },
       { kind: 'note', id: 3, key: 'hidden', value: 'PRIVATE_TEXT' },
     ],
-    mode,
+    delivery:
+      mode === 'json' ? { kind: 'json' } : { kind: 'automerge', partitions: createPartitions() },
     users: { guest: 'editable' },
     comments: [],
     attachments: [],
@@ -30,7 +35,7 @@ function fixture(mode: 'json' | 'automerge') {
   authority.setAccess('guest', 'hidden', 'protected');
   const frames: Uint8Array[] = [];
   const connection = authority.connect('guest', (bytes) => frames.push(bytes.slice()));
-  const client = createOptimisticRecipient(connection.session);
+  const client = createOptimisticRecipient(connection.session, createReceivedPartitions());
 
   function flush() {
     const sent = connection.flush();
@@ -162,7 +167,7 @@ for (const mode of ['json', 'automerge'] as const) {
       f.drain();
       const frames: Uint8Array[] = [];
       const connection = f.authority.connect('guest', (bytes) => frames.push(bytes));
-      const probe = createOptimisticRecipient(connection.session);
+      const probe = createOptimisticRecipient(connection.session, createReceivedPartitions());
       connection.flush();
       probe.receive(frames[0]);
       expect(f.client.text('one')).toBe(probe.text('one'));

@@ -9,7 +9,7 @@ export default defineConfig(({ mode, command }) => ({
   plugins: [react({ compiler: true })],
   build: {
     rollupOptions: {
-      input: ['index.html', 'editor.html', 'extensions.html'],
+      input: ['index.html', 'editor.html', 'extensions.html', 'collaboration.html'],
     },
   },
 }));

@@ -1,0 +1,40 @@
+{
+  "name": "@gprose/collaboration-lab",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "gprose-source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./authority": {
+      "gprose-source": "./src/protected/authority.ts",
+      "types": "./dist/protected/authority.d.ts",
+      "import": "./dist/protected/authority.js"
+    },
+    "./browser": {
+      "gprose-source": "./src/browser.ts",
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
+    "./automerge": {
+      "gprose-source": "./src/protected/partitions.ts",
+      "types": "./dist/protected/partitions.d.ts",
+      "import": "./dist/protected/partitions.js"
+    }
+  },
+  "dependencies": {
+    "@gprose/core": "workspace:*",
+    "@gprose/model": "workspace:*",
+    "@gprose/state": "workspace:*",
+    "@gprose/transform": "workspace:*",
+    "@gprose/view": "workspace:*",
+    "@automerge/automerge": "3.5.0",
+    "zod": "4.6.5"
+  }
+}

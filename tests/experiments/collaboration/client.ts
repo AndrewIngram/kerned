@@ -2,8 +2,7 @@ import { indexTree, validateTextRange, type NodeIdentity, type Schema } from '@g
 import { createEditor, AllSelection } from '@gprose/state';
 import { applySteps, type Step } from '@gprose/transform';
 
-import type { Receipt } from './authority.js';
-import { documentCoordinates } from './coordinates.js';
+import { documentCoordinates } from '../../../packages/collaboration-lab/src/coordinates.js';
 import {
   mapSelection,
   rebase,
@@ -14,7 +13,8 @@ import {
   type Presence,
   type PresenceSelection,
   type PresenceSnapshot,
-} from './protocol.js';
+} from '../../../packages/collaboration-lab/src/protocol.js';
+import type { Receipt } from './authority.js';
 
 /** Disposable headless client. One pending proposal makes the coordinate proof
  * small; additional typing queues and mounted session integration are separate gates. */

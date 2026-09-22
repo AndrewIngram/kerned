@@ -5,7 +5,7 @@ import type { Step } from '@gprose/transform';
 import { documentCoordinates } from '../coordinates.js';
 import { mapSelection, type PresenceSelection } from '../protocol.js';
 import { createProjectedDocument } from './document.js';
-import { createPartitions } from './partitions.js';
+import type { createPartitions } from './partitions.js';
 import {
   bodySchema,
   encodeFrame,
@@ -30,7 +30,9 @@ type Attachment = { id: string; key: string; body: string };
 export function createProtectedAuthority<N extends NodeIdentity>(options: {
   schema: Schema<N>;
   nodes: readonly N[];
-  mode: 'json' | 'automerge';
+  delivery:
+    | { kind: 'json' }
+    | { kind: 'automerge'; partitions: ReturnType<typeof createPartitions> };
   users: Readonly<Record<string, NodeAccess>>;
   comments: readonly Comment[];
   attachments: readonly Attachment[];
@@ -42,7 +44,7 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
   const access = new Map<string, Map<string, NodeAccess>>();
   const comments = structuredClone(options.comments);
   const attachments = new Map(options.attachments.map((item) => [item.id, structuredClone(item)]));
-  const partitions = createPartitions();
+  const partitions = options.delivery.kind === 'automerge' ? options.delivery.partitions : null;
   const presence = new Map<string, PresenceSelection>();
   const connections = new Set<() => void>();
 
@@ -75,7 +77,7 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
 
   function rotate() {
     presence.clear();
-    partitions.clear();
+    partitions?.clear();
     epoch++;
   }
 
@@ -293,9 +295,9 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
             const bodySignature = JSON.stringify(body);
             nextBodies.set(key, bodySignature);
 
-            if (options.mode === 'automerge') {
+            if (options.delivery.kind === 'automerge') {
               const previousHeads = full ? undefined : sentHeads.get(key);
-              const result = partitions.update(key, body, previousHeads);
+              const result = options.delivery.partitions.update(key, body, previousHeads);
               nextHeads.set(key, result.heads);
 
               if (result.update.kind === 'automerge' && result.update.bytes.length)
@@ -353,7 +355,7 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
       destroyed = true;
 
       for (const close of connections) close();
-      partitions.clear();
+      partitions?.clear();
       presence.clear();
     },
   };

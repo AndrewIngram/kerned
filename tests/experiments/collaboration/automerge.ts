@@ -3,8 +3,8 @@ import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
 import { applySteps, type Step } from '@gprose/transform';
 import { z } from 'zod';
 
-import { documentCoordinates } from './coordinates.js';
-import type { Edit, PresenceSelection } from './protocol.js';
+import { documentCoordinates } from '../../../packages/collaboration-lab/src/coordinates.js';
+import type { Edit, PresenceSelection } from '../../../packages/collaboration-lab/src/protocol.js';
 
 const content = z.object({ texts: z.record(z.string(), z.string()) });
 

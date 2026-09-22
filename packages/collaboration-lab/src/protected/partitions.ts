@@ -1,6 +1,6 @@
 import * as Automerge from '@automerge/automerge';
 
-import type { Body, Update } from './wire.js';
+import { bodySchema, type Body, type Update } from './wire.js';
 
 type PartitionUpdate = { update: Update; heads: Automerge.Heads };
 
@@ -49,6 +49,50 @@ export function createPartitions() {
     clear() {
       for (const partition of partitions.values()) Automerge.free(partition.doc);
       partitions.clear();
+    },
+  };
+}
+
+/** Native receive state is optional: JSON clients do not import a WASM backend. */
+export function createReceivedPartitions() {
+  const docs = new Map<string, Automerge.Doc<{ body: Body }>>();
+
+  return {
+    receive(update: Extract<Update, { kind: 'automerge' }>) {
+      if (update.mode === 'snapshot') {
+        const previous = docs.get(update.key);
+
+        if (previous) Automerge.free(previous);
+        docs.set(update.key, Automerge.load<{ body: Body }>(new Uint8Array(update.bytes[0])));
+      } else {
+        const doc = docs.get(update.key);
+
+        if (!doc) throw new Error('Missing partition');
+
+        const [next] = Automerge.applyChanges(
+          doc,
+          update.bytes.map((value) => new Uint8Array(value)),
+        );
+
+        docs.set(update.key, next);
+      }
+
+      const doc = docs.get(update.key);
+
+      if (!doc) throw new Error('Missing partition');
+
+      return bodySchema.parse(doc.body);
+    },
+    retain(keys: ReadonlySet<string>) {
+      for (const [key, doc] of docs)
+        if (!keys.has(key)) {
+          Automerge.free(doc);
+          docs.delete(key);
+        }
+    },
+    clear() {
+      for (const doc of docs.values()) Automerge.free(doc);
+      docs.clear();
     },
   };
 }

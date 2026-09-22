@@ -24,7 +24,8 @@
     "@gprose/extension-comments": "workspace:*",
     "@gprose/react": "workspace:*",
     "react-dom": "19.2.8",
-    "@gprose/extension-search": "workspace:*"
+    "@gprose/extension-search": "workspace:*",
+    "@gprose/collaboration-lab": "workspace:*"
   },
   "devDependencies": {
     "vite": "8.3.0",

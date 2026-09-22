@@ -1,5 +1,9 @@
 # Optimistic typing from restricted replicas
 
+The experimental implementation now lives in `packages/collaboration-lab`.
+A separate [mounted collaboration demo](editor-collaboration-demo.md) exercises
+text editing, presence and protected projections at `/collaboration.html`.
+
 The headless protected-content experiment now accepts continued local typing while
 an earlier edit awaits confirmation. `createOptimisticRecipient` owns the confirmed
 projection, ordered drafts, one immutable request in flight and recovery results.

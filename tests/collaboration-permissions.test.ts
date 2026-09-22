@@ -2,6 +2,7 @@ import * as Automerge from '@automerge/automerge';
 import { indexTree } from '@gprose/model';
 import { expect, test } from 'vitest';
 
+import type { Edit } from '../packages/collaboration-lab/src/protocol.js';
 import { createAuthority } from './experiments/collaboration/authority.js';
 import { createAutomergeAuthority } from './experiments/collaboration/automerge-authority.js';
 import {
@@ -11,7 +12,6 @@ import {
 import { createAutomergePeer, createAutomergeSeed } from './experiments/collaboration/automerge.js';
 import { createClient } from './experiments/collaboration/client.js';
 import { schema, type Node } from './experiments/collaboration/fixtures.js';
-import type { Edit } from './experiments/collaboration/protocol.js';
 
 function fixture() {
   const nodes: Node[] = [

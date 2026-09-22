@@ -1,5 +1,9 @@
 # Selections and presence through optimistic edits
 
+The experimental implementation now lives in `packages/collaboration-lab`.
+A separate [mounted collaboration demo](editor-collaboration-demo.md) exercises
+text editing, presence and protected projections at `/collaboration.html`.
+
 The restricted optimistic client now owns a local text selection and derives remote
 selections in the text currently shown to the user. Selection mapping uses block
 keys, UTF-16 offsets and insertion association, preserving anchor/head orientation.

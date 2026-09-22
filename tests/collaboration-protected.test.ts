@@ -1,16 +1,20 @@
 import * as Automerge from '@automerge/automerge';
 import { expect, test } from 'vitest';
 
-import { schema, type Node } from './experiments/collaboration/fixtures.js';
-import { inspectWire } from './experiments/collaboration/protected/audit.js';
-import { createProtectedAuthority } from './experiments/collaboration/protected/authority.js';
-import { createProtectedRecipient } from './experiments/collaboration/protected/recipient.js';
+import { createProtectedAuthority } from '../packages/collaboration-lab/src/protected/authority.js';
+import {
+  createPartitions,
+  createReceivedPartitions,
+} from '../packages/collaboration-lab/src/protected/partitions.js';
+import { createProtectedRecipient } from '../packages/collaboration-lab/src/protected/recipient.js';
 import {
   decodeFrame,
   encodeFrame,
   encodePresence,
-} from './experiments/collaboration/protected/wire.js';
-import type { PresenceSelection } from './experiments/collaboration/protocol.js';
+} from '../packages/collaboration-lab/src/protected/wire.js';
+import type { PresenceSelection } from '../packages/collaboration-lab/src/protocol.js';
+import { schema, type Node } from './experiments/collaboration/fixtures.js';
+import { inspectWire } from './experiments/collaboration/protected/audit.js';
 
 const secret = 'PRIVATE_TEXT_SENTINEL';
 
@@ -43,7 +47,8 @@ function fixture(mode: 'json' | 'automerge') {
   const host = createProtectedAuthority({
     schema,
     nodes,
-    mode,
+    delivery:
+      mode === 'json' ? { kind: 'json' } : { kind: 'automerge', partitions: createPartitions() },
     users: { owner: 'editable', guest: 'editable', reader: 'read-only' },
     comments: [
       { id: 'comment-public', from: 'before', to: 'before', text: 'Visible comment', readKeys: [] },
@@ -74,7 +79,7 @@ function fixture(mode: 'json' | 'automerge') {
   function connect(principal: string) {
     const frames: Uint8Array[] = [];
     const connection = host.connect(principal, (bytes) => frames.push(bytes.slice()));
-    const recipient = createProtectedRecipient(connection.session);
+    const recipient = createProtectedRecipient(connection.session, createReceivedPartitions());
     let presenceSequence = 0;
 
     return {

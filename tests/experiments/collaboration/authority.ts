@@ -1,7 +1,7 @@
 import { indexTree, validateTextRange, type NodeIdentity, type Schema } from '@gprose/model';
 import { createEditor, AllSelection } from '@gprose/state';
 
-import { documentCoordinates } from './coordinates.js';
+import { documentCoordinates } from '../../../packages/collaboration-lab/src/coordinates.js';
 import {
   rebase,
   sameEdit,
@@ -13,7 +13,7 @@ import {
   type PresenceSelection,
   type RemotePresence,
   type PresenceSnapshot,
-} from './protocol.js';
+} from '../../../packages/collaboration-lab/src/protocol.js';
 
 type Session = { principal: string; sequence: number; latest: Presence | null; receivedAt: number };
 

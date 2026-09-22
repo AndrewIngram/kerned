@@ -1,11 +1,18 @@
 import { expect, test } from 'vitest';
 
+import { createProtectedAuthority } from '../packages/collaboration-lab/src/protected/authority.js';
+import { createOptimisticRecipient } from '../packages/collaboration-lab/src/protected/optimistic.js';
+import {
+  createPartitions,
+  createReceivedPartitions,
+} from '../packages/collaboration-lab/src/protected/partitions.js';
+import {
+  decodePresence,
+  encodePresence,
+} from '../packages/collaboration-lab/src/protected/wire.js';
+import type { PresenceSelection } from '../packages/collaboration-lab/src/protocol.js';
 import { schema } from './experiments/collaboration/fixtures.js';
 import { inspectWire } from './experiments/collaboration/protected/audit.js';
-import { createProtectedAuthority } from './experiments/collaboration/protected/authority.js';
-import { createOptimisticRecipient } from './experiments/collaboration/protected/optimistic.js';
-import { decodePresence, encodePresence } from './experiments/collaboration/protected/wire.js';
-import type { PresenceSelection } from './experiments/collaboration/protocol.js';
 
 function caret(offset: number, key = 'one', association: -1 | 1 = 1): PresenceSelection {
   return { anchor: { key, offset, association }, head: { key, offset, association } };
@@ -27,7 +34,8 @@ function fixture(mode: 'json' | 'automerge') {
       },
       { kind: 'note', id: 5, key: 'after', value: 'last' },
     ],
-    mode,
+    delivery:
+      mode === 'json' ? { kind: 'json' } : { kind: 'automerge', partitions: createPartitions() },
     users: { alice: 'editable', bob: 'editable', owner: 'editable', reader: 'read-only' },
     comments: [],
     attachments: [],
@@ -41,7 +49,7 @@ function fixture(mode: 'json' | 'automerge') {
   function connect(principal: string) {
     const frames: Uint8Array[] = [];
     const connection = authority.connect(principal, (bytes) => frames.push(bytes.slice()));
-    const client = createOptimisticRecipient(connection.session);
+    const client = createOptimisticRecipient(connection.session, createReceivedPartitions());
     clients.push(client);
 
     function flush() {

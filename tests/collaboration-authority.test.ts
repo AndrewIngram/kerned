@@ -1,15 +1,15 @@
 import { expect, test } from 'vitest';
 
-import { createAuthority, type Receipt } from './experiments/collaboration/authority.js';
-import { createClient } from './experiments/collaboration/client.js';
-import { schema, replacementCases, type Node } from './experiments/collaboration/fixtures.js';
 import {
   parseCommit,
   parsePresence,
   parsePresenceSnapshot,
   parseProposal,
   type Commit,
-} from './experiments/collaboration/protocol.js';
+} from '../packages/collaboration-lab/src/protocol.js';
+import { createAuthority, type Receipt } from './experiments/collaboration/authority.js';
+import { createClient } from './experiments/collaboration/client.js';
+import { schema, replacementCases, type Node } from './experiments/collaboration/fixtures.js';
 
 function fixture(value = 'abcdef') {
   let time = 0;

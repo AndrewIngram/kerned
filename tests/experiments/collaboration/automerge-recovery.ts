@@ -1,8 +1,8 @@
 import * as Automerge from '@automerge/automerge';
 import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
 
+import type { Edit } from '../../../packages/collaboration-lab/src/protocol.js';
 import { createAutomergePeer, type Changes } from './automerge.js';
-import type { Edit } from './protocol.js';
 
 export type PendingTextEdit = { sequence: number; before: string; edit: Edit };
 
