@@ -304,6 +304,15 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
             attachments: responses,
           };
 
+          // Reserve the immutable view before handing control to the transport.
+          // It may synchronously submit, flush, resync or close this connection.
+          sequence = frame.sequence;
+          sentEpoch = frame.epoch;
+          signature = nextSignature;
+          reset = false;
+          sentBodies = nextBodies;
+          sentHeads = nextHeads;
+          requested.clear();
           writer.sent(frame.sequence, frame.epoch, view.bodies);
 
           try {
@@ -312,14 +321,6 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
             close();
             throw error;
           }
-
-          sequence++;
-          sentEpoch = epoch;
-          signature = nextSignature;
-          reset = false;
-          sentBodies = nextBodies;
-          sentHeads = nextHeads;
-          requested.clear();
 
           return true;
         },

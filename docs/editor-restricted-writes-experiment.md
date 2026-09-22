@@ -61,7 +61,9 @@ write module enough information without exposing that history. This is a bounded
 experiment: the maps and journal are not yet compacted or persisted across restart.
 Connection closure clears its bases and receipts; authority destruction closes all
 connections. An uncertain send failure also closes the session, preventing a retry
-from reusing the same view number for a different payload.
+from reusing the same view number for a different payload. Delivery state is reserved
+before calling the transport: synchronous delivery may submit edits, flush again or
+request resync without overwriting a view basis or losing the resync request.
 
 ## Admission and concurrency
 

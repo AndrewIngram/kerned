@@ -82,6 +82,39 @@ function fixture(mode: 'json' | 'automerge', value = 'abcd') {
 const insert = (at: number, text: string, key = 'one') => ({ key, from: at, to: at, text });
 
 for (const mode of ['json', 'automerge'] as const) {
+  test(`${mode}: synchronous delivery keeps reentrant views distinct and preserves pending resync`, () => {
+    const f = fixture(mode);
+    const frames: Uint8Array[] = [];
+    const receipts: ReturnType<typeof decodeReceipt>[] = [];
+
+    const connection = f.authority.connect('guest', (bytes) => {
+      frames.push(bytes.slice());
+      recipient.receive(bytes);
+
+      if (frames.length === 1) {
+        receipts.push(decodeReceipt(connection.submit(recipient.propose(insert(0, 'X')))));
+        connection.flush();
+        connection.resync();
+      }
+    });
+
+    const recipient = createProtectedRecipient(connection.session);
+
+    connection.flush();
+    expect(receipts).toEqual([{ kind: 'accepted', operation: 1 }]);
+    expect(frames.map((bytes) => decodeFrame(bytes).sequence)).toEqual([1, 2]);
+    expect(recipient.snapshot().bodies.one?.text).toBe('Xabcd');
+    expect(decodeReceipt(connection.submit(recipient.propose(insert(2, 'Y')))).kind).toBe(
+      'accepted',
+    );
+    connection.flush();
+    expect(decodeFrame(frames[2]).base).toBeNull();
+    expect(recipient.snapshot().bodies.one?.text).toBe('XaYbcd');
+    connection.close();
+    recipient.destroy();
+    f.authority.destroy();
+  });
+
   test(`${mode}: two restricted views edit concurrently across hidden canonical changes`, () => {
     const f = fixture(mode),
       owner = f.connect('owner'),
