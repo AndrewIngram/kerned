@@ -126,7 +126,8 @@ The authority prototype currently avoids that queue problem by allowing only one
 pending proposal. It still needs a realistic queue/rebase recovery proof.
 
 Protected-content projection is separate from edit permission. These replicas
-contain the full readable fixture. No secret-content redaction has been proved.
+contain the full readable fixture. The later [protected-content experiment](editor-protected-content-experiment.md)
+proves bounded read-distribution cases separately.
 Move/delete permissions and general node locking require structural operations;
 this text-only gate does not redefine the user's policy that read-only nodes may
 be moved or deleted unless locked. Mark-level permissions, collaborative undo,

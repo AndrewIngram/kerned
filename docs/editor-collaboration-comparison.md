@@ -30,7 +30,7 @@ node scripts/benchmark-collaboration.mjs
 | External range after save/load, insertion inside it                | Not demonstrated across collaborative rebases                                       | JSON cursor pair survives binary save/load and expands across interior insertion; no range registration |
 | Expiry, reconnect, departure, revocation, stale presence snapshots | Tested in authority membership/transport proof                                      | Not implemented or tested in the Automerge adapter                                                      |
 | Edit permission rejection                                          | Authority checks target and ancestors before commit                                 | Fixed-tree text gate now checks every operation; rejected branches need explicit recovery               |
-| Protected-content redaction                                        | Not implemented                                                                     | Not implemented                                                                                         |
+| Protected-content redaction                                        | Later JSON projection proof covers bounded restricted delivery                      | Later partition/epoch proof covers bounded restricted delivery; native identities change                |
 
 The two suites share the actual replacement generator, not separately copied case
 lists. The grid covers all endpoint pairs in one short ASCII string with fixed
@@ -50,6 +50,10 @@ character when text is prepended. Automerge also offers a special `start` sentin
 that remains at zero. Choosing between sentinels and character-relative cursors
 belongs in a future editor-position adapter, with tests for both endpoint biases,
 complete deletion, reinsertion and reference lifetime.
+
+The subsequent [protected-content experiment](editor-protected-content-experiment.md)
+tests recipient-specific delivery and native-history disclosure. Its write path is
+still a trusted host, not the full concurrent editor.
 
 ## Integration shape and limits
 
