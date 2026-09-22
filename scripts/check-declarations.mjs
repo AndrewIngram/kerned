@@ -17,6 +17,7 @@ try {
       noEmit: false,
       declaration: true,
       emitDeclarationOnly: true,
+      rootDir: process.cwd(),
       outDir: directory,
     },
   });

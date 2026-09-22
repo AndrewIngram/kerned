@@ -15,16 +15,16 @@ These are public source entry points, not published packages or stable versioned
 
 ## Ownership
 
-| Layer                             | Owns                                                                                           | Does not decide                                                 |
-| --------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Model, `@gprose/model`            | Document structure, schemas, marks, codecs and durable-reference values                        | Session history, rendering or concrete node kinds               |
-| Transform, `@gprose/transform`    | Document operations, inversion and change maps                                                 | Selection publication, permissions or history grouping          |
-| State, `@gprose/state`            | Revision publication, selections, permissions, local history and retained reference resolution | Paragraph, heading, list, mention or comment semantics          |
-| Node extensions                   | Attribute validators, storage fields, child constraints and content policies                   | History ordering or revision advancement                        |
-| Inline-object API                 | Atomic inline positions, slicing, replacement and text projection                              | Whether an object is a mention, formula, emoji or another token |
-| Annotation API                    | Range mapping/slicing/joining with extension-selected policies                                 | Comment replies, permissions, rendering or storage              |
-| React adapter, `src/editor-react` | Registration and cleanup of canvas painting components                                         | Document schema or editing rules                                |
-| Demo views and layout adapter     | React controls, overlays, style projection, measured layout inputs                             | Transaction atomicity or anchor resolution                      |
+| Layer                          | Owns                                                                                           | Does not decide                                                 |
+| ------------------------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Model, `@gprose/model`         | Document structure, schemas, marks, codecs and durable-reference values                        | Session history, rendering or concrete node kinds               |
+| Transform, `@gprose/transform` | Document operations, inversion and change maps                                                 | Selection publication, permissions or history grouping          |
+| State, `@gprose/state`         | Revision publication, selections, permissions, local history and retained reference resolution | Paragraph, heading, list, mention or comment semantics          |
+| Node extensions                | Attribute validators, storage fields, child constraints and content policies                   | History ordering or revision advancement                        |
+| Inline-object API              | Atomic inline positions, slicing, replacement and text projection                              | Whether an object is a mention, formula, emoji or another token |
+| Annotation API                 | Range mapping/slicing/joining with extension-selected policies                                 | Comment replies, permissions, rendering or storage              |
+| React adapter, `@gprose/react` | Registration and cleanup of canvas painting components                                         | Document schema or editing rules                                |
+| Demo views and layout adapter  | React controls, overlays, style projection, measured layout inputs                             | Transaction atomicity or anchor resolution                      |
 
 The low-level layout engine's use of the word paragraph means a text-layout unit. It does not require a document node called `paragraph`. Schema nodes must project their content and formatting into layout inputs. The existing demo adapter still explicitly projects its own paragraph nodes; it is not a general renderer for arbitrary schemas.
 

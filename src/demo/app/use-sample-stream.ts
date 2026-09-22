@@ -1,6 +1,6 @@
+import type { ViewDiagnostics, DiagnosticEvent } from '@gprose/view/diagnostics';
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 
-import type { ViewDiagnostics, DiagnosticEvent } from '../../editor-canvas/diagnostics';
 import { type EditorSample } from '../../editor-samples';
 import { createStreamMetrics, streamConfig } from '../../editor-stream';
 import type { StarterNode } from '../../extensions/demo-model';

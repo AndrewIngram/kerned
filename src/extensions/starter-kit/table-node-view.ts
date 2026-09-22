@@ -1,12 +1,8 @@
 import { defineExtension, createInputRules, type ContributionContext } from '@gprose/core';
 import type { NodeIdentity } from '@gprose/model';
+import { createKeyboardShortcuts } from '@gprose/view';
+import { nodeViews, type NodeViewContext, type NodeViewFrame } from '@gprose/view';
 
-import { createKeyboardShortcuts } from '../../editor-browser';
-import {
-  nodeViews,
-  type NodeViewContext,
-  type NodeViewFrame,
-} from '../../editor-browser/node-views';
 import { table } from '../starter-definitions';
 import { editingCommands } from './commands';
 import { createTableView } from './table-view';

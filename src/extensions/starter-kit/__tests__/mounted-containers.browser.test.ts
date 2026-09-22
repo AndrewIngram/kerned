@@ -1,10 +1,10 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
 import { createSchema, defineNode, indexTree } from '@gprose/model';
 import { textSelection } from '@gprose/state';
+import { mountEditor, presentations, defineNodePresentation } from '@gprose/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { mountEditor, presentations, defineNodePresentation } from '../../../editor-canvas';
 import { list } from '../../starter-definitions';
 import { starterBrowserExtensions } from '../browser';
 

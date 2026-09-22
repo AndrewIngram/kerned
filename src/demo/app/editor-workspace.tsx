@@ -1,8 +1,8 @@
 import { createSchema } from '@gprose/model';
+import { useEditor } from '@gprose/react';
 import { textSelection } from '@gprose/state';
 import { useMemo, useState } from 'react';
 
-import { useEditor } from '../../editor-react';
 import type { EditorSample } from '../../editor-samples';
 import { streamConfig } from '../../editor-stream';
 import { createCommentStore } from '../../extensions/comment';

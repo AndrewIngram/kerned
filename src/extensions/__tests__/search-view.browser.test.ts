@@ -1,8 +1,8 @@
 import { createEditor } from '@gprose/core';
 import { createSchema } from '@gprose/model';
+import { mountEditor } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { mountEditor } from '../../editor-canvas';
 import { createCommentStore } from '../comment';
 import { commentView } from '../comment-view';
 import { searchView } from '../search-view';

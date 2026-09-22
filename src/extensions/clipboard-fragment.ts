@@ -9,8 +9,8 @@ import {
   type EditorState,
 } from '@gprose/state';
 import type { Step } from '@gprose/transform';
+import { supportsLayoutText } from '@gprose/view/text';
 
-import { supportsOwnedText } from '../owned-text-support';
 import { replaceStructuredText } from './blocks';
 import type { StarterNode } from './demo-model';
 import { paragraph, table, tableCell, list, listItem } from './starter-definitions';
@@ -145,7 +145,7 @@ export function pasteFragment<N extends NodeIdentity>(
   for (const { node } of all) {
     const text = schema.text(node);
 
-    if (text !== null && !supportsOwnedText(text))
+    if (text !== null && !supportsLayoutText(text))
       throw new Error('This study currently supports Latin text and emoji.');
   }
 

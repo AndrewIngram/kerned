@@ -11,8 +11,8 @@ The root pins pnpm through `packageManager` and owns `pnpm-lock.yaml`.
 dependencies use `workspace:*`. Do not add npm/yarn lockfiles or a second toolchain
 inside a package. Packages remain private until distribution is explicitly ready.
 
-Model, transform, state and core now live in real workspace packages with built
-JavaScript and declaration exports. View, React, extensions and the demo remain
+Model, transform, state, core, view and React now live in real workspace packages
+with built JavaScript and declaration exports. Extensions and the demo remain
 under `src/` while milestone 8 migrates them. The Vite demo is still served from
 the root. Packages must own their implementation; do not create empty manifests
 or exports pointing outside their package.

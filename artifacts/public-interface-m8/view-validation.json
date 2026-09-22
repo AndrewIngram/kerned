@@ -1,0 +1,45 @@
+{
+  "check": "passed",
+  "builtConsumers": {
+    "node": "passed",
+    "vanilla": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "react": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "typecheck": "emitted declarations"
+  },
+  "vitest": {
+    "files": 216,
+    "passed": 956,
+    "todo": 1
+  },
+  "e2e": {
+    "passed": 42
+  },
+  "production": {
+    "file": "main-BojuEs59.js",
+    "sha256": "82d4b3acd76bbc6c15d8671eff739538ea29b8e5cc034af728e89f830b7a1d79",
+    "sameBundleAsPerformanceTrials": true
+  },
+  "reflow": {
+    "cases": 9,
+    "passed": true
+  },
+  "performanceBudgets": "all passed",
+  "maximums": {
+    "firstUsableMs": 230,
+    "streamingMs": 1258.6999998092651,
+    "pasteHandlerMs": 48.5,
+    "pastePaintMs": 112.5,
+    "typingFrameMs": 32.40000009536743,
+    "pagingFrameMs": 32.5,
+    "loadedHeapBytes": 28102404
+  },
+  "milestone8": "in progress"
+}

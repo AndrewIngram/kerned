@@ -1,9 +1,9 @@
 import { createEditor } from '@gprose/core';
 import { createSchema } from '@gprose/model';
+import { defineStyleRule, mountEditor } from '@gprose/view';
+import { createViewDiagnostics } from '@gprose/view/diagnostics';
 import { expect, test } from 'vitest';
 
-import { defineStyleRule, mountEditor } from '../../../editor-canvas';
-import { createViewDiagnostics } from '../../../editor-canvas/diagnostics';
 import { paragraph, heading } from '../../starter-definitions';
 import { starterBrowserExtensions } from '../browser';
 

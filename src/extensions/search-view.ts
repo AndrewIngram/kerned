@@ -1,7 +1,7 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
 
 import './search-view.css';
-import { decorations, type TextDecoration } from '../editor-browser';
+import { decorations, type TextDecoration } from '@gprose/view';
 
 /** Search results are session state; the contribution paints only resident text. */
 export const searchView = defineExtension({

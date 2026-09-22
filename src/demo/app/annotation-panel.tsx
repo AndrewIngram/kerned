@@ -1,7 +1,7 @@
+import type { MountedEditor, ViewSnapshot } from '@gprose/view';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import type { MountedEditor, ViewSnapshot } from '../../editor-canvas';
 import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
 import type { useComments } from './use-comments';
 

@@ -18,7 +18,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
         const core = await page.evaluate(async () => {
           const { hitTestTextLines, createTextNavigation, TextSelection } = Object.assign(
             {},
-            await import('/src/editor-browser/index.ts'),
+            await import('/@id/@gprose/view'),
             await import('/@id/@gprose/state'),
           );
 

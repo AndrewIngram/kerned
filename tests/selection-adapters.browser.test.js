@@ -13,13 +13,13 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const { createSchema } = await import('@gprose/model');
     const { starterExtensions } = await import('../src/extensions/starter-kit/index.ts');
     const { starterInput } = await import('../src/extensions/starter-kit/browser.ts');
-    const { useEditorState } = await import('../src/editor-react/index.tsx');
+    const { useEditorState } = await import('@gprose/react');
 
     const { createStarterDocumentQuery } =
       await import('../src/extensions/starter-kit/browser-document.ts');
 
     const { createStarterKitInput } = await import('../src/extensions/starter-kit/input.ts');
-    const { createTextInput } = await import('../src/editor-browser/text-input.ts');
+    const { createTextInput } = await import('@gprose/view');
     let next = 10;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
 

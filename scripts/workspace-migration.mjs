@@ -14,11 +14,35 @@ import ts from 'typescript';
 
 // The source-to-package moves are explicit so reviewers can audit ownership.
 // Rerunning after a move verifies the destination rather than recreating old paths.
-export const packageMoves = ['model', 'transform', 'state', 'core'].map((name) => ({
-  from: `src/${name}`,
-  to: `packages/${name}/src`,
-  name: `@gprose/${name}`,
-}));
+export const packageMoves = [
+  ...['model', 'transform', 'state', 'core'].map((name) => ({
+    from: `src/${name}`,
+    to: `packages/${name}/src`,
+    name: `@gprose/${name}`,
+  })),
+  { from: 'src/editor-browser', to: 'packages/view/src/browser', name: '@gprose/view' },
+  { from: 'src/editor-canvas', to: 'packages/view/src/canvas', name: '@gprose/view' },
+  { from: 'src/editor-react', to: 'packages/react/src', name: '@gprose/react' },
+  ...[
+    'engines.ts',
+    'layout-types.ts',
+    'owned-blocks.ts',
+    'owned-carets.ts',
+    'owned-document.ts',
+    'owned-inline.ts',
+    'owned-layout.ts',
+    'owned-packed.ts',
+    'owned-paragraph.ts',
+    'owned-shaped.ts',
+    'owned-text-support.ts',
+    'owned-inline-checks.ts',
+  ].map((file) => ({
+    from: `src/${file}`,
+    to: `packages/view/src/internal/${file}`,
+    name: '@gprose/view',
+  })),
+  { from: 'src/__tests__', to: 'packages/view/src/internal/__tests__', name: '@gprose/view' },
+];
 
 const apply = process.argv.includes('--apply');
 
@@ -42,7 +66,7 @@ const files = ['src', 'packages', 'tests', 'scripts'].flatMap((root) =>
 );
 
 function moved(file) {
-  const move = active.find((entry) => file.startsWith(`${entry.from}/`));
+  const move = active.find((entry) => file === entry.from || file.startsWith(`${entry.from}/`));
 
   return move ? move.to + file.slice(move.from.length) : file;
 }
@@ -61,7 +85,7 @@ function resolve(file) {
 }
 
 function specifier(file, value, moduleImport) {
-  const absolute = value.startsWith('/src/');
+  const absolute = /^\/(?:src|packages)\//.test(value);
 
   if (!absolute && (!moduleImport || !value.startsWith('.'))) return value;
 
@@ -74,10 +98,18 @@ function specifier(file, value, moduleImport) {
   const destination = moved(target),
     current = moved(file);
 
-  const owner = packageMoves.find((entry) => destination.startsWith(`${entry.to}/`));
-  const sameOwner = owner && current.startsWith(`${owner.to}/`);
+  const owner = packageMoves.find(
+    (entry) => destination === entry.to || destination.startsWith(`${entry.to}/`),
+  );
 
-  if (owner && !sameOwner && destination === `${owner.to}/index.ts`)
+  const sameOwner = owner && current.startsWith(owner.to.split('/src')[0] + '/src/');
+
+  if (
+    owner &&
+    !sameOwner &&
+    /\/index\.tsx?$/.test(destination) &&
+    (destination === `${owner.to}/index.ts` || destination === `${owner.to}/index.tsx`)
+  )
     return absolute ? `/@id/${owner.name}` : owner.name;
 
   if (absolute) return destination === target ? value : `/${destination}`;

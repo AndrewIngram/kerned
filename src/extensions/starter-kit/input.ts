@@ -1,15 +1,15 @@
 import { createEditorSerializer, createInputRules } from '@gprose/core';
 import { textContent, type NodeIdentity, type Schema } from '@gprose/model';
 import { TextSelection } from '@gprose/state';
-
 import {
   createEditorHtmlParser,
   createTextInput,
   type BrowserViewOptions,
   type ViewSession,
-} from '../../editor-browser';
-import { createDocumentQuery } from '../../editor-browser/document';
-import { supportsOwnedText } from '../../owned-text-support';
+} from '@gprose/view';
+import { createDocumentQuery } from '@gprose/view';
+import { supportsLayoutText } from '@gprose/view/text';
+
 import { readClipboard, writeClipboard } from '../clipboard';
 import type { ClipboardFragment } from '../clipboard-fragment';
 import { table as tableDefinition, tableCell, image } from '../starter-definitions';
@@ -134,7 +134,7 @@ export function createStarterKitInput<N extends NodeIdentity>({
     const normalized = value.replace(/\r\n?/g, '\n').replace(/\t/g, ' ').replaceAll('\ufffc', '');
     const clean = paragraphs ? normalized : normalized.replace(/\n/g, ' ');
 
-    if (!supportsOwnedText(clean)) {
+    if (!supportsLayoutText(clean)) {
       reject('This study currently supports Latin text.');
 
       return;

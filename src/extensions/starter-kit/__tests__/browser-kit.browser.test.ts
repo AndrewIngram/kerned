@@ -3,7 +3,7 @@ import { createSchema } from '@gprose/model';
 import { selectionContext } from '@gprose/state';
 import { expect, test } from 'vitest';
 
-import { createNodeViews } from '../../../editor-browser/node-views';
+import { createNodeViews } from '../../../../packages/view/src/browser/node-views.js';
 import { starterBrowserExtensions } from '../browser';
 
 function host() {

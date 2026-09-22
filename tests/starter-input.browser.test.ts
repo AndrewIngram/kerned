@@ -1,9 +1,9 @@
 import { createEditor } from '@gprose/core';
 import { createSchema } from '@gprose/model';
 import { TextSelection, textSelection } from '@gprose/state';
+import { createTextInput, createKeyboardShortcuts } from '@gprose/view';
 import { expect, test, onTestFinished } from 'vitest';
 
-import { createTextInput, createKeyboardShortcuts } from '../src/editor-browser';
 import { starterExtensions } from '../src/extensions/starter-kit';
 import { starterInput } from '../src/extensions/starter-kit/browser';
 import { createStarterKitInput } from '../src/extensions/starter-kit/input';

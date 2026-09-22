@@ -1,7 +1,7 @@
 import { createDocumentSerializer } from '@gprose/model';
+import { createHtmlParser } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { createHtmlParser } from '../../editor-browser';
 import { demoSchema } from '../demo-schema';
 import { importHtml } from '../html';
 import { starterHtmlParsers } from '../html-parsers';

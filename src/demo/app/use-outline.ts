@@ -1,6 +1,6 @@
+import type { MountedEditor, ViewSnapshot } from '@gprose/view';
 import { useMemo, useState } from 'react';
 
-import type { MountedEditor, ViewSnapshot } from '../../editor-canvas';
 import { type EditorSample } from '../../editor-samples';
 import { plainText } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';

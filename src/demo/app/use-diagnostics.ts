@@ -8,10 +8,11 @@ import {
   RangeSelection,
   textSelection,
 } from '@gprose/state';
+import type { MountedEditor } from '@gprose/view';
+import type { ViewDiagnostics } from '@gprose/view/diagnostics';
+import { checkInlineResources } from '@gprose/view/diagnostics';
 import { useLayoutEffect, type RefObject } from 'react';
 
-import type { MountedEditor } from '../../editor-canvas';
-import type { ViewDiagnostics } from '../../editor-canvas/diagnostics';
 import { benchmarkContainerEdits, checkContainers } from '../../editor-container-checks';
 import { checkExtensions } from '../../editor-extension-checks';
 import { checkReflow } from '../../editor-reflow-checks';
@@ -22,7 +23,6 @@ import { demoSchema } from '../../extensions/demo-schema';
 import { importHtml } from '../../extensions/html';
 import type { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
 import type { EditorSession } from '../../extensions/starter-kit/types';
-import { checkInlineResources } from '../../owned-inline-checks';
 import type { StreamState } from './use-sample-stream';
 
 type DiagnosticsOptions = {

@@ -12,10 +12,10 @@ import {
   defineNodeSerializer,
 } from '@gprose/model';
 import { textSelection, TextSelection } from '@gprose/state';
+import { createEditorHtmlParser, defineHtmlTextParser, htmlParsers } from '@gprose/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createEditorHtmlParser, defineHtmlTextParser, htmlParsers } from '../../editor-browser';
 import { readClipboard, writeClipboard } from '../clipboard';
 import { starterExtensions } from '../starter-kit';
 import { starterInput } from '../starter-kit/browser';

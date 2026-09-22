@@ -30,12 +30,18 @@ importers:
       '@gprose/model':
         specifier: workspace:*
         version: link:packages/model
+      '@gprose/react':
+        specifier: workspace:*
+        version: link:packages/react
       '@gprose/state':
         specifier: workspace:*
         version: link:packages/state
       '@gprose/transform':
         specifier: workspace:*
         version: link:packages/transform
+      '@gprose/view':
+        specifier: workspace:*
+        version: link:packages/view
       '@oxlint/plugins':
         specifier: 1.83.0
         version: 1.83.0
@@ -69,6 +75,9 @@ importers:
       oxlint-tsgolint:
         specifier: 7.0.2002
         version: 7.0.2002
+      playwright:
+        specifier: 1.63.0
+        version: 1.63.0
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
@@ -100,6 +109,27 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
 
+  packages/react:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+      '@gprose/state':
+        specifier: workspace:*
+        version: link:../state
+      '@gprose/view':
+        specifier: workspace:*
+        version: link:../view
+      react:
+        specifier: ^19.2.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.8(react@19.2.8)
+
   packages/state:
     dependencies:
       '@gprose/model':
@@ -117,6 +147,27 @@ importers:
       '@gprose/model':
         specifier: workspace:*
         version: link:../model
+
+  packages/view:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+      '@gprose/state':
+        specifier: workspace:*
+        version: link:../state
+      '@standard-schema/spec':
+        specifier: 1.1.0
+        version: 1.1.0
+      canvaskit-wasm:
+        specifier: 0.42.0
+        version: 0.42.0
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
 
 packages:
 

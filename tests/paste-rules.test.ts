@@ -1,9 +1,9 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
 import { createSchema } from '@gprose/model';
 import { textSelection } from '@gprose/state';
+import { createPasteRules, pasteRules, type PasteRule } from '@gprose/view';
 import { expect, test, onTestFinished } from 'vitest';
 
-import { createPasteRules, pasteRules, type PasteRule } from '../src/editor-browser';
 import { starterExtensions } from '../src/extensions/starter-kit';
 import { editingCommands } from '../src/extensions/starter-kit/commands';
 

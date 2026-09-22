@@ -1,12 +1,12 @@
 import { defineContribution, defineExtension, type ExtensionContext } from '@gprose/core';
 import type { NodeIdentity } from '@gprose/model';
-
 import {
   viewLayers,
   defineInlineView,
   type InlineViewFrame,
   type PreparedText,
-} from '../../editor-browser';
+} from '@gprose/view';
+
 import { mentionDefinition } from '../starter-definitions';
 
 import './mention-view.css';

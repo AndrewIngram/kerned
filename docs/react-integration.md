@@ -1,8 +1,9 @@
 # React integration
 
-Status: milestone 6 is in progress. This document describes the session ownership
-and content-host slice. Measured block rendering is described in
-[React extensions](react-extensions.md); mark/widget integration remains pending.
+Import hooks, content hosts and React rendering adapters from `@gprose/react`.
+The package adapts the same session and view used by vanilla consumers. Custom
+node, mark, inline and widget rendering is described in
+[React extensions](react-extensions.md).
 
 Create the schema outside rendering, then let a hook own the session:
 

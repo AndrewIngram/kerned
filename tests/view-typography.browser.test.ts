@@ -1,10 +1,10 @@
 import { createEditor } from '@gprose/core';
 import { createSchema } from '@gprose/model';
 import { textSelection } from '@gprose/state';
+import { defaultFonts, defineStyleRule, mountEditor } from '@gprose/view';
+import { createViewDiagnostics } from '@gprose/view/diagnostics';
 import { expect, test } from 'vitest';
 
-import { defaultFonts, defineStyleRule, mountEditor } from '../src/editor-canvas';
-import { createViewDiagnostics } from '../src/editor-canvas/diagnostics';
 import { importHtml } from '../src/extensions/html';
 import { heading, paragraph } from '../src/extensions/starter-definitions';
 import { starterBrowserExtensions } from '../src/extensions/starter-kit/browser';

@@ -1,8 +1,8 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
 import type { NodeIdentity, Schema } from '@gprose/model';
+import { defineNodePresentation, presentations } from '@gprose/view';
+import type { BlockPresentation } from '@gprose/view';
 
-import { defineNodePresentation, presentations } from '../../editor-canvas/presentation';
-import type { BlockPresentation, PresentBlock } from '../../editor-canvas/scene';
 import type { StarterLeaf } from '../demo-model';
 import { formattingSpans } from '../formatting';
 import { inlineSchema } from '../mention';
@@ -11,7 +11,7 @@ import { tableRows } from '../table';
 import { typography } from '../typography';
 
 /** Starter-kit appearance, independent of the scene's placement and retention algorithms. */
-export function createStarterPresentation(size: number): PresentBlock<StarterLeaf> {
+export function createStarterPresentation(size: number): (node: StarterLeaf) => BlockPresentation {
   const cache = new WeakMap<StarterLeaf, BlockPresentation>();
 
   return (node) => {

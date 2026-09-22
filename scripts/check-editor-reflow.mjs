@@ -5,6 +5,8 @@ import { chromium, firefox, webkit } from 'playwright';
 
 const url = process.env.EDITOR_URL ?? 'http://127.0.0.1:5176/extensions.html';
 
+const report = process.env.REPORT ?? 'artifacts/editor-reflow-checks.json';
+
 const results = [];
 
 for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
@@ -124,10 +126,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
         runs: m.reflows.filter((r) => r.blocks === total),
         stalePaints: m.stalePaints,
       });
-      await writeFile(
-        'artifacts/editor-reflow-checks.json',
-        JSON.stringify(results, null, 2) + '\n',
-      );
+      await writeFile(report, JSON.stringify(results, null, 2) + '\n');
       console.log(name, total, 'passed');
       await page.close();
     }
@@ -166,7 +165,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       reference,
       stalePaints: final.stalePaints,
     });
-    await writeFile('artifacts/editor-reflow-checks.json', JSON.stringify(results, null, 2) + '\n');
+    await writeFile(report, JSON.stringify(results, null, 2) + '\n');
     console.log(name, 'concurrent stream passed');
     await page.close();
   } finally {

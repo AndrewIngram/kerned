@@ -16,7 +16,7 @@ directories and interfaces are not evidence of completed extraction.
 | 5 — presentation                    | Complete    | Per-view typography, fonts and appropriate cache invalidation                     |
 | 6 — renderers and React             | Complete    | Public rendering/decorations and React adapters over the same view                |
 | 7 — codecs and delayed edits        | Complete    | Extension codecs/input rules and durable async targets                            |
-| 8 — workspace consumers             | In progress | Headless packages built and validated; view, extensions and demo migration remain |
+| 8 — workspace consumers             | In progress | Headless, view and React packages validated; extensions and demo migration remain |
 
 For each milestone, record the implementation commit, architecture judge findings,
 accepted remedies and follow-up commit before beginning the next milestone. The
@@ -3216,3 +3216,55 @@ This is a checkpoint within milestone 8, not its completion. View/React and
 extension package delivery, moving the Vite consumer to `apps/demo`, built
 browser/React consumers, final documentation, performance verification and the
 milestone architecture judge remain outstanding.
+
+### Milestone 8 checkpoint: view and React package delivery
+
+The native browser controller, canvas view and owned layout implementation now
+belong to `@gprose/view`; React hooks, hosts and rendering adapters belong to
+`@gprose/react`. Production consumers use package exports. Removed the old
+browser/canvas entry barrels, retained implementation tests beside their code,
+and updated browser fixture imports and screenshot output paths.
+
+The view package has three explicit entry points:
+
+- `@gprose/view` owns mounting, configuration, geometry and extension rendering
+  contracts. Engine factories and layout resource ownership remain private.
+- `@gprose/view/diagnostics` owns optional measurements and independent layout
+  audits. The demo supplies expected presentation values for reflow checks;
+  it no longer constructs layout engines or resources.
+- `@gprose/view/text` exposes the current renderer's pure text-support predicate.
+  Headless clipboard policy can call it without loading CSS, graphics or DOM
+  implementations. The existing Latin/emoji support limitation is unchanged.
+
+View and React manifests declare their own dependencies; React and React DOM are
+peers of the React adapter. The project check follows package export maps, and
+ownership checks reject production imports into private view/React modules.
+The declaration check now sets an explicit workspace root for package self-import
+resolution while retaining its complete diagnostics.
+
+`tests/consumers/` now has separately built vanilla and React applications using
+custom schemas. The consumer build rejects package imports that resolve to
+source. It checks typing and teardown in vanilla, plus Strict Mode attachment,
+selector updates and an interactive custom React node in React. These consumers
+run serially in Chromium, Firefox and WebKit before the existing quality suites.
+Their TypeScript check uses emitted package declarations. The clean pnpm install
+also exposed that browser scripts used `playwright` transitively; it is now a
+declared root development dependency at the same installed version.
+
+Validation completed for this checkpoint:
+
+- `pnpm check` passed, including all built consumers, 956 Vitest tests across
+  216 files and 42 E2E tests. The existing single TODO remains unchanged.
+- Static collection still matches the original 883 unexpanded cases exactly;
+  see `artifacts/public-interface-m8/view-collection-comparison.json`.
+- Production reflow passed at 2,000 and 10,000 blocks and during concurrent
+  loading in Chromium, Firefox and WebKit. Evidence:
+  `artifacts/public-interface-m8/view-reflow.json`.
+- Three serial production trials passed every unchanged budget. Maximum values:
+  first usable paint 230 ms; streaming 1,258.7 ms; paste handler 48.5 ms;
+  paste paint 112.5 ms; typing 32.4 ms; paging 32.5 ms; loaded heap
+  28,102,404 bytes. Evidence:
+  `artifacts/public-interface-m8/view-performance/`.
+
+Milestone 8 remains in progress. Extension packages, the `apps/demo` move, the
+final consumer documentation and the milestone architecture judge still remain.

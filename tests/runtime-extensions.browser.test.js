@@ -53,7 +53,7 @@ test('framework-free text capture handles a foreign schema and nested selection'
   const result = await (async () => {
     const { fixture, schema } = await import('./fixtures/editor-foundation.js');
     const { TextSelection, textSelection } = await import('@gprose/state');
-    const { createTextInput } = await import('../src/editor-browser/index.ts');
+    const { createTextInput } = await import('@gprose/view');
 
     const editor = fixture(),
       input = document.createElement('textarea'),

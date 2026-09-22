@@ -1,11 +1,11 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
 import { createSchema } from '@gprose/model';
 import { TextSelection, textSelection } from '@gprose/state';
+import { defineNodeView, nodeViews } from '@gprose/view';
+import { mountEditor } from '@gprose/view';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 
-import { defineNodeView, nodeViews } from '../src/editor-browser';
-import { mountEditor } from '../src/editor-canvas';
 import { quote } from '../src/extensions/starter-definitions';
 import { starterBrowserExtensions } from '../src/extensions/starter-kit/browser';
 

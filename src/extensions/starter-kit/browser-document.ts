@@ -1,7 +1,7 @@
 import type { Schema } from '@gprose/model';
 import type { EditorState } from '@gprose/state';
+import { createDocumentQuery } from '@gprose/view';
 
-import { createDocumentQuery } from '../../editor-browser/document';
 import type { StarterNode, StarterLeaf } from '../demo-model';
 import { selectedBlockLabel } from '../headings';
 

@@ -7,15 +7,11 @@ import {
   type SelectionContext,
   type NodeAccess,
 } from '@gprose/state';
+import type { BrowserViewOptions } from '@gprose/view';
+import { nativeTextCaret, revealNativeText } from '@gprose/view';
+import type { ReadTextDecorations, TextDecoration } from '@gprose/view';
+import { applyTextStyle, type ReadTextStyle, type TextStyle } from '@gprose/view';
 
-import type { BrowserViewOptions } from '../../editor-browser';
-import { nativeTextCaret, revealNativeText } from '../../editor-browser/native-text-geometry';
-import type { ReadTextDecorations, TextDecoration } from '../../editor-browser/text-decorations';
-import {
-  applyTextStyle,
-  type ReadTextStyle,
-  type TextStyle,
-} from '../../editor-browser/text-style';
 import { formattingSpans } from '../formatting';
 import { tableCells } from '../table';
 import { createTableContent, type TableText, type TableCellContent } from './table-content';

@@ -1,8 +1,8 @@
 import { indexTree, textContent, type NodeIdentity, type Schema } from '@gprose/model';
 import { selectionContext, TextSelection, type EditorState } from '@gprose/state';
 import { type Step } from '@gprose/transform';
+import { supportsLayoutText } from '@gprose/view/text';
 
-import { supportsOwnedText } from '../owned-text-support';
 import { table as tableDefinition, tableCell, paragraph } from './starter-definitions';
 import { tableCells, tableRows } from './table';
 
@@ -181,7 +181,7 @@ export function pasteCellRectangle<N extends NodeIdentity>(
   function clone(node: N): N {
     const text = schema.text(node);
 
-    if (text !== null && !supportsOwnedText(text))
+    if (text !== null && !supportsLayoutText(text))
       throw new Error('This study currently supports Latin text and emoji.');
 
     return schema.copy(node, allocate);

@@ -1,8 +1,8 @@
 import { createDocumentSerializer, indexTree } from '@gprose/model';
 import { createEditor, textSelection, TextSelection } from '@gprose/state';
+import { createHtmlParser } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { createHtmlParser } from '../../editor-browser';
 import { readClipboard, writeClipboard } from '../clipboard';
 import type { StarterNode } from '../demo-model';
 import { demoSchema } from '../demo-schema';

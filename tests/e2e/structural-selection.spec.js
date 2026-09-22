@@ -83,7 +83,7 @@ test('node-only document supports drag, shift reversal and document-edge extensi
   await page.evaluate(async () => {
     const { schema } = await import('/tests/fixtures/editor-foundation.js');
     const { createEditor, NodeSelection, selectionContext } = await import('/@id/@gprose/state');
-    const { mountEditorView, createTextInteraction } = await import('/src/editor-browser/index.ts');
+    const { mountEditorView, createTextInteraction } = await import('/@id/@gprose/view');
 
     const nodes = [
         { id: 1, key: 'one', kind: 'atom' },

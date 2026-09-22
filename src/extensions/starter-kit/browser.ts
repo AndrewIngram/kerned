@@ -1,7 +1,7 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
+import { inputPolicies, htmlParsers, keyboardShortcuts } from '@gprose/view';
+import { defineNodeView, nodeViews } from '@gprose/view';
 
-import { inputPolicies, htmlParsers, keyboardShortcuts } from '../../editor-browser';
-import { defineNodeView, nodeViews } from '../../editor-browser/node-views';
 import { starterHtmlParsers } from '../html-parsers';
 import { image } from '../starter-definitions';
 import { containerDecorations } from './container-decorations';

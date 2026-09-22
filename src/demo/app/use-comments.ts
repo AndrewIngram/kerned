@@ -1,7 +1,7 @@
+import { useEditorState } from '@gprose/react';
 import { type EditorState } from '@gprose/state';
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { useEditorState } from '../../editor-react';
 import { type EditorSample } from '../../editor-samples';
 import { type createCommentStore } from '../../extensions/comment';
 import { createCommentProjection } from '../../extensions/comment-projection';

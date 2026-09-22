@@ -1,10 +1,10 @@
 import { createEditor, defineExtension, inputRules, type ContributionContext } from '@gprose/core';
 import { createSchema } from '@gprose/model';
 import { textSelection } from '@gprose/state';
+import { pasteRules } from '@gprose/view';
+import { mountEditor } from '@gprose/view';
 import { expect, test, onTestFinished as registerCleanup } from 'vitest';
 
-import { pasteRules } from '../../../editor-browser';
-import { mountEditor } from '../../../editor-canvas';
 import { starterBrowserExtensions } from '../browser';
 import { editingCommands } from '../commands';
 

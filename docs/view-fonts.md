@@ -7,7 +7,7 @@ has passed its implementation gates and independent architecture review.
 A view accepts a font configuration without exposing graphics or shaping handles:
 
 ```ts
-import { defaultFonts, mountEditor } from '../src/editor-canvas';
+import { defaultFonts, mountEditor } from '@gprose/view';
 
 const view = mountEditor(element, {
   editor,
@@ -103,7 +103,7 @@ A rule binds to an installed node definition, including its configured variants,
 and infers that definition's normalized attributes:
 
 ```ts
-import { defineStyleRule } from '../src/editor-canvas';
+import { defineStyleRule } from '@gprose/view';
 import { paragraph, heading, list } from '../src/extensions/starter-definitions';
 
 view.update({

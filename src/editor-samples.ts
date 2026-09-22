@@ -1,4 +1,5 @@
-import { createHtmlParser } from './editor-browser';
+import { createHtmlParser } from '@gprose/view';
+
 import { sampleChunk } from './editor-stream';
 import { plainText, createSampleDocument, type StarterNode } from './extensions/demo-model';
 import { demoSchema } from './extensions/demo-schema';

@@ -1,4 +1,5 @@
-import { createHtmlParser } from '../editor-browser';
+import { createHtmlParser } from '@gprose/view';
+
 import type { StarterNode } from './demo-model';
 import { demoSchema } from './demo-schema';
 import { starterHtmlParsers } from './html-parsers';

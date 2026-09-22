@@ -22,9 +22,16 @@ function visit(file) {
   for (const { fileName: specifier } of ts.preProcessFile(source, true, true).importedFiles) {
     if (!specifier.startsWith('.') && !specifier.startsWith('@gprose/')) continue;
 
-    const base = specifier.startsWith('@gprose/')
-      ? `packages/${specifier.slice('@gprose/'.length)}/src/index.ts`
-      : path.join(path.dirname(file), specifier);
+    let base = path.join(path.dirname(file), specifier);
+
+    if (specifier.startsWith('@gprose/')) {
+      const [, name, ...subpath] = specifier.split('/');
+      const directory = `packages/${name}`;
+      const manifest = JSON.parse(readFileSync(`${directory}/package.json`, 'utf8'));
+      const entry = manifest.exports[subpath.length ? './' + subpath.join('/') : '.'];
+      assert.ok(entry, `${file}: unsupported package export ${specifier}`);
+      base = path.join(directory, entry['gprose-source']);
+    }
 
     const resolved = [
       base,
@@ -50,8 +57,13 @@ for (const entry of ['editor.html', 'extensions.html']) {
 }
 
 // Public headless entry points are supported even when the demo does not import every export.
-for (const entry of ['model', 'transform', 'state', 'core'])
-  visit(`packages/${entry}/src/index.ts`);
+for (const name of readdirSync('packages')) {
+  const directory = `packages/${name}`;
+  const manifest = JSON.parse(readFileSync(`${directory}/package.json`, 'utf8'));
+
+  for (const entry of Object.values(manifest.exports))
+    visit(path.join(directory, entry['gprose-source']));
+}
 
 // Extensions are supported entry points even when the demo does not import them.
 for (const file of sourceFiles.filter((file) => file.startsWith('src/extensions/'))) visit(file);

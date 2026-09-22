@@ -1,10 +1,10 @@
 import type { DocumentNode } from '@gprose/model';
+import type { TextSpan } from '@gprose/view';
 
-import type { Span } from '../layout-types';
 import { createMention, inlineSchema } from './mention';
 import type { starterDefinitions } from './starter-definitions';
 
-export type StarterSpan = Span & { underline?: boolean };
+export type StarterSpan = TextSpan & { underline?: boolean };
 
 export type StarterNode = DocumentNode<typeof starterDefinitions>;
 

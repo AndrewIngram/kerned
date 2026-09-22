@@ -1,12 +1,12 @@
 import type { InlineValue } from '@gprose/model';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
-import type { InlineAtom } from '../owned-inline';
 import { demoSchema } from './demo-schema';
 import { mentionDefinition } from './starter-definitions';
 
 export const inlineSchema = {
   ...demoSchema.inline,
-  layout(this: void, value: InlineValue): InlineAtom {
+  layout(this: void, value: InlineValue) {
     return {
       id: value.id,
       index: value.index,
@@ -15,6 +15,11 @@ export const inlineSchema = {
   },
 };
 
-export function createMention({ id, index, ...attrs }: InlineAtom) {
+export function createMention({
+  id,
+  index,
+  ...attrs
+}: Pick<InlineValue, 'id' | 'index'> &
+  StandardSchemaV1.InferInput<typeof mentionDefinition.spec.attributes>) {
   return inlineSchema.create('mention', id, index, attrs);
 }

@@ -77,7 +77,7 @@ export async function mountStateProbe(editor, element) {
   const { createElement } = await import('react');
   const { createRoot } = await import('react-dom/client');
   const { flushSync } = await import('react-dom');
-  const { useEditorState } = await import('../../src/editor-react/index.tsx');
+  const { useEditorState } = await import('@gprose/react');
 
   function Probe() {
     const value = useEditorState(editor, (state) => `${state.revision}:${state.selection.type}`);
@@ -96,9 +96,9 @@ export async function mountOptimizedProbe(editor, element) {
     { createRoot } = await import('react-dom/client'),
     { flushSync } = await import('react-dom');
 
-  const { useEditorState } = await import('../../src/editor-react/index.tsx');
+  const { useEditorState } = await import('@gprose/react');
 
-  const { mountEditorView } = await import('../../src/editor-browser/index.ts');
+  const { mountEditorView } = await import('@gprose/view');
 
   const counts = { revision: 0, selection: 0, pointer: 0, input: 0 };
   const selectRevision = (state) => state.revision;

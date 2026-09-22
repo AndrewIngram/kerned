@@ -1,9 +1,9 @@
 import * as modelModule from '@gprose/model';
 import * as stateModule from '@gprose/state';
+import * as editorBrowserModule from '@gprose/view';
 import { test, expect } from 'vitest';
 import { z } from 'zod';
 
-import * as editorBrowserModule from '../src/editor-browser/index.ts';
 import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
 import * as editorFoundationModule from './fixtures/editor-foundation.js';
 

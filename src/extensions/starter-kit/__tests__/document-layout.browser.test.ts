@@ -6,8 +6,8 @@ import { beforeAll, expect, test } from 'vitest';
 import {
   createDocumentLayout,
   type DocumentLayoutFrame,
-} from '../../../editor-canvas/document-layout';
-import { createOwnedEngine } from '../../../owned-layout';
+} from '../../../../packages/view/src/canvas/document-layout.js';
+import { createOwnedEngine } from '../../../../packages/view/src/internal/owned-layout.js';
 import type { StarterNode, TextBlockNode } from '../../demo-model';
 import { demoSchema } from '../../demo-schema';
 import { createStarterDocumentQuery } from '../browser-document';

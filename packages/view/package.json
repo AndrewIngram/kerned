@@ -1,0 +1,34 @@
+{
+  "name": "@gprose/view",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "gprose-source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./diagnostics": {
+      "gprose-source": "./src/diagnostics.ts",
+      "types": "./dist/diagnostics.d.ts",
+      "import": "./dist/diagnostics.js"
+    },
+    "./text": {
+      "gprose-source": "./src/text.ts",
+      "types": "./dist/text.d.ts",
+      "import": "./dist/text.js"
+    }
+  },
+  "dependencies": {
+    "@gprose/core": "workspace:*",
+    "@gprose/model": "workspace:*",
+    "@gprose/state": "workspace:*",
+    "canvaskit-wasm": "0.42.0",
+    "zod": "4.6.5",
+    "@standard-schema/spec": "1.1.0"
+  }
+}

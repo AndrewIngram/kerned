@@ -1,10 +1,10 @@
+import { EditorContent, useEditorState, useViewState } from '@gprose/react';
 import { textSelection } from '@gprose/state';
+import type { MountedEditor } from '@gprose/view';
+import { createViewDiagnostics } from '@gprose/view/diagnostics';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { FindBar } from '../../demo/find-bar';
-import type { MountedEditor } from '../../editor-canvas';
-import { createViewDiagnostics } from '../../editor-canvas/diagnostics';
-import { EditorContent, useEditorState, useViewState } from '../../editor-react';
 import type { EditorSample } from '../../editor-samples';
 import { captureComment, createCommentStore } from '../../extensions/comment';
 import { onCommentActivate } from '../../extensions/comment-view';

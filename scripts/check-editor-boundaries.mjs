@@ -80,7 +80,7 @@ for (const fixture of [
   for (const specifier of dependencies(fixture, readFileSync(fixture, 'utf8'))) {
     assert.ok(
       /^@gprose\/(?:model|transform|state)$/.test(specifier) ||
-        /^(?:\.\/|\.\.\/)editor-browser$/.test(specifier) ||
+        specifier === '@gprose/view' ||
         specifier.startsWith('./extensions/') ||
         // Attribute validators are consumer-owned Standard Schema implementations.
         specifier === 'zod',

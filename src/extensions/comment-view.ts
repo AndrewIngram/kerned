@@ -1,13 +1,13 @@
 import { defineContribution, defineExtension, type ExtensionContext } from '@gprose/core';
 import type { NodeIdentity } from '@gprose/model';
-
 import {
   decorations,
   type Decoration,
   type DecorationSource,
   type ViewSession,
   type DecorationActivation,
-} from '../editor-browser';
+} from '@gprose/view';
+
 import { createCommentProjection, type CommentSource } from './comment-projection';
 
 export type CommentActivation = Readonly<{

@@ -1,6 +1,6 @@
+import * as editorBrowserModule from '@gprose/view';
 import { test, expect } from 'vitest';
 
-import * as editorBrowserModule from '../../../../src/editor-browser/index.js';
 import * as editorFoundationModule from '../../../../tests/fixtures/editor-foundation.js';
 import * as stateModule from '../index.js';
 import * as rangeSelectionModule from '../range-selection.js';

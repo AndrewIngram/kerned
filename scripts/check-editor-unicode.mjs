@@ -71,7 +71,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     if (name === 'chromium') {
       const variants = await page.evaluate(async () => {
         const { default: initialize } = await import('/tests/fixtures/canvas-kit.js'),
-          { createOwnedEngine } = await import('/src/owned-layout.ts');
+          { createOwnedEngine } = await import('/packages/view/src/internal/owned-layout.ts');
 
         const kit = await initialize({ locateFile: () => '/engines/canvaskit.wasm' }),
           results = [];

@@ -1,0 +1,26 @@
+{
+  "name": "@gprose/react",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "gprose-source": "./src/index.tsx",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@gprose/core": "workspace:*",
+    "@gprose/model": "workspace:*",
+    "@gprose/state": "workspace:*",
+    "@gprose/view": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  }
+}

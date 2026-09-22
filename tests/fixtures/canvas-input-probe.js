@@ -8,8 +8,7 @@ export async function mountCanvasInputProbe(element, initial) {
   const { createRoot } = await import('react-dom/client');
   const { flushSync } = await import('react-dom');
 
-  const { useCanvasInput, useEditorViewport, useEditorState } =
-    await import('../../src/editor-react/index.tsx');
+  const { useCanvasInput, useEditorViewport, useEditorState } = await import('@gprose/react');
 
   let current,
     props = { editor: initial, page: false, inset: 12 };

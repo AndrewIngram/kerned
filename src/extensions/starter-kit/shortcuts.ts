@@ -1,4 +1,5 @@
-import type { KeyboardShortcut } from '../../editor-browser';
+import type { KeyboardShortcut } from '@gprose/view';
+
 import { formattingCommands } from './formatting';
 
 /** Built-ins run after ordinary extension shortcuts. Both physical modifiers

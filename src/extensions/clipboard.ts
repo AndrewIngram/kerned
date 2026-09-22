@@ -5,8 +5,8 @@ import {
   type Schema,
 } from '@gprose/model';
 import { type EditorState } from '@gprose/state';
+import { createHtmlParser } from '@gprose/view';
 
-import { createHtmlParser } from '../editor-browser';
 import { copyFragment, type ClipboardFragment } from './clipboard-fragment';
 import { starterHtmlParsers } from './html-parsers';
 import { paragraph, table } from './starter-definitions';
