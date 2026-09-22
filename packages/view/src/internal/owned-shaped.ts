@@ -10,6 +10,30 @@ export type ShapingRun = {
   scale: number;
 };
 
+// HarfRust emits monotone clusters in the run's direction. Reverse RTL cluster
+// groups for logical storage, preserving the shaper's glyph order inside each group.
+function logicalGlyphOrder(run: ShapingRun) {
+  const count = run.words[0];
+
+  if (count < 2 || run.words[4] <= run.words[4 + (count - 1) * 5]) return undefined;
+  const order = new Uint32Array(count);
+
+  let end = count,
+    cursor = 0;
+
+  while (end > 0) {
+    let start = end - 1;
+    const cluster = run.words[4 + start * 5];
+
+    while (start > 0 && run.words[4 + (start - 1) * 5] === cluster) start--;
+
+    for (let i = start; i < end; i++) order[cursor++] = i;
+    end = start;
+  }
+
+  return order;
+}
+
 export function decodeShaping(text: string, runs: ShapingRun[], lineBreaks: Uint32Array) {
   const counts = new Uint32Array(Math.max(0, ...runs.map((run) => run.font + 1)));
 
@@ -55,9 +79,11 @@ export function decodeShaping(text: string, runs: ShapingRun[], lineBreaks: Uint
 
   previous = -1;
 
-  for (const run of runs)
+  for (const run of runs) {
+    const order = logicalGlyphOrder(run);
+
     for (let i = 0; i < run.words[0]; i++, glyph++) {
-      const p = 3 + i * 5,
+      const p = 3 + (order?.[i] ?? i) * 5,
         start = run.words[p + 1] + run.offset;
 
       if (start !== previous) {
@@ -77,6 +103,7 @@ export function decodeShaping(text: string, runs: ShapingRun[], lineBreaks: Uint
       dy[glyph] = run.floats[p + 4] * run.scale;
       widths[cluster] += advance[glyph];
     }
+  }
 
   if (count) clusterEnds[count - 1] = text.length;
   starts[count] = glyphCount;

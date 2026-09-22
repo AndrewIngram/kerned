@@ -41,8 +41,24 @@ pub extern "C" fn register_font(ptr: *mut u8, len: usize) -> u32 {
 // [glyph_id, UTF16_cluster, x_advance_bits, x_offset_bits, y_offset_bits], then UTF16 breaks.
 #[unsafe(no_mangle)]
 pub extern "C" fn shape(font_id: usize, ptr: *mut u8, len: usize) -> *const u32 {
+    shape_run(font_id, ptr, len, 0, len, 0)
+}
+// The selected UTF-8 byte range is shaped with its surrounding paragraph as
+// joining context. Results remain local UTF-16 offsets, exactly like shape().
+#[unsafe(no_mangle)]
+pub extern "C" fn shape_run(
+    font_id: usize,
+    ptr: *mut u8,
+    len: usize,
+    start: usize,
+    end: usize,
+    rtl: u32,
+) -> *const u32 {
     let bytes = unsafe { consume(ptr, len) };
-    let Ok(text) = std::str::from_utf8(&bytes) else {
+    let Ok(paragraph) = std::str::from_utf8(&bytes) else {
+        return std::ptr::null();
+    };
+    let Some(text) = paragraph.get(start..end) else {
         return std::ptr::null();
     };
     STATE.with_borrow_mut(|state| {
@@ -53,8 +69,14 @@ pub extern "C" fn shape(font_id: usize, ptr: *mut u8, len: usize) -> *const u32 
         let shaper = font.data.shaper(&face).build();
         let mut buffer = UnicodeBuffer::new();
         buffer.push_str(text);
+        buffer.set_pre_context(&paragraph[..start]);
+        buffer.set_post_context(&paragraph[end..]);
         buffer.guess_segment_properties();
-        buffer.set_direction(harfrust::Direction::LeftToRight);
+        buffer.set_direction(if rtl == 0 {
+            harfrust::Direction::LeftToRight
+        } else {
+            harfrust::Direction::RightToLeft
+        });
         let shaped = shaper.shape(buffer, &[]);
         let mut offsets = vec![0u32; text.len() + 1];
         let mut units = 0;

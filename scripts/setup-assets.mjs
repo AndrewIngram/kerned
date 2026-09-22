@@ -22,6 +22,15 @@ await copyFile(
 );
 
 const sources = [
+  ...[
+    'NotoSansArabic-Regular.ttf',
+    'NotoSansArabic-Bold.ttf',
+    'NotoSansHebrew-Regular.ttf',
+    'NotoSansHebrew-Bold.ttf',
+  ].map((name) => [
+    name,
+    `https://raw.githubusercontent.com/notofonts/noto-fonts/ffebf8c1ee449e544955a7e813c54f9b73848eac/hinted/ttf/${name.split('-')[0]}/${name}`,
+  ]),
   [
     'NotoSans-Regular.ttf',
     'https://raw.githubusercontent.com/notofonts/noto-fonts/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf',

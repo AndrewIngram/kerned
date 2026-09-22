@@ -14,7 +14,7 @@ const allowed = {
 };
 
 const sources = ['apps', 'packages', 'tests', 'scripts'].flatMap((root) =>
-  readdirSync(root, { recursive: true })
+  readdirSync(root, { recursive: true, encoding: 'utf8' })
     .filter(
       (file) => /\.(?:ts|tsx|js|mjs)$/.test(file) && !/(?:^|\/)(?:dist|node_modules)\//.test(file),
     )

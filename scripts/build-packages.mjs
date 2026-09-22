@@ -59,7 +59,7 @@ while (pending.size) {
   assert.deepEqual(emitted.diagnostics, [], `Emit diagnostics for ${manifest.name}`);
 
   for (const file of readdirSync(path.join(location, 'src'), { recursive: true })) {
-    if (!file.endsWith('.css')) continue;
+    if (!file.endsWith('.css') && !path.basename(file).startsWith('LICENSE-')) continue;
     const destination = path.join(outDir, file);
     mkdirSync(path.dirname(destination), { recursive: true });
     writeFileSync(destination, readFileSync(path.join(location, 'src', file)));

@@ -2,9 +2,17 @@ const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
 const words = new Intl.Segmenter(undefined, { granularity: 'word' });
 
+// Some WebKit versions include the preceding grapheme when containing() is
+// queried at a high surrogate. Query its low surrogate, which is in the same
+// Unicode scalar, without changing the returned segment's UTF-16 coordinates.
+function segmentOffset(text: string, offset: number) {
+  return (text.codePointAt(offset) ?? 0) > 0xffff ? offset + 1 : offset;
+}
+
 /** Returns the word, punctuation, or whitespace segment at a text position. */
 export function wordRange(text: string, offset: number): { from: number; to: number } {
-  const segment = words.segment(text).containing(Math.max(0, Math.min(offset, text.length - 1)));
+  const index = Math.max(0, Math.min(offset, text.length - 1));
+  const segment = words.segment(text).containing(segmentOffset(text, index));
 
   return segment
     ? { from: segment.index, to: segment.index + segment.segment.length }
@@ -30,7 +38,7 @@ export function snapTextOffset(text: string, offset: number, association: -1 | 1
     throw new Error('Invalid text offset');
 
   if (offset === 0 || offset === text.length || asciiBoundary(text, offset)) return offset;
-  const segment = graphemes.segment(text).containing(offset);
+  const segment = graphemes.segment(text).containing(segmentOffset(text, offset));
 
   if (!segment || segment.index === offset) return offset;
 
@@ -53,7 +61,7 @@ export function validateTextRange(text: string, from: number, to: number) {
   if (!interior.length) return;
   const segments = graphemes.segment(text);
 
-  if (interior.some((offset) => segments.containing(offset)?.index !== offset))
+  if (interior.some((offset) => segments.containing(segmentOffset(text, offset))?.index !== offset))
     throw new Error('Edit range must follow grapheme boundaries');
 }
 

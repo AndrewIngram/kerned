@@ -454,7 +454,7 @@ function finalDestination(file) {
 
 const files = ['src', 'apps', 'packages', 'tests', 'scripts'].flatMap((root) =>
   existsSync(root)
-    ? readdirSync(root, { recursive: true })
+    ? readdirSync(root, { recursive: true, encoding: 'utf8' })
         .filter(
           (name) =>
             /\.(?:ts|tsx|js|mjs|css)$/.test(name) && !/(?:^|\/)(?:dist|node_modules)\//.test(name),

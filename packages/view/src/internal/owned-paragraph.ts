@@ -1,3 +1,5 @@
+import { createBidiCarets } from './bidi/carets.js';
+import { bidiClusters, type BidiAnalysis } from './bidi/paragraph.js';
 import type { Geometry, Line, Rect } from './engines.js';
 import type { Direction, Position } from './layout-types.js';
 import { createPackedCarets } from './owned-carets.js';
@@ -35,6 +37,7 @@ export function composeParagraph(
   baseline: number,
   packed?: PackedGlyphs,
   caretStorage: 'objects' | 'packed' = 'objects',
+  bidi?: BidiAnalysis,
 ) {
   const numeric = 'clusterStarts' in paragraphGlyphs ? paragraphGlyphs : undefined;
   const clusters = 'clusters' in paragraphGlyphs ? paragraphGlyphs.clusters : [];
@@ -46,15 +49,18 @@ export function composeParagraph(
 
   const lines: Line[] = [];
 
+  const bidiCarets = bidi ? createBidiCarets(lines, lineHeight) : undefined;
+
   const numericCarets =
-    caretStorage === 'packed'
+    bidiCarets ??
+    (caretStorage === 'packed'
       ? createPackedCarets(
           stopCount + Math.max(1, clusterCount),
           Math.max(1, clusterCount),
           lines,
           lineHeight,
         )
-      : undefined;
+      : undefined);
 
   const stops: Stop[] = [];
   const rows: Stop[][] = [];
@@ -74,7 +80,7 @@ export function composeParagraph(
   function appendRun(font: number, slot: number) {
     const previous = ranges.at(-1);
 
-    if (previous?.font === font) previous.to = slot + 1;
+    if (previous?.font === font && previous.to === slot) previous.to = slot + 1;
     else ranges.push({ font, from: slot, to: slot + 1 });
   }
 
@@ -121,10 +127,22 @@ export function composeParagraph(
       }
     }
 
-    append(start, 0, false);
+    if (!bidi || first === end) append(start, 0, false);
     let x = 0;
 
-    for (let i = first; i < end; i++) {
+    const visual = bidi
+      ? bidiClusters(
+          bidi,
+          numeric?.clusterStarts ?? clusters.map((cluster) => cluster.start),
+          first,
+          end,
+          finish,
+        )
+      : undefined;
+
+    for (let ordinal = first; ordinal < end; ordinal++) {
+      const i = visual ? visual.order[ordinal - first] : ordinal;
+      const rtl = visual ? (visual.levels[i - first] & 1) !== 0 : false;
       const clusterWidth = numeric ? numeric.widths[i] : clusters[i].width;
       let pen = x;
 
@@ -147,25 +165,30 @@ export function composeParagraph(
         }
       }
 
+      let previousIndex = numeric ? numeric.clusterStarts[i] : clusters[i].start;
+      let previousX = x + (rtl ? clusterWidth : 0);
+
+      if (bidi) append(previousIndex, previousX, false);
+
+      function appendClusterStop(index: number, fraction: number) {
+        const nextX = x + clusterWidth * (rtl ? 1 - fraction : fraction);
+        append(index, nextX, bidi ? true : index === finish && finish < textLength);
+        bidiCarets?.span(previousIndex, index, previousX, nextX);
+        previousIndex = index;
+        previousX = nextX;
+      }
+
       if (numeric) {
         const from = numeric.stopStarts[i],
           to = numeric.stopStarts[i + 1];
 
         for (let s = from; s < to; s++) {
           const index = numeric.stops[s];
-          append(
-            index,
-            x + (clusterWidth * (s - from + 1)) / (to - from),
-            index === finish && finish < textLength,
-          );
+          appendClusterStop(index, (s - from + 1) / (to - from));
         }
       } else
         clusters[i].stops.forEach((index, n) =>
-          append(
-            index,
-            x + (clusterWidth * (n + 1)) / clusters[i].stops.length,
-            index === finish && finish < textLength,
-          ),
+          appendClusterStop(index, (n + 1) / clusters[i].stops.length),
         );
       x += clusterWidth;
     }
@@ -216,7 +239,10 @@ function finishParagraph(
   baseline: number,
   lines: Line[],
   runs: { font: number; glyphs: Uint16Array; positions: Float32Array }[],
-  numericCarets: ReturnType<typeof createPackedCarets> | undefined,
+  numericCarets:
+    | ReturnType<typeof createPackedCarets>
+    | ReturnType<typeof createBidiCarets>
+    | undefined,
   stops: Stop[],
   rows: Stop[][],
 ) {

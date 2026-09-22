@@ -1,0 +1,11 @@
+{
+  "version": "17.0.0",
+  "sha256": {
+    "DerivedBidiClass.txt": "4867b4b7f0731ed1bfcd34cc6251211ff1542541fce0734b6fbda139ee80b3a4",
+    "BidiBrackets.txt": "dadbaf38a0d0246e5b805bf8725cb81b7c621f93d030595635f5ba2c2f179428",
+    "BidiTest.txt": "888bdfc8090652272d1f859cdb00ae659e2dc6c26740be61ef1d03998a687620",
+    "BidiCharacterTest.txt": "a3e6e905ab5afbe318a96df5401d0372a04cd73ef139ab5e3cf0ae241c255488",
+    "LICENSE-Unicode.txt": "e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96",
+    "LICENSE-bidi-js.txt": "49d4d143fed599deb502a0fe6e02f49832f87e9a3a4cd0502e469596d50faa6d"
+  }
+}

@@ -15,7 +15,7 @@ assert.deepEqual(
 assert.throws(() => dependencies('fixture.ts', 'import(variable)'), /statically checkable/);
 
 const sources = ['apps', 'packages'].flatMap((root) =>
-  readdirSync(root, { recursive: true })
+  readdirSync(root, { recursive: true, encoding: 'utf8' })
     .filter((file) => /\.tsx?$/.test(file) && !/(?:^|\/)(?:dist|node_modules)\//.test(file))
     .map((file) => `${root}/${file}`),
 );
