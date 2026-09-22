@@ -1,4 +1,5 @@
-import { localHistory } from '../history';
+import { localHistory } from '@gprose/extension-history';
+
 import { starterDefinitions } from '../starter-definitions';
 import { starterSerialization } from '../static-serializers';
 import { starterEditing } from './commands';

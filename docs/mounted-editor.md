@@ -127,8 +127,8 @@ for a later mount. Mention IDs are scoped to their text node.
 Comments are an optional extension with an externally owned source:
 
 ```ts
-import { createCommentStore } from '../src/extensions/comment';
-import { commentView, onCommentActivate } from '../src/extensions/comment-view';
+import { createCommentStore } from '@gprose/extension-comments';
+import { commentView, onCommentActivate } from '@gprose/extension-comments/browser';
 
 const comments = createCommentStore<{ body: string }>();
 const extension = commentView(comments).configure({ color: '#f6eab4' });
@@ -150,7 +150,7 @@ reads the current source. Native text descendants, such as individual table-cell
 text ranges, receive highlights through the native text-decoration contract.
 Native editing controls retain their own click/focus behavior.
 
-Install `searchView` from `src/extensions/search-view` to paint search matches in
+Install `searchView` from `@gprose/extension-search` to paint search matches in
 canvas and native text. It subscribes to `editor.find`, including cooperative refresh after
 edits and streamed appends. `searchView.configure({ color, activeColor })` changes
 the highlight colors. Search state survives view destruction; a remounted view

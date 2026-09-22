@@ -1,12 +1,12 @@
 import { createEditor } from '@gprose/core';
+import { createCommentStore } from '@gprose/extension-comments';
+import { commentView } from '@gprose/extension-comments/browser';
 import { createSchema } from '@gprose/model';
 import { mountEditor } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { createCommentStore } from '../comment';
-import { commentView } from '../comment-view';
-import { searchView } from '../search-view';
-import { starterBrowserExtensions } from '../starter-kit/browser';
+import { starterBrowserExtensions } from '../../../../src/extensions/starter-kit/browser.js';
+import { searchView } from '../index.js';
 
 function pixels(host: HTMLElement) {
   const canvas = host.querySelector('canvas');

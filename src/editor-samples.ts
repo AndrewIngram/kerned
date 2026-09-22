@@ -1,11 +1,12 @@
+import { createOutlineExtension, type OutlineEntry } from '@gprose/extension-outline';
 import { createHtmlParser } from '@gprose/view';
 
+import { createSampleDocument } from './demo/sample-document';
 import { sampleChunk } from './editor-stream';
-import { plainText, createSampleDocument, type StarterNode } from './extensions/demo-model';
+import { plainText, type StarterNode } from './extensions/demo-model';
 import { demoSchema } from './extensions/demo-schema';
 import { formattingMarks } from './extensions/formatting';
 import { starterHtmlParsers } from './extensions/html-parsers';
-import { createOutlineExtension, type OutlineEntry } from './extensions/outline';
 
 type BookSampleId = 'warbreaker' | 'war-and-peace';
 

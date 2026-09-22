@@ -1,10 +1,10 @@
+import { type createCommentStore } from '@gprose/extension-comments';
+import { createCommentProjection } from '@gprose/extension-comments';
 import { useEditorState } from '@gprose/react';
 import { type EditorState } from '@gprose/state';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { type EditorSample } from '../../editor-samples';
-import { type createCommentStore } from '../../extensions/comment';
-import { createCommentProjection } from '../../extensions/comment-projection';
 import { type StarterNode } from '../../extensions/demo-model';
 import type { EditorSession } from '../../extensions/starter-kit/types';
 

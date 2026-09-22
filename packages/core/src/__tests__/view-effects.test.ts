@@ -1,9 +1,9 @@
+import { localHistory } from '@gprose/extension-history';
 import { createSchema, defineNode } from '@gprose/model';
 import { textSelection } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
-import { localHistory } from '../../../../src/extensions/history.js';
 import { connectEditorView, createEditor, defineCommand, defineExtension } from '../index.js';
 
 const note = defineNode({

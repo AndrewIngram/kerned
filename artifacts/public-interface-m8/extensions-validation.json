@@ -1,0 +1,61 @@
+{
+  "check": "passed",
+  "builtConsumers": {
+    "node": "passed",
+    "vanilla": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "react": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "typecheck": "emitted declarations",
+    "extensionChecks": [
+      "local undo/redo",
+      "external comment projection",
+      "outline cache and edits",
+      "browser comment activation region",
+      "browser search highlight pixels"
+    ]
+  },
+  "vitest": {
+    "files": 216,
+    "passed": 956,
+    "todo": 1
+  },
+  "e2e": {
+    "passed": 42
+  },
+  "production": {
+    "file": "main-_HLbATh3.js",
+    "sha256": "107b8601b37c3154e85ead047b2c468b7f42bfa9604801542f4c099477e3d7c6"
+  },
+  "reflow": {
+    "cases": 9,
+    "passed": true
+  },
+  "textCommands": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "outline": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "performanceBudgets": "all passed",
+  "maximums": {
+    "firstUsableMs": 234,
+    "streamingMs": 1251.7000000476837,
+    "pasteHandlerMs": 48.90000009536743,
+    "pastePaintMs": 111.90000009536743,
+    "typingFrameMs": 32.200000047683716,
+    "pagingFrameMs": 32.299999952316284,
+    "loadedHeapBytes": 28105004
+  },
+  "milestone8": "in progress"
+}

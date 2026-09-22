@@ -1,10 +1,10 @@
+import { createOutlineExtension, type OutlineEntry } from '@gprose/extension-outline';
 import type { MountedEditor, ViewSnapshot } from '@gprose/view';
 import { useMemo, useState } from 'react';
 
 import { type EditorSample } from '../../editor-samples';
 import { plainText } from '../../extensions/demo-model';
 import { demoSchema } from '../../extensions/demo-schema';
-import { createOutlineExtension, type OutlineEntry } from '../../extensions/outline';
 import type { EditorDocument } from '../../extensions/starter-kit/browser-document';
 
 type OutlineOptions = Pick<EditorDocument, 'editorState'> & {

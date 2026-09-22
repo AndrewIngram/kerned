@@ -1,4 +1,5 @@
-import { createSampleDocument, type StarterNode } from './extensions/demo-model';
+import { createSampleDocument } from './demo/sample-document';
+import type { StarterNode } from './extensions/demo-model';
 import { formattingMarks } from './extensions/formatting';
 import { createMention } from './extensions/mention';
 

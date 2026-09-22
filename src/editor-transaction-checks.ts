@@ -10,11 +10,8 @@ import {
 } from '@gprose/state';
 import { mapPosition } from '@gprose/transform';
 
-import {
-  createSampleDocument,
-  type TextBlockNode,
-  type StarterNode,
-} from './extensions/demo-model';
+import { createSampleDocument } from './demo/sample-document';
+import type { TextBlockNode, StarterNode } from './extensions/demo-model';
 import { demoSchema } from './extensions/demo-schema';
 import { formattingMarks } from './extensions/formatting';
 import { createMention } from './extensions/mention';

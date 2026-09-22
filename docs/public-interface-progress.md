@@ -3268,3 +3268,43 @@ Validation completed for this checkpoint:
 
 Milestone 8 remains in progress. Extension packages, the `apps/demo` move, the
 final consumer documentation and the milestone architecture judge still remain.
+
+### Milestone 8 checkpoint: optional extension packages
+
+Comments, local history, outline extraction and search decorations now own their
+implementation, manifests, declarations and built exports in workspace packages.
+Comments expose a headless root for external threads and durable ranges, with
+view contributions under `@gprose/extension-comments/browser`. Outline extraction
+accepts any schema and heading adapter. Search decorations use the session's
+existing search state. The app now imports these supported package entries.
+
+The outline menu, sample HTML importer and generated sample document now belong
+to the demo. They are not extension APIs. Production ownership checks cover all
+workspace packages, including dependency declarations and private import rejection.
+
+The ordinary Node consumer now exercises history, external comment projection
+and cached outline extraction against its custom schema. The built vanilla
+consumer installs comment and search contributions and verifies their rendered
+highlights in all three browsers. It typechecks against emitted declarations.
+The older text-command diagnostic now uses durable range decorations and the
+current comment capture signature.
+
+Validation for this checkpoint:
+
+- `pnpm check` passed: 956 Vitest tests across 216 files, one unchanged TODO,
+  42 E2E cases and the built Node, vanilla and React consumers.
+- Production build passed. Static test collection preserves all 883 cases;
+  `artifacts/public-interface-m8/extensions-collection-comparison.json` records
+  no missing or added cases.
+- The text-command and full outline scripts passed in Chromium, Firefox and
+  WebKit, including nested heading extraction, cache reuse, pending headings,
+  responsive navigation, editing and undo.
+- Production reflow passed all nine scenarios. Three serial production trials
+  passed every unchanged budget: first usable paint 234 ms, streaming 1,251.7 ms,
+  paste handler 48.9 ms, paste paint 111.9 ms, typing 32.2 ms, paging 32.3 ms
+  and loaded heap 28,105,004 bytes. Reports live under
+  `artifacts/public-interface-m8/extensions-performance/`.
+
+Milestone 8 remains open. Standard document/table extension ownership,
+starter-kit composition, the `apps/demo` move, final consumer documentation
+and the milestone architecture judge remain.

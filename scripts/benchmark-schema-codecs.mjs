@@ -10,7 +10,7 @@ try {
   await page.goto('http://127.0.0.1:5173/editor.html');
 
   const result = await page.evaluate(async () => {
-    const { importHtml } = await import('/src/extensions/html.ts');
+    const { importHtml } = await import('/src/demo/import-html.ts');
     const { demoDocumentCodec } = await import('/src/extensions/demo-schema.ts');
     const nodes = importHtml(await (await fetch('/samples/warbreaker.html')).text()).nodes;
     const trials = [];

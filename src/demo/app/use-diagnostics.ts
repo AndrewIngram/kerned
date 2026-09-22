@@ -1,3 +1,4 @@
+import { commentDecorations, createCommentStore } from '@gprose/extension-comments';
 import { parseAnchor } from '@gprose/model';
 import {
   type FindState,
@@ -18,11 +19,10 @@ import { checkExtensions } from '../../editor-extension-checks';
 import { checkReflow } from '../../editor-reflow-checks';
 import { checkSelections } from '../../editor-selection-checks';
 import { checkTransactions } from '../../editor-transaction-checks';
-import { commentDecorations, createCommentStore } from '../../extensions/comment';
 import { demoSchema } from '../../extensions/demo-schema';
-import { importHtml } from '../../extensions/html';
 import type { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
 import type { EditorSession } from '../../extensions/starter-kit/types';
+import { importHtml } from '../import-html.js';
 import type { StreamState } from './use-sample-stream';
 
 type DiagnosticsOptions = {

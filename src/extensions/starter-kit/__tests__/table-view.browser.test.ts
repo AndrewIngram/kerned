@@ -5,7 +5,8 @@ import { createKeyboardShortcuts } from '@gprose/view';
 import { expect, test } from 'vitest';
 
 import { createDocumentPresentation } from '../../../../packages/view/src/canvas/presentation.js';
-import { createSampleDocument, type TableNode } from '../../demo-model';
+import { createSampleDocument } from '../../../demo/sample-document';
+import type { TableNode } from '../../demo-model';
 import { tableCells } from '../../table';
 import { starterInput } from '../browser';
 import { createStarterDocumentQuery } from '../browser-document';

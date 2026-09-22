@@ -1,3 +1,5 @@
+import { captureComment, createCommentStore } from '@gprose/extension-comments';
+import { onCommentActivate } from '@gprose/extension-comments/browser';
 import { EditorContent, useEditorState, useViewState } from '@gprose/react';
 import { textSelection } from '@gprose/state';
 import type { MountedEditor } from '@gprose/view';
@@ -6,12 +8,10 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import { FindBar } from '../../demo/find-bar';
 import type { EditorSample } from '../../editor-samples';
-import { captureComment, createCommentStore } from '../../extensions/comment';
-import { onCommentActivate } from '../../extensions/comment-view';
-import { OutlineMenu } from '../../extensions/outline-view';
 import { onMentionActivate } from '../../extensions/starter-kit/browser';
 import { createStarterDocumentQuery } from '../../extensions/starter-kit/browser-document';
 import type { EditorSession } from '../../extensions/starter-kit/types';
+import { OutlineMenu } from '../outline-menu.js';
 import { AnnotationPanel, type ActivePanel } from './annotation-panel';
 import { createEditorControls } from './editor-controls';
 import { Toolbar } from './toolbar';

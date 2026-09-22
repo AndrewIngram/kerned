@@ -1,8 +1,8 @@
+import * as commentModule from '@gprose/extension-comments';
 import * as modelModule from '@gprose/model';
 import * as stateModule from '@gprose/state';
 import { test, expect } from 'vitest';
 
-import * as commentModule from '../src/extensions/comment.ts';
 import * as editorFoundationModule from './fixtures/editor-foundation.js';
 
 test('durable mixed ranges survive nested edits, deletion, undo and checkpoint reload without registration', async () => {

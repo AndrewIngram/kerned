@@ -11,10 +11,11 @@ The root pins pnpm through `packageManager` and owns `pnpm-lock.yaml`.
 dependencies use `workspace:*`. Do not add npm/yarn lockfiles or a second toolchain
 inside a package. Packages remain private until distribution is explicitly ready.
 
-Model, transform, state, core, view and React now live in real workspace packages
-with built JavaScript and declaration exports. Extensions and the demo remain
-under `src/` while milestone 8 migrates them. The Vite demo is still served from
-the root. Packages must own their implementation; do not create empty manifests
+Model, transform, state, core, view, React, comments, history, outline extraction
+and search decorations now live in workspace packages with built JavaScript and
+declaration exports. The standard document extensions and demo remain under
+`src/` while milestone 8 migrates them. The Vite demo is still served from the root.
+Packages must own their implementation; do not create empty manifests
 or exports pointing outside their package.
 
 Development and tests select the `gprose-source` export condition for live source
@@ -46,6 +47,9 @@ gprose/
 │   ├── starter-kit/             # @gprose/starter-kit: optional standard composition
 │   ├── extension-table/         # Table semantics, cell selection, commands, clipboard
 │   ├── extension-comments/      # External threads/ranges and decoration contributions
+│   ├── extension-history/       # Optional local undo/redo provider and commands
+│   ├── extension-outline/       # Schema-independent cached heading extraction
+│   ├── extension-search/        # Browser decorations for session search results
 │   └── …                        # Other cohesive extensions as they are extracted
 ├── apps/
 │   └── demo/                    # Vite React consumer of supported package exports

@@ -1,9 +1,9 @@
+import { localHistory } from '@gprose/extension-history';
 import { createSchema, defineNode, type NodeIdentity, type DocumentNode } from '@gprose/model';
 import { textSelection, createStateField } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
-import { localHistory } from '../../../../src/extensions/history.js';
 import {
   createEditor,
   connectEditorView,

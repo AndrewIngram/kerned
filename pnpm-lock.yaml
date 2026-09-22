@@ -27,6 +27,18 @@ importers:
       '@gprose/core':
         specifier: workspace:*
         version: link:packages/core
+      '@gprose/extension-comments':
+        specifier: workspace:*
+        version: link:packages/extension-comments
+      '@gprose/extension-history':
+        specifier: workspace:*
+        version: link:packages/extension-history
+      '@gprose/extension-outline':
+        specifier: workspace:*
+        version: link:packages/extension-outline
+      '@gprose/extension-search':
+        specifier: workspace:*
+        version: link:packages/extension-search
       '@gprose/model':
         specifier: workspace:*
         version: link:packages/model
@@ -99,6 +111,48 @@ importers:
       '@standard-schema/spec':
         specifier: 1.1.0
         version: 1.1.0
+
+  packages/extension-comments:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+      '@gprose/state':
+        specifier: workspace:*
+        version: link:../state
+      '@gprose/view':
+        specifier: workspace:*
+        version: link:../view
+
+  packages/extension-history:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+
+  packages/extension-outline:
+    dependencies:
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+
+  packages/extension-search:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+      '@gprose/view':
+        specifier: workspace:*
+        version: link:../view
 
   packages/model:
     dependencies:

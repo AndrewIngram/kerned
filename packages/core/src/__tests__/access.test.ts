@@ -1,9 +1,9 @@
+import { localHistory } from '@gprose/extension-history';
 import { createSchema, defineNode, type DocumentInput } from '@gprose/model';
 import { createStateField, textSelection, type NodeAccess } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { localHistory } from '../../../../src/extensions/history.js';
 import { createEditor, defineCommand, defineExtension } from '../index.js';
 
 const note = defineNode({

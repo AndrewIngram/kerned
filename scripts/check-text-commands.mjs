@@ -7,7 +7,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
 
   try {
     const page = await browser.newPage();
-    await page.goto('http://127.0.0.1:5173/editor.html');
+    await page.goto(`${process.env.BASE_URL ?? 'http://127.0.0.1:5173'}/editor.html`);
     await page.waitForFunction(() => window.editorDiagnostics);
 
     const result = await page.evaluate(async () => {
@@ -56,13 +56,16 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       const restored = textCommands(demoSchema, editor.state).active('underline');
 
       const { captureComment, createCommentStore, commentDecorations } =
-        await import('/src/extensions/comment.ts');
+        await import('/@id/@gprose/extension-comments');
 
-      const { resolveDecorations } = await import('/@id/@gprose/state');
+      const { resolveRangeDecorations } = await import('/@id/@gprose/state');
       const store = createCommentStore();
-      store.put(captureComment(demoSchema, editor, 'discussion', []));
+      const comment = captureComment(editor, 'discussion', []);
 
-      const annotations = resolveDecorations(
+      if (!comment) throw new Error('Expected a selected comment range');
+      store.put(comment);
+
+      const annotations = resolveRangeDecorations(
         commentDecorations(store.state.threads),
         editor.positions,
       ).resolved[0].ranges;
@@ -70,17 +73,19 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       apply([{ kind: 'replaceText', id: 1, from: 8, to: 8, text: 'new' }]);
 
       const expanded =
-        resolveDecorations(commentDecorations(store.state.threads), editor.positions).resolved[0]
-          .ranges[0].to === 19;
+        resolveRangeDecorations(commentDecorations(store.state.threads), editor.positions)
+          .resolved[0].ranges[0].to === 19;
 
       editor.undo();
 
       const removed =
-        resolveDecorations(commentDecorations(store.state.threads), editor.positions).resolved[0]
-          .ranges[0].to === 16;
+        resolveRangeDecorations(commentDecorations(store.state.threads), editor.positions)
+          .resolved[0].ranges[0].to === 16;
 
       editor.redo();
       const recovered = store.state.threads.length === 1;
+
+      editor.destroy();
 
       return { underline, unchanged, cleared, restored, annotations, expanded, removed, recovered };
     });

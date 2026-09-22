@@ -82,7 +82,7 @@ the original excerpt metadata. The current editor sample adds the title as H1 an
 
 ## Import boundary
 
-`src/extensions/html.ts` exports `importHtml(html)`. It parses a complete HTML
+`src/demo/import-html.ts` exports `importHtml(html)`. It parses a complete HTML
 document or fragment into the demo schema's paragraph and table nodes and reports counts
 of structures that the schema simplifies. It uses an inert template and copies
 only text and supported marks. Source elements, attributes, event handlers,

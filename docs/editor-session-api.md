@@ -19,7 +19,7 @@ the definition; transactional state belongs to registered fields.
 import { createEditor, defineCommand, defineExtension } from '@gprose/core';
 import { createSchema, indexTree } from '@gprose/model';
 import { paragraph } from './src/extensions/starter-definitions';
-import { localHistory } from './src/extensions/history';
+import { localHistory } from '@gprose/extension-history';
 
 const Append = defineExtension({
   name: 'append',
@@ -338,7 +338,7 @@ Text insertion strictly inside a range expands it. Capture excludes insertion ex
 
 The document position checkpoint now also retains surviving structural neighbours at deletion boundaries. Save it with the document ID, revision and stable node keys as before. The checkpoint stores edit metadata independent of the number of comments. Reloading can assign different runtime IDs. Older checkpoints remain readable, but structural deletion information absent from those checkpoints cannot be reconstructed.
 
-`CommentThread` and `commentDecorations` come from `src/extensions/comment.ts`; the generic decoration resolver is in core. Whole-container fragments remain structural until a renderer projects them into its visual blocks. Unresolved decorations retain their reason and do not remove external discussion records. The demo projects comments into text highlights and whole-block outlines, and opens the existing reply panel for images too.
+`CommentThread` and `commentDecorations` come from `@gprose/extension-comments`; the generic decoration resolver is in core. Whole-container fragments remain structural until a renderer projects them into its visual blocks. Unresolved decorations retain their reason and do not remove external discussion records. The demo projects comments into text highlights and whole-block outlines, and opens the existing reply panel for images too.
 
 `captureComment(editor, id, messages)` uses the public range API. `createCommentStore(initial)` supplies a stable snapshot and subscription, plus `put`, `putAll` and `remove`; it can be observed with the optional React hook. Editing discussion messages does not change document revision or text undo history. The demo's discussion store is in memory; durable storage remains the application's responsibility.
 

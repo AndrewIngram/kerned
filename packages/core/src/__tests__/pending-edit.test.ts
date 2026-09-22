@@ -1,3 +1,4 @@
+import { localHistory } from '@gprose/extension-history';
 import {
   createSchema,
   defineNode,
@@ -15,7 +16,6 @@ import {
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { localHistory } from '../../../../src/extensions/history.js';
 import { createEditor, createPendingEdit } from '../index.js';
 
 const note = defineNode({

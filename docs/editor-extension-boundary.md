@@ -86,7 +86,7 @@ Executable callbacks are not stored in document content or transactions.
 
 `src/extensions/mention.ts` implements a mention as `InlineObject<MentionData>`. Its extension supplies plain text and layout projection. The editing model stores extension data separately from positioned draw rectangles. The core inline helpers never inspect a person's name, mention label or identity provider.
 
-`src/extensions/comment.ts` keeps discussion messages outside document nodes and captures independent `DocumentRange` values through state. It supplies range decorations without teaching the generic model about replies or comment storage. The model's annotation helpers remain available for other extension-owned ranges.
+`@gprose/extension-comments` keeps discussion messages outside document nodes and captures independent `DocumentRange` values through state. It supplies range decorations without teaching the generic model about replies or comment storage. The model's annotation helpers remain available for other extension-owned ranges.
 
 The browser `mentionView`, `underlineView`, `commentView` and `searchView`
 extensions draw through the mounted view's geometry and drawing interface. Native

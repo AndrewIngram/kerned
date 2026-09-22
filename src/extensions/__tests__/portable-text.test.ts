@@ -1,10 +1,10 @@
 import { createEditor, defineCommand, defineQuery } from '@gprose/core';
+import { localHistory } from '@gprose/extension-history';
 import { createSchema, defineNode } from '@gprose/model';
 import { NodeSelection, TextSelection, textSelection, toggleMarkCommand } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
-import { localHistory } from '../history';
 import { starterDefinitions } from '../starter-definitions';
 import { starterFormatting } from '../starter-kit/formatting';
 import { starterStructure } from '../starter-kit/structure';

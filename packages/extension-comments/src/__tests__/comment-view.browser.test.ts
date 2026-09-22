@@ -4,10 +4,10 @@ import { textSelection, NodeSelection } from '@gprose/state';
 import { mountEditor } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { createCommentStore, captureComment } from '../comment';
-import { createCommentProjection } from '../comment-projection';
-import { commentView, onCommentActivate, type CommentActivation } from '../comment-view';
-import { starterBrowserExtensions } from '../starter-kit/browser';
+import { starterBrowserExtensions } from '../../../../src/extensions/starter-kit/browser.js';
+import { commentView, onCommentActivate, type CommentActivation } from '../browser.js';
+import { createCommentStore, captureComment } from '../comment.js';
+import { createCommentProjection } from '../projection.js';
 
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 

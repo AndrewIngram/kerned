@@ -146,7 +146,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
 
     const result = await page.evaluate(async () => {
       const { createSchema, defineNode } = await import('/@id/@gprose/model');
-      const { createOutlineExtension } = await import('/src/extensions/outline.ts');
+      const { createOutlineExtension } = await import('/@id/@gprose/extension-outline');
 
       const { z } = await import('/node_modules/zod/index.js');
 

@@ -1,6 +1,6 @@
 # Document outline extension
 
-`createOutlineExtension(schema, heading)` in `src/extensions/outline.ts` derives
+`createOutlineExtension(schema, heading)` in `@gprose/extension-outline` derives
 an outline using the editor's public schema API. The adapter returns a heading's
 level and plain-text title, or `null`. The extension has no dependency on the
 demo schema, React, canvas or DOM elements.

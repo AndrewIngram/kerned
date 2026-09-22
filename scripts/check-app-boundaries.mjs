@@ -20,7 +20,7 @@ const sources = ['src', 'packages'].flatMap((root) =>
     .map((file) => `${root}/${file}`),
 );
 
-const adapters = new Set(['view', 'react']);
+const packages = new Set(readdirSync('packages'));
 
 let checked = 0;
 
@@ -36,10 +36,10 @@ for (const file of sources) {
     const targetOwner = target.startsWith('packages/') ? target.split('/')[1] : null;
 
     // Colocated implementation tests may inspect internals; production callers use exports.
-    if (production && adapters.has(targetOwner) && targetOwner !== owner)
+    if (production && packages.has(targetOwner) && targetOwner !== owner)
       assert.fail(`${file} bypasses the ${targetOwner} public interface: ${specifier}`);
 
-    if (production && adapters.has(owner)) {
+    if (production && packages.has(owner)) {
       assert.ok(
         !target.startsWith('src/'),
         `${file} depends on application or schema implementation: ${specifier}`,
@@ -57,14 +57,14 @@ for (const file of sources) {
           : specifier.split('/')[0];
 
         assert.ok(
-          Object.hasOwn(manifest.dependencies, name) ||
+          Object.hasOwn(manifest.dependencies ?? {}, name) ||
             Object.hasOwn(manifest.peerDependencies ?? {}, name),
           `${file}: undeclared dependency ${specifier}`,
         );
       }
     }
 
-    if (production && (adapters.has(owner) || file.startsWith('src/extensions/starter-kit/'))) {
+    if (production && (packages.has(owner) || file.startsWith('src/extensions/starter-kit/'))) {
       const directory = owner ? `packages/${owner}/src/` : 'src/extensions/starter-kit/';
       assert.ok(
         !target.endsWith('.css') || target.startsWith(directory),

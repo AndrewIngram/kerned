@@ -1,4 +1,7 @@
 import { createEditor } from '@gprose/core';
+import { createCommentStore } from '@gprose/extension-comments';
+import { commentView, onCommentActivate } from '@gprose/extension-comments/browser';
+import { searchView } from '@gprose/extension-search';
 import { createSchema } from '@gprose/model';
 import { EditorContent } from '@gprose/react';
 import { textSelection } from '@gprose/state';
@@ -9,10 +12,7 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { expect, test } from 'vitest';
 
-import { createCommentStore } from '../../comment';
-import { commentView, onCommentActivate } from '../../comment-view';
-import { createSampleDocument } from '../../demo-model';
-import { searchView } from '../../search-view';
+import { createSampleDocument } from '../../../demo/sample-document';
 import { starterBrowserExtensions, onMentionActivate } from '../browser';
 import { createStarterDocumentQuery } from '../browser-document';
 

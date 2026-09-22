@@ -1,7 +1,7 @@
 import type { NodeIdentity, Schema, SelectionRange } from '@gprose/model';
 import { resolveRangeDecorations, selectionContext } from '@gprose/state';
 
-import { commentDecorations, type CommentThread } from './comment';
+import { commentDecorations, type CommentThread } from './comment.js';
 
 export type CommentHighlight = Readonly<{ id: string; from: number; to: number }>;
 

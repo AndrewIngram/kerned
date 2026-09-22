@@ -43,6 +43,10 @@ try {
     [...resolvedPackages].toSorted((a, b) => a.localeCompare(b)),
     [
       '@gprose/core',
+      '@gprose/extension-comments',
+      '@gprose/extension-comments/browser',
+      '@gprose/extension-history',
+      '@gprose/extension-search',
       '@gprose/model',
       '@gprose/react',
       '@gprose/state',
@@ -69,6 +73,21 @@ try {
         page.on('pageerror', (error) => errors.push(error.message));
         await page.goto(url + 'tests/consumers/vanilla.html');
         await page.waitForSelector('#editor[data-ready="ready"]');
+        await page.waitForSelector('[data-comment-hit="opening"]');
+        await page.waitForFunction(() => {
+          const canvas = document.querySelector('canvas');
+
+          const pixels = canvas
+            ?.getContext('2d')
+            ?.getImageData(0, 0, canvas.width, canvas.height).data;
+
+          if (!pixels) return false;
+
+          for (let i = 0; i < pixels.length; i += 4)
+            if (pixels[i] === 153 && pixels[i + 1] === 51 && pixels[i + 2] === 102) return true;
+
+          return false;
+        });
         await page.keyboard.insertText(' typed');
         await page.waitForFunction(
           () => document.querySelector('output').value === 'Vanilla ready typed',

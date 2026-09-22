@@ -5,7 +5,7 @@ import { defaultFonts, defineStyleRule, mountEditor } from '@gprose/view';
 import { createViewDiagnostics } from '@gprose/view/diagnostics';
 import { expect, test } from 'vitest';
 
-import { importHtml } from '../src/extensions/html';
+import { importHtml } from '../src/demo/import-html.js';
 import { heading, paragraph } from '../src/extensions/starter-definitions';
 import { starterBrowserExtensions } from '../src/extensions/starter-kit/browser';
 

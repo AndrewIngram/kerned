@@ -42,6 +42,60 @@ export const packageMoves = [
     name: '@gprose/view',
   })),
   { from: 'src/__tests__', to: 'packages/view/src/internal/__tests__', name: '@gprose/view' },
+  {
+    from: 'src/extensions/comment.ts',
+    to: 'packages/extension-comments/src/comment.ts',
+    name: '@gprose/extension-comments',
+    public: '@gprose/extension-comments',
+  },
+  {
+    from: 'src/extensions/comment-projection.ts',
+    to: 'packages/extension-comments/src/projection.ts',
+    name: '@gprose/extension-comments',
+    public: '@gprose/extension-comments',
+  },
+  {
+    from: 'src/extensions/comment-view.ts',
+    to: 'packages/extension-comments/src/browser.ts',
+    name: '@gprose/extension-comments',
+    public: '@gprose/extension-comments/browser',
+  },
+  {
+    from: 'src/extensions/__tests__/comment-view.browser.test.ts',
+    to: 'packages/extension-comments/src/__tests__/comment-view.browser.test.ts',
+    name: '@gprose/extension-comments',
+  },
+  {
+    from: 'src/extensions/history.ts',
+    to: 'packages/extension-history/src/index.ts',
+    name: '@gprose/extension-history',
+    public: '@gprose/extension-history',
+  },
+  {
+    from: 'src/extensions/outline.ts',
+    to: 'packages/extension-outline/src/index.ts',
+    name: '@gprose/extension-outline',
+    public: '@gprose/extension-outline',
+  },
+  {
+    from: 'src/extensions/search-view.ts',
+    to: 'packages/extension-search/src/index.ts',
+    name: '@gprose/extension-search',
+    public: '@gprose/extension-search',
+  },
+  {
+    from: 'src/extensions/search-view.css',
+    to: 'packages/extension-search/src/search-view.css',
+    name: '@gprose/extension-search',
+  },
+  {
+    from: 'src/extensions/__tests__/search-view.browser.test.ts',
+    to: 'packages/extension-search/src/__tests__/search-view.browser.test.ts',
+    name: '@gprose/extension-search',
+  },
+  { from: 'src/extensions/outline-view.tsx', to: 'src/demo/outline-menu.tsx' },
+  { from: 'src/extensions/outline.css', to: 'src/demo/outline.css' },
+  { from: 'src/extensions/html.ts', to: 'src/demo/import-html.ts' },
 ];
 
 const apply = process.argv.includes('--apply');
@@ -104,8 +158,10 @@ function specifier(file, value, moduleImport) {
 
   const sameOwner = owner && current.startsWith(owner.to.split('/src')[0] + '/src/');
 
+  if (owner?.public && !sameOwner) return absolute ? `/@id/${owner.public}` : owner.public;
+
   if (
-    owner &&
+    owner?.name &&
     !sameOwner &&
     /\/index\.tsx?$/.test(destination) &&
     (destination === `${owner.to}/index.ts` || destination === `${owner.to}/index.tsx`)

@@ -1,3 +1,6 @@
+import { createCommentStore } from '@gprose/extension-comments';
+import { commentView } from '@gprose/extension-comments/browser';
+import { searchView } from '@gprose/extension-search';
 import { createSchema } from '@gprose/model';
 import { useEditor } from '@gprose/react';
 import { textSelection } from '@gprose/state';
@@ -5,9 +8,6 @@ import { useMemo, useState } from 'react';
 
 import type { EditorSample } from '../../editor-samples';
 import { streamConfig } from '../../editor-stream';
-import { createCommentStore } from '../../extensions/comment';
-import { commentView } from '../../extensions/comment-view';
-import { searchView } from '../../extensions/search-view';
 import { starterBrowserExtensions } from '../../extensions/starter-kit/browser';
 import { EditorWorkspaceView } from './editor-workspace-view';
 

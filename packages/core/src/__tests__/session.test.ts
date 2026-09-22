@@ -1,3 +1,4 @@
+import { localHistory } from '@gprose/extension-history';
 import {
   createSchema,
   defineNode,
@@ -13,7 +14,6 @@ import { z } from 'zod';
 
 import type { StarterNode } from '../../../../src/extensions/demo-model.js';
 import { demoSchema } from '../../../../src/extensions/demo-schema.js';
-import { localHistory } from '../../../../src/extensions/history.js';
 import { tableCells } from '../../../../src/extensions/table.js';
 import {
   createEditor,

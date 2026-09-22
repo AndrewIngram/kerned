@@ -4,13 +4,13 @@ import {
   type CommandContext,
   type ExtensionContext,
 } from '@gprose/core';
+import { localHistory } from '@gprose/extension-history';
 import { createSchema, defineNode, indexTree, type DocumentNode } from '@gprose/model';
 import { NodeSelection, textSelection } from '@gprose/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
 import { createBlockCommands } from '../block-commands';
-import { localHistory } from '../history';
 import { createListCommands, type ListAdapter } from '../lists';
 
 const definitions = [

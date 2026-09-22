@@ -8,7 +8,7 @@ import {
   type DecorationActivation,
 } from '@gprose/view';
 
-import { createCommentProjection, type CommentSource } from './comment-projection';
+import { createCommentProjection, type CommentSource } from './projection.js';
 
 export type CommentActivation = Readonly<{
   nodeId: number;

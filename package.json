@@ -100,7 +100,11 @@
     "@gprose/core": "workspace:*",
     "@gprose/view": "workspace:*",
     "@gprose/react": "workspace:*",
-    "playwright": "1.63.0"
+    "playwright": "1.63.0",
+    "@gprose/extension-comments": "workspace:*",
+    "@gprose/extension-history": "workspace:*",
+    "@gprose/extension-outline": "workspace:*",
+    "@gprose/extension-search": "workspace:*"
   },
   "packageManager": "pnpm@10.14.0"
 }
