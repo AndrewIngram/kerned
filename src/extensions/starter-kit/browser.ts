@@ -85,7 +85,7 @@ export const starterInput = defineExtension({
           notice,
         });
 
-        return adapter.events;
+        return { ...adapter.events, afterComposition: adapter.afterComposition };
       },
     });
 

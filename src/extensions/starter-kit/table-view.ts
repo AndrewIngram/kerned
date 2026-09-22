@@ -27,7 +27,16 @@ export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
   context: SelectionContext;
   access: (id: number) => NodeAccess | undefined;
   onSelect: (selection: Selection) => void;
-  onText: (id: number, from: number, to: number, text: string, caret: number) => boolean;
+  onText: (
+    id: number,
+    from: number,
+    to: number,
+    text: string,
+    caret: number,
+    input: { composing: boolean; pasted: boolean },
+  ) => boolean;
+  onComposition: (composing: boolean) => void;
+  afterComposition?: () => void;
   onKeyDown: (event: KeyboardEvent) => boolean;
   onReplace: (text: string) => void;
   clipboard: Pick<NonNullable<BrowserViewOptions['input']>, 'copy' | 'cut' | 'paste'>;
@@ -140,6 +149,7 @@ export function createTableView<N extends NodeIdentity>(
   let editing: number | null = null;
   let destroyed = false;
   let composing = false;
+  let compositionFrame = 0;
   const cleanup: (() => void)[] = [];
 
   function listen<K extends keyof HTMLElementEventMap>(
@@ -406,8 +416,15 @@ export function createTableView<N extends NodeIdentity>(
       tail--;
     }
 
+    if (from === end && from === tail) return;
+
     if (
-      !frame.onText(paragraph.id, from, end, value.slice(from, tail), event.target.selectionStart)
+      !frame.onText(paragraph.id, from, end, value.slice(from, tail), event.target.selectionStart, {
+        composing: composing || (event instanceof InputEvent && event.isComposing),
+        pasted:
+          event instanceof InputEvent &&
+          ['insertFromPaste', 'insertFromDrop'].includes(event.inputType),
+      })
     ) {
       event.target.value = paragraph.text;
       render(true);
@@ -417,10 +434,14 @@ export function createTableView<N extends NodeIdentity>(
   document.addEventListener('selectionchange', selectNative);
   cleanup.push(() => document.removeEventListener('selectionchange', selectNative));
   listen('compositionstart', () => {
+    cancelAnimationFrame(compositionFrame);
     composing = true;
+    frame?.onComposition(true);
   });
   listen('compositionend', () => {
     composing = false;
+    frame?.onComposition(false);
+    compositionFrame = requestAnimationFrame(() => frame?.afterComposition?.());
   });
   listen('focusout', (event) => {
     if (
@@ -523,6 +544,7 @@ export function createTableView<N extends NodeIdentity>(
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      cancelAnimationFrame(compositionFrame);
       observer.disconnect();
 
       for (const dispose of cleanup) dispose();

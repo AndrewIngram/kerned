@@ -3048,3 +3048,47 @@ Validation:
 See [Keyboard shortcuts](keyboard-shortcuts.md) for authoring and native-view
 integration. Input/paste transformation rules, the performance gate and the
 milestone 7 architecture judge remain outstanding. Milestone 8 is still pending.
+
+### Milestone 7 checkpoint: transactional input and paste rules
+
+Extensions can now contribute `inputRules` through core and `pasteRules` through
+the browser adapter. Both use priority followed by installation order, attempt
+each handler in a fresh command transaction, discard declined edits/effects, and
+stop after the first accepted result. The core's new `getNode(id)` query uses the
+existing current tree index; typing-rule matching does not need a document scan.
+An empty registry performs no node lookup or regex matching.
+
+Input rules match the text before a collapsed caret, including nested custom
+text nodes. Matches cannot cut into graphemes. Transformations have a separate
+history entry so Undo restores literal input, and permission rejection or a
+failed rule cannot discard accepted typing. Canvas and native cell adapters
+synchronize transformed content and defer provisional IME text until commit.
+An unchanged trailing input event is ignored instead of creating an empty edit.
+Native paste/drop input bypasses typing rules.
+
+Paste rules run before the shared clipboard pipeline. Declining rules preserve
+normal rich/plain and rectangular table paste; successful rules own the event
+once. Clipboard strings are read lazily, and rejected drafts publish no edits or
+queued effects. Callback failures report a notice and consume the paste rather
+than triggering a second implementation.
+
+A Firefox regression exposed an event-order difference: its native fill emits
+compositionend before final input. Closing history from a deferred callback split
+later ordinary typing. Native tables now close history synchronously, like canvas
+capture, while only the rule flush is deferred. An unrelated verification race
+was traced to running the production build's asset refresh alongside browser
+loading. The final check runs with stable built assets; subsequent builds and
+browser validation must run serially.
+
+Validation: `pnpm run check` passes with 918 Vitest tests, one unchanged
+collaboration TODO, and all 42 end-to-end cases. The production build passes with
+the existing chunk-size warning. Focused rules tests cover precedence, rollback,
+permissions, literal-input undo/redo, regex/grapheme handling, stale composition,
+continued native typing and rich rectangular fallback. No baseline or performance
+threshold changed.
+
+The milestone's implementation tasks are now covered by the delayed-edit,
+serialization, HTML parsing, shortcut and rule checkpoints. Milestone 7 remains
+open for its performance gate and independent architecture judge, including any
+agreed changes. Milestone 8 remains pending. See
+[Input and paste rules](input-and-paste-rules.md) for the public contracts.

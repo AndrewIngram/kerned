@@ -233,3 +233,5 @@ export {
 } from './html-parser';
 
 export { keyboardShortcuts, createKeyboardShortcuts, type KeyboardShortcut } from './shortcuts';
+
+export { pasteRules, createPasteRules, type PasteRule, type ClipboardData } from './paste-rules';

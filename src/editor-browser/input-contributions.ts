@@ -17,6 +17,7 @@ export type ViewSession<N extends NodeIdentity> = EditorViewSession &
     | 'commands'
     | 'positions'
     | 'find'
+    | 'getNode'
     | 'getAccess'
     | 'getSelection'
   > & { readonly schema: Schema<N> };
@@ -33,6 +34,7 @@ export type InputContribution = {
     NonNullable<BrowserViewOptions['input']>,
     'element' | 'focus' | 'compositionstart' | 'compositionend'
   > & {
+    afterComposition?(): void;
     destroy?(): void;
   };
 };

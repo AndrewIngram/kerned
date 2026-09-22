@@ -363,6 +363,12 @@ export function createEditor<N extends NodeIdentity>(
     get isDestroyed() {
       return destroyed;
     },
+    /** Read the canonical node through the session's current tree index. */
+    getNode(id: number) {
+      assertActive();
+
+      return currentTree.byId.get(id)?.node;
+    },
     getSelection(id: number) {
       assertActive();
 

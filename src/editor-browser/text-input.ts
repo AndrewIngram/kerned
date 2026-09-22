@@ -79,13 +79,18 @@ export function createTextInput<N extends NodeIdentity>(
       editor.breakHistory();
       composing = true;
     },
-    compositionEnd(input: HTMLTextAreaElement | null) {
+    compositionEnd(input: HTMLTextAreaElement | null, onCommit?: () => void) {
       assertActive();
       composing = false;
       editor.breakHistory();
       cancelAnimationFrame(frame);
 
-      if (input) frame = requestAnimationFrame(() => sync(input));
+      if (input)
+        frame = requestAnimationFrame(() => {
+          onCommit?.();
+
+          if (!destroyed) sync(input);
+        });
     },
     read(input: HTMLTextAreaElement, replace: (from: number, to: number, text: string) => void) {
       assertActive();
@@ -128,6 +133,7 @@ export function createTextInput<N extends NodeIdentity>(
         end--;
       }
 
+      if (from === to && from === end) return;
       replace(offset + from, offset + to, value.slice(from, end));
     },
     /** Observe Safari's native Select All, which can bypass keydown. */

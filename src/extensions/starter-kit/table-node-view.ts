@@ -1,4 +1,4 @@
-import { defineExtension, type ContributionContext } from '../../core';
+import { defineExtension, createInputRules, type ContributionContext } from '../../core';
 import { createKeyboardShortcuts } from '../../editor-browser';
 import {
   nodeViews,
@@ -18,6 +18,7 @@ export const tableView = defineExtension({
   setup(_options, context: ContributionContext) {
     context.provide(nodeViews, {
       create<N extends NodeIdentity>({ editor, clipboard, notice }: NodeViewContext<N>) {
+        const rules = createInputRules(editor);
         const shortcuts = createKeyboardShortcuts(editor);
         const binding = editor.schema.node(table);
 
@@ -48,14 +49,28 @@ export const tableView = defineExtension({
                   textStyle: frame.textStyle,
                   access: (id) => editor.getAccess(id),
                   onSelect: (selection) => editor.select(selection),
-                  onText: (id, from, to, text, caret) =>
-                    run(() =>
+                  onText: (id, from, to, text, caret, { composing, pasted }) => {
+                    const applied = run(() =>
                       editor.transact(
                         (draft) =>
                           draft.command(editingCommands.replaceText, { id, from, to, text, caret }),
-                        { history: { group: `typing:${id}` } },
+                        {
+                          history: {
+                            group: `${composing ? 'composition' : 'typing'}:${id}`,
+                          },
+                        },
                       ),
-                    ),
+                    );
+
+                    // A rejected transformation must not roll back accepted literal input.
+                    if (applied && !pasted) run(() => rules.input({ text, composing }));
+
+                    return applied;
+                  },
+                  onComposition: () => editor.breakHistory(),
+                  afterComposition: () => {
+                    run(() => rules.endComposition());
+                  },
                   onKeyDown: (event) => run(() => shortcuts(event)),
                   onReplace: (text) =>
                     run(() =>

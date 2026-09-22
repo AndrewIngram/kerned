@@ -169,6 +169,7 @@ export type Editor<D extends readonly SchemaDefinition[], N extends NodeIdentity
   readonly positions: StateSession<N>['positions'];
   readonly journal: StateSession<N>['journal'];
   readonly find: StateSession<N>['find'];
+  readonly getNode: StateSession<N>['getNode'];
   readonly getAccess: StateSession<N>['getAccess'];
   readonly getSelection: StateSession<N>['getSelection'];
   readonly refreshPermissions: StateSession<N>['refreshPermissions'];
@@ -268,6 +269,7 @@ export function createEditor(
         return editor.journal;
       },
       find: editor.find,
+      getNode: (id) => editor.getNode(id),
       getAccess: (id) => editor.getAccess(id),
       getSelection: (id) => editor.getSelection(id),
       refreshPermissions: () => editor.refreshPermissions(),

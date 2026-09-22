@@ -68,6 +68,7 @@ function fixture(writable = true) {
           .replaceText({ id, from, to, text, caret })
           .run();
       },
+      onComposition: () => editor.breakHistory(),
       onKeyDown: shortcuts,
       onReplace: (text) => {
         editor.commands.replaceSelection(text);

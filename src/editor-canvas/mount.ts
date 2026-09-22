@@ -5,6 +5,7 @@ import {
   mountEditorView,
   createEditorViewport,
   createKeyboardShortcuts,
+  createPasteRules,
   type BrowserViewOptions,
 } from '../editor-browser';
 import { allocatedBlockWidth } from '../editor-browser/block-geometry';
@@ -68,9 +69,27 @@ export function mountEditor<N extends NodeIdentity>(
   // Resolve the initial projection before allocating native resources or changing the host.
   presentation.query(editor.state);
   const shortcuts = createKeyboardShortcuts(editor);
+  const paste = createPasteRules(editor);
   const policies: ReturnType<InputContribution['create']>[] = [];
 
   function clipboard(event: ClipboardEvent) {
+    if (event.defaultPrevented) return;
+
+    if (event.type === 'paste' && event.clipboardData) {
+      try {
+        if (paste(event.clipboardData)) {
+          event.preventDefault();
+
+          return;
+        }
+      } catch (error) {
+        event.preventDefault();
+        reportNotice(error instanceof Error ? error.message : String(error));
+
+        return;
+      }
+    }
+
     for (const policy of policies) {
       if (event.type === 'copy') policy.copy?.(event);
       else if (event.type === 'cut') policy.cut?.(event);
@@ -713,7 +732,10 @@ export function mountEditor<N extends NodeIdentity>(
           } else capture.navigate(event);
         },
         compositionstart: capture.textInput.compositionStart,
-        compositionend: () => capture.textInput.compositionEnd(input),
+        compositionend: () =>
+          capture.textInput.compositionEnd(input, () => {
+            for (const policy of policies) policy.afterComposition?.();
+          }),
         input(event, value) {
           for (const policy of policies) policy.input?.(event, value);
         },

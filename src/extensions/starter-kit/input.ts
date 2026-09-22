@@ -1,4 +1,4 @@
-import { createEditorSerializer } from '../../core';
+import { createEditorSerializer, createInputRules } from '../../core';
 import {
   createEditorHtmlParser,
   createTextInput,
@@ -41,6 +41,8 @@ export function createStarterKitInput<N extends NodeIdentity>({
   selectAll,
   navigate,
 }: InputOptions<N>) {
+  const rules = createInputRules(editor);
+  const afterComposition = () => applyRules(() => rules.endComposition());
   const tableType = editor.schema.node(tableDefinition);
   const serializer = createEditorSerializer(editor, { unsupported: 'text' });
   const parser = createEditorHtmlParser(editor);
@@ -82,17 +84,42 @@ export function createStarterKitInput<N extends NodeIdentity>({
   const paste = (fragment: ClipboardFragment<N>) =>
     run(() => editor.transact((context) => editingCommands.paste.execute(context, fragment)), true);
 
+  function applyRules(action: () => boolean) {
+    try {
+      if (action()) syncInput();
+    } catch (error) {
+      notice?.(error instanceof Error ? error.message : 'Input rule failed');
+      syncInput();
+    }
+  }
+
   function syncInput() {
     const element = input();
 
     if (element) textInput.sync(element);
   }
 
-  function replace(from: number, to: number, value: string, separate = false, paragraphs = false) {
+  function replace(
+    from: number,
+    to: number,
+    value: string,
+    {
+      separate = false,
+      paragraphs = false,
+      composing = textInput.composing,
+      pasted = false,
+    }: {
+      separate?: boolean;
+      paragraphs?: boolean;
+      composing?: boolean;
+      pasted?: boolean;
+    } = {},
+  ) {
     const selection = editor.state.selection;
 
     if (!(selection instanceof TextSelection)) {
-      replaceCells(value);
+      if (replaceCells(value) && !separate && !paragraphs && !pasted)
+        applyRules(() => rules.input({ text: value, composing }));
 
       return;
     }
@@ -123,19 +150,22 @@ export function createStarterKitInput<N extends NodeIdentity>({
     const history = separate
       ? 'separate'
       : {
-          group: `${textInput.composing ? 'composition' : clean ? 'typing' : 'delete'}:${selection.head.id}`,
+          group: `${composing ? 'composition' : clean ? 'typing' : 'delete'}:${selection.head.id}`,
         };
 
-    if (
-      run(() =>
-        editor.transact(
-          (context) => context.command(editingCommands.insertText, clean, { from, to }),
-          { history },
-        ),
-      ) &&
-      selection.anchor.id !== selection.head.id
-    )
-      closePanel?.();
+    const applied = run(() =>
+      editor.transact(
+        (context) => context.command(editingCommands.insertText, clean, { from, to }),
+        { history },
+      ),
+    );
+
+    if (applied) {
+      if (!separate && !paragraphs && !pasted)
+        applyRules(() => rules.input({ text: clean, composing }));
+
+      if (selection.anchor.id !== selection.head.id) closePanel?.();
+    }
   }
 
   function copyText() {
@@ -236,8 +266,16 @@ export function createStarterKitInput<N extends NodeIdentity>({
     element: () => input(),
     keydown: key,
     compositionstart: textInput.compositionStart,
-    compositionend: () => textInput.compositionEnd(input()),
-    input: (_event, inputValue) => textInput.read(inputValue, replace),
+    compositionend: () => textInput.compositionEnd(input(), afterComposition),
+    input: (event, inputValue) =>
+      textInput.read(inputValue, (from, to, text) =>
+        replace(from, to, text, {
+          composing: textInput.composing || (event instanceof InputEvent && event.isComposing),
+          pasted:
+            event instanceof InputEvent &&
+            ['insertFromPaste', 'insertFromDrop'].includes(event.inputType),
+        }),
+      ),
     copy: (e) => {
       e.preventDefault();
 
@@ -266,7 +304,8 @@ export function createStarterKitInput<N extends NodeIdentity>({
       }
 
       if (nonTextSelection) replaceCells('');
-      else if (!collapsed && start && end) replace(start.offset, end.offset, '', true);
+      else if (!collapsed && start && end)
+        replace(start.offset, end.offset, '', { separate: true });
     },
     paste: (e) => {
       const editorState = editor.state;
@@ -327,7 +366,10 @@ export function createStarterKitInput<N extends NodeIdentity>({
           const { start, end } = project(editorState);
 
           if (start && end)
-            replace(start.offset, end.offset, e.clipboardData.getData('text/plain'), true, true);
+            replace(start.offset, end.offset, e.clipboardData.getData('text/plain'), {
+              separate: true,
+              paragraphs: true,
+            });
           else replaceCells(e.clipboardData.getData('text/plain'));
         }
       } catch (error) {
@@ -337,7 +379,7 @@ export function createStarterKitInput<N extends NodeIdentity>({
     },
   };
 
-  return { events: inputEvents };
+  return { events: inputEvents, afterComposition };
 }
 
 /** A table's native textarea owns focus while editing a cell; otherwise focus

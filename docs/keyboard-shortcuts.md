@@ -75,5 +75,5 @@ explicitly opts them in. Never call a retained dispatcher after destroying its
 editor. Session destruction makes it unusable; it owns no independent resources
 that require disposal.
 
-Input and paste transformation rules are a separate part of milestone 7 and
-are not provided by this shortcut registry.
+Input and paste transformations have their own transactional registries; see
+[Input and paste rules](input-and-paste-rules.md).

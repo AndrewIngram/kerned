@@ -46,3 +46,5 @@ export {
   type ExtensionContribution,
   type ContributionContext,
 } from './contributions';
+
+export { inputRules, createInputRules, type InputRule } from './input-rules';
