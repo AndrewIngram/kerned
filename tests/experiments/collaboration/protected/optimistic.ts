@@ -48,18 +48,18 @@ export function createOptimisticRecipient(session: string) {
   }
 
   function reset(frame?: Frame) {
-    for (const draft of queue) {
-      const accepted =
-        draft.id === flight?.id &&
-        frame?.writes.receipts.some(
-          (receipt) => receipt.kind === 'accepted' && receipt.operation === flight?.operation,
-        );
+    const accepted =
+      flight &&
+      frame?.writes.receipts.some(
+        (receipt) => receipt.kind === 'accepted' && receipt.operation === flight?.operation,
+      )
+        ? flight.id
+        : null;
 
-      results.push(
-        accepted
-          ? { id: draft.id, kind: 'confirmed' }
-          : { id: draft.id, kind: 'discarded', reason: 'reset' },
-      );
+    if (accepted !== null) results.push({ id: accepted, kind: 'confirmed' });
+
+    for (const draft of queue) {
+      if (draft.id !== accepted) results.push({ id: draft.id, kind: 'discarded', reason: 'reset' });
     }
 
     queue = [];
@@ -73,34 +73,38 @@ export function createOptimisticRecipient(session: string) {
 
         if (own && !sameEdit(own.edit, change.edit)) throw new Error('Accepted edit mismatch');
 
-        if (own) results.push({ id: own.id, kind: 'confirmed' });
+        results.push({ id: flight.id, kind: 'confirmed' });
         queue = queue.filter((draft) => draft.id !== flight?.id);
         flight = null;
-      } else {
-        let over = change.edit;
-        const mapped: Draft[] = [];
-        const conflicts = new Set<string>();
 
-        for (const draft of queue) {
-          if (conflicts.has(draft.edit.key)) {
-            results.push({ id: draft.id, kind: 'discarded', reason: 'conflict' });
-            continue;
-          }
+        // A discarded overlay can still be accepted later. Fresh drafts authored
+        // without that overlay must be mapped over its eventual canonical edit.
+        if (own) continue;
+      }
 
-          const local = rebase(draft.edit, over);
-          const remote = rebase(over, draft.edit, false);
+      let over = change.edit;
+      const mapped: Draft[] = [];
+      const conflicts = new Set<string>();
 
-          if (!local || !remote) {
-            conflicts.add(draft.edit.key);
-            results.push({ id: draft.id, kind: 'discarded', reason: 'conflict' });
-          } else {
-            mapped.push({ id: draft.id, edit: local });
-            over = remote;
-          }
+      for (const draft of queue) {
+        if (conflicts.has(draft.edit.key)) {
+          results.push({ id: draft.id, kind: 'discarded', reason: 'conflict' });
+          continue;
         }
 
-        queue = mapped;
+        const local = rebase(draft.edit, over);
+        const remote = rebase(over, draft.edit, false);
+
+        if (!local || !remote) {
+          conflicts.add(draft.edit.key);
+          results.push({ id: draft.id, kind: 'discarded', reason: 'conflict' });
+        } else {
+          mapped.push({ id: draft.id, edit: local });
+          over = remote;
+        }
       }
+
+      queue = mapped;
     }
 
     if (flight) {
@@ -109,7 +113,7 @@ export function createOptimisticRecipient(session: string) {
       );
 
       if (receipt?.kind === 'rejected') {
-        discard(flight.key, 'rejected');
+        if (queue.some((draft) => draft.id === flight?.id)) discard(flight.key, 'rejected');
         flight = null;
       } else if (receipt?.kind === 'accepted') throw new Error('Missing accepted edit');
     }

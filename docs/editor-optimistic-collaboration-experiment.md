@@ -69,6 +69,10 @@ in-flight head drops its same-block dependants. Recovery results identify draft 
 and reasons (`conflict`, `precondition`, `rejected`, `reset`); they retain no draft
 text. A dropped overlay is not a server-side cancellation: a request already sent
 may still settle, and its original bytes remain the only retry until settlement.
+Fresh typing after an overlay was discarded is independent of that old request.
+A delayed rejection preserves it; a delayed acceptance maps it over the accepted
+edit and emits a confirmation for the original draft ID. Thus a discard result is
+an overlay recovery event, not a terminal claim that the server rejected the draft.
 
 A full resync or any access/structural epoch change conservatively discards the
 unconfirmed queue, including drafts in unaffected blocks. An accepted head named

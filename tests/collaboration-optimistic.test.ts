@@ -80,6 +80,60 @@ function fixture(mode: 'json' | 'automerge') {
 }
 
 for (const mode of ['json', 'automerge'] as const) {
+  test(`${mode}: a delayed rejection preserves fresh typing after its old overlay was discarded`, () => {
+    const f = fixture(mode);
+    f.client.edit({ key: 'one', from: 1, to: 3, text: 'X' });
+    f.request();
+    f.authority.apply([{ kind: 'replaceText', id: 1, from: 1, to: 3, text: 'R' }]);
+    f.flush();
+    f.client.takeResults();
+    const fresh = f.client.edit(insert(3, '!'));
+    expect(f.client.text('one')).toBe('aRd!');
+    expect(f.submit()).toMatchObject({ kind: 'rejected', reason: 'conflict' });
+    f.flush();
+    expect(f.client.text('one')).toBe('aRd!');
+    expect(f.client.takeResults()).toEqual([]);
+    f.drain();
+    expect(f.client.takeResults()).toEqual([{ id: fresh, kind: 'confirmed' }]);
+    expect(f.client.text('one')).toBe('aRd!');
+    f.destroy();
+  });
+
+  test.each(['incremental', 'resync'])(
+    `${mode}: late acceptance via %s settles a discarded overlay`,
+    (delivery) => {
+      const f = fixture(mode);
+      f.authority.apply([{ kind: 'replaceText', id: 1, from: 0, to: 4, text: '🇦🇧🇨🇩' }]);
+      f.flush();
+      const original = f.client.edit({ key: 'one', from: 4, to: 8, text: 'X' });
+      f.request();
+      f.authority.apply([{ kind: 'replaceText', id: 1, from: 0, to: 0, text: '🇪' }]);
+      f.flush();
+      expect(f.client.takeResults()).toEqual([
+        { id: original, kind: 'discarded', reason: 'precondition' },
+      ]);
+      const fresh = f.client.edit(insert(10, '!'));
+      f.authority.apply([{ kind: 'replaceText', id: 1, from: 0, to: 0, text: '🇫' }]);
+      f.flush();
+      expect(f.client.text('one')).toBe('🇫🇪🇦🇧🇨🇩!');
+      expect(f.submit().kind).toBe('accepted');
+
+      if (delivery === 'resync') f.connection.resync();
+      f.flush();
+      const expected = delivery === 'resync' ? '🇫🇪🇦🇧X' : '🇫🇪🇦🇧X!';
+      expect(f.client.text('one')).toBe(expected);
+      f.drain();
+      expect(f.client.text('one')).toBe(expected);
+      expect(f.client.takeResults()).toEqual([
+        { id: original, kind: 'confirmed' },
+        delivery === 'resync'
+          ? { id: fresh, kind: 'discarded', reason: 'reset' }
+          : { id: fresh, kind: 'confirmed' },
+      ]);
+      f.destroy();
+    },
+  );
+
   test(`${mode}: all 225 replacement pairs reconcile queued typing without losing accepted heads`, () => {
     let accepted = 0;
     let conflicted = 0;
