@@ -15,7 +15,7 @@ directories and interfaces are not evidence of completed extraction.
 | 4 — complete view lifetime          | Complete | Vanilla mounting owns rendering, input, assets and cleanup                     |
 | 5 — presentation                    | Complete | Per-view typography, fonts and appropriate cache invalidation                  |
 | 6 — renderers and React             | Complete | Public rendering/decorations and React adapters over the same view             |
-| 7 — codecs and delayed edits        | Pending  | Extension codecs/input rules and durable async targets                         |
+| 7 — codecs and delayed edits        | Complete | Extension codecs/input rules and durable async targets                         |
 | 8 — workspace consumers             | Pending  | Built package exports, migrated demo and final performance verification        |
 
 For each milestone, record the implementation commit, architecture judge findings,
@@ -3092,3 +3092,78 @@ serialization, HTML parsing, shortcut and rule checkpoints. Milestone 7 remains
 open for its performance gate and independent architecture judge, including any
 agreed changes. Milestone 8 remains pending. See
 [Input and paste rules](input-and-paste-rules.md) for the public contracts.
+
+### Milestone 7 review fixes and performance
+
+The independent architecture judge reviewed committed `cfe828f..664dd1f` with
+the improve-codebase-architecture and codebase-design skills. All three findings
+were accepted and addressed:
+
+- Starter commands imported browser CSS indirectly through clipboard parsing.
+  Fragment extraction and paste preparation now live in a headless module;
+  browser clipboard I/O and HTML parsing adapt it. The required project check
+  now launches ordinary Node to import the starter kit, paste, serialize and
+  undo. Its source-path resolver does not load CSS or replace browser globals.
+  Milestone 8 will validate emitted package entry points instead of source paths.
+- Nested-list text copying retained an invalid ancestor with no leading block.
+  Closed extraction omits ancestors for single-block text, promotes selected
+  sublists when their parent text was not selected, and retains valid remaining
+  list runs. Partial table text becomes selected text blocks; rectangular cell
+  selections keep their grid semantics. Output is prepared before any clipboard
+  format is written. Tests cover local and external HTML, partial marks,
+  nested-to-outer selection, and custom schemas without StarterKit.
+- Native paste/drop merged with surrounding typing history. Both native table
+  editing and canvas input fallback now separate those operations. Browser tests
+  undo and redo typing, paste/drop and subsequent typing independently.
+
+Follow-up review caught eager optional-definition binding in extraction.
+`schema.isNode(node, definition)` now compares installed definition families
+without requiring the queried definition. A custom container named `list` is
+not mistaken for the starter list. Local clipboard tokens also bypass HTML
+parser construction. The judge reviewed these remedies and found no remaining
+required correction.
+
+Paste profiling identified redundant work for collapsed selections. The paste
+module now skips an empty removal transaction and reuses its selection/tree
+index; selected-content replacement reuses the preview transaction's index.
+Actual insertion still uses split/join mappings. Tests retain durable positions
+at nested block starts, interiors and ends through paste, undo and redo.
+
+Startup profiling found repeated Unicode segmentation at ordinary ASCII mark
+boundaries and serial font loading after graphics initialization. ASCII boundaries
+now use the local UTF-16 check, with CR/LF and non-ASCII text still segmented.
+Tests compare every offset with Unicode segmentation, including combining marks,
+emoji, Indic text, prepend characters and control characters. Font downloads now
+overlap graphics initialization inside the resource owner. Cancellation, corrupt
+assets, failure recovery, font replacement and mount cleanup retain their checks;
+the judge found no new lifetime issue.
+
+The earlier failed production trials remain recorded in `rules-complete`,
+`paste-index-reuse` and `review-fixes` under `artifacts/public-interface-m7/`.
+No baseline or budget changed. The subsequent `parallel-assets` trials pass all
+unchanged budgets: worst first usable 231 ms, streaming 1,237.2 ms, paste handler
+49.3 ms, paste paint 110.7 ms, typing 31.8 ms, paging 32.2 ms and loaded heap
+28,104,232 bytes. Reports identify pre-commit HEAD `664dd1f` and measure this
+checkpoint's working tree. Final evidence is recorded below after the final
+source verification.
+
+Final validation passes `pnpm run check`: 956 Vitest cases, one unchanged
+collaboration TODO and all 42 end-to-end cases. The production build passes with
+the existing chunk-size warning. Three serial trials on the final source tree
+in `artifacts/public-interface-m7/final/` also pass every unchanged budget:
+
+| Metric               |      Worst trial |             Budget |
+| -------------------- | ---------------: | -----------------: |
+| First usable paint   |           234 ms |           248.4 ms |
+| Streaming completion |       1,248.5 ms |         1,331.3 ms |
+| Paste handler        |          49.3 ms |            62.8 ms |
+| Paste to paint       |         113.3 ms |           123.1 ms |
+| Typing frame         |          31.9 ms |            48.6 ms |
+| Paging frame         |          32.3 ms |            48.7 ms |
+| Loaded heap          | 28,097,060 bytes | 36,069,308.4 bytes |
+
+The delayed-target, serializer, HTML-parser, shortcut and input/paste-rule
+checkpoints cover the milestone's implementation and verification requirements.
+The independent judge and agreed remedies are complete, and the performance gate
+is green. Milestone 7 is complete. Milestone 8 remains pending for physical
+workspace packages, built consumer fixtures, demo migration and final docs.

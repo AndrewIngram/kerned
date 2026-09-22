@@ -40,6 +40,8 @@ test('bindings use the installed configuration and preserve inferred attribute t
   } | null>();
   expect(type.read(node)).toEqual({ value: 'Heading', level: 2 });
   expect(type.read(node)).toBe(type.read(node));
+  expect(schema.isNode(node, text)).toBe(true);
+  expect(schema.isNode(node, group)).toBe(false);
   expect(node).toMatchObject({ styles: [], objects: [] });
   expect(() => type.create({ id: 2, key: 'text-2' }, { value: 'Too deep', level: 3 })).toThrow(
     /<=2/,
@@ -92,6 +94,9 @@ test('bindings reject uninstalled or unrelated definitions with the same name', 
 
   expect(() => schema.node(imposter)).toThrow(/Different node definition/);
   expect(() => schema.node(missing)).toThrow(/No node factory/);
+  const node = schema.node(text).create({ id: 1, key: 'text-1' }, { value: 'Text', level: 1 });
+  expect(schema.isNode(node, missing)).toBe(false);
+  expect(schema.isNode(node, imposter)).toBe(false);
 });
 
 test('construction normalizes once, owns attributes, and reads without revalidating', () => {

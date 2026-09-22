@@ -9,7 +9,7 @@ import {
   textSelection,
 } from '../../state';
 import { replaceStructuredText } from '../blocks';
-import { pasteFragment } from '../clipboard';
+import { pasteFragment } from '../clipboard-fragment';
 import { pasteParagraphs } from '../paste';
 import { paragraph, quote } from '../starter-definitions';
 import { createStructuralPolicies } from './structure';

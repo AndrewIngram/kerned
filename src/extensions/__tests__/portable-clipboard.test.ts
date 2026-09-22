@@ -10,7 +10,7 @@ import {
   type DocumentNode,
 } from '../../model';
 import { TextSelection, textSelection, NodeSelection } from '../../state';
-import type { ClipboardFragment } from '../clipboard';
+import type { ClipboardFragment } from '../clipboard-fragment';
 import { starterExtensions } from '../starter-kit';
 import { tableCells } from '../table';
 
@@ -82,6 +82,73 @@ test('inline paste uses custom text storage, renews inline identities and undoes
   expect(editor.state.nodes).toEqual(original.nodes);
   expect(editor.commands.redo()).toBe(true);
   expect(editor.state.nodes[1]).toEqual(destination);
+});
+
+test.each([0, 3, 6])(
+  'paste at nested offset %i preserves surrounding text and durable positions',
+  (offset) => {
+    const editor = createEditor({
+      schema,
+      content: [
+        { kind: 'caption', id: 1, value: 'X' },
+        { kind: 'quote', id: 2, children: [{ kind: 'caption', id: 3, value: 'abcdef' }] },
+      ],
+      selection: textSelection(3, offset),
+    });
+
+    const original = editor.state.nodes;
+    const before = editor.positions.at(3, offset, -1);
+    const after = editor.positions.at(3, offset, 1);
+    expect(editor.commands.paste({ nodes: [original[0]], inline: true })).toBe(true);
+    expect(editor.getNode(3)).toMatchObject({
+      value: `${'abcdef'.slice(0, offset)}X${'abcdef'.slice(offset)}`,
+    });
+    expect(editor.positions.resolve(before)).toEqual({
+      status: 'resolved',
+      point: { id: 3, offset },
+    });
+    expect(editor.positions.resolve(after)).toEqual({
+      status: 'resolved',
+      point: { id: 3, offset: offset + 1 },
+    });
+    expect(editor.state.selection.eq(textSelection(3, offset + 1))).toBe(true);
+    expect(editor.commands.undo()).toBe(true);
+    expect(editor.state.nodes).toEqual(original);
+    expect(editor.positions.resolve(after)).toEqual({
+      status: 'resolved',
+      point: { id: 3, offset },
+    });
+    expect(editor.commands.redo()).toBe(true);
+    expect(editor.positions.resolve(after)).toEqual({
+      status: 'resolved',
+      point: { id: 3, offset: offset + 1 },
+    });
+    editor.destroy();
+  },
+);
+
+test('rich paste replaces a cross-container selection and restores it on undo', () => {
+  const editor = createEditor({
+    schema,
+    content: [
+      richCaption,
+      { kind: 'quote', id: 10, children: [{ kind: 'caption', id: 2, value: 'AB' }] },
+      { kind: 'quote', id: 20, children: [{ kind: 'caption', id: 3, value: 'CD' }] },
+    ],
+    selection: new TextSelection({ id: 2, offset: 1 }, { id: 3, offset: 1 }),
+  });
+
+  const original = editor.state;
+  expect(editor.commands.paste({ nodes: [original.nodes[0]], inline: true })).toBe(true);
+  expect(editor.getNode(2)).toMatchObject({
+    value: 'AA\ufffcD',
+    styles: [{ from: 1, to: 3, mark: { type: 'bold', attrs: null } }],
+  });
+  expect(editor.getNode(3)).toBeUndefined();
+  expect(editor.commands.undo()).toBe(true);
+  expect(editor.state.nodes).toEqual(original.nodes);
+  expect(editor.state.selection.eq(original.selection)).toBe(true);
+  editor.destroy();
 });
 
 test('rectangular paste retains custom cell content while growing the destination table', () => {

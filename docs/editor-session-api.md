@@ -131,6 +131,13 @@ when the command draft inserts the node. Container constructors accept children
 as their third argument; text constructors initialize empty marks and inline
 objects. Reads use canonical nodes and do not re-run validators.
 
+`schema.isNode(node, definition)` checks a canonical node's definition family
+without requiring that optional definition to be installed. It returns false for
+an absent definition or an unrelated one with the same name. Use it when an
+extension handles some installed node families specially and delegates the rest;
+use `schema.node(definition)` when construction or typed attribute reads require
+that definition.
+
 Reusable commands obtain bindings through `context.schema` and identities through
 `context.allocate()`. Heading changes preserve existing text, marks, inline
 objects and durable positions through the target's editing policy. Lists, quotes

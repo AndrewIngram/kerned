@@ -9,8 +9,13 @@ import {
   type ContributionContext,
 } from '../../core';
 import { createEditorHtmlParser, defineHtmlTextParser, htmlParsers } from '../../editor-browser';
-import { createSchema, defineNode, defineNodeSerializer } from '../../model';
-import { textSelection } from '../../state';
+import {
+  createSchema,
+  createDocumentSerializer,
+  defineNode,
+  defineNodeSerializer,
+} from '../../model';
+import { textSelection, TextSelection } from '../../state';
 import { readClipboard, writeClipboard } from '../clipboard';
 import { starterExtensions } from '../starter-kit';
 import { starterInput } from '../starter-kit/browser';
@@ -32,6 +37,59 @@ const note = defineNode({
 });
 
 const schema = createSchema({ extensions: [...starterExtensions, note] });
+
+test('custom text and container copying needs no starter definitions, even with a reused name', ({
+  onTestFinished,
+}) => {
+  const group = defineNode({
+    name: 'list',
+    version: 1,
+    options: {},
+    schema: () => ({
+      attributes: z.strictObject({}),
+      content: { kind: 'container', field: 'children', allowed: ['note'] },
+    }),
+  });
+
+  const customSchema = createSchema({ extensions: [note, group] });
+
+  const editor = createEditor({
+    schema: customSchema,
+    content: [
+      {
+        kind: 'list',
+        id: 10,
+        children: [
+          { kind: 'note', id: 1, body: 'First' },
+          { kind: 'note', id: 2, body: 'Second' },
+        ],
+      },
+    ],
+    selection: textSelection(1, 1, 3),
+  });
+
+  onTestFinished(() => editor.destroy());
+
+  const output = createDocumentSerializer(customSchema, [
+    defineNodeSerializer(note, ({ content }) => ({
+      ...content,
+      html: [{ tag: 'p', children: content.html }],
+    })),
+    defineNodeSerializer(group, ({ content }) => ({
+      ...content,
+      html: [{ tag: 'section', children: content.html }],
+    })),
+  ]);
+
+  const single = new DataTransfer();
+  writeClipboard(single, customSchema, editor.state, 'ir', output);
+  expect(single.getData('text/html')).toBe('<p>ir</p>');
+  expect(readClipboard(single, customSchema)?.nodes[0]).toMatchObject({ kind: 'note', body: 'ir' });
+  editor.select(new TextSelection({ id: 1, offset: 1 }, { id: 2, offset: 3 }));
+  const multiple = new DataTransfer();
+  writeClipboard(multiple, customSchema, editor.state, 'irst\nSec', output);
+  expect(multiple.getData('text/html')).toBe('<section><p>irst</p><p>Sec</p></section>');
+});
 
 test('local clipboard preserves custom canonical nodes and cross-schema transfer validates the target definition', ({
   onTestFinished,

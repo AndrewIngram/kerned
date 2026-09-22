@@ -17,6 +17,10 @@ test('resolves every asset, initializes native resources and disposes all layout
 
   expect(owner.status).toBe('loading');
   expect(() => owner.read()).toThrow(/loading/);
+  expect(requested).toEqual([
+    'engines/canvaskit.wasm',
+    ...defaultFonts.faces.map((face) => face.asset),
+  ]);
 
   try {
     await owner.ready;
@@ -60,21 +64,24 @@ test('destruction before loading rejects readiness and cannot revive after queue
   expect(() => owner.read()).toThrow(/destroyed/);
 });
 
-test('destruction during font resolution cancels native initialization', async () => {
+test('destruction while parallel fonts load cancels native initialization', async () => {
   const requested: EditorAsset[] = [];
 
   const owner = createViewResources({
     resolveAsset(asset) {
       requested.push(asset);
 
-      if (asset.startsWith('fonts/')) owner.destroy();
+      if (asset === defaultFonts.faces[0].asset) queueMicrotask(() => owner.destroy());
 
       return `/${asset}`;
     },
   });
 
   await expect(owner.ready).rejects.toMatchObject({ name: 'AbortError' });
-  expect(requested).toEqual(['engines/canvaskit.wasm', defaultFonts.faces[0].asset]);
+  expect(requested).toEqual([
+    'engines/canvaskit.wasm',
+    ...defaultFonts.faces.map((face) => face.asset),
+  ]);
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   expect(owner.status).toBe('destroyed');
   expect(() => owner.read()).toThrow(/destroyed/);

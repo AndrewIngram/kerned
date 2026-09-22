@@ -5,7 +5,7 @@ import {
   type DocumentCommandArguments,
 } from '../../core';
 import { AllSelection } from '../../state';
-import { pasteFragment, type ClipboardFragment } from '../clipboard';
+import { pasteFragment, type ClipboardFragment } from '../clipboard-fragment';
 import {
   replaceSelection,
   splitBlock,

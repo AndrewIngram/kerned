@@ -100,7 +100,9 @@ A successful rule owns the event and prevents the ordinary paste handler and
 native default from running again. If all rules decline, the existing clipboard
 path retains rich formatting, inline values and table rectangles. Ordinary text
 paste in a native cell remains native when no rule or rectangle handler owns it.
-Its subsequent input event does not invoke typing rules.
+Its subsequent input event does not invoke typing rules. Native paste and drop
+input also create separate undo entries from preceding and following typing, in
+both table cells and canvas text capture.
 
 An exception rolls back the attempted draft, consumes the event and reports the
 error through the mounted editor's notice callback. It does not fall through to

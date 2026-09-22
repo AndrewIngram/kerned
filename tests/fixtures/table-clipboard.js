@@ -13,4 +13,6 @@ export {
   plainCellRectangle,
 } from '../../src/extensions/table-clipboard.ts';
 
-export { writeClipboard, readClipboard, pasteFragment } from '../../src/extensions/clipboard.ts';
+export { writeClipboard, readClipboard } from '../../src/extensions/clipboard.ts';
+
+export { pasteFragment } from '../../src/extensions/clipboard-fragment.ts';

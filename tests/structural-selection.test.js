@@ -1,7 +1,7 @@
 import { test, expect } from 'vitest';
 
 import * as blocksModule from '../src/extensions/blocks.ts';
-import * as clipboardModule from '../src/extensions/clipboard.ts';
+import * as clipboardModule from '../src/extensions/clipboard-fragment.ts';
 import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
 import * as stateModule from '../src/state/index.ts';
 import * as editorFoundationModule from './fixtures/editor-foundation.js';

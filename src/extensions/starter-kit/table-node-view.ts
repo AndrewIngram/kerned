@@ -55,9 +55,9 @@ export const tableView = defineExtension({
                         (draft) =>
                           draft.command(editingCommands.replaceText, { id, from, to, text, caret }),
                         {
-                          history: {
-                            group: `${composing ? 'composition' : 'typing'}:${id}`,
-                          },
+                          history: pasted
+                            ? 'separate'
+                            : { group: `${composing ? 'composition' : 'typing'}:${id}` },
                         },
                       ),
                     );

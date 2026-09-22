@@ -6,10 +6,11 @@ import {
   type ViewSession,
 } from '../../editor-browser';
 import { createDocumentQuery } from '../../editor-browser/document';
-import { readClipboard, writeClipboard, type ClipboardFragment } from '../../extensions/clipboard';
 import { textContent, type NodeIdentity, type Schema } from '../../model';
 import { supportsOwnedText } from '../../owned-text-support';
 import { TextSelection } from '../../state';
+import { readClipboard, writeClipboard } from '../clipboard';
+import type { ClipboardFragment } from '../clipboard-fragment';
 import { table as tableDefinition, tableCell, image } from '../starter-definitions';
 import { tableCells } from '../table';
 import { plainCellRectangle, cellRectangleText } from '../table-clipboard';
@@ -147,11 +148,12 @@ export function createStarterKitInput<N extends NodeIdentity>({
       return;
     }
 
-    const history = separate
-      ? 'separate'
-      : {
-          group: `${composing ? 'composition' : clean ? 'typing' : 'delete'}:${selection.head.id}`,
-        };
+    const history =
+      separate || pasted
+        ? 'separate'
+        : {
+            group: `${composing ? 'composition' : clean ? 'typing' : 'delete'}:${selection.head.id}`,
+          };
 
     const applied = run(() =>
       editor.transact(

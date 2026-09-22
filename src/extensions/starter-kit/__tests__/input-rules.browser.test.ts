@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest';
+import { expect, test, onTestFinished as registerCleanup } from 'vitest';
 
 import { createEditor, defineExtension, inputRules, type ContributionContext } from '../../../core';
 import { pasteRules } from '../../../editor-browser';
@@ -182,6 +182,30 @@ for (const id of [1, 4]) {
     expect(f.text()).toBe('--');
     expect(f.calls).toEqual([]);
   });
+
+  test.each(['insertFromPaste', 'insertFromDrop'])(
+    `${surface} %s has separate undo from surrounding typing`,
+    async (inputType) => {
+      const f = await fixture(registerCleanup, id);
+      await f.type('Before');
+      await f.type(' pasted', { inputType });
+      await f.type(' after');
+      expect(f.text()).toBe('Before pasted after');
+      f.editor.commands.undo();
+      expect(f.text()).toBe('Before pasted');
+      f.editor.commands.undo();
+      expect(f.text()).toBe('Before');
+      f.editor.commands.undo();
+      expect(f.text()).toBe('');
+      f.editor.commands.redo();
+      expect(f.text()).toBe('Before');
+      f.editor.commands.redo();
+      expect(f.text()).toBe('Before pasted');
+      f.editor.commands.redo();
+      expect(f.text()).toBe('Before pasted after');
+      expect(f.notices.filter(Boolean)).toEqual([]);
+    },
+  );
 }
 
 test('declining paste rules preserve rich rectangular paste in native cells', async ({

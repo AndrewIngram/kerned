@@ -15,12 +15,21 @@ export function boundaries(text: string): number[] {
   return [...graphemes.segment(text)].map((s) => s.index).concat(text.length);
 }
 
+// Between two ASCII code units only CR/LF can share a grapheme. Other scripts,
+// combining marks and surrogate pairs still go through Unicode segmentation.
+function asciiBoundary(text: string, offset: number) {
+  const before = text.charCodeAt(offset - 1),
+    after = text.charCodeAt(offset);
+
+  return before < 128 && after < 128 && !(before === 13 && after === 10);
+}
+
 /** Snap one UTF-16 offset without materializing every grapheme in the text. */
 export function snapTextOffset(text: string, offset: number, association: -1 | 1): number {
   if (!Number.isSafeInteger(offset) || offset < 0 || offset > text.length)
     throw new Error('Invalid text offset');
 
-  if (offset === 0 || offset === text.length) return offset;
+  if (offset === 0 || offset === text.length || asciiBoundary(text, offset)) return offset;
   const segment = graphemes.segment(text).containing(offset);
 
   if (!segment || segment.index === offset) return offset;
@@ -34,9 +43,12 @@ export function validateTextRange(text: string, from: number, to: number) {
 
   if (from > to || !validOffset(from) || !validOffset(to))
     throw new Error('Edit range must follow grapheme boundaries');
+
   // Most imported mark ranges cover a whole block. Interior endpoints need only
   // their containing segment, not an allocated array and Set for the entire text.
-  const interior = [from, to].filter((offset) => offset !== 0 && offset !== text.length);
+  const interior = [from, to].filter(
+    (offset) => offset !== 0 && offset !== text.length && !asciiBoundary(text, offset),
+  );
 
   if (!interior.length) return;
   const segments = graphemes.segment(text);

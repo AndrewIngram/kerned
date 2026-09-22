@@ -1,3 +1,4 @@
+import { definitionFamily } from './definitions';
 import type { InlineValue } from './inline-schema';
 import type { Mark, MarkRange } from './marks';
 import { bindNode, type NodeBinding, type NodeDefinition, type NodeFactory } from './node-binding';
@@ -118,6 +119,12 @@ export function createRuntimeSchema<N extends NodeIdentity & { kind: string }>(
     ),
     resolve,
     copy,
+    isNode(node: N, definition: NodeDefinition) {
+      const installed = resolve(node).factory?.definition;
+      const family = definition[definitionFamily];
+
+      return !!family && installed?.[definitionFamily] === family;
+    },
     value<const Definition extends ValueDefinition>(definition: Definition) {
       return bindValue(valueRegistry.get(definition.name), definition);
     },
@@ -178,6 +185,8 @@ export function createRuntimeSchema<N extends NodeIdentity & { kind: string }>(
 }
 
 export type Schema<N> = {
+  /** Match a definition family without requiring it to be installed. */
+  readonly isNode: (this: void, node: N, definition: NodeDefinition) => boolean;
   readonly value: <const Definition extends ValueDefinition>(
     definition: Definition,
   ) => ValueBinding<Definition>;

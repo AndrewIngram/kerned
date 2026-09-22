@@ -1,7 +1,8 @@
 # Rich clipboard
 
-The clipboard adapter in `src/extensions/clipboard.ts` uses public schema,
-selection and transaction APIs. Copy writes plain text, semantic HTML and an
+The headless fragment module in `src/extensions/clipboard-fragment.ts` extracts
+selected content and prepares paste transactions. The browser adapter in
+`src/extensions/clipboard.ts` writes plain text, semantic HTML and an
 opaque local-fragment token. Paste prefers a known local fragment, then imports
 HTML in an inert template, then falls back to plain text.
 
@@ -17,11 +18,21 @@ immutable node identity without encoding or parsing. Transfers to another schema
 use the source codec and validate against the destination schema. Imported HTML
 also passes through destination validation before it can become editor content.
 The page retains up to eight immutable fragments; unknown or expired tokens use
-HTML instead. Custom extension data is therefore
-not yet portable across reloads or separate tabs. In exported HTML, mentions
-become their labels, and images their alternative text.
-Comments are not exported. Portable extension serialization remains separate
-work. Table-cell controls use the same rich clipboard adapter.
+HTML instead. Custom extension data crosses reloads or separate tabs when the
+extension contributes matching HTML serializers and parsers. Starter HTML retains
+mention attributes and image sources; plain text uses labels and alternative text.
+Comments are not exported. Table-cell controls use the same rich clipboard adapter.
+
+Fragments contain closed, valid trees rather than open ancestor paths. Selecting
+text inside one block copies that block's selected content without its ancestors.
+When a selection starts in a sublist and continues into an outer sibling, the
+selected sublist and the remaining outer list run become separate valid lists.
+Unselected parent text and empty placeholder blocks are never added. Partial table
+text selections copy the selected text blocks; cell selections use the rectangular
+contract below. Complete selected containers retain their structure. Custom
+containers must still satisfy their schema when sliced; arbitrary open-fragment
+fitting is not implemented. All formats are prepared before clipboard writes, so
+serialization failure does not leave only some formats updated.
 
 Run `pnpm run check:editor-rich-paste` for local and HTML round-trips, nested
 blocks, partial inline formatting, undo/redo and the complete Warbreaker book
@@ -50,6 +61,8 @@ accepted cell content. Copying complete merged cells retains their spans; copyin
 bisects a merged cell is rejected. Rectangular paste currently requires unmerged source and
 destination tables. It never silently falls back to destructive plain text after a rejected rich paste.
 Ordinary plain-text paste inside a native cell textarea keeps native text-editing behavior.
+Paste and drop input use separate undo entries from surrounding typing in both
+native cells and canvas text capture.
 
 Run `pnpm run test:vitest tests/table-clipboard` for Node command tests and browser HTML/TSV
 tests in Chromium, Firefox and WebKit. Run `pnpm run test:e2e table-clipboard` for actual

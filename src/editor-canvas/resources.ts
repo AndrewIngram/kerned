@@ -53,12 +53,17 @@ export function createViewResources(
   let pending: AbortController | undefined;
 
   async function loadFonts(
-    kit: CanvasKit,
+    graphics: CanvasKit | Promise<CanvasKit>,
     fonts: ReturnType<typeof createFontCatalog>,
     signal: AbortSignal,
   ): Promise<NativeResources> {
     const sources = { ...assets, signal };
-    const data = await Promise.all(fonts.faces.map((face) => readEditorAsset(face.asset, sources)));
+
+    const [kit, data] = await Promise.all([
+      graphics,
+      Promise.all(fonts.faces.map((face) => readEditorAsset(face.asset, sources))),
+    ]);
+
     const layout = await createOwnedEngine(kit, 'shaping', { ...sources, fonts, fontData: data });
 
     try {
@@ -76,8 +81,7 @@ export function createViewResources(
     }
   }
 
-  async function initialize() {
-    const fonts = createFontCatalog(options.fonts);
+  async function loadGraphics() {
     const bytes = await readEditorAsset('engines/canvaskit.wasm', assets);
 
     if (!WebAssembly.validate(bytes)) throw new Error('Invalid graphics WebAssembly asset');
@@ -95,7 +99,13 @@ export function createViewResources(
     }
 
     abort.signal.throwIfAborted();
-    const resources = await loadFonts(kit, fonts, abort.signal);
+
+    return kit;
+  }
+
+  async function initialize() {
+    const fonts = createFontCatalog(options.fonts);
+    const resources = await loadFonts(loadGraphics(), fonts, abort.signal);
 
     if (abort.signal.aborted) {
       release(resources);

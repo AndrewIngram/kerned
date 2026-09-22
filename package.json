@@ -56,7 +56,7 @@
     "check:editor-rich-paste": "node scripts/check-editor-rich-paste.mjs",
     "check:editor-unicode": "node scripts/check-editor-unicode.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 5176",
-    "check:project": "node scripts/check-project.mjs && pnpm run check:editor-boundaries && pnpm run check:app-boundaries",
+    "check:project": "node scripts/check-project.mjs && node scripts/check-headless-runtime.mjs && pnpm run check:editor-boundaries && pnpm run check:app-boundaries",
     "demo:extensions": "vite --host 127.0.0.1 --open /extensions.html",
     "check:editor-navigation": "node scripts/check-editor-navigation.mjs",
     "check:editor-foundation": "vitest run tests/foundation.test.js tests/foundation.browser.test.js",
