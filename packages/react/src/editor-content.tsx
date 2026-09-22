@@ -32,6 +32,7 @@ export function EditorContent<N extends NodeIdentity>({
   scroll,
   toolbar,
   diagnostics,
+  accessibility,
   zoom = 1,
   paddingTop = 0,
   maxWidth = null,
@@ -45,20 +46,30 @@ export function EditorContent<N extends NodeIdentity>({
   const host = useRef<HTMLDivElement>(null);
   const [portals] = useState(createPortalHost);
   const callbacks = useRef({ onReady, onError, onNotice });
-  const configuration = useRef({ zoom, paddingTop, maxWidth, background, theme, fonts });
+
+  const configuration = useRef({
+    zoom,
+    paddingTop,
+    maxWidth,
+    background,
+    theme,
+    fonts,
+    accessibility,
+  });
+
   const view = useRef<MountedEditor | undefined>(undefined);
   const [error, setError] = useState<Error | null>(null);
 
   useLayoutEffect(() => {
     callbacks.current = { onReady, onError, onNotice };
-    configuration.current = { zoom, paddingTop, maxWidth, background, theme, fonts };
+    configuration.current = { zoom, paddingTop, maxWidth, background, theme, fonts, accessibility };
   });
   useLayoutEffect(() => {
     const mounted = view.current;
 
     if (mounted?.isDestroyed) view.current = undefined;
-    else mounted?.update({ zoom, paddingTop, maxWidth, background, theme });
-  }, [zoom, paddingTop, maxWidth, background, theme]);
+    else mounted?.update({ zoom, paddingTop, maxWidth, background, theme, accessibility });
+  }, [zoom, paddingTop, maxWidth, background, theme, accessibility]);
   useLayoutEffect(() => {
     const mounted = view.current;
 

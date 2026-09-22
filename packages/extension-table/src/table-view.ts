@@ -460,17 +460,21 @@ export function createTableView<N extends NodeIdentity>(
     }
 
     if (event.key === 'Escape') {
+      const selector = input()?.closest('td,th')?.querySelector('button');
       editing = null;
       render(false);
+      selector?.focus({ preventScroll: true });
     }
 
     if (event.key === 'Tab' && event.target === input()) {
-      event.preventDefault();
       const content = frame.node.rows.flat().flatMap((cell) => cell.paragraphs);
       const index = content.findIndex((paragraph) => paragraph.id === editing);
       const next = content[index + (event.shiftKey ? -1 : 1)];
 
-      if (next) edit(next.id);
+      if (next) {
+        event.preventDefault();
+        edit(next.id);
+      }
     }
   });
   listen('copy', (event) => {

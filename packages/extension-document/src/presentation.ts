@@ -1,5 +1,10 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
-import { defineNodePresentation, presentations } from '@gprose/view';
+import {
+  defineNodeAccessibility,
+  nodeAccessibility,
+  defineNodePresentation,
+  presentations,
+} from '@gprose/view';
 
 import { paragraph, heading, image, quote, list, listItem } from './definitions.js';
 import { formattingSpans } from './formatting.js';
@@ -11,6 +16,34 @@ export const documentPresentation = defineExtension({
   options: { bodySize: 18 },
   requires: [paragraph.name, heading.name, image.name, quote.name, list.name, listItem.name],
   setup({ bodySize }, context: ContributionContext) {
+    context.provide(
+      nodeAccessibility,
+      defineNodeAccessibility(paragraph, () => ({ kind: 'text' })),
+    );
+    context.provide(
+      nodeAccessibility,
+      defineNodeAccessibility(heading, (attrs) => ({ kind: 'heading', level: attrs.level })),
+    );
+    context.provide(
+      nodeAccessibility,
+      defineNodeAccessibility(image, (attrs) => ({ kind: 'image', label: attrs.alt })),
+    );
+    context.provide(
+      nodeAccessibility,
+      defineNodeAccessibility(quote, () => ({ kind: 'quote' })),
+    );
+    context.provide(
+      nodeAccessibility,
+      defineNodeAccessibility(list, (attrs) => ({
+        kind: 'list',
+        ordered: attrs.ordered,
+        start: attrs.start,
+      })),
+    );
+    context.provide(
+      nodeAccessibility,
+      defineNodeAccessibility(listItem, () => ({ kind: 'list-item' })),
+    );
     context.provide(
       presentations,
       defineNodePresentation(paragraph, () => (attrs, node) => ({

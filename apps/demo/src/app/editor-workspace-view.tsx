@@ -21,6 +21,10 @@ import { useFind, useFindReveal } from './use-find.js';
 import { useOutline } from './use-outline.js';
 import { useSampleStream } from './use-sample-stream.js';
 
+const readingAccessibility = { readingView: true };
+
+const defaultAccessibility = { readingView: false };
+
 export function EditorWorkspaceView({
   editor,
   comments,
@@ -277,6 +281,7 @@ export function EditorWorkspaceView({
             className="document-scroll"
             editor={editor}
             fonts={sample.fonts}
+            accessibility={sample.total === 0 ? readingAccessibility : defaultAccessibility}
             diagnostics={diagnostics}
             scroll={minimal ? 'page' : 'container'}
             toolbar={minimal ? (toolbar ?? undefined) : undefined}

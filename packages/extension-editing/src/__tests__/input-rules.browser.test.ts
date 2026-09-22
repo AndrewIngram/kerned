@@ -4,12 +4,17 @@ import { createSchema } from '@gprose/model';
 import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
 import { textSelection } from '@gprose/state';
 import { pasteRules } from '@gprose/view';
+import { defaultFonts, type FontConfiguration } from '@gprose/view';
 import { mountEditor } from '@gprose/view';
 import { expect, test, onTestFinished as registerCleanup } from 'vitest';
 
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-async function fixture(cleanup: (callback: () => void) => void, id: number) {
+async function fixture(
+  cleanup: (callback: () => void) => void,
+  id: number,
+  fonts?: FontConfiguration,
+) {
   const calls: string[] = [];
 
   const rules = defineExtension({
@@ -78,7 +83,7 @@ async function fixture(cleanup: (callback: () => void) => void, id: number) {
   host.style.cssText = 'width:600px;height:400px';
   document.body.append(host);
   const notices: string[] = [];
-  const view = mountEditor(host, { editor, onNotice: (value) => notices.push(value) });
+  const view = mountEditor(host, { editor, fonts, onNotice: (value) => notices.push(value) });
   cleanup(() => {
     view.destroy();
     editor.destroy();
@@ -108,7 +113,7 @@ async function fixture(cleanup: (callback: () => void) => void, id: number) {
     await frame();
   };
 
-  return { editor, input, calls, notices, text, type };
+  return { editor, input, calls, notices, text, type, view };
 }
 
 for (const id of [1, 4]) {
@@ -149,6 +154,58 @@ for (const id of [1, 4]) {
     expect(f.calls).toEqual(['input']);
     f.editor.commands.undo();
     expect(f.text()).toBe('--');
+    expect(f.notices.filter(Boolean)).toEqual([]);
+  });
+
+  test(`${surface} Chinese composition replaces candidates once and forms a single undo group`, async ({
+    onTestFinished,
+  }) => {
+    const f = await fixture(onTestFinished, id, {
+      ...defaultFonts,
+      fallbackFamilies: [...(defaultFonts.fallbackFamilies ?? []), 'Chinese'],
+      faces: [
+        ...defaultFonts.faces,
+        {
+          family: 'Chinese',
+          weight: 400,
+          style: 'normal',
+          asset: 'fonts/NotoSansCJKtc-Regular.otf',
+        },
+      ],
+    });
+
+    f.input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+
+    const candidate = async (value: string) => {
+      f.input.value = value;
+      f.input.setSelectionRange(value.length, value.length);
+      f.input.dispatchEvent(
+        new InputEvent('input', {
+          bubbles: true,
+          inputType: 'insertCompositionText',
+          data: value,
+          isComposing: true,
+        }),
+      );
+      await frame();
+      expect(f.text()).toBe(value);
+    };
+
+    await candidate('ni');
+    await candidate('你');
+    await candidate('你好');
+    f.input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '你好' }));
+    f.input.dispatchEvent(
+      new InputEvent('input', { bubbles: true, inputType: 'insertText', data: '你好' }),
+    );
+    await frame();
+    expect(f.text()).toBe('你好');
+    expect(f.input.value).toBe('你好');
+    expect(f.view.status).toBe('ready');
+    f.editor.commands.undo();
+    expect(f.text()).toBe('');
+    f.editor.commands.redo();
+    expect(f.text()).toBe('你好');
     expect(f.notices.filter(Boolean)).toEqual([]);
   });
 

@@ -7,6 +7,7 @@ import {
   type Selection,
   type EditorState,
   type SelectionContext,
+  type NodeAccess,
 } from '@gprose/state';
 
 import type { Rect } from '../internal/engines.js';
@@ -20,6 +21,7 @@ export type CanvasInputSession<N extends NodeIdentity> = {
   readonly state: EditorState<N>;
   breakHistory(this: void): void;
   select(this: void, selection: Selection): void;
+  getAccess?(id: number): NodeAccess | undefined;
 };
 
 export type TextPointerEvent =
@@ -58,9 +60,11 @@ export type CanvasInputFrame<N extends NodeIdentity> = {
 export function createCanvasInput<N extends NodeIdentity>({
   schema,
   editor,
+  readContext,
 }: {
   schema: Schema<N>;
   editor: CanvasInputSession<N>;
+  readContext?: () => SelectionContext;
 }) {
   let frame: CanvasInputFrame<N> | undefined;
 
@@ -92,7 +96,7 @@ export function createCanvasInput<N extends NodeIdentity>({
     return frame;
   }
 
-  const textInput = createTextInput(schema, editor, () => currentFrame().context);
+  const textInput = createTextInput(schema, editor, readContext ?? (() => currentFrame().context));
   const textInteraction = createTextInteraction();
 
   function cancelReveal() {
@@ -283,7 +287,13 @@ export function createCanvasInput<N extends NodeIdentity>({
         ? (frame.layout(selection.head.id).lines[0]?.direction ?? 'ltr')
         : 'auto';
 
-    if (!textInput.composing && (synced?.selection !== selection || synced.node !== node)) {
+    const protectedText =
+      selection instanceof TextSelection && editor.getAccess?.(selection.head.id) === 'protected';
+
+    if (
+      protectedText ||
+      (!textInput.composing && (synced?.selection !== selection || synced.node !== node))
+    ) {
       textInput.sync(input);
       synced = { selection, node };
     }
@@ -322,7 +332,16 @@ export function createCanvasInput<N extends NodeIdentity>({
       assertActive();
 
       if (attachment) throw new Error('Canvas input is already attached');
-      const target = { canvas, input, detach: textInput.mount(input, selectAll) };
+
+      const target = {
+        canvas,
+        input,
+        detach: textInput.mount(input, selectAll, (selection) => {
+          editor.select(selection);
+          revealSelection();
+        }),
+      };
+
       attachment = target;
 
       try {

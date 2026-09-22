@@ -46,15 +46,24 @@ test('table view routes copy, paste and cut through rich clipboard commands', as
     data.setData('application/x-gprose-fragment', copiedValue.token);
     document.querySelector('[data-table]').dispatchEvent(event);
   }, copied);
-  await expect(page.getByRole('table').locator('tr')).toHaveCount(4);
+  await expect(page.locator('[data-table] tr')).toHaveCount(4);
+  await expect(
+    page.getByRole('document', { name: 'Document reading view' }).getByRole('row'),
+  ).toHaveCount(4);
   await expect(page.getByRole('button', { name: 'Edit cell 3, 3', exact: true })).toHaveText(
     'Alice',
   );
   await expect(page.locator('[data-cell][data-selected="true"]')).toHaveCount(4);
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await expect(page.getByRole('table').locator('tr')).toHaveCount(3);
+  await expect(page.locator('[data-table] tr')).toHaveCount(3);
+  await expect(
+    page.getByRole('document', { name: 'Document reading view' }).getByRole('row'),
+  ).toHaveCount(3);
   await page.getByRole('button', { name: 'Redo', exact: true }).click();
-  await expect(page.getByRole('table').locator('tr')).toHaveCount(4);
+  await expect(page.locator('[data-table] tr')).toHaveCount(4);
+  await expect(
+    page.getByRole('document', { name: 'Document reading view' }).getByRole('row'),
+  ).toHaveCount(4);
   await page.evaluate(() =>
     document.querySelector('[data-table]').dispatchEvent(
       new ClipboardEvent('cut', {

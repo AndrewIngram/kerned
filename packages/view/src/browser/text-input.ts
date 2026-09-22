@@ -1,14 +1,17 @@
-import { type NodeIdentity, type Schema } from '@gprose/model';
+import { snapTextOffset, type NodeIdentity, type Schema } from '@gprose/model';
 import {
   TextSelection,
   selectionContext,
   type EditorState,
   type SelectionContext,
+  type Selection,
+  type NodeAccess,
 } from '@gprose/state';
 
 type InputSession<N extends NodeIdentity> = {
   readonly state: EditorState<N>;
   breakHistory(): void;
+  getAccess?(id: number): NodeAccess | undefined;
 };
 
 /** Native textarea capture independent of React, schema names and rendering. */
@@ -20,6 +23,11 @@ export function createTextInput<N extends NodeIdentity>(
   let capture = { value: '', offset: 0 },
     composing = false,
     frame = 0;
+
+  let capturedSelection: Selection | undefined;
+  let discardedComposition = false;
+
+  let mirrored: { selection: TextSelection; value: string } | undefined;
 
   let cached: { nodes: readonly N[]; context: SelectionContext } | undefined;
   let destroyed = false;
@@ -41,6 +49,23 @@ export function createTextInput<N extends NodeIdentity>(
   function sync(input: HTMLTextAreaElement) {
     assertActive();
     const { selection } = editor.state;
+    mirrored = undefined;
+    capturedSelection = selection;
+
+    const access =
+      selection instanceof TextSelection && editor.getAccess
+        ? editor.getAccess(selection.head.id)
+        : 'editable';
+
+    if (access === 'protected' || !access) {
+      discardedComposition ||= composing;
+      composing = false;
+      input.value = '';
+      input.setSelectionRange(0, 0);
+      capture = { value: '', offset: 0 };
+
+      return;
+    }
 
     if (!(selection instanceof TextSelection)) {
       input.value = '';
@@ -69,8 +94,10 @@ export function createTextInput<N extends NodeIdentity>(
       input.setSelectionRange(
         Math.min(anchor.offset, head.offset),
         Math.max(anchor.offset, head.offset),
+        anchor.offset > head.offset ? 'backward' : 'forward',
       );
       capture = { value: text, offset: 0 };
+      mirrored = { selection, value: text };
     }
   }
 
@@ -82,6 +109,7 @@ export function createTextInput<N extends NodeIdentity>(
     compositionStart(this: void) {
       assertActive();
       editor.breakHistory();
+      discardedComposition = false;
       composing = true;
     },
     compositionEnd(input: HTMLTextAreaElement | null, onCommit?: () => void) {
@@ -92,7 +120,16 @@ export function createTextInput<N extends NodeIdentity>(
 
       if (input)
         frame = requestAnimationFrame(() => {
-          onCommit?.();
+          if (
+            !destroyed &&
+            !discardedComposition &&
+            capturedSelection?.eq(editor.state.selection) &&
+            (!(editor.state.selection instanceof TextSelection) ||
+              !editor.getAccess ||
+              editor.getAccess(editor.state.selection.head.id) === 'editable')
+          )
+            onCommit?.();
+          discardedComposition = false;
 
           if (!destroyed) sync(input);
         });
@@ -101,11 +138,33 @@ export function createTextInput<N extends NodeIdentity>(
       assertActive();
       const selection = editor.state.selection;
 
+      const access =
+        selection instanceof TextSelection && editor.getAccess
+          ? editor.getAccess(selection.head.id)
+          : 'editable';
+
+      if (
+        discardedComposition ||
+        access !== 'editable' ||
+        (capturedSelection && !selection.eq(capturedSelection))
+      ) {
+        discardedComposition ||= composing;
+        composing = false;
+        sync(input);
+
+        return;
+      }
+
+      const apply = (from: number, to: number, text: string) => {
+        replace(from, to, text);
+        capturedSelection = editor.state.selection;
+      };
+
       if (!(selection instanceof TextSelection)) {
         const value = input.value;
         input.value = '';
         capture = { value: '', offset: 0 };
-        replace(0, 0, value);
+        apply(0, 0, value);
 
         return;
       }
@@ -121,7 +180,7 @@ export function createTextInput<N extends NodeIdentity>(
         const start = Math.min(anchor.offset, head.offset),
           end = Math.max(anchor.offset, head.offset);
 
-        replace(start, end, value.slice(start, value.length - (old.length - end)));
+        apply(start, end, value.slice(start, value.length - (old.length - end)));
 
         return;
       }
@@ -139,10 +198,14 @@ export function createTextInput<N extends NodeIdentity>(
       }
 
       if (from === to && from === end) return;
-      replace(offset + from, offset + to, value.slice(from, end));
+      apply(offset + from, offset + to, value.slice(from, end));
     },
-    /** Observe Safari's native Select All, which can bypass keydown. */
-    mount(input: HTMLTextAreaElement, onSelectAll: () => void) {
+    /** Observe native/assistive selection changes, including Safari Select All. */
+    mount(
+      input: HTMLTextAreaElement,
+      onSelectAll: () => void,
+      onSelect?: (selection: TextSelection) => void,
+    ) {
       assertActive();
 
       if (detach) throw new Error('Text input is already mounted');
@@ -152,31 +215,69 @@ export function createTextInput<N extends NodeIdentity>(
 
         if (
           composing ||
-          !input.value ||
-          input.selectionStart !== 0 ||
-          input.selectionEnd !== input.value.length ||
+          discardedComposition ||
+          !mirrored ||
+          input.value !== mirrored.value ||
           !(selection instanceof TextSelection) ||
-          selection.anchor.id !== selection.head.id
+          selection.anchor.id !== selection.head.id ||
+          !selection.eq(mirrored.selection) ||
+          context().text(selection.head.id) !== mirrored.value
         )
           return;
 
+        const from = snapTextOffset(input.value, input.selectionStart, -1);
+
+        const to =
+          input.selectionStart === input.selectionEnd
+            ? from
+            : snapTextOffset(input.value, input.selectionEnd, 1);
+
+        const backward = input.selectionDirection === 'backward';
+        const anchor = backward ? to : from;
+        const head = backward ? from : to;
+
+        // Setters queue selection events. Compare values, not a synchronous flag.
+        if (selection.anchor.offset === anchor && selection.head.offset === head) return;
+
         if (
-          Math.min(selection.anchor.offset, selection.head.offset) === 0 &&
-          Math.max(selection.anchor.offset, selection.head.offset) === input.value.length
-        )
-          return;
-        onSelectAll();
+          input.value &&
+          from === 0 &&
+          to === input.value.length &&
+          (Math.min(selection.anchor.offset, selection.head.offset) !== 0 ||
+            Math.max(selection.anchor.offset, selection.head.offset) !== input.value.length)
+        ) {
+          mirrored = undefined;
+          onSelectAll();
+        } else {
+          const next = new TextSelection(
+            { id: selection.head.id, offset: anchor },
+            { id: selection.head.id, offset: head },
+          );
+
+          mirrored = { selection: next, value: input.value };
+          onSelect?.(next);
+          capturedSelection = editor.state.selection;
+        }
+      };
+
+      const selectionChanged = () => {
+        if (input.ownerDocument.activeElement === input) select();
       };
 
       input.addEventListener('select', select);
+      input.ownerDocument.addEventListener('selectionchange', selectionChanged);
 
       const cleanup = () => {
         if (detach !== cleanup) return;
         detach = undefined;
         input.removeEventListener('select', select);
+        input.ownerDocument.removeEventListener('selectionchange', selectionChanged);
         cancelAnimationFrame(frame);
         composing = false;
         capture = { value: '', offset: 0 };
+        capturedSelection = undefined;
+        discardedComposition = false;
+        mirrored = undefined;
         cached = undefined;
       };
 
@@ -192,6 +293,9 @@ export function createTextInput<N extends NodeIdentity>(
       composing = false;
       capture = { value: '', offset: 0 };
       cached = undefined;
+      capturedSelection = undefined;
+      mirrored = undefined;
+      discardedComposition = false;
     },
   };
 }

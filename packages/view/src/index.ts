@@ -139,3 +139,10 @@ export type { BlockPresentation } from './canvas/scene.js';
 export type { Span as TextSpan } from './internal/layout-types.js';
 
 export { viewStyles } from './browser/view-styles.js';
+
+export {
+  defineNodeAccessibility,
+  nodeAccessibility,
+  type NodeSemantics,
+  type AccessibilityContribution,
+} from './browser/accessibility.js';

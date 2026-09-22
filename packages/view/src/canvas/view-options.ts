@@ -7,6 +7,13 @@ const configuration = z.strictObject({
   paddingTop: z.number().finite().nonnegative().optional(),
   maxWidth: z.number().finite().positive().nullable().optional(),
   background: z.string().min(1).optional(),
+  accessibility: z
+    .strictObject({
+      readingView: z.boolean().optional(),
+      label: z.string().trim().min(1).optional(),
+      description: z.string().optional(),
+    })
+    .optional(),
 });
 
 /** View settings can change without replacing the session, input or resource owner. */
@@ -32,11 +39,17 @@ export function readViewConfiguration(
     maxWidth: number | null;
     background: string;
     theme?: ViewTheme;
+    accessibility: { label: string; description: string; readingView: boolean };
   } = {
     zoom: 1,
     paddingTop: 0,
     maxWidth: null,
     background: '#ffffff',
+    accessibility: {
+      readingView: false,
+      label: 'Editor text input',
+      description: 'Press Escape then Tab to move focus out of text editing.',
+    },
   },
 ) {
   const { theme, ...settings } = input;
@@ -48,5 +61,10 @@ export function readViewConfiguration(
     maxWidth: value.maxWidth === undefined ? current.maxWidth : value.maxWidth,
     background: value.background ?? current.background,
     theme: theme ?? current.theme,
+    accessibility: {
+      readingView: value.accessibility?.readingView ?? current.accessibility.readingView,
+      label: value.accessibility?.label ?? current.accessibility.label,
+      description: value.accessibility?.description ?? current.accessibility.description,
+    },
   };
 }

@@ -148,6 +148,68 @@ function capture(element: HTMLElement) {
   return value;
 }
 
+test('keyboard entry has a configurable name, preserves selection, and Escape-Tab bypasses editing policies', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  const before = document.createElement('button');
+  before.textContent = 'Before editor';
+  f.element.before(before);
+  onTestFinished(() => {
+    before.remove();
+    f.destroy();
+  });
+
+  const view = mountEditor(f.element, {
+    editor: f.editor,
+    accessibility: { label: 'Draft document' },
+  });
+
+  expect(capture(f.element).disabled).toBe(true);
+  await view.ready;
+  const input = capture(f.element);
+  before.focus();
+  await userEvent.keyboard('{Tab}');
+  expect(document.activeElement).toBe(input);
+  expect(input.getAttribute('aria-label')).toBe('Draft document');
+  const description = document.getElementById(input.getAttribute('aria-describedby') ?? '');
+  expect(description?.textContent).toContain('Escape then Tab');
+  expect(f.element.querySelector('[data-editor-reading]')?.textContent).toBe('');
+  view.update({
+    accessibility: { label: 'Renamed draft', description: 'Writing area', readingView: true },
+  });
+  const reader = f.element.querySelector('[data-editor-reading]');
+  expect(reader?.textContent).toContain('First');
+  const paragraph = reader?.querySelector('p');
+  input.blur();
+  paragraph?.click();
+  expect(document.activeElement).toBe(input);
+  expect(f.editor.state.selection).toEqual(textSelection(1, 0));
+  view.update({ accessibility: { readingView: false } });
+  expect(reader?.textContent).toBe('');
+  expect(input.getAttribute('aria-label')).toBe('Renamed draft');
+  expect(description?.textContent).toBe('Writing area');
+  expect(capture(f.element)).toBe(input);
+  const selection = f.editor.state.selection;
+  let tabs = 0;
+
+  const policy = (event: KeyboardEvent) => {
+    if (event.key === 'Tab') {
+      tabs++;
+      event.preventDefault();
+    }
+  };
+
+  input.addEventListener('keydown', policy);
+  await userEvent.keyboard('{Tab}');
+  expect(tabs).toBe(1);
+  expect(document.activeElement).toBe(input);
+  await userEvent.keyboard('{Escape}{Tab}');
+  expect(tabs).toBe(1);
+  expect(document.activeElement).not.toBe(input);
+  expect(f.editor.state.selection).toEqual(selection);
+});
+
 test('vanilla mount loads its own assets, edits a foreign schema and resolves client caret geometry', async ({
   onTestFinished,
 }) => {
@@ -1042,4 +1104,58 @@ test('an invalid initial fixed color rejects before DOM or resource ownership is
   const view = mountEditor(f.element, { editor: f.editor });
   await view.ready;
   expect(view.status).toBe('ready');
+});
+
+test('mounted capture clears protected text even during composition', async ({
+  onTestFinished,
+}) => {
+  let protectedText = false;
+
+  const editor = createEditor({
+    schema,
+    content: [{ kind: 'note', id: 1, body: 'Sensitive text' }],
+    permissions: { access: () => (protectedText ? 'protected' : 'editable') },
+  });
+
+  const host = document.createElement('div');
+  host.style.cssText = 'width:400px;height:250px';
+  document.body.append(host);
+  const view = mountEditor(host, { editor, accessibility: { readingView: true } });
+  onTestFinished(() => {
+    view.destroy();
+    editor.destroy();
+    host.remove();
+  });
+  await view.ready;
+  const input = capture(host);
+  expect(input.value).toBe('Sensitive text');
+  input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+  protectedText = true;
+  editor.refreshPermissions();
+  await frame();
+  expect(input.value).toBe('');
+  expect(input.readOnly).toBe(true);
+  expect(host.querySelector('[data-editor-reading]')?.textContent).toBe('Protected content');
+  expect(view.status).toBe('ready');
+});
+
+test('explicit focus synchronizes a moved caret before the next layout frame', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  const view = mountEditor(f.element, { editor: f.editor });
+  await view.ready;
+  f.editor.select(textSelection(2, 7));
+  f.editor.commands.focus();
+  const input = capture(f.element);
+  expect(input.value).toBe('Second paragraph with selectable text.');
+  expect(input.selectionStart).toBe(7);
+  input.setRangeText('new ', input.selectionStart, input.selectionEnd, 'end');
+  input.dispatchEvent(
+    new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'new ' }),
+  );
+  expect(f.editor.state.nodes[1]).toMatchObject({
+    body: 'Second new paragraph with selectable text.',
+  });
 });

@@ -1,7 +1,8 @@
 import { connectEditorView } from '@gprose/core';
 import type { NodeIdentity } from '@gprose/model';
-import { RangeSelection } from '@gprose/state';
+import { RangeSelection, TextSelection } from '@gprose/state';
 
+import { createReadingView } from '../browser/accessibility.js';
 import { allocatedBlockWidth } from '../browser/block-geometry.js';
 import { createCanvasInput } from '../browser/canvas-input.js';
 import { createContentSlot } from '../browser/content-slot.js';
@@ -60,6 +61,7 @@ export function mountEditor<N extends NodeIdentity>(
     maxWidth: options.maxWidth,
     background: options.background,
     theme: options.theme,
+    accessibility: options.accessibility,
   });
 
   const document = element.ownerDocument;
@@ -100,9 +102,17 @@ export function mountEditor<N extends NodeIdentity>(
 
   const viewport = createEditorViewport();
   viewport.setZoom(configuration.zoom);
-  const capture = createCanvasInput({ schema: editor.schema, editor });
+
+  const capture = createCanvasInput({
+    schema: editor.schema,
+    editor,
+    readContext: () => presentation.query(editor.state).context,
+  });
+
   const painter = createCanvasRenderer<N>({ onError: fail });
   const root = document.createElement('div');
+  // Firefox otherwise adds the scroll container as a second implicit tab stop.
+  root.tabIndex = -1;
   const styles = document.createElement('style');
   styles.dataset.editorStyles = '';
   styles.textContent = [mountStyles, decorationStyles, ...viewStyles.read(editor)].join('\n');
@@ -113,6 +123,10 @@ export function mountEditor<N extends NodeIdentity>(
   nativeNodes.style.cssText =
     'position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;';
   const input = document.createElement('textarea');
+  const instructions = document.createElement('div');
+  instructions.id = `editor-instructions-${crypto.randomUUID()}`;
+  instructions.style.cssText =
+    'position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);';
   const notice = document.createElement('div');
   notice.setAttribute('role', 'status');
   notice.style.cssText =
@@ -131,15 +145,44 @@ export function mountEditor<N extends NodeIdentity>(
     'position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;';
   input.style.cssText =
     'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;padding:0;border:0;';
-  input.setAttribute('aria-label', 'Editor text input');
+  input.setAttribute('aria-label', configuration.accessibility.label);
+  input.setAttribute('aria-describedby', instructions.id);
+  instructions.textContent = configuration.accessibility.description;
   input.autocomplete = 'off';
   input.spellcheck = false;
-  input.tabIndex = -1;
+  input.tabIndex = 0;
+  input.disabled = true;
   space.append(nativeNodes, canvas, overlay);
-  root.append(styles, space, input, notice);
+  root.append(styles, input, space, instructions, notice);
 
   let status: 'loading' | 'ready' | 'failed' | 'destroyed' = 'loading';
   const cleanup: (() => void)[] = [() => presentation.clear()];
+  let tabEscapes = false;
+
+  const keyboardExit = (event: KeyboardEvent) => {
+    if (event.target !== input || event.isComposing || capture.textInput.composing) return;
+
+    if (event.key === 'Escape') {
+      tabEscapes = true;
+
+      return;
+    }
+
+    if (event.key === 'Tab' && tabEscapes) event.stopImmediatePropagation();
+
+    if (!['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) tabEscapes = false;
+  };
+
+  const resetKeyboardExit = () => {
+    tabEscapes = false;
+  };
+
+  root.addEventListener('keydown', keyboardExit, true);
+  input.addEventListener('blur', resetKeyboardExit);
+  cleanup.push(() => {
+    root.removeEventListener('keydown', keyboardExit, true);
+    input.removeEventListener('blur', resetKeyboardExit);
+  });
   let failure: Error | undefined;
   let focusPending = false;
   let focused = false;
@@ -219,7 +262,12 @@ export function mountEditor<N extends NodeIdentity>(
     if (status === 'destroyed' || status === 'failed') return;
     focusPending = true;
 
-    if (status !== 'ready' || !geometry.isCurrent()) return;
+    if (status !== 'ready') return;
+
+    // Native text must follow an explicit focus request before deferred layout publishes.
+    if (!capture.textInput.composing) capture.textInput.sync(input);
+
+    if (!geometry.isCurrent()) return;
     const doc = presentation.query(editor.state);
     const owner = doc.focusId === null ? undefined : doc.blockFor(doc.focusId);
 
@@ -311,6 +359,9 @@ export function mountEditor<N extends NodeIdentity>(
   function update(value: ViewConfiguration) {
     if (status === 'destroyed' || status === 'failed') throw new Error(`Editor view is ${status}`);
     const next = readViewConfiguration(value, configuration);
+    input.setAttribute('aria-label', next.accessibility.label);
+    instructions.textContent = next.accessibility.description;
+    reading?.enable(next.accessibility.readingView);
 
     if (
       next.zoom === configuration.zoom &&
@@ -318,8 +369,12 @@ export function mountEditor<N extends NodeIdentity>(
       next.maxWidth === configuration.maxWidth &&
       next.background === configuration.background &&
       next.theme === configuration.theme
-    )
+    ) {
+      configuration = next;
+
       return;
+    }
+
     const repaint = next.background !== configuration.background;
 
     if (next.theme !== configuration.theme) presentation.update(next.theme);
@@ -493,6 +548,11 @@ export function mountEditor<N extends NodeIdentity>(
       width: contentWidth,
     });
     geometry.update({ document: doc, layout: snapshot, viewport: port });
+    const activeSelection = editor.state.selection;
+    input.readOnly =
+      !policies.some((policy) => policy.input) ||
+      (activeSelection instanceof TextSelection &&
+        editor.getAccess(activeSelection.head.id) !== 'editable');
     capture.update({
       context: doc.context,
       inset,
@@ -550,6 +610,7 @@ export function mountEditor<N extends NodeIdentity>(
   }
 
   let resources: ReturnType<typeof createViewResources>;
+  let reading: ReturnType<typeof createReadingView<N>> | undefined;
 
   try {
     // Own the session attachment during loading too, so destroy and duplicate mounts are deterministic.
@@ -597,6 +658,11 @@ export function mountEditor<N extends NodeIdentity>(
       cleanup.push(() => lease.destroy());
     }
 
+    reading = createReadingView(document, editor, fail);
+    const reader = reading;
+    cleanup.push(() => reader.destroy());
+    root.append(reader.element);
+    reader.enable(configuration.accessibility.readingView);
     element.append(root);
     cleanup.push(() => root.remove());
     resources = createViewResources({
@@ -776,6 +842,7 @@ export function mountEditor<N extends NodeIdentity>(
       layout.attach();
       updateLayout();
       status = 'ready';
+      input.disabled = false;
 
       if (focusPending) focus();
     } catch (error) {

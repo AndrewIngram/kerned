@@ -1,15 +1,28 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
 import type { NodeIdentity, Schema } from '@gprose/model';
-import { presentations, type BlockPresentation } from '@gprose/view';
+import {
+  defineNodeAccessibility,
+  nodeAccessibility,
+  presentations,
+  type BlockPresentation,
+} from '@gprose/view';
 
-import { table } from './definitions.js';
+import { table, tableCell } from './definitions.js';
 import { tableRows } from './table.js';
 
 export const tablePresentation = defineExtension({
   name: 'tablePresentation',
   options: {},
-  requires: [table.name],
+  requires: [table.name, tableCell.name],
   setup(_options, context: ContributionContext) {
+    context.provide(
+      nodeAccessibility,
+      defineNodeAccessibility(table, (attrs) => ({ kind: 'table', caption: attrs.caption })),
+    );
+    context.provide(
+      nodeAccessibility,
+      defineNodeAccessibility(tableCell, (attrs) => ({ kind: 'cell', ...attrs })),
+    );
     context.provide(presentations, {
       create<N extends NodeIdentity>(schema: Schema<N>) {
         const binding = schema.node(table);
