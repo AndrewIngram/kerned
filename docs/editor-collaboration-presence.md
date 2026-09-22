@@ -1,8 +1,9 @@
 # Two-client collaboration and presence
 
-Status: acceptance plan. No networked collaboration or remote selection renderer
-is implemented by this document. Presence is part of the two-client experiment,
-alongside concurrent edits and durable comment references.
+Status: acceptance plan, with an initial [headless authority experiment](editor-collaboration-experiment.md).
+No networked collaboration or remote selection renderer is implemented yet.
+Presence is part of the two-client experiment, alongside concurrent edits and
+durable comment references.
 
 ## What the first demonstration must show
 
