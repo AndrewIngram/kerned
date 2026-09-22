@@ -80,6 +80,14 @@ latest selection against the confirmed version. Receivers map through subsequent
 commits and their own optimistic edit. Future-version selections wait for the
 missing commits; deleted endpoints hide the selection.
 
+Numeric rebasing alone is insufficient for Unicode. Removing a separator can
+combine two regional indicators into one flag, and inserting a combining mark
+can invalidate an old grapheme boundary. The shared document-coordinate module
+revalidates optimistic edits against current text. An invalid overlay is hidden
+while its proposal identity remains pending for the authority's receipt.
+Mapped presence snaps to a valid grapheme boundary according to each endpoint's
+association. One invalidated peer cannot break the entire presence snapshot.
+
 The authority sends complete, recipient-specific presence snapshots with a
 monotonic snapshot sequence. This gives departure and revocation a concrete
 removal message. An older snapshot cannot resurrect removed selections. Each
@@ -103,6 +111,9 @@ The suite exercises same-position inserts, 225 pairs of replacements, runtime-ID
 independence, retries with changed content, reordered commits and presence,
 pending/future versions, backward selections, nested cross-block Arabic/Chinese
 selections, grapheme rejection, permission revocation, expiry and reconnects.
+Regression cases cover combining marks with backward association and newly
+formed flag graphemes. These cases came from implementation checks and the
+architectural judge's review.
 
 This first proof intentionally permits only one outstanding proposal per client.
 Additional typing raises an explicit waiting error. It retains snapshots and

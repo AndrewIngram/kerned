@@ -6,6 +6,10 @@ The loader still accepts version 1 and migrates it on the next save. Reference
 objects and their revision semantics are unchanged. Older editor versions that
 only understand version 1 cannot read the new checkpoints.
 
+The serializable `PositionCheckpoint` return type is exported from both
+`@gprose/state` and `@gprose/core`. Consumers can wrap the checkpoint API and emit
+TypeScript declarations without referencing a private implementation module.
+
 Applications should persist this value as a unit, alongside the corresponding
 document snapshot. Do not edit its internal records or use it as a collaboration
 wire protocol. It contains document mapping history, not a registry of external

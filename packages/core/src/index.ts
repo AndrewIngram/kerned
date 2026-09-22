@@ -38,7 +38,7 @@ export {
   type DocumentCommandDefinition,
 } from './definitions.js';
 
-export type { EditorEvents } from '@gprose/state';
+export type { EditorEvents, PositionCheckpoint } from '@gprose/state';
 
 export {
   connectEditorView,

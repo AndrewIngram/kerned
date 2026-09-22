@@ -3,6 +3,7 @@ import { createEditor, AllSelection } from '@gprose/state';
 import { applySteps, type Step } from '@gprose/transform';
 
 import type { Receipt } from './authority.js';
+import { documentCoordinates } from './coordinates.js';
 import {
   mapSelection,
   rebase,
@@ -39,15 +40,11 @@ export function createClient<N extends NodeIdentity>(options: {
   let receivedPresenceAt = 0;
 
   function step(edit: Edit): Step<N> {
-    const node = indexTree(schema, confirmed.state.nodes).byKey.get(edit.key)?.node;
+    const result = documentCoordinates(schema, confirmed.state.nodes).edit(edit);
 
-    if (!node) throw new Error('Unknown edit target');
-    const text = schema.text(node);
+    if (!result) throw new Error('Edit precondition failed');
 
-    if (text === null || text.slice(edit.from, edit.to) !== edit.expected)
-      throw new Error('Edit precondition failed');
-
-    return { kind: 'replaceText', id: node.id, from: edit.from, to: edit.to, text: edit.text };
+    return result;
   }
 
   function nodes() {
@@ -100,7 +97,9 @@ export function createClient<N extends NodeIdentity>(options: {
       };
 
       pending = { request, edit: structuredClone(edit) };
-      localSelection = mapSelection(localSelection, edit);
+      localSelection = documentCoordinates(schema, nodes()).normalizeSelection(
+        mapSelection(localSelection, edit),
+      );
 
       return structuredClone(request);
     },
@@ -145,10 +144,21 @@ export function createClient<N extends NodeIdentity>(options: {
 
         if (own) pending = null;
         else {
-          if (pending?.edit) pending.edit = rebase(pending.edit, next.edit);
+          if (pending?.edit) {
+            const rebased = rebase(pending.edit, next.edit);
+            pending.edit =
+              rebased && documentCoordinates(schema, confirmed.state.nodes).edit(rebased)
+                ? rebased
+                : null;
+          }
+
           localSelection = visibleChange ? mapSelection(localSelection, visibleChange) : null;
         }
 
+        localSelection =
+          pending && !pending.edit
+            ? null
+            : documentCoordinates(schema, nodes()).normalizeSelection(localSelection);
         commits.push(next);
         buffered.delete(next.version);
       }
@@ -201,6 +211,7 @@ export function createClient<N extends NodeIdentity>(options: {
           selection = mapSelection(selection, commit.edit);
 
         if (pending?.edit) selection = mapSelection(selection, pending.edit);
+        selection = documentCoordinates(schema, nodes()).normalizeSelection(selection);
 
         return selection ? [{ session: peer.session, selection: structuredClone(selection) }] : [];
       });

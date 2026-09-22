@@ -1,6 +1,7 @@
 import { indexTree, validateTextRange, type NodeIdentity, type Schema } from '@gprose/model';
 import { createEditor, AllSelection } from '@gprose/state';
 
+import { documentCoordinates } from './coordinates.js';
 import {
   rebase,
   sameEdit,
@@ -43,27 +44,12 @@ export function createAuthority<N extends NodeIdentity>(options: {
   let nextSession = 0,
     presenceSequence = 0;
 
-  function validate(nodes: readonly N[], edit: Edit) {
-    const node = indexTree(schema, nodes).byKey.get(edit.key)?.node;
-    const text = node && schema.text(node);
-
-    if (!node || text === undefined || text === null) return false;
-
-    try {
-      validateTextRange(text, edit.from, edit.to);
-    } catch {
-      return false;
-    }
-
-    return text.slice(edit.from, edit.to) === edit.expected;
-  }
-
   function resolve(value: PresenceSelection | null, version: number) {
     let result = value;
 
     for (const commit of commits.slice(version)) result = mapSelection(result, commit.edit);
 
-    return result;
+    return documentCoordinates(schema, editor.state.nodes).normalizeSelection(result);
   }
 
   function selectionNodes(value: PresenceSelection, nodes = editor.state.nodes) {
@@ -141,7 +127,8 @@ export function createAuthority<N extends NodeIdentity>(options: {
 
             if (request.version > commits.length) return reject('version');
 
-            if (!validate(snapshots[request.version], request.edit)) return reject('precondition');
+            if (!documentCoordinates(schema, snapshots[request.version]).edit(request.edit))
+              return reject('precondition');
             let edit: Edit | null = request.edit;
 
             for (const accepted of commits.slice(request.version)) {
@@ -150,7 +137,8 @@ export function createAuthority<N extends NodeIdentity>(options: {
               if (!edit) return reject('overlap');
             }
 
-            if (!validate(editor.state.nodes, edit)) return reject('precondition');
+            if (!documentCoordinates(schema, editor.state.nodes).edit(edit))
+              return reject('precondition');
             const tree = indexTree(schema, editor.state.nodes);
             const entry = tree.byKey.get(edit.key);
 

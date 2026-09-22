@@ -50,7 +50,7 @@ const checkpointSchema = z.object({
   ),
 });
 
-export type PositionCheckpoint = Omit<z.infer<typeof checkpointSchema>, 'definitions'> & {
+export type DecodedPositionCheckpoint = Omit<z.infer<typeof checkpointSchema>, 'definitions'> & {
   definitions: { id: number; maps: readonly AnchorMap[] }[];
 };
 
@@ -89,13 +89,13 @@ type CompactMapping =
   | Extract<z.infer<typeof compactMapping>, readonly unknown[]>
   | Extract<AnchorMap, { kind: 'insert' | 'remove' }>;
 
-export type CompactPositionCheckpoint = Omit<z.infer<typeof compactCheckpoint>, 'definitions'> & {
+export type PositionCheckpoint = Omit<z.infer<typeof compactCheckpoint>, 'definitions'> & {
   definitions: [number, CompactMapping[]][];
 };
 
 const persistedCheckpoint = z.union([checkpointSchema, compactCheckpoint]);
 
-function decodeCheckpoint(value: z.infer<typeof persistedCheckpoint>): PositionCheckpoint {
+function decodeCheckpoint(value: z.infer<typeof persistedCheckpoint>): DecodedPositionCheckpoint {
   if (value.version === 1) return value;
   const keys = value.keys;
 
@@ -143,7 +143,7 @@ export function encodePositionCheckpoint(
   document: { documentId: string; revision: number; since: number },
   definitions: ReadonlyMap<number, readonly AnchorMap[]>,
   events: readonly { revision: number; operations: readonly { id: number; inverse: boolean }[] }[],
-): CompactPositionCheckpoint {
+): PositionCheckpoint {
   const keys: string[] = [];
   const ids = new Map<string, number>();
 

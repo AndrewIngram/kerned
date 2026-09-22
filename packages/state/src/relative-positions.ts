@@ -30,7 +30,7 @@ import {
   projectOutside,
   mayCoverRange,
 } from './mapping-index.js';
-import { encodePositionCheckpoint, type PositionCheckpoint } from './position-checkpoint.js';
+import { encodePositionCheckpoint, type DecodedPositionCheckpoint } from './position-checkpoint.js';
 import type { RangeEndpoint } from './range-selection.js';
 import { projectBoundaryRange } from './relative-boundaries.js';
 import { type Selection } from './selection-base.js';
@@ -107,7 +107,7 @@ export function createRelativePositions<N extends NodeIdentity>(
   schema: Schema<N>,
   initial: State<N>,
   documentId: string,
-  checkpoint?: PositionCheckpoint,
+  checkpoint?: DecodedPositionCheckpoint,
 ) {
   let state = initial,
     since = initial.revision;

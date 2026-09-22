@@ -422,3 +422,65 @@ test('diverged client content fails before an authority operation changes its do
   expect(schema.text(f.bob.nodes[0])).toBe('abcdef');
   f.destroy();
 });
+
+test('rebasing across a new grapheme hides an invalid pending edit and keeps presence on a boundary', () => {
+  const f = fixture('🇦X🇧');
+  f.bob.select(selection(2));
+  sendPresence(f.bob, f.b);
+  const a = f.alice.propose({ key: 'one', from: 2, to: 3, text: '', expected: 'X' });
+  const b = f.bob.propose(insert(2, '!'));
+  const commit = accepted(f.a.submit(a));
+  f.bob.receive(commit);
+  expect(schema.text(f.bob.nodes[0])).toBe('🇦🇧');
+  const rejection = f.b.submit(b);
+  expect(rejection).toMatchObject({ kind: 'rejected', reason: 'precondition' });
+  expect(f.a.readPresence().peers[0].selection).toEqual(selection(4));
+
+  if (rejection.kind !== 'rejected') throw new Error('Expected grapheme conflict');
+  f.bob.reject(rejection);
+  f.destroy();
+});
+
+test('combining-mark edits snap backward-associated presence without breaking other peers', () => {
+  const f = fixture('ab');
+
+  const caret = {
+    anchor: { key: 'one', offset: 1, association: -1 as const },
+    head: { key: 'one', offset: 1, association: -1 as const },
+  };
+
+  const third = f.authority.connect('carol');
+  third.presence({
+    generation: 'document/epoch-1',
+    version: 0,
+    sequence: 1,
+    selection: selection(2),
+  });
+  f.bob.select(caret);
+  sendPresence(f.bob, f.b);
+  f.alice.select(caret);
+  const request = f.alice.propose(insert(1, '\u0301'));
+  expect(f.alice.selection).toEqual({
+    anchor: { ...caret.anchor, offset: 0 },
+    head: { ...caret.head, offset: 0 },
+  });
+  const pending = f.bob.propose({ key: 'one', from: 0, to: 1, text: 'X', expected: 'a' });
+  const commit = accepted(f.a.submit(request));
+  f.bob.receive(commit);
+  expect(schema.text(f.bob.nodes[0])).toBe('áb');
+  expect(f.bob.selection).toBeNull();
+  expect(f.bob.waiting).toBe(true);
+  const snapshot = f.a.readPresence();
+  expect(snapshot.peers.map((peer) => peer.selection)).toEqual([
+    { anchor: { ...caret.anchor, offset: 0 }, head: { ...caret.head, offset: 0 } },
+    selection(3),
+  ]);
+  f.alice.receivePresence(snapshot);
+  f.alice.receive(commit);
+  expect(f.alice.remoteSelections().map((peer) => peer.selection)).toEqual(
+    snapshot.peers.map((peer) => peer.selection),
+  );
+  const rejected = f.b.submit(pending);
+  expect(rejected).toMatchObject({ kind: 'rejected', reason: 'precondition' });
+  f.destroy();
+});

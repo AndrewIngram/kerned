@@ -106,3 +106,5 @@ export type { EditorEvents } from './events.js';
 export { type HistoryOptions } from './local-history.js';
 
 export { type ScopedSelection, equalScopedSelection, selectionInText } from './scoped-selection.js';
+
+export type { PositionCheckpoint } from './position-checkpoint.js';
