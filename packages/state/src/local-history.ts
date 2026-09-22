@@ -43,6 +43,31 @@ export type HistoryOptions = {
   readonly newGroupDelay?: number;
 };
 
+/** Consecutive snapshots of the same roots only need the group's endpoints.
+ * Position maps remain separate: external references can originate between edits. */
+function appendChanges<N extends NodeIdentity>(
+  target: DocumentChange<N>[],
+  incoming: readonly DocumentChange<N>[],
+) {
+  for (const change of incoming) {
+    const last = target.at(-1);
+
+    if (
+      last &&
+      last.index === change.index &&
+      last.after.length === change.before.length &&
+      last.before.length === change.after.length &&
+      last.after.every((node, index) => node === change.before[index]) &&
+      last.before.every(
+        (node, index) => node.id === change.after[index].id && node.key === change.after[index].key,
+      )
+    ) {
+      // Replace the record; transform results may also be held by subscribers.
+      target[target.length - 1] = { index: last.index, before: last.before, after: change.after };
+    } else target.push(change);
+  }
+}
+
 /** Own grouping and retained edits; preparing a replay never mutates history. */
 export function createLocalHistory<N extends NodeIdentity>(options: HistoryOptions = {}) {
   const depth = options.depth ?? 256;
@@ -86,7 +111,7 @@ export function createLocalHistory<N extends NodeIdentity>(options: HistoryOptio
         (group.startsWith('composition:') || tx.time - last.time < newGroupDelay) &&
         last.afterSelection.eq(before.selection)
       ) {
-        last.changes.push(...edit.changes);
+        appendChanges(last.changes, edit.changes);
         last.maps.push(...edit.anchorMaps);
         last.positionMaps.push(...edit.maps);
         last.operations.push(...edit.operations);
@@ -95,8 +120,10 @@ export function createLocalHistory<N extends NodeIdentity>(options: HistoryOptio
         last.afterMarks = after.storedMarks ?? null;
         last.time = tx.time;
       } else {
+        const changes: DocumentChange<N>[] = [];
+        appendChanges(changes, edit.changes);
         past.push({
-          changes: [...edit.changes],
+          changes,
           maps: [...edit.anchorMaps],
           positionMaps: [...edit.maps],
           operations: [...edit.operations],

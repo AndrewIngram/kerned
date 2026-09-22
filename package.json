@@ -62,6 +62,7 @@
     "check:editor-foundation": "vitest run tests/foundation.test.js tests/foundation.browser.test.js",
     "benchmark:editor-foundation": "node scripts/benchmark-editor-foundation.mjs",
     "benchmark:schema-codecs": "node scripts/benchmark-schema-codecs.mjs",
+    "benchmark:session-retention": "pnpm run build:packages && node scripts/benchmark-session-retention.mjs",
     "benchmark:relative-positions": "node scripts/benchmark-relative-positions.mjs",
     "check:editor-performance": "node scripts/check-editor-performance.mjs",
     "check:app-boundaries": "node scripts/check-app-boundaries.mjs",

@@ -1,0 +1,144 @@
+{
+  "node": "v24.21.0",
+  "recordedAt": "2026-09-22T16:19:11.935Z",
+  "cases": [
+    {
+      "trial": 0,
+      "edits": 1000,
+      "history": false,
+      "heapBytes": 894368,
+      "editMs": 67.964208,
+      "checkpointBytes": 142618,
+      "definitions": 1000,
+      "events": 1000,
+      "undoGroups": 0
+    },
+    {
+      "trial": 0,
+      "edits": 1000,
+      "history": true,
+      "heapBytes": 1815320,
+      "editMs": 69.32091700000001,
+      "checkpointBytes": 142618,
+      "definitions": 1000,
+      "events": 1000,
+      "undoGroups": 1,
+      "undoMs": 0.7726669999999842
+    },
+    {
+      "trial": 0,
+      "edits": 5000,
+      "history": false,
+      "heapBytes": 3454408,
+      "editMs": 1321.426417,
+      "checkpointBytes": 734618,
+      "definitions": 5000,
+      "events": 5000,
+      "undoGroups": 0
+    },
+    {
+      "trial": 0,
+      "edits": 5000,
+      "history": true,
+      "heapBytes": 17954248,
+      "editMs": 1315.70975,
+      "checkpointBytes": 734618,
+      "definitions": 5000,
+      "events": 5000,
+      "undoGroups": 1,
+      "undoMs": 1.9056250000001
+    },
+    {
+      "trial": 1,
+      "edits": 1000,
+      "history": false,
+      "heapBytes": 894016,
+      "editMs": 68.614208,
+      "checkpointBytes": 142618,
+      "definitions": 1000,
+      "events": 1000,
+      "undoGroups": 0
+    },
+    {
+      "trial": 1,
+      "edits": 1000,
+      "history": true,
+      "heapBytes": 1815736,
+      "editMs": 69.223916,
+      "checkpointBytes": 142618,
+      "definitions": 1000,
+      "events": 1000,
+      "undoGroups": 1,
+      "undoMs": 0.821832999999998
+    },
+    {
+      "trial": 1,
+      "edits": 5000,
+      "history": false,
+      "heapBytes": 3454544,
+      "editMs": 1316.816834,
+      "checkpointBytes": 734618,
+      "definitions": 5000,
+      "events": 5000,
+      "undoGroups": 0
+    },
+    {
+      "trial": 1,
+      "edits": 5000,
+      "history": true,
+      "heapBytes": 17953640,
+      "editMs": 1362.9375420000001,
+      "checkpointBytes": 734618,
+      "definitions": 5000,
+      "events": 5000,
+      "undoGroups": 1,
+      "undoMs": 1.9801669999999376
+    },
+    {
+      "trial": 2,
+      "edits": 1000,
+      "history": false,
+      "heapBytes": 889440,
+      "editMs": 73.57208400000002,
+      "checkpointBytes": 142618,
+      "definitions": 1000,
+      "events": 1000,
+      "undoGroups": 0
+    },
+    {
+      "trial": 2,
+      "edits": 1000,
+      "history": true,
+      "heapBytes": 1815768,
+      "editMs": 72.960541,
+      "checkpointBytes": 142618,
+      "definitions": 1000,
+      "events": 1000,
+      "undoGroups": 1,
+      "undoMs": 0.8637910000000204
+    },
+    {
+      "trial": 2,
+      "edits": 5000,
+      "history": false,
+      "heapBytes": 3454512,
+      "editMs": 1412.970333,
+      "checkpointBytes": 734618,
+      "definitions": 5000,
+      "events": 5000,
+      "undoGroups": 0
+    },
+    {
+      "trial": 2,
+      "edits": 5000,
+      "history": true,
+      "heapBytes": 17954664,
+      "editMs": 1484.232375,
+      "checkpointBytes": 734618,
+      "definitions": 5000,
+      "events": 5000,
+      "undoGroups": 1,
+      "undoMs": 2.2344170000001213
+    }
+  ]
+}

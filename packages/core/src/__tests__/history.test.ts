@@ -314,3 +314,96 @@ test('a changed history boundary invalidates prepared replay without partially m
   expect(editor.history).toEqual({ undo: 1, redo: 0 });
   expect(editor.commands.undo()).toBe(true);
 });
+
+test('long typing groups preserve references from intermediate revisions through replay and checkpoints', () => {
+  const schema = createSchema({ extensions: [note, editing, localHistory] });
+  const editor = createEditor({ schema, content: [...content], selection: textSelection(1, 1) });
+  const initial = editor.state.nodes[0];
+  const start = editor.positions.at(1, 1, -1);
+  const end = editor.positions.at(1, 1, 1);
+  const range = editor.positions.range(start, end);
+  const references = [end];
+
+  for (let i = 0; i < 500; i++) {
+    editor
+      .chain({ history: { group: 'typing' }, time: i })
+      .append('x')
+      .run();
+
+    if (i % 100 === 0) references.push(editor.positions.at(1, i + 2, 1));
+  }
+
+  const resolved = references.map((reference) => editor.positions.resolve(reference));
+  expect(editor.history).toEqual({ undo: 1, redo: 0 });
+  expect(editor.positions.resolveRange(range)).toMatchObject({
+    status: 'resolved',
+    ranges: [{ id: 1, from: 1, to: 501 }],
+  });
+  expect(initial.text).toBe('A');
+  expect(editor.commands.undo()).toBe(true);
+  expect(editor.state.nodes[0]).toBe(initial);
+  expect(editor.positions.resolve(end)).toMatchObject({
+    status: 'resolved',
+    point: { id: 1, offset: 1 },
+  });
+  expect(editor.commands.redo()).toBe(true);
+  expect(references.map((reference) => editor.positions.resolve(reference))).toEqual(resolved);
+
+  const reopened = createEditor({
+    schema,
+    document: editor.state.nodes,
+    revision: editor.state.revision,
+    documentId: editor.documentId,
+    positionCheckpoint: editor.positions.checkpoint(),
+  });
+
+  expect(references.map((reference) => reopened.positions.resolve(reference))).toEqual(resolved);
+  expect(reopened.positions.resolveRange(range)).toEqual(editor.positions.resolveRange(range));
+  editor.destroy();
+  reopened.destroy();
+});
+
+test('grouped changes to different roots and structural edits retain replay order', () => {
+  const schema = createSchema({ extensions: [note, editing, localHistory] });
+
+  const editor = createEditor({
+    schema,
+    content: [...content, { kind: 'note', id: 2, key: 'two', text: 'B' }],
+  });
+
+  const original = editor.state.nodes;
+
+  for (const id of [1, 1, 2, 2, 1]) {
+    const node = editor.getNode(id);
+
+    if (!node) throw new Error('Missing note');
+    editor.transact(
+      (draft) => {
+        draft.apply({
+          steps: [
+            { kind: 'replaceText', id, from: node.text.length, to: node.text.length, text: '!' },
+          ],
+        });
+
+        return true;
+      },
+      { history: { group: 'mixed' }, time: 100 },
+    );
+  }
+
+  editor.transact(
+    (draft) => {
+      draft.apply({ steps: [{ kind: 'split', id: 1, at: 2, rightId: 3, rightKey: 'three' }] });
+
+      return true;
+    },
+    { history: { group: 'mixed' }, time: 100 },
+  );
+  const changed = editor.state.nodes;
+  expect(editor.history.undo).toBe(1);
+  expect(editor.commands.undo()).toBe(true);
+  expect(editor.state.nodes).toEqual(original);
+  expect(editor.commands.redo()).toBe(true);
+  expect(editor.state.nodes).toEqual(changed);
+  editor.destroy();
+});
