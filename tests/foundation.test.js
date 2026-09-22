@@ -629,7 +629,7 @@ test('new text blocks inside a range are included and checkpoint state does not 
     ]);
     dispatch(editor, [{ kind: 'replaceText', id: 18, from: 3, to: 3, text: '!' }]);
     const checkpoint = editor.positions.checkpoint();
-    checkpoint.definitions.at(-1).maps[0].inserted = 999;
+    checkpoint.definitions.at(-1)[1][0][4] = 999;
 
     return editor.positions.resolveRange(range);
   })();
@@ -1097,10 +1097,10 @@ test('position checkpoint rejects missing original operations and invalid undo s
           c.events = [];
         },
         (c) => {
-          c.events[0].operations[0].inverse = true;
+          c.events[0][1][0] *= -1;
         },
         (c) => {
-          c.events[1].operations[0].inverse = false;
+          c.events[1][1][0] *= -1;
         },
       ].map(rejects),
     };

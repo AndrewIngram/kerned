@@ -1,8 +1,37 @@
 import { indexTree, boundaries } from '@gprose/model';
 
+// Independent decoding keeps the replay oracle independent of the production codec.
+export function positionHistory(checkpoint) {
+  if (checkpoint.version === 1) return checkpoint;
+
+  const decode = (map) => {
+    if (!Array.isArray(map)) return map;
+    const [kind, key, at, end, inserted] = map;
+
+    return kind === 0
+      ? { kind: 'replace', key: checkpoint.keys[key], from: at, to: end, inserted }
+      : {
+          kind: kind === 1 ? 'split' : 'join',
+          key: checkpoint.keys[key],
+          at,
+          rightKey: checkpoint.keys[end],
+        };
+  };
+
+  return {
+    ...checkpoint,
+    version: 1,
+    definitions: checkpoint.definitions.map(([id, maps]) => ({ id, maps: maps.map(decode) })),
+    events: checkpoint.events.map(([revision, ids]) => ({
+      revision,
+      operations: ids.map((id) => ({ id: Math.abs(id), inverse: id < 0 })),
+    })),
+  };
+}
+
 // Deliberately slow reference interpreter. It knows nothing about summaries or chunks.
 export function replayRange(schema, editor, range) {
-  const checkpoint = editor.positions.checkpoint(),
+  const checkpoint = positionHistory(editor.positions.checkpoint()),
     definitions = new Map(checkpoint.definitions.map((d) => [d.id, d.maps]));
 
   const pending = [],

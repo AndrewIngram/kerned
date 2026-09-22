@@ -78,14 +78,32 @@ function measure(edits, history) {
     status: 'resolved',
     point: { id: 1, offset: 12 + edits },
   });
+  const saveStarted = performance.now();
   const checkpoint = editor.positions.checkpoint();
+  const serialized = JSON.stringify(checkpoint);
+  const checkpointMs = performance.now() - saveStarted;
+  const loadStarted = performance.now();
+
+  const reopened = createEditor({
+    schema,
+    documentId: editor.documentId,
+    document: editor.state.nodes,
+    revision: editor.state.revision,
+    positionCheckpoint: JSON.parse(serialized),
+  });
+
+  const checkpointLoadMs = performance.now() - loadStarted;
+  assert.deepEqual(reopened.positions.resolve(position), editor.positions.resolve(position));
+  reopened.destroy();
 
   const result = {
     edits,
     history,
     heapBytes,
     editMs,
-    checkpointBytes: Buffer.byteLength(JSON.stringify(checkpoint)),
+    checkpointBytes: Buffer.byteLength(serialized),
+    checkpointMs,
+    checkpointLoadMs,
     definitions: checkpoint.definitions.length,
     events: checkpoint.events.length,
     undoGroups: editor.history.undo,

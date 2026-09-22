@@ -30,6 +30,7 @@ import {
   projectOutside,
   mayCoverRange,
 } from './mapping-index.js';
+import { encodePositionCheckpoint, type PositionCheckpoint } from './position-checkpoint.js';
 import type { RangeEndpoint } from './range-selection.js';
 import { projectBoundaryRange } from './relative-boundaries.js';
 import { type Selection } from './selection-base.js';
@@ -54,58 +55,9 @@ type State<N> = { nodes: readonly N[]; revision: number };
 
 type Point = { key: string; offset: number };
 
-const positionInteger = z.number().int().nonnegative();
-
-const identity = z.string().min(1);
-
 const bias = z.union([z.literal(-1), z.literal(1)]);
 
 const association = bias.parse.bind(bias);
-
-const point = z.object({ key: identity, offset: positionInteger });
-
-const edge = z.object({ key: identity, side: z.enum(['before', 'after']) });
-
-const mapping = z.union([
-  z
-    .object({
-      kind: z.literal('replace'),
-      key: identity,
-      from: positionInteger,
-      to: positionInteger,
-      inserted: positionInteger,
-    })
-    .refine((data) => data.to >= data.from, 'Invalid replacement mapping'),
-  z.object({ kind: z.literal('split'), key: identity, at: positionInteger, rightKey: identity }),
-  z.object({ kind: z.literal('join'), key: identity, at: positionInteger, rightKey: identity }),
-  z.object({ kind: z.literal('insert'), keys: z.array(identity) }),
-  z.object({
-    kind: z.literal('remove'),
-    keys: z.array(identity),
-    boundaries: z.array(edge.extend({ left: edge.nullable(), right: edge.nullable() })).optional(),
-    fallbacks: z
-      .array(z.object({ key: identity, before: point.nullable(), after: point.nullable() }))
-      .optional(),
-  }),
-]);
-
-const checkpointSchema = z.object({
-  version: z.literal(1),
-  documentId: identity,
-  revision: positionInteger,
-  since: positionInteger,
-  definitions: z.array(z.object({ id: positionInteger, maps: z.array(mapping) })),
-  events: z.array(
-    z.object({
-      revision: positionInteger,
-      operations: z.array(z.object({ id: positionInteger, inverse: z.boolean() })),
-    }),
-  ),
-});
-
-export type PositionCheckpoint = z.infer<typeof checkpointSchema>;
-
-export const parsePositionCheckpoint = checkpointSchema.parse.bind(checkpointSchema);
 
 function mapped(
   pointValue: Point | null,
@@ -696,17 +648,11 @@ export function createRelativePositions<N extends NodeIdentity>(
       };
     },
     checkpoint() {
-      return {
-        version: 1,
-        documentId,
-        revision: state.revision,
-        since,
-        definitions: [...definitions].map(([id, maps]) => ({ id, maps: structuredClone(maps) })),
-        events: events.map((event) => ({
-          revision: event.revision,
-          operations: event.operations.map((op) => ({ ...op })),
-        })),
-      };
+      return encodePositionCheckpoint(
+        { documentId, revision: state.revision, since },
+        definitions,
+        events,
+      );
     },
   });
 

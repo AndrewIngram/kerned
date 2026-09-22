@@ -86,6 +86,9 @@ For both candidates, test:
 - Three permission views of one logical document: editable, read-only and redacted.
 - General node locking across node types and user access states; revocation during an outstanding edit; permitted movement/deletion of unlocked read-only/protected nodes; deletion locks checked through ancestors; unauthorized annotation removal.
 - Incremental projection cost, load time and retained memory against the recorded baseline.
+- Remote carets and selections under pending edits, reordered delivery, reconnect
+  and permission changes. Follow the [presence acceptance plan](editor-collaboration-presence.md),
+  including extension-owned cell selections and a shared coordinate basis.
 
 Inspect delivered snapshots and update payloads, not only the UI. Hidden sentinel content must not appear in unauthorized updates, history, search/outline results, clipboard responses or agent input. Test how editing around a placeholder maps back to canonical content.
 

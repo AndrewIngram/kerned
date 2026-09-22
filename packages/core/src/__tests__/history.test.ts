@@ -407,3 +407,49 @@ test('grouped changes to different roots and structural edits retain replay orde
   expect(editor.state.nodes).toEqual(changed);
   editor.destroy();
 });
+
+test('public sessions load legacy position checkpoints and subsequently save the compact format', () => {
+  const schema = createSchema({ extensions: [note, editing, localHistory] });
+  const editor = createEditor({ schema, content: [...content], documentId: 'legacy' });
+  const position = editor.positions.at(1, 1, 1);
+  editor.commands.append('BC');
+  editor.commands.undo();
+  editor.commands.redo();
+
+  const reopened = createEditor({
+    schema,
+    document: editor.state.nodes,
+    documentId: editor.documentId,
+    revision: editor.state.revision,
+    positionCheckpoint: {
+      version: 1,
+      documentId: 'legacy',
+      since: 0,
+      revision: 3,
+      definitions: [
+        { id: 1, maps: [{ kind: 'replace', key: 'one', from: 1, to: 1, inserted: 2 }] },
+      ],
+      events: [
+        { revision: 1, operations: [{ id: 1, inverse: false }] },
+        { revision: 2, operations: [{ id: 1, inverse: true }] },
+        { revision: 3, operations: [{ id: 1, inverse: false }] },
+      ],
+    },
+  });
+
+  expect(reopened.positions.resolve(position)).toEqual(editor.positions.resolve(position));
+  expect(reopened.positions.checkpoint().version).toBe(2);
+
+  const roundTrip = createEditor({
+    schema,
+    document: reopened.state.nodes,
+    documentId: reopened.documentId,
+    revision: reopened.state.revision,
+    positionCheckpoint: JSON.parse(JSON.stringify(reopened.positions.checkpoint())),
+  });
+
+  expect(roundTrip.positions.resolve(position)).toEqual(editor.positions.resolve(position));
+  editor.destroy();
+  reopened.destroy();
+  roundTrip.destroy();
+});

@@ -33,7 +33,8 @@ import {
   nodeAccess,
   type AccessPolicy,
 } from './permissions.js';
-import { createRelativePositions, parsePositionCheckpoint } from './relative-positions.js';
+import { parsePositionCheckpoint } from './position-checkpoint.js';
+import { createRelativePositions } from './relative-positions.js';
 import { indexSelection } from './scoped-selection.js';
 import { Selection } from './selection-base.js';
 import {
