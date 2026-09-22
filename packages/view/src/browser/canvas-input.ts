@@ -290,10 +290,7 @@ export function createCanvasInput<N extends NodeIdentity>({
     const protectedText =
       selection instanceof TextSelection && editor.getAccess?.(selection.head.id) === 'protected';
 
-    if (
-      protectedText ||
-      (!textInput.composing && (synced?.selection !== selection || synced.node !== node))
-    ) {
+    if (protectedText || synced?.selection !== selection || synced.node !== node) {
       textInput.sync(input);
       synced = { selection, node };
     }

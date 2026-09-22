@@ -229,3 +229,19 @@ test('revoked access clears the native buffer during composition and read-only i
   expect(changes).toEqual([]);
   expect(input.value).toBe('Private text');
 });
+
+test('a new composition invalidates the previous deferred commit', async ({ onTestFinished }) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  let commits = 0;
+  f.capture.compositionStart();
+  f.capture.compositionEnd(f.input, () => {
+    commits++;
+  });
+  f.capture.compositionStart();
+  f.input.value = 'New candidate';
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  expect(f.capture.composing).toBe(true);
+  expect(f.input.value).toBe('New candidate');
+  expect(commits).toBe(0);
+});

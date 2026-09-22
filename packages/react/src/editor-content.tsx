@@ -1,12 +1,14 @@
 import type { NodeIdentity } from '@gprose/model';
 import {
   defaultFonts,
+  defaultAccessibility,
   mountEditor,
   type MountEditorOptions,
   type MountedEditor,
 } from '@gprose/view';
 import {
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -32,7 +34,7 @@ export function EditorContent<N extends NodeIdentity>({
   scroll,
   toolbar,
   diagnostics,
-  accessibility,
+  accessibility: accessibilityProp,
   zoom = 1,
   paddingTop = 0,
   maxWidth = null,
@@ -43,6 +45,15 @@ export function EditorContent<N extends NodeIdentity>({
   onNotice,
   ...props
 }: EditorContentProps<N>) {
+  const accessibility = useMemo(
+    () => ({
+      readingView: accessibilityProp?.readingView ?? defaultAccessibility.readingView,
+      label: accessibilityProp?.label ?? defaultAccessibility.label,
+      description: accessibilityProp?.description ?? defaultAccessibility.description,
+    }),
+    [accessibilityProp],
+  );
+
   const host = useRef<HTMLDivElement>(null);
   const [portals] = useState(createPortalHost);
   const callbacks = useRef({ onReady, onError, onNotice });

@@ -31,6 +31,13 @@ export function readRevealOptions(input: RevealOptions) {
   return revealOptions.parse(input);
 }
 
+/** Shared initial settings for imperative views and declarative framework adapters. */
+export const defaultAccessibility = Object.freeze({
+  readingView: false,
+  label: 'Editor text input',
+  description: 'Press Escape then Tab to move focus out of text editing.',
+});
+
 export function readViewConfiguration(
   input: ViewConfiguration,
   current: {
@@ -45,11 +52,7 @@ export function readViewConfiguration(
     paddingTop: 0,
     maxWidth: null,
     background: '#ffffff',
-    accessibility: {
-      readingView: false,
-      label: 'Editor text input',
-      description: 'Press Escape then Tab to move focus out of text editing.',
-    },
+    accessibility: defaultAccessibility,
   },
 ) {
   const { theme, ...settings } = input;

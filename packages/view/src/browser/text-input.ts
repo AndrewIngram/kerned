@@ -49,13 +49,20 @@ export function createTextInput<N extends NodeIdentity>(
   function sync(input: HTMLTextAreaElement) {
     assertActive();
     const { selection } = editor.state;
-    mirrored = undefined;
-    capturedSelection = selection;
 
     const access =
       selection instanceof TextSelection && editor.getAccess
         ? editor.getAccess(selection.head.id)
         : 'editable';
+
+    if (composing) {
+      if (capturedSelection?.eq(selection) && access === 'editable') return;
+      discardedComposition = true;
+      composing = false;
+    }
+
+    mirrored = undefined;
+    capturedSelection = selection;
 
     if (access === 'protected' || !access) {
       discardedComposition ||= composing;
@@ -108,6 +115,7 @@ export function createTextInput<N extends NodeIdentity>(
     sync,
     compositionStart(this: void) {
       assertActive();
+      cancelAnimationFrame(frame);
       editor.breakHistory();
       discardedComposition = false;
       composing = true;

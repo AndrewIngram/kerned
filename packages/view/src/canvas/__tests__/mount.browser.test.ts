@@ -1159,3 +1159,47 @@ test('explicit focus synchronizes a moved caret before the next layout frame', a
     body: 'Second new paragraph with selectable text.',
   });
 });
+
+test('composition releases the old buffer after selection handoff and access revocation', async ({
+  onTestFinished,
+}) => {
+  let revoked = false;
+
+  const editor = createEditor({
+    schema,
+    content: [
+      { kind: 'note', id: 1, body: 'Private candidate' },
+      { kind: 'note', id: 2, body: 'Public text' },
+    ],
+    permissions: { access: (node) => (revoked && node.id === 1 ? 'protected' : 'editable') },
+  });
+
+  const host = document.createElement('div');
+  host.style.cssText = 'width:400px;height:250px';
+  document.body.append(host);
+  const view = mountEditor(host, { editor });
+  onTestFinished(() => {
+    view.destroy();
+    editor.destroy();
+    host.remove();
+  });
+  await view.ready;
+  const input = capture(host);
+  input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+  editor.select(textSelection(2, 0));
+  revoked = true;
+  editor.refreshPermissions();
+  await frame();
+  expect(input.value).toBe('Public text');
+  input.value = 'Private candidate';
+  input.dispatchEvent(
+    new InputEvent('input', {
+      bubbles: true,
+      inputType: 'insertCompositionText',
+      isComposing: true,
+      data: 'Private candidate',
+    }),
+  );
+  expect(editor.state.nodes[1]).toMatchObject({ body: 'Public text' });
+  expect(input.value).toBe('Public text');
+});

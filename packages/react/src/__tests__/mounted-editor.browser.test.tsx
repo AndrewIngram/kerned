@@ -2,6 +2,7 @@ import { createEditor, defineExtension, type ContributionContext } from '@gprose
 import { createSchema, defineNode } from '@gprose/model';
 import {
   defaultFonts,
+  defaultAccessibility,
   defineNodePresentation,
   defineStyleRule,
   presentations,
@@ -368,4 +369,51 @@ test('a nullable React content host waits for its session and detaches when clea
   expect(mounted.isDestroyed).toBe(true);
   expect(f.editor.isDestroyed).toBe(false);
   expect(f.element.querySelector('canvas')).toBeNull();
+});
+
+const readingSettings = { readingView: true, label: 'Draft', description: 'Custom instructions' };
+
+const renamedSettings = { label: 'Final' };
+
+test('accessibility props replace declarative settings and removal restores defaults without remounting', async ({
+  onTestFinished,
+}) => {
+  const f = fixture();
+  onTestFinished(() => f.destroy());
+  flushSync(() =>
+    f.root.render(
+      <EditorContent
+        editor={f.editor}
+        style={size}
+        accessibility={readingSettings}
+        onReady={f.ready}
+      />,
+    ),
+  );
+  const mounted = await f.readiness;
+  const input = f.element.querySelector('textarea');
+  const reader = f.element.querySelector<HTMLElement>('[data-editor-reading]');
+  expect(reader?.hidden).toBe(false);
+  flushSync(() =>
+    f.root.render(
+      <EditorContent
+        editor={f.editor}
+        style={size}
+        accessibility={renamedSettings}
+        onReady={unexpectedRemount}
+      />,
+    ),
+  );
+  expect(reader?.hidden).toBe(true);
+  expect(input?.getAttribute('aria-label')).toBe('Final');
+  expect(document.getElementById(input?.getAttribute('aria-describedby') ?? '')?.textContent).toBe(
+    defaultAccessibility.description,
+  );
+  flushSync(() =>
+    f.root.render(<EditorContent editor={f.editor} style={size} onReady={unexpectedRemount} />),
+  );
+  expect(input?.getAttribute('aria-label')).toBe(defaultAccessibility.label);
+  expect(reader?.hidden).toBe(true);
+  expect(f.element.querySelector('textarea')).toBe(input);
+  expect(f.mounted).toBe(mounted);
 });

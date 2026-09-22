@@ -18,7 +18,9 @@ const view = mountEditor(element, {
 view.update({ accessibility: { label: 'Final document' } });
 ```
 
-`EditorContent` accepts the same `accessibility` prop. The input is a normal Tab
+`EditorContent` accepts the same `accessibility` prop. Unlike imperative
+`view.update` patches, React props are complete declarative settings: omitted
+fields revert to the exported `defaultAccessibility` values. The input is a normal Tab
 stop once the view is ready. Escape then Tab bypasses structural Tab commands.
 Native caret/selection changes map back to grapheme-safe model positions. Read-only
 content remains readable; protected text is omitted from capture and projection.
@@ -80,3 +82,8 @@ Rich mark announcements, cross-block native selection, accessible text geometry
 for magnification/braille routing, and large-document reading are still open.
 The projection currently activates the beginning of a block, not a screen-reader
 word position. It does not duplicate custom interactive controls.
+
+The architectural review fixes keep composition ownership inside the native input
+module: moving selection away discards the old candidate, and a new composition
+cancels the previous deferred callback. Mounted and React tests cover both cases
+and removing accessibility props without remounting.

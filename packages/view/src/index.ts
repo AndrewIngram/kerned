@@ -115,7 +115,11 @@ export {
 
 export type { ResolveEditorAsset, EditorAsset } from './canvas/assets.js';
 
-export type { ViewConfiguration, RevealOptions } from './canvas/view-options.js';
+export {
+  defaultAccessibility,
+  type ViewConfiguration,
+  type RevealOptions,
+} from './canvas/view-options.js';
 
 export type { ViewSnapshot, BlockBounds } from './canvas/view-geometry.js';
 
