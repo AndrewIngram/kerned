@@ -1,16 +1,27 @@
 import { formattingMarks } from '@gprose/extension-document';
 import { createOutlineExtension, type OutlineEntry } from '@gprose/extension-outline';
 import { starterHtmlParsers } from '@gprose/starter-kit/browser';
-import { createHtmlParser } from '@gprose/view';
+import { createHtmlParser, type FontConfiguration } from '@gprose/view';
 
 import { plainText, type StarterNode } from './demo-model.js';
 import { demoSchema } from './demo-schema.js';
 import { sampleChunk } from './editor-stream.js';
 import { createSampleDocument } from './sample-document.js';
+import { chineseFonts } from './sample-fonts.js';
 
-type BookSampleId = 'warbreaker' | 'war-and-peace' | 'hayy-ibn-yaqzan' | 'tashlikh';
+type BookSampleId =
+  | 'warbreaker'
+  | 'war-and-peace'
+  | 'hayy-ibn-yaqzan'
+  | 'tashlikh'
+  | 'journey-to-the-west';
 
-export const bookSamples: readonly { id: BookSampleId; title: string; description: string }[] = [
+export const bookSamples: readonly {
+  id: BookSampleId;
+  title: string;
+  description: string;
+  fonts?: FontConfiguration;
+}[] = [
   {
     id: 'hayy-ibn-yaqzan',
     title: 'Hayy ibn Yaqzan · العربية',
@@ -20,6 +31,12 @@ export const bookSamples: readonly { id: BookSampleId; title: string; descriptio
     id: 'tashlikh',
     title: 'Tashlikh · עברית',
     description: 'Isaac Erter · Hebrew · Complete satire, 1840',
+  },
+  {
+    id: 'journey-to-the-west',
+    title: 'Journey to the West · 西遊記',
+    description: 'Wu Cheng’en · Traditional Chinese · All 100 chapters',
+    fonts: chineseFonts,
   },
   {
     id: 'warbreaker',
@@ -34,6 +51,7 @@ export const bookSamples: readonly { id: BookSampleId; title: string; descriptio
 ];
 
 export type EditorSample = {
+  fonts?: FontConfiguration;
   id: 'extensions' | 'stream' | 'minimal' | BookSampleId;
   title: string;
   description: string;

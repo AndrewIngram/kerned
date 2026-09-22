@@ -146,7 +146,9 @@ export function pasteFragment<N extends NodeIdentity>(
     const text = schema.text(node);
 
     if (text !== null && !supportsLayoutText(text))
-      throw new Error('This study currently supports Latin text and emoji.');
+      throw new Error(
+        'This text contains a script or control character the editor does not yet support.',
+      );
   }
 
   const tree = indexTree(schema, state.nodes),

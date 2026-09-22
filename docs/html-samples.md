@@ -12,9 +12,9 @@ three additional books, with readable HTML reference pages and pinned source sna
 
 Arabic and Hebrew are available in the canvas editor's sample selector and retain
 browser-rendered references for comparison. _Journey to the West_ (西遊記), Wu
-Cheng’en, adds a Chinese browser reference: all 100 chapters, 2,968 blocks and
-588,710 Han characters. It remains outside the canvas selector until CJK fonts,
-line breaking and input are validated. See [international text progress](research-international-text.md).
+Cheng’en, adds a Chinese canvas sample and browser reference: all 100 chapters, 2,968 blocks and
+588,710 Han characters. The sample selector loads its opt-in Chinese fonts;
+see [Chinese text support and limits](chinese-text.md). See [international text progress](research-international-text.md).
 
 The HTML `main#book` contains only book content. Headers and footers provide
 reference status, attribution, licence links and conversion notes. To import a
@@ -48,7 +48,7 @@ Conversion normalizes whitespace, preserves original Unicode sequences, keeps
 italics, flattens link labels/superscripts, and turns the Hebrew verse table into
 two lines. It adds the Arabic title from the source page title and does not invent
 chapter divisions. The Arabic narrative has one heading; the Hebrew sample has
-three. Browser reference typography uses the bundled Noto Arabic/Hebrew fonts.
+three. The Chinese canvas sample uses [opt-in CJK fonts](chinese-text.md). Browser reference typography uses the bundled Noto Arabic/Hebrew fonts.
 
 ## Canvas editor samples
 

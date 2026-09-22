@@ -2,7 +2,7 @@
 
 Research date: 2026-09-22. Arabic/Hebrew and mixed-direction rendering are now
 connected to the mounted canvas editor. Greek/Cyrillic use the same directional
-run path. CJK remains a browser reference, pending font/layout integration.
+run path. Horizontal Chinese is also connected with opt-in fonts; see [Chinese text](chinese-text.md).
 
 ## Implementation progress
 
@@ -46,8 +46,9 @@ views receive the matching direction and registered font stack.
 
 Remaining limitations: emergency intra-word wrapping with line-edge reshaping,
 script-specific italic faces, arbitrary cross-font combining clusters when no
-single configured face covers them, vertical writing, CJK typography and IME/device
-validation. The script guard rejects CJK rather than drawing missing glyphs.
+single configured face covers them, vertical writing, advanced CJK typography and
+IME/device validation. Han and Bopomofo are accepted with configured font coverage;
+Japanese kana and Korean remain outside the enabled script set.
 Mixed-run word arrows use retained visual word edges with caret affinity, including
 platform-specific word starts/ends. Boundary progression and selection collapse are
 covered in all three browser engines; broader native-editor parity remains to be

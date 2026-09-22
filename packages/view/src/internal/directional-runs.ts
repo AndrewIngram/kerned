@@ -5,6 +5,8 @@ import { emojiSequence } from './owned-text-support.js';
 type Run = { start: number; end: number; level: number; script: number; font: number };
 
 const scripts = [
+  { pattern: /\p{Script=Han}/u, tag: 0x48616e69 },
+  { pattern: /\p{Script=Bopomofo}/u, tag: 0x426f706f },
   { pattern: /\p{Script=Arabic}/u, tag: 0x41726162 },
   { pattern: /\p{Script=Hebrew}/u, tag: 0x48656272 },
   { pattern: /\p{Script=Latin}/u, tag: 0x4c61746e },

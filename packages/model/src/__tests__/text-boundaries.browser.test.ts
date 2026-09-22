@@ -1,6 +1,12 @@
 import { expect, test } from 'vitest';
 
-import { boundaries, snapTextOffset, validateTextRange } from '../text.js';
+import {
+  wordBoundary,
+  wordRanges,
+  boundaries,
+  snapTextOffset,
+  validateTextRange,
+} from '../text.js';
 
 function acceptsRange(text: string, offset: number) {
   try {
@@ -27,3 +33,15 @@ test.each(['A😀e\u0301Z', 'x👨‍👩‍👧‍👦y', 'a🇬🇧b', 'a𞤀�
     }
   },
 );
+
+test('Han dictionary segments remain words in every browser', () => {
+  const text = '天地玄黃，宇宙洪荒。';
+  expect(wordRanges(text)).toEqual([
+    { from: 0, to: 2 },
+    { from: 2, to: 4 },
+    { from: 5, to: 7 },
+    { from: 7, to: 9 },
+  ]);
+  expect(wordBoundary(text, 2, false, 'mac')).toBe(4);
+  expect(wordBoundary(text, 4, true, 'mac')).toBe(2);
+});

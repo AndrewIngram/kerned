@@ -276,6 +276,7 @@ export function EditorWorkspaceView({
           <EditorContent
             className="document-scroll"
             editor={editor}
+            fonts={sample.fonts}
             diagnostics={diagnostics}
             scroll={minimal ? 'page' : 'container'}
             toolbar={minimal ? (toolbar ?? undefined) : undefined}

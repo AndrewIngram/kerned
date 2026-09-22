@@ -2,12 +2,12 @@ import { boundaries } from '@gprose/model';
 
 export const emojiSequence = /\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20e3/u;
 
-/** Scripts with registered shaping coverage and navigation support. CJK remains a reference fixture. */
+/** Scripts supported by the layout pipeline. Font coverage is configured separately. */
 export function supportsLayoutText(text: string) {
   if (/^[\x20-\x7e\n]*$/.test(text)) return true;
 
   if (
-    /[^\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Common}\p{Script=Inherited}]/u.test(
+    /[^\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Han}\p{Script=Bopomofo}\p{Script=Common}\p{Script=Inherited}]/u.test(
       text,
     ) ||
     /[\p{Zl}\p{Zp}]/u.test(text) ||

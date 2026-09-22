@@ -65,6 +65,20 @@ export function validateTextRange(text: string, from: number, to: number) {
     throw new Error('Edit range must follow grapheme boundaries');
 }
 
+/** Word ranges in UTF-16 coordinates, excluding punctuation and whitespace. */
+export function wordRanges(text: string): { from: number; to: number }[] {
+  const ranges: { from: number; to: number }[] = [];
+
+  for (const segment of words.segment(text)) {
+    // Firefox can classify dictionary-segmented Han words as not word-like.
+    // Keep its boundaries, but do not drop words such as 玄黃 or 洪荒.
+    if (segment.isWordLike || /\p{Script=Han}/u.test(segment.segment))
+      ranges.push({ from: segment.index, to: segment.index + segment.segment.length });
+  }
+
+  return ranges;
+}
+
 /** Word movement uses Unicode segments, with platform-specific forward stops. */
 export function wordBoundary(
   text: string,
@@ -72,13 +86,13 @@ export function wordBoundary(
   back: boolean,
   platform: 'mac' | 'other',
 ) {
-  const segments = [...words.segment(text)].filter((segment) => segment.isWordLike);
+  const segments = wordRanges(text);
 
-  if (back) return segments.findLast((segment) => segment.index < offset)?.index ?? 0;
+  if (back) return segments.findLast((segment) => segment.from < offset)?.from ?? 0;
 
   if (platform === 'other')
-    return segments.find((segment) => segment.index > offset)?.index ?? text.length;
-  const next = segments.find((segment) => segment.index + segment.segment.length > offset);
+    return segments.find((segment) => segment.from > offset)?.from ?? text.length;
+  const next = segments.find((segment) => segment.to > offset);
 
-  return next ? next.index + next.segment.length : text.length;
+  return next?.to ?? text.length;
 }

@@ -30,7 +30,14 @@ export {
 
 export { type InlineValue } from './inline-schema.js';
 
-export { boundaries, snapTextOffset, validateTextRange, wordBoundary, wordRange } from './text.js';
+export {
+  boundaries,
+  snapTextOffset,
+  validateTextRange,
+  wordBoundary,
+  wordRange,
+  wordRanges,
+} from './text.js';
 
 export {
   indexTree,

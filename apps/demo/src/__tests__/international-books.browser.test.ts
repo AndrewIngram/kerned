@@ -56,6 +56,7 @@ test.each([
 test.each([
   { id: 'hayy-ibn-yaqzan', count: 125 },
   { id: 'tashlikh', count: 39 },
+  { id: 'journey-to-the-west', count: 2968 },
 ])('streams only the book body of $id into the editor', async ({ id, count }) => {
   const sample = await loadEditorSample(new URL(`/editor.html?sample=${id}`, location.href));
   expect(sample.total).toBe(count);

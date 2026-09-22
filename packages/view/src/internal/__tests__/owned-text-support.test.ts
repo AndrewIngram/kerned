@@ -30,7 +30,8 @@ test.each([
   ['مرحبا', true],
   ['שָׁלוֹם English 123', true],
   ['Ελληνικά Кириллица', true],
-  ['中文 日本語', false],
+  ['中文 日本語 ㄅㄆㄇ', true],
+  ['ひらがな カタカナ', false],
 ])('retains the Unicode support policy for %s', (text, accepted) => {
   expect(supportsLayoutText(text)).toBe(accepted);
 });

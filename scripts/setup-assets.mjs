@@ -22,10 +22,12 @@ await copyFile(
 );
 
 const sources = [
-  ...['NotoSansHebrew-Regular.ttf', 'NotoSansHebrew-Bold.ttf'].map((name) => [
-    name,
-    checksums[name].source,
-  ]),
+  ...[
+    'NotoSansHebrew-Regular.ttf',
+    'NotoSansHebrew-Bold.ttf',
+    'NotoSansCJKtc-Regular.otf',
+    'NotoSansCJKtc-Bold.otf',
+  ].map((name) => [name, checksums[name].source]),
   ...['NotoSansArabic-Regular.ttf', 'NotoSansArabic-Bold.ttf'].map((name) => [
     name,
     `https://raw.githubusercontent.com/notofonts/noto-fonts/ffebf8c1ee449e544955a7e813c54f9b73848eac/hinted/ttf/${name.split('-')[0]}/${name}`,
@@ -73,6 +75,7 @@ for (const [name, url] of sources) {
 }
 
 for (const [name, url] of [
+  ['LICENSE-CJK.txt', checksums['LICENSE-CJK.txt'].source],
   ['LICENSE-Noto.txt', 'https://raw.githubusercontent.com/notofonts/noto-fonts/main/LICENSE'],
   [
     'LICENSE-Emoji.txt',

@@ -45,7 +45,7 @@ const books = [
     attribution:
       'Wu Cheng’en; Project Gutenberg ebook 23962, produced by Leong Joana Kit Ieng. Public-domain original Chinese text. The source snapshot includes the Project Gutenberg licence. Occasional question marks in the transcription are retained.',
     contents:
-      'Complete novel, all 100 chapters. Browser reference for horizontal Chinese typography; canvas CJK support remains pending.',
+      'Complete novel, all 100 chapters. Horizontal Chinese canvas sample and browser typography reference.',
   },
 ];
 
@@ -185,10 +185,7 @@ async function convert(book) {
 
   const direction = book.language === 'zh' ? 'ltr' : 'rtl';
 
-  const status =
-    book.language === 'zh'
-      ? 'Browser-rendered reference. Canvas CJK layout is not enabled yet.'
-      : `Browser-rendered reference. <a href="/editor.html?sample=${book.id}">Open in the canvas editor</a>.`;
+  const status = `Browser-rendered reference. <a href="/editor.html?sample=${book.id}">Open in the canvas editor</a>.`;
 
   const html = `<!doctype html>
 <html lang="${book.language}" dir="${direction}">

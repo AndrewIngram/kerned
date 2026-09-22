@@ -951,7 +951,7 @@ export async function createOwnedEngine(
 function needsBidi(text: string, direction: TextDirection = 'auto') {
   return (
     direction === 'rtl' ||
-    /[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Greek}\p{Script=Cyrillic}\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(
+    /[\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Greek}\p{Script=Cyrillic}\p{Script=Han}\p{Script=Bopomofo}\u3000-\u303f\uff00-\uffef\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(
       text,
     )
   );

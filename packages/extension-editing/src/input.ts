@@ -136,7 +136,7 @@ export function createDocumentInput<N extends NodeIdentity>({
     const clean = paragraphs ? normalized : normalized.replace(/\n/g, ' ');
 
     if (!supportsLayoutText(clean)) {
-      reject('This study currently supports Latin text.');
+      reject('This text contains a script or control character the editor does not yet support.');
 
       return;
     }

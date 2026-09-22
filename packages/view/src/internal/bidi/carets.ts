@@ -1,3 +1,5 @@
+import { wordRanges } from '@gprose/model';
+
 import type { Geometry, Line, Rect } from '../engines.js';
 import type { Direction, Position } from '../layout-types.js';
 
@@ -144,13 +146,15 @@ function finishCarets(
     wordLeft: number[] = [],
     wordRight: number[] = [];
 
-  for (const word of new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text)) {
-    if (!word.isWordLike) continue;
-    const start = locate(word.index, false);
-    const end = locate(word.index + word.segment.length, true);
+  for (const word of wordRanges(text)) {
+    const start = locate(word.from, false);
+    const end = locate(word.to, true);
     wordStarts.push(start);
-    wordLeft.push(xs[start] <= xs[end] ? start : end);
-    wordRight.push(xs[start] <= xs[end] ? end : start);
+    // Across a soft wrap, x alone reverses word edges. Compare rows in the
+    // paragraph's reading direction before comparing positions within a row.
+    const startIsLeft = rows[start] === rows[end] ? xs[start] <= xs[end] : !rtl;
+    wordLeft.push(startIsLeft ? start : end);
+    wordRight.push(startIsLeft ? end : start);
   }
 
   const ordered = (values: number[]) =>
