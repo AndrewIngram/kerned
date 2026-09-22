@@ -12,7 +12,7 @@ const endpoint = z.object({
 
 const selection = z.object({ anchor: endpoint, head: endpoint });
 
-const editSchema = z
+export const editSchema = z
   .object({ key: identity, from: integer, to: integer, text: z.string(), expected: z.string() })
   .refine((value) => value.to >= value.from, 'Invalid edit range');
 

@@ -5,6 +5,10 @@ updates and separately authorised Automerge partitions. Both reuse the core
 `projectDocument` function. Restricted recipients receive an opaque block's stable
 key, placement and lock flag, but no payload or descendant identities.
 
+The subsequent [restricted-write experiment](editor-restricted-writes-experiment.md)
+adds authority-admitted concurrent text proposals from these incomplete replicas.
+Native concurrent Automerge writes remain separate.
+
 This is a headless read-distribution proof under
 `tests/experiments/collaboration/protected`. It is not connected to the demo or a
 production network service. Run:
@@ -161,7 +165,8 @@ it does not yet select the edit-concurrency algorithm. The trusted host drives
 canonical edits here. Neither path is an end-to-end multiplayer editor with
 restricted replicas making concurrent structural changes.
 
-Still outstanding: write admission from projected coordinates, durable references
+Text write admission from projected coordinates is now covered by the linked
+restricted-write proof. Still outstanding: durable references
 across access epochs, simultaneous permission and edit transactions, protected
 inline spans/marks, arbitrary extension metadata, large-document projection cost,
 network authentication/quotas, persistent caches and production asset delivery.

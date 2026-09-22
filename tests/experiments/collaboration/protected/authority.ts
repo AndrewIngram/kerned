@@ -1,13 +1,17 @@
 import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
 import { projectDocument, type NodeAccess, type ProjectedNode } from '@gprose/state';
-import { applySteps, type Step } from '@gprose/transform';
+import type { Step } from '@gprose/transform';
 
 import { documentCoordinates } from '../coordinates.js';
 import type { PresenceSelection } from '../protocol.js';
+import { createProjectedDocument } from './document.js';
 import { createPartitions } from './partitions.js';
 import {
   bodySchema,
   encodeFrame,
+  decodeProposal,
+  encodeReceipt,
+  type ProjectedProposal,
   type AttachmentResult,
   type Body,
   type Frame,
@@ -19,8 +23,8 @@ type Comment = { id: string; from: string; to: string; text: string; readKeys: r
 
 type Attachment = { id: string; key: string; body: string };
 
-/** Read-distribution proof. Trusted host applies accepted edits. Connections own
- * principal identity; callers never receive the canonical tree or native history. */
+/** Restricted delivery and text admission proof. Connections own principal
+ * identity; callers never receive the canonical tree or native history. */
 export function createProtectedAuthority<N extends NodeIdentity>(options: {
   schema: Schema<N>;
   nodes: readonly N[];
@@ -31,17 +35,29 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
   title: (node: N) => string | null;
 }) {
   const { schema } = options;
-  let nodes = options.nodes;
+
   const users = new Map(Object.entries(options.users));
   const access = new Map<string, Map<string, NodeAccess>>();
   const comments = structuredClone(options.comments);
   const attachments = new Map(options.attachments.map((item) => [item.id, structuredClone(item)]));
   const partitions = createPartitions();
   const presence = new Map<string, PresenceSelection>();
+  const connections = new Set<() => void>();
 
   let epoch = 1,
     sessionCount = 0,
     destroyed = false;
+
+  const document = createProjectedDocument({
+    schema,
+    nodes: options.nodes,
+    epoch: () => epoch,
+    changed(structural) {
+      presence.clear();
+
+      if (structural) rotate();
+    },
+  });
 
   function active() {
     if (destroyed) throw new Error('Authority destroyed');
@@ -57,7 +73,7 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
 
     if (!root) throw new Error('Not a document member');
 
-    const projected = projectDocument(schema, nodes, {
+    const projected = projectDocument(schema, document.nodes, {
       access: (node) => access.get(principal)?.get(node.key) ?? root,
     });
 
@@ -93,7 +109,7 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
     }
 
     for (const item of projected) visit(item, null);
-    const tree = indexTree(schema, nodes);
+    const tree = indexTree(schema, document.nodes);
 
     function readableRange(from: string, to: string) {
       const first = tree.order.findIndex((entry) => entry.node.key === from);
@@ -114,17 +130,12 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
   return {
     apply(steps: readonly Step<N>[]) {
       active();
-      nodes = applySteps(schema, nodes, [...steps]).nodes;
-      presence.clear();
-
-      // Parent changes can alter effective visibility. A fresh history epoch is
-      // conservative, and intentionally exposes the reference-lifetime tradeoff.
-      if (steps.some((step) => step.kind !== 'replaceText')) rotate();
+      document.apply(steps);
     },
     setAccess(principal: string, key: string, value: NodeAccess) {
       active();
 
-      if (!users.has(principal) || !indexTree(schema, nodes).byKey.has(key))
+      if (!users.has(principal) || !indexTree(schema, document.nodes).byKey.has(key))
         throw new Error('Unknown permission target');
       const entries = access.get(principal) ?? new Map<string, NodeAccess>();
 
@@ -149,6 +160,25 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
       let sentHeads = new Map<string, string[]>();
       const requested = new Set<string>();
 
+      const writer = document.writer(session, (key) =>
+        project(principal).manifest.some(
+          (item) => item.key === key && item.kind === 'visible' && item.access === 'editable',
+        ),
+      );
+
+      function close() {
+        closed = true;
+        presence.delete(session);
+        requested.clear();
+        sentBodies.clear();
+        sentHeads.clear();
+        signature = '';
+        writer.close();
+        connections.delete(close);
+      }
+
+      connections.add(close);
+
       function connected() {
         active();
 
@@ -157,6 +187,18 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
 
       return {
         session,
+        submit(bytes: Uint8Array) {
+          connected();
+          let proposal: ProjectedProposal;
+
+          try {
+            proposal = decodeProposal(bytes);
+          } catch {
+            return encodeReceipt({ kind: 'invalid' });
+          }
+
+          return encodeReceipt(writer.submit(proposal));
+        },
         requestAttachment(id: string) {
           connected();
           requested.add(id);
@@ -171,7 +213,10 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
           }
 
           const view = project(principal);
-          const normalized = documentCoordinates(schema, nodes).normalizeSelection(selection);
+
+          const normalized = documentCoordinates(schema, document.nodes).normalizeSelection(
+            selection,
+          );
 
           if (
             !normalized ||
@@ -259,7 +304,15 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
             attachments: responses,
           };
 
-          send(encodeFrame(frame));
+          writer.sent(frame.sequence, frame.epoch, view.bodies);
+
+          try {
+            send(encodeFrame(frame));
+          } catch (error) {
+            close();
+            throw error;
+          }
+
           sequence++;
           sentEpoch = epoch;
           signature = nextSignature;
@@ -270,18 +323,13 @@ export function createProtectedAuthority<N extends NodeIdentity>(options: {
 
           return true;
         },
-        close() {
-          closed = true;
-          presence.delete(session);
-          requested.clear();
-          sentBodies.clear();
-          sentHeads.clear();
-          signature = '';
-        },
+        close,
       };
     },
     destroy() {
       destroyed = true;
+
+      for (const close of connections) close();
       partitions.clear();
       presence.clear();
     },

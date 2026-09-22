@@ -1,6 +1,8 @@
 import * as Automerge from '@automerge/automerge';
+import { validateTextRange } from '@gprose/model';
 
-import { bodySchema, decodeFrame, type Body, type Frame } from './wire.js';
+import type { Edit } from '../protocol.js';
+import { bodySchema, decodeFrame, encodeProposal, type Body, type Frame } from './wire.js';
 
 /** A cooperative recipient. An application cannot erase copies a hostile recipient
  * made while it was authorized. Frames from an older session/sequence are ignored. */
@@ -11,6 +13,7 @@ export function createProtectedRecipient(session: string) {
   let status: 'empty' | 'ready' | 'resync' = 'empty';
   let latest: Frame | null = null;
   let destroyed = false;
+  let operation = 0;
   const bodies = new Map<string, Body>();
   const docs = new Map<string, Automerge.Doc<{ body: Body }>>();
   const attachments = new Map<string, { key: string; body: string }>();
@@ -115,6 +118,23 @@ export function createProtectedRecipient(session: string) {
         status = 'resync';
         throw error;
       }
+    },
+    propose(edit: Omit<Edit, 'expected'>) {
+      if (destroyed || status !== 'ready' || !latest) throw new Error('Recipient not ready');
+      const entry = latest.manifest.find((item) => item.key === edit.key);
+      const body = bodies.get(edit.key);
+
+      if (entry?.kind !== 'visible' || entry.access !== 'editable' || !body || body.text === null)
+        throw new Error('Target not editable');
+      validateTextRange(body.text, edit.from, edit.to);
+
+      return encodeProposal({
+        session,
+        epoch,
+        base: sequence,
+        operation: ++operation,
+        edit: { ...edit, expected: body.text.slice(edit.from, edit.to) },
+      });
     },
     get status() {
       return status;
