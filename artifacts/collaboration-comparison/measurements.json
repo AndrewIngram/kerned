@@ -1,0 +1,68 @@
+{
+  "recordedAt": "2026-09-22T18:27:14.938Z",
+  "cpu": "Apple M4 Pro",
+  "node": "v24.21.0",
+  "methodology": "Three serial trials, one 1024-code-unit block, fixed-size replacement, immediately delivered and acknowledged. Authority: proposal + server validation + both client deliveries. Automerge: local change + one peer delivery + whole-text model projection. No network, rendering, presence, startup or save time in timings. Authority wire bytes count three JSON messages; Automerge counts one raw binary change, without envelope. Saved sizes are DIFFERENT artifacts: authority positions only versus Automerge full document/history. These unoptimized adapters do NOT isolate algorithm, serialization or WASM cost, and do not measure heap.",
+  "rows": [
+    {
+      "trial": 0,
+      "edits": 100,
+      "authorityMs": 35.227709000000004,
+      "automergeMs": 53.50237499999997,
+      "authorityBytes": 39150,
+      "automergeBytes": 10998,
+      "authorityPositionCheckpointBytes": 3408,
+      "automergeSavedBytes": 256
+    },
+    {
+      "trial": 0,
+      "edits": 1000,
+      "authorityMs": 308.77799999999996,
+      "automergeMs": 540.5809999999999,
+      "authorityBytes": 397355,
+      "automergeBytes": 110871,
+      "authorityPositionCheckpointBytes": 35812,
+      "automergeSavedBytes": 270
+    },
+    {
+      "trial": 1,
+      "edits": 100,
+      "authorityMs": 30.175457999999935,
+      "automergeMs": 44.79941699999995,
+      "authorityBytes": 39150,
+      "automergeBytes": 10998,
+      "authorityPositionCheckpointBytes": 3408,
+      "automergeSavedBytes": 256
+    },
+    {
+      "trial": 1,
+      "edits": 1000,
+      "authorityMs": 300.16875000000005,
+      "automergeMs": 521.4870410000001,
+      "authorityBytes": 397355,
+      "automergeBytes": 110871,
+      "authorityPositionCheckpointBytes": 35812,
+      "automergeSavedBytes": 270
+    },
+    {
+      "trial": 2,
+      "edits": 100,
+      "authorityMs": 31.00729199999978,
+      "automergeMs": 44.30650000000014,
+      "authorityBytes": 39150,
+      "automergeBytes": 10998,
+      "authorityPositionCheckpointBytes": 3408,
+      "automergeSavedBytes": 256
+    },
+    {
+      "trial": 2,
+      "edits": 1000,
+      "authorityMs": 300.03825000000006,
+      "automergeMs": 513.5854590000004,
+      "authorityBytes": 397355,
+      "automergeBytes": 110871,
+      "authorityPositionCheckpointBytes": 35812,
+      "automergeSavedBytes": 265
+    }
+  ]
+}

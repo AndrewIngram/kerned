@@ -81,6 +81,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@automerge/automerge": "3.5.0",
     "@gprose/core": "workspace:*",
     "@gprose/extension-comments": "workspace:*",
     "@gprose/extension-document": "workspace:*",

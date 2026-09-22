@@ -130,8 +130,9 @@ appropriate for this disposable experiment; rebuilding the optimistic draft on
 read is not a proposed rendering hot path.
 
 The next gates are queued local edits and rejection recovery, then structural and
-mark semantics, durable references, collaborative undo and the corresponding
-Automerge comparison. The selection protocol must also accommodate node and
+mark semantics, durable references, collaborative undo and broader
+Automerge comparison. The [initial text/cursor comparison](editor-collaboration-comparison.md)
+now records shared cases, semantic differences and measured adapter costs. The selection protocol must also accommodate node and
 extension-owned cell selections before publication. Choose the production backend
 only after those gates, as required by the implementation plan. Visible remote
 carets and labels require the separate UI exploration step.

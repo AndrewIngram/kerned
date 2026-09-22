@@ -1,9 +1,8 @@
-import { createSchema, defineNode, type DocumentNode } from '@gprose/model';
 import { expect, test } from 'vitest';
-import { z } from 'zod';
 
 import { createAuthority, type Receipt } from './experiments/collaboration/authority.js';
 import { createClient } from './experiments/collaboration/client.js';
+import { schema, replacementCases, type Node } from './experiments/collaboration/fixtures.js';
 import {
   parseCommit,
   parsePresence,
@@ -11,31 +10,6 @@ import {
   parseProposal,
   type Commit,
 } from './experiments/collaboration/protocol.js';
-
-const extensions = [
-  defineNode({
-    name: 'note',
-    version: 1,
-    options: {},
-    schema: () => ({
-      attributes: z.strictObject({ value: z.string() }),
-      content: { kind: 'text', field: 'value' },
-    }),
-  }),
-  defineNode({
-    name: 'group',
-    version: 1,
-    options: {},
-    schema: () => ({
-      attributes: z.strictObject({}),
-      content: { kind: 'container', field: 'children' },
-    }),
-  }),
-] as const;
-
-const schema = createSchema({ extensions });
-
-type Node = DocumentNode<typeof extensions>;
 
 function fixture(value = 'abcdef') {
   let time = 0;
@@ -156,47 +130,29 @@ test('all small replacement pairs either converge or return an explicit overlap 
   let conflicts = 0,
     acceptedPairs = 0;
 
-  for (let a = 0; a <= 4; a++)
-    for (let ae = a; ae <= 4; ae++)
-      for (let b = 0; b <= 4; b++)
-        for (let be = b; be <= 4; be++) {
-          const f = fixture('abcd');
+  for (const edits of replacementCases()) {
+    const f = fixture('abcd');
+    const first = f.alice.propose(edits.first);
+    const second = f.bob.propose(edits.second);
+    const ca = accepted(f.a.submit(first));
+    const outcome = f.b.submit(second);
 
-          const first = f.alice.propose({
-            key: 'one',
-            from: a,
-            to: ae,
-            text: 'X',
-            expected: 'abcd'.slice(a, ae),
-          });
+    if (outcome.kind === 'accepted') {
+      converge(f, accepted(outcome), ca);
+      acceptedPairs++;
+    } else {
+      reasons.add(outcome.reason);
+      f.bob.reject(outcome);
+      converge(f, ca);
+      conflicts++;
+    }
 
-          const second = f.bob.propose({
-            key: 'one',
-            from: b,
-            to: be,
-            text: 'Y',
-            expected: 'abcd'.slice(b, be),
-          });
-
-          const ca = accepted(f.a.submit(first));
-          const outcome = f.b.submit(second);
-
-          if (outcome.kind === 'accepted') {
-            converge(f, accepted(outcome), ca);
-            acceptedPairs++;
-          } else {
-            reasons.add(outcome.reason);
-            f.bob.reject(outcome);
-            converge(f, ca);
-            conflicts++;
-          }
-
-          f.destroy();
-        }
+    f.destroy();
+  }
 
   expect([...reasons]).toEqual(['overlap']);
-  expect(conflicts).toBeGreaterThan(0);
-  expect(acceptedPairs).toBeGreaterThan(0);
+  expect(conflicts).toBe(90);
+  expect(acceptedPairs).toBe(135);
 });
 
 test('presence waits for acknowledgement, retains backward direction and defers future versions', () => {
