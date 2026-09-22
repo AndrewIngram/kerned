@@ -29,7 +29,7 @@ node scripts/benchmark-collaboration.mjs
 | Referenced character deleted                                       | Presence endpoint may become unavailable                                            | Native cursor falls back to remaining text                                                              |
 | External range after save/load, insertion inside it                | Not demonstrated across collaborative rebases                                       | JSON cursor pair survives binary save/load and expands across interior insertion; no range registration |
 | Expiry, reconnect, departure, revocation, stale presence snapshots | Tested in authority membership/transport proof                                      | Not implemented or tested in the Automerge adapter                                                      |
-| Edit permission rejection                                          | Authority checks target and ancestors before commit                                 | No permission gate; negative probe demonstrates why dropping denied changes is insufficient             |
+| Edit permission rejection                                          | Authority checks target and ancestors before commit                                 | Fixed-tree text gate now checks every operation; rejected branches need explicit recovery               |
 | Protected-content redaction                                        | Not implemented                                                                     | Not implemented                                                                                         |
 
 The two suites share the actual replacement generator, not separately copied case
@@ -61,7 +61,7 @@ structural editing or preserve marks through fine-grained patches. Those are
 explicit next gates; whole-field projection is not a proposed hot path.
 
 The adapter accepts changes produced by trusted fixture peers. It is not a
-validated network ingress, permission server, mounted editor binding or recoverable
+validated network ingress, mounted editor binding or recoverable
 malformed-input handler. Native binary save/load and cursor resolution are used
 directly. No generic collaboration-backend interface has been introduced: the
 candidates have genuinely different coordinate, rejection and persistence models.
@@ -82,7 +82,9 @@ edit from the same actor. Delivering only the latter leaves it pending because i
 depends on the forbidden change. Delivering the forbidden dependency applies both.
 This disproves a naive filter, not the possibility of an authorized Automerge
 architecture. Restricted replicas, rejection recovery and protected-content
-partitioning need a separate design and adversarial tests. The authority prototype
+partitioning need a separate design and adversarial tests. The subsequent
+[permission/recovery experiment](editor-collaboration-permissions.md) adds a central
+text-only admission gate and conservative replay of independent pending intents. The authority prototype
 also has no confidential replica projection yet.
 
 ## Measurements
