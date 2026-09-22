@@ -31,6 +31,14 @@ mounted navigation policies and browser validation. The text-support guard remai
 closed for RTL scripts until these are connected. This foundation is not evidence
 that Arabic/Hebrew can already be entered in `editor.html`.
 
+The architectural judge reviewed commit `fddf2b0`. The follow-up fixes RTL
+horizontal movement across soft wraps, coalesces reordered same-font glyphs into
+one drawing run, indexes isolate continuation runs, and avoids scanning selection
+spans for collapsed caret queries. Regression cases include 1,000 RTL glyphs,
+100,000 digits, and 10,000 nested or sibling isolates. Per-cluster helper closures
+were also removed from the unchanged LTR path after a local composition comparison
+exposed their cost. These microbenchmarks are not end-to-end editor measurements.
+
 ## Recommendation
 
 Keep paragraph analysis, wrapping, visual ordering, caret movement and selection

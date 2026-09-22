@@ -337,6 +337,7 @@ export function getEmbeddingLevels(string: Uint32Array, baseDirection: 'ltr' | '
     }
 
     const isolatingRunSeqs = []; // [{seqIndices: [], sosType: L|R, eosType: L|R}]
+    const runsByStart = new Map(levelRuns.map((run) => [run.start, run]));
 
     for (let runIdx = 0; runIdx < levelRuns.length; runIdx++) {
       const run = levelRuns[runIdx];
@@ -350,12 +351,10 @@ export function getEmbeddingLevels(string: Uint32Array, baseDirection: 'ltr' | '
           currentRun.endsWithIsolInit &&
           (pdiIndex = isolationPairs.get(currentRun.end)) != null;
         ) {
-          for (let i = runIdx + 1; i < levelRuns.length; i++) {
-            if (levelRuns[i].start === pdiIndex) {
-              seqRuns.push((currentRun = levelRuns[i]));
-              break;
-            }
-          }
+          const nextRun = runsByStart.get(pdiIndex);
+
+          if (!nextRun) break;
+          seqRuns.push((currentRun = nextRun));
         }
 
         // build flat list of indices across all runs:

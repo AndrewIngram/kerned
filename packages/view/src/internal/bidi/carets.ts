@@ -2,7 +2,7 @@ import type { Geometry, Line, Rect } from '../engines.js';
 import type { Direction, Position } from '../layout-types.js';
 
 /** Separate logical and visual indexes. The builder is discarded at publication. */
-export function createBidiCarets(lines: Line[], lineHeight: number) {
+export function createBidiCarets(lines: Line[], lineHeight: number, rtl: boolean) {
   const pending: { index: number; x: number; upstream: boolean; row: number }[] = [];
   const spans: { from: number; to: number; left: number; right: number; row: number }[] = [];
   let row = -1;
@@ -25,7 +25,7 @@ export function createBidiCarets(lines: Line[], lineHeight: number) {
       spans.push({ from, to, left: Math.min(x1, x2), right: Math.max(x1, x2), row });
     },
     finish() {
-      snapshot = finishCarets(pending, spans, lines, lineHeight);
+      snapshot = finishCarets(pending, spans, lines, lineHeight, rtl);
       pending.length = 0;
       spans.length = 0;
     },
@@ -43,6 +43,7 @@ function finishCarets(
   spans: { from: number; to: number; left: number; right: number; row: number }[],
   lines: Line[],
   lineHeight: number,
+  rtl: boolean,
 ) {
   pending.sort(
     (a, b) =>
@@ -146,6 +147,9 @@ function finishCarets(
         line = lines[rows[ordinal]];
 
       const rects: Rect[] = [];
+      const caret: Rect = [xs[ordinal], line.top, xs[ordinal] + 1, line.bottom];
+
+      if (anchor === focus) return { caret, rects };
 
       const low = Math.min(anchor, focus),
         high = Math.max(anchor, focus);
@@ -163,7 +167,7 @@ function finishCarets(
         else rects.push([left[i], top, right[i], bottom]);
       }
 
-      return { caret: [xs[ordinal], line.top, xs[ordinal] + 1, line.bottom], rects };
+      return { caret, rects };
     },
     move(index: number, upstream: boolean, direction: Direction): Position {
       const ordinal = locate(index, upstream),
@@ -182,7 +186,12 @@ function finishCarets(
       while (next >= 0 && next < offsets.length && rows[next] === row && xs[next] === xs[ordinal])
         next += step;
 
-      return next < 0 || next >= offsets.length ? position(ordinal) : position(next);
+      if (next >= 0 && next < offsets.length && rows[next] === row) return position(next);
+      const nextRow = row + (rtl ? -step : step);
+
+      if (nextRow < 0 || nextRow >= lines.length) return position(ordinal);
+
+      return position(step < 0 ? rowStarts[nextRow + 1] - 1 : rowStarts[nextRow]);
     },
   };
 }

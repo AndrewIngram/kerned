@@ -52,4 +52,7 @@ test('long digit runs and overflow-depth isolates resolve without repeated looka
   const nested = analyzeBidi('\u2068'.repeat(10000) + 'א' + '\u2069'.repeat(10000));
   expect(nested.levels.length).toBe(20001);
   expect(nested.levels[10000]).toBe(125);
+  const siblings = analyzeBidi('\u2066a\u2069'.repeat(10000));
+  expect(siblings.levels.length).toBe(30000);
+  expect(siblings.levels.every((level, index) => level === (index % 3 === 1 ? 2 : 0))).toBe(true);
 });

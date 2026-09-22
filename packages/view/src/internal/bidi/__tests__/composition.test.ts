@@ -71,8 +71,17 @@ test('wrapping reorders each line and preserves both sides of soft breaks', () =
   ).toBe('באדג');
   expect(paragraph.geometry(2, 2, true).caret).toEqual([0, 0, 1, 20]);
   expect(paragraph.geometry(2, 2, false).caret).toEqual([20, 20, 21, 40]);
+  expect(paragraph.move(2, true, 'left')).toEqual({ index: 2, upstream: false });
+  expect(paragraph.move(2, false, 'right')).toEqual({ index: 2, upstream: true });
   const down = paragraph.move(0, false, 'down');
   expect(paragraph.geometry(down.index, down.index, down.upstream).caret).toEqual([20, 20, 21, 40]);
+});
+
+test('a long same-face RTL paragraph stays one drawing run', () => {
+  const paragraph = compose('א'.repeat(1000));
+  expect(paragraph.runs).toHaveLength(1);
+  expect(paragraph.runs[0].glyphs).toHaveLength(1000);
+  expect(paragraph.geometry(500, 500, false).rects).toEqual([]);
 });
 
 test('empty bidi composition has a usable caret', () => {

@@ -43,13 +43,19 @@ export function composeParagraph(
   const clusters = 'clusters' in paragraphGlyphs ? paragraphGlyphs.clusters : [];
   const clusterCount = numeric ? numeric.widths.length : clusters.length;
 
+  const bidiStarts = bidi
+    ? (numeric?.clusterStarts ?? clusters.map((cluster) => cluster.start))
+    : undefined;
+
   const stopCount = numeric
     ? numeric.stops.length
     : clusters.reduce((n, c) => n + c.stops.length, 0);
 
   const lines: Line[] = [];
 
-  const bidiCarets = bidi ? createBidiCarets(lines, lineHeight) : undefined;
+  const bidiCarets = bidi
+    ? createBidiCarets(lines, lineHeight, (bidi.paragraphs[0]?.level ?? 0) % 2 !== 0)
+    : undefined;
 
   const numericCarets =
     bidiCarets ??
@@ -130,15 +136,8 @@ export function composeParagraph(
     if (!bidi || first === end) append(start, 0, false);
     let x = 0;
 
-    const visual = bidi
-      ? bidiClusters(
-          bidi,
-          numeric?.clusterStarts ?? clusters.map((cluster) => cluster.start),
-          first,
-          end,
-          finish,
-        )
-      : undefined;
+    const visual =
+      bidi && bidiStarts ? bidiClusters(bidi, bidiStarts, first, end, finish) : undefined;
 
     for (let ordinal = first; ordinal < end; ordinal++) {
       const i = visual ? visual.order[ordinal - first] : ordinal;
@@ -165,30 +164,41 @@ export function composeParagraph(
         }
       }
 
-      let previousIndex = numeric ? numeric.clusterStarts[i] : clusters[i].start;
-      let previousX = x + (rtl ? clusterWidth : 0);
+      if (bidiCarets) {
+        let previousIndex = numeric ? numeric.clusterStarts[i] : clusters[i].start;
+        let previousX = x + (rtl ? clusterWidth : 0);
+        append(previousIndex, previousX, false);
+        const from = numeric ? numeric.stopStarts[i] : 0;
+        const to = numeric ? numeric.stopStarts[i + 1] : clusters[i].stops.length;
 
-      if (bidi) append(previousIndex, previousX, false);
-
-      function appendClusterStop(index: number, fraction: number) {
-        const nextX = x + clusterWidth * (rtl ? 1 - fraction : fraction);
-        append(index, nextX, bidi ? true : index === finish && finish < textLength);
-        bidiCarets?.span(previousIndex, index, previousX, nextX);
-        previousIndex = index;
-        previousX = nextX;
-      }
-
-      if (numeric) {
+        for (let s = from; s < to; s++) {
+          const index = numeric ? numeric.stops[s] : clusters[i].stops[s];
+          const fraction = (s - from + 1) / (to - from);
+          const nextX = x + clusterWidth * (rtl ? 1 - fraction : fraction);
+          append(index, nextX, true);
+          bidiCarets.span(previousIndex, index, previousX, nextX);
+          previousIndex = index;
+          previousX = nextX;
+        }
+      } else if (numeric) {
         const from = numeric.stopStarts[i],
           to = numeric.stopStarts[i + 1];
 
         for (let s = from; s < to; s++) {
           const index = numeric.stops[s];
-          appendClusterStop(index, (s - from + 1) / (to - from));
+          append(
+            index,
+            x + (clusterWidth * (s - from + 1)) / (to - from),
+            index === finish && finish < textLength,
+          );
         }
       } else
         clusters[i].stops.forEach((index, n) =>
-          appendClusterStop(index, (n + 1) / clusters[i].stops.length),
+          append(
+            index,
+            x + (clusterWidth * (n + 1)) / clusters[i].stops.length,
+            index === finish && finish < textLength,
+          ),
         );
       x += clusterWidth;
     }
@@ -211,11 +221,13 @@ export function composeParagraph(
   const ids = packed?.ids ?? glyphs.map((values) => new Uint16Array(values));
   const coordinates = packedPositions ?? positions.map((values) => new Float32Array(values));
 
-  const runs = ranges.map(({ font, from, to }) => ({
-    font,
-    glyphs: ids[font].subarray(from, to),
-    positions: coordinates[font].subarray(from * 2, to * 2),
-  }));
+  const runs = bidi
+    ? visualGlyphRuns(ranges, ids, coordinates)
+    : ranges.map(({ font, from, to }) => ({
+        font,
+        glyphs: ids[font].subarray(from, to),
+        positions: coordinates[font].subarray(from * 2, to * 2),
+      }));
 
   return finishParagraph(
     width,
@@ -228,6 +240,47 @@ export function composeParagraph(
     stops,
     rows,
   );
+}
+
+// Logical glyph slots descend through RTL runs. Gather adjacent same-face slices
+// into a single drawing buffer while preserving visual cluster paint order.
+function visualGlyphRuns(
+  ranges: { font: number; from: number; to: number }[],
+  ids: Uint16Array[],
+  positions: Float32Array[],
+) {
+  const result: { font: number; glyphs: Uint16Array; positions: Float32Array }[] = [];
+
+  for (let first = 0; first < ranges.length;) {
+    const font = ranges[first].font;
+
+    let end = first,
+      count = 0;
+
+    while (end < ranges.length && ranges[end].font === font) {
+      count += ranges[end].to - ranges[end].from;
+      end++;
+    }
+
+    const glyphs = new Uint16Array(count);
+    const coordinates = new Float32Array(count * 2);
+    let cursor = 0;
+
+    for (let i = first; i < end; i++) {
+      const { from, to } = ranges[i];
+
+      for (let slot = from; slot < to; slot++, cursor++) {
+        glyphs[cursor] = ids[font][slot];
+        coordinates[cursor * 2] = positions[font][slot * 2];
+        coordinates[cursor * 2 + 1] = positions[font][slot * 2 + 1];
+      }
+    }
+
+    result.push({ font, glyphs, positions: coordinates });
+    first = end;
+  }
+
+  return result;
 }
 
 // Keep snapshot closures outside the composition scope. Otherwise captured
