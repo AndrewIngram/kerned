@@ -1,20 +1,9 @@
+import { paragraph } from '@gprose/extension-document';
+import type { NodeIdentity, Schema } from '@gprose/model';
 import { z } from 'zod';
 
-import type { TableNode } from './demo-model';
-
-/** Plain-text clipboard representation for a read-only table block. */
-export function tablePlainText(table: TableNode): string {
-  const rows = table.rows.map((row) =>
-    row.map((cell) => cell.paragraphs.map((p) => p.text).join('\n')).join('\t'),
-  );
-
-  return (table.caption ? [table.caption, ...rows] : rows).join('\n');
-}
-
-import type { NodeIdentity, Schema } from '@gprose/model';
-
-import { createCellSelectionExtension } from './cell-selection';
-import { paragraph, table as tableDefinition, tableCell } from './starter-definitions';
+import { table as tableDefinition, tableCell } from './definitions.js';
+import { createCellSelectionExtension } from './selection.js';
 
 const cellCoordinates = z.object({
   row: z.number().int().nonnegative(),

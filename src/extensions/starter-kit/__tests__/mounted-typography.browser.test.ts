@@ -1,10 +1,10 @@
 import { createEditor } from '@gprose/core';
+import { paragraph, heading } from '@gprose/extension-document';
 import { createSchema } from '@gprose/model';
 import { defineStyleRule, mountEditor } from '@gprose/view';
 import { createViewDiagnostics } from '@gprose/view/diagnostics';
 import { expect, test } from 'vitest';
 
-import { paragraph, heading } from '../../starter-definitions';
 import { starterBrowserExtensions } from '../browser';
 
 test('list markers follow their text metrics, font and live theme rather than independent CSS constants', async ({

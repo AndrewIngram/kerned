@@ -1,13 +1,14 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
+import { formattingSpans } from '@gprose/extension-document';
+import { mentionLayout } from '@gprose/extension-document';
+import { paragraph, heading, image, quote, list, listItem } from '@gprose/extension-document';
+import { table } from '@gprose/extension-table';
+import { tableRows } from '@gprose/extension-table';
 import type { NodeIdentity, Schema } from '@gprose/model';
 import { defineNodePresentation, presentations } from '@gprose/view';
 import type { BlockPresentation } from '@gprose/view';
 
 import type { StarterLeaf } from '../demo-model';
-import { formattingSpans } from '../formatting';
-import { inlineSchema } from '../mention';
-import { paragraph, heading, image, table, quote, list, listItem } from '../starter-definitions';
-import { tableRows } from '../table';
 import { typography } from '../typography';
 
 /** Starter-kit appearance, independent of the scene's placement and retention algorithms. */
@@ -31,7 +32,7 @@ export function createStarterPresentation(size: number): (node: StarterLeaf) => 
         baselineGrid: 4,
         text: node.text,
         spans,
-        atoms: node.inline.map(inlineSchema.layout),
+        atoms: node.inline.map(mentionLayout),
       };
     } else {
       value = {
@@ -71,7 +72,7 @@ export const starterPresentation = defineExtension({
         baselineGrid: 4,
         text: attrs.text,
         spans: formattingSpans(node.marks),
-        atoms: node.inline.map(inlineSchema.layout),
+        atoms: node.inline.map(mentionLayout),
       })),
     );
     context.provide(
@@ -86,7 +87,7 @@ export const starterPresentation = defineExtension({
           baselineGrid: 4,
           text: attrs.text,
           spans,
-          atoms: node.inline.map(inlineSchema.layout),
+          atoms: node.inline.map(mentionLayout),
         };
       }),
     );

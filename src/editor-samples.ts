@@ -1,3 +1,4 @@
+import { formattingMarks } from '@gprose/extension-document';
 import { createOutlineExtension, type OutlineEntry } from '@gprose/extension-outline';
 import { createHtmlParser } from '@gprose/view';
 
@@ -5,7 +6,6 @@ import { createSampleDocument } from './demo/sample-document';
 import { sampleChunk } from './editor-stream';
 import { plainText, type StarterNode } from './extensions/demo-model';
 import { demoSchema } from './extensions/demo-schema';
-import { formattingMarks } from './extensions/formatting';
 import { starterHtmlParsers } from './extensions/html-parsers';
 
 type BookSampleId = 'warbreaker' | 'war-and-peace';

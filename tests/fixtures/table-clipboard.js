@@ -4,14 +4,14 @@ export { indexTree } from '@gprose/model';
 
 export { demoSchema } from '../../src/extensions/demo-schema.ts';
 
-export { createTable, tableCells } from '../../src/extensions/table.ts';
+export { createTable, tableCells } from '@gprose/extension-table';
 
 export {
   copyCellRectangle,
   pasteCellRectangle,
   cellRectangleText,
   plainCellRectangle,
-} from '../../src/extensions/table-clipboard.ts';
+} from '@gprose/extension-table';
 
 export { writeClipboard, readClipboard } from '../../src/extensions/clipboard.ts';
 

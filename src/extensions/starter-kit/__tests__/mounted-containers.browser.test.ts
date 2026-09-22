@@ -1,11 +1,11 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { list } from '@gprose/extension-document';
 import { createSchema, defineNode, indexTree } from '@gprose/model';
 import { textSelection } from '@gprose/state';
 import { mountEditor, presentations, defineNodePresentation } from '@gprose/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { list } from '../../starter-definitions';
 import { starterBrowserExtensions } from '../browser';
 
 const section = defineNode({

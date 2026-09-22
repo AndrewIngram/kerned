@@ -1,10 +1,10 @@
 import * as commentModule from '@gprose/extension-comments';
+import * as cellSelectionModule from '@gprose/extension-table';
 import * as modelModule from '@gprose/model';
 import * as stateModule from '@gprose/state';
 import * as transformModule from '@gprose/transform';
 import { test, expect } from 'vitest';
 
-import * as cellSelectionModule from '../src/extensions/cell-selection.ts';
 import * as demoSchemaModule from '../src/extensions/demo-schema.ts';
 import * as headingsModule from '../src/extensions/headings.ts';
 import * as editorFoundationModule from './fixtures/editor-foundation.js';

@@ -1,7 +1,7 @@
+import { mentionText } from '@gprose/extension-document';
 import type { DocumentNode } from '@gprose/model';
 import type { TextSpan } from '@gprose/view';
 
-import { inlineSchema } from './mention';
 import type { starterDefinitions } from './starter-definitions';
 
 export type StarterSpan = TextSpan & { underline?: boolean };
@@ -27,7 +27,7 @@ export type ListItemNode = Extract<StarterNode, { kind: 'listItem' }>;
 export type StarterLeaf = TextBlockNode | ImageNode | TableNode;
 
 export function plainText(node: TextBlockNode, from = 0, to = node.text.length) {
-  const labels = new Map(node.inline.map((value) => [value.index, inlineSchema.plainText(value)]));
+  const labels = new Map(node.inline.map((value) => [value.index, mentionText(value)]));
   let result = '';
 
   for (let i = from; i < to; i++) result += labels.get(i) ?? node.text[i];

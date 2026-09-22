@@ -1,3 +1,4 @@
+import { createCellSelectionExtension } from '@gprose/extension-table';
 import { jsonNumber, createSchema, defineNode, type DocumentNode } from '@gprose/model';
 import {
   createEditor,
@@ -12,8 +13,6 @@ import {
 } from '@gprose/state';
 import { type Step } from '@gprose/transform';
 import { z } from 'zod';
-
-import { createCellSelectionExtension } from './extensions/cell-selection';
 
 const textDefinition = defineNode({
   name: 'text',

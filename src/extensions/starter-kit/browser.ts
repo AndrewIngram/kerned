@@ -1,9 +1,9 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
+import { image } from '@gprose/extension-document';
 import { inputPolicies, htmlParsers, keyboardShortcuts } from '@gprose/view';
 import { defineNodeView, nodeViews } from '@gprose/view';
 
 import { starterHtmlParsers } from '../html-parsers';
-import { image } from '../starter-definitions';
 import { containerDecorations } from './container-decorations';
 import { createImageRenderer } from './image-view';
 import { starterExtensions } from './index';
@@ -11,10 +11,11 @@ import { mentionView } from './mention-view';
 
 export { mentionView, onMentionActivate, type MentionActivation } from './mention-view';
 
+import { tableView } from '@gprose/extension-table/browser';
+
 import { createStarterKitInput } from './input';
 import { starterPresentation } from './presentation';
 import { starterKeyboardShortcuts } from './shortcuts';
-import { tableView } from './table-node-view';
 import { underlineView } from './underline-view';
 
 export { containerDecorations } from './container-decorations';
@@ -68,7 +69,7 @@ export function starterBrowserExtensions({
 /** Schema-specific editing policy installed through the same composed session. */
 export const starterInput = defineExtension({
   name: 'starterInput',
-  requires: ['starterEditing', 'starterFormatting', 'starterStructure', 'starterTables'],
+  requires: ['starterEditing', 'documentFormatting', 'starterStructure', 'tableEditing'],
   options: {},
   setup(_options, context: ContributionContext) {
     for (const shortcut of starterKeyboardShortcuts) context.provide(keyboardShortcuts, shortcut);

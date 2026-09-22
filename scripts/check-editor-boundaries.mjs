@@ -75,11 +75,11 @@ for (const fixture of [
   'src/editor-extension-checks.ts',
   'src/editor-container-checks.ts',
   'src/editor-selection-checks.ts',
-  'src/extensions/cell-selection.ts',
+  'packages/extension-table/src/selection.ts',
 ]) {
   for (const specifier of dependencies(fixture, readFileSync(fixture, 'utf8'))) {
     assert.ok(
-      /^@gprose\/(?:model|transform|state)$/.test(specifier) ||
+      /^@gprose\/(?:model|transform|state|extension-document|extension-table)$/.test(specifier) ||
         specifier === '@gprose/view' ||
         specifier.startsWith('./extensions/') ||
         // Attribute validators are consumer-owned Standard Schema implementations.

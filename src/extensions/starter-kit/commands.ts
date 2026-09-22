@@ -4,6 +4,7 @@ import {
   defineDocumentCommand,
   type DocumentCommandArguments,
 } from '@gprose/core';
+import { replaceText } from '@gprose/extension-document';
 import { AllSelection } from '@gprose/state';
 
 import { pasteFragment, type ClipboardFragment } from '../clipboard-fragment';
@@ -14,7 +15,6 @@ import {
   deleteForward,
   insertText,
   pasteText,
-  replaceText,
 } from './text-editing';
 
 export interface UpdateNodeArguments extends DocumentCommandArguments {

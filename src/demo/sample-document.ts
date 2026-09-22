@@ -1,5 +1,6 @@
+import { createMention } from '@gprose/extension-document';
+
 import type { StarterNode } from '../extensions/demo-model';
-import { createMention } from '../extensions/mention';
 
 export function createSampleDocument(): StarterNode[] {
   const first = 'Review the draft with \ufffc before sharing it with the team.';

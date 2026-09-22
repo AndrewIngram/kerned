@@ -1,4 +1,5 @@
 import { createEditor } from '@gprose/core';
+import { tableCells } from '@gprose/extension-table';
 import {
   createSchema,
   defineNode,
@@ -12,7 +13,6 @@ import { z } from 'zod';
 
 import type { ClipboardFragment } from '../clipboard-fragment';
 import { starterExtensions } from '../starter-kit';
-import { tableCells } from '../table';
 
 const caption = defineNode({
   name: 'caption',

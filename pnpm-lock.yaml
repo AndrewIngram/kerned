@@ -30,6 +30,9 @@ importers:
       '@gprose/extension-comments':
         specifier: workspace:*
         version: link:packages/extension-comments
+      '@gprose/extension-document':
+        specifier: workspace:*
+        version: link:packages/extension-document
       '@gprose/extension-history':
         specifier: workspace:*
         version: link:packages/extension-history
@@ -39,6 +42,9 @@ importers:
       '@gprose/extension-search':
         specifier: workspace:*
         version: link:packages/extension-search
+      '@gprose/extension-table':
+        specifier: workspace:*
+        version: link:packages/extension-table
       '@gprose/model':
         specifier: workspace:*
         version: link:packages/model
@@ -127,6 +133,30 @@ importers:
         specifier: workspace:*
         version: link:../view
 
+  packages/extension-document:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+      '@gprose/state':
+        specifier: workspace:*
+        version: link:../state
+      '@gprose/transform':
+        specifier: workspace:*
+        version: link:../transform
+      '@gprose/view':
+        specifier: workspace:*
+        version: link:../view
+      '@standard-schema/spec':
+        specifier: 1.1.0
+        version: 1.1.0
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
+
   packages/extension-history:
     dependencies:
       '@gprose/core':
@@ -153,6 +183,30 @@ importers:
       '@gprose/view':
         specifier: workspace:*
         version: link:../view
+
+  packages/extension-table:
+    dependencies:
+      '@gprose/core':
+        specifier: workspace:*
+        version: link:../core
+      '@gprose/extension-document':
+        specifier: workspace:*
+        version: link:../extension-document
+      '@gprose/model':
+        specifier: workspace:*
+        version: link:../model
+      '@gprose/state':
+        specifier: workspace:*
+        version: link:../state
+      '@gprose/transform':
+        specifier: workspace:*
+        version: link:../transform
+      '@gprose/view':
+        specifier: workspace:*
+        version: link:../view
+      zod:
+        specifier: 4.6.5
+        version: 4.6.5
 
   packages/model:
     dependencies:

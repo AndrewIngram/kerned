@@ -1,8 +1,8 @@
+import { formattingSpans } from '@gprose/extension-document';
+import { mentionLayout } from '@gprose/extension-document';
 import { auditReflow, type ViewDiagnostics, type ReflowAuditBlock } from '@gprose/view/diagnostics';
 
 import type { StarterLeaf } from './extensions/demo-model';
-import { formattingSpans } from './extensions/formatting';
-import { inlineSchema } from './extensions/mention';
 import { typography } from './extensions/typography';
 
 /** The fixture owns schema-specific presentation; the view owns the independent layout audit. */
@@ -22,7 +22,7 @@ export function checkReflow(nodes: StarterLeaf[], diagnostics: ViewDiagnostics, 
           baselineGrid: 4,
           text: node.text,
           spans,
-          atoms: node.inline.map(inlineSchema.layout),
+          atoms: node.inline.map(mentionLayout),
         },
       };
     }

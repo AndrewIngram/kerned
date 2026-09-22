@@ -1,4 +1,5 @@
 import './table-view.css';
+import { formattingSpans } from '@gprose/extension-document';
 import type { NodeIdentity, Schema, TextPoint } from '@gprose/model';
 import {
   TextSelection,
@@ -12,9 +13,8 @@ import { nativeTextCaret, revealNativeText } from '@gprose/view';
 import type { ReadTextDecorations, TextDecoration } from '@gprose/view';
 import { applyTextStyle, type ReadTextStyle, type TextStyle } from '@gprose/view';
 
-import { formattingSpans } from '../formatting';
-import { tableCells } from '../table';
-import { createTableContent, type TableText, type TableCellContent } from './table-content';
+import { createTableContent, type TableText, type TableCellContent } from './table-content.js';
+import { tableCells } from './table.js';
 
 export type TableFrame<N extends NodeIdentity = NodeIdentity> = {
   node: N;

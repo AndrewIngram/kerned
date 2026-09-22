@@ -1,11 +1,11 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createMention, mentionLayout } from '@gprose/extension-document';
 import { createSchema, defineNode } from '@gprose/model';
 import { textSelection } from '@gprose/state';
 import { defineNodePresentation, mountEditor, presentations } from '@gprose/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 
-import { createMention, inlineSchema } from '../../mention';
 import { starterBrowserExtensions, onMentionActivate, type MentionActivation } from '../browser';
 
 const caption = defineNode({
@@ -34,7 +34,7 @@ const captionView = defineExtension({
         before: 0,
         after: 16,
         spans: [],
-        atoms: node.inline.map(inlineSchema.layout),
+        atoms: node.inline.map(mentionLayout),
       })),
     );
 

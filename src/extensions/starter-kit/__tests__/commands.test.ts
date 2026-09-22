@@ -1,9 +1,9 @@
 import { createEditor } from '@gprose/core';
+import { tableCells } from '@gprose/extension-table';
 import { createSchema, indexTree } from '@gprose/model';
 import { AllSelection, TextSelection, textSelection } from '@gprose/state';
 import { expect, test, vi } from 'vitest';
 
-import { tableCells } from '../../table';
 import { starterExtensions } from '../index';
 
 const schema = createSchema({ extensions: starterExtensions });

@@ -1,4 +1,5 @@
 import { defineContribution, defineExtension, type ExtensionContext } from '@gprose/core';
+import { mentionDefinition } from '@gprose/extension-document';
 import type { NodeIdentity } from '@gprose/model';
 import {
   viewLayers,
@@ -6,8 +7,6 @@ import {
   type InlineViewFrame,
   type PreparedText,
 } from '@gprose/view';
-
-import { mentionDefinition } from '../starter-definitions';
 
 import './mention-view.css';
 

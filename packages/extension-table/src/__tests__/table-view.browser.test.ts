@@ -4,15 +4,15 @@ import { textSelection } from '@gprose/state';
 import { createKeyboardShortcuts } from '@gprose/view';
 import { expect, test } from 'vitest';
 
-import { createDocumentPresentation } from '../../../../packages/view/src/canvas/presentation.js';
-import { createSampleDocument } from '../../../demo/sample-document';
-import type { TableNode } from '../../demo-model';
-import { tableCells } from '../../table';
-import { starterInput } from '../browser';
-import { createStarterDocumentQuery } from '../browser-document';
-import { starterExtensions } from '../index';
-import { starterPresentation } from '../presentation';
-import { createTableView, type TableFrame } from '../table-view';
+import { createSampleDocument } from '../../../../src/demo/sample-document.js';
+import type { TableNode } from '../../../../src/extensions/demo-model.js';
+import { createStarterDocumentQuery } from '../../../../src/extensions/starter-kit/browser-document.js';
+import { starterInput } from '../../../../src/extensions/starter-kit/browser.js';
+import { starterExtensions } from '../../../../src/extensions/starter-kit/index.js';
+import { starterPresentation } from '../../../../src/extensions/starter-kit/presentation.js';
+import { createDocumentPresentation } from '../../../view/src/canvas/presentation.js';
+import { createTableView, type TableFrame } from '../table-view.js';
+import { tableCells } from '../table.js';
 
 function fixture(writable = true) {
   let editable = writable;

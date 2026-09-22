@@ -1,6 +1,5 @@
+import { formattingCommands } from '@gprose/extension-document';
 import type { KeyboardShortcut } from '@gprose/view';
-
-import { formattingCommands } from './formatting';
 
 /** Built-ins run after ordinary extension shortcuts. Both physical modifiers
  * preserve the editor's existing Control/Command bindings on every platform. */

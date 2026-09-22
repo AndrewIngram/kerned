@@ -1,16 +1,17 @@
-import { normalizeMarks, type MarkRange } from '@gprose/model';
+import { createSchema, normalizeMarks, type MarkRange } from '@gprose/model';
+import type { TextSpan } from '@gprose/view';
 
-import type { StarterSpan } from './demo-model';
-import { demoSchema } from './demo-schema';
-import { formattingDefinitions } from './starter-definitions';
+export type FormattingSpan = TextSpan & { underline?: boolean };
+
+import { formattingDefinitions } from './definitions.js';
 
 export type TextFormat = (typeof formattingDefinitions)[number]['name'];
 
 const formats = formattingDefinitions.map((definition) => definition.name);
 
-export const formattingSchema = demoSchema.marks;
+const formattingSchema = createSchema({ extensions: formattingDefinitions }).marks;
 
-export function formattingMarks(spans: readonly StarterSpan[]) {
+export function formattingMarks(spans: readonly FormattingSpan[]) {
   return normalizeMarks(
     spans.flatMap((span) =>
       formats.flatMap((type) =>
@@ -23,11 +24,11 @@ export function formattingMarks(spans: readonly StarterSpan[]) {
 }
 
 /** Project semantic marks to the compact font-style runs consumed by layout. */
-export function formattingSpans(ranges: readonly MarkRange[]): StarterSpan[] {
+export function formattingSpans(ranges: readonly MarkRange[]): FormattingSpan[] {
   const points = [...new Set(ranges.flatMap((range) => [range.from, range.to]))].toSorted(
       (a, b) => a - b,
     ),
-    spans: StarterSpan[] = [];
+    spans: FormattingSpan[] = [];
 
   for (let i = 0; i < points.length - 1; i++) {
     const start = points[i],

@@ -41,7 +41,7 @@ plain-text fallback.
 
 ## Rectangular cell clipboard
 
-`src/extensions/table-clipboard.ts` owns schema-specific rectangular copy and paste commands.
+`@gprose/extension-table` owns schema-specific rectangular copy and paste commands.
 The selection extension supplies logical grid bounds, including row/column selections. Copy uses
 visual row/column order even when the active cell is the bottom-right corner. It writes a cropped
 HTML table, the local rich fragment and spreadsheet TSV. Empty cells remain present; TSV quotes

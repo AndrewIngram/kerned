@@ -104,7 +104,9 @@
     "@gprose/extension-comments": "workspace:*",
     "@gprose/extension-history": "workspace:*",
     "@gprose/extension-outline": "workspace:*",
-    "@gprose/extension-search": "workspace:*"
+    "@gprose/extension-search": "workspace:*",
+    "@gprose/extension-document": "workspace:*",
+    "@gprose/extension-table": "workspace:*"
   },
   "packageManager": "pnpm@10.14.0"
 }

@@ -5,15 +5,15 @@ import {
   type ReadContext,
   type CommandContext,
 } from '@gprose/core';
-import type { NodeIdentity } from '@gprose/model';
-import { TextSelection, RangeSelection, textSelection } from '@gprose/state';
+import { paragraph } from '@gprose/extension-document';
+import { indexTree, type NodeIdentity } from '@gprose/model';
+import { TextSelection, RangeSelection, textSelection, selectionContext } from '@gprose/state';
 
-import { paragraph, table } from '../starter-definitions';
-import { appendTableColumn, appendTableRow, createTable, tableCells } from '../table';
-import { selectedStructure } from './selection';
+import { table } from './definitions.js';
+import { appendTableColumn, appendTableRow, createTable, tableCells } from './table.js';
 
 function tableSelection<N extends NodeIdentity>(context: ReadContext<N>) {
-  const selected = selectedStructure(context);
+  const tree = indexTree(context.schema, context.state.nodes);
   const selection = context.state.selection;
 
   const id =
@@ -21,13 +21,15 @@ function tableSelection<N extends NodeIdentity>(context: ReadContext<N>) {
       ? selection.tableId
       : selection instanceof TextSelection || selection instanceof RangeSelection
         ? selection.head.id
-        : selected.ids[0];
+        : selection.ranges(selectionContext(context.schema, context.state.nodes, tree))[0]?.id;
 
-  return {
-    selected,
-    id,
-    entry: id === undefined ? undefined : selected.ancestor(id, context.schema.node(table).matches),
-  };
+  let entry = id === undefined ? undefined : tree.byId.get(id);
+  const tableType = context.schema.node(table);
+
+  while (entry && !tableType.matches(entry.node))
+    entry = entry.parent === null ? undefined : tree.byId.get(entry.parent);
+
+  return { tree, id, entry };
 }
 
 function changeTable<N extends NodeIdentity>(context: CommandContext<N>, column: boolean) {
@@ -52,8 +54,8 @@ function changeTable<N extends NodeIdentity>(context: CommandContext<N>, column:
   return true;
 }
 
-export const starterTables = defineExtension({
-  name: 'starterTables',
+export const tableEditing = defineExtension({
+  name: 'tableEditing',
   options: {},
   requires: ['paragraph', 'table', 'tableCell'],
   setup: () => ({
@@ -61,10 +63,10 @@ export const starterTables = defineExtension({
     commands: {
       insertTable: defineCommand({
         execute(context) {
-          const { selected, id } = tableSelection(context);
-          let entry = id === undefined ? undefined : selected.tree.byId.get(id);
+          const { tree, id } = tableSelection(context);
+          let entry = id === undefined ? undefined : tree.byId.get(id);
 
-          while (entry?.parent != null) entry = selected.tree.byId.get(entry.parent);
+          while (entry?.parent != null) entry = tree.byId.get(entry.parent);
 
           if (!entry) return false;
           const node = createTable(context.schema, context.allocate);

@@ -1,9 +1,9 @@
+import { paragraph } from '@gprose/extension-document';
 import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
 import { TextSelection, textSelection, selectionContext, type EditorState } from '@gprose/state';
 import { type Step } from '@gprose/transform';
 
 import { replaceStructuredText } from './blocks';
-import { paragraph } from './starter-definitions';
 
 /** Plain-text clipboard paragraphs, inserted together as one undoable transaction. */
 export function pasteParagraphs<N extends NodeIdentity>(

@@ -1,4 +1,5 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { quote } from '@gprose/extension-document';
 import { createSchema } from '@gprose/model';
 import { TextSelection, textSelection } from '@gprose/state';
 import { defineNodeView, nodeViews } from '@gprose/view';
@@ -6,7 +7,6 @@ import { mountEditor } from '@gprose/view';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 
-import { quote } from '../src/extensions/starter-definitions';
 import { starterBrowserExtensions } from '../src/extensions/starter-kit/browser';
 
 const chrome = defineExtension({

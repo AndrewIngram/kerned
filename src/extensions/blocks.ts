@@ -1,3 +1,5 @@
+import { quote, list, listItem } from '@gprose/extension-document';
+import { table } from '@gprose/extension-table';
 import { indexTree, type Schema, type NodeIdentity, type SelectionRange } from '@gprose/model';
 import {
   type EditorState,
@@ -11,7 +13,6 @@ import { type Step } from '@gprose/transform';
 import { createBlockCommands } from './block-commands';
 import type { StarterNode } from './demo-model';
 import { createListCommands, type ListAdapter } from './lists';
-import { quote, list, listItem, table } from './starter-definitions';
 
 const starterList: ListAdapter<StarterNode> = {
   list: (node) => (node.kind === 'list' ? node : null),

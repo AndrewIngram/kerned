@@ -11,7 +11,7 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     await page.waitForFunction(() => window.editorDiagnostics);
 
     const result = await page.evaluate(async () => {
-      const { textCommands } = await import('/src/extensions/text-commands.ts');
+      const { textCommands } = await import('/@id/@gprose/extension-document');
       const { createEditor, TextSelection } = await import('/@id/@gprose/state');
       const { demoSchema } = await import('/src/extensions/demo-schema.ts');
 

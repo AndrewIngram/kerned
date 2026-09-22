@@ -1,4 +1,5 @@
 import { defineCommand, type CommandContext } from '@gprose/core';
+import { paragraph, quote, type TextReplacementRange } from '@gprose/extension-document';
 import { boundaries, childrenAt, indexTree, type NodeIdentity } from '@gprose/model';
 import {
   AllSelection,
@@ -12,7 +13,6 @@ import {
 import { replaceStructuredText } from '../blocks';
 import { pasteFragment } from '../clipboard-fragment';
 import { pasteParagraphs } from '../paste';
-import { paragraph, quote } from '../starter-definitions';
 import { createStructuralPolicies } from './structure';
 
 export const replaceSelection = defineCommand({
@@ -53,8 +53,6 @@ export const replaceSelection = defineCommand({
   },
 });
 
-export type TextReplacementRange = { readonly from: number; readonly to: number };
-
 /** Native input may replace a textarea diff range within the currently selected text node. */
 export const insertText = defineCommand({
   execute(context, text: string, range?: TextReplacementRange) {
@@ -86,33 +84,6 @@ export const insertText = defineCommand({
     if (!(change.selection instanceof TextSelection))
       throw new Error('Text insertion requires a caret');
     context.apply({ ...change, selection: change.selection, input: true });
-
-    return true;
-  },
-});
-
-export type TextReplacement = TextReplacementRange & {
-  readonly id: number;
-  readonly text: string;
-  readonly caret?: number;
-};
-
-/** Explicit text targets support native controls whose diff includes a resulting caret. */
-export const replaceText = defineCommand({
-  execute(context, edit: TextReplacement) {
-    const selection = context.state.selection;
-
-    if (
-      !(selection instanceof TextSelection) ||
-      selection.anchor.id !== edit.id ||
-      selection.head.id !== edit.id
-    )
-      context.select(textSelection(edit.id, edit.from, edit.to));
-    context.apply({
-      steps: [{ kind: 'replaceText', id: edit.id, from: edit.from, to: edit.to, text: edit.text }],
-      selection: textSelection(edit.id, edit.caret ?? edit.from + edit.text.length),
-      input: true,
-    });
 
     return true;
   },

@@ -1,9 +1,9 @@
 import { defineCommand, defineExtension, defineQuery } from '@gprose/core';
 import { toggleMarkCommand } from '@gprose/state';
 
-import type { TextFormat } from '../formatting';
-import { formattingDefinitions } from '../starter-definitions';
-import { textCommands } from '../text-commands';
+import { formattingDefinitions } from './definitions.js';
+import type { TextFormat } from './formatting.js';
+import { textCommands } from './text-commands.js';
 
 /** Formatting follows text and mark capabilities, including custom text nodes. */
 export const formattingCommands = {
@@ -39,8 +39,8 @@ export const formattingQueries = {
   ),
 };
 
-export const starterFormatting = defineExtension({
-  name: 'starterFormatting',
+export const documentFormatting = defineExtension({
+  name: 'documentFormatting',
   options: {},
   requires: formattingDefinitions.map((definition) => definition.name),
   setup: () => ({

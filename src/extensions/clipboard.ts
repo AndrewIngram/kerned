@@ -1,3 +1,6 @@
+import { paragraph } from '@gprose/extension-document';
+import { table } from '@gprose/extension-table';
+import { cellRectangleText } from '@gprose/extension-table';
 import {
   createDocumentSerializer,
   createDocumentCodec,
@@ -9,9 +12,7 @@ import { createHtmlParser } from '@gprose/view';
 
 import { copyFragment, type ClipboardFragment } from './clipboard-fragment';
 import { starterHtmlParsers } from './html-parsers';
-import { paragraph, table } from './starter-definitions';
 import { starterSerializers } from './static-serializers';
-import { cellRectangleText } from './table-clipboard';
 
 const mime = 'application/x-gprose-fragment';
 

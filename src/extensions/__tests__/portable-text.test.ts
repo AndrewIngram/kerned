@@ -1,16 +1,16 @@
 import { createEditor, defineCommand, defineQuery } from '@gprose/core';
+import { documentFormatting } from '@gprose/extension-document';
+import { textCommands } from '@gprose/extension-document';
 import { localHistory } from '@gprose/extension-history';
+import { tableEditing } from '@gprose/extension-table';
+import { tableCells } from '@gprose/extension-table';
 import { createSchema, defineNode } from '@gprose/model';
 import { NodeSelection, TextSelection, textSelection, toggleMarkCommand } from '@gprose/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 
 import { starterDefinitions } from '../starter-definitions';
-import { starterFormatting } from '../starter-kit/formatting';
 import { starterStructure } from '../starter-kit/structure';
-import { starterTables } from '../starter-kit/tables';
-import { tableCells } from '../table';
-import { textCommands } from '../text-commands';
 
 const caption = defineNode({
   name: 'caption',
@@ -70,7 +70,7 @@ const schema = createSchema({
   extensions: [
     ...starterDefinitions,
     localHistory,
-    starterFormatting,
+    documentFormatting,
     starterStructure,
     caption,
     widget,
@@ -237,9 +237,9 @@ test('table commands preserve custom cell text and cell selections across edits 
     extensions: [
       ...starterDefinitions,
       localHistory,
-      starterFormatting,
+      documentFormatting,
       starterStructure,
-      starterTables,
+      tableEditing,
       caption,
       widget,
     ],

@@ -10,7 +10,7 @@ import {
 } from '@gprose/state';
 import { type Step } from '@gprose/transform';
 
-import type { TextFormat } from './formatting';
+import type { TextFormat } from './formatting.js';
 
 /** Extension commands return ordinary transactions; the core owns history/mapping. */
 export function textCommands<N extends NodeIdentity>(

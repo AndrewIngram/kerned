@@ -84,7 +84,7 @@ Executable callbacks are not stored in document content or transactions.
 
 ## Mentions and comments use public APIs
 
-`src/extensions/mention.ts` implements a mention as `InlineObject<MentionData>`. Its extension supplies plain text and layout projection. The editing model stores extension data separately from positioned draw rectangles. The core inline helpers never inspect a person's name, mention label or identity provider.
+`@gprose/extension-document` defines mentions through `defineInline`. Its extension supplies plain text and layout projection. The editing model stores extension data separately from positioned draw rectangles. The core inline helpers never inspect a person's name, mention label or identity provider.
 
 `@gprose/extension-comments` keeps discussion messages outside document nodes and captures independent `DocumentRange` values through state. It supplies range decorations without teaching the generic model about replies or comment storage. The model's annotation helpers remain available for other extension-owned ranges.
 
@@ -117,3 +117,27 @@ OT or CRDT integration must validate that peers agree on schemas and operation m
 `pnpm run check:transactions` runs a separate heading/card schema without paragraphs, including a different text field, split/join, undo/redo and durable anchors. It tests diagnostics and formula tokens against the same public annotation and inline APIs used by comments and mentions. Invalid registration and a plugin that violates replacement semantics are rejected.
 
 The existing editor, large-document and viewport-reflow checks exercise the migrated demo in Chromium, Firefox and WebKit. Extension dispatch occurs at document operations and layout projection, not per glyph. The Standard Schema contract is type-only; assembly reuses the existing validator dependency and adds no serialization boundary.
+
+## Delivered extension packages
+
+`@gprose/extension-document` owns paragraph, heading, image, quote and list
+definitions, formatting marks and mention values. Its formatting commands bind
+to the consumer's installed schema. Mention construction and mark conversion
+assemble only their own value definitions, with no demo schema dependency.
+HTML parsing contributions live under `@gprose/extension-document/browser`.
+
+`@gprose/extension-table` owns the table/cell definitions, grid selection, row and
+column commands, rectangular clipboard operations and static serializers.
+`tableEditing` installs the cell selection adapter and named commands; its
+default constructors require the standard paragraph definition. Existing cells
+can contain other installed textblock definitions. The browser entry exports
+`tableView` and `tableHtmlParsers`. The view uses the public text-replacement
+command and the selection's replacement operation, so it does not require
+starter-kit editing policies. Keyboard and clipboard integrations still come
+from the mounted view's registered contributions.
+
+The built table consumer in `tests/consumers/table.ts` installs a custom text
+node and explicit presentations without starter-kit or React. It checks native
+input, grid changes, cell clearing, undo, nested table import and destruction.
+The headless consumer checks table persistence, static serialization, cell
+selection and grid commands in ordinary Node.

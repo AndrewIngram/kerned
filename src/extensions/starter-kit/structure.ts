@@ -1,11 +1,11 @@
 import { defineCommand, defineExtension, defineQuery, type ReadContext } from '@gprose/core';
+import { quote, list, listItem } from '@gprose/extension-document';
 import { type NodeIdentity, type Schema } from '@gprose/model';
 
 import { createBlockCommands } from '../block-commands';
 import type { HeadingLevel } from '../demo-model';
 import { setTextBlockType } from '../headings';
 import { createListCommands, type ListAdapter } from '../lists';
-import { quote, list, listItem } from '../starter-definitions';
 import { selectedStructure } from './selection';
 
 /** Bind constructors to the executing schema so wrappers can retain foreign children. */

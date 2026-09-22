@@ -1,3 +1,6 @@
+import { paragraph, list, listItem } from '@gprose/extension-document';
+import { table, tableCell } from '@gprose/extension-table';
+import { copyCellRectangle, pasteCellRectangle } from '@gprose/extension-table';
 import { indexTree, validateTree, type NodeIdentity, type Schema } from '@gprose/model';
 import {
   RangeSelection,
@@ -13,8 +16,6 @@ import { supportsLayoutText } from '@gprose/view/text';
 
 import { replaceStructuredText } from './blocks';
 import type { StarterNode } from './demo-model';
-import { paragraph, table, tableCell, list, listItem } from './starter-definitions';
-import { copyCellRectangle, pasteCellRectangle } from './table-clipboard';
 
 export type ClipboardFragment<N = StarterNode> = { nodes: readonly N[]; inline: boolean };
 

@@ -9,6 +9,7 @@ export const note = defineNode({
   version: 1,
   options: {},
   schema: () => ({
+    groups: ['block', 'textblock'],
     attributes: z.strictObject({ body: z.string() }),
     content: { kind: 'text', field: 'body' },
   }),

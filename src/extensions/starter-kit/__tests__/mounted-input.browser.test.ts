@@ -1,4 +1,5 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { formattingCommands } from '@gprose/extension-document';
 import { createSchema, defineNode } from '@gprose/model';
 import { textSelection } from '@gprose/state';
 import { keyboardShortcuts } from '@gprose/view';
@@ -7,7 +8,6 @@ import { expect, test } from 'vitest';
 import { z } from 'zod';
 
 import { starterBrowserExtensions } from '../browser';
-import { formattingCommands } from '../formatting';
 
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 

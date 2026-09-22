@@ -1,17 +1,19 @@
 import { defineExtension, createInputRules, type ContributionContext } from '@gprose/core';
+import { replaceText } from '@gprose/extension-document';
 import type { NodeIdentity } from '@gprose/model';
+import { selectionContext } from '@gprose/state';
 import { createKeyboardShortcuts } from '@gprose/view';
 import { nodeViews, type NodeViewContext, type NodeViewFrame } from '@gprose/view';
 
-import { table } from '../starter-definitions';
-import { editingCommands } from './commands';
-import { createTableView } from './table-view';
+import { table } from './definitions.js';
+import { createTableView } from './table-view.js';
+import { tableCells } from './table.js';
 
 /** Grid interaction belongs to the table extension; the mount supplies shared clipboard policy. */
 export const tableView = defineExtension({
   name: 'tableView',
   options: {},
-  requires: ['table', 'tableCell', 'heading', 'starterEditing', 'starterFormatting'],
+  requires: ['table', 'tableCell', 'tableEditing'],
   setup(_options, context: ContributionContext) {
     context.provide(nodeViews, {
       create<N extends NodeIdentity>({ editor, clipboard, notice }: NodeViewContext<N>) {
@@ -49,8 +51,7 @@ export const tableView = defineExtension({
                   onText: (id, from, to, text, caret, { composing, pasted }) => {
                     const applied = run(() =>
                       editor.transact(
-                        (draft) =>
-                          draft.command(editingCommands.replaceText, { id, from, to, text, caret }),
+                        (draft) => draft.command(replaceText, { id, from, to, text, caret }),
                         {
                           history: pasted
                             ? 'separate'
@@ -71,9 +72,19 @@ export const tableView = defineExtension({
                   onKeyDown: (event) => run(() => shortcuts(event)),
                   onReplace: (text) =>
                     run(() =>
-                      editor.transact((draft) =>
-                        draft.command(editingCommands.replaceSelection, text),
-                      ),
+                      editor.transact((draft) => {
+                        const selection = draft.state.selection;
+
+                        if (!(selection instanceof tableCells.CellSelection)) return false;
+                        draft.apply(
+                          selection.replace(
+                            selectionContext(draft.schema, draft.state.nodes),
+                            text,
+                          ),
+                        );
+
+                        return true;
+                      }),
                     ),
                   clipboard: { copy: clipboard, cut: clipboard, paste: clipboard },
                 });
@@ -91,3 +102,5 @@ export const tableView = defineExtension({
     return {};
   },
 });
+
+export { tableHtmlParsers } from './html-parsers.js';

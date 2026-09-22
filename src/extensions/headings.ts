@@ -1,9 +1,9 @@
+import { paragraph, heading } from '@gprose/extension-document';
 import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
 import { selectionContext, type EditorState } from '@gprose/state';
 import { type Step } from '@gprose/transform';
 
 import type { StarterNode, HeadingLevel } from './demo-model';
-import { paragraph, heading } from './starter-definitions';
 
 /** Change block semantics without replacing text identities or relative positions. */
 export function setTextBlockType<N extends NodeIdentity>(

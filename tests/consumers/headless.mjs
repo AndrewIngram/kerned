@@ -6,9 +6,25 @@ import {
   createCommentStore,
   createCommentProjection,
 } from '@gprose/extension-comments';
+import { paragraph } from '@gprose/extension-document';
 import { localHistory } from '@gprose/extension-history';
 import { createOutlineExtension } from '@gprose/extension-outline';
-import { createSchema, defineNode, defineExtension as modelExtension } from '@gprose/model';
+import {
+  table,
+  tableCell,
+  tableEditing,
+  tableCells,
+  tableRows,
+  tableSerializers,
+} from '@gprose/extension-table';
+import {
+  createSchema,
+  defineNode,
+  createDocumentCodec,
+  createDocumentSerializer,
+  defineNodeSerializer,
+  defineExtension as modelExtension,
+} from '@gprose/model';
 import { TextSelection, Selection, textSelection } from '@gprose/state';
 import { mapPosition } from '@gprose/transform';
 import { z } from 'zod';
@@ -26,6 +42,8 @@ for (const name of [
   'extension-comments',
   'extension-history',
   'extension-outline',
+  'extension-document',
+  'extension-table',
 ]) {
   assert.match(import.meta.resolve(`@gprose/${name}`), /\/dist\/index\.js$/);
   assert.throws(() => import.meta.resolve(`@gprose/${name}/src/index.ts`), {
@@ -134,4 +152,61 @@ assert.equal(editor.isDestroyed, true);
 
 console.log(
   'Built headless packages: custom schema, commands, history, comments, outline, selection identity and private exports pass.',
+);
+
+// Tables assemble without the starter kit, browser exports or default document union.
+const grid = createEditor({
+  schema: createSchema({ extensions: [paragraph, table, tableCell, tableEditing, localHistory] }),
+  content: [{ kind: 'paragraph', text: 'Intro' }],
+});
+
+const intro = grid.state.nodes[0];
+
+grid.select(textSelection(intro.id, 0));
+
+assert.equal(grid.commands.insertTable(), true);
+
+const inserted = grid.state.nodes[1];
+
+const rows = tableRows(grid.schema, inserted);
+
+assert.equal(rows.length, 3);
+
+assert.equal(rows[0].length, 3);
+
+grid.select(new tableCells.CellSelection(inserted.id, rows[0][0].id, rows[0][0].id));
+
+assert.equal(grid.chain().addTableRow().addTableColumn().run(), true);
+
+const expanded = tableRows(grid.schema, grid.state.nodes[1]);
+
+assert.equal(expanded.length, 4);
+
+assert.equal(expanded[0].length, 4);
+
+assert.equal(grid.commands.undo(), true);
+
+assert.deepEqual(tableRows(grid.schema, grid.state.nodes[1]), rows);
+
+const gridCodec = createDocumentCodec(grid.schema);
+
+assert.deepEqual(
+  gridCodec.encode(gridCodec.decode(gridCodec.encode(grid.state.nodes))),
+  gridCodec.encode(grid.state.nodes),
+);
+
+const gridSerializer = createDocumentSerializer(grid.schema, [
+  ...tableSerializers,
+  defineNodeSerializer(paragraph, ({ content }) => ({
+    ...content,
+    html: [{ tag: 'p', children: content.html }],
+  })),
+]);
+
+assert.match(gridSerializer.serialize(grid.state.nodes).html, /<table><caption><\/caption><tr>/);
+
+grid.destroy();
+
+console.log(
+  'Built table package: standalone assembly, cell selection, grid commands and undo pass.',
 );

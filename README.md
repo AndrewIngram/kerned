@@ -195,7 +195,7 @@ are milestone 6 work.
 Inline objects use `InlineObject<Data>` and an `InlineExtension<Data, Layout>`
 with `plainText` and `layout` functions. Range annotations use
 `RangeAnnotation<Data>` and the core's replace, slice, and join helpers. The
-[mention](src/extensions/mention.ts) and [comment](packages/extension-comments/src/index.ts)
+[mention](packages/extension-document/src/mention.ts) and [comment](packages/extension-comments/src/index.ts)
 extensions show both patterns; the text node's editing methods keep their ranges
 in sync. See [React integration](docs/react-extensions.md) for DOM controls,
 measurements, portals, and focus.

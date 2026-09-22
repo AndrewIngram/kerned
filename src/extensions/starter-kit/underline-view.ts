@@ -1,7 +1,6 @@
 import { defineExtension, type ContributionContext } from '@gprose/core';
+import { underline } from '@gprose/extension-document';
 import { defineMarkView, viewLayers, type MarkViewFrame } from '@gprose/view';
-
-import { underline } from '../starter-definitions';
 
 type UnderlineOptions = { color?: string; offset: number; thickness: number };
 

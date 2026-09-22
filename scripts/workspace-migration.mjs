@@ -96,6 +96,90 @@ export const packageMoves = [
   { from: 'src/extensions/outline-view.tsx', to: 'src/demo/outline-menu.tsx' },
   { from: 'src/extensions/outline.css', to: 'src/demo/outline.css' },
   { from: 'src/extensions/html.ts', to: 'src/demo/import-html.ts' },
+  {
+    from: 'src/extensions/formatting.ts',
+    to: 'packages/extension-document/src/formatting.ts',
+    name: '@gprose/extension-document',
+    public: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/mention.ts',
+    to: 'packages/extension-document/src/mention.ts',
+    name: '@gprose/extension-document',
+    public: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/text-commands.ts',
+    to: 'packages/extension-document/src/text-commands.ts',
+    name: '@gprose/extension-document',
+    public: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/starter-kit/formatting.ts',
+    to: 'packages/extension-document/src/commands.ts',
+    name: '@gprose/extension-document',
+    public: '@gprose/extension-document',
+  },
+  {
+    from: 'src/extensions/cell-selection.ts',
+    to: 'packages/extension-table/src/selection.ts',
+    name: '@gprose/extension-table',
+    public: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/table.ts',
+    to: 'packages/extension-table/src/table.ts',
+    name: '@gprose/extension-table',
+    public: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/table-clipboard.ts',
+    to: 'packages/extension-table/src/clipboard.ts',
+    name: '@gprose/extension-table',
+    public: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/starter-kit/tables.ts',
+    to: 'packages/extension-table/src/commands.ts',
+    name: '@gprose/extension-table',
+    public: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/starter-kit/table-node-view.ts',
+    to: 'packages/extension-table/src/browser.ts',
+    name: '@gprose/extension-table',
+    public: '@gprose/extension-table/browser',
+  },
+  {
+    from: 'src/extensions/starter-kit/table-view.ts',
+    to: 'packages/extension-table/src/table-view.ts',
+    name: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/starter-kit/table-content.ts',
+    to: 'packages/extension-table/src/table-content.ts',
+    name: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/starter-kit/table-view.css',
+    to: 'packages/extension-table/src/table-view.css',
+    name: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/table-view.browser.test.ts',
+    to: 'packages/extension-table/src/__tests__/table-view.browser.test.ts',
+    name: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/starter-kit/__tests__/mounted-table.browser.test.ts',
+    to: 'packages/extension-table/src/__tests__/mounted-table.browser.test.ts',
+    name: '@gprose/extension-table',
+  },
+  {
+    from: 'src/extensions/__tests__/scoped-cell-selection.test.ts',
+    to: 'packages/extension-table/src/__tests__/scoped-cell-selection.test.ts',
+    name: '@gprose/extension-table',
+  },
 ];
 
 const apply = process.argv.includes('--apply');

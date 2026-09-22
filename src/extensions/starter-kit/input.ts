@@ -1,4 +1,8 @@
 import { createEditorSerializer, createInputRules } from '@gprose/core';
+import { image } from '@gprose/extension-document';
+import { table as tableDefinition, tableCell } from '@gprose/extension-table';
+import { tableCells } from '@gprose/extension-table';
+import { plainCellRectangle, cellRectangleText } from '@gprose/extension-table';
 import { textContent, type NodeIdentity, type Schema } from '@gprose/model';
 import { TextSelection } from '@gprose/state';
 import {
@@ -12,9 +16,6 @@ import { supportsLayoutText } from '@gprose/view/text';
 
 import { readClipboard, writeClipboard } from '../clipboard';
 import type { ClipboardFragment } from '../clipboard-fragment';
-import { table as tableDefinition, tableCell, image } from '../starter-definitions';
-import { tableCells } from '../table';
-import { plainCellRectangle, cellRectangleText } from '../table-clipboard';
 import { editingCommands } from './commands';
 import { structureCommands, structureQueries } from './structure';
 

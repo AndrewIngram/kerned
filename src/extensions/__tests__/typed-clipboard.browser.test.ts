@@ -5,6 +5,8 @@ import {
   serializers,
   type ContributionContext,
 } from '@gprose/core';
+import { tableCells } from '@gprose/extension-table';
+import { copyCellRectangle, cellRectangleText } from '@gprose/extension-table';
 import {
   createSchema,
   createDocumentSerializer,
@@ -19,8 +21,6 @@ import { z } from 'zod';
 import { readClipboard, writeClipboard } from '../clipboard';
 import { starterExtensions } from '../starter-kit';
 import { starterInput } from '../starter-kit/browser';
-import { tableCells } from '../table';
-import { copyCellRectangle, cellRectangleText } from '../table-clipboard';
 
 const note = defineNode({
   name: 'note',

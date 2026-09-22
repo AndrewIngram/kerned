@@ -1,7 +1,7 @@
+import { paragraph, quote } from '@gprose/extension-document';
+import { table, tableCell } from '@gprose/extension-table';
 import { createSchema } from '@gprose/model';
 import { expect, test } from 'vitest';
-
-import { paragraph, quote, table, tableCell } from '../starter-definitions';
 
 test('blockquote works with a minimal text kit without tables, lists or images', () => {
   const schema = createSchema({ extensions: [paragraph, quote, table, tableCell] });

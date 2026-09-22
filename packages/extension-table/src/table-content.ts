@@ -1,7 +1,7 @@
 import { type NodeIdentity, type Schema, type MarkRange } from '@gprose/model';
 
-import { table, tableCell } from '../starter-definitions';
-import { tableRows } from '../table';
+import { table, tableCell } from './definitions.js';
+import { tableRows } from './table.js';
 
 export type TableText = {
   id: number;

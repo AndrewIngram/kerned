@@ -1,10 +1,11 @@
+import { paragraph } from '@gprose/extension-document';
 import { indexTree, textContent, type NodeIdentity, type Schema } from '@gprose/model';
 import { selectionContext, TextSelection, type EditorState } from '@gprose/state';
 import { type Step } from '@gprose/transform';
 import { supportsLayoutText } from '@gprose/view/text';
 
-import { table as tableDefinition, tableCell, paragraph } from './starter-definitions';
-import { tableCells, tableRows } from './table';
+import { table as tableDefinition, tableCell } from './definitions.js';
+import { tableCells, tableRows } from './table.js';
 
 /** Copy a logical rectangle rather than a tree slice ordered by the active cell. */
 export function copyCellRectangle<N extends NodeIdentity>(

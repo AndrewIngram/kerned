@@ -35,7 +35,11 @@ try {
       emptyOutDir: true,
       target: 'es2022',
       rollupOptions: {
-        input: ['tests/consumers/vanilla.html', 'tests/consumers/react.html'],
+        input: [
+          'tests/consumers/vanilla.html',
+          'tests/consumers/react.html',
+          'tests/consumers/table.html',
+        ],
       },
     },
   });
@@ -45,13 +49,17 @@ try {
       '@gprose/core',
       '@gprose/extension-comments',
       '@gprose/extension-comments/browser',
+      '@gprose/extension-document',
       '@gprose/extension-history',
       '@gprose/extension-search',
+      '@gprose/extension-table',
+      '@gprose/extension-table/browser',
       '@gprose/model',
       '@gprose/react',
       '@gprose/state',
       '@gprose/transform',
       '@gprose/view',
+      '@gprose/view/text',
     ],
   );
 
@@ -97,6 +105,24 @@ try {
         await page.waitForSelector('#editor[data-ready="destroyed"]');
         assert.equal(await page.locator('canvas').count(), 0);
 
+        await page.goto(url + 'tests/consumers/table.html');
+        await page.waitForSelector('#editor[data-ready="ready"]');
+        await page.locator('.table-block textarea').press('End');
+        await page.keyboard.insertText('!');
+        await page.waitForFunction(() => document.querySelector('output').value === 'Native!');
+        await page.getByRole('button', { name: 'Add row', exact: true }).click();
+        await page.waitForFunction(() => document.querySelectorAll('.table-block tr').length === 2);
+        await page.getByRole('button', { name: 'Undo', exact: true }).click();
+        await page.waitForFunction(() => document.querySelectorAll('.table-block tr').length === 1);
+        await page.getByRole('button', { name: 'Select cell 1, 1', exact: true }).click();
+        await page.keyboard.press('Backspace');
+        await page.waitForFunction(() => document.querySelector('output').value === '');
+        await page.getByRole('button', { name: 'Undo', exact: true }).click();
+        await page.waitForFunction(() => document.querySelector('output').value === 'Native!');
+        await page.getByRole('button', { name: 'Destroy', exact: true }).click();
+        await page.waitForSelector('#editor[data-ready="destroyed"]');
+        assert.equal(await page.locator('.table-block').count(), 0);
+
         await page.goto(url + 'tests/consumers/react.html');
         await page.waitForSelector('body[data-ready="ready"]');
         await page.getByRole('button', { name: 'Custom node: 0', exact: true }).click();
@@ -110,7 +136,7 @@ try {
         await page.waitForSelector('body[data-ready="destroyed"]');
         assert.equal(await page.locator('canvas').count(), 0);
         assert.deepEqual(errors, []);
-        console.log(`${name}: built vanilla and React consumers passed`);
+        console.log(`${name}: built vanilla, standalone table and React consumers passed`);
       } finally {
         await browser.close();
       }

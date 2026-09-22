@@ -103,7 +103,7 @@ for (const file of sources) {
     if (
       [
         'src/extensions/starter-kit/image-view.ts',
-        'src/extensions/starter-kit/table-view.ts',
+        'packages/extension-table/src/table-view.ts',
       ].includes(file)
     )
       assert.ok(

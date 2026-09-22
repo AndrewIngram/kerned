@@ -1,0 +1,67 @@
+{
+  "check": "passed",
+  "builtConsumers": {
+    "node": "passed",
+    "vanilla": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "table": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "react": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "typecheck": "emitted declarations",
+    "tableChecks": [
+      "standalone assembly without starter-kit",
+      "foreign textblock attributes",
+      "cell selection and grid commands",
+      "explicit text replacement",
+      "cell clearing and undo",
+      "nested table HTML import",
+      "static serialization",
+      "document codec round trip",
+      "destroy",
+      "nested merged table import text"
+    ]
+  },
+  "vitest": {
+    "files": 219,
+    "passed": 959,
+    "todo": 1
+  },
+  "e2e": {
+    "passed": 42
+  },
+  "production": {
+    "file": "main-BUcBc71A.js",
+    "sha256": "c8e7f90b9d80ec870bfb2053883d5786222d45aa9b0842bca236c44f972ba5d7"
+  },
+  "collection": {
+    "before": 883,
+    "after": 886,
+    "missing": 0,
+    "added": 3
+  },
+  "reflow": {
+    "cases": 9,
+    "passed": true
+  },
+  "performanceBudgets": "all passed",
+  "maximums": {
+    "firstUsableMs": 227,
+    "streamingMs": 1237.1000001430511,
+    "pasteHandlerMs": 49.799999952316284,
+    "pastePaintMs": 112.70000004768372,
+    "typingFrameMs": 32.30000019073486,
+    "pagingFrameMs": 32.200000047683716,
+    "loadedHeapBytes": 28110936
+  },
+  "milestone8": "in progress"
+}

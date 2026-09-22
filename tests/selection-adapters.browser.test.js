@@ -7,7 +7,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     const { NodeSelection, textSelection, selectionContext } = await import('@gprose/state');
 
     const { demoSchema } = await import('../src/extensions/demo-schema.ts');
-    const { createTable, tableCells } = await import('../src/extensions/table.ts');
+    const { createTable, tableCells } = await import('@gprose/extension-table');
 
     const { createEditor } = await import('@gprose/core');
     const { createSchema } = await import('@gprose/model');

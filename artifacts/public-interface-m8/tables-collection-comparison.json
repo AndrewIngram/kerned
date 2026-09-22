@@ -1,0 +1,22 @@
+{
+  "before": 883,
+  "after": 886,
+  "missing": [],
+  "added": [
+    [
+      "browser-chromium",
+      "packages/extension-table/src/__tests__/html-parsers.browser.test.ts",
+      "nested merged tables retain serializer text without requiring unrelated definitions"
+    ],
+    [
+      "browser-firefox",
+      "packages/extension-table/src/__tests__/html-parsers.browser.test.ts",
+      "nested merged tables retain serializer text without requiring unrelated definitions"
+    ],
+    [
+      "browser-webkit",
+      "packages/extension-table/src/__tests__/html-parsers.browser.test.ts",
+      "nested merged tables retain serializer text without requiring unrelated definitions"
+    ]
+  ]
+}

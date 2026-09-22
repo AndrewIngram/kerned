@@ -3308,3 +3308,51 @@ Validation for this checkpoint:
 Milestone 8 remains open. Standard document/table extension ownership,
 starter-kit composition, the `apps/demo` move, final consumer documentation
 and the milestone architecture judge remain.
+
+### Milestone 8 checkpoint: standard definitions and table ownership
+
+`@gprose/extension-document` now owns standard paragraph, heading, list, quote,
+image, mark and mention definitions. It also owns formatting commands, portable
+mention/mark construction and its static/HTML codecs. Formatting and mention
+helpers no longer import an assembled demo schema. The former inline-schema
+wrapper has been replaced by explicit mention construction, text and layout
+helpers. The remaining starter definitions module only assembles imports.
+
+`@gprose/extension-table` owns table/cell definitions, grid selection, grid
+commands, rectangular clipboard operations, persistence rules, serializers,
+HTML import and the native table view. Table commands no longer import starter
+selection policy. The native view shares the public explicit text-replacement
+command with ordinary editing and uses the selected cell range's replacement
+operation for clearing. It does not import the starter editing bundle.
+`tableEditing` and `documentFormatting` replace their starter-prefixed names.
+
+Table HTML import retains nested-table text using table serializers and the
+generic text fallback. It needs only the installed paragraph/table definitions
+and caller-supplied text parsing, rather than a serializer for every starter
+node. A focused browser regression preserves merged-cell text without injecting
+rectangular clipboard placeholders. Default document serializers and parsers remain separate from table rules;
+the remaining source modules assemble those contributions. The unused
+closed-union `tablePlainText` helper was removed.
+
+The built headless fixture assembles tables without starter-kit, exercises cell
+selection and grid commands, and round-trips persistence and static serialization.
+A third built browser consumer mounts a table containing a custom textblock,
+then verifies native typing, adding rows, clearing cells, undo, nested HTML import
+and destruction. It runs in Chromium, Firefox and WebKit and typechecks against
+emitted declarations. The consumer provides presentations explicitly.
+
+Validation:
+
+- `pnpm check` passed: 959 Vitest tests in 219 files, one unchanged TODO,
+  42 E2E cases and the built headless, vanilla, table and React consumers.
+- Production build and package ownership checks passed. No new package has
+  production imports into `src/`. Test collection preserves all 883 cases and adds the merged-cell regression in
+  three browsers, for 886 collected cases.
+- Production reflow passed all nine scenarios. Three serial trials passed every
+  unchanged budget: first usable paint 227 ms, streaming 1,237.1 ms, paste handler
+  49.8 ms, paste paint 112.7 ms, typing 32.3 ms, paging 32.2 ms and loaded heap
+  28,110,936 bytes. Evidence is under `artifacts/public-interface-m8/tables-*`.
+
+Milestone 8 is still open. Shared document editing policy, presentation defaults,
+starter-kit composition, the `apps/demo` migration, final consumer documentation
+and the milestone architecture judge remain.

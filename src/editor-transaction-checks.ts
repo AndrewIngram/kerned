@@ -1,3 +1,5 @@
+import { formattingMarks } from '@gprose/extension-document';
+import { createMention } from '@gprose/extension-document';
 import { parseAnchor, boundaries } from '@gprose/model';
 import {
   textSelection,
@@ -13,8 +15,6 @@ import { mapPosition } from '@gprose/transform';
 import { createSampleDocument } from './demo/sample-document';
 import type { TextBlockNode, StarterNode } from './extensions/demo-model';
 import { demoSchema } from './extensions/demo-schema';
-import { formattingMarks } from './extensions/formatting';
-import { createMention } from './extensions/mention';
 
 export function checkTransactions() {
   let assertions = 0;

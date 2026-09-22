@@ -1,4 +1,6 @@
 import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { formattingCommands } from '@gprose/extension-document';
+import { tableView } from '@gprose/extension-table/browser';
 import { createSchema, defineNode } from '@gprose/model';
 import { textSelection } from '@gprose/state';
 import { mountEditor, presentations, defineNodePresentation } from '@gprose/view';
@@ -6,10 +8,8 @@ import { expect, test } from 'vitest';
 import { z } from 'zod';
 
 import { containerDecorations, imageView, starterInput, underlineView } from '../browser';
-import { formattingCommands } from '../formatting';
 import { starterExtensions } from '../index';
 import { starterPresentation } from '../presentation';
-import { tableView } from '../table-node-view';
 
 const caption = defineNode({
   name: 'caption',

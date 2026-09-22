@@ -2,8 +2,8 @@ import { createEditor } from '@gprose/core';
 import { createSchema } from '@gprose/model';
 import { expect, test } from 'vitest';
 
-import { starterExtensions } from '../starter-kit';
-import { tableCells } from '../table';
+import { starterExtensions } from '../../../../src/extensions/starter-kit/index.js';
+import { tableCells } from '../table.js';
 
 test('rectangular selection scopes include only selected cells, including their empty text', ({
   onTestFinished,
