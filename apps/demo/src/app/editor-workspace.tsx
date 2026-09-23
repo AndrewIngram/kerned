@@ -7,7 +7,7 @@ import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
 import { textSelection } from '@kerned/state';
 import { useMemo, useState } from 'react';
 
-import type { EditorSample } from '../editor-samples.js';
+import { isWritingEditorPath, type EditorSample } from '../editor-samples.js';
 import { streamConfig } from '../editor-stream.js';
 import { EditorWorkspaceView } from './editor-workspace-view.js';
 
@@ -16,7 +16,7 @@ export function EditorWorkspace(props: {
   onSampleChange: (id: string) => void;
   loading: boolean;
 }) {
-  const minimal = location.pathname === '/editor.html';
+  const minimal = isWritingEditorPath(location.pathname);
   const [comments] = useState(() => createCommentStore<{ body: string; reply: string }>());
 
   const schema = useMemo(

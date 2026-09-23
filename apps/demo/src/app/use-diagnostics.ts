@@ -19,6 +19,7 @@ import type { createDemoDocumentQuery } from '../document-query.js';
 import { benchmarkContainerEdits, checkContainers } from '../editor-container-checks.js';
 import { checkExtensions } from '../editor-extension-checks.js';
 import { checkReflow } from '../editor-reflow-checks.js';
+import { isWritingEditorPath } from '../editor-samples.js';
 import { checkSelections } from '../editor-selection-checks.js';
 import { checkTransactions } from '../editor-transaction-checks.js';
 import type { EditorSession } from '../editor-types.js';
@@ -114,7 +115,7 @@ export function useDiagnostics({
         checkReflow(
           projectDocument(editor.state).nodes,
           diagnostics,
-          location.pathname === '/editor.html' ? 18 : 20,
+          isWritingEditorPath(location.pathname) ? 18 : 20,
         ),
       pause: () => {
         paused.current = true;

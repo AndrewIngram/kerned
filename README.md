@@ -38,9 +38,9 @@ pnpm run cloudflare:deploy
 ```
 
 The Worker serves the built multi-page demo from `apps/demo/dist`; the writing
-demo is available at `/editor.html`, with `/extensions.html` and
-`/collaboration.html` as additional entrypoints. `wrangler.toml` is the source
-of truth for the Worker name and asset directory.
+demo is available at `/`, `/editor`, and `/editor.html`, with `/extensions.html`
+and `/collaboration.html` as additional entrypoints. `wrangler.toml` is the
+source of truth for the Worker name and asset directory.
 
 ## Mount an editor
 
