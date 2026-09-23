@@ -72,7 +72,10 @@
     "check:declarations": "node scripts/check-declarations.mjs",
     "build:packages": "node scripts/build-packages.mjs",
     "check:built-consumers": "pnpm run build:packages && node tests/consumers/headless.mjs && node tests/consumers/react-server.mjs && tsc -p tests/consumers/tsconfig.json && node scripts/check-built-browser-consumers.mjs",
-    "demo:collaboration": "pnpm --filter @kerned/demo dev --open /collaboration.html"
+    "demo:collaboration": "pnpm --filter @kerned/demo dev --open /collaboration.html",
+    "cloudflare:build": "pnpm run build",
+    "cloudflare:dev": "pnpm run cloudflare:build && wrangler dev",
+    "cloudflare:deploy": "pnpm run cloudflare:build && wrangler deploy"
   },
   "dependencies": {
     "@standard-schema/spec": "1.1.0",
@@ -113,7 +116,8 @@
     "typescript": "~5.9.2",
     "vite": "8.3.0",
     "vitest": "5.0.1",
-    "@kerned/collaboration-lab": "workspace:*"
+    "@kerned/collaboration-lab": "workspace:*",
+    "wrangler": "4.137.0"
   },
   "packageManager": "pnpm@10.14.0"
 }
