@@ -53,6 +53,11 @@ test('the site root opens the writing demo and preserves query parameters', asyn
   await expect(page.getByRole('toolbar', { name: 'Formatting' })).toBeVisible();
 });
 
+test('the clean editor route opens the writing demo with its toolbar', async ({ page }) => {
+  await page.goto('/editor?sample=warbreaker');
+  await expect(page.getByRole('toolbar', { name: 'Formatting' })).toBeVisible();
+});
+
 test('sample replacement releases only the old layout owner and keeps assets resident', async ({
   page,
 }) => {

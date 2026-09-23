@@ -26,6 +26,27 @@ belong to the app, rather than the editor packages.
 WASM and font assets under `apps/demo/public`; another application must serve
 these assets too, or supply a `resolveAsset` function to its mounted view.
 
+## Deploy the demo to Cloudflare
+
+The demo is configured as a Cloudflare Worker with Static Assets, using the
+same deployment shape as the hosted `tupl` playground. Authenticate Wrangler,
+then run:
+
+```sh
+pnpm run cloudflare:dev
+pnpm run cloudflare:deploy
+```
+
+`cloudflare:build` is the fast deployment build: it prepares the assets,
+rebuilds the packages, and builds the demo without running the repository-wide
+preflight checks. Use `pnpm run cloudflare:build:verified` when you want the
+full build and verification path.
+
+The Worker serves the built multi-page demo from `apps/demo/dist`; the writing
+demo is available at `/`, `/editor`, and `/editor.html`, with `/extensions.html`
+and `/collaboration.html` as additional entrypoints. `wrangler.toml` is the
+source of truth for the Worker name and asset directory.
+
 ## Mount an editor
 
 This example uses supported package exports. `starterBrowserExtensions` assembles

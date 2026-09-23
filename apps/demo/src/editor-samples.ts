@@ -68,6 +68,10 @@ const books = new Map<BookSampleId, Promise<StarterNode[]>>();
 
 const bookParser = createHtmlParser(demoSchema, starterHtmlParsers);
 
+export function isWritingEditorPath(pathname: string) {
+  return pathname === '/editor.html' || pathname === '/editor' || pathname === '/editor/';
+}
+
 export async function loadEditorSample(url = new URL(location.href)): Promise<EditorSample> {
   const book = bookSamples.find((book) => book.id === url.searchParams.get('sample'));
 
@@ -126,7 +130,7 @@ export async function loadEditorSample(url = new URL(location.href)): Promise<Ed
       chunk: sampleChunk,
     };
 
-  if (location.pathname === '/editor.html') {
+  if (isWritingEditorPath(location.pathname)) {
     const texts = [
       'Good ideas often begin with a few words. A thought worth keeping, a question to explore, or a plan taking shape.',
       'Give the important parts some emphasis, leave room for another perspective, and keep going.',
