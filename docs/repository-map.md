@@ -21,7 +21,7 @@ HTML entries, assets and configuration. Root scripts delegate to that workspace.
 Packages must own their implementation; do not create empty manifests
 or exports pointing outside their package.
 
-Development and tests select the `gprose-source` export condition for live source
+Development and tests select the `kerned-source` export condition for live source
 updates. Production builds and ordinary Node consumers resolve `dist/` exports.
 The build compiles dependencies first without bundling shared runtime classes.
 `pnpm check` builds and checks consumers before starting the parallel suites;
@@ -30,7 +30,7 @@ tests never race replacement of the package build output.
 ## Target tree
 
 ```text
-gprose/
+kerned/
 ├── package.json                 # Workspace-wide commands and development tools
 ├── pnpm-workspace.yaml
 ├── pnpm-lock.yaml                # Single dependency resolution record
@@ -40,14 +40,14 @@ gprose/
 ├── vitest.config.ts             # Unit and real-browser test projects
 ├── playwright.config.js         # Isolated demo E2E server and browser matrix
 ├── packages/
-│   ├── model/                   # @gprose/model: schema mechanics and document values
-│   ├── transform/               # @gprose/transform: operations, inversion, mapping
-│   ├── state/                   # @gprose/state: selections, publication, history
-│   ├── core/                    # @gprose/core: session and extension composition
-│   ├── view/                    # @gprose/view: native editing surface and lifetime
+│   ├── model/                   # @kerned/model: schema mechanics and document values
+│   ├── transform/               # @kerned/transform: operations, inversion, mapping
+│   ├── state/                   # @kerned/state: selections, publication, history
+│   ├── core/                    # @kerned/core: session and extension composition
+│   ├── view/                    # @kerned/view: native editing surface and lifetime
 │   │   └── src/internal/        # Owned layout/shaping/painting; no public engine setup
-│   ├── react/                   # @gprose/react: hooks, hosts, React renderer adapters
-│   ├── starter-kit/             # @gprose/starter-kit: optional standard composition
+│   ├── react/                   # @kerned/react: hooks, hosts, React renderer adapters
+│   ├── starter-kit/             # @kerned/starter-kit: optional standard composition
 │   ├── extension-document/      # Standard definitions, formatting, presentation and codecs
 │   ├── extension-editing/       # Cross-node editing, structure, clipboard and native input
 │   ├── extension-table/         # Table semantics, cell selection, commands, clipboard

@@ -13,8 +13,8 @@ import {
   type Schema,
   type RangeAnnotation,
   type InlineObject,
-} from '@gprose/model';
-import { textSelection, createEditor, createAnchor, resolveAnchor } from '@gprose/state';
+} from '@kerned/model';
+import { textSelection, createEditor, createAnchor, resolveAnchor } from '@kerned/state';
 import { z } from 'zod';
 
 const headingDefinition = defineNode({

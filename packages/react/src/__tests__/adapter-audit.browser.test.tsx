@@ -1,6 +1,6 @@
-import { createEditor } from '@gprose/core';
-import { createSchema } from '@gprose/model';
-import type { MountedEditor } from '@gprose/view';
+import { createEditor } from '@kerned/core';
+import { createSchema } from '@kerned/model';
+import type { MountedEditor } from '@kerned/view';
 import { StrictMode } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';

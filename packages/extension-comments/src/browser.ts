@@ -1,12 +1,12 @@
-import { defineContribution, defineExtension, type ExtensionContext } from '@gprose/core';
-import type { NodeIdentity } from '@gprose/model';
+import { defineContribution, defineExtension, type ExtensionContext } from '@kerned/core';
+import type { NodeIdentity } from '@kerned/model';
 import {
   decorations,
   type Decoration,
   type DecorationSource,
   type ViewSession,
   type DecorationActivation,
-} from '@gprose/view';
+} from '@kerned/view';
 
 import { createCommentProjection, type CommentSource } from './projection.js';
 

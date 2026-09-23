@@ -3,7 +3,7 @@ import {
   type NodeIdentity,
   type Schema,
   type SerializerContribution,
-} from '@gprose/model';
+} from '@kerned/model';
 
 import { defineContribution } from './contributions.js';
 

@@ -1,5 +1,5 @@
-import { formattingMarks } from '@gprose/extension-document';
-import { createMention } from '@gprose/extension-document';
+import { formattingMarks } from '@kerned/extension-document';
+import { createMention } from '@kerned/extension-document';
 
 import type { StarterNode } from './demo-model.js';
 import { createSampleDocument } from './sample-document.js';

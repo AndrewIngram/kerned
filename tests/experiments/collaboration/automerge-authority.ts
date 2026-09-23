@@ -1,5 +1,5 @@
 import * as Automerge from '@automerge/automerge';
-import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
+import { indexTree, type NodeIdentity, type Schema } from '@kerned/model';
 import { z } from 'zod';
 
 import { createAutomergePeer, type Changes } from './automerge.js';

@@ -1,5 +1,5 @@
 {
-  "name": "@gprose/extension-history",
+  "name": "@kerned/extension-history",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,13 +8,13 @@
   ],
   "exports": {
     ".": {
-      "gprose-source": "./src/index.ts",
+      "kerned-source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
   "dependencies": {
-    "@gprose/core": "workspace:*",
-    "@gprose/model": "workspace:*"
+    "@kerned/core": "workspace:*",
+    "@kerned/model": "workspace:*"
   }
 }

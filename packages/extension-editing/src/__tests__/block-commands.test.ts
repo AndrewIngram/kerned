@@ -3,11 +3,11 @@ import {
   defineExtension,
   type CommandContext,
   type ExtensionContext,
-} from '@gprose/core';
-import { createListCommands, type ListAdapter } from '@gprose/extension-editing';
-import { localHistory } from '@gprose/extension-history';
-import { createSchema, defineNode, indexTree, type DocumentNode } from '@gprose/model';
-import { NodeSelection, textSelection } from '@gprose/state';
+} from '@kerned/core';
+import { createListCommands, type ListAdapter } from '@kerned/extension-editing';
+import { localHistory } from '@kerned/extension-history';
+import { createSchema, defineNode, indexTree, type DocumentNode } from '@kerned/model';
+import { NodeSelection, textSelection } from '@kerned/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

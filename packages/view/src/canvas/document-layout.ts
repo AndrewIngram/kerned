@@ -1,5 +1,5 @@
-import type { NodeIdentity } from '@gprose/model';
-import { RangeSelection } from '@gprose/state';
+import type { NodeIdentity } from '@kerned/model';
+import { RangeSelection } from '@kerned/state';
 
 import { allocatedBlockWidth } from '../browser/block-geometry.js';
 import type { createDocumentQuery } from '../browser/document.js';

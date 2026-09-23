@@ -1,4 +1,4 @@
-import { defaultFonts, type FontConfiguration } from '@gprose/view';
+import { defaultFonts, type FontConfiguration } from '@kerned/view';
 
 // Opt in for this book: ordinary samples retain the smaller default font set.
 export const chineseFonts: FontConfiguration = {

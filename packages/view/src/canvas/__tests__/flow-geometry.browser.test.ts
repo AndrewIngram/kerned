@@ -1,15 +1,15 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
-import { textSelection } from '@gprose/state';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
+import { textSelection } from '@kerned/state';
 import {
   decorations,
   defineWidgetView,
   defineNodeView,
   nodeViews,
   type Decoration,
-} from '@gprose/view';
-import { defineNodePresentation, mountEditor, presentations } from '@gprose/view';
-import { createViewDiagnostics } from '@gprose/view/diagnostics';
+} from '@kerned/view';
+import { defineNodePresentation, mountEditor, presentations } from '@kerned/view';
+import { createViewDiagnostics } from '@kerned/view/diagnostics';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';

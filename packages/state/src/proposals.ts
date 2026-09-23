@@ -1,5 +1,5 @@
-import { type RelativeRange, type NodeIdentity, type Schema, indexTree } from '@gprose/model';
-import type { Step } from '@gprose/transform';
+import { type RelativeRange, type NodeIdentity, type Schema, indexTree } from '@kerned/model';
+import type { Step } from '@kerned/transform';
 
 import type { RelativeRangeResult } from './relative-positions.js';
 

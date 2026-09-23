@@ -1,8 +1,8 @@
-import { paragraph, heading } from '@gprose/extension-document';
-import type { HeadingLevel } from '@gprose/extension-document';
-import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
-import { type EditorState } from '@gprose/state';
-import { type Step } from '@gprose/transform';
+import { paragraph, heading } from '@kerned/extension-document';
+import type { HeadingLevel } from '@kerned/extension-document';
+import { indexTree, type NodeIdentity, type Schema } from '@kerned/model';
+import { type EditorState } from '@kerned/state';
+import { type Step } from '@kerned/transform';
 
 /** Change block semantics without replacing text identities or relative positions. */
 export function setTextBlockType<N extends NodeIdentity>(

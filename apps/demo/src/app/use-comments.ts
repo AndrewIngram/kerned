@@ -1,7 +1,7 @@
-import { type createCommentStore } from '@gprose/extension-comments';
-import { createCommentProjection } from '@gprose/extension-comments';
-import { useEditorState } from '@gprose/react';
-import { type EditorState } from '@gprose/state';
+import { type createCommentStore } from '@kerned/extension-comments';
+import { createCommentProjection } from '@kerned/extension-comments';
+import { useEditorState } from '@kerned/react';
+import { type EditorState } from '@kerned/state';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { type StarterNode } from '../demo-model.js';

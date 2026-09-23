@@ -1,6 +1,6 @@
-# Gprose
+# Kerned
 
-Gprose is a canvas text editor with a framework-independent editing core and an
+Kerned is a canvas text editor with a framework-independent editing core and an
 optional React integration. Schemas, commands, rendering and input behavior are
 assembled from extensions. The workspace packages are private and are not yet
 published to a registry.
@@ -33,10 +33,10 @@ the standard content definitions, editing commands, history and browser renderin
 and input contributions. Applications can instead assemble their own extensions.
 
 ```ts
-import { createEditor } from '@gprose/core';
-import { createSchema } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { mountEditor } from '@gprose/view';
+import { createEditor } from '@kerned/core';
+import { createSchema } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { mountEditor } from '@kerned/view';
 
 const editor = createEditor({
   schema: createSchema({ extensions: starterBrowserExtensions() }),
@@ -71,7 +71,7 @@ commands. See [session commands](docs/editor-session-api.md),
 [mounted view lifetime](docs/mounted-editor.md) and
 [typography and fonts](docs/view-fonts.md).
 
-For headless use, assemble `starterExtensions` from `@gprose/starter-kit` instead.
+For headless use, assemble `starterExtensions` from `@kerned/starter-kit` instead.
 The session, schema validation, commands, history and static serialization work
 in ordinary Node without a DOM or a TypeScript loader.
 
@@ -82,9 +82,9 @@ Create a stable schema outside rendering. `useEditor` owns the session;
 commits, which the content component accepts.
 
 ```tsx
-import { createSchema } from '@gprose/model';
-import { EditorContent, useEditor, useCommandState } from '@gprose/react';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
+import { createSchema } from '@kerned/model';
+import { EditorContent, useEditor, useCommandState } from '@kerned/react';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
 
 const schema = createSchema({ extensions: starterBrowserExtensions() });
 const editorStyle = { height: 400 };
@@ -117,14 +117,14 @@ rendering contracts as native extensions. See
 
 ## Schemas, extensions and persistence
 
-`@gprose/model` defines nodes, marks and inline objects. `createSchema` assembles
+`@kerned/model` defines nodes, marks and inline objects. `createSchema` assembles
 extensions into a typed schema implementing Standard Schema v1. The schema
 validates incoming content and supplies configured defaults. Custom schemas do
 not require starter-kit, React or a particular text field name.
 
 Behavior extensions contribute commands, queries and per-session state through
-`@gprose/core`. Browser extensions contribute presentations, native views,
-decorations, input policies and shortcuts through `@gprose/view`. Standard
+`@kerned/core`. Browser extensions contribute presentations, native views,
+decorations, input policies and shortcuts through `@kerned/view`. Standard
 paragraphs, headings, lists, quotes, images and formatting belong to extension
 packages. Tables and external comment annotations are also extensions.
 

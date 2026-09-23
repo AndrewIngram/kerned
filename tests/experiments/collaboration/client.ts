@@ -1,6 +1,6 @@
-import { indexTree, validateTextRange, type NodeIdentity, type Schema } from '@gprose/model';
-import { createEditor, AllSelection } from '@gprose/state';
-import { applySteps, type Step } from '@gprose/transform';
+import { indexTree, validateTextRange, type NodeIdentity, type Schema } from '@kerned/model';
+import { createEditor, AllSelection } from '@kerned/state';
+import { applySteps, type Step } from '@kerned/transform';
 
 import { documentCoordinates } from '../../../packages/collaboration-lab/src/coordinates.js';
 import {

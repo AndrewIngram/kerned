@@ -1,5 +1,5 @@
-import { createSchema, normalizeMarks, type MarkRange } from '@gprose/model';
-import type { TextSpan } from '@gprose/view';
+import { createSchema, normalizeMarks, type MarkRange } from '@kerned/model';
+import type { TextSpan } from '@kerned/view';
 
 export type FormattingSpan = TextSpan & { underline?: boolean };
 

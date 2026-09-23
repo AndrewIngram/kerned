@@ -1,4 +1,4 @@
-import { validateTextRange } from '@gprose/model';
+import { validateTextRange } from '@kerned/model';
 
 import type { Edit, PresenceSelection } from '../protocol.js';
 import type { createReceivedPartitions } from './partitions.js';

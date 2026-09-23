@@ -1,4 +1,4 @@
-import { defineContribution } from '@gprose/core';
+import { defineContribution } from '@kerned/core';
 import type {
   InlineValue,
   MarkRange,
@@ -7,7 +7,7 @@ import type {
   Schema,
   SchemaDefinition,
   ValueBinding,
-} from '@gprose/model';
+} from '@kerned/model';
 
 import { createDocumentQuery } from '../browser/document.js';
 import type { InlineAtom } from '../internal/owned-inline.js';

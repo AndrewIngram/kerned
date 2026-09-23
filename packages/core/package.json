@@ -1,5 +1,5 @@
 {
-  "name": "@gprose/core",
+  "name": "@kerned/core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,14 +8,14 @@
   ],
   "exports": {
     ".": {
-      "gprose-source": "./src/index.ts",
+      "kerned-source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
   "dependencies": {
-    "@gprose/model": "workspace:*",
-    "@gprose/state": "workspace:*",
+    "@kerned/model": "workspace:*",
+    "@kerned/state": "workspace:*",
     "@standard-schema/spec": "1.1.0"
   }
 }

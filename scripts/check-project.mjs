@@ -20,17 +20,17 @@ function visit(file) {
   const source = readFileSync(file, 'utf8');
 
   for (const { fileName: specifier } of ts.preProcessFile(source, true, true).importedFiles) {
-    if (!specifier.startsWith('.') && !specifier.startsWith('@gprose/')) continue;
+    if (!specifier.startsWith('.') && !specifier.startsWith('@kerned/')) continue;
 
     let base = path.join(path.dirname(file), specifier);
 
-    if (specifier.startsWith('@gprose/')) {
+    if (specifier.startsWith('@kerned/')) {
       const [, name, ...subpath] = specifier.split('/');
       const directory = `packages/${name}`;
       const manifest = JSON.parse(readFileSync(`${directory}/package.json`, 'utf8'));
       const entry = manifest.exports[subpath.length ? './' + subpath.join('/') : '.'];
       assert.ok(entry, `${file}: unsupported package export ${specifier}`);
-      base = path.join(directory, entry['gprose-source']);
+      base = path.join(directory, entry['kerned-source']);
     }
 
     const resolved = [
@@ -88,7 +88,7 @@ for (const name of readdirSync('packages')) {
   const manifest = JSON.parse(readFileSync(`${directory}/package.json`, 'utf8'));
 
   for (const entry of Object.values(manifest.exports))
-    visit(path.join(directory, entry['gprose-source']));
+    visit(path.join(directory, entry['kerned-source']));
 }
 
 assert.deepEqual(

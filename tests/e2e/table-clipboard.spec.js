@@ -27,7 +27,7 @@ test('table view routes copy, paste and cut through rich clipboard commands', as
     return {
       html: event.clipboardData.getData('text/html'),
       text: event.clipboardData.getData('text/plain'),
-      token: event.clipboardData.getData('application/x-gprose-fragment'),
+      token: event.clipboardData.getData('application/x-kerned-fragment'),
     };
   });
 
@@ -43,7 +43,7 @@ test('table view routes copy, paste and cut through rich clipboard commands', as
 
     data.setData('text/html', copiedValue.html);
     data.setData('text/plain', copiedValue.text);
-    data.setData('application/x-gprose-fragment', copiedValue.token);
+    data.setData('application/x-kerned-fragment', copiedValue.token);
     document.querySelector('[data-table]').dispatchEvent(event);
   }, copied);
   await expect(page.locator('[data-table] tr')).toHaveCount(4);

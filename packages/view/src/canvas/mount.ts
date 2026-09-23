@@ -1,6 +1,6 @@
-import { connectEditorView } from '@gprose/core';
-import type { NodeIdentity } from '@gprose/model';
-import { RangeSelection, TextSelection } from '@gprose/state';
+import { connectEditorView } from '@kerned/core';
+import type { NodeIdentity } from '@kerned/model';
+import { RangeSelection, TextSelection } from '@kerned/state';
 
 import { createReadingView } from '../browser/accessibility.js';
 import { allocatedBlockWidth } from '../browser/block-geometry.js';

@@ -4,14 +4,14 @@ import type {
   RelativePosition,
   SchemaDefinition,
   SelectionRange,
-} from '@gprose/model';
+} from '@kerned/model';
 import {
   TextSelection,
   type CommandContext,
   type CommandOptions,
   type DocumentRangeResult,
   type Selection,
-} from '@gprose/state';
+} from '@kerned/state';
 
 import type { Editor } from './session.js';
 

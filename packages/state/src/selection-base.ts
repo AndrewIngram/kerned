@@ -1,4 +1,4 @@
-import type { SelectionRange } from '@gprose/model';
+import type { SelectionRange } from '@kerned/model';
 
 import type {
   SelectionContext,

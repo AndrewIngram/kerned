@@ -1,4 +1,4 @@
-import { createMention } from '@gprose/extension-document';
+import { createMention } from '@kerned/extension-document';
 
 import type { StarterNode } from './demo-model.js';
 

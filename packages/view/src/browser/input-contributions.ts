@@ -1,5 +1,5 @@
-import { defineContribution, type Editor, type EditorViewSession } from '@gprose/core';
-import type { NodeIdentity, Schema, SchemaDefinition } from '@gprose/model';
+import { defineContribution, type Editor, type EditorViewSession } from '@kerned/core';
+import type { NodeIdentity, Schema, SchemaDefinition } from '@kerned/model';
 
 import type { createTextInput } from './text-input.js';
 

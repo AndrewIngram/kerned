@@ -1,5 +1,5 @@
-import { wordRange } from '@gprose/model';
-import { TextSelection } from '@gprose/state';
+import { wordRange } from '@kerned/model';
+import { TextSelection } from '@kerned/state';
 
 export function textSelectionAtClick(
   text: string,

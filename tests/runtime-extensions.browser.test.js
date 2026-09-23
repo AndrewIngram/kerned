@@ -3,8 +3,8 @@ import { test, expect } from 'vitest';
 test('framework-free text capture handles a foreign schema and nested selection', async () => {
   const result = await (async () => {
     const { fixture, schema } = await import('./fixtures/editor-foundation.js');
-    const { TextSelection, textSelection } = await import('@gprose/state');
-    const { createTextInput } = await import('@gprose/view');
+    const { TextSelection, textSelection } = await import('@kerned/state');
+    const { createTextInput } = await import('@kerned/view');
 
     const editor = fixture(),
       input = document.createElement('textarea'),

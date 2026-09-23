@@ -13,7 +13,14 @@ const endpoint = z.object({
 const selection = z.object({ anchor: endpoint, head: endpoint });
 
 export const editSchema = z
-  .object({ key: identity, from: integer, to: integer, text: z.string(), expected: z.string(), run: z.object({id: identity, offset: integer}).optional() })
+  .object({
+    key: identity,
+    from: integer,
+    to: integer,
+    text: z.string(),
+    expected: z.string(),
+    run: z.object({ id: identity, offset: integer }).optional(),
+  })
   .refine((value) => value.to >= value.from, 'Invalid edit range');
 
 const proposal = z.object({
@@ -80,7 +87,8 @@ export function sameEdit(left: Edit, right: Edit): boolean {
     left.to === right.to &&
     left.text === right.text &&
     left.expected === right.expected &&
-    left.run?.id === right.run?.id && left.run?.offset === right.run?.offset
+    left.run?.id === right.run?.id &&
+    left.run?.offset === right.run?.offset
   );
 }
 
@@ -94,6 +102,7 @@ export function rebase(edit: Edit, over: Edit, afterEqualInsertion = true): Edit
     const continuing = (edit.run?.offset ?? 0) > 0;
     const overContinuing = (over.run?.offset ?? 0) > 0;
     const after = continuing === overContinuing ? afterEqualInsertion : overContinuing;
+
     return after ? { ...edit, from: edit.from + delta, to: edit.to + delta } : edit;
   }
 

@@ -26,7 +26,7 @@ try {
 
   const results = await page.evaluate(async () => {
     const { createEditor, TextSelection, createAnchor, resolveAnchor } =
-      await import('/@id/@gprose/state');
+      await import('/@id/@kerned/state');
 
     const { demoSchema, replaceStructuredText } = await import('/tests/fixtures/bulk-delete.js');
     const reports = [];

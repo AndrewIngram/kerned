@@ -1,10 +1,10 @@
-import { captureComment, createCommentStore } from '@gprose/extension-comments';
-import { onCommentActivate } from '@gprose/extension-comments/browser';
-import { onMentionActivate } from '@gprose/extension-document/browser';
-import { EditorContent, useEditorState, useViewState } from '@gprose/react';
-import { textSelection } from '@gprose/state';
-import type { MountedEditor } from '@gprose/view';
-import { createViewDiagnostics } from '@gprose/view/diagnostics';
+import { captureComment, createCommentStore } from '@kerned/extension-comments';
+import { onCommentActivate } from '@kerned/extension-comments/browser';
+import { onMentionActivate } from '@kerned/extension-document/browser';
+import { EditorContent, useEditorState, useViewState } from '@kerned/react';
+import { textSelection } from '@kerned/state';
+import type { MountedEditor } from '@kerned/view';
+import { createViewDiagnostics } from '@kerned/view/diagnostics';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { createDemoDocumentQuery } from '../document-query.js';

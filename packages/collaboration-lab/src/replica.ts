@@ -1,7 +1,7 @@
-import { defineExtension, type Editor, type ExtensionContext } from '@gprose/core';
-import { indexTree, type NodeIdentity, type Schema, type SchemaDefinition } from '@gprose/model';
-import { createStateField, TextSelection, type AccessPolicy } from '@gprose/state';
-import type { Step } from '@gprose/transform';
+import { defineExtension, type Editor, type ExtensionContext } from '@kerned/core';
+import { indexTree, type NodeIdentity, type Schema, type SchemaDefinition } from '@kerned/model';
+import { createStateField, TextSelection, type AccessPolicy } from '@kerned/state';
+import type { Step } from '@kerned/transform';
 
 import { createOptimisticRecipient } from './protected/optimistic.js';
 import type { PresenceSelection } from './protocol.js';
@@ -207,7 +207,10 @@ export function createTextReplica<N extends NodeIdentity>(session: string) {
             const node = tree.byId.get(step.id)?.node;
 
             if (!node) throw new Error('Missing collaboration node');
-            client.edit({ key: node.key, from: step.from, to: step.to, text: step.text },{typing:event.transaction.input === true});
+            client.edit(
+              { key: node.key, from: step.from, to: step.to, text: step.text },
+              { typing: event.transaction.input === true },
+            );
           }
         }
 

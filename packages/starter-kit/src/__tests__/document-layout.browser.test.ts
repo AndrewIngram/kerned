@@ -1,5 +1,5 @@
-import { createEditor } from '@gprose/core';
-import { textSelection } from '@gprose/state';
+import { createEditor } from '@kerned/core';
+import { textSelection } from '@kerned/state';
 import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 

@@ -176,7 +176,7 @@ for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(','
       }));
 
       const apiTimings = await page.evaluate(async () => {
-        const { createFind } = await import('/@id/@gprose/state'),
+        const { createFind } = await import('/@id/@kerned/state'),
           { demoSchema } = await import('/src/demo-schema.ts');
 
         const nodes = window.editorDiagnostics.read().nodes,

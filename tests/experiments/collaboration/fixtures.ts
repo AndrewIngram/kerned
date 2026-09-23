@@ -1,4 +1,4 @@
-import { createSchema, defineNode, type DocumentNode } from '@gprose/model';
+import { createSchema, defineNode, type DocumentNode } from '@kerned/model';
 import { z } from 'zod';
 
 const extensions = [

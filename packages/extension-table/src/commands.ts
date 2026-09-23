@@ -4,10 +4,10 @@ import {
   defineQuery,
   type ReadContext,
   type CommandContext,
-} from '@gprose/core';
-import { paragraph } from '@gprose/extension-document';
-import { indexTree, type NodeIdentity } from '@gprose/model';
-import { TextSelection, RangeSelection, textSelection, selectionContext } from '@gprose/state';
+} from '@kerned/core';
+import { paragraph } from '@kerned/extension-document';
+import { indexTree, type NodeIdentity } from '@kerned/model';
+import { TextSelection, RangeSelection, textSelection, selectionContext } from '@kerned/state';
 
 import { table } from './definitions.js';
 import { appendTableColumn, appendTableRow, createTable, tableCells } from './table.js';

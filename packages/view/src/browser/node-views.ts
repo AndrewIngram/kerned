@@ -1,6 +1,6 @@
-import { defineContribution } from '@gprose/core';
-import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '@gprose/model';
-import type { NodeAccess, ScopedSelection, Selection, SelectionContext } from '@gprose/state';
+import { defineContribution } from '@kerned/core';
+import type { NodeBinding, SchemaDefinition, NodeIdentity, TextPoint } from '@kerned/model';
+import type { NodeAccess, ScopedSelection, Selection, SelectionContext } from '@kerned/state';
 
 import type { ContentSlot } from './content-slot.js';
 import type { ViewSession } from './input-contributions.js';

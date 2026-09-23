@@ -1,12 +1,12 @@
-import { createTextReplica } from '@gprose/collaboration-lab';
-import { createProtectedAuthority } from '@gprose/collaboration-lab/authority';
-import { remotePresence, protectedContent } from '@gprose/collaboration-lab/browser';
-import { createEditor } from '@gprose/core';
-import { paragraph, heading } from '@gprose/extension-document';
-import { createSchema, type DocumentNode } from '@gprose/model';
-import { starterDefinitions } from '@gprose/starter-kit';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection } from '@gprose/state';
+import { createTextReplica } from '@kerned/collaboration-lab';
+import { createProtectedAuthority } from '@kerned/collaboration-lab/authority';
+import { remotePresence, protectedContent } from '@kerned/collaboration-lab/browser';
+import { createEditor } from '@kerned/core';
+import { paragraph, heading } from '@kerned/extension-document';
+import { createSchema, type DocumentNode } from '@kerned/model';
+import { starterDefinitions } from '@kerned/starter-kit';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection } from '@kerned/state';
 
 const schema = createSchema({ extensions: starterDefinitions });
 

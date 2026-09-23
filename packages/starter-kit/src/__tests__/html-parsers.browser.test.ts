@@ -1,5 +1,5 @@
-import { createDocumentSerializer } from '@gprose/model';
-import { createHtmlParser } from '@gprose/view';
+import { createDocumentSerializer } from '@kerned/model';
+import { createHtmlParser } from '@kerned/view';
 import { expect, test } from 'vitest';
 
 import { demoSchema } from '../../../../apps/demo/src/demo-schema.js';
@@ -13,14 +13,14 @@ const serializer = createDocumentSerializer(demoSchema, starterSerializers);
 
 test('starter HTML round trips rich tables, lists, headings, images and inline mentions', () => {
   const source =
-    '<h4>Title</h4><blockquote><p><strong>Bold</strong> and <em>italic</em></p><ol start="3"><li><p>Item</p><ul><li><p>Nested</p></li></ul></li></ol></blockquote><table><caption>Table</caption><tr><th rowspan="2"><p><u>Header</u></p></th><td><p><span data-gprose-mention="Ada" data-gprose-width="40" data-gprose-ascent="20" data-gprose-descent="4">Ada</span></p></td></tr><tr><td><p>Last</p></td></tr></table><img src="/image.png" alt="A &amp; B">';
+    '<h4>Title</h4><blockquote><p><strong>Bold</strong> and <em>italic</em></p><ol start="3"><li><p>Item</p><ul><li><p>Nested</p></li></ul></li></ol></blockquote><table><caption>Table</caption><tr><th rowspan="2"><p><u>Header</u></p></th><td><p><span data-kerned-mention="Ada" data-kerned-width="40" data-kerned-ascent="20" data-kerned-descent="4">Ada</span></p></td></tr><tr><td><p>Last</p></td></tr></table><img src="/image.png" alt="A &amp; B">';
 
   const nodes = parser.parse(source);
   const exported = serializer.serialize(nodes);
   const restored = parser.parse(exported.html);
   expect(serializer.serialize(restored)).toEqual(exported);
   expect(demoSchema.validateDocument(restored).issues).toBeUndefined();
-  expect(exported.html).toContain('data-gprose-width="40"');
+  expect(exported.html).toContain('data-kerned-width="40"');
   expect(exported.html).toContain('<h4>Title</h4>');
   expect(exported.html).toContain('<img src="/image.png" alt="A &amp; B">');
   expect(exported.text).toContain('Ada');

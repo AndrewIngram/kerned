@@ -1,19 +1,19 @@
 import assert from 'node:assert/strict';
 
-import { createEditor } from '@gprose/core';
-import { createCommentStore } from '@gprose/extension-comments';
-import { commentView } from '@gprose/extension-comments/browser';
-import { searchView } from '@gprose/extension-search';
-import { createSchema } from '@gprose/model';
-import { EditorContent, useEditor, useEditorState } from '@gprose/react';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
+import { createEditor } from '@kerned/core';
+import { createCommentStore } from '@kerned/extension-comments';
+import { commentView } from '@kerned/extension-comments/browser';
+import { searchView } from '@kerned/extension-search';
+import { createSchema } from '@kerned/model';
+import { EditorContent, useEditor, useEditorState } from '@kerned/react';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
 
 // Plain Node must load the same public entries used by an SSR application.
 assert.equal('document' in globalThis, false);
 
-assert.match(import.meta.resolve('@gprose/react'), /\/dist\/index\.js$/);
+assert.match(import.meta.resolve('@kerned/react'), /\/dist\/index\.js$/);
 
 const schema = createSchema({
   extensions: [...starterBrowserExtensions(), searchView, commentView(createCommentStore())],

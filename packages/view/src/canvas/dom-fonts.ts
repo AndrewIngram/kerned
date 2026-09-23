@@ -8,7 +8,7 @@ export async function createDOMFonts(
   signal?: AbortSignal,
 ) {
   signal?.throwIfAborted();
-  const prefix = `gprose-${crypto.randomUUID()}`;
+  const prefix = `kerned-${crypto.randomUUID()}`;
   const aliases = new Map<FontSource, string>();
   const faces: FontFace[] = [];
   let emojiFallback = false;

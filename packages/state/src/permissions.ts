@@ -1,5 +1,5 @@
-import { type NodeIdentity, type Schema, indexTree, type TreeIndex } from '@gprose/model';
-import type { Step } from '@gprose/transform';
+import { type NodeIdentity, type Schema, indexTree, type TreeIndex } from '@kerned/model';
+import type { Step } from '@kerned/transform';
 import { z } from 'zod';
 
 export type NodeAccess = 'editable' | 'read-only' | 'protected';

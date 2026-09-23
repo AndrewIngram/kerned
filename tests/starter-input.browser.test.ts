@@ -1,9 +1,9 @@
-import { createEditor } from '@gprose/core';
-import { documentInput } from '@gprose/extension-editing/browser';
-import { createSchema } from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { TextSelection, textSelection } from '@gprose/state';
-import { createTextInput, createKeyboardShortcuts } from '@gprose/view';
+import { createEditor } from '@kerned/core';
+import { documentInput } from '@kerned/extension-editing/browser';
+import { createSchema } from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { TextSelection, textSelection } from '@kerned/state';
+import { createTextInput, createKeyboardShortcuts } from '@kerned/view';
 import { expect, test, onTestFinished } from 'vitest';
 
 import { createDocumentInput } from '../packages/extension-editing/src/input.js';

@@ -1,4 +1,4 @@
-import { defineNode, defineMark, defineInline } from '@gprose/model';
+import { defineNode, defineMark, defineInline } from '@kerned/model';
 import { z } from 'zod';
 
 export const bold = defineMark({

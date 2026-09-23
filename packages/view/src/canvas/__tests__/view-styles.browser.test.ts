@@ -1,6 +1,6 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema } from '@gprose/model';
-import { mountEditor, viewStyles } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema } from '@kerned/model';
+import { mountEditor, viewStyles } from '@kerned/view';
 import { expect, test } from 'vitest';
 
 import { note, presentation } from '../../../../../tests/consumers/document.js';

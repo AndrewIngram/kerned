@@ -20,6 +20,6 @@ if (result.status !== 0) process.exit(result.status ?? 1);
 await mkdir('apps/demo/public/engines', { recursive: true });
 
 await copyFile(
-  'native-owned/target/wasm32-unknown-unknown/release/gprose_owned_shaper.wasm',
+  'native-owned/target/wasm32-unknown-unknown/release/kerned_owned_shaper.wasm',
   'apps/demo/public/engines/owned.wasm',
 );

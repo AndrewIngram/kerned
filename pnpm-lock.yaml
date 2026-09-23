@@ -27,49 +27,49 @@ importers:
       '@automerge/automerge':
         specifier: 3.5.0
         version: 3.5.0
-      '@gprose/collaboration-lab':
+      '@kerned/collaboration-lab':
         specifier: workspace:*
         version: link:packages/collaboration-lab
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:packages/core
-      '@gprose/extension-comments':
+      '@kerned/extension-comments':
         specifier: workspace:*
         version: link:packages/extension-comments
-      '@gprose/extension-document':
+      '@kerned/extension-document':
         specifier: workspace:*
         version: link:packages/extension-document
-      '@gprose/extension-editing':
+      '@kerned/extension-editing':
         specifier: workspace:*
         version: link:packages/extension-editing
-      '@gprose/extension-history':
+      '@kerned/extension-history':
         specifier: workspace:*
         version: link:packages/extension-history
-      '@gprose/extension-outline':
+      '@kerned/extension-outline':
         specifier: workspace:*
         version: link:packages/extension-outline
-      '@gprose/extension-search':
+      '@kerned/extension-search':
         specifier: workspace:*
         version: link:packages/extension-search
-      '@gprose/extension-table':
+      '@kerned/extension-table':
         specifier: workspace:*
         version: link:packages/extension-table
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:packages/model
-      '@gprose/react':
+      '@kerned/react':
         specifier: workspace:*
         version: link:packages/react
-      '@gprose/starter-kit':
+      '@kerned/starter-kit':
         specifier: workspace:*
         version: link:packages/starter-kit
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:packages/state
-      '@gprose/transform':
+      '@kerned/transform':
         specifier: workspace:*
         version: link:packages/transform
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:packages/view
       '@oxlint/plugins':
@@ -123,46 +123,46 @@ importers:
 
   apps/demo:
     dependencies:
-      '@gprose/collaboration-lab':
+      '@kerned/collaboration-lab':
         specifier: workspace:*
         version: link:../../packages/collaboration-lab
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@gprose/extension-comments':
+      '@kerned/extension-comments':
         specifier: workspace:*
         version: link:../../packages/extension-comments
-      '@gprose/extension-document':
+      '@kerned/extension-document':
         specifier: workspace:*
         version: link:../../packages/extension-document
-      '@gprose/extension-editing':
+      '@kerned/extension-editing':
         specifier: workspace:*
         version: link:../../packages/extension-editing
-      '@gprose/extension-outline':
+      '@kerned/extension-outline':
         specifier: workspace:*
         version: link:../../packages/extension-outline
-      '@gprose/extension-search':
+      '@kerned/extension-search':
         specifier: workspace:*
         version: link:../../packages/extension-search
-      '@gprose/extension-table':
+      '@kerned/extension-table':
         specifier: workspace:*
         version: link:../../packages/extension-table
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../../packages/model
-      '@gprose/react':
+      '@kerned/react':
         specifier: workspace:*
         version: link:../../packages/react
-      '@gprose/starter-kit':
+      '@kerned/starter-kit':
         specifier: workspace:*
         version: link:../../packages/starter-kit
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../../packages/state
-      '@gprose/transform':
+      '@kerned/transform':
         specifier: workspace:*
         version: link:../../packages/transform
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:../../packages/view
       react:
@@ -187,19 +187,19 @@ importers:
       '@automerge/automerge':
         specifier: 3.5.0
         version: 3.5.0
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../state
-      '@gprose/transform':
+      '@kerned/transform':
         specifier: workspace:*
         version: link:../transform
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:../view
       zod:
@@ -208,10 +208,10 @@ importers:
 
   packages/core:
     dependencies:
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../state
       '@standard-schema/spec':
@@ -220,34 +220,34 @@ importers:
 
   packages/extension-comments:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../state
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:../view
 
   packages/extension-document:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../state
-      '@gprose/transform':
+      '@kerned/transform':
         specifier: workspace:*
         version: link:../transform
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:../view
       '@standard-schema/spec':
@@ -259,73 +259,73 @@ importers:
 
   packages/extension-editing:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/extension-document':
+      '@kerned/extension-document':
         specifier: workspace:*
         version: link:../extension-document
-      '@gprose/extension-table':
+      '@kerned/extension-table':
         specifier: workspace:*
         version: link:../extension-table
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../state
-      '@gprose/transform':
+      '@kerned/transform':
         specifier: workspace:*
         version: link:../transform
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:../view
 
   packages/extension-history:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
 
   packages/extension-outline:
     dependencies:
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
 
   packages/extension-search:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:../view
 
   packages/extension-table:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/extension-document':
+      '@kerned/extension-document':
         specifier: workspace:*
         version: link:../extension-document
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../state
-      '@gprose/transform':
+      '@kerned/transform':
         specifier: workspace:*
         version: link:../transform
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:../view
       zod:
@@ -343,16 +343,16 @@ importers:
 
   packages/react:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../state
-      '@gprose/view':
+      '@kerned/view':
         specifier: workspace:*
         version: link:../view
       react:
@@ -364,28 +364,28 @@ importers:
 
   packages/starter-kit:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/extension-document':
+      '@kerned/extension-document':
         specifier: workspace:*
         version: link:../extension-document
-      '@gprose/extension-editing':
+      '@kerned/extension-editing':
         specifier: workspace:*
         version: link:../extension-editing
-      '@gprose/extension-history':
+      '@kerned/extension-history':
         specifier: workspace:*
         version: link:../extension-history
-      '@gprose/extension-table':
+      '@kerned/extension-table':
         specifier: workspace:*
         version: link:../extension-table
 
   packages/state:
     dependencies:
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/transform':
+      '@kerned/transform':
         specifier: workspace:*
         version: link:../transform
       zod:
@@ -394,19 +394,19 @@ importers:
 
   packages/transform:
     dependencies:
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
 
   packages/view:
     dependencies:
-      '@gprose/core':
+      '@kerned/core':
         specifier: workspace:*
         version: link:../core
-      '@gprose/model':
+      '@kerned/model':
         specifier: workspace:*
         version: link:../model
-      '@gprose/state':
+      '@kerned/state':
         specifier: workspace:*
         version: link:../state
       '@standard-schema/spec':

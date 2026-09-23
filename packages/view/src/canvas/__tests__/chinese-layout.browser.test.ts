@@ -1,4 +1,4 @@
-import { boundaries } from '@gprose/model';
+import { boundaries } from '@kerned/model';
 import { afterAll, beforeAll, expect, test } from 'vitest';
 
 import { defaultFonts, type FontConfiguration } from '../font-catalog.js';

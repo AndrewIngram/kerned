@@ -1,11 +1,11 @@
-import { createEditor, defineExtension, inputRules, type ContributionContext } from '@gprose/core';
-import { editingCommands } from '@gprose/extension-editing';
-import { createSchema } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection } from '@gprose/state';
-import { pasteRules } from '@gprose/view';
-import { defaultFonts, type FontConfiguration } from '@gprose/view';
-import { mountEditor } from '@gprose/view';
+import { createEditor, defineExtension, inputRules, type ContributionContext } from '@kerned/core';
+import { editingCommands } from '@kerned/extension-editing';
+import { createSchema } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection } from '@kerned/state';
+import { pasteRules } from '@kerned/view';
+import { defaultFonts, type FontConfiguration } from '@kerned/view';
+import { mountEditor } from '@kerned/view';
 import { expect, test, onTestFinished as registerCleanup } from 'vitest';
 
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));

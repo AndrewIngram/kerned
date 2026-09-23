@@ -7,7 +7,7 @@ objects and their revision semantics are unchanged. Older editor versions that
 only understand version 1 cannot read the new checkpoints.
 
 The serializable `PositionCheckpoint` return type is exported from both
-`@gprose/state` and `@gprose/core`. Consumers can wrap the checkpoint API and emit
+`@kerned/state` and `@kerned/core`. Consumers can wrap the checkpoint API and emit
 TypeScript declarations without referencing a private implementation module.
 
 Applications should persist this value as a unit, alongside the corresponding

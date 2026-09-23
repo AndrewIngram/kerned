@@ -4,7 +4,7 @@ pnpm run check: PASS (561 Vitest tests, one unchanged TODO, 42 E2E)
 pnpm run build: PASS (existing bundle-size warning)
 
 
-> gprose-engine-prototype@0.0.0 check:editor-unicode /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-unicode /Users/andrewingram/Code/kerned
 > node scripts/check-editor-unicode.mjs
 
 chromium emoji sequences, missing glyphs, accents, grapheme deletion, undo and safe unsupported input passed
@@ -12,7 +12,7 @@ firefox emoji sequences, missing glyphs, accents, grapheme deletion, undo and sa
 webkit emoji sequences, missing glyphs, accents, grapheme deletion, undo and safe unsupported input passed
 
 
-> gprose-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/kerned
 > node scripts/check-editor-performance.mjs artifacts/public-interface-m5/font-resolution/baseline.json
 
 firstUsableMs: 220.0 <= 248.4

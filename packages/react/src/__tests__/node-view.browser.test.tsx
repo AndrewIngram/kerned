@@ -3,16 +3,16 @@ import {
   defineExtension,
   type CommandDefinition,
   type ContributionContext,
-} from '@gprose/core';
-import { createSchema, defineNode, type DocumentNode, type NodeIdentity } from '@gprose/model';
-import { NodeSelection, textSelection, type AccessPolicy } from '@gprose/state';
-import { nodeViews } from '@gprose/view';
+} from '@kerned/core';
+import { createSchema, defineNode, type DocumentNode, type NodeIdentity } from '@kerned/model';
+import { NodeSelection, textSelection, type AccessPolicy } from '@kerned/state';
+import { nodeViews } from '@kerned/view';
 import {
   defineNodePresentation,
   mountEditor,
   presentations,
   type MountedEditor,
-} from '@gprose/view';
+} from '@kerned/view';
 import {
   Component,
   type ReactNode,

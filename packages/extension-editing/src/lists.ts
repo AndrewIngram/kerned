@@ -1,6 +1,6 @@
-import { indexTree, childrenAt, type NodeIdentity, type Schema } from '@gprose/model';
-import { textSelection, type EditorState, type Selection } from '@gprose/state';
-import { type Step } from '@gprose/transform';
+import { indexTree, childrenAt, type NodeIdentity, type Schema } from '@kerned/model';
+import { textSelection, type EditorState, type Selection } from '@kerned/state';
+import { type Step } from '@kerned/transform';
 
 export type ListSettings = { ordered: boolean; start: number };
 

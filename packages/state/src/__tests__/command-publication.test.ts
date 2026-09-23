@@ -1,4 +1,4 @@
-import { createSchema, defineNode, defineMark, type DocumentNode } from '@gprose/model';
+import { createSchema, defineNode, defineMark, type DocumentNode } from '@kerned/model';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 

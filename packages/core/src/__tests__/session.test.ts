@@ -1,5 +1,5 @@
-import { localHistory } from '@gprose/extension-history';
-import { tableCells } from '@gprose/extension-table';
+import { localHistory } from '@kerned/extension-history';
+import { tableCells } from '@kerned/extension-table';
 import {
   createSchema,
   defineNode,
@@ -8,8 +8,8 @@ import {
   indexTree,
   type DocumentNode,
   type NodeIdentity,
-} from '@gprose/model';
-import { createStateField, textSelection } from '@gprose/state';
+} from '@kerned/model';
+import { createStateField, textSelection } from '@kerned/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 

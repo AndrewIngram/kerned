@@ -1,18 +1,18 @@
-import { createEditorSerializer, createInputRules } from '@gprose/core';
-import { image } from '@gprose/extension-document';
-import { table as tableDefinition, tableCell } from '@gprose/extension-table';
-import { tableCells } from '@gprose/extension-table';
-import { plainCellRectangle, cellRectangleText } from '@gprose/extension-table';
-import { textContent, type NodeIdentity, type Schema } from '@gprose/model';
-import { TextSelection } from '@gprose/state';
+import { createEditorSerializer, createInputRules } from '@kerned/core';
+import { image } from '@kerned/extension-document';
+import { table as tableDefinition, tableCell } from '@kerned/extension-table';
+import { tableCells } from '@kerned/extension-table';
+import { plainCellRectangle, cellRectangleText } from '@kerned/extension-table';
+import { textContent, type NodeIdentity, type Schema } from '@kerned/model';
+import { TextSelection } from '@kerned/state';
 import {
   createEditorHtmlParser,
   createTextInput,
   type InputHandlers,
   type ViewSession,
-} from '@gprose/view';
-import { createDocumentQuery } from '@gprose/view';
-import { supportsLayoutText } from '@gprose/view/text';
+} from '@kerned/view';
+import { createDocumentQuery } from '@kerned/view';
+import { supportsLayoutText } from '@kerned/view/text';
 
 import type { ClipboardFragment } from './clipboard-fragment.js';
 import { readClipboard, writeClipboard } from './clipboard.js';

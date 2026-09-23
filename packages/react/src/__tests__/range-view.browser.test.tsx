@@ -1,19 +1,19 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
 import {
   createSchema,
   defineNode,
   defineInline,
   defineMark,
   type NodeIdentity,
-} from '@gprose/model';
-import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '@gprose/state';
-import { viewLayers } from '@gprose/view';
+} from '@kerned/model';
+import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '@kerned/state';
+import { viewLayers } from '@kerned/view';
 import {
   defineNodePresentation,
   mountEditor,
   presentations,
   type MountedEditor,
-} from '@gprose/view';
+} from '@kerned/view';
 import { createContext, StrictMode, useContext, useLayoutEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { expect, expectTypeOf, test } from 'vitest';

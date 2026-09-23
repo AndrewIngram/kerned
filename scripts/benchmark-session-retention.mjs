@@ -4,10 +4,10 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { createEditor, defineCommand, defineExtension } from '@gprose/core';
-import { localHistory } from '@gprose/extension-history';
-import { createSchema, defineNode } from '@gprose/model';
-import { textSelection } from '@gprose/state';
+import { createEditor, defineCommand, defineExtension } from '@kerned/core';
+import { localHistory } from '@kerned/extension-history';
+import { createSchema, defineNode } from '@kerned/model';
+import { textSelection } from '@kerned/state';
 import { z } from 'zod';
 
 const note = defineNode({

@@ -1,5 +1,5 @@
-import { defineCommand, defineExtension, defineQuery } from '@gprose/core';
-import { toggleMarkCommand } from '@gprose/state';
+import { defineCommand, defineExtension, defineQuery } from '@kerned/core';
+import { toggleMarkCommand } from '@kerned/state';
 
 import { formattingDefinitions } from './definitions.js';
 import type { TextFormat } from './formatting.js';

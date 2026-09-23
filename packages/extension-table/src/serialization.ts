@@ -1,4 +1,4 @@
-import { defineNodeSerializer, type HtmlOutput } from '@gprose/model';
+import { defineNodeSerializer, type HtmlOutput } from '@kerned/model';
 
 import { table, tableCell } from './definitions.js';
 

@@ -3,7 +3,7 @@ export async function mountOptimizedProbe(editor, element) {
     { createRoot } = await import('react-dom/client'),
     { flushSync } = await import('react-dom');
 
-  const { useEditorState } = await import('@gprose/react');
+  const { useEditorState } = await import('@kerned/react');
 
   const { mountEditorView } = await import('../native-view.js');
 

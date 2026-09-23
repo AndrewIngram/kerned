@@ -1,5 +1,5 @@
-import type { NodeIdentity, Schema, SelectionRange } from '@gprose/model';
-import { resolveRangeDecorations, selectionContext } from '@gprose/state';
+import type { NodeIdentity, Schema, SelectionRange } from '@kerned/model';
+import { resolveRangeDecorations, selectionContext } from '@kerned/state';
 
 import { commentDecorations, type CommentThread } from './comment.js';
 

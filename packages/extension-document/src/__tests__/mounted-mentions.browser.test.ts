@@ -1,10 +1,10 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createMention, mentionLayout } from '@gprose/extension-document';
-import { onMentionActivate, type MentionActivation } from '@gprose/extension-document/browser';
-import { createSchema, defineNode } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection } from '@gprose/state';
-import { defineNodePresentation, mountEditor, presentations } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createMention, mentionLayout } from '@kerned/extension-document';
+import { onMentionActivate, type MentionActivation } from '@kerned/extension-document/browser';
+import { createSchema, defineNode } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection } from '@kerned/state';
+import { defineNodePresentation, mountEditor, presentations } from '@kerned/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

@@ -1,4 +1,4 @@
-import type { NodeIdentity, Schema, TextPoint } from '@gprose/model';
+import type { NodeIdentity, Schema, TextPoint } from '@kerned/model';
 import {
   TextSelection,
   NodeSelection,
@@ -8,7 +8,7 @@ import {
   type EditorState,
   type SelectionContext,
   type NodeAccess,
-} from '@gprose/state';
+} from '@kerned/state';
 
 import type { Rect } from '../internal/engines.js';
 import type { TextHitRegion } from './hit-testing.js';

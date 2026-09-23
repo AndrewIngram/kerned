@@ -1,11 +1,11 @@
-import type { NodeIdentity } from '@gprose/model';
+import type { NodeIdentity } from '@kerned/model';
 import {
   defaultFonts,
   defaultAccessibility,
   mountEditor,
   type MountEditorOptions,
   type MountedEditor,
-} from '@gprose/view';
+} from '@kerned/view';
 import {
   useLayoutEffect,
   useMemo,

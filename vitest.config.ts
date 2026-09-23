@@ -5,10 +5,10 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   publicDir: 'apps/demo/public',
-  resolve: { conditions: [...defaultClientConditions, 'gprose-source'] },
+  resolve: { conditions: [...defaultClientConditions, 'kerned-source'] },
   ssr: {
-    resolve: { conditions: [...defaultServerConditions, 'gprose-source'] },
-    noExternal: [/^@gprose\//],
+    resolve: { conditions: [...defaultServerConditions, 'kerned-source'] },
+    noExternal: [/^@kerned\//],
   },
   plugins: [react({ compiler: true })],
   // Dynamic fixture imports must be optimized before any browser starts its tests.

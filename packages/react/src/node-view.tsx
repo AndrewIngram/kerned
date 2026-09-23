@@ -1,6 +1,6 @@
-import type { SchemaDefinition } from '@gprose/model';
-import { equalScopedSelection } from '@gprose/state';
-import { defineNodeView, type NodeRenderFrame } from '@gprose/view';
+import type { SchemaDefinition } from '@kerned/model';
+import { equalScopedSelection } from '@kerned/state';
+import { defineNodeView, type NodeRenderFrame } from '@kerned/view';
 import { memo, type ComponentType } from 'react';
 
 import { portalHostFor } from './portals.js';

@@ -1,4 +1,4 @@
-import { wordRanges } from '@gprose/model';
+import { wordRanges } from '@kerned/model';
 
 import type { Geometry, Line, Rect } from '../engines.js';
 import type { Direction, Position } from '../layout-types.js';

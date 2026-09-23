@@ -1,4 +1,4 @@
-import type { OutlineEntry } from '@gprose/extension-outline';
+import type { OutlineEntry } from '@kerned/extension-outline';
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 
 import './outline.css';

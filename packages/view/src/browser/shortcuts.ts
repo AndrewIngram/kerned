@@ -1,5 +1,5 @@
-import { defineContribution } from '@gprose/core';
-import type { NodeIdentity } from '@gprose/model';
+import { defineContribution } from '@kerned/core';
+import type { NodeIdentity } from '@kerned/model';
 
 import type { ViewSession } from './input-contributions.js';
 

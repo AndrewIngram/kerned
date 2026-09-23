@@ -5,7 +5,7 @@ import {
   type NodeIdentity,
   type Schema,
   boundaries,
-} from '@gprose/model';
+} from '@kerned/model';
 
 export function markInsertedText<N extends NodeIdentity>(
   schema: Schema<N>,

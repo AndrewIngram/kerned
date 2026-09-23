@@ -1,7 +1,7 @@
-import { formattingMarks } from '@gprose/extension-document';
-import { createOutlineExtension, type OutlineEntry } from '@gprose/extension-outline';
-import { starterHtmlParsers } from '@gprose/starter-kit/browser';
-import { createHtmlParser, type FontConfiguration } from '@gprose/view';
+import { formattingMarks } from '@kerned/extension-document';
+import { createOutlineExtension, type OutlineEntry } from '@kerned/extension-outline';
+import { starterHtmlParsers } from '@kerned/starter-kit/browser';
+import { createHtmlParser, type FontConfiguration } from '@kerned/view';
 
 import { plainText, type StarterNode } from './demo-model.js';
 import { demoSchema } from './demo-schema.js';

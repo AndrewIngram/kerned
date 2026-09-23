@@ -1,5 +1,5 @@
-import { commentDecorations, createCommentStore } from '@gprose/extension-comments';
-import { parseAnchor } from '@gprose/model';
+import { commentDecorations, createCommentStore } from '@kerned/extension-comments';
+import { parseAnchor } from '@kerned/model';
 import {
   type FindState,
   createAnchor,
@@ -8,10 +8,10 @@ import {
   TextSelection,
   RangeSelection,
   textSelection,
-} from '@gprose/state';
-import type { MountedEditor } from '@gprose/view';
-import type { ViewDiagnostics } from '@gprose/view/diagnostics';
-import { checkInlineResources } from '@gprose/view/diagnostics';
+} from '@kerned/state';
+import type { MountedEditor } from '@kerned/view';
+import type { ViewDiagnostics } from '@kerned/view/diagnostics';
+import { checkInlineResources } from '@kerned/view/diagnostics';
 import { useLayoutEffect, type RefObject } from 'react';
 
 import { demoSchema } from '../demo-schema.js';

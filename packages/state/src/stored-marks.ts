@@ -5,7 +5,7 @@ import {
   type Schema,
   type TreeIndex,
   indexTree,
-} from '@gprose/model';
+} from '@kerned/model';
 
 import { TextSelection } from './selection.js';
 import type { EditorState } from './transactions.js';

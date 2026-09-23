@@ -5,7 +5,7 @@ canonical content, transactions and history. A mounted view borrows that session
 and owns its DOM, input capture, viewport, layout, graphics and native node views.
 
 ```ts
-import { mountEditor } from '@gprose/view';
+import { mountEditor } from '@kerned/view';
 
 const view = mountEditor(element, { editor });
 await view.ready;
@@ -29,7 +29,7 @@ semantic mark ranges and inline values. It returns text/box metrics or a flowing
 Immutable node presentations are cached per view. Duplicate or missing
 presentations produce explicit errors.
 
-Input extensions contribute through `inputPolicies` from `@gprose/view`.
+Input extensions contribute through `inputPolicies` from `@kerned/view`.
 They receive the imperative session, native text capture, navigation/select-all
 helpers and a notice callback. Navigation,
 select-all, composition lifetime and focus synchronization belong to the mount;
@@ -56,7 +56,7 @@ cell text and active textareas.
 Transient text-highlight ranges accompany native frames through the public
 [decoration contribution](decorations.md), shared with canvas text.
 
-Document overlays contribute through `viewLayers` from `@gprose/view`.
+Document overlays contribute through `viewLayers` from `@kerned/view`.
 Each named contribution creates one layer per mounted view and returns `update`
 and `destroy` methods. Its factory receives the imperative session, a positioned
 DOM host, text preparation and a `paint` registration function. Factories run
@@ -116,7 +116,7 @@ stylesheet belongs to the extension. Both the demo and public mount use it.
 Applications observe activation without supplying callbacks as serialized options:
 
 ```ts
-import { onMentionActivate } from '@gprose/extension-document/browser';
+import { onMentionActivate } from '@kerned/extension-document/browser';
 
 const unsubscribe = onMentionActivate(editor, ({ nodeId, id, index }) => {
   // Open application UI for this mention. The extension does not choose a panel.
@@ -130,8 +130,8 @@ for a later mount. Mention IDs are scoped to their text node.
 Comments are an optional extension with an externally owned source:
 
 ```ts
-import { createCommentStore } from '@gprose/extension-comments';
-import { commentView, onCommentActivate } from '@gprose/extension-comments/browser';
+import { createCommentStore } from '@kerned/extension-comments';
+import { commentView, onCommentActivate } from '@kerned/extension-comments/browser';
 
 const comments = createCommentStore<{ body: string }>();
 const extension = commentView(comments).configure({ color: '#f6eab4' });
@@ -153,7 +153,7 @@ reads the current source. Native text descendants, such as individual table-cell
 text ranges, receive highlights through the native text-decoration contract.
 Native editing controls retain their own click/focus behavior.
 
-Install `searchView` from `@gprose/extension-search` to paint search matches in
+Install `searchView` from `@kerned/extension-search` to paint search matches in
 canvas and native text. It subscribes to `editor.find`, including cooperative refresh after
 edits and streamed appends. `searchView.configure({ color, activeColor })` changes
 the highlight colors. Search state survives view destruction; a remounted view
@@ -195,7 +195,7 @@ this extension and its stylesheet. General range highlights use `decorations`;
 ## React
 
 ```tsx
-import { EditorContent } from '@gprose/react';
+import { EditorContent } from '@kerned/react';
 
 <EditorContent editor={editor} style={{ height: 480 }} onReady={(view) => view.focus()} />;
 ```
@@ -287,7 +287,7 @@ for owned sessions, context and toolbar selectors.
 Instrumentation is separate from the geometry interface used by editor UI:
 
 ```ts
-import { createViewDiagnostics } from '@gprose/view/diagnostics';
+import { createViewDiagnostics } from '@kerned/view/diagnostics';
 
 const diagnostics = createViewDiagnostics();
 const unsubscribe = diagnostics.subscribe((event) => {
@@ -357,7 +357,7 @@ checks allocate their own temporary resources outside the application view.
 
 ## View-owned styles
 
-Browser extensions can provide inert CSS through `viewStyles` from `@gprose/view`:
+Browser extensions can provide inert CSS through `viewStyles` from `@kerned/view`:
 
 ```ts
 context.provide(viewStyles, '.my-editor-card { border-radius: 8px; }');

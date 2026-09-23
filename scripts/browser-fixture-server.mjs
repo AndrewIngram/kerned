@@ -12,7 +12,7 @@ export async function createBrowserFixtureServer() {
     publicDir: 'apps/demo/public',
     cacheDir: 'node_modules/.vite-fixtures',
     logLevel: 'warn',
-    resolve: { conditions: [...defaultClientConditions, 'gprose-source'] },
+    resolve: { conditions: [...defaultClientConditions, 'kerned-source'] },
     server: { host: '127.0.0.1', port: 0, strictPort: true },
   });
 

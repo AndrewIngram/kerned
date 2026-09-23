@@ -1,6 +1,6 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
-import { selectionContext } from '@gprose/state';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
+import { selectionContext } from '@kerned/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 

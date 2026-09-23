@@ -1,7 +1,7 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
-import { textSelection } from '@gprose/state';
-import { defineNodePresentation, mountEditor, presentations } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
+import { textSelection } from '@kerned/state';
+import { defineNodePresentation, mountEditor, presentations } from '@kerned/view';
 import {
   decorations,
   defineWidgetView,
@@ -9,7 +9,7 @@ import {
   type DecorationActivation,
   type DecorationContribution,
   type InvalidateDecorations,
-} from '@gprose/view';
+} from '@kerned/view';
 import { expect, expectTypeOf, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';

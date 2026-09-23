@@ -1,4 +1,4 @@
-import type { DocumentNode } from '@gprose/model';
+import type { DocumentNode } from '@kerned/model';
 
 import type { image } from './definitions.js';
 

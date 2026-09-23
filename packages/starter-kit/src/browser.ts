@@ -4,9 +4,9 @@ import {
   mentionView,
   documentPresentation,
   underlineView,
-} from '@gprose/extension-document/browser';
-import { documentInput } from '@gprose/extension-editing/browser';
-import { tableView, tablePresentation } from '@gprose/extension-table/browser';
+} from '@kerned/extension-document/browser';
+import { documentInput } from '@kerned/extension-editing/browser';
+import { tableView, tablePresentation } from '@kerned/extension-table/browser';
 
 import { starterExtensions } from './index.js';
 

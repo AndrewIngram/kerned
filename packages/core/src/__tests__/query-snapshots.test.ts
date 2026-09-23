@@ -1,5 +1,5 @@
-import { createSchema, defineNode } from '@gprose/model';
-import { textSelection } from '@gprose/state';
+import { createSchema, defineNode } from '@kerned/model';
+import { textSelection } from '@kerned/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

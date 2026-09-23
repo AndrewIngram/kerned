@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["vite/client"],
-    "customConditions": ["gprose-source"]
+    "customConditions": ["kerned-source"]
   },
   "include": [
     "apps/*/src",

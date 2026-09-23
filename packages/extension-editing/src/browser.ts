@@ -1,7 +1,7 @@
-import { defineExtension, type ContributionContext } from '@gprose/core';
-import { documentHtmlParsers } from '@gprose/extension-document/browser';
-import { tableHtmlParsers } from '@gprose/extension-table/browser';
-import { inputPolicies, htmlParsers, keyboardShortcuts } from '@gprose/view';
+import { defineExtension, type ContributionContext } from '@kerned/core';
+import { documentHtmlParsers } from '@kerned/extension-document/browser';
+import { tableHtmlParsers } from '@kerned/extension-table/browser';
+import { inputPolicies, htmlParsers, keyboardShortcuts } from '@kerned/view';
 
 import { createDocumentInput } from './input.js';
 import { documentKeyboardShortcuts } from './shortcuts.js';

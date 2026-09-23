@@ -1,4 +1,4 @@
-import type { CommandState } from '@gprose/state';
+import type { CommandState } from '@kerned/state';
 import { useMemo, useSyncExternalStore } from 'react';
 
 export { EditorContent, useViewState, type EditorContentProps } from './editor-content.js';

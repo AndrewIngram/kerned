@@ -4,20 +4,20 @@ import {
   defineExtension,
   serializers,
   type ContributionContext,
-} from '@gprose/core';
-import { readClipboard, writeClipboard } from '@gprose/extension-editing/browser';
-import { documentInput } from '@gprose/extension-editing/browser';
-import { tableCells } from '@gprose/extension-table';
-import { copyCellRectangle, cellRectangleText } from '@gprose/extension-table';
+} from '@kerned/core';
+import { readClipboard, writeClipboard } from '@kerned/extension-editing/browser';
+import { documentInput } from '@kerned/extension-editing/browser';
+import { tableCells } from '@kerned/extension-table';
+import { copyCellRectangle, cellRectangleText } from '@kerned/extension-table';
 import {
   createSchema,
   createDocumentSerializer,
   defineNode,
   defineNodeSerializer,
-} from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { textSelection, TextSelection } from '@gprose/state';
-import { createEditorHtmlParser, defineHtmlTextParser, htmlParsers } from '@gprose/view';
+} from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { textSelection, TextSelection } from '@kerned/state';
+import { createEditorHtmlParser, defineHtmlTextParser, htmlParsers } from '@kerned/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

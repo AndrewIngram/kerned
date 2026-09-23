@@ -1,6 +1,6 @@
-import { createEditor } from '@gprose/core';
-import { createSchema } from '@gprose/model';
-import { selectionContext } from '@gprose/state';
+import { createEditor } from '@kerned/core';
+import { createSchema } from '@kerned/model';
+import { selectionContext } from '@kerned/state';
 import { expect, test } from 'vitest';
 
 import { createNodeViews } from '../../../view/src/browser/node-views.js';

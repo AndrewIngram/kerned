@@ -6,7 +6,7 @@ Second oxlint --fix and format pass: unchanged
 Production desktop/narrow writing and extension study screenshots: inspected
 
 
-> gprose-engine-prototype@0.0.0 check:editor-pointer /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-pointer /Users/andrewingram/Code/kerned
 > node scripts/check-editor-pointer.mjs
 
 chromium click, type, drag, replace and undo passed
@@ -14,7 +14,7 @@ firefox click, type, drag, replace and undo passed
 webkit click, type, drag, replace and undo passed
 
 
-> gprose-engine-prototype@0.0.0 check:editor-navigation /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-navigation /Users/andrewingram/Code/kerned
 > node scripts/check-editor-navigation.mjs
 
 chromium 1100 editor-wide clicks, gutters, shift/drag, controls and modifier navigation passed
@@ -28,7 +28,7 @@ webkit 390 editor-wide clicks, gutters, shift/drag, controls and modifier naviga
 webkit page movement, shift selection and distant document boundaries passed
 
 
-> gprose-engine-prototype@0.0.0 check:editor-page-scroll /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-page-scroll /Users/andrewingram/Code/kerned
 > node scripts/check-editor-page-scroll.mjs
 
 chromium 1100 page scrolling, sticky toolbar, canvas hit testing and resize passed
@@ -39,7 +39,7 @@ webkit 1100 page scrolling, sticky toolbar, canvas hit testing and resize passed
 webkit 390 page scrolling, sticky toolbar, canvas hit testing and resize passed
 
 
-> gprose-engine-prototype@0.0.0 check:editor-outline /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-outline /Users/andrewingram/Code/kerned
 > node scripts/check-editor-outline.mjs
 
 chromium full pending outline, disabled navigation, live edits and progressive availability passed
@@ -56,7 +56,7 @@ webkit 390 outline navigation, dismissal, preserved selection and responsive fit
 webkit generic extraction, nested/skipped levels, caching, streaming and editing passed
 
 
-> gprose-engine-prototype@0.0.0 check:editor-large /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-large /Users/andrewingram/Code/kerned
 > node scripts/check-editor-large.mjs
 
 chromium 2000 1100 passed
@@ -70,7 +70,7 @@ webkit 10000 1100 passed
 webkit 10000 420 passed
 
 
-> gprose-engine-prototype@0.0.0 check:editor-reflow /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-reflow /Users/andrewingram/Code/kerned
 > node scripts/check-editor-reflow.mjs
 
 chromium 2000 passed
@@ -84,7 +84,7 @@ webkit 10000 passed
 webkit concurrent stream passed
 
 
-> gprose-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/kerned
 > node scripts/check-editor-performance.mjs artifacts/public-interface-m4/public-mount/baseline.json
 
 firstUsableMs: 217.0 <= 248.4

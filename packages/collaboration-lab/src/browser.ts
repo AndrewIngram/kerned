@@ -1,12 +1,12 @@
-import { defineExtension, type ContributionContext } from '@gprose/core';
-import { indexTree, type NodeIdentity } from '@gprose/model';
+import { defineExtension, type ContributionContext } from '@kerned/core';
+import { indexTree, type NodeIdentity } from '@kerned/model';
 import {
   decorations,
   defineWidgetView,
   type Decoration,
   type ViewSession,
   type DecorationSource,
-} from '@gprose/view';
+} from '@kerned/view';
 
 import type { PresenceSelection } from './protocol.js';
 

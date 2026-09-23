@@ -1,5 +1,5 @@
-import { defineExtension, type ContributionContext } from '@gprose/core';
-import { defineNodeView, nodeViews } from '@gprose/view';
+import { defineExtension, type ContributionContext } from '@kerned/core';
+import { defineNodeView, nodeViews } from '@kerned/view';
 
 import { image } from './definitions.js';
 import { createImageRenderer } from './image-view.js';

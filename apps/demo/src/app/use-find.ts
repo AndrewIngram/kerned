@@ -1,5 +1,5 @@
-import type { FindOptions, FindState } from '@gprose/state';
-import type { MountedEditor } from '@gprose/view';
+import type { FindOptions, FindState } from '@kerned/state';
+import type { MountedEditor } from '@kerned/view';
 import {
   useCallback,
   useEffect,

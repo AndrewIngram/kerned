@@ -101,7 +101,7 @@ The baseline must compare project, file and test identity during relocation, not
 just aggregate totals. A passing suite with missing discovery is a regression.
 
 - `pnpm exec vitest run --project unit --reporter=json
---outputFile=/tmp/gprose-m0-unit-results.json`: **74 passed, one todo**, across
+--outputFile=/tmp/kerned-m0-unit-results.json`: **74 passed, one todo**, across
   11 files. This is actual execution, including expanded parameterized cases.
 - `pnpm exec playwright test --list --reporter=json`: **39 collected cases**,
   13 per browser, across eight files. Collection does not prove execution.
@@ -253,9 +253,9 @@ records both relocated test files and that one title change. Reproduce discovery
 verification after collecting the two reporter outputs:
 
 ```sh
-pnpm exec vitest run --reporter=json --outputFile=/tmp/gprose-tests.json
-pnpm exec playwright test --list --reporter=json > /tmp/gprose-e2e.json
-node scripts/check-test-discovery.mjs /tmp/gprose-tests.json /tmp/gprose-e2e.json artifacts/public-interface-m1/test-relocations.json
+pnpm exec vitest run --reporter=json --outputFile=/tmp/kerned-tests.json
+pnpm exec playwright test --list --reporter=json > /tmp/kerned-e2e.json
+node scripts/check-test-discovery.mjs /tmp/kerned-tests.json /tmp/kerned-e2e.json artifacts/public-interface-m1/test-relocations.json
 ```
 
 Three serial production foundation trials are preserved in
@@ -3174,13 +3174,13 @@ Moved model, transform, state and core implementations and colocated tests into
 `packages/{model,transform,state,core}/src`. Each private pnpm package owns its
 manifest, explicit public export, dependency declarations and emitted JavaScript
 and types. There are no compatibility barrels at the removed source locations.
-Cross-package callers use `@gprose/*`; ownership checks reject private imports
+Cross-package callers use `@kerned/*`; ownership checks reject private imports
 and undeclared headless dependencies.
 
 `scripts/workspace-migration.mjs` records and applies the moves and import
 rewrites. It is idempotent after the move. `scripts/build-packages.mjs` emits
 packages in dependency order without bundling shared classes. Development and
-tests select the `gprose-source` export condition; production and ordinary Node
+tests select the `kerned-source` export condition; production and ordinary Node
 use built exports. The Node test resolver also selects source and inlines
 workspace packages, preventing mixed source/built selection identities.
 Package builds run before the parallel quality suites, avoiding replacement of
@@ -3220,19 +3220,19 @@ milestone architecture judge remain outstanding.
 ### Milestone 8 checkpoint: view and React package delivery
 
 The native browser controller, canvas view and owned layout implementation now
-belong to `@gprose/view`; React hooks, hosts and rendering adapters belong to
-`@gprose/react`. Production consumers use package exports. Removed the old
+belong to `@kerned/view`; React hooks, hosts and rendering adapters belong to
+`@kerned/react`. Production consumers use package exports. Removed the old
 browser/canvas entry barrels, retained implementation tests beside their code,
 and updated browser fixture imports and screenshot output paths.
 
 The view package has three explicit entry points:
 
-- `@gprose/view` owns mounting, configuration, geometry and extension rendering
+- `@kerned/view` owns mounting, configuration, geometry and extension rendering
   contracts. Engine factories and layout resource ownership remain private.
-- `@gprose/view/diagnostics` owns optional measurements and independent layout
+- `@kerned/view/diagnostics` owns optional measurements and independent layout
   audits. The demo supplies expected presentation values for reflow checks;
   it no longer constructs layout engines or resources.
-- `@gprose/view/text` exposes the current renderer's pure text-support predicate.
+- `@kerned/view/text` exposes the current renderer's pure text-support predicate.
   Headless clipboard policy can call it without loading CSS, graphics or DOM
   implementations. The existing Latin/emoji support limitation is unchanged.
 
@@ -3274,7 +3274,7 @@ final consumer documentation and the milestone architecture judge still remain.
 Comments, local history, outline extraction and search decorations now own their
 implementation, manifests, declarations and built exports in workspace packages.
 Comments expose a headless root for external threads and durable ranges, with
-view contributions under `@gprose/extension-comments/browser`. Outline extraction
+view contributions under `@kerned/extension-comments/browser`. Outline extraction
 accepts any schema and heading adapter. Search decorations use the session's
 existing search state. The app now imports these supported package entries.
 
@@ -3311,14 +3311,14 @@ and the milestone architecture judge remain.
 
 ### Milestone 8 checkpoint: standard definitions and table ownership
 
-`@gprose/extension-document` now owns standard paragraph, heading, list, quote,
+`@kerned/extension-document` now owns standard paragraph, heading, list, quote,
 image, mark and mention definitions. It also owns formatting commands, portable
 mention/mark construction and its static/HTML codecs. Formatting and mention
 helpers no longer import an assembled demo schema. The former inline-schema
 wrapper has been replaced by explicit mention construction, text and layout
 helpers. The remaining starter definitions module only assembles imports.
 
-`@gprose/extension-table` owns table/cell definitions, grid selection, grid
+`@kerned/extension-table` owns table/cell definitions, grid selection, grid
 commands, rectangular clipboard operations, persistence rules, serializers,
 HTML import and the native table view. Table commands no longer import starter
 selection policy. The native view shares the public explicit text-replacement
@@ -3360,11 +3360,11 @@ and the milestone architecture judge remain.
 ### Milestone 8 checkpoint: presentation, editing policies and starter-kit
 
 Standard node presentations, image rendering, mention/underline views and container
-paint now belong to `@gprose/extension-document/browser`. The table package owns
+paint now belong to `@kerned/extension-document/browser`. The table package owns
 its default presentation. Neither imports the demo schema or starter composition.
 The old closed-union presentation helper is now a test fixture only.
 
-`@gprose/extension-editing` owns default cross-node text editing, structural
+`@kerned/extension-editing` owns default cross-node text editing, structural
 commands and rich clipboard fragments. Its browser entry installs input policies,
 shortcuts and HTML parsing through public contributions. The package depends on
 the document and table contracts, so neither concrete extension needs to depend
@@ -3372,7 +3372,7 @@ back on the combined editing policy. Generic list adapters still support the
 independent custom-schema consumer. Unused closed-union command instances and
 the obsolete native focus helper were deleted.
 
-`@gprose/starter-kit` now contains only default definitions and extension, codec
+`@kerned/starter-kit` now contains only default definitions and extension, codec
 and presentation assembly. Its headless entry exports `starterExtensions`,
 `starterDefinitions` and `starterSerializers`; its browser entry exports
 `starterBrowserExtensions` and `starterHtmlParsers`. The demo's fixed document
@@ -3400,7 +3400,7 @@ remain. This checkpoint is not the completed milestone's pre-judge commit.
 
 ### Milestone 8 checkpoint: workspace demo and independent diagnostics
 
-The writing and extension routes now belong to `@gprose/demo` in `apps/demo`.
+The writing and extension routes now belong to `@kerned/demo` in `apps/demo`.
 Its manifest declares application and build dependencies. It owns its Vite React
 configuration, HTML entries, samples, font assets and generated WASM files. Root
 development, build and preview commands delegate to this workspace. Production

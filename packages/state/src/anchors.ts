@@ -4,8 +4,8 @@ import {
   type Schema,
   type DocumentSnapshot,
   indexTree,
-} from '@gprose/model';
-import type { RevisionMap } from '@gprose/transform';
+} from '@kerned/model';
+import type { RevisionMap } from '@kerned/transform';
 
 export type AnchorResolution =
   | { status: 'resolved' | 'deleted'; anchor: Anchor }

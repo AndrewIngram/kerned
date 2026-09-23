@@ -9,7 +9,7 @@ import {
   type SelectionContext,
   TextSelection,
   type Selection,
-} from '@gprose/state';
+} from '@kerned/state';
 
 import { hitTestTextLines, type TextHitRegion } from './hit-testing.js';
 import {

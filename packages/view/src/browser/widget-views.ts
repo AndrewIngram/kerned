@@ -1,5 +1,5 @@
-import type { NodeIdentity } from '@gprose/model';
-import { equalScopedSelection, type ScopedSelection, type NodeAccess } from '@gprose/state';
+import type { NodeIdentity } from '@kerned/model';
+import { equalScopedSelection, type ScopedSelection, type NodeAccess } from '@kerned/state';
 
 import { allocatedBlockWidth } from './block-geometry.js';
 import type { Decoration } from './decorations.js';

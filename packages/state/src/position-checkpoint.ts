@@ -1,4 +1,4 @@
-import type { AnchorMap } from '@gprose/transform';
+import type { AnchorMap } from '@kerned/transform';
 import { z } from 'zod';
 
 const positionInteger = z.number().int().nonnegative();

@@ -1,6 +1,6 @@
-import { paragraph, quote } from '@gprose/extension-document';
-import { table, tableCell } from '@gprose/extension-table';
-import { createSchema } from '@gprose/model';
+import { paragraph, quote } from '@kerned/extension-document';
+import { table, tableCell } from '@kerned/extension-table';
+import { createSchema } from '@kerned/model';
 import { expect, test } from 'vitest';
 
 test('blockquote works with a minimal text kit without tables, lists or images', () => {

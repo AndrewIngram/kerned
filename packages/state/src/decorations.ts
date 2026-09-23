@@ -1,4 +1,4 @@
-import type { DocumentRange, RelativeRange, SelectionRange } from '@gprose/model';
+import type { DocumentRange, RelativeRange, SelectionRange } from '@kerned/model';
 
 import type { DocumentRangeResult } from './document-ranges.js';
 import type { RelativeRangeResult } from './relative-positions.js';

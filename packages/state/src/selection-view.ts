@@ -1,4 +1,4 @@
-import { type NodeIdentity, type Schema } from '@gprose/model';
+import { type NodeIdentity, type Schema } from '@kerned/model';
 
 import { RangeSelection } from './range-selection.js';
 import type { Selection } from './selection-base.js';

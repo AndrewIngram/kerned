@@ -1,14 +1,14 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { formattingCommands } from '@gprose/extension-document';
-import { documentPresentation } from '@gprose/extension-document/browser';
-import { containerDecorations, imageView, underlineView } from '@gprose/extension-document/browser';
-import { documentInput } from '@gprose/extension-editing/browser';
-import { tablePresentation } from '@gprose/extension-table/browser';
-import { tableView } from '@gprose/extension-table/browser';
-import { createSchema, defineNode } from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { textSelection } from '@gprose/state';
-import { mountEditor, presentations, defineNodePresentation } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { formattingCommands } from '@kerned/extension-document';
+import { documentPresentation } from '@kerned/extension-document/browser';
+import { containerDecorations, imageView, underlineView } from '@kerned/extension-document/browser';
+import { documentInput } from '@kerned/extension-editing/browser';
+import { tablePresentation } from '@kerned/extension-table/browser';
+import { tableView } from '@kerned/extension-table/browser';
+import { createSchema, defineNode } from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { textSelection } from '@kerned/state';
+import { mountEditor, presentations, defineNodePresentation } from '@kerned/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

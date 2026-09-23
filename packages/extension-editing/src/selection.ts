@@ -1,6 +1,6 @@
-import type { ReadContext } from '@gprose/core';
-import { indexTree, type NodeIdentity } from '@gprose/model';
-import { RangeSelection, TextSelection, selectionContext } from '@gprose/state';
+import type { ReadContext } from '@kerned/core';
+import { indexTree, type NodeIdentity } from '@kerned/model';
+import { RangeSelection, TextSelection, selectionContext } from '@kerned/state';
 
 export function selectedStructure<N extends NodeIdentity>({ schema, state }: ReadContext<N>) {
   const tree = indexTree(schema, state.nodes);

@@ -1,6 +1,6 @@
-import { formattingSpans, mentionLayout } from '@gprose/extension-document';
-import { typography } from '@gprose/extension-document/browser';
-import type { BlockPresentation } from '@gprose/view';
+import { formattingSpans, mentionLayout } from '@kerned/extension-document';
+import { typography } from '@kerned/extension-document/browser';
+import type { BlockPresentation } from '@kerned/view';
 
 import type { StarterLeaf } from '../../apps/demo/src/demo-model.js';
 

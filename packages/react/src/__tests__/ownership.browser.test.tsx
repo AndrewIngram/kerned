@@ -1,6 +1,6 @@
-import { createEditor, type Editor } from '@gprose/core';
-import type { DocumentNode } from '@gprose/model';
-import { textSelection } from '@gprose/state';
+import { createEditor, type Editor } from '@kerned/core';
+import type { DocumentNode } from '@kerned/model';
+import { textSelection } from '@kerned/state';
 import { StrictMode, Suspense, useLayoutEffect, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot, hydrateRoot } from 'react-dom/client';

@@ -1,19 +1,19 @@
-import { createListCommands, type ListCommand } from '@gprose/extension-editing';
+import { createListCommands, type ListCommand } from '@kerned/extension-editing';
 import {
   createSchema,
   defineNode,
   indexTree,
   type NodeIdentity,
   type DocumentNode,
-} from '@gprose/model';
+} from '@kerned/model';
 import {
   textSelection,
   TextSelection,
   createEditor,
   createAnchor,
   resolveAnchor,
-} from '@gprose/state';
-import { type Step } from '@gprose/transform';
+} from '@kerned/state';
+import { type Step } from '@kerned/transform';
 import { z } from 'zod';
 
 const definitions = [

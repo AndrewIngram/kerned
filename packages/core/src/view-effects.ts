@@ -1,5 +1,5 @@
-import type { NodeIdentity } from '@gprose/model';
-import type { createEditor, Selection } from '@gprose/state';
+import type { NodeIdentity } from '@kerned/model';
+import type { createEditor, Selection } from '@kerned/state';
 
 import { defineCommand } from './definitions.js';
 

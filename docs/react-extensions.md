@@ -31,8 +31,8 @@ const cardViews = defineExtension({
 });
 ```
 
-`defineReactNodeView` and `ReactNodeViewProps` come from `@gprose/react`;
-`nodeViews` and `defineNodeView` come from `@gprose/view`. Assemble the view
+`defineReactNodeView` and `ReactNodeViewProps` come from `@kerned/react`;
+`nodeViews` and `defineNodeView` come from `@kerned/view`. Assemble the view
 extension alongside its node definition and presentation. There is no second
 renderer list on `EditorContent` and no schema name lookup inside the component.
 Binding recognizes configured variants of the same definition family.

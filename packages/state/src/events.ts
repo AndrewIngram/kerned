@@ -1,4 +1,4 @@
-import type { NodeIdentity } from '@gprose/model';
+import type { NodeIdentity } from '@kerned/model';
 
 import type { ExtensionUpdate } from './extension-state.js';
 import type { EditorState } from './transactions.js';

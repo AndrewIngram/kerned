@@ -1,8 +1,8 @@
-import { createEditor } from '@gprose/core';
-import { paragraph } from '@gprose/extension-document';
-import { createSchema, indexTree } from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { selectionContext, textSelection } from '@gprose/state';
+import { createEditor } from '@kerned/core';
+import { paragraph } from '@kerned/extension-document';
+import { createSchema, indexTree } from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { selectionContext, textSelection } from '@kerned/state';
 import { expect, onTestFinished, test } from 'vitest';
 
 import { pasteCellRectangle } from '../clipboard.js';

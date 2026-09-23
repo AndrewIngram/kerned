@@ -1,6 +1,6 @@
-import { localHistory } from '@gprose/extension-history';
-import { createSchema, defineNode, type DocumentInput } from '@gprose/model';
-import { createStateField, textSelection, type NodeAccess } from '@gprose/state';
+import { localHistory } from '@kerned/extension-history';
+import { createSchema, defineNode, type DocumentInput } from '@kerned/model';
+import { createStateField, textSelection, type NodeAccess } from '@kerned/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

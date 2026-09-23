@@ -1,11 +1,11 @@
-import { createEditor } from '@gprose/core';
-import { captureComment, createCommentStore } from '@gprose/extension-comments';
-import { commentView } from '@gprose/extension-comments/browser';
-import { localHistory } from '@gprose/extension-history';
-import { searchView } from '@gprose/extension-search';
-import { createSchema } from '@gprose/model';
-import { textSelection } from '@gprose/state';
-import { mountEditor } from '@gprose/view';
+import { createEditor } from '@kerned/core';
+import { captureComment, createCommentStore } from '@kerned/extension-comments';
+import { commentView } from '@kerned/extension-comments/browser';
+import { localHistory } from '@kerned/extension-history';
+import { searchView } from '@kerned/extension-search';
+import { createSchema } from '@kerned/model';
+import { textSelection } from '@kerned/state';
+import { mountEditor } from '@kerned/view';
 
 import { note, editing, presentation } from './document';
 

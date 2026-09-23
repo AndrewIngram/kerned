@@ -1,4 +1,4 @@
-import type { TextFormat } from '@gprose/extension-document';
+import type { TextFormat } from '@kerned/extension-document';
 
 import type { EditorSession } from '../editor-types.js';
 

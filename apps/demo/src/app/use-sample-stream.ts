@@ -1,4 +1,4 @@
-import type { ViewDiagnostics, DiagnosticEvent } from '@gprose/view/diagnostics';
+import type { ViewDiagnostics, DiagnosticEvent } from '@kerned/view/diagnostics';
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 
 import type { StarterNode } from '../demo-model.js';

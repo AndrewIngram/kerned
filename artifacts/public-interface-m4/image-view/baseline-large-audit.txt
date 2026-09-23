@@ -1,5 +1,5 @@
 
-> gprose-engine-prototype@0.0.0 check:editor-large /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-large /Users/andrewingram/Code/kerned
 > node scripts/check-editor-large.mjs
 
 node:internal/modules/run_main:107
@@ -10,7 +10,7 @@ AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
 
 10992 !== 10991
 
-    at file:///Users/andrewingram/Code/gprose/scripts/check-editor-large.mjs:154:16 {
+    at file:///Users/andrewingram/Code/kerned/scripts/check-editor-large.mjs:154:16 {
   generatedMessage: true,
   code: 'ERR_ASSERTION',
   actual: 10992,

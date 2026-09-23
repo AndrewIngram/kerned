@@ -1,18 +1,18 @@
-export { createEditor, textSelection, selectionContext } from '@gprose/state';
+export { createEditor, textSelection, selectionContext } from '@kerned/state';
 
-export { indexTree } from '@gprose/model';
+export { indexTree } from '@kerned/model';
 
 export { demoSchema } from '../../apps/demo/src/demo-schema.js';
 
-export { createTable, tableCells } from '@gprose/extension-table';
+export { createTable, tableCells } from '@kerned/extension-table';
 
 export {
   copyCellRectangle,
   pasteCellRectangle,
   cellRectangleText,
   plainCellRectangle,
-} from '@gprose/extension-table';
+} from '@kerned/extension-table';
 
-export { writeClipboard, readClipboard } from '@gprose/extension-editing/browser';
+export { writeClipboard, readClipboard } from '@kerned/extension-editing/browser';
 
-export { pasteFragment } from '@gprose/extension-editing';
+export { pasteFragment } from '@kerned/extension-editing';

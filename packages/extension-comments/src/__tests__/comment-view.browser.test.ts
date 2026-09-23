@@ -1,8 +1,8 @@
-import { createEditor } from '@gprose/core';
-import { createSchema } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection, NodeSelection } from '@gprose/state';
-import { mountEditor } from '@gprose/view';
+import { createEditor } from '@kerned/core';
+import { createSchema } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection, NodeSelection } from '@kerned/state';
+import { mountEditor } from '@kerned/view';
 import { expect, test } from 'vitest';
 
 import { commentView, onCommentActivate, type CommentActivation } from '../browser.js';

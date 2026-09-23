@@ -7,8 +7,8 @@ const server = await createServer({
   configFile: false,
   server: { middlewareMode: true },
   ssr: {
-    resolve: { conditions: [...defaultServerConditions, 'gprose-source'] },
-    noExternal: [/^@gprose\//],
+    resolve: { conditions: [...defaultServerConditions, 'kerned-source'] },
+    noExternal: [/^@kerned\//],
   },
 });
 

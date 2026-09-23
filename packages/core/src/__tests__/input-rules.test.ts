@@ -1,6 +1,6 @@
-import { localHistory } from '@gprose/extension-history';
-import { createSchema, defineNode } from '@gprose/model';
-import { textSelection } from '@gprose/state';
+import { localHistory } from '@kerned/extension-history';
+import { createSchema, defineNode } from '@kerned/model';
+import { textSelection } from '@kerned/state';
 import { expect, test, onTestFinished } from 'vitest';
 import { z } from 'zod';
 

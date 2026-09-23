@@ -1,13 +1,13 @@
-import { createEditor, defineCommand, defineQuery } from '@gprose/core';
-import { documentFormatting } from '@gprose/extension-document';
-import { textCommands } from '@gprose/extension-document';
-import { documentStructure } from '@gprose/extension-editing';
-import { localHistory } from '@gprose/extension-history';
-import { tableEditing } from '@gprose/extension-table';
-import { tableCells } from '@gprose/extension-table';
-import { createSchema, defineNode } from '@gprose/model';
-import { starterDefinitions } from '@gprose/starter-kit';
-import { NodeSelection, TextSelection, textSelection, toggleMarkCommand } from '@gprose/state';
+import { createEditor, defineCommand, defineQuery } from '@kerned/core';
+import { documentFormatting } from '@kerned/extension-document';
+import { textCommands } from '@kerned/extension-document';
+import { documentStructure } from '@kerned/extension-editing';
+import { localHistory } from '@kerned/extension-history';
+import { tableEditing } from '@kerned/extension-table';
+import { tableCells } from '@kerned/extension-table';
+import { createSchema, defineNode } from '@kerned/model';
+import { starterDefinitions } from '@kerned/starter-kit';
+import { NodeSelection, TextSelection, textSelection, toggleMarkCommand } from '@kerned/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 

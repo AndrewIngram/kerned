@@ -1,4 +1,4 @@
-import type { NodeIdentity, Schema } from '@gprose/model';
+import type { NodeIdentity, Schema } from '@kerned/model';
 
 /** Offsets use the original text's UTF-16 indices and follow grapheme boundaries. */
 export type FindMatch = Readonly<{ id: number; key: string; from: number; to: number }>;

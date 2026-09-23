@@ -4,7 +4,7 @@ import { defaultClientConditions, defineConfig } from 'vite';
 export default defineConfig(({ mode, command }) => ({
   cacheDir: mode === 'e2e' ? 'node_modules/.vite-e2e' : 'node_modules/.vite',
   resolve: {
-    conditions: [...defaultClientConditions, ...(command === 'serve' ? ['gprose-source'] : [])],
+    conditions: [...defaultClientConditions, ...(command === 'serve' ? ['kerned-source'] : [])],
   },
   plugins: [react({ compiler: true })],
   build: {

@@ -1,5 +1,5 @@
-import type { Editor } from '@gprose/core';
-import type { starterExtensions } from '@gprose/starter-kit';
+import type { Editor } from '@kerned/core';
+import type { starterExtensions } from '@kerned/starter-kit';
 
 import type { StarterNode } from './demo-model.js';
 

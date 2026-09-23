@@ -7,7 +7,7 @@ test('React selectors suppress unchanged values and view listeners clean up unde
 
     const { mountOptimizedProbe } = await import('./react-events-probe.js');
 
-    const { textSelection } = await import('@gprose/state');
+    const { textSelection } = await import('@kerned/state');
 
     const editor = fixture(),
       element = document.createElement('div');

@@ -30,7 +30,7 @@ starter schema into text metrics, inline dimensions and estimated block heights.
 shared span, position, and direction types and re-exports grapheme boundaries
 from the editor core. Neither module contains the former comparison editors.
 
-These files are private implementations of `mountEditor` from `@gprose/view`; consumers do not create an engine directly.
+These files are private implementations of `mountEditor` from `@kerned/view`; consumers do not create an engine directly.
 
 The layout engine accepts Latin, Greek, Cyrillic, Arabic, Hebrew and supported
 emoji. Directional scripts use retained Unicode bidi analysis, coverage-based font

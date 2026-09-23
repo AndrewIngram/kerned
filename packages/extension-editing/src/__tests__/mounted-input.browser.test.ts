@@ -1,10 +1,10 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { formattingCommands } from '@gprose/extension-document';
-import { createSchema, defineNode } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection } from '@gprose/state';
-import { keyboardShortcuts } from '@gprose/view';
-import { mountEditor, defineNodePresentation, presentations } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { formattingCommands } from '@kerned/extension-document';
+import { createSchema, defineNode } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection } from '@kerned/state';
+import { keyboardShortcuts } from '@kerned/view';
+import { mountEditor, defineNodePresentation, presentations } from '@kerned/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

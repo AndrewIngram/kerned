@@ -1,5 +1,5 @@
-import { defineExtension, type ContributionContext } from '@gprose/core';
-import { defineMarkView, viewLayers, type MarkViewFrame } from '@gprose/view';
+import { defineExtension, type ContributionContext } from '@kerned/core';
+import { defineMarkView, viewLayers, type MarkViewFrame } from '@kerned/view';
 
 import { underline } from './definitions.js';
 

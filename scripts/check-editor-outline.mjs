@@ -145,8 +145,8 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     assert.equal(await page.locator('.document-outline').count(), 0);
 
     const result = await page.evaluate(async () => {
-      const { createSchema, defineNode } = await import('/@id/@gprose/model');
-      const { createOutlineExtension } = await import('/@id/@gprose/extension-outline');
+      const { createSchema, defineNode } = await import('/@id/@kerned/model');
+      const { createOutlineExtension } = await import('/@id/@kerned/extension-outline');
 
       const { z } = await import('/node_modules/zod/index.js');
 

@@ -71,7 +71,7 @@ try {
 
   const varied = await page.evaluate(async () => {
     const { schema, dispatch, capture } = await import('/tests/fixtures/editor-foundation.js');
-    const { createEditor, textSelection } = await import('/@id/@gprose/state');
+    const { createEditor, textSelection } = await import('/@id/@kerned/state');
     const rows = [];
 
     for (let trial = 0; trial < 3; trial++)

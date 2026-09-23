@@ -8,7 +8,7 @@ export {
 
 export { type DirectCommands, type NamedChain } from './commands.js';
 
-export { defineExtension } from '@gprose/model';
+export { defineExtension } from '@kerned/model';
 
 export {
   type Command,
@@ -17,7 +17,7 @@ export {
   type CommandOptions,
   type ReadContext,
   type CommandDefinition,
-} from '@gprose/state';
+} from '@kerned/state';
 
 export { selectedValue, type SelectedValue } from './queries.js';
 
@@ -38,7 +38,7 @@ export {
   type DocumentCommandDefinition,
 } from './definitions.js';
 
-export type { EditorEvents, PositionCheckpoint } from '@gprose/state';
+export type { EditorEvents, PositionCheckpoint } from '@kerned/state';
 
 export {
   connectEditorView,

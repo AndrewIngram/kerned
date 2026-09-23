@@ -1,9 +1,9 @@
-import { readClipboard, writeClipboard } from '@gprose/extension-editing/browser';
-import { createDocumentSerializer, indexTree } from '@gprose/model';
-import { starterSerializers } from '@gprose/starter-kit';
-import { starterHtmlParsers } from '@gprose/starter-kit/browser';
-import { createEditor, textSelection, TextSelection } from '@gprose/state';
-import { createHtmlParser } from '@gprose/view';
+import { readClipboard, writeClipboard } from '@kerned/extension-editing/browser';
+import { createDocumentSerializer, indexTree } from '@kerned/model';
+import { starterSerializers } from '@kerned/starter-kit';
+import { starterHtmlParsers } from '@kerned/starter-kit/browser';
+import { createEditor, textSelection, TextSelection } from '@kerned/state';
+import { createHtmlParser } from '@kerned/view';
 import { expect, test } from 'vitest';
 
 import type { StarterNode } from '../../../../apps/demo/src/demo-model.js';

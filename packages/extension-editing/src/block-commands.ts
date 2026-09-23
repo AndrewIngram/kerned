@@ -1,6 +1,6 @@
-import { indexTree, type Schema, type NodeIdentity } from '@gprose/model';
-import type { EditorState } from '@gprose/state';
-import type { Step } from '@gprose/transform';
+import { indexTree, type Schema, type NodeIdentity } from '@kerned/model';
+import type { EditorState } from '@kerned/state';
+import type { Step } from '@kerned/transform';
 
 import { createListCommands, type ListAdapter } from './lists.js';
 

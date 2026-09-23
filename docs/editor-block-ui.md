@@ -2,7 +2,7 @@
 
 The toolbar uses the compact Blocks menu. Underline and clear formatting operate
 on the selected text; comments can span canvas paragraphs. Comment threads live
-outside the document in `@gprose/extension-comments`. Formatting and structural
+outside the document in `@kerned/extension-comments`. Formatting and structural
 commands belong to the document, editing and table extension packages.
 
 Quotes, lists and list items are container extensions. Paragraph identities survive

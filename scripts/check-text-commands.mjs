@@ -11,8 +11,8 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
     await page.waitForFunction(() => window.editorDiagnostics);
 
     const result = await page.evaluate(async () => {
-      const { textCommands } = await import('/@id/@gprose/extension-document');
-      const { createEditor, TextSelection } = await import('/@id/@gprose/state');
+      const { textCommands } = await import('/@id/@kerned/extension-document');
+      const { createEditor, TextSelection } = await import('/@id/@kerned/state');
       const { demoSchema } = await import('/src/demo-schema.ts');
 
       const nodes = [1, 2].map((id) => ({
@@ -56,9 +56,9 @@ for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
       const restored = textCommands(demoSchema, editor.state).active('underline');
 
       const { captureComment, createCommentStore, commentDecorations } =
-        await import('/@id/@gprose/extension-comments');
+        await import('/@id/@kerned/extension-comments');
 
-      const { resolveRangeDecorations } = await import('/@id/@gprose/state');
+      const { resolveRangeDecorations } = await import('/@id/@kerned/state');
       const store = createCommentStore();
       const comment = captureComment(editor, 'discussion', []);
 

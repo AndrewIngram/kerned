@@ -1,4 +1,4 @@
-import type { NodeIdentity } from '@gprose/model';
+import type { NodeIdentity } from '@kerned/model';
 
 import { allocatedBlockBounds } from './block-geometry.js';
 import {

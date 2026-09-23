@@ -1,5 +1,5 @@
-import { createSchema, defineExtension, defineNode, type DocumentNode } from '@gprose/model';
-import { createEditor, createStateField, textSelection } from '@gprose/state';
+import { createSchema, defineExtension, defineNode, type DocumentNode } from '@kerned/model';
+import { createEditor, createStateField, textSelection } from '@kerned/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 

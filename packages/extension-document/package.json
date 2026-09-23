@@ -1,5 +1,5 @@
 {
-  "name": "@gprose/extension-document",
+  "name": "@kerned/extension-document",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,22 +8,22 @@
   ],
   "exports": {
     ".": {
-      "gprose-source": "./src/index.ts",
+      "kerned-source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./browser": {
-      "gprose-source": "./src/browser.ts",
+      "kerned-source": "./src/browser.ts",
       "types": "./dist/browser.d.ts",
       "import": "./dist/browser.js"
     }
   },
   "dependencies": {
-    "@gprose/core": "workspace:*",
-    "@gprose/model": "workspace:*",
-    "@gprose/state": "workspace:*",
-    "@gprose/transform": "workspace:*",
-    "@gprose/view": "workspace:*",
+    "@kerned/core": "workspace:*",
+    "@kerned/model": "workspace:*",
+    "@kerned/state": "workspace:*",
+    "@kerned/transform": "workspace:*",
+    "@kerned/view": "workspace:*",
     "zod": "4.6.5",
     "@standard-schema/spec": "1.1.0"
   }

@@ -7,8 +7,8 @@ import {
   type Schema,
   indexTree,
   type TreeIndex,
-} from '@gprose/model';
-import type { Step } from '@gprose/transform';
+} from '@kerned/model';
+import type { Step } from '@kerned/transform';
 
 import { selectionContext } from './selection.js';
 import type { EditorState } from './transactions.js';

@@ -1,5 +1,5 @@
-import { type NodeIdentity, type SelectionRange, validateTextRange } from '@gprose/model';
-import { mapPosition, mapGapPosition, type PositionMap } from '@gprose/transform';
+import { type NodeIdentity, type SelectionRange, validateTextRange } from '@kerned/model';
+import { mapPosition, mapGapPosition, type PositionMap } from '@kerned/transform';
 
 import { Selection } from './selection-base.js';
 import {

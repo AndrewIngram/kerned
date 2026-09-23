@@ -1,4 +1,4 @@
-import type { ContentSlot } from '@gprose/view';
+import type { ContentSlot } from '@kerned/view';
 import { useLayoutEffect, useRef, type CSSProperties } from 'react';
 
 /** Reserve canvas-owned child content inside a custom node's React chrome. */

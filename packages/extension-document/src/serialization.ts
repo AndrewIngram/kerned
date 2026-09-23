@@ -1,4 +1,4 @@
-import { defineNodeSerializer, defineMarkSerializer, defineInlineSerializer } from '@gprose/model';
+import { defineNodeSerializer, defineMarkSerializer, defineInlineSerializer } from '@kerned/model';
 
 import {
   paragraph,
@@ -61,10 +61,10 @@ export const documentSerializers = [
       {
         tag: 'span',
         attributes: {
-          'data-gprose-mention': attributes.label,
-          'data-gprose-width': attributes.width,
-          'data-gprose-ascent': attributes.ascent,
-          'data-gprose-descent': attributes.descent,
+          'data-kerned-mention': attributes.label,
+          'data-kerned-width': attributes.width,
+          'data-kerned-ascent': attributes.ascent,
+          'data-kerned-descent': attributes.descent,
         },
         children: [attributes.label],
       },

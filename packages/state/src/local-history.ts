@@ -1,4 +1,4 @@
-import type { Mark, NodeIdentity } from '@gprose/model';
+import type { Mark, NodeIdentity } from '@kerned/model';
 import {
   invertAnchorMap,
   invertPositionMap,
@@ -6,7 +6,7 @@ import {
   type AnchorMap,
   type DocumentChange,
   type PositionMap,
-} from '@gprose/transform';
+} from '@kerned/transform';
 
 import type { MappingOperation } from './relative-positions.js';
 import type { Selection } from './selection-base.js';

@@ -1,8 +1,8 @@
-import { createEditor } from '@gprose/core';
-import { paragraph, heading } from '@gprose/extension-document';
-import { createSchema } from '@gprose/model';
-import { defineStyleRule, mountEditor } from '@gprose/view';
-import { createViewDiagnostics } from '@gprose/view/diagnostics';
+import { createEditor } from '@kerned/core';
+import { paragraph, heading } from '@kerned/extension-document';
+import { createSchema } from '@kerned/model';
+import { defineStyleRule, mountEditor } from '@kerned/view';
+import { createViewDiagnostics } from '@kerned/view/diagnostics';
 import { expect, test } from 'vitest';
 
 import { starterBrowserExtensions } from '../browser.js';

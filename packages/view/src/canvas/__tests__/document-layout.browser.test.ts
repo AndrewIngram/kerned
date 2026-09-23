@@ -1,6 +1,6 @@
-import { createEditor } from '@gprose/core';
-import { createSchema, defineNode, type DocumentNode } from '@gprose/model';
-import { textSelection } from '@gprose/state';
+import { createEditor } from '@kerned/core';
+import { createSchema, defineNode, type DocumentNode } from '@kerned/model';
+import { textSelection } from '@kerned/state';
 import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import { beforeAll, expect, test } from 'vitest';
 import { z } from 'zod';

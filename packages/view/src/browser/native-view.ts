@@ -1,5 +1,5 @@
-import { connectEditorView, type EditorViewSession } from '@gprose/core';
-import type { Selection } from '@gprose/state';
+import { connectEditorView, type EditorViewSession } from '@kerned/core';
+import type { Selection } from '@kerned/state';
 
 import type { InputHandlers } from './input-contributions.js';
 import { createPointerSelection, type PointerSelectionOptions } from './pointer-selection.js';

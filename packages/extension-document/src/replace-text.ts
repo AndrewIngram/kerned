@@ -1,5 +1,5 @@
-import { defineCommand } from '@gprose/core';
-import { TextSelection, textSelection } from '@gprose/state';
+import { defineCommand } from '@kerned/core';
+import { TextSelection, textSelection } from '@kerned/state';
 
 export type TextReplacementRange = { readonly from: number; readonly to: number };
 

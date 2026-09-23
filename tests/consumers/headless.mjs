@@ -1,14 +1,14 @@
 import assert from 'node:assert/strict';
 
-import { createEditor, createEditorSerializer, defineExtension } from '@gprose/core';
+import { createEditor, createEditorSerializer, defineExtension } from '@kerned/core';
 import {
   captureComment,
   createCommentStore,
   createCommentProjection,
-} from '@gprose/extension-comments';
-import { paragraph } from '@gprose/extension-document';
-import { localHistory } from '@gprose/extension-history';
-import { createOutlineExtension } from '@gprose/extension-outline';
+} from '@kerned/extension-comments';
+import { paragraph } from '@kerned/extension-document';
+import { localHistory } from '@kerned/extension-history';
+import { createOutlineExtension } from '@kerned/extension-outline';
 import {
   table,
   tableCell,
@@ -16,7 +16,7 @@ import {
   tableCells,
   tableRows,
   tableSerializers,
-} from '@gprose/extension-table';
+} from '@kerned/extension-table';
 import {
   createSchema,
   defineNode,
@@ -24,10 +24,10 @@ import {
   createDocumentSerializer,
   defineNodeSerializer,
   defineExtension as modelExtension,
-} from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { TextSelection, Selection, textSelection } from '@gprose/state';
-import { mapPosition } from '@gprose/transform';
+} from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { TextSelection, Selection, textSelection } from '@kerned/state';
+import { mapPosition } from '@kerned/transform';
 import { z } from 'zod';
 
 // This fixture runs in Node with no TypeScript loader or source export condition.
@@ -48,8 +48,8 @@ for (const name of [
   'extension-editing',
   'starter-kit',
 ]) {
-  assert.match(import.meta.resolve(`@gprose/${name}`), /\/dist\/index\.js$/);
-  assert.throws(() => import.meta.resolve(`@gprose/${name}/src/index.ts`), {
+  assert.match(import.meta.resolve(`@kerned/${name}`), /\/dist\/index\.js$/);
+  assert.throws(() => import.meta.resolve(`@kerned/${name}/src/index.ts`), {
     code: 'ERR_PACKAGE_PATH_NOT_EXPORTED',
   });
 }

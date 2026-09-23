@@ -1,5 +1,5 @@
-import { createSchema, defineNode } from '@gprose/model';
-import { createEditor, textSelection } from '@gprose/state';
+import { createSchema, defineNode } from '@kerned/model';
+import { createEditor, textSelection } from '@kerned/state';
 import { z } from 'zod';
 
 // Deliberately independent of the demo schema, text fields and renderer.
@@ -77,7 +77,7 @@ export async function mountStateProbe(editor, element) {
   const { createElement } = await import('react');
   const { createRoot } = await import('react-dom/client');
   const { flushSync } = await import('react-dom');
-  const { useEditorState } = await import('@gprose/react');
+  const { useEditorState } = await import('@kerned/react');
 
   function Probe() {
     const value = useEditorState(editor, (state) => `${state.revision}:${state.selection.type}`);

@@ -1,6 +1,6 @@
-import { defineExtension, type ContributionContext } from '@gprose/core';
-import { viewStyles } from '@gprose/view';
-import { decorations, type TextDecoration } from '@gprose/view';
+import { defineExtension, type ContributionContext } from '@kerned/core';
+import { viewStyles } from '@kerned/view';
+import { decorations, type TextDecoration } from '@kerned/view';
 
 import { searchStyles } from './search-view-styles.js';
 

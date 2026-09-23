@@ -5,8 +5,8 @@ test('text capture reuses the document index while the caret moves and refreshes
     const { fixture, schema, dispatch } =
       await import('../../../../../tests/fixtures/editor-foundation.js');
 
-    const { textSelection, selectionContext } = await import('@gprose/state');
-    const { createTextInput } = await import('@gprose/view');
+    const { textSelection, selectionContext } = await import('@kerned/state');
+    const { createTextInput } = await import('@kerned/view');
     const editor = fixture();
     let visits = 0;
 

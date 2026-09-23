@@ -1,7 +1,7 @@
-import { defineCommand, defineExtension, defineQuery, type ReadContext } from '@gprose/core';
-import { quote, list, listItem } from '@gprose/extension-document';
-import type { HeadingLevel } from '@gprose/extension-document';
-import { type NodeIdentity, type Schema } from '@gprose/model';
+import { defineCommand, defineExtension, defineQuery, type ReadContext } from '@kerned/core';
+import { quote, list, listItem } from '@kerned/extension-document';
+import type { HeadingLevel } from '@kerned/extension-document';
+import { type NodeIdentity, type Schema } from '@kerned/model';
 
 import { createBlockCommands } from './block-commands.js';
 import { setTextBlockType } from './headings.js';

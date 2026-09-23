@@ -1,5 +1,5 @@
 {
-  "name": "@gprose/react",
+  "name": "@kerned/react",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,16 +8,16 @@
   ],
   "exports": {
     ".": {
-      "gprose-source": "./src/index.tsx",
+      "kerned-source": "./src/index.tsx",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
   "dependencies": {
-    "@gprose/core": "workspace:*",
-    "@gprose/model": "workspace:*",
-    "@gprose/state": "workspace:*",
-    "@gprose/view": "workspace:*"
+    "@kerned/core": "workspace:*",
+    "@kerned/model": "workspace:*",
+    "@kerned/state": "workspace:*",
+    "@kerned/view": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.2.0",

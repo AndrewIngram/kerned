@@ -1,5 +1,5 @@
-import { textSelection, TextSelection } from '@gprose/state';
-import { decorations } from '@gprose/view';
+import { textSelection, TextSelection } from '@kerned/state';
+import { decorations } from '@kerned/view';
 import { expect, test, onTestFinished as registerCleanup } from 'vitest';
 
 import { createCollaborationRoom } from '../room.js';

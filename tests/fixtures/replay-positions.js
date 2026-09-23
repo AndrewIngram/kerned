@@ -1,4 +1,4 @@
-import { indexTree, boundaries } from '@gprose/model';
+import { indexTree, boundaries } from '@kerned/model';
 
 // Independent decoding keeps the replay oracle independent of the production codec.
 export function positionHistory(checkpoint) {

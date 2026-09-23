@@ -1,6 +1,6 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
-import { keyboardShortcuts, createKeyboardShortcuts, type KeyboardShortcut } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
+import { keyboardShortcuts, createKeyboardShortcuts, type KeyboardShortcut } from '@kerned/view';
 import { expect, test, onTestFinished } from 'vitest';
 import { z } from 'zod';
 

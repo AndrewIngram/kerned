@@ -6,7 +6,7 @@ import {
   selectionAnchor,
   type SelectionAnchor,
   type SelectionContext,
-} from '@gprose/state';
+} from '@kerned/state';
 
 import { type TextHit } from './hit-testing.js';
 

@@ -12,7 +12,7 @@ table consumer and external comment state. Three P2 findings required changes.
 
 ## Built React server imports
 
-Ordinary Node could not import `@gprose/react`: its eager view import reached a
+Ordinary Node could not import `@kerned/react`: its eager view import reached a
 CSS file and raised `ERR_UNKNOWN_FILE_EXTENSION`. Vitest transformed CSS, so its
 SSR tests did not reveal the failure. Standard browser extensions had the same
 problem when used to assemble a schema during server rendering.

@@ -1,4 +1,4 @@
-import type { AnchorMap } from '@gprose/transform';
+import type { AnchorMap } from '@kerned/transform';
 
 export type MappingPoint = { key: string; offset: number };
 

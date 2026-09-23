@@ -1,18 +1,18 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { formattingSpans } from '@gprose/extension-document';
-import { paragraph } from '@gprose/extension-document';
-import { formattingCommands } from '@gprose/extension-document';
-import { createSchema, defineNode } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection } from '@gprose/state';
-import { keyboardShortcuts, type KeyboardShortcut } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { formattingSpans } from '@kerned/extension-document';
+import { paragraph } from '@kerned/extension-document';
+import { formattingCommands } from '@kerned/extension-document';
+import { createSchema, defineNode } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection } from '@kerned/state';
+import { keyboardShortcuts, type KeyboardShortcut } from '@kerned/view';
 import {
   defaultFonts,
   mountEditor,
   defineNodePresentation,
   presentations,
   defineStyleRule,
-} from '@gprose/view';
+} from '@kerned/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

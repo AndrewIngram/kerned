@@ -6,7 +6,7 @@ import {
   type Schema,
   type SchemaValues,
   type DefinitionContribution,
-} from '@gprose/model';
+} from '@kerned/model';
 import {
   createEditor as createStateEditor,
   selectionContext,
@@ -20,7 +20,7 @@ import {
   type Selection,
   type SelectionExtension,
   type HistoryOptions,
-} from '@gprose/state';
+} from '@kerned/state';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 import {

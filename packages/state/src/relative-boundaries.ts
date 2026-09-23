@@ -1,4 +1,4 @@
-import type { BoundaryPoint } from '@gprose/transform';
+import type { BoundaryPoint } from '@kerned/transform';
 
 import { projectOutside, mayCoverRange } from './mapping-index.js';
 

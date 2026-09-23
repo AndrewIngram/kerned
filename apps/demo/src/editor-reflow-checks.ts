@@ -1,7 +1,7 @@
-import { formattingSpans } from '@gprose/extension-document';
-import { mentionLayout } from '@gprose/extension-document';
-import { typography } from '@gprose/extension-document/browser';
-import { auditReflow, type ViewDiagnostics, type ReflowAuditBlock } from '@gprose/view/diagnostics';
+import { formattingSpans } from '@kerned/extension-document';
+import { mentionLayout } from '@kerned/extension-document';
+import { typography } from '@kerned/extension-document/browser';
+import { auditReflow, type ViewDiagnostics, type ReflowAuditBlock } from '@kerned/view/diagnostics';
 
 import type { StarterLeaf } from './demo-model.js';
 

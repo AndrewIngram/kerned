@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import ts from 'typescript';
 
-const directory = mkdtempSync(path.join(tmpdir(), 'gprose-declarations-'));
+const directory = mkdtempSync(path.join(tmpdir(), 'kerned-declarations-'));
 
 try {
   const config = ts.readConfigFile('tsconfig.json', (file) => ts.sys.readFile(file));

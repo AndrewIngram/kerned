@@ -1,6 +1,6 @@
-import { createSchema, defineNode, type DocumentNode } from '@gprose/model';
-import type { NodeIdentity } from '@gprose/model';
-import { createStateField } from '@gprose/state';
+import { createSchema, defineNode, type DocumentNode } from '@kerned/model';
+import type { NodeIdentity } from '@kerned/model';
+import { createStateField } from '@kerned/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

@@ -1,14 +1,14 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createMention } from '@gprose/extension-document';
-import { createSchema, defineInline } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createMention } from '@kerned/extension-document';
+import { createSchema, defineInline } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
 import {
   defineInlinePresentation,
   defineInlineView,
   inlinePresentations,
   mountEditor,
   viewLayers,
-} from '@gprose/view';
+} from '@kerned/view';
 import { z } from 'zod';
 
 export const badge = defineInline(

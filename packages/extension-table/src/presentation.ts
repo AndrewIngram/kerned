@@ -1,11 +1,11 @@
-import { defineExtension, type ContributionContext } from '@gprose/core';
-import type { NodeIdentity, Schema } from '@gprose/model';
+import { defineExtension, type ContributionContext } from '@kerned/core';
+import type { NodeIdentity, Schema } from '@kerned/model';
 import {
   defineNodeAccessibility,
   nodeAccessibility,
   presentations,
   type BlockPresentation,
-} from '@gprose/view';
+} from '@kerned/view';
 
 import { table, tableCell } from './definitions.js';
 import { tableRows } from './table.js';

@@ -30,7 +30,7 @@ Transactions lazily map the current selection through newly added steps. An expl
 
 History stores selection bookmarks at event boundaries, maps them with intervening changes and resolves them against the undo/redo result. It retains position maps for changes excluded from undo, including collaboration-related changes. A bookmark is not itself a durable remote reference: it still depends on the relevant mappings and document. [History source](https://github.com/ProseMirror/prosemirror-history/blob/master/src/history.ts)
 
-## Recommended adaptation for gprose
+## Recommended adaptation for kerned
 
 Mimic the protocol and observable behavior, using our stable identities and in-memory TypeScript pipeline:
 

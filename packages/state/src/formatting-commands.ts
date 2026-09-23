@@ -5,7 +5,7 @@ import {
   type NodeIdentity,
   type Schema,
   indexTree,
-} from '@gprose/model';
+} from '@kerned/model';
 
 import type { CommandActivity, CommandDefinition } from './commands.js';
 import { changeSelectionMarks } from './mark-commands.js';

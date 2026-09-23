@@ -36,7 +36,7 @@ for (const file of sources) {
 
     const targetLayer = target.startsWith('packages/')
       ? target.split('/')[1]
-      : target.startsWith('@gprose/')
+      : target.startsWith('@kerned/')
         ? target.split('/')[1]
         : null;
 
@@ -62,7 +62,7 @@ for (const file of sources) {
 
     if (layers.has(targetLayer) && targetLayer !== layer) {
       assert.ok(
-        target === `@gprose/${targetLayer}`,
+        target === `@kerned/${targetLayer}`,
         `${file}: use the ${targetLayer} public entry point, not ${specifier}`,
       );
     }
@@ -79,10 +79,10 @@ for (const fixture of [
 ]) {
   for (const specifier of dependencies(fixture, readFileSync(fixture, 'utf8'))) {
     assert.ok(
-      /^@gprose\/(?:model|transform|state|extension-document|extension-table|extension-editing)$/.test(
+      /^@kerned\/(?:model|transform|state|extension-document|extension-table|extension-editing)$/.test(
         specifier,
       ) ||
-        specifier === '@gprose/view' ||
+        specifier === '@kerned/view' ||
         // Attribute validators are consumer-owned Standard Schema implementations.
         specifier === 'zod',
       `${fixture}: independent fixture bypasses public entry points: ${specifier}`,

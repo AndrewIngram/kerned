@@ -5,9 +5,9 @@ import {
   defineInline,
   validateTree,
   createDocumentCodec,
-} from '@gprose/model';
-import { createEditor, textSelection } from '@gprose/state';
-import { applySteps, restoreChanges } from '@gprose/transform';
+} from '@kerned/model';
+import { createEditor, textSelection } from '@kerned/state';
+import { applySteps, restoreChanges } from '@kerned/transform';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

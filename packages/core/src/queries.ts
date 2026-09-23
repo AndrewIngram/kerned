@@ -1,5 +1,5 @@
-import type { NodeIdentity } from '@gprose/model';
-import type { ReadContext } from '@gprose/state';
+import type { NodeIdentity } from '@kerned/model';
+import type { ReadContext } from '@kerned/state';
 
 export type SelectedValue<Value> =
   | { kind: 'none' }

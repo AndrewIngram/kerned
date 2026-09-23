@@ -1,5 +1,5 @@
-import { textSelection } from '@gprose/state';
-import { mountEditor, decorations } from '@gprose/view';
+import { textSelection } from '@kerned/state';
+import { mountEditor, decorations } from '@kerned/view';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 

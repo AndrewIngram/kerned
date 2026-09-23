@@ -1,4 +1,4 @@
-import { type NodeIdentity, type Schema, type MarkRange } from '@gprose/model';
+import { type NodeIdentity, type Schema, type MarkRange } from '@kerned/model';
 
 import { table, tableCell } from './definitions.js';
 import { tableRows } from './table.js';

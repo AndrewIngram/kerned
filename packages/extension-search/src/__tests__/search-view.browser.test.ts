@@ -1,9 +1,9 @@
-import { createEditor } from '@gprose/core';
-import { createCommentStore } from '@gprose/extension-comments';
-import { commentView } from '@gprose/extension-comments/browser';
-import { createSchema } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { mountEditor } from '@gprose/view';
+import { createEditor } from '@kerned/core';
+import { createCommentStore } from '@kerned/extension-comments';
+import { commentView } from '@kerned/extension-comments/browser';
+import { createSchema } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { mountEditor } from '@kerned/view';
 import { expect, test } from 'vitest';
 
 import { searchView } from '../index.js';

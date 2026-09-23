@@ -1,5 +1,5 @@
-import type { Mark, NodeIdentity, Schema } from '@gprose/model';
-import type { Step } from '@gprose/transform';
+import type { Mark, NodeIdentity, Schema } from '@kerned/model';
+import type { Step } from '@kerned/transform';
 
 import { PermissionDenied } from './permissions.js';
 import type { Selection } from './selection-base.js';

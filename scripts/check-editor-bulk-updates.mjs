@@ -19,7 +19,7 @@ try {
       indexTree,
       createAnchor,
       resolveAnchor,
-    } = Object.assign({}, await import('/@id/@gprose/model'), await import('/@id/@gprose/state'));
+    } = Object.assign({}, await import('/@id/@kerned/model'), await import('/@id/@kerned/state'));
 
     const checks = [];
 

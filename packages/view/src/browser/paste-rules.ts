@@ -1,5 +1,5 @@
-import { defineContribution, type CommandContext } from '@gprose/core';
-import type { NodeIdentity } from '@gprose/model';
+import { defineContribution, type CommandContext } from '@kerned/core';
+import type { NodeIdentity } from '@kerned/model';
 
 import type { ViewSession } from './input-contributions.js';
 

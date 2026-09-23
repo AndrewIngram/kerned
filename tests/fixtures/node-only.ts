@@ -1,13 +1,13 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
-import { NodeSelection, selectionContext } from '@gprose/state';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
+import { NodeSelection, selectionContext } from '@kerned/state';
 import {
   defineNodePresentation,
   defineNodeView,
   mountEditor,
   nodeViews,
   presentations,
-} from '@gprose/view';
+} from '@kerned/view';
 import { z } from 'zod';
 
 const atom = defineNode({

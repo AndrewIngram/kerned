@@ -1,4 +1,4 @@
-import { defineWidgetView, type WidgetViewFrame } from '@gprose/view';
+import { defineWidgetView, type WidgetViewFrame } from '@kerned/view';
 import { memo, type ComponentType } from 'react';
 
 import { portalHostFor } from './portals.js';

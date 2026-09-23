@@ -1,4 +1,4 @@
-import type { MountedEditor, ViewSnapshot } from '@gprose/view';
+import type { MountedEditor, ViewSnapshot } from '@kerned/view';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 

@@ -1,4 +1,4 @@
-import type { NodeBinding, NodeIdentity, Schema, SchemaDefinition } from '@gprose/model';
+import type { NodeBinding, NodeIdentity, Schema, SchemaDefinition } from '@kerned/model';
 import { z } from 'zod';
 
 import { fontSelectionSchema } from './font-catalog.js';

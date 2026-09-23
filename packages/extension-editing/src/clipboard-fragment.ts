@@ -1,7 +1,7 @@
-import { paragraph, list, listItem } from '@gprose/extension-document';
-import { table, tableCell } from '@gprose/extension-table';
-import { copyCellRectangle, pasteCellRectangle } from '@gprose/extension-table';
-import { indexTree, validateTree, type NodeIdentity, type Schema } from '@gprose/model';
+import { paragraph, list, listItem } from '@kerned/extension-document';
+import { table, tableCell } from '@kerned/extension-table';
+import { copyCellRectangle, pasteCellRectangle } from '@kerned/extension-table';
+import { indexTree, validateTree, type NodeIdentity, type Schema } from '@kerned/model';
 import {
   RangeSelection,
   NodeSelection,
@@ -10,9 +10,9 @@ import {
   selectionContext,
   textSelection,
   type EditorState,
-} from '@gprose/state';
-import type { Step } from '@gprose/transform';
-import { supportsLayoutText } from '@gprose/view/text';
+} from '@kerned/state';
+import type { Step } from '@kerned/transform';
+import { supportsLayoutText } from '@kerned/view/text';
 
 import { replaceStructuredText } from './blocks.js';
 

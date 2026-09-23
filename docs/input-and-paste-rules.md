@@ -13,8 +13,8 @@ Input rules belong to the headless core. The starter browser input and native
 table views invoke them after successful text insertion.
 
 ```ts
-import { defineExtension, inputRules, type ContributionContext } from '@gprose/core';
-import { textSelection } from '@gprose/state';
+import { defineExtension, inputRules, type ContributionContext } from '@kerned/core';
+import { textSelection } from '@kerned/state';
 
 const smartDash = defineExtension({
   name: 'smartDash',
@@ -76,8 +76,8 @@ Paste rules belong to the browser adapter and run before ordinary rich/plain
 paste, including native table clipboard handling.
 
 ```ts
-import { pasteRules } from '@gprose/view';
-import { editingCommands } from '@gprose/extension-editing';
+import { pasteRules } from '@kerned/view';
+import { editingCommands } from '@kerned/extension-editing';
 
 // Inside extension setup:
 context.provide(pasteRules, {

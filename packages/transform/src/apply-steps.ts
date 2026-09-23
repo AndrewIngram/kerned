@@ -8,7 +8,7 @@ import {
   childrenAt,
   spliceChildren,
   type TreeIndex,
-} from '@gprose/model';
+} from '@kerned/model';
 
 import type { AnchorMap } from './anchor-maps.js';
 import { removalBoundaries } from './boundary-maps.js';

@@ -1,8 +1,8 @@
 # Rich clipboard
 
-The headless fragment module in `@gprose/extension-editing` extracts
+The headless fragment module in `@kerned/extension-editing` extracts
 selected content and prepares paste transactions. Its browser adapter at
-`@gprose/extension-editing/browser` writes plain text, semantic HTML and an
+`@kerned/extension-editing/browser` writes plain text, semantic HTML and an
 opaque local-fragment token. Paste prefers a known local fragment, then imports
 HTML in an inert template, then falls back to plain text.
 
@@ -41,7 +41,7 @@ plain-text fallback.
 
 ## Rectangular cell clipboard
 
-`@gprose/extension-table` owns schema-specific rectangular copy and paste commands.
+`@kerned/extension-table` owns schema-specific rectangular copy and paste commands.
 The selection extension supplies logical grid bounds, including row/column selections. Copy uses
 visual row/column order even when the active cell is the bottom-right corner. It writes a cropped
 HTML table, the local rich fragment and spreadsheet TSV. Empty cells remain present; TSV quotes

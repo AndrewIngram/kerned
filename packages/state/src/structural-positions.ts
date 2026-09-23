@@ -5,7 +5,7 @@ import {
   type Schema,
   indexTree,
   childrenAt,
-} from '@gprose/model';
+} from '@kerned/model';
 
 export type RelativeGapResult =
   | { status: 'resolved'; gap: { parent: number | null; index: number } }

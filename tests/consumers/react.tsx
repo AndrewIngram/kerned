@@ -1,12 +1,12 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
 import {
   EditorContent,
   defineReactNodeView,
   useEditorState,
   type ReactNodeViewProps,
-} from '@gprose/react';
-import { defineNodePresentation, nodeViews, presentations } from '@gprose/view';
+} from '@kerned/react';
+import { defineNodePresentation, nodeViews, presentations } from '@kerned/view';
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { z } from 'zod';

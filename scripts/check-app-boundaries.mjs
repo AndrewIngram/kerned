@@ -89,7 +89,7 @@ for (const file of sources) {
 
     if (production && owner === 'view') {
       assert.ok(
-        !['react', 'react-dom', '@gprose/react'].some(
+        !['react', 'react-dom', '@kerned/react'].some(
           (name) => target === name || target.startsWith(name + '/'),
         ),
         `${file} couples the view lifecycle to React: ${specifier}`,
@@ -111,7 +111,7 @@ for (const file of sources) {
       )
     )
       assert.ok(
-        !/^@gprose\/(view|react)(?:\/|$)/.test(target),
+        !/^@kerned\/(view|react)(?:\/|$)/.test(target),
         `${file} imports a view adapter: ${specifier}`,
       );
 
@@ -122,7 +122,7 @@ for (const file of sources) {
       ].includes(file)
     )
       assert.ok(
-        !['react', 'react-dom', '@gprose/react'].some(
+        !['react', 'react-dom', '@kerned/react'].some(
           (name) => target === name || target.startsWith(name + '/'),
         ),
         `${file} couples view lifecycle to React: ${specifier}`,

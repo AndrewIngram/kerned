@@ -1,6 +1,6 @@
-import * as stateModule from '@gprose/state';
-import * as rangeSelectionModule from '@gprose/state';
-import * as selectionModule from '@gprose/state';
+import * as stateModule from '@kerned/state';
+import * as rangeSelectionModule from '@kerned/state';
+import * as selectionModule from '@kerned/state';
 import { test, expect } from 'vitest';
 
 import * as editorFoundationModule from '../../../../../tests/fixtures/editor-foundation.js';

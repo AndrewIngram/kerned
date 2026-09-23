@@ -1,4 +1,4 @@
-import type { NodeIdentity } from '@gprose/model';
+import type { NodeIdentity } from '@kerned/model';
 
 import { allocatedBlockWidth } from '../browser/block-geometry.js';
 import type { SlotInsets } from '../browser/content-slot.js';

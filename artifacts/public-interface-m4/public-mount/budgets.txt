@@ -1,5 +1,5 @@
 
-> gprose-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/gprose
+> kerned-engine-prototype@0.0.0 check:editor-performance /Users/andrewingram/Code/kerned
 > node scripts/check-editor-performance.mjs artifacts/public-interface-m4/public-mount/baseline.json
 
 firstUsableMs: 217.0 <= 248.4

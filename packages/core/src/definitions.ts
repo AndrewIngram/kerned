@@ -1,5 +1,5 @@
-import type { NodeIdentity } from '@gprose/model';
-import type { CommandActivity, CommandContext, ReadContext } from '@gprose/state';
+import type { NodeIdentity } from '@kerned/model';
+import type { CommandActivity, CommandContext, ReadContext } from '@kerned/state';
 
 /** Reusable commands operate on the executing document, not one closed node union. */
 export function defineCommand<Args extends unknown[]>(definition: {

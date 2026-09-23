@@ -1,8 +1,8 @@
-import { createEditor } from '@gprose/core';
-import { tableCells } from '@gprose/extension-table';
-import { createSchema, indexTree } from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { AllSelection, TextSelection, textSelection } from '@gprose/state';
+import { createEditor } from '@kerned/core';
+import { tableCells } from '@kerned/extension-table';
+import { createSchema, indexTree } from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { AllSelection, TextSelection, textSelection } from '@kerned/state';
 import { expect, test, vi } from 'vitest';
 
 const schema = createSchema({ extensions: starterExtensions });

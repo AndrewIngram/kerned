@@ -1,5 +1,5 @@
-import { snapTextOffset, type NodeIdentity, type SchemaDefinition } from '@gprose/model';
-import { TextSelection, type CommandContext } from '@gprose/state';
+import { snapTextOffset, type NodeIdentity, type SchemaDefinition } from '@kerned/model';
+import { TextSelection, type CommandContext } from '@kerned/state';
 
 import { defineContribution } from './contributions.js';
 import type { Editor } from './session.js';

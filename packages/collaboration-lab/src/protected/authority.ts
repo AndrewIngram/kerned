@@ -1,6 +1,6 @@
-import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
-import { projectDocument, type NodeAccess, type ProjectedNode } from '@gprose/state';
-import type { Step } from '@gprose/transform';
+import { indexTree, type NodeIdentity, type Schema } from '@kerned/model';
+import { projectDocument, type NodeAccess, type ProjectedNode } from '@kerned/state';
+import type { Step } from '@kerned/transform';
 
 import { documentCoordinates } from '../coordinates.js';
 import { mapSelection, type PresenceSelection } from '../protocol.js';

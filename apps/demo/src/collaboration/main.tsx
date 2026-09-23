@@ -1,4 +1,4 @@
-import { EditorContent } from '@gprose/react';
+import { EditorContent } from '@kerned/react';
 import { useCallback, useState, useSyncExternalStore } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -52,7 +52,7 @@ function App() {
     <main className="collaboration-app">
       <header className="collaboration-header">
         <div>
-          <p className="eyebrow">GPROSE / LOCAL EXPERIMENT</p>
+          <p className="eyebrow">KERNED / LOCAL EXPERIMENT</p>
           <h1>Collaboration</h1>
           <p>Two independent editors. One shared document.</p>
         </div>

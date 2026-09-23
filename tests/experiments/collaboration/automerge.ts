@@ -1,6 +1,6 @@
 import * as Automerge from '@automerge/automerge';
-import { indexTree, type NodeIdentity, type Schema } from '@gprose/model';
-import { applySteps, type Step } from '@gprose/transform';
+import { indexTree, type NodeIdentity, type Schema } from '@kerned/model';
+import { applySteps, type Step } from '@kerned/transform';
 import { z } from 'zod';
 
 import { documentCoordinates } from '../../../packages/collaboration-lab/src/coordinates.js';

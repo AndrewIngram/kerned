@@ -1,6 +1,6 @@
-import { createSchema, defineNode, parseRelativeRange, type DocumentNode } from '@gprose/model';
-import { createEditor, textSelection } from '@gprose/state';
-import { applySteps, createPositionSnapshot, restoreChanges } from '@gprose/transform';
+import { createSchema, defineNode, parseRelativeRange, type DocumentNode } from '@kerned/model';
+import { createEditor, textSelection } from '@kerned/state';
+import { applySteps, createPositionSnapshot, restoreChanges } from '@kerned/transform';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

@@ -5,7 +5,7 @@ import {
   type SelectionRange,
   validateTextRange,
   type TreeIndex,
-} from '@gprose/model';
+} from '@kerned/model';
 
 import type { AnchorMap } from './anchor-maps.js';
 import { markInsertedText } from './inserted-marks.js';

@@ -1,10 +1,10 @@
 # Implemented editor session APIs
 
-The composed session interface is exported from `@gprose/core`. The lower-level
+The composed session interface is exported from `@kerned/core`. The lower-level
 transaction, selection and history implementation is exported from
-`@gprose/state`. Schema, content and durable-reference codecs live in
-`@gprose/model`; document operations and mappings live in
-`@gprose/transform`. These modules are headless. The
+`@kerned/state`. Schema, content and durable-reference codecs live in
+`@kerned/model`; document operations and mappings live in
+`@kerned/transform`. These modules are headless. The
 [completion audit](public-interface-completion-audit.md) records the completed
 package migration; [current limitations](editor-limitations.md) lists remaining work.
 
@@ -16,10 +16,10 @@ through `setup`. Each session runs its own factories. Configuration belongs to
 the definition; transactional state belongs to registered fields.
 
 ```ts
-import { createEditor, defineCommand, defineExtension } from '@gprose/core';
-import { createSchema, indexTree } from '@gprose/model';
-import { paragraph } from '@gprose/extension-document';
-import { localHistory } from '@gprose/extension-history';
+import { createEditor, defineCommand, defineExtension } from '@kerned/core';
+import { createSchema, indexTree } from '@kerned/model';
+import { paragraph } from '@kerned/extension-document';
+import { localHistory } from '@kerned/extension-history';
 
 const Append = defineExtension({
   name: 'append',
@@ -302,7 +302,7 @@ its native listeners on session destruction. The mounted view owns graphics and 
 see [mounted editor lifetime](mounted-editor.md).
 
 ```tsx
-import { useEditorState } from '@gprose/react';
+import { useEditorState } from '@kerned/react';
 
 function Revision({ editor }) {
   const revision = useEditorState(editor, (state) => state.revision);
@@ -335,7 +335,7 @@ Text insertion strictly inside a range expands it. Capture excludes insertion ex
 
 The document position checkpoint now also retains surviving structural neighbours at deletion boundaries. Save it with the document ID, revision and stable node keys as before. The checkpoint stores edit metadata independent of the number of comments. Reloading can assign different runtime IDs. Older checkpoints remain readable, but structural deletion information absent from those checkpoints cannot be reconstructed.
 
-`CommentThread` and `commentDecorations` come from `@gprose/extension-comments`; the generic decoration resolver is in core. Whole-container fragments remain structural until a renderer projects them into its visual blocks. Unresolved decorations retain their reason and do not remove external discussion records. The demo projects comments into text highlights and whole-block outlines, and opens the existing reply panel for images too.
+`CommentThread` and `commentDecorations` come from `@kerned/extension-comments`; the generic decoration resolver is in core. Whole-container fragments remain structural until a renderer projects them into its visual blocks. Unresolved decorations retain their reason and do not remove external discussion records. The demo projects comments into text highlights and whole-block outlines, and opens the existing reply panel for images too.
 
 `captureComment(editor, id, messages)` uses the public range API. `createCommentStore(initial)` supplies a stable snapshot and subscription, plus `put`, `putAll` and `remove`; it can be observed with the optional React hook. Editing discussion messages does not change document revision or text undo history. The demo's discussion store is in memory; durable storage remains the application's responsibility.
 
@@ -401,7 +401,7 @@ Text extensions can provide a mark-storage adapter, and node extensions can prov
 
 ## Browser view and React host
 
-`mountEditor(element, { editor })` from `@gprose/view` owns rendering, pointer
+`mountEditor(element, { editor })` from `@kerned/view` owns rendering, pointer
 selection, native input, viewport observation and focus routing. Its `ready`
 promise reports initialization, `update` changes view configuration, and `destroy`
 releases the view without destroying the borrowed session. Native interactive
@@ -410,7 +410,7 @@ mount rather than assembling the lower-level event and text-input adapters.
 See [mounted editor lifetime](mounted-editor.md) for assets, configuration and
 geometry contracts.
 
-`EditorContent` from `@gprose/react` attaches the complete native mount.
+`EditorContent` from `@kerned/react` attaches the complete native mount.
 `useEditor` owns a headless session after commit; `useEditorState`,
 `useCommandState` and `useViewState` subscribe to session and view snapshots.
 The demo uses those interfaces and no longer assembles private renderer resources.
@@ -495,10 +495,10 @@ lifecycle event error reporting described above.
 ## Typed extension state
 
 ```ts
-import { createEditor, defineExtension, defineQuery } from '@gprose/core';
-import { createSchema, type NodeIdentity } from '@gprose/model';
-import { createStateField } from '@gprose/state';
-import { paragraph } from '@gprose/extension-document';
+import { createEditor, defineExtension, defineQuery } from '@kerned/core';
+import { createSchema, type NodeIdentity } from '@kerned/model';
+import { createStateField } from '@kerned/state';
+import { paragraph } from '@kerned/extension-document';
 
 const Stats = defineExtension({
   name: 'stats',

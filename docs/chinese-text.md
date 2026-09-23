@@ -13,7 +13,7 @@ it does not cover Chinese. Applications opt in with the existing `fonts` option
 on `mountEditor` or `EditorContent`. For example:
 
 ```ts
-import { defaultFonts, type FontConfiguration } from '@gprose/view';
+import { defaultFonts, type FontConfiguration } from '@kerned/view';
 
 const fonts: FontConfiguration = {
   ...defaultFonts,

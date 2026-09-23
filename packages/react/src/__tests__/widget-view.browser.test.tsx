@@ -1,13 +1,13 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
-import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '@gprose/state';
-import { decorations, type Decoration, type InvalidateDecorations } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
+import { NodeSelection, TextSelection, textSelection, type NodeAccess } from '@kerned/state';
+import { decorations, type Decoration, type InvalidateDecorations } from '@kerned/view';
 import {
   defineNodePresentation,
   presentations,
   mountEditor,
   type MountedEditor,
-} from '@gprose/view';
+} from '@kerned/view';
 import { createContext, StrictMode, useContext, useLayoutEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { expect, expectTypeOf, test } from 'vitest';

@@ -3,9 +3,9 @@ import {
   defineCommand,
   defineDocumentCommand,
   type DocumentCommandArguments,
-} from '@gprose/core';
-import { replaceText } from '@gprose/extension-document';
-import { AllSelection } from '@gprose/state';
+} from '@kerned/core';
+import { replaceText } from '@kerned/extension-document';
+import { AllSelection } from '@kerned/state';
 
 import { pasteFragment, type ClipboardFragment } from './clipboard-fragment.js';
 import {

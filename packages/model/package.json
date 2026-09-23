@@ -1,5 +1,5 @@
 {
-  "name": "@gprose/model",
+  "name": "@kerned/model",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,7 @@
   ],
   "exports": {
     ".": {
-      "gprose-source": "./src/index.ts",
+      "kerned-source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }

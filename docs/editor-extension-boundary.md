@@ -17,13 +17,13 @@ These are public source entry points, not published packages or stable versioned
 
 | Layer                          | Owns                                                                                           | Does not decide                                                 |
 | ------------------------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Model, `@gprose/model`         | Document structure, schemas, marks, codecs and durable-reference values                        | Session history, rendering or concrete node kinds               |
-| Transform, `@gprose/transform` | Document operations, inversion and change maps                                                 | Selection publication, permissions or history grouping          |
-| State, `@gprose/state`         | Revision publication, selections, permissions, local history and retained reference resolution | Paragraph, heading, list, mention or comment semantics          |
+| Model, `@kerned/model`         | Document structure, schemas, marks, codecs and durable-reference values                        | Session history, rendering or concrete node kinds               |
+| Transform, `@kerned/transform` | Document operations, inversion and change maps                                                 | Selection publication, permissions or history grouping          |
+| State, `@kerned/state`         | Revision publication, selections, permissions, local history and retained reference resolution | Paragraph, heading, list, mention or comment semantics          |
 | Node extensions                | Attribute validators, storage fields, child constraints and content policies                   | History ordering or revision advancement                        |
 | Inline-object API              | Atomic inline positions, slicing, replacement and text projection                              | Whether an object is a mention, formula, emoji or another token |
 | Annotation API                 | Range mapping/slicing/joining with extension-selected policies                                 | Comment replies, permissions, rendering or storage              |
-| React adapter, `@gprose/react` | Registration and cleanup of canvas painting components                                         | Document schema or editing rules                                |
+| React adapter, `@kerned/react` | Registration and cleanup of canvas painting components                                         | Document schema or editing rules                                |
 | Demo views and layout adapter  | React controls, overlays, style projection, measured layout inputs                             | Transaction atomicity or anchor resolution                      |
 
 The low-level layout engine's use of the word paragraph means a text-layout unit. It does not require a document node called `paragraph`. Schema nodes must project their content and formatting into layout inputs. The existing demo adapter still explicitly projects its own paragraph nodes; it is not a general renderer for arbitrary schemas.
@@ -84,9 +84,9 @@ Executable callbacks are not stored in document content or transactions.
 
 ## Mentions and comments use public APIs
 
-`@gprose/extension-document` defines mentions through `defineInline`. Its extension supplies plain text and layout projection. The editing model stores extension data separately from positioned draw rectangles. The core inline helpers never inspect a person's name, mention label or identity provider.
+`@kerned/extension-document` defines mentions through `defineInline`. Its extension supplies plain text and layout projection. The editing model stores extension data separately from positioned draw rectangles. The core inline helpers never inspect a person's name, mention label or identity provider.
 
-`@gprose/extension-comments` keeps discussion messages outside document nodes and captures independent `DocumentRange` values through state. It supplies range decorations without teaching the generic model about replies or comment storage. The model's annotation helpers remain available for other extension-owned ranges.
+`@kerned/extension-comments` keeps discussion messages outside document nodes and captures independent `DocumentRange` values through state. It supplies range decorations without teaching the generic model about replies or comment storage. The model's annotation helpers remain available for other extension-owned ranges.
 
 The browser `mentionView`, `underlineView`, `commentView` and `searchView`
 extensions draw through the mounted view's geometry and drawing interface. Native
@@ -120,13 +120,13 @@ The existing editor, large-document and viewport-reflow checks exercise the migr
 
 ## Delivered extension packages
 
-`@gprose/extension-document` owns paragraph, heading, image, quote and list
+`@kerned/extension-document` owns paragraph, heading, image, quote and list
 definitions, formatting marks and mention values. Its formatting commands bind
 to the consumer's installed schema. Mention construction and mark conversion
 assemble only their own value definitions, with no demo schema dependency.
-HTML parsing contributions live under `@gprose/extension-document/browser`.
+HTML parsing contributions live under `@kerned/extension-document/browser`.
 
-`@gprose/extension-table` owns the table/cell definitions, grid selection, row and
+`@kerned/extension-table` owns the table/cell definitions, grid selection, row and
 column commands, rectangular clipboard operations and static serializers.
 `tableEditing` installs the cell selection adapter and named commands; its
 default constructors require the standard paragraph definition. Existing cells

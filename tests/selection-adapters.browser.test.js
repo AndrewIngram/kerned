@@ -4,21 +4,21 @@ test('starter commands target the selected node and disjoint cells, never the fi
   const result = await (async () => {
     const { React, createRoot, flushSync } = await import('./fixtures/selection-probe.js');
 
-    const { NodeSelection, textSelection, selectionContext } = await import('@gprose/state');
+    const { NodeSelection, textSelection, selectionContext } = await import('@kerned/state');
 
     const { demoSchema } = await import('../apps/demo/src/demo-schema.js');
-    const { createTable, tableCells } = await import('@gprose/extension-table');
+    const { createTable, tableCells } = await import('@kerned/extension-table');
 
-    const { createEditor } = await import('@gprose/core');
-    const { createSchema } = await import('@gprose/model');
-    const { starterExtensions } = await import('@gprose/starter-kit');
-    const { documentInput } = await import('@gprose/extension-editing/browser');
-    const { useEditorState } = await import('@gprose/react');
+    const { createEditor } = await import('@kerned/core');
+    const { createSchema } = await import('@kerned/model');
+    const { starterExtensions } = await import('@kerned/starter-kit');
+    const { documentInput } = await import('@kerned/extension-editing/browser');
+    const { useEditorState } = await import('@kerned/react');
 
     const { createDemoDocumentQuery } = await import('../apps/demo/src/document-query.js');
 
     const { createDocumentInput } = await import('../packages/extension-editing/src/input.js');
-    const { createTextInput } = await import('@gprose/view');
+    const { createTextInput } = await import('@kerned/view');
     let next = 10;
     const allocate = () => ({ id: next++, key: crypto.randomUUID() });
 
@@ -104,7 +104,7 @@ test('starter commands target the selected node and disjoint cells, never the fi
     flushSync(() => editor.commands.undo());
     flushSync(() => editor.commands.insertTable());
     const order = editor.state.nodes.map((n) => n.kind);
-    const { TextSelection } = await import('@gprose/state');
+    const { TextSelection } = await import('@kerned/state');
 
     const insertedTable = editor.state.nodes[2],
       after = editor.state.nodes[3];

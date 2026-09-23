@@ -1,6 +1,6 @@
 # React integration
 
-Import hooks, content hosts and React rendering adapters from `@gprose/react`.
+Import hooks, content hosts and React rendering adapters from `@kerned/react`.
 The package adapts the same session and view used by vanilla consumers. Custom
 node, mark, inline and widget rendering is described in
 [React extensions](react-extensions.md).

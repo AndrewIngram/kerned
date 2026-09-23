@@ -1,7 +1,7 @@
-import { createEditor } from '@gprose/core';
-import { createSchema, defineNode, indexTree } from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { TextSelection, textSelection } from '@gprose/state';
+import { createEditor } from '@kerned/core';
+import { createSchema, defineNode, indexTree } from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { TextSelection, textSelection } from '@kerned/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

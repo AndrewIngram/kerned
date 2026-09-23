@@ -1,4 +1,4 @@
-import type { NodeIdentity, RelativePosition, TextPoint } from '@gprose/model';
+import type { NodeIdentity, RelativePosition, TextPoint } from '@kerned/model';
 
 import { allocatedBlockWidth } from '../browser/block-geometry.js';
 import type { ViewSession } from '../browser/input-contributions.js';

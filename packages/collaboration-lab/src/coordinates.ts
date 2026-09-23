@@ -4,8 +4,8 @@ import {
   validateTextRange,
   type NodeIdentity,
   type Schema,
-} from '@gprose/model';
-import type { Step } from '@gprose/transform';
+} from '@kerned/model';
+import type { Step } from '@kerned/transform';
 
 import type { Edit, Endpoint, PresenceSelection } from './protocol.js';
 

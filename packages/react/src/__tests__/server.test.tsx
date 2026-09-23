@@ -1,4 +1,4 @@
-import { createEditor } from '@gprose/core';
+import { createEditor } from '@kerned/core';
 import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vitest';
 

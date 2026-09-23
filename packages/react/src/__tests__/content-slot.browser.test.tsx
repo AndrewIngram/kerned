@@ -1,8 +1,8 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
-import { textSelection } from '@gprose/state';
-import { nodeViews } from '@gprose/view';
-import { defineNodePresentation, presentations, type MountedEditor } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
+import { textSelection } from '@kerned/state';
+import { nodeViews } from '@kerned/view';
+import { defineNodePresentation, presentations, type MountedEditor } from '@kerned/view';
 import { createContext, StrictMode, useContext, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';

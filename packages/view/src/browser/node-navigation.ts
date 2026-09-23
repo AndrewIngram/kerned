@@ -1,4 +1,4 @@
-import { rangeSelection, NodeSelection, TextSelection, type Selection } from '@gprose/state';
+import { rangeSelection, NodeSelection, TextSelection, type Selection } from '@kerned/state';
 
 import type { NavigationKey } from './keyboard-navigation.js';
 

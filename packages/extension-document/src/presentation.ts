@@ -1,10 +1,10 @@
-import { defineExtension, type ContributionContext } from '@gprose/core';
+import { defineExtension, type ContributionContext } from '@kerned/core';
 import {
   defineNodeAccessibility,
   nodeAccessibility,
   defineNodePresentation,
   presentations,
-} from '@gprose/view';
+} from '@kerned/view';
 
 import { paragraph, heading, image, quote, list, listItem } from './definitions.js';
 import { formattingSpans } from './formatting.js';

@@ -18,8 +18,8 @@ for (const name of (process.env.BROWSERS ?? 'chromium,firefox,webkit').split(','
     const result = await page.evaluate(async () => {
       const { createSchema, defineNode, createEditor, textSelection } = Object.assign(
         {},
-        await import('/@id/@gprose/model'),
-        await import('/@id/@gprose/state'),
+        await import('/@id/@kerned/model'),
+        await import('/@id/@kerned/state'),
       );
 
       let reads = 0,

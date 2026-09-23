@@ -1,15 +1,15 @@
-import { createEditor } from '@gprose/core';
-import type { ClipboardFragment } from '@gprose/extension-editing';
-import { tableCells } from '@gprose/extension-table';
+import { createEditor } from '@kerned/core';
+import type { ClipboardFragment } from '@kerned/extension-editing';
+import { tableCells } from '@kerned/extension-table';
 import {
   createSchema,
   defineNode,
   indexTree,
   type DocumentInput,
   type DocumentNode,
-} from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { TextSelection, textSelection, NodeSelection } from '@gprose/state';
+} from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { TextSelection, textSelection, NodeSelection } from '@kerned/state';
 import { expect, expectTypeOf, test } from 'vitest';
 import { z } from 'zod';
 

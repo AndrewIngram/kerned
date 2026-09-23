@@ -1,6 +1,6 @@
 # Wordgard architecture research
 
-Verified against official documentation on 2026-09-20. Web-reader requests failed, but direct HTTPS downloads succeeded. This note distinguishes documented behavior from recommendations for gprose; it does not propose adopting Wordgard as a dependency.
+Verified against official documentation on 2026-09-20. Web-reader requests failed, but direct HTTPS downloads succeeded. This note distinguishes documented behavior from recommendations for kerned; it does not propose adopting Wordgard as a dependency.
 
 ## Relationship to ProseMirror
 
@@ -31,7 +31,7 @@ The FAQ leaves 1.0 timing open and anticipates learning from use before stabiliz
 
 Bundled collaboration uses operational transformation with a central authority. Its example lacks production reconnection, persistence, and complete validation. Transforming structural changes requires the starting document. Corrections need coordinated ownership; server and client must apply matching rules when transforming. Independently running fixes on every peer can duplicate changes or loop. [Official collaboration example](https://wordgard.net/examples/collab/)
 
-## Implications for gprose — recommendations, not Wordgard claims
+## Implications for kerned — recommendations, not Wordgard claims
 
 1. Adopt the separation between document values, extensible state, transactions, and an imperative view. Give the canvas view each transaction's changes and mapping so it can invalidate layout precisely.
 2. Define one owned generic node/mark protocol with application-supplied schema types. Keep feature types reusable across schemas; avoid teaching core editing logic about specific demo paragraphs or comments.

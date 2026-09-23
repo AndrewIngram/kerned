@@ -1,6 +1,6 @@
-import { indexTree, type Schema } from '@gprose/model';
-import { selectionContext, type EditorState } from '@gprose/state';
-import { createDocumentQuery } from '@gprose/view';
+import { indexTree, type Schema } from '@kerned/model';
+import { selectionContext, type EditorState } from '@kerned/state';
+import { createDocumentQuery } from '@kerned/view';
 
 import type { StarterNode, StarterLeaf } from './demo-model.js';
 

@@ -11,7 +11,7 @@ import {
   validateTextRange,
   indexTree,
   type TreeIndex,
-} from '@gprose/model';
+} from '@kerned/model';
 
 import { readRangeSelection, mapRangeEndpoint, type RangeEndpoint } from './range-selection.js';
 import { Selection } from './selection-base.js';
@@ -28,7 +28,7 @@ export {
   type SelectionAnchor,
 } from './range-selection.js';
 
-import { mapPosition, type PositionMap, type Step } from '@gprose/transform';
+import { mapPosition, type PositionMap, type Step } from '@kerned/transform';
 
 export type SelectionContext = {
   node(id: number): NodeIdentity | undefined;

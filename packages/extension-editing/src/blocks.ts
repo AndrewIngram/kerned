@@ -1,14 +1,14 @@
-import { quote, list, listItem } from '@gprose/extension-document';
-import { table } from '@gprose/extension-table';
-import { indexTree, type Schema, type NodeIdentity, type SelectionRange } from '@gprose/model';
+import { quote, list, listItem } from '@kerned/extension-document';
+import { table } from '@kerned/extension-table';
+import { indexTree, type Schema, type NodeIdentity, type SelectionRange } from '@kerned/model';
 import {
   type EditorState,
   RangeSelection,
   selectionContext,
   TextSelection,
   textSelection,
-} from '@gprose/state';
-import { type Step } from '@gprose/transform';
+} from '@kerned/state';
+import { type Step } from '@kerned/transform';
 
 /** Join selected text across quote/list boundaries without flattening the document. */
 export function replaceStructuredText<N extends NodeIdentity>(

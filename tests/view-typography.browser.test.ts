@@ -1,10 +1,10 @@
-import { createEditor } from '@gprose/core';
-import { heading, paragraph } from '@gprose/extension-document';
-import { createSchema } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection } from '@gprose/state';
-import { defaultFonts, defineStyleRule, mountEditor } from '@gprose/view';
-import { createViewDiagnostics } from '@gprose/view/diagnostics';
+import { createEditor } from '@kerned/core';
+import { heading, paragraph } from '@kerned/extension-document';
+import { createSchema } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection } from '@kerned/state';
+import { defaultFonts, defineStyleRule, mountEditor } from '@kerned/view';
+import { createViewDiagnostics } from '@kerned/view/diagnostics';
 import { expect, test } from 'vitest';
 
 import { importHtml } from '../apps/demo/src/import-html.js';

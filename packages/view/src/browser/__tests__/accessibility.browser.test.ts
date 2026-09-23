@@ -1,8 +1,8 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createMention } from '@gprose/extension-document';
-import { createSchema, defineNode } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection, type NodeAccess } from '@gprose/state';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createMention } from '@kerned/extension-document';
+import { createSchema, defineNode } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection, type NodeAccess } from '@kerned/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

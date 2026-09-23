@@ -1,18 +1,18 @@
-import { localHistory } from '@gprose/extension-history';
+import { localHistory } from '@kerned/extension-history';
 import {
   createSchema,
   defineNode,
   indexTree,
   type NodeIdentity,
   type SelectionRange,
-} from '@gprose/model';
+} from '@kerned/model';
 import {
   NodeSelection,
   TextSelection,
   textSelection,
   type CommandContext,
   type NodeAccess,
-} from '@gprose/state';
+} from '@kerned/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

@@ -1,4 +1,4 @@
-import { createSchema, defineNode } from '@gprose/model';
+import { createSchema, defineNode } from '@kerned/model';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

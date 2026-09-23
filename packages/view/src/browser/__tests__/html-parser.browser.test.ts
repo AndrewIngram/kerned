@@ -1,5 +1,5 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode, defineMark, defineInline } from '@gprose/model';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode, defineMark, defineInline } from '@kerned/model';
 import {
   createHtmlParser,
   createEditorHtmlParser,
@@ -7,7 +7,7 @@ import {
   defineHtmlTextParser,
   defineHtmlNodeParser,
   defineHtmlValueParser,
-} from '@gprose/view';
+} from '@kerned/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

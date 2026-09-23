@@ -1,6 +1,6 @@
-import { formattingMarks } from '@gprose/extension-document';
-import { createMention } from '@gprose/extension-document';
-import { parseAnchor, boundaries } from '@gprose/model';
+import { formattingMarks } from '@kerned/extension-document';
+import { createMention } from '@kerned/extension-document';
+import { parseAnchor, boundaries } from '@kerned/model';
 import {
   textSelection,
   selectionContext,
@@ -9,8 +9,8 @@ import {
   type Transaction,
   createAnchor,
   resolveAnchor,
-} from '@gprose/state';
-import { mapPosition } from '@gprose/transform';
+} from '@kerned/state';
+import { mapPosition } from '@kerned/transform';
 
 import type { TextBlockNode, StarterNode } from './demo-model.js';
 import { demoSchema } from './demo-schema.js';

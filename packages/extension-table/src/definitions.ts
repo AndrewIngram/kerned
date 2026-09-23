@@ -1,4 +1,4 @@
-import { defineNode, jsonRecord, jsonNumber } from '@gprose/model';
+import { defineNode, jsonRecord, jsonNumber } from '@kerned/model';
 import { z } from 'zod';
 
 export const tableCell = defineNode({

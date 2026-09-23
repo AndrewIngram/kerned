@@ -1,8 +1,8 @@
-import { paragraph } from '@gprose/extension-document';
-import { table, tableCell } from '@gprose/extension-table';
-import { tableHtmlParsers } from '@gprose/extension-table/browser';
-import { createSchema } from '@gprose/model';
-import { createHtmlParser, defineHtmlTextParser } from '@gprose/view';
+import { paragraph } from '@kerned/extension-document';
+import { table, tableCell } from '@kerned/extension-table';
+import { tableHtmlParsers } from '@kerned/extension-table/browser';
+import { createSchema } from '@kerned/model';
+import { createHtmlParser, defineHtmlTextParser } from '@kerned/view';
 import { expect, test } from 'vitest';
 
 test('nested merged tables retain serializer text without requiring unrelated definitions', () => {

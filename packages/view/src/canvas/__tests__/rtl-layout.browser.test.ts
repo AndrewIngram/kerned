@@ -1,5 +1,5 @@
-import { boundaries } from '@gprose/model';
-import { TextSelection } from '@gprose/state';
+import { boundaries } from '@kerned/model';
+import { TextSelection } from '@kerned/state';
 import { afterAll, beforeAll, expect, test } from 'vitest';
 
 import { createTextNavigation } from '../../browser/keyboard-navigation.js';

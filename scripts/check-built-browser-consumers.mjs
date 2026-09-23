@@ -7,7 +7,7 @@ import react from '@vitejs/plugin-react';
 import { chromium, firefox, webkit } from 'playwright';
 import { build, preview } from 'vite';
 
-const directory = mkdtempSync(path.join(tmpdir(), 'gprose-consumers-'));
+const directory = mkdtempSync(path.join(tmpdir(), 'kerned-consumers-'));
 
 const resolvedPackages = new Set();
 
@@ -22,7 +22,7 @@ try {
         name: 'require-built-package-exports',
         enforce: 'pre',
         async resolveId(source, importer) {
-          if (!source.startsWith('@gprose/')) return null;
+          if (!source.startsWith('@kerned/')) return null;
           const resolved = await this.resolve(source, importer, { skipSelf: true });
           assert.ok(resolved?.id.includes('/dist/'), `Consumer resolved source: ${source}`);
           resolvedPackages.add(source);
@@ -49,24 +49,24 @@ try {
   assert.deepEqual(
     [...resolvedPackages].toSorted((a, b) => a.localeCompare(b)),
     [
-      '@gprose/core',
-      '@gprose/extension-comments',
-      '@gprose/extension-comments/browser',
-      '@gprose/extension-document',
-      '@gprose/extension-document/browser',
-      '@gprose/extension-editing',
-      '@gprose/extension-editing/browser',
-      '@gprose/extension-history',
-      '@gprose/extension-search',
-      '@gprose/extension-table',
-      '@gprose/extension-table/browser',
-      '@gprose/model',
-      '@gprose/react',
-      '@gprose/starter-kit/browser',
-      '@gprose/state',
-      '@gprose/transform',
-      '@gprose/view',
-      '@gprose/view/text',
+      '@kerned/core',
+      '@kerned/extension-comments',
+      '@kerned/extension-comments/browser',
+      '@kerned/extension-document',
+      '@kerned/extension-document/browser',
+      '@kerned/extension-editing',
+      '@kerned/extension-editing/browser',
+      '@kerned/extension-history',
+      '@kerned/extension-search',
+      '@kerned/extension-table',
+      '@kerned/extension-table/browser',
+      '@kerned/model',
+      '@kerned/react',
+      '@kerned/starter-kit/browser',
+      '@kerned/state',
+      '@kerned/transform',
+      '@kerned/view',
+      '@kerned/view/text',
     ],
   );
 

@@ -31,7 +31,7 @@ Browser extensions contribute semantic descriptions independently of their canva
 presentation or custom React renderer:
 
 ```ts
-import { defineNodeAccessibility, nodeAccessibility } from '@gprose/view';
+import { defineNodeAccessibility, nodeAccessibility } from '@kerned/view';
 
 // Inside an extension's setup callback; chapter is its schema definition.
 context.provide(

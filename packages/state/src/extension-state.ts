@@ -1,5 +1,5 @@
-import type { NodeIdentity } from '@gprose/model';
-import type { SnapshotTransition } from '@gprose/transform';
+import type { NodeIdentity } from '@kerned/model';
+import type { SnapshotTransition } from '@kerned/transform';
 
 import type { EditorState, Transaction } from './transactions.js';
 

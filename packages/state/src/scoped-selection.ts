@@ -1,4 +1,4 @@
-import type { NodeIdentity, SelectionRange, TreeIndex } from '@gprose/model';
+import type { NodeIdentity, SelectionRange, TreeIndex } from '@kerned/model';
 
 import { RangeSelection, type RangeEndpoint } from './range-selection.js';
 import type { Selection } from './selection-base.js';

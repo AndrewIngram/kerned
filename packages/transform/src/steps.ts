@@ -1,4 +1,4 @@
-import type { Mark, NodeIdentity, SelectionRange } from '@gprose/model';
+import type { Mark, NodeIdentity, SelectionRange } from '@kerned/model';
 
 export type Step<N extends NodeIdentity> =
   | {

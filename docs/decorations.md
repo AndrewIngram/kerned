@@ -5,8 +5,8 @@ the schema, document, history or selection. Comments and search both use this
 public contribution, in canvas text and native table cells.
 
 ```ts
-import { defineExtension, type ContributionContext } from '@gprose/core';
-import { decorations, type Decoration, type InvalidateDecorations } from '@gprose/view';
+import { defineExtension, type ContributionContext } from '@kerned/core';
+import { decorations, type Decoration, type InvalidateDecorations } from '@kerned/view';
 
 type HighlightStore = {
   read(nodeId: number): readonly Decoration[];
@@ -118,7 +118,7 @@ Semantic marks and inline objects have separate
 
 ## Widgets
 
-`defineWidgetView<Data>(create)` from `@gprose/view` creates a typed widget
+`defineWidgetView<Data>(create)` from `@kerned/view` creates a typed widget
 factory. Call it to produce a decoration, then return that descriptor from the
 same source as your highlights. No schema node, mark or document mutation is needed.
 
@@ -167,7 +167,7 @@ only repositions its host. Treat descriptor data as immutable and invalidate its
 source when external data changes. Descriptors contain renderer closures and are
 not persistence payloads. Persist the semantic data and durable target separately.
 
-For React, use `defineReactWidgetView(Component)` from `@gprose/react`:
+For React, use `defineReactWidgetView(Component)` from `@kerned/react`:
 
 ```tsx
 function ReviewButton({ data }: ReactWidgetViewProps<{ label: string }>) {

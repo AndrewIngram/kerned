@@ -1,7 +1,7 @@
-import { mentionText } from '@gprose/extension-document';
-import type { DocumentNode } from '@gprose/model';
-import type { starterDefinitions } from '@gprose/starter-kit';
-import type { TextSpan } from '@gprose/view';
+import { mentionText } from '@kerned/extension-document';
+import type { DocumentNode } from '@kerned/model';
+import type { starterDefinitions } from '@kerned/starter-kit';
+import type { TextSpan } from '@kerned/view';
 
 export type StarterSpan = TextSpan & { underline?: boolean };
 

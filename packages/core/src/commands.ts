@@ -1,5 +1,5 @@
-import type { NodeIdentity } from '@gprose/model';
-import type { CommandDefinition, CommandState, createEditor, CommandOptions } from '@gprose/state';
+import type { NodeIdentity } from '@kerned/model';
+import type { CommandDefinition, CommandState, createEditor, CommandOptions } from '@kerned/state';
 
 import type { CommandArguments } from './definitions.js';
 import type { ViewCommands } from './view-effects.js';

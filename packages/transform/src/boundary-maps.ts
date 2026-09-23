@@ -1,4 +1,4 @@
-import type { NodeIdentity, Schema, TreeIndex } from '@gprose/model';
+import type { NodeIdentity, Schema, TreeIndex } from '@kerned/model';
 
 import type { AnchorMap } from './anchor-maps.js';
 

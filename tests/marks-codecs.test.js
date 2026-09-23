@@ -1,5 +1,5 @@
-import * as modelModule from '@gprose/model';
-import * as stateModule from '@gprose/state';
+import * as modelModule from '@kerned/model';
+import * as stateModule from '@kerned/state';
 import { test, expect } from 'vitest';
 import { z } from 'zod';
 

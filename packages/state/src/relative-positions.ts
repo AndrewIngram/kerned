@@ -9,13 +9,13 @@ import {
   boundaries,
   validateTextRange,
   indexTree,
-} from '@gprose/model';
+} from '@kerned/model';
 import {
   invertAnchorMap,
   type AnchorMap,
   mapBoundary,
   type BoundaryPoint,
-} from '@gprose/transform';
+} from '@kerned/transform';
 import { z } from 'zod';
 
 import {

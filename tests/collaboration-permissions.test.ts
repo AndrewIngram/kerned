@@ -1,5 +1,5 @@
 import * as Automerge from '@automerge/automerge';
-import { indexTree } from '@gprose/model';
+import { indexTree } from '@kerned/model';
 import { expect, test } from 'vitest';
 
 import type { Edit } from '../packages/collaboration-lab/src/protocol.js';

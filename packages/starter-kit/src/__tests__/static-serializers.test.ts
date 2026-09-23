@@ -1,5 +1,5 @@
-import { createEditor, createEditorSerializer } from '@gprose/core';
-import { createSchema, createDocumentCodec } from '@gprose/model';
+import { createEditor, createEditorSerializer } from '@kerned/core';
+import { createSchema, createDocumentCodec } from '@kerned/model';
 import { expect, test } from 'vitest';
 
 import { starterExtensions } from '../index.js';
@@ -47,7 +47,7 @@ test('assembled headless starter output covers rich tables, heading levels, ment
     const serializer = createEditorSerializer(editor);
     const output = serializer.serialize(editor.state.nodes);
     expect(output).toEqual({
-      html: '<h4>Heading</h4><table><caption>A &amp; B</caption><tr><th colspan="2" rowspan="1"><p><strong>Hi</strong> <span data-gprose-mention="Ada" data-gprose-width="40" data-gprose-ascent="20" data-gprose-descent="4">Ada</span></p></th></tr></table><img src="/image.png" alt="A &lt; B">',
+      html: '<h4>Heading</h4><table><caption>A &amp; B</caption><tr><th colspan="2" rowspan="1"><p><strong>Hi</strong> <span data-kerned-mention="Ada" data-kerned-width="40" data-kerned-ascent="20" data-kerned-descent="4">Ada</span></p></th></tr></table><img src="/image.png" alt="A &lt; B">',
       text: 'Heading\n\nHi Ada\n\nA < B',
     });
     const codec = createDocumentCodec(editor.schema);

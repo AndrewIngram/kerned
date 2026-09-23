@@ -1,6 +1,6 @@
-import { paragraph } from '@gprose/extension-document';
-import { createDocumentSerializer } from '@gprose/model';
-import type { HtmlParserContribution } from '@gprose/view';
+import { paragraph } from '@kerned/extension-document';
+import { createDocumentSerializer } from '@kerned/model';
+import type { HtmlParserContribution } from '@kerned/view';
 
 import { table, tableCell } from './definitions.js';
 import { tableSerializers } from './serialization.js';

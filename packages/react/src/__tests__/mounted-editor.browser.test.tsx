@@ -1,5 +1,5 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
 import {
   defaultFonts,
   defaultAccessibility,
@@ -7,8 +7,8 @@ import {
   defineStyleRule,
   presentations,
   type MountedEditor,
-} from '@gprose/view';
-import { createViewDiagnostics } from '@gprose/view/diagnostics';
+} from '@kerned/view';
+import { createViewDiagnostics } from '@kerned/view/diagnostics';
 import { StrictMode } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';

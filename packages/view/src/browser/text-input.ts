@@ -1,4 +1,4 @@
-import { snapTextOffset, type NodeIdentity, type Schema } from '@gprose/model';
+import { snapTextOffset, type NodeIdentity, type Schema } from '@kerned/model';
 import {
   TextSelection,
   selectionContext,
@@ -6,7 +6,7 @@ import {
   type SelectionContext,
   type Selection,
   type NodeAccess,
-} from '@gprose/state';
+} from '@kerned/state';
 
 type InputSession<N extends NodeIdentity> = {
   readonly state: EditorState<N>;

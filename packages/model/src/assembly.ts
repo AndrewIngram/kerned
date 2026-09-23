@@ -587,7 +587,7 @@ export function createSchema(config: {
     'validate'
   > & {
     validate: typeof validate;
-  } = { version: 1, vendor: 'gprose', validate: (input) => validate(input) };
+  } = { version: 1, vendor: 'kerned', validate: (input) => validate(input) };
 
   const runtime = compileSchema(definitions);
 

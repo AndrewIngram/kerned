@@ -344,7 +344,7 @@ export function Toolbar({
   ) : (
     <header className="app-header">
       <strong>
-        gprose <span> / Extension study</span>
+        kerned <span> / Extension study</span>
       </strong>
       <div>
         <label>

@@ -1,7 +1,7 @@
-import { defineCommand, defineExtension, type ContributionContext } from '@gprose/core';
-import { defineNode } from '@gprose/model';
-import { TextSelection, textSelection } from '@gprose/state';
-import { defineNodePresentation, inputPolicies, presentations } from '@gprose/view';
+import { defineCommand, defineExtension, type ContributionContext } from '@kerned/core';
+import { defineNode } from '@kerned/model';
+import { TextSelection, textSelection } from '@kerned/state';
+import { defineNodePresentation, inputPolicies, presentations } from '@kerned/view';
 import { z } from 'zod';
 
 export const note = defineNode({

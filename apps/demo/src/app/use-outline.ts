@@ -1,5 +1,5 @@
-import { createOutlineExtension, type OutlineEntry } from '@gprose/extension-outline';
-import type { MountedEditor, ViewSnapshot } from '@gprose/view';
+import { createOutlineExtension, type OutlineEntry } from '@kerned/extension-outline';
+import type { MountedEditor, ViewSnapshot } from '@kerned/view';
 import { useMemo, useState } from 'react';
 
 import { plainText } from '../demo-model.js';

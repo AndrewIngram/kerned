@@ -1,17 +1,17 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { paragraph } from '@gprose/extension-document';
-import { localHistory } from '@gprose/extension-history';
-import { table, tableCell, tableEditing } from '@gprose/extension-table';
-import { tableView, tableHtmlParsers, tablePresentation } from '@gprose/extension-table/browser';
-import { createSchema } from '@gprose/model';
-import { textSelection } from '@gprose/state';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { paragraph } from '@kerned/extension-document';
+import { localHistory } from '@kerned/extension-history';
+import { table, tableCell, tableEditing } from '@kerned/extension-table';
+import { tableView, tableHtmlParsers, tablePresentation } from '@kerned/extension-table/browser';
+import { createSchema } from '@kerned/model';
+import { textSelection } from '@kerned/state';
 import {
   mountEditor,
   presentations,
   defineNodePresentation,
   createHtmlParser,
   defineHtmlTextParser,
-} from '@gprose/view';
+} from '@kerned/view';
 
 import { note, presentation } from './document';
 

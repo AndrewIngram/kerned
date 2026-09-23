@@ -1,5 +1,5 @@
-import { createSchema, createDocumentCodec } from '@gprose/model';
-import { starterDefinitions } from '@gprose/starter-kit';
+import { createSchema, createDocumentCodec } from '@kerned/model';
+import { starterDefinitions } from '@kerned/starter-kit';
 
 export const demoSchema = createSchema({ extensions: starterDefinitions });
 

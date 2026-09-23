@@ -1,8 +1,8 @@
-import { paragraph } from '@gprose/extension-document';
-import { indexTree, textContent, type NodeIdentity, type Schema } from '@gprose/model';
-import { selectionContext, TextSelection, type EditorState } from '@gprose/state';
-import { type Step } from '@gprose/transform';
-import { supportsLayoutText } from '@gprose/view/text';
+import { paragraph } from '@kerned/extension-document';
+import { indexTree, textContent, type NodeIdentity, type Schema } from '@kerned/model';
+import { selectionContext, TextSelection, type EditorState } from '@kerned/state';
+import { type Step } from '@kerned/transform';
+import { supportsLayoutText } from '@kerned/view/text';
 
 import { table as tableDefinition, tableCell } from './definitions.js';
 import { tableCells, tableRows } from './table.js';

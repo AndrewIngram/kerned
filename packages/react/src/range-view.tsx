@@ -1,4 +1,4 @@
-import type { SchemaDefinition } from '@gprose/model';
+import type { SchemaDefinition } from '@kerned/model';
 import {
   defineInlineView,
   defineMarkView,
@@ -6,7 +6,7 @@ import {
   type MarkViewFrame,
   type RangeView,
   type RangeViewMount,
-} from '@gprose/view';
+} from '@kerned/view';
 import { memo, type ComponentType } from 'react';
 
 import { portalHostFor } from './portals.js';

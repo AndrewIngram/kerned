@@ -1,6 +1,6 @@
-import { defineExtension, serializers, type ContributionContext } from '@gprose/core';
-import { documentSerializers } from '@gprose/extension-document';
-import { tableSerializers } from '@gprose/extension-table';
+import { defineExtension, serializers, type ContributionContext } from '@kerned/core';
+import { documentSerializers } from '@kerned/extension-document';
+import { tableSerializers } from '@kerned/extension-table';
 
 export const starterSerializers = [...documentSerializers, ...tableSerializers] as const;
 

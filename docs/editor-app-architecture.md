@@ -16,11 +16,11 @@ and [mounted editor lifetime](mounted-editor.md) for those interfaces.
 
 | Owner                                                 | Responsibility                                                                               |
 | ----------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `@gprose/model`, `@gprose/transform`, `@gprose/state` | Schema, immutable content, operations, mapping, selections and transactions                  |
-| `@gprose/core`                                        | Composed headless session, named commands/queries, extension state and lifetime              |
-| `@gprose/view`                                        | Mounting, native input, rendering contracts, assets, layout, viewport, painting and lifetime |
-| `@gprose/react`                                       | Optional session ownership, borrowed content host, context and selector subscriptions        |
-| `@gprose/starter-kit`                                 | Assembly of public document, editing, table and history extensions                           |
+| `@kerned/model`, `@kerned/transform`, `@kerned/state` | Schema, immutable content, operations, mapping, selections and transactions                  |
+| `@kerned/core`                                        | Composed headless session, named commands/queries, extension state and lifetime              |
+| `@kerned/view`                                        | Mounting, native input, rendering contracts, assets, layout, viewport, painting and lifetime |
+| `@kerned/react`                                       | Optional session ownership, borrowed content host, context and selector subscriptions        |
+| `@kerned/starter-kit`                                 | Assembly of public document, editing, table and history extensions                           |
 | `apps/demo/src/app`                                   | Sample loading, toolbar, external comment UI, find/outline panels and diagnostics            |
 
 The headless modules import neither React nor browser code. Browser and canvas

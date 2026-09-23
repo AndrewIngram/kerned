@@ -1,4 +1,4 @@
-import type { AnchorMap } from '@gprose/transform';
+import type { AnchorMap } from '@kerned/transform';
 import { expect, test } from 'vitest';
 
 import { encodePositionCheckpoint, parsePositionCheckpoint } from '../position-checkpoint.js';

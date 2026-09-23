@@ -1,6 +1,6 @@
-import { defineContribution, defineExtension, type ExtensionContext } from '@gprose/core';
-import type { NodeIdentity } from '@gprose/model';
-import { viewStyles } from '@gprose/view';
+import { defineContribution, defineExtension, type ExtensionContext } from '@kerned/core';
+import type { NodeIdentity } from '@kerned/model';
+import { viewStyles } from '@kerned/view';
 import {
   viewLayers,
   inlinePresentations,
@@ -8,7 +8,7 @@ import {
   defineInlineView,
   type InlineViewFrame,
   type PreparedText,
-} from '@gprose/view';
+} from '@kerned/view';
 
 import { mentionDefinition } from './definitions.js';
 import { mentionStyles } from './mention-view-styles.js';

@@ -3,7 +3,7 @@
 Reviewed 2026-09-21 against official Tiptap 3.x documentation. This is a design
 audit across the major editor interface families, not an exhaustive compatibility
 specification or a promise to implement every commercial feature. Findings from
-documentation are distinguished from recommendations for Gprose below.
+documentation are distinguished from recommendations for Kerned below.
 
 Companion research: [React, rendering, persistence, positions and collaboration](tiptap-adapters-research.md).
 Target module ownership: [package architecture](package-architecture.md).

@@ -1,11 +1,11 @@
-import { createEditor } from '@gprose/core';
-import { documentPresentation } from '@gprose/extension-document/browser';
-import { documentInput } from '@gprose/extension-editing/browser';
-import { tablePresentation } from '@gprose/extension-table/browser';
-import { createSchema } from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { textSelection } from '@gprose/state';
-import { createKeyboardShortcuts } from '@gprose/view';
+import { createEditor } from '@kerned/core';
+import { documentPresentation } from '@kerned/extension-document/browser';
+import { documentInput } from '@kerned/extension-editing/browser';
+import { tablePresentation } from '@kerned/extension-table/browser';
+import { createSchema } from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { textSelection } from '@kerned/state';
+import { createKeyboardShortcuts } from '@kerned/view';
 import { expect, test } from 'vitest';
 
 import type { TableNode } from '../../../../apps/demo/src/demo-model.js';

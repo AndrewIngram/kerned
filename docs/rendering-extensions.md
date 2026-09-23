@@ -1,7 +1,7 @@
 # Inline and mark rendering
 
 Register inline objects and semantic mark renderers through `viewLayers` from
-`@gprose/view`. `defineInlineView` and `defineMarkView` bind the installed
+`@kerned/view`. `defineInlineView` and `defineMarkView` bind the installed
 schema definition and own instance placement, caching and destruction. They work
 with canvas drawing, DOM overlays, or both. Underlines and mentions use these
 contracts in the demo and vanilla mount.
@@ -91,7 +91,7 @@ context.provide(viewLayers, defineReactInlineView(badge, Badge));
 context.provide(viewLayers, defineReactMarkView(reviewMark, ReviewMark));
 ```
 
-The React registrations and prop types come from `@gprose/react`. They use
+The React registrations and prop types come from `@kerned/react`. They use
 the same instance owner and portal host as React node views. `ReviewMark` receives
 `ReactMarkViewProps<typeof reviewMark>` and can render a positioned element for
 each entry in `fragments`. One component represents the whole range, including
@@ -126,7 +126,7 @@ context.provide(
 );
 ```
 
-Import both helpers from `@gprose/view`. The callback receives the installed
+Import both helpers from `@kerned/view`. The callback receives the installed
 inline definition's canonical attributes; it does not parse another inline type's
 attributes. The factory runs once per view, and metrics are cached with the owning
 node presentation. The view attaches the inline identity and text offset.
@@ -160,7 +160,7 @@ they do not replace native text input or create a second editable DOM tree.
 
 `editor.getSelection(nodeId)` returns the selection inside that node's subtree,
 with `undefined` for a missing node. Renderers receive the same `ScopedSelection`
-from `@gprose/state` without traversing the document:
+from `@kerned/state` without traversing the document:
 
 - `none`: no selection inside this scope.
 - `caret`: a `point` and `upstream` affinity. The point is a text offset or a

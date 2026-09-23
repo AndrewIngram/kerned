@@ -1,11 +1,11 @@
-import { type NodeIdentity } from '@gprose/model';
+import { type NodeIdentity } from '@kerned/model';
 import {
   defineHtmlTextParser,
   defineHtmlValueParser,
   defineHtmlNodeParser,
   type HtmlParserContribution,
   type HtmlParseContext,
-} from '@gprose/view';
+} from '@kerned/view';
 
 import {
   paragraph,
@@ -80,8 +80,8 @@ function imageSource(element: Element) {
 
   if (!src) return false;
 
-  if (!URL.canParse(src, 'https://gprose.invalid/')) return false;
-  const url = new URL(src, 'https://gprose.invalid/');
+  if (!URL.canParse(src, 'https://kerned.invalid/')) return false;
+  const url = new URL(src, 'https://kerned.invalid/');
 
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return false;
 
@@ -89,7 +89,7 @@ function imageSource(element: Element) {
 }
 
 function dimension(element: Element, name: string, fallback: number) {
-  const value = element.getAttribute(`data-gprose-${name}`);
+  const value = element.getAttribute(`data-kerned-${name}`);
   const number = value === null ? NaN : Number(value);
 
   return Number.isFinite(number) && number >= 0 ? number : fallback;
@@ -148,9 +148,9 @@ export const documentHtmlParsers: readonly HtmlParserContribution[] = [
         : false,
   }),
   defineHtmlValueParser(mentionDefinition, {
-    selector: '[data-gprose-mention]',
+    selector: '[data-kerned-mention]',
     attributes: (element) => ({
-      label: element.getAttribute('data-gprose-mention') ?? '',
+      label: element.getAttribute('data-kerned-mention') ?? '',
       width: dimension(element, 'width', 80),
       ascent: dimension(element, 'ascent', 18),
       descent: dimension(element, 'descent', 5),

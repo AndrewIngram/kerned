@@ -1,5 +1,5 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode, indexTree } from '@gprose/model';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode, indexTree } from '@kerned/model';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

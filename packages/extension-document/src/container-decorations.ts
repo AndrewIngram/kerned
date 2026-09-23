@@ -1,8 +1,8 @@
-import { defineExtension, type ContributionContext } from '@gprose/core';
-import type { NodeIdentity, Schema } from '@gprose/model';
-import { viewStyles } from '@gprose/view';
-import { applyTextStyle } from '@gprose/view';
-import { viewLayers, type ViewLayerFrame } from '@gprose/view';
+import { defineExtension, type ContributionContext } from '@kerned/core';
+import type { NodeIdentity, Schema } from '@kerned/model';
+import { viewStyles } from '@kerned/view';
+import { applyTextStyle } from '@kerned/view';
+import { viewLayers, type ViewLayerFrame } from '@kerned/view';
 
 import { containerStyles } from './container-decorations-styles.js';
 import { quote, list, listItem } from './definitions.js';

@@ -1,6 +1,6 @@
-import { defineContribution } from '@gprose/core';
-import type { NodeIdentity } from '@gprose/model';
-import type { EditorState } from '@gprose/state';
+import { defineContribution } from '@kerned/core';
+import type { NodeIdentity } from '@kerned/model';
+import type { EditorState } from '@kerned/state';
 
 import type { ViewSession } from './input-contributions.js';
 import type { WidgetDecoration } from './widget-views.js';

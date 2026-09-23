@@ -1,5 +1,5 @@
-import { paragraph } from '@gprose/extension-document';
-import type { NodeIdentity, Schema } from '@gprose/model';
+import { paragraph } from '@kerned/extension-document';
+import type { NodeIdentity, Schema } from '@kerned/model';
 import { z } from 'zod';
 
 import { table as tableDefinition, tableCell } from './definitions.js';

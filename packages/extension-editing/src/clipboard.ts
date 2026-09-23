@@ -1,22 +1,22 @@
-import { paragraph } from '@gprose/extension-document';
-import { documentSerializers } from '@gprose/extension-document';
-import { documentHtmlParsers } from '@gprose/extension-document/browser';
-import { table } from '@gprose/extension-table';
-import { cellRectangleText } from '@gprose/extension-table';
-import { tableSerializers } from '@gprose/extension-table';
-import { tableHtmlParsers } from '@gprose/extension-table/browser';
+import { paragraph } from '@kerned/extension-document';
+import { documentSerializers } from '@kerned/extension-document';
+import { documentHtmlParsers } from '@kerned/extension-document/browser';
+import { table } from '@kerned/extension-table';
+import { cellRectangleText } from '@kerned/extension-table';
+import { tableSerializers } from '@kerned/extension-table';
+import { tableHtmlParsers } from '@kerned/extension-table/browser';
 import {
   createDocumentSerializer,
   createDocumentCodec,
   type NodeIdentity,
   type Schema,
-} from '@gprose/model';
-import { type EditorState } from '@gprose/state';
-import { createHtmlParser } from '@gprose/view';
+} from '@kerned/model';
+import { type EditorState } from '@kerned/state';
+import { createHtmlParser } from '@kerned/view';
 
 import { copyFragment, type ClipboardFragment } from './clipboard-fragment.js';
 
-const mime = 'application/x-gprose-fragment';
+const mime = 'application/x-kerned-fragment';
 
 // The token refers only to immutable fragments created in this page. Untrusted
 // clipboard JSON never becomes editor state; other pages use the inert HTML importer.

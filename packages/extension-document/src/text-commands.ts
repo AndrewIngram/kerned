@@ -1,4 +1,4 @@
-import { sameMark, type Schema, type NodeIdentity, indexTree } from '@gprose/model';
+import { sameMark, type Schema, type NodeIdentity, indexTree } from '@kerned/model';
 import {
   markActivity,
   inputMarks,
@@ -7,8 +7,8 @@ import {
   selectionHasMark,
   selectionContext,
   type EditorState,
-} from '@gprose/state';
-import { type Step } from '@gprose/transform';
+} from '@kerned/state';
+import { type Step } from '@kerned/transform';
 
 import type { TextFormat } from './formatting.js';
 

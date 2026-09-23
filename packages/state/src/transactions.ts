@@ -6,7 +6,7 @@ import {
   type TreeIndex,
   indexTree,
   validateTree,
-} from '@gprose/model';
+} from '@kerned/model';
 import {
   type AnchorMap,
   type RevisionMap,
@@ -15,7 +15,7 @@ import {
   applySteps,
   type DocumentChange,
   type Step,
-} from '@gprose/transform';
+} from '@kerned/transform';
 
 import {
   createCommandChain,

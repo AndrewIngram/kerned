@@ -1,4 +1,4 @@
-import type { NodeIdentity } from '@gprose/model';
+import type { NodeIdentity } from '@kerned/model';
 
 import type { DrawingRect } from './drawing.js';
 import type { RangeView, RangeViewMount, RangeViewContext } from './range-views.js';

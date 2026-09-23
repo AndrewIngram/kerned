@@ -82,7 +82,7 @@ test('dragging from an image and shift-clicking it creates a usable structural s
 
     return {
       plain: data.getData('text/plain'),
-      token: data.getData('application/x-gprose-fragment'),
+      token: data.getData('application/x-kerned-fragment'),
     };
   });
 

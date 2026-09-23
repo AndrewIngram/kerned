@@ -7,8 +7,8 @@ import {
   listItem,
   formattingDefinitions,
   mentionDefinition,
-} from '@gprose/extension-document';
-import { table, tableCell } from '@gprose/extension-table';
+} from '@kerned/extension-document';
+import { table, tableCell } from '@kerned/extension-table';
 
 export const starterDefinitions = [
   paragraph,

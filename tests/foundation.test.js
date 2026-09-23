@@ -1,8 +1,8 @@
-import * as commentModule from '@gprose/extension-comments';
-import * as cellSelectionModule from '@gprose/extension-table';
-import * as modelModule from '@gprose/model';
-import * as stateModule from '@gprose/state';
-import * as transformModule from '@gprose/transform';
+import * as commentModule from '@kerned/extension-comments';
+import * as cellSelectionModule from '@kerned/extension-table';
+import * as modelModule from '@kerned/model';
+import * as stateModule from '@kerned/state';
+import * as transformModule from '@kerned/transform';
 import { test, expect } from 'vitest';
 
 import * as demoSchemaModule from '../apps/demo/src/demo-schema.js';

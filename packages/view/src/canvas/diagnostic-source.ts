@@ -1,4 +1,4 @@
-import type { NodeIdentity } from '@gprose/model';
+import type { NodeIdentity } from '@kerned/model';
 
 import type { createOwnedEngine } from '../internal/owned-layout.js';
 import type { DocumentLayout } from './document-layout.js';

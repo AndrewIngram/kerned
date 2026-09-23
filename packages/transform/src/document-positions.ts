@@ -4,7 +4,7 @@ import {
   type Schema,
   boundaries,
   indexTree,
-} from '@gprose/model';
+} from '@kerned/model';
 
 import { mapPosition, mapGapPosition, type PositionMap } from './positions.js';
 

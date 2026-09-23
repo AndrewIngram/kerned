@@ -1,8 +1,8 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineMark, defineNode, indexTree } from '@gprose/model';
-import { textSelection } from '@gprose/state';
-import { defineNodePresentation, presentations, mountEditor } from '@gprose/view';
-import { defineMarkView, viewLayers, type RangeViewMount } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineMark, defineNode, indexTree } from '@kerned/model';
+import { textSelection } from '@kerned/state';
+import { defineNodePresentation, presentations, mountEditor } from '@kerned/view';
+import { defineMarkView, viewLayers, type RangeViewMount } from '@kerned/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

@@ -1,7 +1,7 @@
 # Tiptap adapter and persistence patterns
 
 Audited 2026-09-21 against the official documentation. This is a design input,
-not a claim that these interfaces already exist in gprose. Recommendations below
+not a claim that these interfaces already exist in kerned. Recommendations below
 are our interpretation; cited observations describe Tiptap.
 
 ## React integration and subscriptions

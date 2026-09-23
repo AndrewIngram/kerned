@@ -1,8 +1,8 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { createSchema, defineNode } from '@gprose/model';
-import { TextSelection, textSelection } from '@gprose/state';
-import { mountEditor, defineNodePresentation, defineStyleRule, presentations } from '@gprose/view';
-import { createViewDiagnostics, type DiagnosticEvent } from '@gprose/view/diagnostics';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { createSchema, defineNode } from '@kerned/model';
+import { TextSelection, textSelection } from '@kerned/state';
+import { mountEditor, defineNodePresentation, defineStyleRule, presentations } from '@kerned/view';
+import { createViewDiagnostics, type DiagnosticEvent } from '@kerned/view/diagnostics';
 import { expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { z } from 'zod';

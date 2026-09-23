@@ -1,5 +1,5 @@
-import { localHistory } from '@gprose/extension-history';
-import { createSchema, defineNode, type DocumentInput } from '@gprose/model';
+import { localHistory } from '@kerned/extension-history';
+import { createSchema, defineNode, type DocumentInput } from '@kerned/model';
 import {
   AllSelection,
   NodeSelection,
@@ -9,7 +9,7 @@ import {
   equalScopedSelection,
   selectionInText,
   type SelectionContext,
-} from '@gprose/state';
+} from '@kerned/state';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

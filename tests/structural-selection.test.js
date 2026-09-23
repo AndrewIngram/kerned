@@ -1,5 +1,5 @@
-import * as clipboardModule from '@gprose/extension-editing';
-import * as stateModule from '@gprose/state';
+import * as clipboardModule from '@kerned/extension-editing';
+import * as stateModule from '@kerned/state';
 import { test, expect } from 'vitest';
 
 import * as demoSchemaModule from '../apps/demo/src/demo-schema.js';

@@ -13,8 +13,8 @@ Use `defineMark` and assemble it with the consuming text definitions. Attributes
 use a synchronous Standard Schema validator and must normalize to JSON values:
 
 ```ts
-import { createSchema, defineMark } from '@gprose/model';
-import { paragraph } from '@gprose/extension-document';
+import { createSchema, defineMark } from '@kerned/model';
+import { paragraph } from '@kerned/extension-document';
 import { z } from 'zod';
 
 const Link = defineMark({
@@ -99,7 +99,7 @@ The starter kit stores `inline: InlineValue[]`, where each value has `id`, `inde
 `type`, and JSON `attrs`. `defineInline` declares a named/versioned attribute
 schema and a plain-text projection. `createSchema` assembles those definitions;
 layout metrics belong to separate `defineInlinePresentation` contributions from
-`@gprose/view`. Generic editing helpers preserve values through insertion,
+`@kerned/view`. Generic editing helpers preserve values through insertion,
 deletion, slicing and joining. Unknown types, unsupported versions, malformed
 attributes and invalid replacement-character positions reject at decode.
 

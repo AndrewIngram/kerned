@@ -1,9 +1,9 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { list } from '@gprose/extension-document';
-import { createSchema, defineNode, indexTree } from '@gprose/model';
-import { starterBrowserExtensions } from '@gprose/starter-kit/browser';
-import { textSelection } from '@gprose/state';
-import { mountEditor, presentations, defineNodePresentation } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { list } from '@kerned/extension-document';
+import { createSchema, defineNode, indexTree } from '@kerned/model';
+import { starterBrowserExtensions } from '@kerned/starter-kit/browser';
+import { textSelection } from '@kerned/state';
+import { mountEditor, presentations, defineNodePresentation } from '@kerned/view';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 

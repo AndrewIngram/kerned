@@ -1,5 +1,5 @@
-import { starterHtmlParsers } from '@gprose/starter-kit/browser';
-import { createHtmlParser } from '@gprose/view';
+import { starterHtmlParsers } from '@kerned/starter-kit/browser';
+import { createHtmlParser } from '@kerned/view';
 
 import type { StarterNode } from './demo-model.js';
 import { demoSchema } from './demo-schema.js';

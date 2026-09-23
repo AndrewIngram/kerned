@@ -1,6 +1,6 @@
-import { defineCommand, type CommandContext } from '@gprose/core';
-import { paragraph, quote, type TextReplacementRange } from '@gprose/extension-document';
-import { boundaries, childrenAt, indexTree, type NodeIdentity } from '@gprose/model';
+import { defineCommand, type CommandContext } from '@kerned/core';
+import { paragraph, quote, type TextReplacementRange } from '@kerned/extension-document';
+import { boundaries, childrenAt, indexTree, type NodeIdentity } from '@kerned/model';
 import {
   AllSelection,
   NodeSelection,
@@ -8,7 +8,7 @@ import {
   TextSelection,
   selectionContext,
   textSelection,
-} from '@gprose/state';
+} from '@kerned/state';
 
 import { replaceStructuredText } from './blocks.js';
 import { pasteFragment } from './clipboard-fragment.js';

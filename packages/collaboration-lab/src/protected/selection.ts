@@ -1,4 +1,4 @@
-import { validateTextRange } from '@gprose/model';
+import { validateTextRange } from '@kerned/model';
 
 import type { PresenceSelection } from '../protocol.js';
 import type { Manifest } from './wire.js';

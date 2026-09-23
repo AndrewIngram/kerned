@@ -1,10 +1,10 @@
-import { defineExtension, createInputRules, type ContributionContext } from '@gprose/core';
-import { replaceText } from '@gprose/extension-document';
-import type { NodeIdentity } from '@gprose/model';
-import { selectionContext } from '@gprose/state';
-import { viewStyles } from '@gprose/view';
-import { createKeyboardShortcuts } from '@gprose/view';
-import { nodeViews, type NodeViewContext, type NodeViewFrame } from '@gprose/view';
+import { defineExtension, createInputRules, type ContributionContext } from '@kerned/core';
+import { replaceText } from '@kerned/extension-document';
+import type { NodeIdentity } from '@kerned/model';
+import { selectionContext } from '@kerned/state';
+import { viewStyles } from '@kerned/view';
+import { createKeyboardShortcuts } from '@kerned/view';
+import { nodeViews, type NodeViewContext, type NodeViewFrame } from '@kerned/view';
 
 import { table } from './definitions.js';
 import { tableStyles } from './table-view-styles.js';

@@ -1,5 +1,5 @@
-import * as formattingModule from '@gprose/extension-document';
-import * as stateModule from '@gprose/state';
+import * as formattingModule from '@kerned/extension-document';
+import * as stateModule from '@kerned/state';
 import { test, expect } from 'vitest';
 
 import * as demoSchemaModule from '../apps/demo/src/demo-schema.js';

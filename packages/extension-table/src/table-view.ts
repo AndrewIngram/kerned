@@ -1,16 +1,16 @@
-import { formattingSpans } from '@gprose/extension-document';
-import type { NodeIdentity, Schema, TextPoint } from '@gprose/model';
+import { formattingSpans } from '@kerned/extension-document';
+import type { NodeIdentity, Schema, TextPoint } from '@kerned/model';
 import {
   TextSelection,
   textSelection,
   type Selection,
   type SelectionContext,
   type NodeAccess,
-} from '@gprose/state';
-import type { InputHandlers } from '@gprose/view';
-import { nativeTextCaret, revealNativeText } from '@gprose/view';
-import type { ReadTextDecorations, TextDecoration } from '@gprose/view';
-import { applyTextStyle, type ReadTextStyle, type TextStyle } from '@gprose/view';
+} from '@kerned/state';
+import type { InputHandlers } from '@kerned/view';
+import { nativeTextCaret, revealNativeText } from '@kerned/view';
+import type { ReadTextDecorations, TextDecoration } from '@kerned/view';
+import { applyTextStyle, type ReadTextStyle, type TextStyle } from '@kerned/view';
 
 import { createTableContent, type TableText, type TableCellContent } from './table-content.js';
 import { tableCells } from './table.js';

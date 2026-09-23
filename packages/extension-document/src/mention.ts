@@ -1,4 +1,4 @@
-import { createSchema, type InlineValue } from '@gprose/model';
+import { createSchema, type InlineValue } from '@kerned/model';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 import { mentionDefinition } from './definitions.js';

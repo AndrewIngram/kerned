@@ -1,12 +1,12 @@
-import { defineContribution } from '@gprose/core';
+import { defineContribution } from '@kerned/core';
 import {
   textContent,
   type NodeBinding,
   type NodeIdentity,
   type Schema,
   type SchemaDefinition,
-} from '@gprose/model';
-import { TextSelection } from '@gprose/state';
+} from '@kerned/model';
+import { TextSelection } from '@kerned/state';
 
 import type { ViewSession } from './input-contributions.js';
 

@@ -131,7 +131,7 @@ reviews are complete; the progress log and completion audit record the evidence.
 
 Requirement: the final assembled document schema implements `StandardSchemaV1`
 directly. Consumers can infer its input/output document types and pass it to
-tools accepting Standard Schema without a Gprose-specific adapter. The standard
+tools accepting Standard Schema without a Kerned-specific adapter. The standard
 defines an unknown-input validator returning a typed value or issues with paths;
 it permits synchronous or asynchronous results.
 [Standard Schema specification](https://standardschema.dev/).

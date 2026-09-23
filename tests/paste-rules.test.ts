@@ -1,9 +1,9 @@
-import { createEditor, defineExtension, type ContributionContext } from '@gprose/core';
-import { editingCommands } from '@gprose/extension-editing';
-import { createSchema } from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
-import { textSelection } from '@gprose/state';
-import { createPasteRules, pasteRules, type PasteRule } from '@gprose/view';
+import { createEditor, defineExtension, type ContributionContext } from '@kerned/core';
+import { editingCommands } from '@kerned/extension-editing';
+import { createSchema } from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
+import { textSelection } from '@kerned/state';
+import { createPasteRules, pasteRules, type PasteRule } from '@kerned/view';
 import { expect, test, onTestFinished } from 'vitest';
 
 function fixture(rules: readonly PasteRule[], writable = true) {

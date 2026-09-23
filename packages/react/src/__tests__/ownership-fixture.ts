@@ -1,5 +1,5 @@
-import { defineExtension, type CommandDefinition, type ExtensionContext } from '@gprose/core';
-import { createSchema, defineNode, type DocumentNode, type NodeIdentity } from '@gprose/model';
+import { defineExtension, type CommandDefinition, type ExtensionContext } from '@kerned/core';
+import { createSchema, defineNode, type DocumentNode, type NodeIdentity } from '@kerned/model';
 import { z } from 'zod';
 
 const note = defineNode({

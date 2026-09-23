@@ -1,6 +1,6 @@
-import { createEditor } from '@gprose/core';
-import { createSchema } from '@gprose/model';
-import { starterExtensions } from '@gprose/starter-kit';
+import { createEditor } from '@kerned/core';
+import { createSchema } from '@kerned/model';
+import { starterExtensions } from '@kerned/starter-kit';
 import { expect, test } from 'vitest';
 
 import { tableCells } from '../table.js';
