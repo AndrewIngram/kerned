@@ -253,7 +253,7 @@ test('retained prepared labels refresh before a replaced font collection is dest
     fonts: createFontCatalog({
       ...defaultFonts,
       faces: defaultFonts.faces.map((face, index) =>
-        index === 0 ? { ...face, asset: defaultFonts.faces[1].asset } : face,
+        index < 2 ? { ...face, asset: defaultFonts.faces[index + 1].asset } : face,
       ),
     }),
   });
@@ -265,7 +265,10 @@ test('retained prepared labels refresh before a replaced font collection is dest
     next.destroy();
   });
   const drawing = createLayerDrawing(renderer.register, () => 0, createTextLabels(first));
-  const label = drawing.prepareText({ text: 'MMMM MMMM MMMM', width: 125, size: 18 });
+  const font = { family: 'Noto Sans', weight: 400 };
+  const label = drawing.prepareText({ text: 'MMMM MMMM MMMM', width: 125, size: 18, font });
+  // Retained label configuration must survive caller mutation before font replacement.
+  font.weight = 700;
   const canvas = document.createElement('canvas');
   drawing.register('retained', 'content', (paint) => paint.text(label, 0, 0));
   renderer.attach(kit, canvas);
@@ -284,4 +287,16 @@ test('retained prepared labels refresh before a replaced font collection is dest
   expect(after).not.toEqual(before);
   expect(next.stats.glyphCalls).toBe(calls);
   expect(label.height).toBeGreaterThan(0);
+
+  const expected = drawing.prepareText({
+    text: 'MMMM MMMM MMMM',
+    width: 125,
+    size: 18,
+    font: { family: 'Noto Sans', weight: 400 },
+  });
+
+  drawing.register('retained', 'content', (paint) => paint.text(expected, 0, 0));
+  renderer.update(frame(() => {}));
+  await nextFrame();
+  expect(context.getImageData(0, 0, canvas.width, canvas.height).data).toEqual(after);
 });

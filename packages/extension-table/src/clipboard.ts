@@ -163,7 +163,7 @@ export function pasteCellRectangle<N extends NodeIdentity>(
   }
 
   if (
-    [...sourceRows, ...targetRows].some((row) =>
+    sourceRows.some((row) =>
       row.some((cell) => {
         const attrs = attributes(cell);
 
@@ -171,13 +171,39 @@ export function pasteCellRectangle<N extends NodeIdentity>(
       }),
     )
   )
-    throw new Error('Rectangular paste currently requires tables without merged cells.');
+    throw new Error('Rectangular paste currently requires a source without merged cells.');
 
   const width = sourceRows[0]?.length ?? 0,
     height = sourceRows.length;
 
   if (!width || !height || sourceRows.some((row) => row.length !== width))
     throw new Error('Clipboard table must be rectangular.');
+
+  // Only overwritten cells must be unmerged. Grid slots map visual columns to
+  // flat child indexes, including rows displaced by a rowspan from above.
+  for (let y = target.row; y < Math.min(target.row + height, target.map.height); y++)
+    for (let x = target.column; x < Math.min(target.column + width, target.map.width); x++) {
+      const cell = target.map.cells[target.map.slots[y * target.map.width + x]];
+
+      if (cell.colspan !== 1 || cell.rowspan !== 1)
+        throw new Error('Rectangular paste cannot overwrite merged cells.');
+    }
+
+  let childCount = 0;
+
+  const rowOffsets = targetRows.map((row) => {
+    const offset = childCount;
+    childCount += row.length;
+
+    return offset;
+  });
+
+  const rowIndex = (y: number, x: number) => {
+    if (y < target.map.height && x < target.map.width)
+      return target.map.slots[y * target.map.width + x] - rowOffsets[y];
+
+    return (targetRows[y]?.length ?? 0) + x - (y < target.map.height ? target.map.width : 0);
+  };
 
   function clone(node: N): N {
     const text = schema.text(node);
@@ -205,7 +231,7 @@ export function pasteCellRectangle<N extends NodeIdentity>(
   for (let y = 0; y < rows; y++) {
     const row = result[y] ?? (result[y] = []);
 
-    for (let x = row.length; x < columns; x++)
+    for (let x = y < target.map.height ? target.map.width : 0; x < columns; x++)
       row.push(
         empty(y, y < target.map.height && targetRows[y].every((cell) => attributes(cell).header)),
       );
@@ -213,10 +239,12 @@ export function pasteCellRectangle<N extends NodeIdentity>(
 
   for (let y = 0; y < height; y++)
     for (let x = 0; x < width; x++) {
-      const cell = result[target.row + y][target.column + x],
+      const index = rowIndex(target.row + y, target.column + x);
+
+      const cell = result[target.row + y][index],
         content = schema.children(sourceRows[y][x]).map(clone);
 
-      result[target.row + y][target.column + x] = cells.create(
+      result[target.row + y][index] = cells.create(
         cell,
         {
           ...attributes(cell),
@@ -229,12 +257,13 @@ export function pasteCellRectangle<N extends NodeIdentity>(
   // Replace only the affected row slices, retaining destination cell identities.
   for (let y = target.row; y < Math.min(target.row + height, target.map.height); y++) {
     const count = Math.min(width, target.map.width - target.column);
+    const index = rowIndex(y, target.column);
     steps.push({
       kind: 'replaceChildren',
       parent: table.id,
-      index: y * target.map.width + target.column,
+      index: rowOffsets[y] + index,
       count,
-      nodes: result[y].slice(target.column, target.column + count),
+      nodes: result[y].slice(index, index + count),
     });
   }
 
@@ -247,8 +276,7 @@ export function pasteCellRectangle<N extends NodeIdentity>(
       steps.push({
         kind: 'insertChildren',
         parent: table.id,
-        index:
-          y < target.map.height ? (y + 1) * target.map.width : target.map.width * target.map.height,
+        index: y < target.map.height ? rowOffsets[y] + old : childCount,
         nodes: added,
       });
   }
@@ -257,8 +285,9 @@ export function pasteCellRectangle<N extends NodeIdentity>(
     steps,
     selection: new tableCells.CellSelection(
       table.id,
-      result[target.row][target.column].id,
-      result[target.row + height - 1][target.column + width - 1].id,
+      result[target.row][rowIndex(target.row, target.column)].id,
+      result[target.row + height - 1][rowIndex(target.row + height - 1, target.column + width - 1)]
+        .id,
     ),
   };
 }

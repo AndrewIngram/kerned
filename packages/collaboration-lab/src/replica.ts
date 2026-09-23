@@ -207,10 +207,11 @@ export function createTextReplica<N extends NodeIdentity>(session: string) {
             const node = tree.byId.get(step.id)?.node;
 
             if (!node) throw new Error('Missing collaboration node');
-            client.edit({ key: node.key, from: step.from, to: step.to, text: step.text });
+            client.edit({ key: node.key, from: step.from, to: step.to, text: step.text },{typing:event.transaction.input === true});
           }
         }
 
+        if (event.kind === 'selection') client.breakTyping();
         client.select(selection());
         changed();
       });

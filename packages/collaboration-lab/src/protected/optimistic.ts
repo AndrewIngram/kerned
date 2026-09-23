@@ -25,6 +25,7 @@ export function createOptimisticRecipient(
   let nextId = 0;
   let needsReset = false;
   let selection: PresenceSelection | null = null;
+  let typing: {id:string;key:string;offset:number;end:number} | null = null;
 
   function texts() {
     return new Map(
@@ -43,6 +44,7 @@ export function createOptimisticRecipient(
   }
 
   function clearSelectionIn(key: string) {
+    if (typing?.key === key) typing = null;
     if (selection?.anchor.key === key || selection?.head.key === key) selection = null;
   }
 
@@ -58,6 +60,7 @@ export function createOptimisticRecipient(
 
   function reset(frame?: Frame) {
     selection = null;
+    typing = null;
 
     const accepted =
       flight &&
@@ -118,6 +121,11 @@ export function createOptimisticRecipient(
 
       queue = mapped;
       selection = mapSelection(selection, over);
+      if (typing) {
+        const point = {key:typing.key,offset:typing.end,association:-1 as const};
+        const mapped = mapSelection({anchor:point,head:point},over);
+        typing = mapped ? {...typing,end:mapped.head.offset} : null;
+      }
     }
 
     if (flight) {
@@ -157,7 +165,7 @@ export function createOptimisticRecipient(
   }
 
   return {
-    edit(value: Omit<Edit, 'expected'>) {
+    edit(value: Omit<Edit, 'expected' | 'run'>, options: {typing?:boolean} = {}) {
       if (needsReset || recipient.status !== 'ready') throw new Error('Recipient not ready');
       const snapshot = recipient.snapshot();
       const node = snapshot.manifest.find((item) => item.key === value.key);
@@ -170,10 +178,15 @@ export function createOptimisticRecipient(
       const text = values.get(value.key);
 
       if (text === undefined) throw new Error('Missing text');
-      const edit = { ...value, expected: text.slice(value.from, value.to) };
+      if (options.typing && value.from === value.to && value.text) {
+        if (!typing || typing.key !== value.key || typing.end !== value.from)
+          typing = {id:crypto.randomUUID(),key:value.key,offset:0,end:value.from};
+      } else typing = null;
+      const edit: Edit = { ...value, expected: text.slice(value.from, value.to), ...(typing ? {run:{id:typing.id,offset:typing.offset}} : {}) };
       apply(values, edit);
       const id = ++nextId;
       queue.push({ id, edit });
+      if (typing) typing = {...typing,offset:typing.offset+value.text.length,end:value.from+value.text.length};
       selection = mapSelection(selection, edit);
 
       if (!readableSelection(selection, values, snapshot.manifest)) selection = null;
@@ -186,7 +199,10 @@ export function createOptimisticRecipient(
       if (!readableSelection(value, visibleTexts(), recipient.snapshot().manifest))
         throw new Error('Invalid selection');
       selection = structuredClone(value);
+      if (typing && selection && selection.anchor.key === typing.key && selection.head.key === typing.key && selection.anchor.offset === typing.end && selection.head.offset === typing.end)
+        selection = {anchor:{...selection.anchor,association:-1},head:{...selection.head,association:-1}};
     },
+    breakTyping() {typing = null;},
     get selection() {
       return structuredClone(selection);
     },
@@ -292,6 +308,7 @@ export function createOptimisticRecipient(
       flight = null;
       results = [];
       selection = null;
+      typing = null;
       recipient.destroy();
     },
   };

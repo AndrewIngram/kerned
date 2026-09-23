@@ -92,13 +92,16 @@ coordinates. The mount owns scrolling, zoom and graphics state. Drawing outside
 the callback throws. Registrations are released with the view layer, including
 when its factory or destructor throws.
 
-`prepareText({ text, width, size })` prepares a label during an update or factory
+`prepareText({ text, width, size, font? })` prepares a label during an update or factory
 call. It returns an immutable, view-owned token with width and height.
 `drawing.text(label, left, top)` paints it without shaping in the paint callback.
 The view keeps a bounded label cache across viewport culling. Tokens cannot be
 drawn by another view, and text preparation rejects calls after layer destruction.
-Prepared labels use the view's default font family. The label contract accepts
-text, width and size; it does not expose a per-label font-family override.
+The optional `font` uses the view's font catalog, for example
+`{ family: 'Product Sans', weight: 600, style: 'italic' }`. Omitted fields use the
+same defaults and matching rules as text presentations. Font selection participates
+in label caching. Retained tokens capture their configuration and refresh when
+`view.setFonts()` replaces the font collection, before the old resources are released.
 
 The starter `underlineView` uses `defineMarkView`, the schema-bound
 [mark rendering contract](rendering-extensions.md). Custom text and mark fields

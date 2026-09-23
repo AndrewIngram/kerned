@@ -1,9 +1,9 @@
 # Block editing in the minimal demo
 
 The toolbar uses the compact Blocks menu. Underline and clear formatting operate
-on the selected text; comments can span canvas paragraphs. Comment replies update
-all ranges belonging to the same comment. These commands return ordinary steps
-from `extensions/text-commands.ts`, with no UI or core schema dependencies.
+on the selected text; comments can span canvas paragraphs. Comment threads live
+outside the document in `@gprose/extension-comments`. Formatting and structural
+commands belong to the document, editing and table extension packages.
 
 Quotes, lists and list items are container extensions. Paragraph identities survive
 wrapping, unwrapping, indentation and outdentation. The view projects container
@@ -22,20 +22,22 @@ ranges, serialization and history bookmarks. Click a cell's content to edit; Tab
 moves between paragraphs/cells. Corner controls select a cell; Shift-click another
 corner extends a rectangle. Delete clears the selected cells. Toolbar formatting
 also operates on selected cell ranges. New tables are 3 by 3 with a header row.
-Rows and columns can be appended from Blocks while a table is active.
+Rows and columns can be appended through table commands while a table is active.
 
 ## Current limits
 
-- Table text uses a React DOM display and textarea editing surface. Canvas text
+- Table text uses a framework-independent DOM display and textarea editing surface. Canvas text
   remains the renderer for paragraphs, quotes and lists. There is no contenteditable.
 - Row/column insertion supports unmerged tables. Imported colspan/rowspan data is
   preserved; merging, splitting and deleting rows/columns have no commands yet.
 - Rectangular clipboard supports rich HTML, local fragments and TSV, with table expansion
-  and atomic undo. Pasting merged grids remains unsupported; see `clipboard.md`.
+  and atomic undo. Merged source cells and overwriting merged destination cells
+  remain unsupported; unrelated destination merges are preserved. See [clipboard](clipboard.md).
 - Comments are currently exposed for canvas text, not table cells.
 - Structural replacement handles quote/list boundaries but is not a general rich
   slice/paste algorithm. Arbitrary schema joins still need extension policy.
-- Formatting requires a nonempty selection; stored marks for future typing are absent.
+- Caret formatting uses stored marks for future typing. This is implemented for
+  both canvas text and native cell input.
 
 ## Verification
 

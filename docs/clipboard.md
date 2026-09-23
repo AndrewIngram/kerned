@@ -1,8 +1,8 @@
 # Rich clipboard
 
-The headless fragment module in `src/extensions/clipboard-fragment.ts` extracts
-selected content and prepares paste transactions. The browser adapter in
-`src/extensions/clipboard.ts` writes plain text, semantic HTML and an
+The headless fragment module in `@gprose/extension-editing` extracts
+selected content and prepares paste transactions. Its browser adapter at
+`@gprose/extension-editing/browser` writes plain text, semantic HTML and an
 opaque local-fragment token. Paste prefers a known local fragment, then imports
 HTML in an inert template, then falls back to plain text.
 
@@ -58,8 +58,11 @@ Cells accept installed text-block definitions, including custom text nodes as we
 and headings. The clipboard reads text, marks and inline labels through schema capabilities rather
 than assuming particular field names. Nested lists, quotes and embedded blocks are not
 accepted cell content. Copying complete merged cells retains their spans; copying a rectangle that
-bisects a merged cell is rejected. Rectangular paste currently requires unmerged source and
-destination tables. It never silently falls back to destructive plain text after a rejected rich paste.
+bisects a merged cell is rejected. Rectangular paste requires an unmerged source and
+unmerged cells within the affected destination rectangle. Merged cells outside that
+rectangle remain untouched, including their identities, spans and content, even
+when the table expands. Paste intersecting any merged destination cell is rejected
+before allocating content. It never silently falls back to destructive plain text after a rejected rich paste.
 Ordinary plain-text paste inside a native cell textarea keeps native text-editing behavior.
 Paste and drop input use separate undo entries from surrounding typing in both
 native cells and canvas text capture.

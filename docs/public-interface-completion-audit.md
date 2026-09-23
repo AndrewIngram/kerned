@@ -24,6 +24,9 @@ records its findings, remedies and validation.
 
 ## Explicit limitations
 
+The maintained [limitations inventory](editor-limitations.md) includes subsequent
+fixes and the remaining collaboration, persistence, clipboard and validation gaps.
+
 - The existing concurrent split/insert convergence test remains a TODO. This
   refactor does not implement a network collaboration transport or choose a new
   conflict-resolution algorithm.
@@ -31,8 +34,6 @@ records its findings, remedies and validation.
   international shaping and bidirectional editing remain outside this plan.
 - A session supports one mounted view. React remains optional; React renderer
   registrations require a React content host.
-- Prepared canvas labels accept text, width and size and use the view's default
-  font family. They do not accept a per-label font-family override.
 - Markdown, JSON Schema generation, schema hot-swapping and a complete
   Tiptap-compatible extension catalog are outside this implementation wave.
 - Packages remain private and unpublished. Consumers must serve the documented

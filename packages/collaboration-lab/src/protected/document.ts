@@ -22,6 +22,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
   function apply(
     steps: readonly Step<N>[],
     source: { session: string; operation: number } | null = null,
+    run?: Edit['run'],
   ) {
     let next = nodes;
     const changes: Edit[] = [];
@@ -38,6 +39,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
           to: step.to,
           text: step.text,
           expected: before.slice(step.from, step.to),
+          ...(run ? {run} : {}),
         });
       }
 
@@ -61,6 +63,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
     },
     writer(session: string, canEdit: (key: string) => boolean) {
       const views = new Map<number, Basis>();
+      const runs = new Map<string,{key:string; end:number; offset:number; revision:number; epoch:number}>();
 
       const receipts = new Map<number, { proposal: ProjectedProposal; receipt: WriteReceipt }>();
 
@@ -181,10 +184,25 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
               if (!edit) return reject('conflict');
             }
 
+            const run = edit.run;
+            if (run) {
+              if (edit.from !== edit.to || !edit.text) return reject('precondition');
+              const priorRun = runs.get(run.id);
+              if (run.offset === 0) {
+                if (priorRun) return reject('identity');
+              } else {
+                if (!priorRun || priorRun.epoch !== options.epoch() || priorRun.key !== edit.key || priorRun.offset !== run.offset) return reject('precondition');
+                let end: PresenceSelection | null = {anchor:{key:edit.key,offset:priorRun.end,association:-1},head:{key:edit.key,offset:priorRun.end,association:-1}};
+                for (const subsequent of edits.slice(priorRun.revision)) end = mapSelection(end,subsequent.edit);
+                if (!end || end.head.offset !== edit.from) return reject('precondition');
+              }
+            }
+
             const step = documentCoordinates(schema, nodes).edit(edit);
 
             if (!step) return reject('precondition');
-            apply([step], { session, operation: proposal.operation });
+            apply([step], { session, operation: proposal.operation },run);
+            if (run) runs.set(run.id,{key:edit.key,end:edit.from+edit.text.length,offset:run.offset+edit.text.length,revision:edits.length,epoch:options.epoch()});
 
             return { kind: 'accepted', operation: proposal.operation };
           }
@@ -199,6 +217,7 @@ export function createProjectedDocument<N extends NodeIdentity>(options: {
         },
         close() {
           views.clear();
+          runs.clear();
           receipts.clear();
         },
       };

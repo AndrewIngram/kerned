@@ -3,7 +3,12 @@ export type DrawingRect = Readonly<{ left: number; top: number; width: number; h
 /** Prepared by this view; height refreshes on font replacement, glyph storage stays private. */
 export type PreparedText = Readonly<{ width: number; height: number }>;
 
-export type PrepareText = (input: { text: string; width: number; size: number }) => PreparedText;
+export type PrepareText = (input: {
+  text: string;
+  width: number;
+  size: number;
+  font?: FontSelection;
+}) => PreparedText;
 
 /** Borrowed for one paint callback. Coordinates are unscaled document coordinates. */
 export type Drawing = {
@@ -33,3 +38,5 @@ export type BlockTextGeometry = {
   /** UTF-16 offset; upstream chooses the preceding line at a soft wrap. */
   caret(offset: number, upstream?: boolean): DrawingRect;
 };
+
+import type { FontSelection } from '../canvas/font-catalog.js';

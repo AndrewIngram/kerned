@@ -1,5 +1,10 @@
 # Large editor documents
 
+Historical benchmark. Cross-block selection, shared mounting and IME lifecycle
+handling have since been implemented; the final paragraph's open-work list records
+the original study. Consult [current limitations](editor-limitations.md) for the
+remaining accessibility, international-input and loading restrictions.
+
 This is the initial loading and memory study. [Retained geometry](editor-retained-geometry.md) now supersedes its memory measurements. Width changes now use [viewport-first reflow](editor-viewport-reflow.md); its paired benchmark supersedes the synchronous resize measurements below. The [book loading study](editor-loading-performance.md) documents the updated batch controller, which targets new paragraph composition rather than total render work.
 
 Recorded 2026-09-19T15:17:14.919Z on Apple M4 Pro. Production build, local Vite preview, headless Chromium, Firefox and WebKit. Browser versions and raw measurements are in [the benchmark artifact](../artifacts/editor-large-benchmark.json); correctness results are in [the check artifact](../artifacts/editor-large-checks.json).

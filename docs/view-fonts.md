@@ -71,6 +71,11 @@ an already italic base style. A missing requested weight chooses an available
 face rather than generating a synthetic weight. Supply real variants when their
 appearance matters.
 
+Extension labels accept the same selection through
+`prepareText({ text, width, size, font: { family, weight, style } })`.
+Selection is optional and participates in the label cache. Retained prepared
+labels refresh on font replacement without shaping inside a paint callback.
+
 Resolved face identities participate in shaping and metrics cache keys. Changing
 a paragraph's face cannot reuse shaping from its previous face; changing only
 its width, line height or baseline grid retains shaping. Composition separately

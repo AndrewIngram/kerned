@@ -2,6 +2,11 @@
 
 Updated 2026-09-20. This records implemented slices of the [implementation plan](editor-implementation-plan.md), not completion of the schema migration or collaboration backend.
 
+Historical progress snapshot. The package/schema/view migration has since completed;
+see the [completion audit](public-interface-completion-audit.md) and maintained
+[limitations inventory](editor-limitations.md). Test counts and performance figures
+below belong to this snapshot.
+
 See the [implemented session API guide](editor-session-api.md) for commands, React, permissions, comments and proposals.
 
 Subsequent performance work: [indexed relative-position lookup](relative-position-performance.md).
@@ -54,7 +59,7 @@ An initial regression rebuilt the full tree for each toolbar mark query. Reusing
 - A durable storage strategy that bounds retained metadata while preserving unknown external references. Indexed lookup now skips safe replay; persisted history still grows.
 - Permission-aware client update transport, revocation handling, restricted reference resolution and protected-text/mark semantics. Projection must run at a trusted boundary, and application-defined metadata must not duplicate hidden descendant content.
 - Automatic schema migrations and application persistence. The starter-kit paragraph/heading codecs are version 2; older serialized inline payloads require migration.
-- Packaging the application-owned CanvasKit scene and starter-kit shortcuts into a configurable ready-made editor assembly. The generic browser runtime and React host are implemented and used, but consumers still supply these policies and their renderer.
+- Completed since this snapshot: the CanvasKit scene, input and starter shortcuts are packaged behind `mountEditor` and `starterBrowserExtensions`. Consumers no longer assemble a renderer.
 - Concurrent operation transformation and convergence remain outstanding. Durable mixed text/structural ranges now use the shared position checkpoint and support external comments spanning atomic blocks; see `editor-session-api.md`.
 
 These are remaining engineering tasks, not requests for another round of routine decisions. Offline guarantees and trust/encryption assumptions still belong at the collaboration architecture gate.

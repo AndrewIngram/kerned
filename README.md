@@ -168,3 +168,6 @@ See the [repository map](docs/repository-map.md),
 [progress record](docs/public-interface-progress.md) and
 [completion audit](docs/public-interface-completion-audit.md) for responsibilities,
 verified behavior and deferred work.
+
+The [current limitations](docs/editor-limitations.md) distinguish implemented
+behavior, missing capabilities and areas that still need validation.

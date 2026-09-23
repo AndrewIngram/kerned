@@ -1,38 +1,54 @@
 # Marks and document codecs
 
-The core supports semantic mark ranges without imposing a node storage shape. Text extensions expose `editing.marks.read(node)` and `write(node, ranges)`. They may store ranges directly or project them to their own representation. The starter kit stores semantic `marks` directly. It projects bold and italic into compact style runs at layout; underline uses a schema-bound mark renderer. Canvas and React mark/inline registrations are documented in [Rendering extensions](rendering-extensions.md). View-only controls use public [decoration widgets](decorations.md#widgets), with canvas, DOM and React registrations.
+The assembled schema supports semantic marks and inline values through installed
+definitions. A text node declares its text, mark and inline fields in its content
+specification; assembly supplies editing and validation behavior. The starter kit
+stores semantic `marks` directly and projects bold/italic into layout style runs.
+Underline uses a schema-bound mark renderer. See [rendering extensions](rendering-extensions.md)
+and [decoration widgets](decorations.md#widgets) for canvas, DOM and React rendering.
 
 ## Mark schema
 
-`createMarkSchema` registers named, versioned attribute parsers. Attributes are JSON values. For example:
+Use `defineMark` and assemble it with the consuming text definitions. Attributes
+use a synchronous Standard Schema validator and must normalize to JSON values:
 
 ```ts
-const marks = createMarkSchema([
-  {
-    name: 'link',
-    version: 1,
-    parse(value) {
-      const attrs = jsonRecord(value);
-      const href = jsonString(attrs.href);
-      if (!href.startsWith('https://')) throw new Error('Expected an HTTPS link');
-      return { href };
-    },
-  },
-]);
-const link = marks.create('link', { href: 'https://example.com' });
+import { createSchema, defineMark } from '@gprose/model';
+import { paragraph } from '@gprose/extension-document';
+import { z } from 'zod';
+
+const Link = defineMark({
+  name: 'link',
+  version: 1,
+  options: {},
+  schema: () => ({
+    attributes: z.strictObject({ href: z.url().refine((url) => url.startsWith('https://')) }),
+  }),
+});
+const schema = createSchema({ extensions: [paragraph, Link] });
+const link = schema.value(Link).create({ href: 'https://example.com' });
 ```
 
 `MarkRange` holds `{from, to, mark}` within one text node. Different types can overlap. At a given location, one type has one attribute value. `setMark` replaces that type only within the supplied interval; `removeMark` can remove one type or every type. `normalizeMarks` merges adjacent equal values and rejects conflicting overlaps. Attribute comparison ignores object-key order. `sliceMarks` projects a fragment to local coordinates.
 
-`marks.validate(text, ranges)` checks grapheme boundaries and attribute values. `marks.encode` and `decode` include each mark extension's version; unknown types and unsupported versions reject instead of silently dropping formatting. There is no automatic version migration.
+`schema.marks.validate(text, ranges)` checks grapheme boundaries and attribute
+values. The document codec includes each mark definition's version; unknown types
+and unsupported versions reject instead of silently dropping formatting. There is
+no automatic version migration. Defining a mark does not itself add a renderer,
+toolbar command or HTML serializer; those are separate extension contributions.
 
 `changeSelectionMarks(schema, state, change)` returns ordinary transaction steps. It supports the selection's text ranges, including disjoint ranges, through the registered text capabilities. Run those steps through `editor.chain().steps(steps).run()` for one undo event. `selectionHasMark` checks full coverage. Read-only nodes are rejected by the existing transaction permission checks. These range commands act on nonempty selections. At a caret, the session supplies stored marks for subsequent typing (below).
 
-Text replacement, split and join semantics still belong to each text extension. The demo maps semantic ranges through replacement and slices/normalizes them for split/join. Marks are document content; comments remain external decorations.
+The compiled text capabilities map marks and inline values through replacement,
+split and join. Structural commands belong to editing extensions. Marks are
+document content; comments remain external decorations.
 
 ## Document codec
 
-A node extension can provide `codec.encode(node)` and `codec.decode(data, {identity, children})`. Core owns the envelope, traversal and identity checks; the extension owns its payload parser. A codec is required for every node type being persisted. No serialization happens during editing or layout.
+Assembly generates codecs from each node/mark/inline definition. Model owns the
+envelope, traversal and identity checks. A node definition may supply a
+`persistence` adapter to preserve an established wire payload; it does not own the
+identity or child envelope. No document serialization happens during editing or layout.
 
 ```ts
 const codec = createDocumentCodec(schema);
@@ -42,13 +58,20 @@ const restoredNodes = codec.decode(JSON.parse(saved));
 
 The envelope stores format version 1, then each node's type, schema version, ID, durable key, optional lock, payload and children. Decoding rejects unsupported versions/types, invalid identities, duplicate keys or IDs, children on non-containers, and extension violations of child order or identity. Extension child constraints run on the completed tree. Decoding is bounded to one million nodes and 256 nested levels. Encoded payloads are detached JSON copies; unsupported values reject instead of being silently lost by JSON serialization.
 
-`demoDocumentCodec` covers the current starter kit: paragraphs, headings, quotes, lists/items, table cells/tables, mentions inside text and images. Text payloads use semantic marks. Table row indices must agree with the serialized structure.
+`createDocumentCodec(schema)` covers the installed definitions, including custom
+nodes. Starter definitions include paragraphs, headings, quotes, lists/items,
+table cells/tables, mentions and images. Text payloads use semantic marks.
+Table row indices must agree with the serialized structure.
 
 This is document serialization, not a complete session backup. Restoring durable external ranges also requires the same document ID, revision and position checkpoint, as described in [reference persistence](editor-references.md). Threads are stored separately. Undo history, authentication, protected-content projection, automatic persistence, collaborative delivery and migrations are not supplied by this codec. A protected client must receive a trusted projection, never the full canonical document envelope.
 
 ## Validation and performance
 
-The full browser suite passes 141 tests across Chromium, Firefox and WebKit; three pre-existing concurrent split/insert tests remain skipped. Coverage includes a foreign node codec, attribute-bearing marks, invalid input rejection, nested starter-kit round trips, permission-aware formatting, undo and checkpoint-based reference restoration. Existing rich clipboard checks pass in all three browsers.
+Current required checks include foreign node codecs, attribute-bearing marks,
+invalid input rejection, nested starter-kit round trips, permission-aware
+formatting, undo, checkpoint restoration and rich clipboard behavior in three
+browsers. Use `pnpm run check` for current results. The measurements below are the
+historical pre-package-migration codec study, not new timings for this build.
 
 On the development server, three warmed Chromium trials of the 7,280-block Warbreaker document measured median encoding at 7.1 ms, JSON stringification at 4.1 ms, and parsing plus validated decoding at 120.5 ms. The JSON envelope is 2,143,127 bytes. This is synchronous bulk decoding; worker/incremental decoding remains an option for avoiding a long initial task. See [codec measurements](../artifacts/schema-codecs/book.json).
 
@@ -56,7 +79,11 @@ The [interactive regression measurements](../artifacts/editor-marks-codecs/basel
 
 ## Stored marks and typing
 
-`editor.state.storedMarks` distinguishes `null` (inherit at the caret) from `[]` (explicitly type without marks). `editor.setStoredMarks(marks)` changes this session state without modifying document nodes, revision or undo history. It validates against the text adapter's optional `validate` function and current edit permissions, copies the supplied marks, and separates the next typing history group. The demo adapter validates every type and its attributes.
+`editor.state.storedMarks` distinguishes `null` (inherit at the caret) from `[]`
+(explicitly type without marks). `editor.setStoredMarks(marks)` changes this
+session state without modifying document nodes, revision or undo history. It
+checks the compiled text capability and current edit permissions, owns the supplied
+marks, and separates the next typing history group.
 
 `inputMarks(schema, state)` reads the effective formatting. At a collapsed caret, the left-hand text supplies formatting; offset zero uses the right-hand text. Replacing a selection uses the first selected character's formatting. Moving the selection clears explicit overrides. Stream appends preserve them. Mark extensions can override this default with `inclusiveStart` and `inclusiveEnd`. Text adapters expose the mark schema's `boundary` query. Selected-text replacement inherits the first selected character regardless of caret boundary inclusion.
 
@@ -68,7 +95,13 @@ Stored-mark integration was checked in all three browsers, including table focus
 
 ## Inline values
 
-The starter kit stores `inline: InlineValue[]`, where each value has `id`, `index`, `type`, and JSON `attrs`. `createInlineSchema` registers named/versioned attribute parsers, plain-text projection and layout projection. Generic editing helpers preserve these values through insertion, deletion, slicing and joining. Unknown types, unsupported versions, malformed attributes and invalid replacement-character positions reject at decode.
+The starter kit stores `inline: InlineValue[]`, where each value has `id`, `index`,
+`type`, and JSON `attrs`. `defineInline` declares a named/versioned attribute
+schema and a plain-text projection. `createSchema` assembles those definitions;
+layout metrics belong to separate `defineInlinePresentation` contributions from
+`@gprose/view`. Generic editing helpers preserve values through insertion,
+deletion, slicing and joining. Unknown types, unsupported versions, malformed
+attributes and invalid replacement-character positions reject at decode.
 
 Mentions use this interface; their label and dimensions belong to the mention extension. Document codecs no longer know mention fields. Other extensions can define different attributes and layout results, as the foreign equation extension test demonstrates. The owned layout engine still receives compact inline boxes, which are renderer data rather than document storage.
 

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, expect, test } from 'vitest';
 
+import { defaultFonts } from '../font-catalog.js';
 import { createViewResources } from '../resources.js';
 import { createTextLabels } from '../text-labels.js';
 
@@ -10,6 +11,41 @@ beforeAll(async () => {
 });
 
 afterAll(() => resources.destroy());
+
+test('label fonts select registered faces without cross-family cache reuse', async ({
+  onTestFinished,
+}) => {
+  const owner = createViewResources({
+    fonts: {
+      ...defaultFonts,
+      faces: [...defaultFonts.faces, { ...defaultFonts.faces[1], family: 'Display', weight: 400 }],
+    },
+  });
+
+  onTestFinished(() => owner.destroy());
+  await owner.ready;
+  const engine = owner.read().layout;
+  const labels = createTextLabels(engine);
+  const input = { text: 'MMMM wide label', size: 18, width: 200 };
+  const regular = labels(input);
+  const display = labels({ ...input, font: { family: 'Display' } });
+  const bold = labels({ ...input, font: { weight: 700 } });
+  const italic = labels({ ...input, font: { style: 'italic' } });
+  expect(display.lines).toEqual(bold.lines);
+  expect(display.geometry(0, input.text.length, false)).toEqual(
+    bold.geometry(0, input.text.length, false),
+  );
+  expect(display.lines).not.toEqual(regular.lines);
+  expect(italic).not.toBe(regular);
+  const calls = engine.stats.glyphCalls;
+  expect(labels({ ...input, font: { family: ' display ', weight: 400, style: 'normal' } })).toBe(
+    display,
+  );
+  expect(labels({ ...input, font: {} })).toBe(regular);
+  expect(engine.stats.glyphCalls).toBe(calls);
+  expect(labels({ ...input, font: { family: 'Unavailable' } }).lines).toEqual(regular.lines);
+  expect(() => labels({ ...input, font: { weight: NaN } })).toThrow(/expected number/);
+});
 
 test('labels reuse shaping across node-view lifetimes and distinguish text, size and width', () => {
   const engine = resources.read().layout;

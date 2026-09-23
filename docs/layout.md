@@ -1,34 +1,36 @@
 # Editor layout pipeline
 
-`editor.html` uses the layout engine in `src/owned-layout.ts` with packed shaping.
+`editor.html` uses the layout engine in `packages/view/src/internal/owned-layout.ts` with packed shaping.
 CanvasKit draws positioned glyphs; HarfRust shapes text through
 `native-owned/src/lib.rs`. TypeScript owns paragraph wrapping, caret positions,
 selection geometry, and block placement.
 
-The bridge registers regular, bold, italic, bold-italic, and emoji fonts. Shaping
+The bridge registers the configured font catalog, including emoji fallback. The default catalog supplies regular, bold, italic and bold-italic text faces. Shaping
 returns a binary buffer of glyph identifiers, advances, offsets, and UTF-16 line
 break positions. The adapter reads that buffer synchronously and copies data it
 must retain before another shaping call overwrites the native result.
 
-`src/owned-shaped.ts` decodes packed shaping. `src/owned-paragraph.ts` composes
-width-dependent lines and render buffers; `src/owned-carets.ts` stores caret
-geometry. `src/owned-inline.ts` incorporates the numeric metrics of inline atoms.
-`src/owned-document.ts` translates paragraph coordinates to document coordinates,
-and `src/owned-blocks.ts` provides paragraph-local splice updates.
+`packages/view/src/internal/owned-shaped.ts` decodes packed shaping. `packages/view/src/internal/owned-paragraph.ts` composes
+width-dependent lines and render buffers; `packages/view/src/internal/owned-carets.ts` stores caret
+geometry. `packages/view/src/internal/owned-inline.ts` incorporates the numeric metrics of inline atoms.
+`packages/view/src/internal/owned-document.ts` translates paragraph coordinates to document coordinates,
+and `packages/view/src/internal/owned-blocks.ts` provides paragraph-local splice updates.
 
 Text and style changes invalidate shaping for affected paragraphs. Width changes
 reuse shaping and rebuild composition. Published snapshots remain readable after
-updates or cache release. The editor's `src/editor-canvas/scene.ts` schedules visible
+updates or cache release. The editor's `packages/view/src/canvas/scene.ts` schedules visible
 paragraphs first and finishes offscreen work in batches. It retains shaping while
 releasing offscreen geometry, then rebuilds that geometry on demand. The scene
 accepts immutable text-or-box presentation values and preserves the original
 node type in placements. It has no dependency on starter node names, marks or
-inline objects. `src/extensions/starter-kit/presentation.ts` translates the
+inline objects. `packages/extension-document/src/presentation.ts` translates the
 starter schema into text metrics, inline dimensions and estimated block heights.
 
-`src/engines.ts` defines the layout and geometry contracts. `src/layout-types.ts` holds
+`packages/view/src/internal/engines.ts` defines the layout and geometry contracts. `packages/view/src/internal/layout-types.ts` holds
 shared span, position, and direction types and re-exports grapheme boundaries
 from the editor core. Neither module contains the former comparison editors.
+
+These files are private implementations of `mountEditor` from `@gprose/view`; consumers do not create an engine directly.
 
 The layout engine accepts Latin, Greek, Cyrillic, Arabic, Hebrew and supported
 emoji. Directional scripts use retained Unicode bidi analysis, coverage-based font

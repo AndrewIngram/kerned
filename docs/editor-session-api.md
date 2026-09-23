@@ -5,8 +5,8 @@ transaction, selection and history implementation is exported from
 `@gprose/state`. Schema, content and durable-reference codecs live in
 `@gprose/model`; document operations and mappings live in
 `@gprose/transform`. These modules are headless. The
-[implementation plan](public-interface-implementation-plan.md) distinguishes
-implemented interfaces from remaining migration work.
+[completion audit](public-interface-completion-audit.md) records the completed
+package migration; [current limitations](editor-limitations.md) lists remaining work.
 
 ## Composed sessions and reusable extensions
 
@@ -82,8 +82,8 @@ paths validate once at the session boundary.
 
 The complete starter kit composes with foreign text and atom definitions,
 including node-valued update and paste arguments. Browser codecs and renderer
-projection remain tied to starter definitions and still need their complete
-migration. Native typing, Enter, deletion, plain/rich paste and table text edits
+presentations are extension contributions, with standard definitions supplying
+their own implementations. Native typing, Enter, deletion, plain/rich paste and table text edits
 invoke named session commands; the browser adapter does not construct document
 steps for these actions.
 

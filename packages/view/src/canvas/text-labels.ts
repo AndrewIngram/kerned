@@ -1,7 +1,9 @@
-import type { LaidOut, LayoutInput } from '../internal/engines.js';
+import type { PrepareText } from '../browser/drawing.js';
+import type { LaidOut } from '../internal/engines.js';
 import type { createOwnedEngine } from '../internal/owned-layout.js';
+import { fontSelectionSchema } from './font-catalog.js';
 
-type TextLabel = Pick<LayoutInput, 'text' | 'width' | 'size'>;
+type TextLabel = Parameters<PrepareText>[0];
 
 /** View-owned labels survive viewport eviction without reserving document node IDs.
  * Snapshots borrow the engine's fonts; dropping a cached label owns no native cleanup.
@@ -12,7 +14,11 @@ export function createTextLabels(
   const snapshots = new Map<string, LaidOut>();
 
   return (input: TextLabel) => {
-    const key = `${input.size}/${input.width}/${input.text}`;
+    const font = input.font === undefined ? undefined : fontSelectionSchema.parse(input.font);
+
+    const family = font?.family?.toLowerCase() ?? '';
+    const key = `${family.length}:${family}/${font?.weight ?? 400}/${font?.style ?? 'normal'}/${input.size}/${input.width}/${input.text}`;
+
     const existing = snapshots.get(key);
 
     if (existing) {
@@ -22,7 +28,7 @@ export function createTextLabels(
       return existing;
     }
 
-    const layout = engine.layoutText({ ...input, spans: [] });
+    const layout = engine.layoutText({ ...input, font, spans: [] });
     snapshots.set(key, layout);
     const oldest = snapshots.keys().next();
 

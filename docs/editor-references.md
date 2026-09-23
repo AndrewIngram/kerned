@@ -19,7 +19,7 @@ Association `-1` stays before text inserted at an endpoint, and `1` follows it. 
 
 Resolution returns node-local text intervals, suitable for canvas geometry. It follows split, join, movement, wrapping, unwrapping and deletion. If an endpoint block disappears, range resolution uses surviving text on the interior side first. Partial deletion preserves the surviving range. Complete deletion or complete text replacement returns `deleted`; local undo restores pre-existing references. An array of ranges represents a disjoint selection such as selected table cells. A single range stays contiguous between its endpoints; it does not follow a disconnected bag of text when content is reordered.
 
-Unavailable results distinguish another document, a future revision and missing historical metadata. Snapshot positions remain a separate API: `createPositionSnapshot` provides tree context, child gaps and explicit transition mapping, but its handles are not serialized durable values. Durable structural gaps and permission-aware reference resolution are still outstanding.
+Unavailable results distinguish another document, a future revision and missing historical metadata. Snapshot positions remain a separate API: `createPositionSnapshot` provides tree context, child gaps and explicit transition mapping, but its handles are not serialized durable values. Durable structural gaps are implemented below; permission-aware reference resolution remains outstanding.
 
 ## What is persisted
 
@@ -30,7 +30,10 @@ const saved = {
   nodes: editor.state.nodes,
   positions: editor.positions.checkpoint(),
 };
-const restored = createEditor(schema, saved.nodes, selection, [], {
+const restored = createEditor({
+  schema,
+  document: saved.nodes,
+  selection,
   documentId: saved.documentId,
   revision: saved.revision,
   positionCheckpoint: saved.positions,
@@ -44,6 +47,10 @@ This checkpoint contains **document change metadata**, independent of whether an
 Undo and redo retain operation identities so a mapping and its undo can cancel for older external endpoints, without knowing which endpoints exist. This is tested against local history, including grouped edits and references created between edit and undo. Remote-history rebasing remains unimplemented. Undo stacks themselves are not included in the position checkpoint.
 
 ## Cost and validation
+
+The measurements below are the original reference-lookup study, not fresh timings
+for the current package build. See [current limitations](editor-limitations.md)
+for the remaining retention and long-session validation work.
 
 Normal dispatch retains owned mapping records without JSON/WASM serialization or visiting external ranges. Resolution lazily indexes the current tree and caches grapheme boundaries by immutable node. Shared mapping summaries skip safe sections, combine offset shifts and serve different capture revisions. Undo cancellation remains capture-revision-aware. Ambiguous cases use exact replay with chunk summaries and a bounded suffix cache. None of these caches registers ranges.
 

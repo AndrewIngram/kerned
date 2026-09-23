@@ -1,5 +1,12 @@
 # Transactions, history and durable anchors
 
+Historical implementation study. The paragraph-local selections, registered
+comment fragments, React input ownership and legacy anchor behavior described
+below have been superseded. Use the current [session API](editor-session-api.md),
+[reference contract](editor-references.md) and [limitations inventory](editor-limitations.md).
+Current relative ranges span blocks and restore after local undo; the deleted
+legacy-anchor behavior below is not the public relative-range contract.
+
 The [extension-boundary follow-up](editor-extension-boundary.md) extracts this core from the demo schema.
 
 The editor editor now routes local edits and streamed arrivals through a pure transaction function. The rendering pipeline consumes the resulting document. React owns focus, input capture and viewport state; the editing core owns document changes, selection, revision checks and local undo history.

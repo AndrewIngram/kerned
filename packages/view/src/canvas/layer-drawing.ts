@@ -48,7 +48,11 @@ export function createLayerDrawing(
       let label = prepared.get(layout);
 
       if (!label) {
-        const value = { input: { ...input }, layout };
+        const value = {
+          input: { ...input, font: input.font === undefined ? undefined : { ...input.font } },
+          layout,
+        };
+
         label = Object.freeze({
           width: input.width,
           get height() {
