@@ -37,6 +37,11 @@ pnpm run cloudflare:dev
 pnpm run cloudflare:deploy
 ```
 
+`cloudflare:build` is the fast deployment build: it prepares the assets,
+rebuilds the packages, and builds the demo without running the repository-wide
+preflight checks. Use `pnpm run cloudflare:build:verified` when you want the
+full build and verification path.
+
 The Worker serves the built multi-page demo from `apps/demo/dist`; the writing
 demo is available at `/`, `/editor`, and `/editor.html`, with `/extensions.html`
 and `/collaboration.html` as additional entrypoints. `wrangler.toml` is the
